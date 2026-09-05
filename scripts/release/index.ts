@@ -5,8 +5,8 @@
 //   branch <hotfix|release> <patch|minor|major>  次の版のブランチを切り、既定ブランチへ据える
 //   tag <patch|minor|major>                      production HEAD へタグを打ち、Release を作る
 //
-// どちらも取り消せない操作を含む。何をどの順で走らせるかは [branch.ts](branch.ts) /
-// [tag.ts](tag.ts) が持ち、ここは走らせることと終了コードだけを担う。
+// 何をどの順で走らせるかは [branch.ts](branch.ts) / [tag.ts](tag.ts) が持ち、ここは走らせる
+// ことと終了コードだけを担う（取り消せない操作を手順として組む理由は [steps.ts](steps.ts)）。
 //
 // 途中で 1 つでも失敗したらそこで止まる。押せなかったブランチを既定に据える、本文を取れない
 // まま Release を作る、といった半端な状態を残さないため。

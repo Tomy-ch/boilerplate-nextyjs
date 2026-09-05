@@ -24,6 +24,12 @@ hook / CI の二層実行を明示するため `make` が入口となり、内�
   `.PHONY` 行は `make help` が警告する（一覧に出ないターゲットは利用者から見えないため）
 - 自明でないロジックはインラインシェルではなく `scripts/*.ts` に置き `pnpm exec tsx` から実行する。TypeScript に
   置けば `pnpm typecheck` と biome の検査対象に入り、実行環境ごとのシェル差異も持ち込まずに済む
+- **外から来る値を make の変数として recipe 行へ展開しない。**`$(VAR)` はシェルへ渡る前にテキスト置換されるので、
+  `"` や `;` を含む値でクォートが破れ、任意のコマンドが走る。ブランチ名は `git check-ref-format` が両方の文字を
+  許すため、これは想定上の入力ではなく実在する入力である。`export <NAME>` で環境変数として渡し、受け取る側が
+  `process.env` から読む形にすれば、値はシェルの構文解析を一度も通らない。**この規約を機械検査するものは無い**
+  —— `make actions-shellcheck` が見るのは composite action の `run:` で、`make shellcheck` が見るのは追跡下の
+  `*.sh` であり、どちらも `.mk` の recipe を読まない
 - 一回限りのリポジトリ運用コマンド（`make setup-repo` とその補助）は `.makefiles/github/operation/` 配下に置き、
   開発者向けターゲットと分離する。GitHub 設定を**適用する**ターゲットは `setting/`、何も変更せずファイルを
   **検査する**ターゲットは `lint/` へ置く
@@ -180,10 +186,8 @@ pre-commit hook と CI の `actions-lint` job が実行します。actionlint �
 何を書くか・何を落とすかの判断は [`scripts/package-version/version.ts`](../scripts/package-version/version.ts)
 が持ちます。
 
-`REF` は recipe 行へ展開せず、環境変数 `PACKAGE_VERSION_REF` としてスクリプトへ渡します。make の変数は
-シェルへ渡る前にテキスト置換されるため、`"` や `;` を含むブランチ名（git は許す）を引数で渡すとクォートが
-破れて任意のコマンドが走ります。`REF` 省略時の取り回し（`GITHUB_REF_NAME` → 手元の現在ブランチ）は
-スクリプトが持ちます。
+`REF` は recipe 行へ展開せず、環境変数 `PACKAGE_VERSION_REF` としてスクリプトへ渡します（理由は上記
+「規約」）。`REF` 省略時の取り回し（`GITHUB_REF_NAME` → 手元の現在ブランチ）はスクリプトが持ちます。
 
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |

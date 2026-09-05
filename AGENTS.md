@@ -291,7 +291,7 @@ make tag-minor             # Same (minor)
 make tag-major             # Same (major)
 ```
 
-For release branches, follow 0150 (`git switch -c release/v<X.Y.Z> origin/develop`).
+For release branches, follow 0150 (`git switch -c release/v<X.Y.Z> origin/production`).
 
 See [`.makefiles/README.md`](.makefiles/README.md) for details.
 

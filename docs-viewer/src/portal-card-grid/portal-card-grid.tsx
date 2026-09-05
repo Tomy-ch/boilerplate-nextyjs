@@ -1,4 +1,3 @@
-import { IconExternalLink } from "@tabler/icons-react";
 import { useCallback } from "react";
 
 import {
@@ -7,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/design-system/display/card/card";
+import { ExternalLinkIcon } from "@/components/icon";
 
 import type { PortalItem } from "../docs-json/docs-json";
 
@@ -54,7 +54,7 @@ function PortalCard({ item, onOpenDocument }: PortalCardProps) {
               >
                 {item.name}
               </a>
-              <IconExternalLink aria-hidden className="size-4 shrink-0" />
+              <ExternalLinkIcon aria-hidden className="size-4 shrink-0" />
             </>
           )}
         </CardTitle>

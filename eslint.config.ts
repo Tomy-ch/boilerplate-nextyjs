@@ -43,6 +43,15 @@ const iconVendorImports = {
     "アイコンの供給元は `@/components/icon` へ閉じます（ADR 0052）。アイコンはそこから import してください。",
 };
 
+/**
+ * どのファイルでも締め出すもの。
+ *
+ * **新しい締め出しは原則ここへ足す。**flat config は同名ルールを配列ごと後勝ちで置き換えるので、
+ * 適用範囲の広いブロックの側だけへ足すと、それを外している例外ファイルには黙って効かない。
+ * 例外ファイルを持つ締め出しは、この基底へではなく、例外を外した側のブロックで足す。
+ */
+const commonImportRestrictions = [nodeBuiltinImports];
+
 const elements = [
   // 層より先に並べる。区画は層の内側にあるため、層の要素が先に一致すると区画としては
   // 見えなくなり、層の粒度の許可がそのまま区画への許可になる。
@@ -229,14 +238,26 @@ export default [
             "`process` を読んでよいのは config カーネルと起動境界だけです（ADR 0030）。値は config を通して受け取ってください。",
         },
       ],
-      "no-restricted-imports": ["error", { patterns: [nodeBuiltinImports, iconVendorImports] }],
+      "no-restricted-imports": [
+        "error",
+        { patterns: [...commonImportRestrictions, iconVendorImports] },
+      ],
     },
   },
   {
     // アイコンの公開面そのもの。ここだけが供給元を名指しするので、締め出しの側から外す。
     files: ["src/components/icon.ts"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [nodeBuiltinImports] }],
+      "no-restricted-imports": ["error", { patterns: commonImportRestrictions }],
+    },
+  },
+  {
+    // ビューアーは `@` alias でアプリ本体のソースを直接参照する（`docs-viewer/README.md`）ので、
+    // アイコンも同じ公開面から取る。ここを締め出さないと、供給元を名指しできる場所が
+    // ワークスペースに 2 つできる。
+    files: ["docs-viewer/src/**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [iconVendorImports] }],
     },
   },
   {

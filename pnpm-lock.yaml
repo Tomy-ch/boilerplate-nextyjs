@@ -348,9 +348,6 @@ importers:
 
   docs-viewer:
     dependencies:
-      '@tabler/icons-react':
-        specifier: 3.46.0
-        version: 3.46.0(react@19.2.8)
       fuse.js:
         specifier: 7.5.0
         version: 7.5.0

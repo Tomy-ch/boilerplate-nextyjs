@@ -13,14 +13,19 @@
  * 公開名は供給元の綴りではなく、この面の語彙です。供給元が別の名前で同じ字面を配っていても、
  * ここでの名前は変えません。
  */
-import type { TablerIcon } from "@tabler/icons-react";
+import type { ComponentProps, ComponentType } from "react";
 
 /**
  * アイコン component の型です。
  *
+ * @remarks
  * 一覧や対応表の値としてアイコンを持つ場合に使います。
+ *
+ * 供給元の型をそのまま別名にしていないのは、供給元が足した props（大きさや線幅の指定）が
+ * この型を通って呼び出し側へ漏れるためです。漏らすと、差し替えたときにその props を使っていた
+ * 箇所だけが型検査に落ちます。この面が約束するのは `svg` を描くことだけです。
  */
-export type IconComponent = TablerIcon;
+export type IconComponent = ComponentType<ComponentProps<"svg">>;
 
 export {
   IconAlertTriangle as AlertTriangleIcon,
@@ -45,6 +50,7 @@ export {
   IconCopy as CopyIcon,
   IconDownload as DownloadIcon,
   IconDots as EllipsisIcon,
+  IconExternalLink as ExternalLinkIcon,
   IconEye as EyeIcon,
   IconFileText as FileTextIcon,
   IconFilter as FilterIcon,

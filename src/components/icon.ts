@@ -70,7 +70,7 @@ export {
   IconLock as LockIcon,
   IconMap as MapIcon,
   IconMenu2 as MenuIcon,
-  IconMessageCircle as MessageCircleIcon,
+  IconMessageCircle as MessageCircleIcon, // sample:line
   IconMinus as MinusIcon,
   IconPencil as PencilIcon,
   IconPlus as PlusIcon,
@@ -83,7 +83,7 @@ export {
   IconSearchOff as SearchOffIcon,
   IconSettings as SettingsIcon,
   IconShield as ShieldIcon,
-  IconShoppingCart as ShoppingCartIcon,
+  IconShoppingCart as ShoppingCartIcon, // sample:line
   IconLayoutSidebar as SidebarIcon,
   IconAdjustments as SlidersIcon,
   IconStrikethrough as StrikethroughIcon,

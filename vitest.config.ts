@@ -30,7 +30,7 @@ const COVERAGE_THRESHOLDS = {
  * ここはそれを読むだけにします。**未設定が既定**なので、手元の `pnpm test` と保護ブランチの
  * 実行は今までどおり閾値を持ちます。
  */
-const isShard = process.env.VITEST_SHARDED === "1";
+const isShard = process.env["VITEST_SHARDED"] === "1";
 
 export default defineConfig({
   plugins: [react()],

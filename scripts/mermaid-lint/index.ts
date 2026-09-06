@@ -40,12 +40,12 @@ async function loadMermaid(): Promise<MermaidApi> {
     // globalThis の window / document 等は DOM lib で読み取り専用のため、
     // 代入するには構造を持たない袋として扱う必要がある。
     const global = globalThis as unknown as Record<string, unknown>;
-    global.window = window;
-    global.document = document;
+    global["window"] = window;
+    global["document"] = document;
     Object.defineProperty(globalThis, "navigator", { value: window.navigator, configurable: true });
-    global.location = window.location;
-    global.requestAnimationFrame = (fn: () => void) => setTimeout(fn, 0);
-    global.MutationObserver = window.MutationObserver;
+    global["location"] = window.location;
+    global["requestAnimationFrame"] = (fn: () => void) => setTimeout(fn, 0);
+    global["MutationObserver"] = window.MutationObserver;
 
     const mermaidModule = await import("mermaid");
     const mermaid = (mermaidModule.default ?? mermaidModule) as unknown as MermaidApi;

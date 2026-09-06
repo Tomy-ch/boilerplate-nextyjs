@@ -51,7 +51,7 @@ const TOOLBAR_BUTTON_CLASS_NAME = "size-8 min-w-8 p-0 [&_svg]:size-4";
  * @returns link がかかっていれば その `href`、かかっていなければ空文字列
  */
 function readLinkHref(editor: Editor): string {
-  const href = editor.getAttributes("link").href;
+  const href = editor.getAttributes("link")["href"];
 
   return typeof href === "string" ? href : "";
 }

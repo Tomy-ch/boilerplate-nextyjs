@@ -30,7 +30,7 @@ import { expect, test } from "../lib/test";
 
 const screens = selectScreens(
   resolveScreens(listScreenRoutes(readFileSync(SCREEN_MANIFEST_FILE, "utf8")), SCREENS),
-  process.env.E2E_ONLY,
+  process.env["E2E_ONLY"],
 );
 
 for (const screen of screens) {

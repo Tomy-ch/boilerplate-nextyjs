@@ -33,7 +33,8 @@ function main(argv: readonly string[]): void {
   }
 
   const ref =
-    selectRef([process.env.PACKAGE_VERSION_REF, process.env.GITHUB_REF_NAME]) ?? currentBranch();
+    selectRef([process.env["PACKAGE_VERSION_REF"], process.env["GITHUB_REF_NAME"]]) ??
+    currentBranch();
   const manifest = path.join(process.cwd(), MANIFEST);
   const plan = planStamp(ref, () => readFileSync(manifest, "utf8"));
 

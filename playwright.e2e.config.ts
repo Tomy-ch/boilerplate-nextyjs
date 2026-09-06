@@ -42,7 +42,7 @@ if (getEnvironment().APP_API_MODE !== "mock") {
  * ホストで動くため、Playwright の `webServer` では起動できません（コンテナの中から見た
  * `127.0.0.1` はコンテナ自身です）。分けている理由は `docker-compose.dev-tools.yml` にあります。
  */
-const BASE_URL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000";
+const BASE_URL = process.env["E2E_BASE_URL"] ?? "http://127.0.0.1:3000";
 
 const bands = loadBands();
 

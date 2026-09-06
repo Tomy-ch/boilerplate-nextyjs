@@ -137,8 +137,8 @@ async function githubGet<T>(url: string): Promise<GitHubResponse<T>> {
   const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
   // 未認証でも 60 req/h の枠内で足りるが、トークンがあれば枠を広げる。gh CLI を常用する
   // 手元では GH_TOKEN しか無いことがあるため両方を見る。
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const token = process.env["GITHUB_TOKEN"] || process.env["GH_TOKEN"];
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const response = await fetch(url, {
     headers,

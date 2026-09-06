@@ -94,7 +94,7 @@ function trigger(baseRef: string): void {
   }
 
   const decision = decideTrigger(parseNumstat(numstat.stdout));
-  const output = process.env.GITHUB_OUTPUT;
+  const output = process.env["GITHUB_OUTPUT"];
 
   if (output === undefined) {
     fail("GITHUB_OUTPUT がありません。この副命令は CI から呼ばれます。");
@@ -118,8 +118,8 @@ function writeComment(logFile: string, reportFile: string): void {
     composeNotes({
       kinds: classifyFailure(readFileSync(logFile, "utf8")),
       screenNames: readScreenNames(reportFile),
-      headRef: process.env.HEAD_REF ?? "",
-      runId: process.env.RUN_ID ?? "",
+      headRef: process.env["HEAD_REF"] ?? "",
+      runId: process.env["RUN_ID"] ?? "",
     }),
   );
 }

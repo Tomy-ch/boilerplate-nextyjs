@@ -29,7 +29,7 @@ function isApplicationEnvironment(value: string): value is ApplicationEnvironmen
  * @throws `APP_ENV` が選べる値でないとき
  */
 export function findApplicationEnvironment(): ApplicationEnvironment | null {
-  const applicationEnvironment = process.env.APP_ENV;
+  const applicationEnvironment = process.env["APP_ENV"];
 
   if (applicationEnvironment === undefined) {
     return null;

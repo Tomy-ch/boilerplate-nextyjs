@@ -18,7 +18,7 @@ function buildTrack(options: {
 }): HTMLDivElement {
   const container = document.createElement("div");
 
-  container.dataset.slot = "carousel-content";
+  container.dataset["slot"] = "carousel-content";
   container.getBoundingClientRect = vi.fn(
     () => new DOMRect(options.viewLeft, 0, options.viewWidth, 0),
   );
@@ -27,7 +27,7 @@ function buildTrack(options: {
   for (const left of options.slideLefts) {
     const slide = document.createElement("div");
 
-    slide.dataset.slot = "carousel-item";
+    slide.dataset["slot"] = "carousel-item";
     slide.getBoundingClientRect = vi.fn(() => new DOMRect(left, 0, options.slideWidth, 0));
     container.append(slide);
   }

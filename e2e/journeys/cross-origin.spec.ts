@@ -16,7 +16,7 @@ import { expect, test } from "../lib/test";
 const FOREIGN_ORIGIN = "https://foreign.invalid";
 
 /** 起動側が宣言した別 origin。起動側を通さずに開いた環境では、この spec は成立しない。 */
-const ALLOWED_ORIGIN = process.env.E2E_ALLOWED_ORIGIN ?? "http://host.docker.internal:3102";
+const ALLOWED_ORIGIN = process.env["E2E_ALLOWED_ORIGIN"] ?? "http://host.docker.internal:3102";
 
 /**
  * 読むだけの BFF の口。

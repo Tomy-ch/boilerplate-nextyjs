@@ -40,9 +40,9 @@ function nudge(baseRef: string, alertAt: number, bodyFile: string): void {
   }
 
   const comment = renderNudge(
-    decideNudge(parseNumstat(numstat.stdout), parseLabels(process.env.PR_LABELS), alertAt),
+    decideNudge(parseNumstat(numstat.stdout), parseLabels(process.env["PR_LABELS"]), alertAt),
   );
-  const output = process.env.GITHUB_OUTPUT;
+  const output = process.env["GITHUB_OUTPUT"];
 
   if (output === undefined) {
     throw new Error("GITHUB_OUTPUT がありません。この副命令は CI から呼ばれます。");

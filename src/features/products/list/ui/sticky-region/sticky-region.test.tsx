@@ -16,7 +16,12 @@ vi.mock("@/capabilities/use-scroll-direction", () => ({ useScrollDirection }));
 // 既定のスタブは何も通知しない。帯の高さは通知されて初めて配られるため、ここでは観測した時点で
 // 1 度返す実装へ差し替える。
 class ReportingResizeObserver implements ResizeObserver {
-  constructor(private readonly notify: ResizeObserverCallback) {}
+  private readonly notify: ResizeObserverCallback;
+
+  constructor(notify: ResizeObserverCallback) {
+    this.notify = notify;
+  }
+
   observe(): void {
     this.notify([], this);
   }

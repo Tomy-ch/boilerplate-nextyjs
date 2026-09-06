@@ -31,7 +31,7 @@ const meta = {
     // 脇に出す姿は `parameters.narrow` で指定する。器の幅で折り返しが変わる部品なので、
     // 実物と同じ幅の器に入れないと確かめたい姿にならない。
     (Story, context) => (
-      <ul className={cn("flex flex-col divide-y", context.parameters.narrow === true && "w-70")}>
+      <ul className={cn("flex flex-col divide-y", context.parameters["narrow"] === true && "w-70")}>
         <Story />
       </ul>
     ),

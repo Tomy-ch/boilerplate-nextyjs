@@ -59,7 +59,7 @@ const QUIET_MS = 150;
 export async function settle(page: Page, theme: string): Promise<void> {
   try {
     await page.waitForFunction(
-      (expected) => document.documentElement.dataset.theme === expected,
+      (expected) => document.documentElement.dataset["theme"] === expected,
       theme,
       { timeout: RENDER_TIMEOUT_MS },
     );

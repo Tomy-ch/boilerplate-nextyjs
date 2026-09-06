@@ -106,7 +106,7 @@ function arrayOf(record: Record<string, unknown>, key: string, subject: string):
 
 /** object の `id` を読む。差し替えの選び先を決める鍵にする。 */
 function idOf(value: unknown): unknown {
-  return (value as Record<string, unknown> | null)?.id;
+  return (value as Record<string, unknown> | null)?.["id"];
 }
 
 /** 商品 1 件の名前・分類・状態を、噛み合う組へ揃える。 */
@@ -119,7 +119,7 @@ function alignProduct(product: unknown, draw: DrawFromEndpoint): unknown {
 
   const categories = entriesOf(draw("getGetProductCategoriesResponseMock", CATEGORIES_PATH));
   const statuses = entriesOf(draw("getGetProductStatusesResponseMock", STATUSES_PATH));
-  const catalogued = pick(PRODUCT_CATALOGUE, record.id);
+  const catalogued = pick(PRODUCT_CATALOGUE, record["id"]);
   const category = categories.find((entry) => entry.name === catalogued.categoryName);
 
   if (category === undefined) {
@@ -130,7 +130,7 @@ function alignProduct(product: unknown, draw: DrawFromEndpoint): unknown {
     ...record,
     name: catalogued.name,
     category,
-    status: pick(statuses, idOf(record.status)),
+    status: pick(statuses, idOf(record["status"])),
   };
 }
 
@@ -153,7 +153,7 @@ function alignProductRanking(response: unknown): unknown {
     rankings: arrayOf(record, "rankings", "ランキング").map((entry) => {
       const ranked = recordOf(entry, "ランキングの行");
 
-      return { ...ranked, name: pick(PRODUCT_CATALOGUE, ranked.productId).name };
+      return { ...ranked, name: pick(PRODUCT_CATALOGUE, ranked["productId"]).name };
     }),
   };
 }
@@ -171,14 +171,14 @@ function alignPurchase(purchase: unknown, draw: DrawFromEndpoint): Record<string
     throw new Error("購入の応答がステータスを持ちません");
   }
 
-  const details = record.details;
+  const details = record["details"];
   const named = Array.isArray(details)
     ? details.map((detail, index) => {
         const line = recordOf(detail, "購入の明細");
 
         // 位置でずらします。明細ごとに識別子から引くと同じ商品が 1 つの注文に何度も並びます。
         return "productName" in line
-          ? { ...line, productName: pick(PRODUCT_CATALOGUE, record.code, index).name }
+          ? { ...line, productName: pick(PRODUCT_CATALOGUE, record["code"], index).name }
           : line;
       })
     : undefined;
@@ -188,7 +188,7 @@ function alignPurchase(purchase: unknown, draw: DrawFromEndpoint): Record<string
   return {
     ...record,
     ...(named === undefined ? {} : { details: named }),
-    status: pick(statuses, idOf(record.status)),
+    status: pick(statuses, idOf(record["status"])),
   };
 }
 
@@ -203,7 +203,7 @@ function alignPurchaseList(response: unknown, draw: DrawFromEndpoint): unknown {
 
       return {
         ...alignPurchase(line, draw),
-        firstItemName: pick(PRODUCT_CATALOGUE, line.code).name,
+        firstItemName: pick(PRODUCT_CATALOGUE, line["code"]).name,
       };
     }),
   };

@@ -121,7 +121,7 @@ function PlanTable({
       </TableHeader>
       <TableBody>
         {ROWS.map((row) => (
-          <TableRow className={TABLE_STICKY_ROW_CLASS} key={row.id}>
+          <TableRow className={TABLE_STICKY_ROW_CLASS} key={row["id"]}>
             {columns.map((column) => (
               <TableCell className={columnClass(column)} key={column.id}>
                 {row[column.id]}

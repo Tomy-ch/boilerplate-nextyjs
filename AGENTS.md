@@ -519,9 +519,8 @@ rule below still applies to them.
 
 The criteria are in `.agents/purity-sweep/purity-sweep.prompt`. Read it when the hook says so, and
 record the file only once you have seen all of it — an entry claiming a sweep that did not happen is
-worse than no entry, because nothing will look at that file again. `.agents/README.md` states the
-mechanism's terminus: when nothing is unrecorded and `[pending]` is empty, that directory and the
-hook entry in `.claude/settings.json` are deleted.
+worse than no entry, because nothing will look at that file again. `.agents/README.md` owns what the
+mechanism is and how it ends; this section does not restate either.
 
 This is not a review lane. The three skills under `Review Phase Protocol` judge **a change**; this
 pass judges the **accumulated state of a file**, and it runs as a side effect of touching one.

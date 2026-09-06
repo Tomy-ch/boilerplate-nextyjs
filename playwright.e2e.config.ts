@@ -41,8 +41,11 @@ if (getEnvironment().APP_API_MODE !== "mock") {
  * アプリを起動するのはこの設定ではなく `make e2e` です。ブラウザはコンテナの中、アプリは
  * ホストで動くため、Playwright の `webServer` では起動できません（コンテナの中から見た
  * `127.0.0.1` はコンテナ自身です）。分けている理由は `docker-compose.dev-tools.yml` にあります。
+ *
+ * 開く先はこの手元の宿に固定します。測る相手は**手元で起動したアプリ**であり、繋ぎ先が
+ * 配信物に入ることはありません。別の宿へ向けるときだけ `E2E_BASE_URL` を渡します。
  */
-const BASE_URL = process.env["E2E_BASE_URL"] ?? "http://127.0.0.1:3000";
+const BASE_URL = process.env["E2E_BASE_URL"] ?? "http://127.0.0.1:3000"; // DevSkim: ignore DS162092
 
 const bands = loadBands();
 

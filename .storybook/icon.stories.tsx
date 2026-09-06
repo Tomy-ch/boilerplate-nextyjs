@@ -13,9 +13,8 @@ import * as icons from "@/components/icon";
  * ここは Storybook 自身の資料であり、アプリが描画する部品ではありません。名前空間 import を
  * 使っているのはそのためで、この束はカタログにしか載りません。
  */
-const CATALOG: readonly (readonly [string, ComponentType<ComponentProps<"svg">>])[] = Object.entries(
-  icons,
-).sort(([left], [right]) => left.localeCompare(right));
+const CATALOG: readonly (readonly [string, ComponentType<ComponentProps<"svg">>])[] =
+  Object.entries(icons).sort(([left], [right]) => left.localeCompare(right));
 
 /**
  * 部品がアイコンへ与えている大きさ。
@@ -31,7 +30,7 @@ function Catalog() {
   return (
     <div className="p-6">
       <p className="mb-4 text-sm text-muted-foreground">
-        {CATALOG.length} 件。名前は `@/components/icon` の公開名で、呼び出し側が書くのはこの綴りです。
+        {CATALOG.length} 件。呼び出し側が書くのはこの綴りです。
       </p>
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-1">
         {CATALOG.map(([name, Icon]) => (

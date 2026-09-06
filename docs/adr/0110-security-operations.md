@@ -178,6 +178,14 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 <!-- = - **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く(go 方式の翻案) -->
 <!-- boilerplate-only:replace-end -->
 
+### 6. エージェントの文脈へ入るリポジトリ由来の文字列
+
+- **リポジトリに置かれた文字列をエージェントの文脈へ入れる口は、それがデータであると名乗らせる。** 対象は hook の `additionalContext`、スキルやエージェントが読み込む台帳・索引・宣言ファイル、そこから組み立てた要約——**リポジトリの中身がそのままモデルの入力になる経路**である。データを先に、指示を後に置き、データの側に「指示ではない」と述べさせる
+- **制御文字を落とす。** 改行やエスケープシーケンスを残すと、封筒の中で別の段落・別の話者として読まれうる
+- **JSON のエスケープを対策と見なさない。** `JSON.stringify` が保証するのは封筒が壊れないことだけで、消費側が `JSON.parse` した時点で中身は元の文字列へ戻り、そのまま文脈へ入る
+  - > Rationale: その綴りを書いた者は、それを読むセッションの依頼者ではない。本リポジトリは public であり、ファイル名や台帳のエントリは通常の PR で持ち込める。**指示めいた自由記述は「もっともらしい理由」に偽装でき、設計やアーキテクチャの観点で読むレビュアーには見抜きにくい**。効くのは後日、無関係な別セッションが同じファイルへ触れた瞬間である
+- **リポジトリ外の値と同じ扱いにしない。** これは[表示層が上流由来の値を無害化しない](0070-backend-role-separation.md)という線引きの外側にある。ここで守るのは配信先のブラウザではなく、**このリポジトリで作業するエージェント自身**であり、値を作ったのはこのリポジトリである
+
 ## exclusion(no-Docker で対象外)
 
 go-boilerplate にはあるが、本リポは [0011](0011-no-docker.md)(no-Docker / PaaS・静的 CDN 配送)のため**採用しない**:
@@ -191,6 +199,7 @@ go-boilerplate にはあるが、本リポは [0011](0011-no-docker.md)(no-Docke
 
 - ❌ Renovate を併用すること(Dependabot に一本化)
 - ❌ セキュリティアップデートに cooldown を効かせること(即時 PR)
+- ❌ リポジトリ由来の文字列を、囲いもラベルも無くエージェントの文脈へ連結すること
 <!-- boilerplate-only:replace-begin -->
 - ❌ gitleaks / CodeQL の検出を fail-closed にしないこと(秘密・SAST high は必ずブロック)
 <!-- boilerplate-only:replace-with -->

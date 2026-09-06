@@ -42,6 +42,7 @@ include .makefiles/security/opengrep.mk
 include .makefiles/security/osv.mk
 include .makefiles/security/bearer.mk
 include .makefiles/security/dast.mk
+include .makefiles/security/suppression.mk
 
 # 一括実行系ファイル
 # GitHub関連

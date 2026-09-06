@@ -25,8 +25,12 @@ export function alignSlideToStart(container: Element, target: Element): void {
  * いま最も見えている slide の位置を返す。slide が無ければ 0。
  *
  * @remarks
- * 交差の割合ではなく領域との重なり幅で決めます。拡大表示のように slide が領域いっぱいを占める
- * 形では、送っている途中に 2 枚が同じ割合で見え、割合だけでは順序が決まりません。
+ * 拡大表示を閉じる瞬間のように、送り終えた位置を同期で 1 回読むための関数です。
+ * `IntersectionObserver` は非同期で、しかも threshold を跨いだときしか報告しないため、閉じる直前の
+ * 位置には使えません。
+ *
+ * 判定は領域との重なり幅で行い、同点（送っている途中に 2 枚が同じだけ見えている状態）は DOM 順で
+ * 先を取ります。追従表示を担う `CarouselThumbnails` の割合による判定と同じ結果になります。
  */
 export function currentSlideIndex(container: Element): number {
   const slides = [...container.querySelectorAll(CAROUSEL_ITEM_SLOT)];

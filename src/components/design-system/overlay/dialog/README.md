@@ -27,6 +27,8 @@
 
 ## 責務境界
 
+開いているあいだは履歴を 1 つ持ち、**戻る操作で自分だけを閉じます**（[0053](../../../../../docs/adr/0053-ui-component-interaction-seam.md)）。積むのは同じ URL の履歴 entry だけで、URL 自体は変わりません。
+
 focus trap・Escape・開閉・背面の inert 化のため hydration が必要な client island です。表示する文言、取得、保存、業務判断、開閉を URL へ載せるかの選択は持ちません。内容自体に client runtime が要らない場合は、Server Component で組み立てた要素を `children` として渡します。
 
 `DialogFooter` は配置だけを担い、閉じる操作を自前で描画しません。閉じる操作は `DialogClose` を `Button` へ合成して呼び出し元が置きます。shadcn の生成物にある footer 側の `showCloseButton` は、`DialogContent` の閉じる操作と重複し文言を component へ持ち込むため採っていません。

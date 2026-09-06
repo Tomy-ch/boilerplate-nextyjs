@@ -34,7 +34,8 @@ const STATUS_TONE: Readonly<Record<number, BadgeVariant>> = {
  * @remarks
  * **マスタはこちらの都合と関係なく増えます。** 知らない状態を既存のどれかへ寄せると、意味を
  * 取り違えた色が付きます。**装飾を持たない姿**は「区分を決めていない」ことをそのまま示します。
- * 区分の決まっている状態が縁を持つので、決まっていないものだけが枠を持ちません。
+ * 区分の決まっている状態は塗りか枠線で囲まれた形を持つので、決まっていないものだけが形を持たず、
+ * 素の文字で出ます。
  */
 const UNKNOWN_STATUS_TONE: BadgeVariant = BADGE_VARIANT.GHOST;
 

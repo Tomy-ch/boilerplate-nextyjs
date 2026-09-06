@@ -4,7 +4,7 @@ import { EARPHONE_LINE, INSUFFICIENT_LINE } from "../../../checkout.fixture";
 import { OrderLineRow } from "./order-line-row";
 
 const meta = {
-  title: "Features/Checkout/OrderLineRow",
+  title: "Features/Checkout/Confirm/OrderLineRow",
   component: OrderLineRow,
   parameters: {
     layout: "centered",

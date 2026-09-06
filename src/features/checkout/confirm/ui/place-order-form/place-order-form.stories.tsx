@@ -7,7 +7,7 @@ import { PlaceOrderForm } from "./place-order-form";
 const IDEMPOTENCY_KEY = "0195f0c2-0000-7000-a000-000000000001";
 
 const meta = {
-  title: "Features/Checkout/PlaceOrderForm",
+  title: "Features/Checkout/Confirm/PlaceOrderForm",
   component: PlaceOrderForm,
   parameters: {
     layout: "centered",

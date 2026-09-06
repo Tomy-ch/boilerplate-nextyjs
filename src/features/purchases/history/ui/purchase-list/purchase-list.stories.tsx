@@ -13,7 +13,7 @@ function toEntries(purchases: readonly PurchaseHistoryEntry[]): readonly Purchas
 const ENTRIES = toEntries(HISTORY_ENTRIES);
 
 const meta = {
-  title: "Features/Purchases/PurchaseLoadMoreList",
+  title: "Features/Purchases/History/PurchaseList",
   component: PurchaseLoadMoreList,
   parameters: {
     layout: "padded",

@@ -12,7 +12,7 @@ const FIRST_PAGE: CursorPage<PurchaseHistoryEntry> = {
 };
 
 const meta = {
-  title: "Features/Purchases/InfiniteList",
+  title: "Features/Purchases/History/InfiniteList",
   component: PurchaseInfiniteList,
   parameters: {
     layout: "padded",
@@ -20,7 +20,7 @@ const meta = {
       story: { inline: false, iframeHeight: 620 },
       description: {
         component: [
-          "読み進められる購入履歴です。**取得と見た目をつなぐだけ**で、見た目は `Features/Purchases/PurchaseLoadMoreList`、",
+          "読み進められる購入履歴です。**取得と見た目をつなぐだけ**で、見た目は `Features/Purchases/History/PurchaseList`、",
           "取得と末尾到達の検知は hook が持ちます。",
           "詳細への行き先はここで組みます。**canvas では末尾の目印が最初から見えている**ので、開いた時点で続きを取りに行き、届く続きは 1 度きりです。",
         ].join(""),

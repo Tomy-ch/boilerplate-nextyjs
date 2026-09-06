@@ -14,7 +14,7 @@ function LiveConfirmSection({ profile }: { profile: UserProfile | null }) {
 }
 
 const meta = {
-  title: "Features/Account/RegistrationConfirmSection",
+  title: "Features/Account/Onboarding/ConfirmSection",
   component: RegistrationConfirmSection,
   parameters: {
     layout: "padded",

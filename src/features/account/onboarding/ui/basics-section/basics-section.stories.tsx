@@ -25,7 +25,7 @@ function LiveBasicsSection({
 }
 
 const meta = {
-  title: "Features/Account/RegistrationBasicsSection",
+  title: "Features/Account/Onboarding/BasicsSection",
   component: RegistrationBasicsSection,
   parameters: {
     layout: "padded",

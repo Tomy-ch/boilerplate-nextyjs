@@ -56,7 +56,7 @@ async function searchAddress({ canvasElement }: { canvasElement: HTMLElement }):
 }
 
 const meta = {
-  title: "Features/Account/ProfileForm",
+  title: "Features/Account/Edit/ProfileForm",
   component: ProfileForm,
   parameters: {
     docs: {

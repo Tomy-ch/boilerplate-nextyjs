@@ -8,7 +8,7 @@ import { PriceChangeConfirm } from "./price-change-confirm";
 const IDEMPOTENCY_KEY = "0195f0c2-0000-7000-a000-000000000001";
 
 const meta = {
-  title: "Features/Checkout/PriceChangeConfirm",
+  title: "Features/Checkout/Confirm/PriceChangeConfirm",
   component: PriceChangeConfirm,
   parameters: {
     layout: "centered",

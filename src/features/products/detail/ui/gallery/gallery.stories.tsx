@@ -5,7 +5,7 @@ import { SAMPLE_ITEM_URLS } from "~catalog/lib/sample-asset";
 import { ProductGallery } from "./gallery";
 
 const meta = {
-  title: "Features/Products/DetailGallery",
+  title: "Features/Products/Detail/Gallery",
   component: ProductGallery,
   parameters: {
     layout: "padded",

@@ -13,7 +13,7 @@ import { OrderSummary } from "./order-summary";
 const IDEMPOTENCY_KEY = "0195f0c2-0000-7000-a000-000000000001";
 
 const meta = {
-  title: "Features/Checkout/OrderSummary",
+  title: "Features/Checkout/Confirm/OrderSummary",
   component: OrderSummary,
   parameters: {
     layout: "centered",

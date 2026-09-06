@@ -8,7 +8,7 @@ import {
 import { PurchaseHistoryDialog } from "./purchase-history-dialog";
 
 const meta = {
-  title: "Features/Account/PurchaseHistoryDialog",
+  title: "Features/Account/Mypage/PurchaseHistoryDialog",
   component: PurchaseHistoryDialog,
   parameters: {
     docs: {

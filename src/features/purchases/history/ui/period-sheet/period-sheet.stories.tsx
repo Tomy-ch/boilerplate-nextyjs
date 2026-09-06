@@ -17,7 +17,7 @@ function withDraft(Story: () => ReactElement, context: { args: { period: PeriodS
 }
 
 const meta = {
-  title: "Features/Purchases/PeriodSheet",
+  title: "Features/Purchases/History/PeriodSheet",
   component: PurchasePeriodSheet,
   parameters: {
     layout: "fullscreen",

@@ -24,14 +24,14 @@ function withPlaceOrderState(Story: () => ReactElement) {
 }
 
 const meta = {
-  title: "Features/Checkout/PlaceOrderSubmit",
+  title: "Features/Checkout/Confirm/PlaceOrderSubmit",
   component: PlaceOrderSubmit,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component: [
-          "購入を確定する送信部です。**待っているかは画面が 1 つだけ持つ送信の状態から採ります**（`Features/Checkout/PlaceOrderState`）。",
+          "購入を確定する送信部です。**待っているかは画面が 1 つだけ持つ送信の状態から採ります**（`Features/Checkout/Confirm/PlaceOrderState`）。",
           "幅は器に合わせ、集計の中では主操作として広げ、確かめの footer では文言の幅に収めます。",
         ].join(""),
       },

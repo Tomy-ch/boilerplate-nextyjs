@@ -47,7 +47,7 @@ test-requirement: feature
 | 履歴 | success | `Page/Purchases/History/Default` |
 | | empty（購入が 1 件も無い） | `Page/Purchases/History/NoPurchases` |
 | | empty（その期間に無い） | `Page/Purchases/History/NoResultInPeriod` |
-| | loading | `Features/Purchases/HistorySkeleton/Default` |
+| | loading | `Features/Purchases/History/Skeleton/Default` |
 | | 続きを読んでいる | `Page/Purchases/History/LoadingMore` |
 | | 続きの取得に失敗 | `Page/Purchases/History/LoadMoreFailed` |
 | | 末尾まで読んだ | `Page/Purchases/History/ReachedEnd` |

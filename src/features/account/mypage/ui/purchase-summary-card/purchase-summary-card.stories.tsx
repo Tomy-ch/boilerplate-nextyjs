@@ -9,7 +9,7 @@ import {
 import { PurchaseSummaryCard } from "./purchase-summary-card";
 
 const meta = {
-  title: "Features/Account/PurchaseSummaryCard",
+  title: "Features/Account/Mypage/PurchaseSummaryCard",
   component: PurchaseSummaryCard,
   parameters: {
     docs: {

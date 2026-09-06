@@ -30,7 +30,7 @@ async function openConfirm(canvasElement: HTMLElement, label: string) {
 }
 
 const meta = {
-  title: "Features/Purchases/TransitionButton",
+  title: "Features/Purchases/Detail/TransitionButton",
   component: PurchaseTransitionButton,
   parameters: {
     layout: "centered",

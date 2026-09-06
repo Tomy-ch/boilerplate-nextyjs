@@ -51,12 +51,12 @@ coverage-exclusions:
 | --- | --- | --- |
 | マイページ | success | `Page/Account/Mypage/Default` |
 | | empty（購入が無い） | `Page/Account/Mypage/NoPurchases` |
-| | loading | `Features/Account/MypageSkeleton/Default` |
+| | loading | `Features/Account/Mypage/Skeleton/Default` |
 | プロフィール編集 | success | `Page/Account/ProfileEdit/Default` |
-| | loading | `Features/Account/ProfileEditSkeleton/Default` |
-| | 誤りを見せている | `Features/Account/ProfileForm/ValidationErrors` |
-| | 住所が埋まった | `Features/Account/ProfileForm/AddressCompleted` |
-| | 該当が無い | `Features/Account/ProfileForm/AddressNotFound` |
+| | loading | `Features/Account/Edit/Skeleton/Default` |
+| | 誤りを見せている | `Features/Account/Edit/ProfileForm/ValidationErrors` |
+| | 住所が埋まった | `Features/Account/Edit/ProfileForm/AddressCompleted` |
+| | 該当が無い | `Features/Account/Edit/ProfileForm/AddressNotFound` |
 | 登録 | 段ごと | `Page/Account/Onboarding/{Default,AddressStep,ConfirmStepFilled}` |
 | | 誤りを見せている | `Page/Account/Onboarding/ValidationErrors` |
 | | 補完の機構が動いていない | `Page/Account/Onboarding/AddressUnavailable` |

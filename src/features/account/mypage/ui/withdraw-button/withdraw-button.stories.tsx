@@ -12,7 +12,7 @@ async function openConfirm(canvasElement: HTMLElement) {
 }
 
 const meta = {
-  title: "Features/Account/WithdrawButton",
+  title: "Features/Account/Mypage/WithdrawButton",
   component: WithdrawButton,
   parameters: {
     layout: "centered",

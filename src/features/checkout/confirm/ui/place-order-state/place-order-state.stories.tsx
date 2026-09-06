@@ -35,7 +35,7 @@ function TwoPlaces() {
 }
 
 const meta = {
-  title: "Features/Checkout/PlaceOrderState",
+  title: "Features/Checkout/Confirm/PlaceOrderState",
   component: PlaceOrderStateProvider,
   parameters: {
     layout: "padded",

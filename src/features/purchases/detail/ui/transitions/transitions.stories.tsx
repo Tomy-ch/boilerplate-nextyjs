@@ -25,7 +25,7 @@ function confirm(label: string) {
 }
 
 const meta = {
-  title: "Features/Purchases/Transitions",
+  title: "Features/Purchases/Detail/Transitions",
   component: PurchaseTransitions,
   parameters: {
     layout: "padded",

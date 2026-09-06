@@ -4,7 +4,7 @@ import { PROFILE } from "../../../account.fixture";
 import { ProfileCard } from "./profile-card";
 
 const meta = {
-  title: "Features/Account/ProfileCard",
+  title: "Features/Account/Mypage/ProfileCard",
   component: ProfileCard,
   parameters: {
     docs: {

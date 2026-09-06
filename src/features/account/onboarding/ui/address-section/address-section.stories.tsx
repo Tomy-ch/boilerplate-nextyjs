@@ -15,7 +15,7 @@ function LiveAddressSection({ profile }: { profile: UserProfile | null }) {
 }
 
 const meta = {
-  title: "Features/Account/RegistrationAddressSection",
+  title: "Features/Account/Onboarding/AddressSection",
   component: RegistrationAddressSection,
   parameters: {
     layout: "padded",

@@ -38,7 +38,7 @@ const TITLE = "ステータス別の件数";
  * **棒も表もサーバで描き切ります。** 棒は渡された件数を並べるだけで操作を受けないため、
  * client 島にする理由がありません（[0040](../../../../../docs/adr/0040-routing-rendering-strategy.md)）。
  *
- * @see Storybook `Page/Admin/Dashboard`
+ * @see Storybook `Features/Admin/StatusBreakdown`
  */
 export const StatusBreakdown = withPartSpan(
   "features/admin/ui/status-breakdown/status-breakdown",

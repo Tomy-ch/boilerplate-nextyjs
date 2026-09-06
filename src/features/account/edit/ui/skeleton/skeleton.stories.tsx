@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ProfileEditSkeleton } from "./skeleton";
 
 const meta = {
-  title: "Features/Account/ProfileEditSkeleton",
+  title: "Features/Account/Edit/Skeleton",
   component: ProfileEditSkeleton,
   parameters: {
     docs: {

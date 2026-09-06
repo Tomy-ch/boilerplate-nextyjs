@@ -33,7 +33,7 @@ export type AdminProductFilterSelectProps = {
  *
  * 選び直すと読み進めた位置を捨てます。前の条件の途中の位置は、新しい条件では別の場所を指します。
  *
- * @see Storybook `Page/Admin/Products/List`
+ * @see Storybook `Features/Admin/Products/List/FilterSelect`
  */
 export function AdminProductFilterSelect({
   field,

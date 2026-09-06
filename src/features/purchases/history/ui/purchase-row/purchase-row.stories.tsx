@@ -7,7 +7,7 @@ import { PurchaseRow } from "./purchase-row";
 const [FIRST, , DELIVERED, CANCELED] = HISTORY_ENTRIES;
 
 const meta = {
-  title: "Features/Purchases/PurchaseRow",
+  title: "Features/Purchases/History/PurchaseRow",
   component: PurchaseRow,
   parameters: {
     layout: "padded",

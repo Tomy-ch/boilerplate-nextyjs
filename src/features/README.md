@@ -75,6 +75,27 @@ export const XxxPageContent = withScreenSpan(
 - **取得を持つ側を包むと帰属が付く。** `page-content` が待つ通信はその span の中に入るので、外向きの `fetch` を画面へ結び付けられる
 - **部品は常用しない。** `part` を開けると 1 描画の span が描く部品の数だけ増える。値打ちが出るのは、分岐した結果——どの姿を返したか——を trace から読みたいときである
 
+## カタログに載せる
+
+画面は `Page/`、部品は `Features/` に置く（先頭セグメントの決まりは
+[`components/README.md`](../components/README.md)）。**`<screen>/ui/**` と `facade/**` の描画する部品は、
+すべて自分の story を持つ。** 画面の story から届く状態であっても持つ —— 画面は部品を 1 つの姿で
+しか通らないので、部品が表せる残りの状態（帯ごとの幅・契約上の最大長・送信中・拒まれた結果）は
+そこに現れない。
+
+story を持てないのは**ブラウザで描けない部品だけ**である。`server-only` を辿る取得を中に持つ
+async な合成がそれにあたる。持てない理由と、中身がどこで見られるかを本体の doc に書く。
+
+- **`title` の体系は [`components/README.md`](../components/README.md) が持つ。** ADR 0054 が所有者をそこ 1 か所に定めているので、ここには写さない
+- **`@see Storybook` は自分の story を指す。** 画面の story を指していると、その部品を直す人が
+  確かめる先を見つけられない
+- 送信中は解決しない送信先（[`~catalog/lib/pending-action`](../../.storybook/lib/pending-action.ts)）で
+  留める。すぐ返る送信先では、撮る前に送信が終わっている
+- Server Action を直に読む部品は、`.storybook/preview.tsx` の差し替え宣言に載せる
+  （[0054](../../docs/adr/0054-ui-catalog-storybook.md)）。載せないと、押した先で `config` の読み込みに落ちる
+- 入力の状態を外から受ける部品は、本物の hook を通した器で包む。差し替えると label と control の
+  対応まで偽物になり、カタログで確かめられるものが無くなる
+
 ## 運用
 
 - 横断利用が必要になった要素は責務に応じて `model`、`components`、`adapters`、`capabilities`、`stores` へ昇格する

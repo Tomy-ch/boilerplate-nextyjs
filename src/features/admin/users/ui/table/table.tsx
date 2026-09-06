@@ -97,7 +97,7 @@ function toColumns(
  * **退会済みかを色だけで伝えません。** 状態の列に文字のバッジを置き、行そのものは淡くしません
  * （[0100](../../../../../../docs/adr/0100-accessibility-target.md)）。
  *
- * @see Storybook `Page/Admin/Users`
+ * @see Storybook `Features/Admin/Users/Table`
  */
 export function AdminUserTable({ items, onWithdraw, pagination }: AdminUserTableProps) {
   return (

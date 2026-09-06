@@ -20,7 +20,7 @@ export type WithdrawFeedbackProps = {
  * 戻しは後から順に進むためです（[0070](../../../../../../docs/adr/0070-backend-role-separation.md)）。
  * 添えないと、一覧を見た人はもう在庫も戻っていると読みます。
  *
- * @see Storybook `Page/Admin/Users`
+ * @see Storybook `Features/Admin/Users/WithdrawFeedback`
  */
 export const WithdrawFeedback = withPartSpan(
   "features/admin/users/ui/withdraw-feedback/withdraw-feedback",

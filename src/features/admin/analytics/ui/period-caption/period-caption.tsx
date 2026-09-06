@@ -19,7 +19,7 @@ export type PeriodCaptionProps = {
  *
  * 1 日だけを指すときは範囲の形にしません。同じ日付を 2 度並べても、読み手が得るものがありません。
  *
- * @see Storybook `Page/Admin/Analytics`
+ * @see Storybook `Features/Admin/Analytics/PeriodCaption`
  */
 export const PeriodCaption = withPartSpan(
   "features/admin/analytics/ui/period-caption/period-caption",

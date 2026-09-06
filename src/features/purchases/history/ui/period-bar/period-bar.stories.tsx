@@ -18,7 +18,7 @@ function withDraft(
 }
 
 const meta = {
-  title: "Features/Purchases/PeriodBar",
+  title: "Features/Purchases/History/PeriodBar",
   component: PurchasePeriodBar,
   parameters: {
     layout: "padded",

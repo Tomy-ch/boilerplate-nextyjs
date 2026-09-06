@@ -13,15 +13,14 @@ import {
   PageHeaderTitle,
 } from "@/components/shell/page-header/page-header";
 import type { DashboardSummary, PurchaseStatusCount } from "@/model/dashboard/dashboard";
-import { toProductId } from "@/model/product/product";
 
 import { ADMIN_ANALYTICS_PATH, ADMIN_DASHBOARD_PATH, ADMIN_PRODUCT_LIST_PATH } from "../paths";
 import { toSummaryCards } from "../summary-cards";
 import { AdminSummarySkeleton } from "../ui/skeleton/skeleton";
 import { StatCards } from "../ui/stat-cards/stat-cards";
 import { StatusBreakdown } from "../ui/status-breakdown/status-breakdown";
+import { RANKING_ROWS } from "./analytics.fixture";
 import { DASHBOARD_PERIOD } from "./period";
-import type { AdminRankingRow } from "./ranking-rows";
 import { RankingTable } from "./ui/ranking-table/ranking-table";
 import { AnalyticsView } from "./view";
 
@@ -95,29 +94,6 @@ const SUMMARY: DashboardSummary = {
   publishedProductCount: 476,
 };
 
-let rankSeq = 0;
-
-function row(name: string, soldQuantity: number, price: string): AdminRankingRow {
-  rankSeq += 1;
-
-  return {
-    id: toProductId(`0195f0c2-3000-7000-8000-${String(rankSeq).padStart(12, "0")}`),
-    rank: rankSeq,
-    name,
-    price,
-    soldQuantity,
-  };
-}
-
-/** 実測した契約の応答と同じ顔ぶれ。価格は decimal 文字列のまま持つ。 */
-const RANKING: readonly AdminRankingRow[] = [
-  row("バゲット 1本", 5, "1.99"),
-  row("チームトポロジー", 4, "17.6"),
-  row("リーバイス 501 オリジナルフィット", 3, "102.67"),
-  row("MONSTER 完全版 1", 3, "8"),
-  row("スナップエンドウ 150g", 3, "2.19"),
-];
-
 /** 集計が届いている区画。route では `Suspense` の中で取得したものが入る。 */
 const SUMMARY_SLOT = (
   <>
@@ -126,7 +102,7 @@ const SUMMARY_SLOT = (
   </>
 );
 
-const RANKING_SLOT = <RankingTable rows={RANKING} />;
+const RANKING_SLOT = <RankingTable rows={RANKING_ROWS} />;
 
 const meta = {
   title: "Page/Admin/Analytics",

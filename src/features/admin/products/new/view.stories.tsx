@@ -22,27 +22,12 @@ import {
 import { failedActionState, idleActionState } from "@/model/action-state";
 
 import { ADMIN_PRODUCT_LIST_PATH } from "../../paths";
-import type { ProductSelectOption } from "../ui/select-field/select-field";
+import { CATEGORY_OPTIONS, MAX_UPLOAD_BYTES, STATUS_OPTIONS } from "../products.fixture";
 import { AdminProductCreateView } from "./view";
 
 const NAV_GROUPS: readonly AdminShellNavGroup[] = [
   { label: "商品", items: [{ href: ADMIN_PRODUCT_LIST_PATH, label: "商品一覧管理" }] },
 ];
-
-const CATEGORY_OPTIONS: readonly ProductSelectOption[] = [
-  { value: "01936f6d-0000-7000-8000-000000000001", label: "電子機器" },
-  { value: "01936f6d-0000-7000-8000-000000000002", label: "書籍" },
-  { value: "01936f6d-0000-7000-8000-000000000004", label: "食品" },
-];
-
-const STATUS_OPTIONS: readonly ProductSelectOption[] = [
-  { value: "01936f6d-0000-7000-8000-000000000101", label: "在庫あり" },
-  { value: "01936f6d-0000-7000-8000-000000000102", label: "在庫切れ" },
-  { value: "01936f6d-0000-7000-8000-000000000106", label: "入荷待ち" },
-];
-
-/** 4 MiB。config が配る既定と同じ値を、story でも同じ意味で使う。 */
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 /** canvas では送らない。押した先で何も起きないことを、待ち続けない形で示す。 */
 const idle = () => Promise.resolve(idleActionState<void>());

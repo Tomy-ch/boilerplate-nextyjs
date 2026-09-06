@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MypageSkeleton } from "./skeleton";
 
 const meta = {
-  title: "Features/Account/MypageSkeleton",
+  title: "Features/Account/Mypage/Skeleton",
   component: MypageSkeleton,
   parameters: {
     docs: {

@@ -64,8 +64,8 @@ coverage-exclusions:
 | | 進めない（買える明細が無い） | `Page/Checkout/Confirm/Blocked` |
 | | 外れる明細がある | `Page/Checkout/Confirm/WithExcludedLines` |
 | | 参考換算額が読めなかった | `Page/Checkout/Confirm/WithoutReference` |
-| | loading | `Features/Checkout/Skeleton/PC` |
-| | 値の変更を確かめる | `Features/Checkout/PriceChangeConfirm/Default` |
+| | loading | `Features/Checkout/Confirm/Skeleton/PC` |
+| | 値の変更を確かめる | `Features/Checkout/Confirm/PriceChangeConfirm/Default` |
 | 購入完了 | success | `Page/Checkout/Complete/Default` |
 | | 参考換算額が読めなかった | `Page/Checkout/Complete/WithoutReference` |
 

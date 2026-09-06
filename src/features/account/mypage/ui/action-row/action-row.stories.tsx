@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MypageActionRow } from "./action-row";
 
 const meta = {
-  title: "Features/Account/MypageActionRow",
+  title: "Features/Account/Mypage/ActionRow",
   component: MypageActionRow,
   parameters: {
     docs: {

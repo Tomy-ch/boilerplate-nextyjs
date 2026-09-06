@@ -4,7 +4,7 @@ import { PROFILE } from "../../../checkout.fixture";
 import { ShippingCard } from "./shipping-card";
 
 const meta = {
-  title: "Features/Checkout/ShippingCard",
+  title: "Features/Checkout/Confirm/ShippingCard",
   component: ShippingCard,
   parameters: {
     layout: "centered",

@@ -44,7 +44,7 @@ export type StockAmountFieldsProps = {
  * 量として読めるかは [`toStockQuantity`](../../stock-quantity.ts) が決めます。送信を読む側と同じ
  * 規則なので、見込みが出ているのに弾かれる、が起きません。
  *
- * @see Storybook `Page/Admin/Products/Stock`
+ * @see Storybook `Features/Admin/Products/Stock/AmountFields`
  */
 export function StockAmountFields({ current, message }: StockAmountFieldsProps) {
   const idPrefix = useId();

@@ -51,7 +51,7 @@ function tickStyle(tick: number, index: number, axis: BarAxis): CSSProperties {
  *
  * 取得も並べ替えも持たず、渡された配列をそのまま描きます。
  *
- * @see Storybook `Page/Admin/Dashboard`
+ * @see Storybook `Features/Admin/StatusBars`
  */
 export function StatusBars({ counts }: StatusBarsProps) {
   const axis = barAxis(counts.map((entry) => entry.count));

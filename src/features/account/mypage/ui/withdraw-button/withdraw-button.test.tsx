@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
@@ -133,6 +133,20 @@ describe("WithdrawButton", () => {
 
   it("送信していない間は失敗の文言を出さない", () => {
     render(<WithdrawButton />);
+
+    expect(screen.queryByText("退会できませんでした")).not.toBeInTheDocument();
+  });
+
+  it("退会できなかった理由が無ければ、見出しごと出さない", async () => {
+    const user = userEvent.setup();
+
+    withdrawAction.mockResolvedValue(failedActionState({}));
+
+    render(<WithdrawButton />);
+    const dialog = await open(user);
+    await user.click(confirmButton(dialog));
+
+    await waitFor(() => expect(withdrawAction).toHaveBeenCalled());
 
     expect(screen.queryByText("退会できませんでした")).not.toBeInTheDocument();
   });

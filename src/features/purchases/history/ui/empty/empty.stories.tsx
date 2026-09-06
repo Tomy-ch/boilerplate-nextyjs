@@ -4,7 +4,7 @@ import { toPurchaseHistoryHref } from "../../period";
 import { PurchaseHistoryEmpty } from "./empty";
 
 const meta = {
-  title: "Features/Purchases/HistoryEmpty",
+  title: "Features/Purchases/History/Empty",
   component: PurchaseHistoryEmpty,
   parameters: {
     layout: "padded",

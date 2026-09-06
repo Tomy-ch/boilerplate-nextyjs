@@ -13,7 +13,6 @@ import {
 } from "@/components/shell/page-header/page-header";
 import { ErrorKind } from "@/errors/error-kind";
 import { failedActionState, idleActionState, succeededActionState } from "@/model/action-state";
-import { toUserId } from "@/model/user/user";
 
 import { ADMIN_DASHBOARD_PATH, ADMIN_PRODUCT_LIST_PATH, ADMIN_USER_LIST_PATH } from "../paths";
 import { WITHDRAW_CONFLICT_MESSAGE } from "./form-state";
@@ -21,45 +20,13 @@ import { USER_SCOPE } from "./query";
 import type { AdminUserRow } from "./row";
 import { AdminUserPagination } from "./ui/pagination/pagination";
 import { WithdrawableUserList } from "./ui/withdrawable-list/withdrawable-list";
+import { ADMIN_USER_ROWS, LONG_NAME_USER_ROW, WITHDRAWN_USER_ROWS } from "./users.fixture";
 import { AdminUserListView } from "./view";
 
 const NAV_GROUPS: readonly AdminShellNavGroup[] = [
   { label: "集計", items: [{ href: ADMIN_DASHBOARD_PATH, label: "ダッシュボード" }] },
   { label: "商品", items: [{ href: ADMIN_PRODUCT_LIST_PATH, label: "商品一覧管理" }] },
   { label: "利用者", items: [{ href: ADMIN_USER_LIST_PATH, label: "利用者一覧" }] },
-];
-
-/** 契約が許す姓名の最大長（`src/adapters/gen/api/endpoints.zod.ts`）。 */
-const MAX_NAME_LENGTH = 100;
-
-/** 折り返しの有無を見分けるため、区切りの無い長い語と日本語を混ぜる。 */
-function longText(length: number): string {
-  const unit = "長谷川ヴィクトリア-Bartholomew-Featherstonehaugh-";
-
-  return unit.repeat(Math.ceil(length / unit.length)).slice(0, length);
-}
-
-let rowSeq = 0;
-
-function row(overrides: Partial<AdminUserRow> = {}): AdminUserRow {
-  rowSeq += 1;
-
-  return {
-    id: toUserId(`0195f0c2-0000-7000-8000-${String(rowSeq).padStart(12, "0")}`),
-    name: "山田 太郎",
-    email: "yamada@example.com",
-    phone: "09012345678",
-    withdrawn: false,
-    ...overrides,
-  };
-}
-
-const ROWS: readonly AdminUserRow[] = [
-  row(),
-  row({ name: "佐藤 花子", email: "sato@example.com", phone: "08098765432" }),
-  row({ name: "鈴木 一郎", email: "suzuki@example.com", phone: "+819011112222" }),
-  row({ name: "田中 二郎", email: "tanaka@example.com", withdrawn: true }),
-  row({ name: "高橋 三郎", email: "takahashi@example.com", phone: "0312345678" }),
 ];
 
 /** canvas では送らない。押した先で何も起きないことを、待ち続けない形で示す。 */
@@ -110,7 +77,7 @@ function withPageFrame(Story: () => React.ReactElement) {
 
 /** 一覧本体を組み立てる。story ごとに差し替えるのは行・ページ位置・送信先の 3 つだけ。 */
 function list({
-  items = ROWS,
+  items = ADMIN_USER_ROWS,
   page = 1,
   pageCount = 4,
   withdrawAction = idle,
@@ -194,7 +161,7 @@ export const DefaultMobile: Story = {
 export const ActiveOnly: Story = {
   args: {
     scope: USER_SCOPE.ACTIVE,
-    children: list({ items: ROWS.filter((item) => !item.withdrawn), pageCount: 3 }),
+    children: list({ items: ADMIN_USER_ROWS.filter((item) => !item.withdrawn), pageCount: 3 }),
   },
   globals: { viewport: { value: "desktop", isRotated: false } },
 };
@@ -203,13 +170,7 @@ export const ActiveOnly: Story = {
 export const WithdrawnOnly: Story = {
   args: {
     scope: USER_SCOPE.WITHDRAWN,
-    children: list({
-      items: [
-        row({ name: "田中 二郎", email: "tanaka@example.com", withdrawn: true }),
-        row({ name: "伊藤 四郎", email: "ito@example.com", withdrawn: true }),
-      ],
-      pageCount: 1,
-    }),
+    children: list({ items: WITHDRAWN_USER_ROWS, pageCount: 1 }),
   },
   globals: { viewport: { value: "desktop", isRotated: false } },
 };
@@ -222,7 +183,7 @@ export const MiddlePage: Story = {
 
 /** 末尾のページ。次が無いので「次へ」は押せない。 */
 export const LastPage: Story = {
-  args: { children: list({ items: ROWS.slice(0, 2), page: 4, pageCount: 4 }) },
+  args: { children: list({ items: ADMIN_USER_ROWS.slice(0, 2), page: 4, pageCount: 4 }) },
   globals: { viewport: { value: "desktop", isRotated: false } },
 };
 
@@ -281,15 +242,7 @@ export const WithdrawConflicted: Story = {
 /** 契約上の最大長を持つ姓名。表は自分の領域の中で横へ伸び、画面そのものは横へあふれない。 */
 export const LongName: Story = {
   args: {
-    children: list({
-      items: [
-        row({
-          name: `${longText(MAX_NAME_LENGTH)} ${longText(MAX_NAME_LENGTH)}`,
-          email: `${longText(60)}@example.com`,
-        }),
-        ...ROWS.slice(0, 2),
-      ],
-    }),
+    children: list({ items: [LONG_NAME_USER_ROW, ...ADMIN_USER_ROWS.slice(0, 2)] }),
   },
   globals: { viewport: { value: "desktop", isRotated: false } },
 };

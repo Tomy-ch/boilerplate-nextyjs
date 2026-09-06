@@ -3,7 +3,6 @@ import Link from "next/link";
 import { userEvent, within } from "storybook/test";
 import { CursorPagination } from "@/components/app-starter/cursor-pagination/cursor-pagination";
 import { Button } from "@/components/design-system/action/button/button";
-import { BADGE_VARIANT } from "@/components/design-system/display/badge/badge.definition";
 import { AdminShell } from "@/components/shell/admin-shell/admin-shell";
 import type { AdminShellNavGroup } from "@/components/shell/admin-shell/admin-shell.definition";
 import { ContentContainer } from "@/components/shell/content-container/content-container";
@@ -12,12 +11,14 @@ import {
   PageHeaderDescription,
   PageHeaderTitle,
 } from "@/components/shell/page-header/page-header";
-import { toProductId } from "@/model/product/product";
 import { ADMIN_ANALYTICS_PATH, ADMIN_DASHBOARD_PATH, ADMIN_PRODUCT_LIST_PATH } from "../../paths";
-import type { AdminProductFilterOption } from "./filter-option";
-import type { AdminProductListConditions } from "./query";
-import type { AdminProductRow } from "./row";
-import { toStatusTone } from "./status-tone";
+import {
+  CATEGORY_OPTIONS,
+  LONG_NAME_PRODUCT_ROW,
+  NO_CONDITIONS,
+  PRODUCT_ROWS,
+  STATUS_OPTIONS,
+} from "./list.fixture";
 import { AdminProductTable } from "./ui/table/table";
 import { AdminProductListView } from "./view";
 
@@ -31,24 +32,6 @@ const NAV_GROUPS: readonly AdminShellNavGroup[] = [
   },
   { label: "商品", items: [{ href: ADMIN_PRODUCT_LIST_PATH, label: "商品一覧管理" }] },
 ];
-
-const CATEGORY_OPTIONS: readonly AdminProductFilterOption[] = [
-  { value: "1", label: "電子機器" },
-  { value: "2", label: "書籍" },
-  { value: "4", label: "食品" },
-];
-
-const STATUS_OPTIONS: readonly AdminProductFilterOption[] = [
-  { value: "1", label: "在庫あり" },
-  { value: "2", label: "在庫切れ" },
-  { value: "6", label: "入荷待ち" },
-];
-
-const NO_CONDITIONS: AdminProductListConditions = {
-  keyword: "",
-  categoryCodes: [],
-  statusCodes: [],
-};
 
 /**
  * route と同じ器で包む。`admin/layout.tsx` が置く shell と `page.tsx` が置く見出しを story 側で
@@ -83,84 +66,6 @@ function withPageFrame(Story: () => React.ReactElement) {
   );
 }
 
-/**
- * 契約が許す最大長。`name` は 255 で、分類名・状態名に上限の宣言は無い
- * （`src/adapters/gen/api/endpoints.zod.ts`）。上限の無い項目は、表が折り返しで耐えるかを見る。
- */
-const MAX_NAME_LENGTH = 255;
-
-/** 折り返しの有無を見分けるため、区切りの無い長い語と日本語を混ぜる。 */
-function longText(length: number): string {
-  const unit = "超高性能ワイヤレスノイズキャンセリングイヤホン-第3世代-ProMaxUltraEdition-";
-
-  return unit.repeat(Math.ceil(length / unit.length)).slice(0, length);
-}
-
-let itemSeq = 0;
-
-/** 状態のコードから、実際の画面と同じ見た目の割り当てで 1 行を作る。 */
-function item(
-  overrides: Partial<AdminProductRow> & { readonly statusCode?: number } = {},
-): AdminProductRow {
-  itemSeq += 1;
-  const { statusCode = 1, ...rest } = overrides;
-
-  return {
-    id: toProductId(`0195f0c2-0000-7000-8000-${String(itemSeq).padStart(12, "0")}`),
-    name: "ワイヤレスイヤホン",
-    price: "19.99",
-    quantity: 12,
-    categoryName: "電子機器",
-    statusName: "在庫あり",
-    statusTone: toStatusTone(statusCode),
-    ...rest,
-  };
-}
-
-/** 状態は 4 つの区分がそろうように選ぶ。色の割り当てを 1 画面で見比べられるようにするため。 */
-const ITEMS: readonly AdminProductRow[] = [
-  item(),
-  item({
-    name: "スマートウォッチ",
-    price: "129.00",
-    quantity: 0,
-    statusName: "在庫切れ",
-    statusCode: 2,
-  }),
-  item({ name: "USB-C ハブ", price: "45.50", quantity: 4, statusName: "入荷待ち", statusCode: 6 }),
-  item({
-    name: "編組ケーブル 2m",
-    price: "0.99",
-    categoryName: "食品",
-    quantity: 480,
-    statusName: "販売終了",
-    statusCode: 4,
-  }),
-  item({
-    name: "モバイルバッテリー",
-    price: "1299.00",
-    quantity: 2,
-    statusName: "限定販売",
-    statusCode: 10,
-  }),
-  item({
-    name: "有線イヤホン",
-    price: "12.00",
-    quantity: 8,
-    statusName: "新設された状態",
-    statusCode: 99,
-  }),
-  // 廃番はマスタのコードから決まらないため、`item` の割り当てを通さず直に置く。実際の値は
-  // `row.ts` が持ち、対応は `row.test.ts` が押さえる。
-  item({
-    name: "AirPods Pro 第2世代",
-    price: "265.33",
-    quantity: 192,
-    statusName: "廃番",
-    statusTone: BADGE_VARIANT.DEFAULT,
-  }),
-];
-
 const meta = {
   title: "Page/Admin/Products/List",
   component: AdminProductListView,
@@ -186,7 +91,7 @@ const meta = {
     statusOptions: STATUS_OPTIONS,
     children: (
       <AdminProductTable
-        items={ITEMS}
+        items={PRODUCT_ROWS}
         pagination={<CursorPagination aria-label="商品一覧のページ送り" nextHref="?after=next" />}
       />
     ),
@@ -237,7 +142,7 @@ export const MiddlePage: Story = {
   args: {
     children: (
       <AdminProductTable
-        items={ITEMS}
+        items={PRODUCT_ROWS}
         pagination={
           <CursorPagination
             aria-label="商品一覧のページ送り"
@@ -256,7 +161,7 @@ export const LastPage: Story = {
   args: {
     children: (
       <AdminProductTable
-        items={ITEMS.slice(0, 2)}
+        items={PRODUCT_ROWS.slice(0, 2)}
         pagination={
           <CursorPagination
             aria-label="商品一覧のページ送り"
@@ -275,7 +180,7 @@ export const Searched: Story = {
     conditions: { ...NO_CONDITIONS, keyword: "イヤホン" },
     children: (
       <AdminProductTable
-        items={[ITEMS[0]]}
+        items={[PRODUCT_ROWS[0]]}
         pagination={<CursorPagination aria-label="商品一覧のページ送り" />}
       />
     ),
@@ -289,7 +194,7 @@ export const FilteredByMaster: Story = {
     conditions: { ...NO_CONDITIONS, categoryCodes: ["1"], statusCodes: ["2"] },
     children: (
       <AdminProductTable
-        items={ITEMS.slice(0, 3)}
+        items={PRODUCT_ROWS.slice(0, 3)}
         pagination={<CursorPagination aria-label="商品一覧のページ送り" />}
       />
     ),
@@ -316,7 +221,7 @@ export const LongName: Story = {
   args: {
     children: (
       <AdminProductTable
-        items={[item({ name: longText(MAX_NAME_LENGTH) }), ...ITEMS.slice(0, 2)]}
+        items={[LONG_NAME_PRODUCT_ROW, ...PRODUCT_ROWS.slice(0, 2)]}
         pagination={<CursorPagination aria-label="商品一覧のページ送り" />}
       />
     ),

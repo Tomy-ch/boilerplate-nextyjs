@@ -4,7 +4,7 @@ import { DEFAULT_RECENT_DAYS } from "../../period-draft";
 import { PurchasePeriodFields } from "./period-fields";
 
 const meta = {
-  title: "Features/Purchases/PeriodFields",
+  title: "Features/Purchases/History/PeriodFields",
   component: PurchasePeriodFields,
   parameters: {
     layout: "padded",

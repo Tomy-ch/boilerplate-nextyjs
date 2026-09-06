@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
@@ -100,5 +100,45 @@ describe("DeliveryListCard", () => {
 
     expect(await screen.findByText("配達済みにできませんでした")).toBeVisible();
     expect(screen.getByText(DELIVERY_CONFLICT_MESSAGE)).toBeVisible();
+  });
+
+  it("確認している間は、押した行だけを押せなくする", async () => {
+    let settle: ((state: unknown) => void) | undefined;
+
+    deliverAction.mockReturnValueOnce(
+      new Promise((resolve) => {
+        settle = resolve;
+      }),
+    );
+
+    render(<DeliveryListCard deliverAction={deliverAction} purchases={SHIPPED_PURCHASES} />);
+
+    await userEvent.click(deliverActionAt(0));
+
+    const pending = await screen.findByRole("button", { name: "確認しています…" });
+
+    expect(pending).toBeDisabled();
+
+    for (const control of screen.getAllByRole("button", { name: "配達済みにする" })) {
+      expect(control).toBeEnabled();
+    }
+
+    settle?.(succeededActionState({ purchaseCode: SHIPPED_PURCHASES[0]?.code ?? "" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "確認しています…" })).not.toBeInTheDocument(),
+    );
+  });
+
+  it("通らなかった理由が無ければ、何も述べない", async () => {
+    deliverAction.mockResolvedValueOnce(failedActionState({ kind: ErrorKind.CONFLICT }));
+
+    render(<DeliveryListCard deliverAction={deliverAction} purchases={SHIPPED_PURCHASES} />);
+
+    await userEvent.click(deliverActionAt(0));
+
+    await waitFor(() => expect(deliverAction).toHaveBeenCalledOnce());
+
+    expect(screen.queryByText("配達済みにできませんでした")).not.toBeInTheDocument();
+    expect(screen.queryByText("配達を確認しました")).not.toBeInTheDocument();
   });
 });

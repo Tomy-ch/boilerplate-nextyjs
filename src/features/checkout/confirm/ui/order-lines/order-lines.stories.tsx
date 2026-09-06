@@ -4,7 +4,7 @@ import { LONG_CART, ORDERABLE_CART, PARTIALLY_ORDERABLE_CART } from "../../../ch
 import { OrderLines } from "./order-lines";
 
 const meta = {
-  title: "Features/Checkout/OrderLines",
+  title: "Features/Checkout/Confirm/OrderLines",
   component: OrderLines,
   parameters: {
     layout: "centered",

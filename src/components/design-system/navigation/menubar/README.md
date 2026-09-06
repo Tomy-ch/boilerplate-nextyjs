@@ -60,7 +60,7 @@ menu は touch device と screen reader で到達コストが高く、menubar �
 
 項目と trigger の focus / hover は `bg-accent` / `text-accent-foreground` で示します。キーボードで移動したときに現在位置が分かる唯一の手がかりなので、`className` でこの指定を打ち消しません。
 
-vendor は現在 Radix と lucide ですが、公開 API に vendor 名は含めません。
+vendor は現在 Radix ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。
 
 ## Storybook とテスト
 

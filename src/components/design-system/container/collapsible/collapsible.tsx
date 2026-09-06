@@ -1,7 +1,7 @@
-import { ChevronDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronDownIcon } from "@/components/icon";
 
 /**
  * 単一の補助領域を開閉する SSR first の collapsible。

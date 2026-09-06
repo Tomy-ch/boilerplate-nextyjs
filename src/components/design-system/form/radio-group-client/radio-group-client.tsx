@@ -1,10 +1,10 @@
 "use client";
 
-import { CircleIcon } from "lucide-react";
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
 import type * as React from "react";
 
 import { cn } from "@/components/cn";
+import { CircleIcon } from "@/components/icon";
 
 /** {@link RadioGroupClient} の props。 */
 export type RadioGroupClientProps = React.ComponentProps<typeof RadioGroupPrimitive.Root>;

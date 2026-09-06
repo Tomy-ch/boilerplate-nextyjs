@@ -835,7 +835,7 @@ test-requirement: unit
 - **目的**: shadcn/ui を起点に、**コードを SSOT とするデザインシステム**を立ち上げる(§3.11)。P3-7 のトークン確定はこの改修の結果として決まる
 - **対象 ADR**: [0052](../adr/0052-ui-component-policy.md) / [0053](../adr/0053-ui-component-interaction-seam.md) / [0054](../adr/0054-ui-catalog-storybook.md) / [0051](../adr/0051-styling-system.md) / [0100](../adr/0100-accessibility-target.md)
 - **主な変更先**:
-  - `src/components/` — shadcn/ui + lucide-react + 複雑入力を import(`cva` 込み。§3.10)
+  - `src/components/` — shadcn/ui + @tabler/icons-react + 複雑入力を import(`cva` 込み。§3.10)
   - `.storybook/` — builder / framework 統合
   - `*.stories.tsx` — 対象コンポーネントへ co-location([0027](../adr/0027-directory-structure.md))
   - `src/components/component-template.md` — component README の必須見出しを固定するコピー元
@@ -1660,7 +1660,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 
 ## Phase 8: docs portal
 
-[0141](../adr/0141-portal-operations.md) の残務。生成基盤(`docs/portal/manifest.yaml` / `scripts/portal/` / `docs-viewer/`)と GitHub Pages への配信 workflow は Phase 3 で着地済みで、ここに残るのは manifest のキュレーションを支える運用スキルと、リポジトリ設定である配信先ブランチの許可だけである。スキルの判定対象が README である以上、README が出揃ってから着手する。
+[0141](../adr/0141-portal-operations.md) の残務。生成基盤(`docs/portal/manifest.yaml` / `scripts/portal/` / `docs-viewer/`)と GitHub Pages への配信 workflow は Phase 3 で着地済みで、ここに残るのは manifest のキュレーションを支える運用スキルと、配信先ブランチの許可だけである。スキルの判定対象が README である以上、README が出揃ってから着手する。
 
 ### P8-2: portal 運用スキルの復活 + 配信先ブランチの許可
 
@@ -1669,9 +1669,9 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 - **主な変更先**:
   - `.claude/skills/portal-manifest-sync/` — 移植バックログの「対象外(D)」からの復活移植（移植済み）
   - `.claude/skills/readme-review/` — manual-worthy 判定から `portal-manifest-sync` への導線を接続
-- **主な変更先(追記)**: リポジトリ設定 — `github-pages` environment の deployment branch policy
+- **主な変更先(追記)**: `.makefiles/github/setting/pages-delivery.mk` — Pages の有効化と配信元ブランチの許可
 - **完了条件**: GitHub Pages で portal が公開され、`deploy-docs.yaml` の `docs-deploy` が `production` への push で成功する。`portal-manifest-sync` が manifest の drift を検出する
-- **注**: Pages 自体は既に有効(`build_type: workflow`)で、足りないのは**配信先の許可**である。`github-pages` environment の deployment branch policy に `production` が無いため、`docs-deploy` は step を 1 つも実行せずに落ちる。**この設定変更はリポジトリ設定なのでユーザが実施する**
+- **注**: 足りなかったのは Pages の有効化ではなく**配信先の許可**である。`github-pages` environment の deployment branch policy が配信元ブランチを許可していないと、`docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない。`docs-build` は緑のままなので気付けない。**人手の手順ではなく `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ**
 - **URL 整合**: setup が書き込む portal URL（既定の GitHub Pages project site または導入先指定の custom domain）で、Typeset の Storybook 例から公開 portal へ到達できる
 - **依存**: P5-16
 

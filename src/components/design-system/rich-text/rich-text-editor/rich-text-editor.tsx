@@ -2,7 +2,6 @@
 
 import type { Editor } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
-import { EyeIcon, LinkIcon, UnlinkIcon } from "lucide-react";
 import {
   type ChangeEvent,
   type KeyboardEvent,
@@ -13,6 +12,7 @@ import {
 } from "react";
 
 import { cn } from "@/components/cn";
+import { EyeIcon, LinkIcon, UnlinkIcon } from "@/components/icon";
 import { SanitizedRichText } from "@/model/rich-text/sanitized-rich-text";
 import { Button } from "../../action/button/button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "../../action/button/button.definition";

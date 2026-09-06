@@ -1,6 +1,5 @@
-import { ChevronUpIcon } from "lucide-react";
-
 import { cn } from "@/components/cn";
+import { ChevronUpIcon } from "@/components/icon";
 import { withPartSpan } from "@/observability/render-span";
 
 /** `CartDockHandle` の props。 */

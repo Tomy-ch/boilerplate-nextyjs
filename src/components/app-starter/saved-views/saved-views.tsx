@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronsUpDownIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import { useCallback, useId, useState } from "react";
 import { Button } from "@/components/design-system/action/button/button";
@@ -40,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/design-system/overlay/dropdown-menu/dropdown-menu";
 import { DROPDOWN_MENU_ITEM_VARIANT } from "@/components/design-system/overlay/dropdown-menu/dropdown-menu.definition";
+import { ChevronsUpDownIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icon";
 import { SAVED_VIEWS_DIALOG, type SavedViewsDialog } from "./saved-views.definition";
 
 /** 保存済みの一覧条件 1 件。 */
@@ -237,7 +237,7 @@ export function SavedViews({
             onSelect={openDelete}
             variant={DROPDOWN_MENU_ITEM_VARIANT.DESTRUCTIVE}
           >
-            <Trash2Icon aria-hidden="true" />
+            <TrashIcon aria-hidden="true" />
             削除
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { InfoIcon } from "lucide-react";
+
+import { InfoIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";

@@ -1,10 +1,10 @@
 "use client";
 
-import { Trash2Icon } from "lucide-react";
 import { useActionState, useCallback } from "react";
 import { useFormStatus } from "react-dom";
 
 import { Button } from "@/components/design-system/action/button/button";
+import { TrashIcon } from "@/components/icon";
 import { idleActionState } from "@/model/action-state";
 
 import { type CartActionState, removeCartItemAction } from "../../actions";
@@ -34,7 +34,7 @@ function RemoveSubmit({ label, onSubmit }: { label: string; onSubmit: () => void
       type="submit"
       variant="ghost"
     >
-      <Trash2Icon aria-hidden="true" className="size-4" />
+      <TrashIcon aria-hidden="true" className="size-4" />
     </Button>
   );
 }

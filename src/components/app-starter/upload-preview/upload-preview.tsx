@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowDownIcon, ArrowUpIcon, RefreshCwIcon, RotateCcwIcon, XIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -15,6 +14,7 @@ import {
 import { ATTACHMENT_STATE } from "@/components/app-starter/attachment/attachment.definition";
 import { cn } from "@/components/cn";
 import { Spinner } from "@/components/design-system/status/spinner/spinner";
+import { ArrowDownIcon, ArrowUpIcon, RefreshIcon, RotateIcon, XIcon } from "@/components/icon";
 
 import type { UploadPreviewItem, UploadPreviewOrientation } from "./upload-preview.definition";
 import { UPLOAD_PREVIEW_ORIENTATION } from "./upload-preview.definition";
@@ -119,7 +119,7 @@ function UploadPreviewRow({
               onClick={retry}
               type="button"
             >
-              <RotateCcwIcon aria-hidden="true" />
+              <RotateIcon aria-hidden="true" />
             </AttachmentAction>
           ) : null}
           {onReplace === undefined ? null : (
@@ -129,7 +129,7 @@ function UploadPreviewRow({
               onClick={replace}
               type="button"
             >
-              <RefreshCwIcon aria-hidden="true" />
+              <RefreshIcon aria-hidden="true" />
             </AttachmentAction>
           )}
           {onRemove === undefined ? null : (

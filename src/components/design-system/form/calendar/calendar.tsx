@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import * as React from "react";
 import {
   type ChevronProps,
@@ -12,6 +11,7 @@ import {
 } from "react-day-picker";
 
 import { cn } from "@/components/cn";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "@/components/icon";
 import { Button, buttonVariants } from "../../action/button/button";
 
 function CalendarRoot({ className, rootRef, ...rootProps }: RootProps) {

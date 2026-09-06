@@ -1,7 +1,8 @@
 "use client";
 
-import { CalendarIcon } from "lucide-react";
 import { useCallback, useState } from "react";
+
+import { CalendarIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../../overlay/popover/popover";

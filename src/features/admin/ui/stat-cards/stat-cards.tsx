@@ -1,7 +1,7 @@
-import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Card } from "@/components/design-system/display/card/card";
+import { ChevronRightIcon } from "@/components/icon";
 import { withPartSpan } from "@/observability/render-span";
 import type { SummaryCard } from "../../summary-cards";
 

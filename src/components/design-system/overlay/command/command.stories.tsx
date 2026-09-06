@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CalendarIcon, FileTextIcon, SettingsIcon, UserIcon } from "lucide-react";
 import { useCallback, useState } from "react";
+
+import { CalendarIcon, FileTextIcon, SettingsIcon, UserIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import {

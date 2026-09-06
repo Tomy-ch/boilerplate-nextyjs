@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronsUpDownIcon } from "lucide-react";
 import { type ChangeEvent, useCallback, useId, useState } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronsUpDownIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../../overlay/popover/popover";

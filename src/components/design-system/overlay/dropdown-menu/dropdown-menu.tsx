@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { CheckIcon, ChevronRightIcon, CircleIcon } from "@/components/icon";
 import { KbdGroup } from "../../display/kbd/kbd";
 import {
   DROPDOWN_MENU_ITEM_VARIANT,

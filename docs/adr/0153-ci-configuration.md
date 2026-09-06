@@ -91,7 +91,7 @@ go-boilerplate は workflows を **「1 関心事 = 1 ワークフロー」** �
 ## 補足
 
 - 本 ADR の Accepted に伴う AGENTS.md の `[TODO] CI Configuration` 節の削除・書き換えは実施済み(AGENTS.md の `[TODO]` 群は全て削除され、Accepted Rules 表に集約済み)
-- required check の branch ruleset への指定は、Security グループ([0110](0110-security-operations.md))の workflow が揃った時点でユーザが実施する。portal 配信([0141](0141-portal-operations.md) D2)はその後
+- required check の branch ruleset への指定は、Security グループ([0110](0110-security-operations.md))の workflow が揃った時点でユーザが実施する。portal 配信([0141](0141-portal-operations.md) D2)は着地済みで、配信先の設定は `make apply-pages-delivery` が持つ
 
 ## 関連 ADR
 

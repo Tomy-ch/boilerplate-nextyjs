@@ -1,9 +1,9 @@
 "use client";
 
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { cn } from "@/components/cn";
+import { CheckIcon, ChevronsUpDownIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import {

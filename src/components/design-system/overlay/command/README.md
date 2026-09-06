@@ -59,7 +59,7 @@ SSR first の選定では、入力に応じた絞り込みとキーボード操�
 
 `CommandSeparator` は `role="separator"` を固定で持ちますが、`listbox` が子に許すのは `option` と `group` だけです。区切りが読み上げの対象として残ると ARIA として不正な入れ子になり、a11y 自動検査が critical として検出します。要素は残したまま `aria-hidden` で支援技術から隠しています。group の見出しが読み上げ順での区切りをすでに伝えるため、伝わる情報は減りません。
 
-vendor は現在 cmdk と lucide、および `Dialog` を通じた Radix ですが、公開 API に vendor 名は含めません。
+vendor は現在 cmdk と、`Dialog` を通じた Radix ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。
 
 ## Storybook とテスト
 

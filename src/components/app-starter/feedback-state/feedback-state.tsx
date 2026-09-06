@@ -1,6 +1,5 @@
-import { CircleAlert, CircleCheck, Inbox, type LucideIcon } from "lucide-react";
-
 import { Spinner } from "@/components/design-system/status/spinner/spinner";
+import { CircleAlertIcon, CircleCheckIcon, type IconComponent, InboxIcon } from "@/components/icon";
 
 import { FEEDBACK_STATE_KIND, type FeedbackStateKind } from "./feedback-state.definition";
 
@@ -14,10 +13,10 @@ export type FeedbackStateProps = {
   description?: string;
 };
 
-const feedbackStateIcon: Record<Exclude<FeedbackStateKind, "loading">, LucideIcon> = {
-  [FEEDBACK_STATE_KIND.EMPTY]: Inbox,
-  [FEEDBACK_STATE_KIND.ERROR]: CircleAlert,
-  [FEEDBACK_STATE_KIND.SUCCESS]: CircleCheck,
+const feedbackStateIcon: Record<Exclude<FeedbackStateKind, "loading">, IconComponent> = {
+  [FEEDBACK_STATE_KIND.EMPTY]: InboxIcon,
+  [FEEDBACK_STATE_KIND.ERROR]: CircleAlertIcon,
+  [FEEDBACK_STATE_KIND.SUCCESS]: CircleCheckIcon,
 };
 
 /**

@@ -1,7 +1,7 @@
-import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/design-system/display/badge/badge";
+import { ChevronRightIcon } from "@/components/icon";
 import { formatDateTime } from "@/model/datetime";
 import { formatMoney } from "@/model/money";
 import type { PurchaseHistoryEntry } from "@/model/purchase/purchase";

@@ -1,7 +1,8 @@
 "use client";
 
-import { PrinterIcon } from "lucide-react";
 import { useCallback } from "react";
+
+import { PrinterIcon } from "@/components/icon";
 
 import { Button } from "../button/button";
 

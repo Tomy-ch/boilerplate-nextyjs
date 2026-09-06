@@ -50,7 +50,7 @@ menu は touch device と screen reader で到達コストが高いため、主�
 
 項目の focus / hover は `bg-accent` / `text-accent-foreground` で示します。この semantic token は `tokens/themes/<系統>/<配色>.json` に定義があり、地から一段離れた淡い面を使います。キーボードで項目を移動したときに現在位置が分かる唯一の手がかりなので、`className` でこの指定を打ち消しません。
 
-vendor は現在 Radix と lucide ですが、公開 API に vendor 名は含めません。
+vendor は現在 Radix ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。
 
 ## Storybook とテスト
 

@@ -140,7 +140,8 @@ post-checkout:
       # その汚れを commit すると間違った指し先が保護ブランチへ載る (ADR 0151)。
       #
       # {3} はブランチの移動なら 1、ファイルの取り出しなら 0。後者では指し先が動かない。
-      run: test "{3}" = "1" && make baseline-sync
+      # 合わせる必要が無いことと、合わせに失敗したことを終了コードで分ける。
+      run: if [ "{3}" = "1" ]; then make baseline-sync; fi
 
 post-merge:
   commands:

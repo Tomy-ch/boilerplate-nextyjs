@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatPrunePlan,
+  isNotFound,
   isSnapshotRef,
   needsPrune,
   parseDefaultBranch,
@@ -108,6 +109,22 @@ describe("parseDefaultBranch", () => {
     expect(() => parseDefaultBranch("0123456789abcdef\tHEAD\n")).toThrow(
       /既定ブランチを解決できません/,
     );
+  });
+});
+
+describe("isNotFound", () => {
+  // ----- 正常系 -----
+  it("gh が出した 404 の診断文を 404 と見なす", () => {
+    expect(isNotFound("gh: No commit found for the ref v0.4.0 (HTTP 404)\n")).toBe(true);
+  });
+
+  // ----- 異常系 -----
+  it("404 以外の応答を 404 と見なさない", () => {
+    expect(isNotFound("gh: Bad credentials (HTTP 401)\n")).toBe(false);
+  });
+
+  it("stderr を持たない失敗を 404 と見なさない", () => {
+    expect(isNotFound("")).toBe(false);
   });
 });
 

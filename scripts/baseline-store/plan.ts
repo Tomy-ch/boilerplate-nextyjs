@@ -122,6 +122,19 @@ export function parseDefaultBranch(lsRemoteOutput: string): string {
   return match[1];
 }
 
+/**
+ * `gh` の失敗が 404 か。
+ *
+ * @param stderr 子プロセスが出した stderr そのもの。呼び出し側が組み立てた文面を渡さないこと。
+ *   引数を連ねた文面を渡すと、問い合わせ先の ref 名が判定の材料に混ざる。
+ *
+ * @remarks
+ * 見ているのは gh の人間向けの診断文です。綴りが変われば 404 を拾えなくなります。
+ */
+export function isNotFound(stderr: string): boolean {
+  return stderr.includes("(HTTP 404)");
+}
+
 function escapeRegExp(literal: string): string {
   return literal.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }

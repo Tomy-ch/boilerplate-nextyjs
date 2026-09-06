@@ -16,6 +16,7 @@ import { retakenTargets } from "../../baseline/lib/targets.js";
 import { composeRetakeOutcome } from "./outcome.js";
 import {
   formatPrunePlan,
+  isNotFound,
   needsPrune,
   parseDefaultBranch,
   planPrune,
@@ -235,6 +236,9 @@ function resolveImagesRepository(): string {
  *
  * サブモジュールを持たない時点の ref（配線より前のタグなど）では 404 になる。保持すべき
  * ものが無いだけなので、そこは黙って飛ばす。
+ *
+ * 404 以外は投げ直す。取れなかった ref は保持しない側へ倒れるので、通信の失敗まで飛ばすと
+ * 生きた基準画像が消える対象に混ざる。
  */
 function gitlinkAt(parent: string, ref: string): string | undefined {
   try {
@@ -244,9 +248,17 @@ function gitlinkAt(parent: string, ref: string): string | undefined {
       "-q",
       ".sha",
     ]);
-  } catch {
-    return undefined;
+  } catch (error) {
+    if (isNotFound(stderrOf(error))) return undefined;
+    throw error;
   }
+}
+
+/** `execFileSync` が投げた例外が持つ、子プロセスの stderr。 */
+function stderrOf(error: unknown): string {
+  if (error === null || typeof error !== "object") return "";
+  const { stderr } = error as { stderr?: unknown };
+  return typeof stderr === "string" ? stderr : "";
 }
 
 function ghJson<T>(args: readonly string[]): T {
@@ -258,8 +270,14 @@ function ghText(args: readonly string[]): string {
   return gh(args).trim();
 }
 
+// 子の stderr を捕まえる。既定では親へ素通しするので、呼び出し側が握り潰した失敗
+// （gitlinkAt が飛ばす 404）まで端末に出る。捕まえた stderr は失敗時の Error に載る。
 function gh(args: readonly string[]): string {
-  return execFileSync("gh", [...args], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  return execFileSync("gh", [...args], {
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 }
 
 function git(args: readonly string[]): string {

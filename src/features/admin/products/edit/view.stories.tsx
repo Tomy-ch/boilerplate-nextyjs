@@ -19,49 +19,19 @@ import {
   PageHeaderTitle,
 } from "@/components/shell/page-header/page-header";
 import { failedActionState, idleActionState } from "@/model/action-state";
-import type { Product } from "@/model/product/product";
-import { toProductId } from "@/model/product/product";
 import { SAMPLE_ITEM_URLS } from "~catalog/lib/sample-asset";
 import { ADMIN_PRODUCT_LIST_PATH } from "../../paths";
-import type { ProductSelectOption } from "../ui/select-field/select-field";
+import {
+  CATEGORY_OPTIONS,
+  MAX_UPLOAD_BYTES,
+  SAMPLE_PRODUCT,
+  STATUS_OPTIONS,
+} from "../products.fixture";
 import { AdminProductEditView } from "./view";
 
 const NAV_GROUPS: readonly AdminShellNavGroup[] = [
   { label: "商品", items: [{ href: ADMIN_PRODUCT_LIST_PATH, label: "商品一覧管理" }] },
 ];
-
-const CATEGORY_ID = "01936f6d-0000-7000-8000-000000000001";
-const STATUS_ID = "01936f6d-0000-7000-8000-000000000101";
-
-const CATEGORY_OPTIONS: readonly ProductSelectOption[] = [
-  { value: CATEGORY_ID, label: "電子機器" },
-  { value: "01936f6d-0000-7000-8000-000000000002", label: "書籍" },
-  { value: "01936f6d-0000-7000-8000-000000000004", label: "食品" },
-];
-
-const STATUS_OPTIONS: readonly ProductSelectOption[] = [
-  { value: STATUS_ID, label: "在庫あり" },
-  { value: "01936f6d-0000-7000-8000-000000000102", label: "在庫切れ" },
-  { value: "01936f6d-0000-7000-8000-000000000106", label: "入荷待ち" },
-];
-
-/** 4 MiB。config が配る既定と同じ値を、story でも同じ意味で使う。 */
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
-
-const PRODUCT: Product = {
-  id: toProductId("0195f0c2-0000-7000-8000-000000000001"),
-  name: "ワイヤレスイヤホン",
-  description: "<h2>特長</h2><ul><li>ノイズキャンセリング</li><li>最長 30 時間の再生</li></ul>",
-  price: "19.99",
-  quantity: 12,
-  stockWarningThreshold: 3,
-  status: { id: STATUS_ID, name: "在庫あり" },
-  category: { id: CATEGORY_ID, name: "電子機器" },
-  publishedAt: new Date("2026-08-07T09:00:00.000Z"),
-  discontinuedAt: null,
-  imagePaths: [],
-  version: 4,
-};
 
 /** 読み込んだ時点で保存されている画像。表示 URL は route が解決したものが届く。 */
 const SAVED_IMAGES = [
@@ -101,7 +71,7 @@ function withPageFrame(Story: () => React.ReactElement) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{PRODUCT.name}</BreadcrumbPage>
+              <BreadcrumbPage>{SAMPLE_PRODUCT.name}</BreadcrumbPage>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -151,11 +121,11 @@ const meta = {
       },
     },
     layout: "fullscreen",
-    nextjs: { navigation: { pathname: `${ADMIN_PRODUCT_LIST_PATH}/${PRODUCT.id}/edit` } },
+    nextjs: { navigation: { pathname: `${ADMIN_PRODUCT_LIST_PATH}/${SAMPLE_PRODUCT.id}/edit` } },
   },
   decorators: [withPageFrame],
   args: {
-    product: PRODUCT,
+    product: SAMPLE_PRODUCT,
     savedImages: SAVED_IMAGES,
     categoryOptions: CATEGORY_OPTIONS,
     statusOptions: STATUS_OPTIONS,
@@ -215,6 +185,6 @@ export const Conflicted: Story = {
 
 /** 説明が空の商品。編集面は空のまま開き、保存済みの内容が無いことが判る。 */
 export const WithoutDescription: Story = {
-  args: { product: { ...PRODUCT, description: null, publishedAt: null }, savedImages: [] },
+  args: { product: { ...SAMPLE_PRODUCT, description: null, publishedAt: null }, savedImages: [] },
   globals: { viewport: { value: "desktop", isRotated: false } },
 };

@@ -8,6 +8,7 @@
   "AGENTS.md": 4,
   "README.md": 2,
   "SECURITY.md": 7,
+  "docs/README.md": 1,
   "docs/adr/0053-ui-component-interaction-seam.md": 1,
   "docs/adr/0110-security-operations.md": 26,
   "docs/adr/0152-agents-md-policy.md": 4,

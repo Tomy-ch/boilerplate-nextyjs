@@ -197,9 +197,12 @@ one finding.
 
 ### Where things go, and the two misroutes to refuse
 
-**`docs/rules.md` #90 owns the routing table and the two misroutes** — a library's specific behavior
-stays in the code, and business knowledge goes to the feature's own README rather than to an ADR.
-Read that row when a 移設 verdict needs a destination.
+**`docs/README.md` owns the routing judgment** — the four kinds a candidate is classified into, the
+ordered test that names a destination, the two tests that settle a borderline case, and the default:
+a candidate that fits no destination stays in the code. **`docs/rules.md` #90 carries the two named
+misroutes** — a library's or an API's specific behavior stays at the call site, and business
+knowledge goes to `docs/spec/` rather than to an ADR. Read both when a 移設 verdict needs a
+destination.
 
 Do not restate it here. The same rule kept in two places means that the day one side is revised, this
 skill and whatever else routes a rationale start answering differently for the same comment — and

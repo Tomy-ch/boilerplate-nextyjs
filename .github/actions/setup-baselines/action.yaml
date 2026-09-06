@@ -49,6 +49,14 @@ runs:
     # on exactly those two. Naming the store here instead would duplicate the wiring
     # that `.gitmodules` already owns.
     #
+    # **This app is no longer only the store's.** Workflows that make ordinary REST calls
+    # mint from it too, because `GITHUB_TOKEN` is capped at 1,000 requests per hour per
+    # repository and that cap is what took the retake down. Registering a second app for
+    # those calls was weighed and not taken: this key already carries `contents: write` on
+    # both repositories, so an attacker holding it can already push arbitrary code, and the
+    # `pull-requests` / `issues` write those callers add is close to a subset of that. A
+    # second app would also leave the rate limit unfixed until a human registered it.
+    #
     # The permissions are named, though, so the token carries only what the baselines
     # need rather than everything the installation grants. `contents: write` covers both
     # ends: fetching the recorded commit here, and — for the caller that retakes — pushing

@@ -36,6 +36,10 @@ jobs:
       contents: read
       pull-requests: read
 
+    # A step's `if` cannot read `secrets`, only `env`. The app id is not a secret.
+    env:
+      BASELINE_APP_ID: ${{ secrets.BASELINE_APP_ID }}
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -87,6 +91,20 @@ jobs:
         if: steps.moved.outputs.moved == 'false'
         run: echo '基準画像は動いていません。' >> "$GITHUB_STEP_SUMMARY"
 
+      # Minted rather than using `GITHUB_TOKEN` for its rate limit; falls back when the app
+      # is absent (README § PR コメント).
+      - name: Mint a token for the API calls
+        id: api-token
+        if: steps.moved.outputs.moved == 'true' && env.BASELINE_APP_ID != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BASELINE_APP_ID }}
+          private-key: ${{ secrets.BASELINE_APP_PRIVATE_KEY }}
+          permission-pull-requests: read
+          permission-issues: read
+          permission-contents: read
+
       # The label alone is not the gate: an acceptance given before the current images
       # existed accepted something else. The pointer's own commit date is the line.
       #
@@ -96,7 +114,7 @@ jobs:
       - name: Require an acceptance newer than the baselines
         if: steps.moved.outputs.moved == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         shell: bash

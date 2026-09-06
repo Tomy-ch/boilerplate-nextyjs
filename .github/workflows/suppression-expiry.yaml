@@ -36,6 +36,10 @@ jobs:
       contents: read
       issues: write
 
+    # A step's `if` cannot read `secrets`, only `env`. The app id is not a secret.
+    env:
+      BASELINE_APP_ID: ${{ secrets.BASELINE_APP_ID }}
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -76,13 +80,26 @@ jobs:
           SUPPRESSION_REPORT: /tmp/suppression-expiry.md
         run: make suppression-expiry
 
+      # Minted rather than using `GITHUB_TOKEN` for its rate limit; falls back when the app
+      # is absent (README § PR コメント).
+      - name: Mint a token for the issue
+        id: api-token
+        if: env.BASELINE_APP_ID != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BASELINE_APP_ID }}
+          private-key: ${{ secrets.BASELINE_APP_PRIVATE_KEY }}
+          permission-issues: write
+          permission-contents: read
+
       # One issue for the subject, commented on while it stays open. A fresh issue each
       # week would bury the thread where the decision to keep or drop was argued.
       - name: Raise it where it has an owner
         if: ${{ steps.expiry.outcome == 'failure' }}
         uses: ./.github/actions/upsert-issue
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           title: '[Suppression] 撤回条件を満たした抑止が残っている'
           body-file: /tmp/suppression-expiry.md
           label: chore

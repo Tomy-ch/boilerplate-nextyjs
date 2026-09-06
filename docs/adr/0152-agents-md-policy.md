@@ -60,6 +60,7 @@ Accepted
 | 10 | Exception | ユーザが明示的に英語を指示した場合のみ英語可 |
 | 11 | Code Style | ADR 0002 を前提とした実行手順 |
 | 12 | Review Phase Protocol | 「レビューして」が指す 3 つの subject (`impl-review` / `test-review` / `comment-sweep`) と、実行可否を見積もり付きで問う責務 |
+| 12.5 | Purity Sweep | **boilerplate 限定節**。全ファイルを 1 度ずつ通す純化パス(純粋性 / 設計判断の蒸留 / 所有文書への還元)と、その台帳・照会フックの在り処を述べる。本文を `boilerplate-only:begin` / `end` で囲む。削除の契機は台帳(`.agents/purity-sweep/purity-swept.toml`)の未記帳がゼロになり `[pending]` が空になったときで、節・`.agents/purity-sweep/`・`.claude/settings.json` のフック定義を同時に消す <!-- boilerplate-only:line --> |
 | 13 | Protected Documentation | 直接編集禁止ファイルの宣言 |
 
 節の追加・順序変更は ADR 改訂を要する。表 (Accepted Rules) への ADR 追加や `[TODO]` セクションの追加・削除は軽微編集とし、ADR 改訂は不要。

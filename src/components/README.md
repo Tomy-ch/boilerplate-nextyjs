@@ -1,6 +1,8 @@
 ---
 imports-allowed: [model, errors]
 forbidden: [fetch, config, capabilities, stores, business-state]
+coverage-exclusions:
+  - "src/components/icon.ts"
 test-requirement: component
 ---
 

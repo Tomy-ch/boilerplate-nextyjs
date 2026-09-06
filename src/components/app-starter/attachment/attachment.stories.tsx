@@ -8,9 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { SAMPLE_DOCUMENT_URL } from "~catalog/lib/sample-asset";
-
 import { FileTextIcon, ImageIcon, RotateIcon, XIcon } from "@/components/icon";
+import { SAMPLE_DOCUMENT_URL } from "~catalog/lib/sample-asset";
 import { Button } from "../../design-system/action/button/button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "../../design-system/action/button/button.definition";
 import { MediaImage } from "../../design-system/display/media-image/media-image";

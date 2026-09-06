@@ -256,6 +256,7 @@ export default [
     // アイコンも同じ公開面から取る。ここを締め出さないと、供給元を名指しできる場所が
     // ワークスペースに 2 つできる。
     files: ["docs-viewer/src/**/*.{js,jsx,ts,tsx}"],
+    languageOptions: { parser: tseslint.parser },
     rules: {
       "no-restricted-imports": ["error", { patterns: [iconVendorImports] }],
     },

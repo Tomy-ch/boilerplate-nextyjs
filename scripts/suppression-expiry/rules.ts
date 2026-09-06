@@ -44,7 +44,6 @@ function latestDateIn(condition: string): string | undefined {
  * 書いた意味が消えるので、**呼ぶ側は全件を一覧として出します**（`index.ts`）。
  *
  * 比較を日付の文字列どうしで行うのは、`YYYY-MM-DD` が辞書順と時系列順で一致するためです。
- * 時刻を持ち込むと、実行するのが CI のどの時間帯かで判定が揺れます。
  *
  * @param suppressions - 読み取った宣言の全件
  * @param today - 判定の基準日（`YYYY-MM-DD`）

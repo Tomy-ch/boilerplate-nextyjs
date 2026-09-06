@@ -1,9 +1,7 @@
 ## 抑止の撤回条件の棚卸し
 .PHONY: suppression-expiry ## 抑止の撤回条件を突き合わせ、満たしたものがあれば落ちる
 
-# 抑止に条件を書く運用（docs/adr/0110-security-operations.md 3.4）は、条件を満たした時点で
-# 誰かが撤去して初めて成立する。見る機構が無いと期限を過ぎた宣言が残り続け、次に同じ枠を
-# 使う人が期限そのものを軽く扱う。
+# 抑止に条件を書く運用と、見る機構が要る理由は docs/adr/0110-security-operations.md 3.4 が持つ。
 #
 # 週に一度 CI が回す（.github/workflows/suppression-expiry.yaml）。手元でも同じ入口で引ける。
 # SUPPRESSION_REPORT を渡すと、一覧を Markdown で書き出す。

@@ -40,7 +40,7 @@ describe("scanSuppressions", () => {
   });
 
   it("角括弧の内側に空白があっても読む。TOML として合法な書き方である", () => {
-    // 位置を数える実装はここで黙って 0 件を返し、期限切れが誰にも見えなくなっていた。
+    // 位置を数える実装はここで黙って 0 件を返し、期限切れが誰にも見えなくなる。
     place("osv-scanner.toml", '[[ IgnoredVulns ]]\nid = "GHSA-2222"\nreason = "理由"\n');
 
     expect(scanSuppressions(root)).toEqual([

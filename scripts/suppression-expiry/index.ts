@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 
-// 抑止の撤回条件を週に一度見る入口。
-//
-// 抑止に条件を書く運用（ADR 0110 §3.4）は、条件を満たした時点で誰かが撤去して初めて成立する。
-// 見る機構が無いと、期限を過ぎた宣言が残り続け、次に同じ枠を使う人が期限そのものを軽く扱う。
+// 抑止の撤回条件を週に一度見る入口。運用と、見る機構が要る理由は ADR 0110 §3.4 が持つ。
 //
 //   pnpm exec tsx scripts/suppression-expiry            期限を過ぎた宣言があれば 1 で落ちる
 //   pnpm exec tsx scripts/suppression-expiry --report <path>   issue の本文を書き出す
@@ -19,9 +16,8 @@ import { COMMENT_BORNE_SOURCES, scanSuppressions } from "./scan.js";
  * 判定の基準日。
  *
  * @remarks
- * **抑止の条件は日本時間で書かれている**（`# 2026-08-02 20:34 JST 以降に削除する` のように）。
- * `toISOString()` は UTC の暦日を返すので、そのまま使うと日本時間で期限日を迎えた朝から 9 時間、
- * 機構だけが「まだ」と答える。時刻を持ち込まないのは、実行が CI のどの時間帯かで結果を揺らさない
+ * **抑止の条件は日本時間で書かれている**（`# 2026-08-02 20:34 JST 以降に削除する` のように）ので、
+ * 暦日も日本時間で取る。時刻まで持ち込まないのは、実行が CI のどの時間帯かで結果を揺らさない
  * ためで、暦をどこに合わせるかとは別の話である。
  */
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());

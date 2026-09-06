@@ -2,10 +2,7 @@ name: Suppression Expiry
 
 # Weekly re-read of the suppressions this repository declares (ADR 0110 §3.4).
 #
-# Suppressions carry a withdrawal condition in prose. That rule only holds if somebody
-# acts once a condition is met; without a job that looks, an expired declaration simply
-# stays, and the next person to use the same escape hatch learns that the deadline is
-# decorative. One such entry sat a month past its own deadline before this job existed.
+# Why the rule needs a job that looks is ADR 0110 §3.4; this file is that job.
 #
 # Two limits are deliberate, and the report states both rather than reading as complete.
 # Only dates are decided: "once upstream requires N or later" and "after the sample purge

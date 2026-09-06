@@ -16,6 +16,9 @@ const meta = {
   parameters: {
     layout: "padded",
     docs: {
+      // story ごとに iframe を分ける。開いた状態と閉じた状態を同じ docs ページへ載せるが、
+      // 開閉を持つ store は 1 つしかないので、同じ木で描くと後の story の値が先へも及ぶ。
+      story: { inline: false, iframeHeight: 640 },
       description: {
         component: [
           "本文の脇に出すカートです。狭い幅では出しません（`CartHeaderAction` が被せる形で受け持つ）。",

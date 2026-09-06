@@ -6,7 +6,6 @@ import type { UserProfile } from "@/model/user/user";
 import { PROFILE } from "../../../account.fixture";
 import type { ProfileFormState } from "../../../form-state";
 import { useProfileFields } from "../../../use-profile-fields";
-import type { RegistrationBasicsSectionProps } from "./basics-section";
 import { RegistrationBasicsSection } from "./basics-section";
 
 /**

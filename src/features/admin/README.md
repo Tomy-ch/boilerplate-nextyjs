@@ -86,10 +86,12 @@ app 層にあるためで、理由は「Action 戻り値契約」に書いてあ
 | | loading | `Features/Admin/Users/Skeleton/Default` |
 | 配下の全画面 | error | `Features/Admin/ErrorState/{Default,WithDigest}` |
 
-**loading と error は画面の合成ではなく部品の story で押さえます。**待機表示は `Suspense` の
-fallback、失敗表示は `/admin` の error 境界が描くもので、どちらも取得が成立した後の画面を撮る
-E2E の画面比較には現れません。VRT へ載せる経路は story しか無いため、部品そのものを story に
-してあります。
+**loading と error は画面の合成からは届きません。**待機表示は `Suspense` の fallback、失敗表示は
+`/admin` の error 境界が描くもので、どちらも取得が成立した後の画面を撮る E2E の画面比較には
+現れません。VRT へ載せる経路は story しか無いため、部品そのものを story にしてあります。
+
+上の表は画面の状態と story の対応です。部品そのものが表せる状態（帯ごとの幅・契約上の最大長・
+送信中・拒まれた結果）は各部品の story（`Features/Admin/**`）が持ちます。
 
 ## 構成
 

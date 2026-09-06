@@ -197,21 +197,17 @@ one finding.
 
 ### Where things go, and the two misroutes to refuse
 
-| Content | Destination |
-| --- | --- |
-| A decision about structure, mechanism, or policy | The ADR that owns that area |
-| What a layer / feature accepts and refuses | That directory's `README.md` |
-| A constraint whose premise sits at the call site | **Stays in the code** |
+**`docs/rules.md` #90 owns the routing table and the two misroutes** — a library's specific behavior
+stays in the code, and business knowledge goes to the feature's own README rather than to an ADR.
+Read that row when a 移設 verdict needs a destination.
 
-Two misroutes are common enough to name:
+Do not restate it here. The same rule kept in two places means that the day one side is revised, this
+skill and whatever else routes a rationale start answering differently for the same comment — and
+neither copy says which one is authoritative.
 
-- **A library's specific behavior stays in the code.** "This API returns `null` rather than throwing
-  when the key is absent" is a fact about the call site, not a decision. Moving it to an ADR buries a
-  detail the next editor needs at exactly the place they are editing.
-- **Business knowledge does not go to an ADR.** Why a purchase can be cancelled before shipping is
-  the feature's knowledge; it belongs in that feature's README (or the backend's contract), not in a
-  record of architectural decisions. An ADR that accumulates business rules stops being readable as
-  a decision log.
+What this skill adds on top of that rule is the verdict and the write: a comment whose content
+belongs elsewhere is **移設**, and the edit into the destination document is performed here rather
+than left to the reader.
 
 Classification is **mode-independent**. Produce every finding, in full, whatever Step 0 resolved —
 the entire difference between the three modes lives in Steps 3–5. A run that classified less because

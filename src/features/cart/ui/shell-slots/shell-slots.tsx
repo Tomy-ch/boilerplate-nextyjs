@@ -11,6 +11,10 @@ import { CartPanel } from "../panel/panel";
  * 穴の内側で読めば、殻は主体を知らないまま固められます。
  *
  * **読めなかったときは何も出しません。** 判断は `readShellCart` が持ち、ここはその結果を置くだけです。
+ *
+ * カタログには置けません。取得が server の側にあり、ブラウザで描く面には持ち込めないためです
+ * （[0091](../../../../../docs/adr/0091-test-verification-methods.md) の async RSC）。中身の
+ * `CartHeaderAction` / `CartPanel` はそれぞれ story を持ちます。
  */
 export async function CartHeaderSlot() {
   const cart = await readShellCart();

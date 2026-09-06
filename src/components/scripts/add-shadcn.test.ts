@@ -526,7 +526,7 @@ describe("componentManifestEntries", () => {
       [],
     );
 
-    expect(entries.dialog).toMatchObject({
+    expect(entries["dialog"]).toMatchObject({
       kind: "copy-in",
       layer: "design-system",
       as: "overlay",
@@ -547,7 +547,7 @@ describe("componentManifestEntries", () => {
       ["radix-ui"],
     );
 
-    expect(entries.dialog).toMatchObject({ dependencies: ["radix-ui"] });
+    expect(entries["dialog"]).toMatchObject({ dependencies: ["radix-ui"] });
   });
 
   it("依存が無ければ dependencies を持たせない", () => {
@@ -560,7 +560,7 @@ describe("componentManifestEntries", () => {
       [],
     );
 
-    expect(entries.dialog).not.toHaveProperty("dependencies");
+    expect(entries["dialog"]).not.toHaveProperty("dependencies");
   });
 
   it("部品を渡さなければ空の台帳項目を返す", () => {

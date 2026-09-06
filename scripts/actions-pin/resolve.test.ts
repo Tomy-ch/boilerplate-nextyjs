@@ -227,7 +227,7 @@ describe("refAgeDays", () => {
     const [, init] = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock
       .calls[0] as [string, { headers: Record<string, string> }];
 
-    expect(init.headers.Authorization).toBe("Bearer token-value");
+    expect(init.headers["Authorization"]).toBe("Bearer token-value");
   });
 
   it("トークンが無ければ Authorization を添えない", async () => {

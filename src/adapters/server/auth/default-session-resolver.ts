@@ -201,13 +201,13 @@ export function createDefaultSessionResolver(deps: DefaultSessionResolverDeps): 
 
       // aud が多値のときは、どの client のために出されたトークンかを azp が名指しする。
       // 含まれてさえいれば通す形にすると、別の client 向けのトークンを持ち込まれても通る。
-      if (audiences.length > 1 && payload.azp !== deps.clientId) {
+      if (audiences.length > 1 && payload["azp"] !== deps.clientId) {
         throw createAppError(ErrorKind.UNAUTHENTICATED, {
           cause: new Error("ID Token の azp が client と一致しません"),
         });
       }
 
-      if (payload.nonce !== transaction.nonce) {
+      if (payload["nonce"] !== transaction.nonce) {
         throw createAppError(ErrorKind.UNAUTHENTICATED, {
           cause: new Error("ID Token の nonce が要求時のものと一致しません"),
         });

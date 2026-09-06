@@ -26,7 +26,7 @@ const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).forma
 
 const suppressions = scanSuppressions();
 const expired = expiredSuppressions(suppressions, today);
-const reportPath = process.env.SUPPRESSION_REPORT;
+const reportPath = process.env["SUPPRESSION_REPORT"];
 
 if (reportPath !== undefined && reportPath !== "") {
   fs.writeFileSync(
@@ -35,7 +35,7 @@ if (reportPath !== undefined && reportPath !== "") {
       expired,
       suppressions,
       commentBorneSources: COMMENT_BORNE_SOURCES,
-      ...(process.env.RUN_URL === undefined ? {} : { runUrl: process.env.RUN_URL }),
+      ...(process.env["RUN_URL"] === undefined ? {} : { runUrl: process.env["RUN_URL"] }),
     }),
   );
 }

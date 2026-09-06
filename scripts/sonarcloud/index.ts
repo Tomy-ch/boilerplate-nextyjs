@@ -131,7 +131,7 @@ async function poll(url: string, token: string, remaining: number): Promise<Poll
  * 後から原因を辿る側が SonarCloud の答えそのものを読めなくなります。
  */
 async function readQualityGate(): Promise<void> {
-  const analysisId = process.env.ANALYSIS_ID;
+  const analysisId = process.env["ANALYSIS_ID"];
 
   if (analysisId === undefined || analysisId === "") {
     fail("the completed task carried no analysisId, so the quality gate cannot be read");
@@ -151,7 +151,7 @@ async function fetchIssues(): Promise<void> {
   const url = issuesSearchUrl(
     required("SERVER_URL"),
     required("PROJECT_KEY"),
-    process.env.PR_NUMBER,
+    process.env["PR_NUMBER"],
   );
 
   writeFileSync(ISSUES_JSON, await getText(url, required("SONAR_TOKEN")));
@@ -169,7 +169,7 @@ function summarize(): void {
   const sarif: unknown = JSON.parse(readFileSync(SARIF_FILE, "utf8"));
   const conditions = existsSync(GATE_MARKDOWN) ? readFileSync(GATE_MARKDOWN, "utf8") : "";
 
-  writeFileSync(SUMMARY_FILE, renderSummary(sarif, process.env.GATE_STATUS ?? "", conditions));
+  writeFileSync(SUMMARY_FILE, renderSummary(sarif, process.env["GATE_STATUS"] ?? "", conditions));
   writeOutput([`count=${countResults(sarif)}`]);
 }
 
@@ -221,7 +221,7 @@ function required(name: string): string {
 
 /** GitHub Actions の出力へ書く。 */
 function writeOutput(lines: readonly string[]): void {
-  const file = process.env.GITHUB_OUTPUT;
+  const file = process.env["GITHUB_OUTPUT"];
 
   if (file === undefined) {
     throw new Error("GITHUB_OUTPUT がありません。この副命令は CI から呼ばれます。");

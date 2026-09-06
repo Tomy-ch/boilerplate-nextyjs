@@ -32,7 +32,7 @@ import { loadBands } from "../lib/viewports";
 
 const screens = selectScreens(
   resolveScreens(listScreenRoutes(readFileSync(SCREEN_MANIFEST_FILE, "utf8")), SCREENS),
-  process.env.E2E_ONLY,
+  process.env["E2E_ONLY"],
 );
 const bands = loadBands();
 
@@ -67,7 +67,7 @@ test("基準画像 / 撮影対象と 1 対 1 で対応する", { tag: SCREEN_BAS
   test.skip(testInfo.project.name !== bands[0]?.name, "帯を 1 つ選んで 1 回だけ見る");
   test.skip(isRetaking(process.env), "撮り直しの最中は対応を見ない");
   // 範囲を絞った実行では対応を見ない（理由は selectScreens の doc）。
-  test.skip(Boolean(process.env.E2E_ONLY), "範囲を絞った実行では対応を見ない");
+  test.skip(Boolean(process.env["E2E_ONLY"]), "範囲を絞った実行では対応を見ない");
 
   const { orphans, missing } = noteBaselineGap(
     testInfo.annotations,

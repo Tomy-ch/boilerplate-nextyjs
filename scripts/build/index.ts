@@ -18,10 +18,10 @@ import { portOf, servesMockApi } from "./build";
 
 loadEnvironment();
 
-const baseUrl = process.env.APP_API_BASE_URL;
+const baseUrl = process.env["APP_API_BASE_URL"];
 let server: ReturnType<typeof startMockApi> | undefined;
 
-if (servesMockApi(process.env.APP_API_MODE) && baseUrl !== undefined) {
+if (servesMockApi(process.env["APP_API_MODE"]) && baseUrl !== undefined) {
   // 素通しにすると、掴まれなかった要求がこの口自身へ向き直って輪になる。
   mockServer.listen({ onUnhandledRequest: "error" });
   server = startMockApi(portOf(baseUrl));

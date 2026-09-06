@@ -139,13 +139,13 @@ function parseCommon(form: FormData): CommonFields {
   const publishedAt = read(form, "publishedAt");
   // 形として読めないことは規則が既に言っている。重ねて言うと、同じ項目に 2 つの文言が並ぶ。
   const instant =
-    publishedAt === "" || fieldErrors.publishedAt !== undefined
+    publishedAt === "" || fieldErrors["publishedAt"] !== undefined
       ? null
       : toInstant(publishedAt, readTimezoneOffset(form));
 
   if (instant === undefined) {
-    fieldErrors.publishedAt = [
-      ...(fieldErrors.publishedAt ?? []),
+    fieldErrors["publishedAt"] = [
+      ...(fieldErrors["publishedAt"] ?? []),
       "公開日時を確定できませんでした。入力し直してください。",
     ];
   }

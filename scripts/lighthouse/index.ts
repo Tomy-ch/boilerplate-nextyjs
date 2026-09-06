@@ -194,7 +194,7 @@ async function runOnceStrict(
   const output = join(OUTPUT_DIR, `${target.name}-${run}.json`);
   const browser = await startBrowser(
     chromium.executablePath(),
-    buildChromeFlags({ CI: process.env.CI }),
+    buildChromeFlags({ CI: process.env["CI"] }),
   );
 
   let result: ReturnType<typeof spawnSync>;
@@ -262,7 +262,7 @@ function trigger(baseRef: string): void {
   }
 
   const decision = decideTrigger(parseNumstat(numstat.stdout));
-  const output = process.env.GITHUB_OUTPUT;
+  const output = process.env["GITHUB_OUTPUT"];
 
   if (output === undefined) {
     throw new Error("GITHUB_OUTPUT がありません。この副命令は CI から呼ばれます。");
@@ -291,7 +291,7 @@ function trigger(baseRef: string): void {
 function judgeAll(measurements: readonly Measurement[], budget: Budget): void {
   // 絞った実行では見ない。在るべき画面の集合が絞った側に縮み、対象外の緩和がすべて
   // 「居ない画面への宣言」として上がる（`selectScreens` が撮影側について言うのと同じ）。
-  const missing = process.env.E2E_ONLY ? [] : missingScreens(measurements, budget);
+  const missing = process.env["E2E_ONLY"] ? [] : missingScreens(measurements, budget);
 
   if (missing.length > 0) {
     console.error(
@@ -341,7 +341,7 @@ function merge(): void {
 }
 
 async function measureAll(): Promise<void> {
-  const baseUrl = process.env.E2E_BASE_URL;
+  const baseUrl = process.env["E2E_BASE_URL"];
 
   if (baseUrl === undefined) {
     throw new Error("E2E_BASE_URL がありません。make lighthouse から呼んでください。");
@@ -353,14 +353,14 @@ async function measureAll(): Promise<void> {
   // 手元では 16 分を払うことになり、実際には誰も回さなくなる。
   const selected = selectScreens(
     resolveScreens(listScreenRoutes(readFileSync(SCREEN_MANIFEST_FILE, "utf8")), SCREENS),
-    process.env.E2E_ONLY,
+    process.env["E2E_ONLY"],
   );
 
   // 分割の指定が無ければ 1 台。手元の `make lighthouse` だけがこちらを通る。
   //
   // **空文字列も「指定なし」として受けます。** make は既定値を空で `export` するので、手元の
   // 実行では未定義ではなく空が届きます。`undefined` だけを見ると、割らない経路が誰も通れません。
-  const spec = process.env.LIGHTHOUSE_SHARD || undefined;
+  const spec = process.env["LIGHTHOUSE_SHARD"] || undefined;
   const shard = spec === undefined ? { index: 1, total: 1 } : parseShard(spec);
   const { screens, control } = planScreens(selected, shard, budget.floor.screen);
 

@@ -31,7 +31,7 @@ const shootable = excludeDeclared(
 // 同じ場所に混ざる。
 assertAreaUnclaimed(shootable.map((story) => story.group));
 
-const stories = selectStories(shootable, process.env.VRT_ONLY);
+const stories = selectStories(shootable, process.env["VRT_ONLY"]);
 
 // ポートは OS に選ばせる。固定のポートで単一のサーバを外から与えると、worktree を並べた分だけ
 // 衝突する。
@@ -87,7 +87,7 @@ for (const story of stories) {
 
 // 撮影対象と基準画像の対応。範囲を絞った実行(`VRT_ONLY`)では、対象外の story の画像と孤児を
 // 区別できないため見ない。比較を省いた実行でもここだけは走る(`make vrt`)。
-if (!process.env.VRT_ONLY) {
+if (!process.env["VRT_ONLY"]) {
   test("基準画像 / 撮影対象と 1 対 1 で対応する", { tag: BASELINE_TAG }, ({}, testInfo) => {
     test.skip(isRetaking(process.env), "撮り直しの最中は対応を見ない");
 

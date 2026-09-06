@@ -40,7 +40,7 @@
 - [0045-fonts-and-images.md](0045-fonts-and-images.md) - フォント・画像（next/font / next/image / public/ / 動的 OG）
 - [0050-styling-strategy.md](0050-styling-strategy.md) - スタイリング戦略（Tailwind 主軸 + CSS Modules 限定許可 / `cn()` / design token = CSS 変数）
 - [0051-styling-system.md](0051-styling-system.md) - スタイリング体系（デザイントークン / レスポンシブ / モーション = Framer Motion / 印刷）
-- [0052-ui-component-policy.md](0052-ui-component-policy.md) - UI コンポーネント方針（shadcn/ui + lucide 採用）
+- [0052-ui-component-policy.md](0052-ui-component-policy.md) - UI コンポーネント方針（shadcn/ui + Tabler アイコン採用）
 - [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) - UI コンポーネント方針とインタラクション a11y seam
 - [0054-ui-catalog-storybook.md](0054-ui-catalog-storybook.md) - UI カタログ（Storybook）方針
 - [0060-state-management.md](0060-state-management.md) - 状態管理方針（Server state = fetch 既定 / Client = local 既定 / react-hook-form・Zustand 採用）

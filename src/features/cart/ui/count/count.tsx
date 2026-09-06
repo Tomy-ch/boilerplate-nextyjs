@@ -1,4 +1,4 @@
-import { ShoppingCartIcon } from "lucide-react";
+import { ShoppingCartIcon } from "@/components/icon";
 import { withPartSpan } from "@/observability/render-span";
 
 /** `CartCount` の props。 */

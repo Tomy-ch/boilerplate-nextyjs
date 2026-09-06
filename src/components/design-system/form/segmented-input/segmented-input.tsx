@@ -1,10 +1,10 @@
 "use client";
 
 import { OTPInput, OTPInputContext } from "input-otp";
-import { MinusIcon } from "lucide-react";
 import { type ComponentProps, createContext, useContext } from "react";
 
 import { cn } from "@/components/cn";
+import { MinusIcon } from "@/components/icon";
 import { SEGMENTED_INPUT_MASK_CHAR } from "./segmented-input.definition";
 
 const SegmentedInputMaskContext = createContext<{ mask: boolean; maskChar: string }>({

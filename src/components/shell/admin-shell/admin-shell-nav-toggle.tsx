@@ -1,8 +1,7 @@
 "use client";
 
-import { PanelLeftIcon } from "lucide-react";
-
 import { Button } from "@/components/design-system/action/button/button";
+import { SidebarIcon } from "@/components/icon";
 
 import { useAdminShellNav } from "./admin-shell-nav-state";
 
@@ -28,7 +27,7 @@ export function AdminShellNavToggle() {
       size="sm"
       variant="ghost"
     >
-      <PanelLeftIcon aria-hidden="true" />
+      <SidebarIcon aria-hidden="true" />
     </Button>
   );
 }

@@ -24,6 +24,14 @@ pnpm install
 pnpm exec lefthook install   # 自動では入らない。clone 後に 1 度だけ
 ```
 
+**`lefthook install` は基準画像の追随にも要る。** git はブランチを移っても submodule の実体を
+動かさないため、撮り直しで指し先が進むと実体が取り残され、`git status` に `baseline/images` が
+出続ける。**その汚れを commit すると間違った指し先が載る。** hook が移動と pull のたびに実体を
+指し先へ合わせるので、入れておけば手で直すことはない（[0151](../adr/0151-git-hooks.md)）。
+
+入れ忘れても壊れはしない。リリースブランチを切る口はこの汚れだけを見分け、合わせ直す手を
+名指しで案内する（`scripts/release`）。
+
 ## 2. リポジトリを初期化する
 
 ```bash
@@ -31,19 +39,25 @@ make setup-repo
 ```
 
 **破壊的**。既存タグをローカルと `origin` の両方から全削除し、`v0.0.0` を打ち直す。
-`develop` / `staging` / `production` を作り、デフォルトブランチ・ルールセット・ラベルを設定する。
-中身は [`.makefiles/README.md`](../../.makefiles/README.md) を参照。
+`develop` / `staging` / `production` を作り、デフォルトブランチ・ルールセット・ラベル、および
+ドキュメントサイトの配信設定（Pages を Actions 配信にし、`production` からの配信を許可する）を
+入れる。中身は [`.makefiles/README.md`](../../.makefiles/README.md) を参照。
+
+**配信の許可は、忘れると原因が読めない形で落ちる。** `github-pages` environment が配信元ブランチを
+許可していないと、`docs-deploy` は job としては起動するが step を 1 つも実行せずに失敗する。
+ログに理由が出ないため、`docs-build` が緑であることと合わせて「組み上がっているのに公開されない」
+状態になる。配信元を `production` 以外にするなら、`PAGES_DELIVERY_BRANCH` と
+[`deploy-docs.yaml`](../../.github/workflows/deploy-docs.yaml) の push トリガを揃えて変える。
 
 ## 3. GitHub の画面で設定する（人手）
 
 `gh` では代行できないものだけ。
 
 1. **Actions を有効にする** — 作成直後は無効になっていることがある
-2. **GitHub Pages のソースを GitHub Actions にする** — ドキュメントサイトの配信先（[0141](../adr/0141-portal-operations.md)）
-3. **Dependency graph を有効にする** — Settings → Security → Dependency graph。Dependabot が依存の木を
+2. **Dependency graph を有効にする** — Settings → Security → Dependency graph。Dependabot が依存の木を
    読むのに要る（[0110](../adr/0110-security-operations.md)）。有効化そのものに課金は無い
    （**このリポジトリでは `dependency-review` job もこれを読む**ため、無効のままだと「このリポジトリでは使えない」で落ちる。設定を入れるまでコード側では直せない） <!-- boilerplate-only:line -->
-4. **必須チェックを確認する** — `make setup-repo` が適用したルールセットの `required_status_checks` が、
+3. **必須チェックを確認する** — `make setup-repo` が適用したルールセットの `required_status_checks` が、
    1 度 CI を回した後に実際の context 名と一致しているか見る（[`.github/workflows/README.md`](../../.github/workflows/README.md)）
 
 ## 4. 自分のリポジトリの姿にする

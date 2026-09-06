@@ -44,16 +44,12 @@ components:
     as: feedback
     directory: src/components/app-starter/api-error-feedback
     addedAt: 2026-08-03T14:45:00.000Z
-    dependencies:
-      - lucide-react
   auth-state-feedback:
     kind: original
     layer: app-starter
     as: feedback
     directory: src/components/app-starter/auth-state-feedback
     addedAt: 2026-08-03T14:45:00.000Z
-    dependencies:
-      - lucide-react
   form-feedback:
     kind: original
     layer: app-starter
@@ -78,8 +74,6 @@ components:
     registryItem: sonner
     directory: src/components/shell/toaster
     addedAt: 2026-08-03T14:45:00.000Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/sonner.tsx
@@ -165,8 +159,6 @@ components:
     as: navigation
     directory: src/components/app-starter/cursor-pagination
     addedAt: 2026-08-03T14:45:00.000Z
-    dependencies:
-      - lucide-react
   load-more:
     kind: original
     layer: app-starter
@@ -181,7 +173,6 @@ components:
     directory: src/components/patterns/filter-bar
     addedAt: 2026-08-03T14:45:00.000Z
     dependencies:
-      - lucide-react
       - next
   rich-text-content:
     kind: original
@@ -213,7 +204,6 @@ components:
       - "@tiptap/extension-text"
       - "@tiptap/extensions"
       - "@tiptap/react"
-      - lucide-react
     addedAt: 2026-08-04T10:30:00.000Z
   table-columns:
     kind: original
@@ -234,7 +224,6 @@ components:
     directory: src/components/patterns/table/row-actions
     addedAt: 2026-08-03T14:45:00.000Z
     dependencies:
-      - lucide-react
       - next
   static-data:
     kind: original
@@ -284,16 +273,12 @@ components:
     layer: design-system
     as: action
     directory: src/components/design-system/action/copy-button
-    dependencies:
-      - lucide-react
     addedAt: 2026-08-04T07:00:00.000Z
   print-button:
     kind: original
     layer: design-system
     as: action
     directory: src/components/design-system/action/print-button
-    dependencies:
-      - lucide-react
     addedAt: 2026-08-19T00:00:00.000Z
   toggle:
     kind: reimplemented
@@ -317,8 +302,6 @@ components:
     registryItem: accordion
     directory: src/components/design-system/container/accordion
     addedAt: 2026-08-03T10:49:00.202Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/accordion.tsx
@@ -345,8 +328,6 @@ components:
     registryItem: carousel
     directory: src/components/design-system/container/carousel
     addedAt: 2026-08-03T12:05:11Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/carousel.tsx
@@ -360,8 +341,6 @@ components:
     registryItem: collapsible
     directory: src/components/design-system/container/collapsible
     addedAt: 2026-08-03T10:49:01.583Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/collapsible.tsx
@@ -392,8 +371,6 @@ components:
     registryItem: message-scroller
     directory: src/components/design-system/container/message-scroller
     addedAt: 2026-08-04T00:15:00Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/message-scroller.tsx
@@ -410,7 +387,6 @@ components:
     addedAt: 2026-08-03T16:03:27.945Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - react-resizable-panels
     source:
       - repository: shadcn-ui/ui
@@ -423,8 +399,6 @@ components:
     layer: app-starter
     as: container
     directory: src/components/app-starter/saved-views
-    dependencies:
-      - lucide-react
     addedAt: 2026-08-04T14:33:46Z
   scroll-area:
     kind: reimplemented
@@ -451,8 +425,6 @@ components:
     as: container
     directory: src/components/patterns/table-view-options
     addedAt: 2026-08-04T02:10:00.000Z
-    dependencies:
-      - lucide-react
   activity-timeline:
     kind: original
     layer: design-system
@@ -683,8 +655,6 @@ components:
     kind: original
     layer: design-system
     as: display
-    dependencies:
-      - lucide-react
     directory: src/components/design-system/display/stepper
     addedAt: 2026-08-04T02:10:00.000Z
   table:
@@ -712,8 +682,6 @@ components:
     kind: original
     layer: app-starter
     as: display
-    dependencies:
-      - lucide-react
     directory: src/components/app-starter/upload-preview
     addedAt: 2026-08-04T01:20:00.000Z
   calendar:
@@ -726,7 +694,6 @@ components:
     addedAt: 2026-08-02T05:13:10.687Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - react-day-picker
     source:
       - repository: shadcn-ui/ui
@@ -744,7 +711,6 @@ components:
     addedAt: 2026-08-02T03:46:35.446Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -772,8 +738,6 @@ components:
     registryItem: combobox
     directory: src/components/design-system/form/combobox-client
     addedAt: 2026-08-03T10:49:02.239Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/combobox.tsx
@@ -786,8 +750,6 @@ components:
     as: form
     directory: src/components/design-system/form/date-picker-client
     addedAt: 2026-08-03T10:49:02.794Z
-    dependencies:
-      - lucide-react
   editable-table:
     kind: original
     layer: design-system
@@ -813,8 +775,6 @@ components:
     kind: original
     layer: app-starter
     as: form
-    dependencies:
-      - lucide-react
     directory: src/components/app-starter/file-upload
     addedAt: 2026-08-04T00:25:00Z
   input:
@@ -874,7 +834,6 @@ components:
     addedAt: 2026-08-02T04:01:17.140Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -901,16 +860,12 @@ components:
     as: form
     directory: src/components/design-system/form/search-field-client
     addedAt: 2026-08-03T10:49:04.761Z
-    dependencies:
-      - lucide-react
   search-field-native:
     kind: original
     layer: design-system
     as: form
     directory: src/components/design-system/form/search-field-native
     addedAt: 2026-08-03T10:49:04.790Z
-    dependencies:
-      - lucide-react
   segmented-input:
     kind: reimplemented
     layer: design-system
@@ -922,7 +877,6 @@ components:
     shadcnCliVersion: 4.15.0
     dependencies:
       - input-otp
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/input-otp.tsx
@@ -939,7 +893,6 @@ components:
     addedAt: 2026-08-02T03:35:28.433Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -956,8 +909,6 @@ components:
     registry: https://ui.shadcn.com
     addedAt: 2026-08-02T03:32:21.754Z
     shadcnCliVersion: 4.15.0
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/native-select.tsx
@@ -1106,7 +1057,6 @@ components:
     addedAt: 2026-08-03T08:46:28.557Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1120,8 +1070,6 @@ components:
     as: form
     directory: src/components/design-system/form/multi-select-client
     addedAt: 2026-08-20T00:40:00.000Z
-    dependencies:
-      - lucide-react
   menubar:
     kind: copy-in
     layer: design-system
@@ -1132,7 +1080,6 @@ components:
     addedAt: 2026-08-03T11:51:01.273Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1159,7 +1106,6 @@ components:
     shadcnCliVersion: 4.15.0
     dependencies:
       - class-variance-authority
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1177,7 +1123,6 @@ components:
     addedAt: 2026-08-02T04:45:48.555Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - next
     source:
       - repository: shadcn-ui/ui
@@ -1252,7 +1197,6 @@ components:
     shadcnCliVersion: 4.15.0
     dependencies:
       - cmdk
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/command.tsx
@@ -1269,7 +1213,6 @@ components:
     addedAt: 2026-08-03T09:39:42.523Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1287,7 +1230,6 @@ components:
     addedAt: 2026-08-03T01:26:34.376Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1322,7 +1264,6 @@ components:
     addedAt: 2026-08-03T02:01:38.277Z
     shadcnCliVersion: 4.15.0
     dependencies:
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1375,7 +1316,6 @@ components:
     shadcnCliVersion: 4.15.0
     dependencies:
       - class-variance-authority
-      - lucide-react
       - radix-ui
     source:
       - repository: shadcn-ui/ui
@@ -1422,16 +1362,12 @@ components:
     layer: app-starter
     as: status
     directory: src/components/app-starter/import-export
-    dependencies:
-      - lucide-react
     addedAt: 2026-08-04T09:40:00.000Z
   notification-center:
     kind: original
     layer: app-starter
     as: status
     directory: src/components/app-starter/notification-center
-    dependencies:
-      - lucide-react
     addedAt: 2026-08-04T09:00:00.000Z
   progress-client:
     kind: copy-in
@@ -1487,8 +1423,6 @@ components:
     registry: https://ui.shadcn.com
     addedAt: 2026-08-03T08:05:25.437Z
     shadcnCliVersion: 4.15.0
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/spinner.tsx
@@ -1504,8 +1438,6 @@ components:
     registryItem: empty
     directory: src/components/app-starter/feedback-state
     addedAt: 2026-08-03T14:45:00.000Z
-    dependencies:
-      - lucide-react
     source:
       - repository: shadcn-ui/ui
         path: apps/v4/registry/new-york-v4/ui/empty.tsx

@@ -1,8 +1,8 @@
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronLeftIcon, ChevronRightIcon, EllipsisIcon } from "@/components/icon";
 
 import { Button, type ButtonProps } from "../../action/button/button";
 
@@ -222,7 +222,7 @@ export function PaginationEllipsis({ className, ...props }: ComponentProps<"span
     >
       {/* 隠すのは記号だけ。外側に付けると子孫ごとアクセシビリティツリーから外れ、
           sr-only の文言も一緒に消える。 */}
-      <MoreHorizontalIcon aria-hidden="true" className="size-4" />
+      <EllipsisIcon aria-hidden="true" className="size-4" />
       <span className="sr-only">省略されたページ</span>
     </span>
   );

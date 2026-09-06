@@ -40,14 +40,15 @@ production  ←(merge)  staging  ←(merge)  develop  ←(merge)  release/vX.Y.Z
 
 | ブランチ | 派生元 | merge 先 |
 | --- | --- | --- |
-| `release/vX.Y.Z` | `develop` | `develop` |
+| `release/vX.Y.Z` | `production` | `develop` |
 | `feature/*` | **最新の `release/vX.Y.Z`** | 派生元の `release/*` |
 | `bugfix/*` | **最新の `release/vX.Y.Z`** | 派生元の `release/*` |
 | `hotfix/*` | `production` | `production` (＋ `develop` にも反映) |
 
 ### 重要な派生ルール
 
-- `feature/*` / `bugfix/*` は **`develop` からではなく、現行の `release/vX.Y.Z` から派生** させる。`develop` は統合先であり、作業起点として使わない
+- `release/*` は **`production` から派生** させる。出荷済みの断面から始めないと、まだ出していない変更をリリース版へ引き連れる。`develop` は統合先であり、作業起点として使わない
+- `feature/*` / `bugfix/*` は **`develop` からではなく、現行の `release/vX.Y.Z` から派生** させる
 - 1 リリースにつき 1 本の `release/*` ブランチを使う。リリース番号が確定した時点でブランチ名にバージョンを含める (`release/v0.1.0`)
 - `hotfix/*` は本番障害の緊急修正専用。`production` へ戻した後、`develop` にも反映して履歴を一致させる
 
@@ -171,7 +172,7 @@ PR タイトルも日本語で書き、関連 issue / ADR を本文末尾に記�
 
 ## リリース運用
 
-1. 次バージョン (`v<X.Y.Z>`) を決め、`develop` から `release/v<X.Y.Z>` を作る (`make branch-patch` / `branch-minor` / `branch-major`)
+1. 次バージョン (`v<X.Y.Z>`) を決め、`production` から `release/v<X.Y.Z>` を作る (`make branch-patch` / `branch-minor` / `branch-major`)
 2. このブランチに `feature/*` / `bugfix/*` を PR 経由で merge していく
 3. リリース対象が揃ったら `release/v<X.Y.Z>` → `develop` の PR を作る (タイトル例: `Release v<X.Y.Z>`)
 4. `.github/release/` に該当バージョンのリリースノートを Markdown で追加する (本リポの慣例。フォーマットは既存ファイルを参照)

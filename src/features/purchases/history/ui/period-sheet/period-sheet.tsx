@@ -1,6 +1,5 @@
 "use client";
 
-import { ListFilterIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { Button } from "@/components/design-system/action/button/button";
@@ -14,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/design-system/overlay/sheet/sheet";
+import { FilterIcon } from "@/components/icon";
 import { ActionBar } from "@/components/patterns/action-bar/action-bar";
 import { ACTION_BAR_POSITION } from "@/components/patterns/action-bar/action-bar.definition";
 
@@ -67,7 +67,7 @@ export function PurchasePeriodSheet({ period }: PurchasePeriodSheetProps) {
       <ActionBar position={ACTION_BAR_POSITION.FIXED}>
         <SheetTrigger asChild>
           <Button className="w-full" variant={BUTTON_VARIANT.OUTLINE}>
-            <ListFilterIcon aria-hidden="true" />
+            <FilterIcon aria-hidden="true" />
             {applied === null ? "期間で絞り込む" : `期間: ${applied}`}
           </Button>
         </SheetTrigger>

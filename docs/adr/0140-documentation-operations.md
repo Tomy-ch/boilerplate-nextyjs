@@ -94,7 +94,7 @@ go `docs/adr/README.md` の 4 分類を本リポの器へ翻案する:
 ## 関連 ADR
 
 - [0152-agents-md-policy.md](0152-agents-md-policy.md) — AGENTS.md 構成方針(「AGENTS.md = 規約集約」との整合が rule 移行時に必要)
-- [0155-claude-skills-development.md](0155-claude-skills-development.md) — Claude スキル運用・開発系(canonicalize-doc / readme-review / sync-readme の公認。配置・命名・frontmatter は [0154-claude-skills-operations.md](0154-claude-skills-operations.md) と共通)
+- [0155-claude-skills-development.md](0155-claude-skills-development.md) — Claude スキル運用・開発系(canonicalize-doc / readme-review / sync-readme / portal-manifest-sync の公認。配置・命名・frontmatter は [0154-claude-skills-operations.md](0154-claude-skills-operations.md) と共通)
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 層別 README 運用(per-package README = 正)
 - [0141-portal-operations.md](0141-portal-operations.md)(D2)— 生成 portal(本 ADR の三層戦略の第 3 層)
 - [0121-i18n-strategy.md](0121-i18n-strategy.md) / [0130-pwa-strategy.md](0130-pwa-strategy.md) — exclusion ADR の実例(`Accepted (exclusion)`)

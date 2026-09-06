@@ -1,4 +1,3 @@
-import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
@@ -10,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/design-system/overlay/dropdown-menu/dropdown-menu";
+import { EllipsisIcon } from "@/components/icon";
 import type { StaticDataTableColumn } from "../static-data/static-data";
 import { ROW_ACTION_KIND, type RowAction } from "./row-actions.definition";
 

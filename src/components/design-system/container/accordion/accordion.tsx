@@ -1,7 +1,7 @@
-import { ChevronDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronDownIcon } from "@/components/icon";
 
 /**
  * 複数の {@link AccordionItem} を縦に並べる SSR first の外枠。

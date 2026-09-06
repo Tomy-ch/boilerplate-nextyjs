@@ -457,7 +457,7 @@ backend が server→client push の入口機構(SSE)と、その配信基盤で
 | P7-1 | 爆破スクリプト移植 | 7 | P5-16 |
 | P7-2 | マーカー埋め込み + purge 検証 CI | 7 | P7-1, P6-4 |
 | P7-3 | `new-feature` スキル(B12) | 7 | P4-6, P3-10 |
-| P8-2 | portal 運用スキルの復活 + Pages 有効化 | 8 | P5-16 |
+| P8-2 | portal 運用スキルの復活 + 配信先ブランチの許可 | 8 | P5-16 |
 | P9-1 | rules.md 磨き上げ | 9 | P7-2, Phase 6 全 PR, Phase 8 全 PR |
 | P9-2 | EN canonical 化 + `.ja.md` mirror | 9 | P9-1 |
 | P9-3 | ADR immutable 化 + 経緯除去 + 暫定運用の撤去 | 9 | P9-2 |
@@ -710,7 +710,7 @@ master-plan 旧 2.1 の残り。lefthook + markdownlint + mermaid-lint は導入
 
 垂直スライスを通すための土台。ここまで `src/` は `app/` のみで、実装コードがほぼ存在しない。
 
-ドキュメント portal([0141](../adr/0141-portal-operations.md))の生成基盤・ビューアー・配信 workflow も、デザインシステムの最初の利用者として P3-8 と同じ PR で着地させる。Storybook の中だけでは掛からない負荷(実データ量・実文書長・実際の組み合わせ)を部品へ掛けるためであり、Phase 8 には運用スキルと Pages 有効化だけが残る。
+ドキュメント portal([0141](../adr/0141-portal-operations.md))の生成基盤・ビューアー・配信 workflow も、デザインシステムの最初の利用者として P3-8 と同じ PR で着地させる。Storybook の中だけでは掛からない負荷(実データ量・実文書長・実際の組み合わせ)を部品へ掛けるためであり、Phase 8 には運用スキルと配信先ブランチの許可だけが残る。
 
 ### P3-1: 11 カーネルの物理化 + 層別 README(B13)
 
@@ -835,7 +835,7 @@ test-requirement: unit
 - **目的**: shadcn/ui を起点に、**コードを SSOT とするデザインシステム**を立ち上げる(§3.11)。P3-7 のトークン確定はこの改修の結果として決まる
 - **対象 ADR**: [0052](../adr/0052-ui-component-policy.md) / [0053](../adr/0053-ui-component-interaction-seam.md) / [0054](../adr/0054-ui-catalog-storybook.md) / [0051](../adr/0051-styling-system.md) / [0100](../adr/0100-accessibility-target.md)
 - **主な変更先**:
-  - `src/components/` — shadcn/ui + lucide-react + 複雑入力を import(`cva` 込み。§3.10)
+  - `src/components/` — shadcn/ui + @tabler/icons-react + 複雑入力を import(`cva` 込み。§3.10)
   - `.storybook/` — builder / framework 統合
   - `*.stories.tsx` — 対象コンポーネントへ co-location([0027](../adr/0027-directory-structure.md))
   - `src/components/component-template.md` — component README の必須見出しを固定するコピー元
@@ -1660,16 +1660,18 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 
 ## Phase 8: docs portal
 
-[0141](../adr/0141-portal-operations.md) の残務。生成基盤(`docs/portal/manifest.yaml` / `scripts/portal/` / `docs-viewer/`)と GitHub Pages への配信 workflow は Phase 3 で着地済みで、ここに残るのは manifest のキュレーションを支える運用スキルと、リポジトリ設定である Pages の有効化だけである。スキルの判定対象が README である以上、README が出揃ってから着手する。
+[0141](../adr/0141-portal-operations.md) の残務。生成基盤(`docs/portal/manifest.yaml` / `scripts/portal/` / `docs-viewer/`)と GitHub Pages への配信 workflow は Phase 3 で着地済みで、ここに残るのは manifest のキュレーションを支える運用スキルと、配信先ブランチの許可だけである。スキルの判定対象が README である以上、README が出揃ってから着手する。
 
-### P8-2: portal 運用スキルの復活 + Pages 有効化
+### P8-2: portal 運用スキルの復活 + 配信先ブランチの許可
 
 - **目的**: manifest の同期をスキル化し、portal を公開する
 - **対象 ADR**: [0141](../adr/0141-portal-operations.md) / [0155](../adr/0155-claude-skills-development.md)
 - **主な変更先**:
-  - `.claude/skills/portal-manifest-sync/` — BACKLOG「対象外(D)」からの復活移植
+  - `.claude/skills/portal-manifest-sync/` — 移植バックログの「対象外(D)」からの復活移植（移植済み）
   - `.claude/skills/readme-review/` — manual-worthy 判定から `portal-manifest-sync` への導線を接続
-- **完了条件**: GitHub Pages で portal が公開される(**Pages の有効化はユーザが実施**)。`portal-manifest-sync` が manifest の drift を検出する
+- **主な変更先(追記)**: `.makefiles/github/setting/pages-delivery.mk` — Pages の有効化と配信元ブランチの許可
+- **完了条件**: GitHub Pages で portal が公開され、`deploy-docs.yaml` の `docs-deploy` が `production` への push で成功する。`portal-manifest-sync` が manifest の drift を検出する
+- **注**: 足りなかったのは Pages の有効化ではなく**配信先の許可**である。`github-pages` environment の deployment branch policy が配信元ブランチを許可していないと、`docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない。`docs-build` は緑のままなので気付けない。**人手の手順ではなく `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ**
 - **URL 整合**: setup が書き込む portal URL（既定の GitHub Pages project site または導入先指定の custom domain）で、Typeset の Storybook 例から公開 portal へ到達できる
 - **依存**: P5-16
 

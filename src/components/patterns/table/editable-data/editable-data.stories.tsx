@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CheckIcon } from "lucide-react";
 import { useId } from "react";
 
 import { Button } from "@/components/design-system/action/button/button";
@@ -16,6 +15,7 @@ import {
   INPUT_GROUP_ADDON_ALIGN,
   INPUT_GROUP_BUTTON_SIZE,
 } from "@/components/design-system/form/input-group/input-group.definition";
+import { CheckIcon } from "@/components/icon";
 import { EditableDataTable, type EditableDataTableColumn } from "./editable-data";
 
 type SettingRow = { id: string; label: string; value: string };

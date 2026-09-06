@@ -24,6 +24,16 @@ hook / CI の二層実行を明示するため `make` が入口となり、内�
   `.PHONY` 行は `make help` が警告する（一覧に出ないターゲットは利用者から見えないため）
 - 自明でないロジックはインラインシェルではなく `scripts/*.ts` に置き `pnpm exec tsx` から実行する。TypeScript に
   置けば `pnpm typecheck` と biome の検査対象に入り、実行環境ごとのシェル差異も持ち込まずに済む
+- **外から来る値を make の変数として recipe 行へ展開しない。**`$(VAR)` はシェルへ渡る前にテキスト置換されるので、
+  `"` や `;` を含む値でクォートが破れ、任意のコマンドが走る。ブランチ名は `git check-ref-format` が両方の文字を
+  許すため、これは想定上の入力ではなく実在する入力である。`export <NAME>` で環境変数として渡し、受け取る側が
+  `process.env` から読む形にすれば、値はシェルの構文解析を一度も通らない。**この規約を機械検査するものは無い**
+  —— `make actions-shellcheck` が見るのは composite action の `run:` で、`make shellcheck` が見るのは追跡下の
+  `*.sh` であり、どちらも `.mk` の recipe を読まない
+- **シェル変数を全角文字の直前に裸で置かない。**`echo "…（配信元: $$BRANCH）"` と書くと、シェルが全角文字の
+  先頭バイト（`0xEF`）を変数名の一部として食い、空へ展開したうえで壊れたバイト列を出す。`$${BRANCH}` と
+  囲む。recipe の説明文は日本語なので、変数を差し込む位置はたいてい全角文字の隣になる。**壊れるのは表示
+  だけで終了コードは変わらない**ため、検査でも人の目でも素通りしやすい
 - 一回限りのリポジトリ運用コマンド（`make setup-repo` とその補助）は `.makefiles/github/operation/` 配下に置き、
   開発者向けターゲットと分離する。GitHub 設定を**適用する**ターゲットは `setting/`、何も変更せずファイルを
   **検査する**ターゲットは `lint/` へ置く
@@ -47,6 +57,7 @@ make help
 | `make delete-all-labels` | GitHub リポジトリ上の既存ラベルをすべて削除します。 | なし |
 | `make create-default-labels` | `.github/settings/labels.json` をもとに、デフォルトラベルを作成します。 | 宣言の読み取りと、宣言と実在の差分は [`scripts/github-settings/labels.ts`](../scripts/github-settings/labels.ts) が持ちます。名前が実在するラベルは色や説明が宣言と違っても触りません。 |
 | `make apply-branch-protection` | `.github/settings/branch-protection.json` をもとに、対象リポジトリへブランチルールセットを適用します。 | なし |
+| `make apply-pages-delivery [PAGES_DELIVERY_BRANCH=<branch>]` | GitHub Pages を Actions 配信にし、`github-pages` environment へ配信元ブランチを許可します。 | 既定の配信元は `production` で、[`deploy-docs.yaml`](../.github/workflows/deploy-docs.yaml) の push トリガと揃える必要があります。3 段とも現状を読んでから書くため、適用済みのリポジトリで実行しても何も変えません。**許可が無いと `docs-deploy` は step を 1 つも実行せずに落ちます**（job 自体は起動するので、失敗の理由がログに出ません）。 |
 
 ### GitHub リポジトリ初期化関連
 
@@ -60,6 +71,7 @@ make help
 - `develop` / `staging` / `production` ブランチの作成
 - GitHub デフォルトブランチの設定
 - ブランチルールセット適用
+- Pages の配信設定（Actions 配信への切り替えと、`production` からの配信許可）
 - ラベル初期化
 - **`.github/release/` 配下のリリースノートを `v0.0.0.md` を除いて全削除**
 - **`upstream` リモートの削除**
@@ -180,10 +192,8 @@ pre-commit hook と CI の `actions-lint` job が実行します。actionlint �
 何を書くか・何を落とすかの判断は [`scripts/package-version/version.ts`](../scripts/package-version/version.ts)
 が持ちます。
 
-`REF` は recipe 行へ展開せず、環境変数 `PACKAGE_VERSION_REF` としてスクリプトへ渡します。make の変数は
-シェルへ渡る前にテキスト置換されるため、`"` や `;` を含むブランチ名（git は許す）を引数で渡すとクォートが
-破れて任意のコマンドが走ります。`REF` 省略時の取り回し（`GITHUB_REF_NAME` → 手元の現在ブランチ）は
-スクリプトが持ちます。
+`REF` は recipe 行へ展開せず、環境変数 `PACKAGE_VERSION_REF` としてスクリプトへ渡します（理由は上記
+「規約」）。`REF` 省略時の取り回し（`GITHUB_REF_NAME` → 手元の現在ブランチ）はスクリプトが持ちます。
 
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
@@ -313,6 +323,7 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make vrt [VRT_SHARD=<i>/<N>] [VRT_ARGS=<args>]` | 全 story を基準画像と比較します。`VRT_SHARD` は撮影対象の何分割目かで、渡すのは CI だけです。 | digest 固定した Playwright コンテナ内で実行します（[`vrt/README.md`](../vrt/README.md)）。ホスト直実行は比較の前に落ちます。 |
 | `make vrt-retake [VRT_ONLY=<id>,<id>] [VRT_ARGS=<args>] [BASELINE_BRANCH=<branch>]` | 基準画像を撮り直して置き場へ送ります（`vrt-update` → `baseline-push`）。 | 手元から撮り直す入口はこれです。撮って送らないと親の gitlink が古いままになり、手元の `make vrt` は通るのに CI だけ落ちます。 |
 | `make vrt-update [VRT_ONLY=<id>,<id>] [VRT_ARGS=<args>]` | 基準画像を撮り直します（置き場へは送りません）。 | `VRT_ONLY` は撮り直す story を id で絞ります（該当 0 件なら失敗）。CI 側の同じ操作は `baseline-retake` ラベルが起動し、直前の実行が報告した story だけを対象にします。撮り直しは承認ではなく、見た目の判断は置き場の compare ビューを見て PR レビューで行います。 |
+| `make baseline-sync` | 基準画像の実体を、いま居るブランチが指す版へ合わせます。 | hook (post-checkout / post-merge) が呼びます。git はブランチを移っても実体を動かさないため、放っておくと指し先から取り残され、その汚れを commit すると間違った指し先が載ります。取り込んでいない作業ツリーでは何もしません。 |
 | `make baseline-push [BASELINE_BRANCH=<branch>]` | 撮り直した一式を置き場へ送り、サブモジュールのポインタを進めます。 | 置き場へ送る経路はここだけです。サブモジュールの中で直接コミットすると撮り直しどうしが繋がり、掃除でどれも落とせなくなります。`BASELINE_BRANCH` の既定は現在のブランチ。 |
 | `make vrt-gate` | 比較を省いてよいかだけを答えます（`run` / `skip`）。 | **`build-storybook` の後でしか答えられません** —— 絵を決める入力に `storybook-static` が入っているためで、CI が「先に判定してから撮影を割る」形を取れない理由もこれです。 |
 | `make vrt-record-verified` | 検査が通った時点の入力のハッシュを記録します。 | CI が呼びます。割った実行では**全 shard が緑になってから**書きます（`vrt.yaml`）。 |
@@ -350,6 +361,7 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make dast` | 走っているアプリへ HTTP を撃ち、配信面を検査します。 | **ここだけが成果物ではなく応答を読みます。** 撃つ相手は `DAST_TARGET` で渡します（既定はコンテナから見たホストの :3000）。既知の欠落は `.github/zap/rules.tsv` の一覧が持ち、**一覧に無い所見は exit 1**。ZAP は `IGNORE` にした規則も出力に残すので、黙殺と区別が付きます。 |
 | `make bearer-scan` | 値がプロセスの外へ出る地点を、その値の分類と併せて見ます。 | **落としません。** 誤検知の傾向が強く、fail-closed にすると規則単位の無効化へ寄っていくためです（それは禁止）。所見は code scanning へ送り、差分が持ち込んだものを GitHub 側のチェックが赤にします。個別の誤検知は `bearer.ignore` がフィンガープリントで受けます。 |
 | `make bearer-sarif` | 同じ検査を SARIF で書き出します。 | code scanning への取り込み用。所見が 0 件のとき Bearer は `results: null` を書きますが SARIF にその値は無いため、`scripts/sarif` が配列へ揃えます。揃えないと取り込みが弾かれ、「所見が無い」と「報告できていない」が見分けられなくなります。 |
+| `make suppression-expiry` | 抑止の撤回条件を突き合わせ、満たしたものがあれば落とします。 | 週に一度 CI が回します。**限界が 2 つあり、報告がそれを名指しします。** 決められるのは日付だけなので出力は全件の一覧を伴い、理由をコメントに持つ面（gitleaks / zizmor / pnpm の冷却期間と override / sonar）は宣言単位では読めず日付を含む行だけが出ます。`SUPPRESSION_REPORT` を環境から渡すと issue の本文を書き出します（recipe 行へは展開しません）。 |
 | `make audit` | 依存監査ゲート（`pnpm audit`）。 | 修正版のある `high` / `critical` が 1 件でもあれば exit 1。判定と表の組み立ては `scripts/audit-gate` が持ちます。Trivy とは集計単位も参照する DB も違うため件数は一致せず、**突合して差分を潰そうとしません** —— どちらか一方でも閾値に達したものを blocking として扱います（[ADR 0110](../docs/adr/0110-security-operations.md) 3）。 |
 
 ## 補足

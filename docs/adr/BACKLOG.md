@@ -113,7 +113,7 @@ UI / スタイリング / データ統合 / 状態管理 / エラー / 観測性
 | 枠 ID | ADR # | タイトル | 選定済み | 実装済み | 依存 | 内容要旨 |
 | --- | --- | --- | --- | --- | --- | --- |
 | **B1** | 0050 | スタイリング戦略 | ✅ | ✅ | A5 | Tailwind 主軸 / CSS Modules 限定許可(styled-components・emotion 非採用)/ design token = CSS 変数 / `cn()` = `clsx` + `tailwind-merge`(`components` カーネル内)/ variant 定義 = `cva` / global は `globals.css` 集約 |
-| **B2** | 0052 | UI コンポーネント方針 | ✅ | ✅ | A5, B1 | **v1 バッテリー採用(2026-07-14 反転)**: shadcn/ui + lucide-react + 複雑入力 + リッチテキスト(TipTap)を採用(`components` カーネル・vendor 越し差替可能。0010 / 0004)/ variant 定義は `cva`。旧「非同梱」から反転 |
+| **B2** | 0052 | UI コンポーネント方針 | ✅ | ✅ | A5, B1 | **v1 バッテリー採用(2026-07-14 反転)**: shadcn/ui + @tabler/icons-react + 複雑入力 + リッチテキスト(TipTap)を採用(`components` カーネル・vendor 越し差替可能。0010 / 0004)/ アイコンの供給元は `src/components/icon.ts` 1 ファイルへ閉じる/ variant 定義は `cva`。旧「非同梱」から反転 |
 | **B3** | 0071 | BFF / API 統合 | ✅ | ✅ | A2, A4, A5 | API クライアント = `adapters` / fetch wrapper に go 0019 resilience を広く翻案(dual timeout / idempotent retry / retry budget / circuit breaker)/ 生 status を errors へ正規化 / response は adapters 境界で zod 検証 |
 | **B4** | 0072 | 型生成 (API スキーマ) | ✅ | ✅ | A2, B3 | backend `openapi.gen.yaml` から **orval で zod + 型生成**(型 + runtime validation)/ `gen/` do-not-edit / gh 取込 + short SHA スタンプ / 型漏洩禁止(adapters 変換)/ drift ゲート |
 | **B5** | 0060 | 状態管理 | ✅ | ✅ | A3, A5, B3 | Server state = Server Component fetch 既定 / Client state = local から / **v1 バッテリー採用(2026-07-14 反転)**: react-hook-form + zod / Zustand(横断 client 状態は `stores` カーネル 0023)/ **`nuqs` 等 searchParams ヘルパは v1 不採用**(標準形は scaffold 生成で担保)。旧「非同梱」から反転 |
@@ -126,7 +126,7 @@ UI / スタイリング / データ統合 / 状態管理 / エラー / 観測性
 ### Tier 4 の de facto 状態
 
 - **B1(ADR 0050 として実装 ✅)**: 2026-07-12 に [ADR 0050](0050-styling-strategy.md) として成文化(2026-07-14・v1 でバッテリー採用へ部分改訂 = Tailwind 主軸 / CSS Modules 限定許可・styled-components・emotion 非採用 / `cn()` は `components` カーネル内 / design token = CSS 変数 / global は `globals.css` 集約)。`tokens/*.json` を SSOT とする CSS 生成・drift gate・`cn()` に加え、variant 定義の `cva` と design token の値が着地したため ✅ とする
-- **B2(ADR 0052 として実装 ✅)**: shadcn/ui を取り込んだ `src/components/` の design-system / patterns / app-starter / shell、lucide-react のアイコン、Radix ベースの複雑入力、TipTap の `RichTextEditor` と sanitize 済み表示の `RichTextContent`、`cva` による variant 定義を実装済み。取り込みの台帳は `shadcn-manifest.yaml` が持ち、上流追従の drift 検出を CI へ載せている
+- **B2(ADR 0052 として実装 ✅)**: shadcn/ui を取り込んだ `src/components/` の design-system / patterns / app-starter / shell、`src/components/icon.ts` へ閉じた Tabler のアイコン、Radix ベースの複雑入力、TipTap の `RichTextEditor` と sanitize 済み表示の `RichTextContent`、`cva` による variant 定義を実装済み。取り込みの台帳は `shadcn-manifest.yaml` が持ち、上流追従の drift 検出を CI へ載せている
 - **B5(ADR 0060 — 2026-07-14 に v1 バッテリー採用へ反転・実装 ✅)**: B2 と同じく、当初(2026-07-12)は本体非同梱の exclusion だったが、**v1 = 一般的 Next.js アプリ基盤として必要ライブラリを採用**の方針転換で反転。0060 = react-hook-form + zod / Zustand(横断 client 状態は `stores` カーネル [0023](0023-stores-kernel.md))。Server state = RSC fetch 既定 / Client state = local から、は不変。ライブラリの導入と `stores` の実体化(同意状態 / 通知)は着地済み。詳細は [docs/plan/master-plan.md](../plan/master-plan.md) の採用ロードマップ節
 - **B8(ADR 0090 として実装 ✅)**: Vitest + RTL + MSW + `vitest-axe` を導入し、co-location・正常系 / 異常系・table-driven 禁止の規約、`make test-cached` / `make test-full` の二層実行、100% coverage gate と CI の PR レポートを実装済み。Playwright は story 全数の visual regression(`make vrt`)に加えて、画面を通した E2E ジャーニー・ブラウザが報告する異常の見張り・帯ごとの出し分け・3 つの描画エンジン・画面単位の比較(`make e2e` / `e2e/`)も持つ。どちらも digest 固定した公式イメージ内で実行し、基準画像の置き場を共有する
 - **B3 / B4(ADR 0071 / 0072・実装 ✅)**: 2026-07-13 に決定 4 バッチとして成文化。B3 = [ADR 0071](0071-bff-api-integration.md)(API クライアント = `adapters` / fetch wrapper に go ADR 0019 resilience を広く翻案 = dual timeout + idempotent retry + retry budget + circuit breaker / 生 status を errors へ正規化・詳細テーブルは B6 / response は adapters 境界で zod 検証 / SSRF guard は外部叩き時のみ)。B4 = [ADR 0072](0072-api-type-generation.md)(**型 + runtime validation を orval で zod 生成** — 決定 4 当初の openapi-typescript 型のみから、go 境界値所有哲学に合わせユーザが変更 / `gen/` do-not-edit / gh 取込 + short SHA スタンプ + マニフェスト / 型漏洩禁止 = adapters 変換 / drift ゲート)。取込 + 生成パイプラインは `scripts/openapi/`、生成物は `src/adapters/gen/`、drift ゲートは `gen-drift` が持つ
@@ -190,7 +190,7 @@ i18n / a11y / パフォーマンス予算 / ブラウザサポート 等、boile
 | 枠 ID | ADR # | タイトル | 選定済み | 実装済み | 依存 | 内容要旨 |
 | --- | --- | --- | --- | --- | --- | --- |
 | **D1** | 0140 | ドキュメント運用ポリシー | ✅ | ⬜ | — | canonical 言語 = EN 目標・移行は v1(0.0.x は日本語 living)/ タクソノミー4分類(decision・exclusion=ADR / rule=rules.md 新設 / inventory=BACKLOG)/ ADR 不可変性(0.0.x living→v1 immutable)/ per-package README |
-| **D2** | 0141 | ポータル運用 | ✅ | ⚠️ | D1 | `docs/portal/manifest.yaml` = 構造制御のみ(curated manual)/ コード README 手動登録・`docs/*` 自動発見 / GitHub Pages 配信 |
+| **D2** | 0141 | ポータル運用 | ✅ | ✅ | D1 | `docs/portal/manifest.yaml` = 構造制御のみ(curated manual)/ コード README 手動登録・`docs/*` 自動発見 / GitHub Pages 配信 |
 | **D3** | 0142 | ライセンス選定 | ✅ | ✅ | — | MIT 採用根拠(最大許容・エコシステム標準・go 統一)/ OSS 寄与 = inbound=outbound・CLA なし / 同梱ライブラリ整合は 0004 / `private:true` は publish ガードで MIT と両立 |
 | **D4** | 0152 | AGENTS.md 構成方針 | ✅ | ✅ | D1 | ファイル配置 / 本文言語 / 節構成 / Instruction Priority / `## [TODO]` セクション運用 |
 | **D5** | 0154 | Claude スキル運用方針 (運用系) | ✅ | ✅ | D4, G1, G2, T3, T4 | 配置・命名・frontmatter / 本文構造 / カバー範囲 / 商用操作前ユーザ確認 |
@@ -199,7 +199,7 @@ i18n / a11y / パフォーマンス予算 / ブラウザサポート 等、boile
 ### Tier 6 の de facto 状態
 
 - **D1(ADR 0140 として策定済み・実装未)**: 2026-07-13 に決定 5 バッチとして成文化([ADR 0140](0140-documentation-operations.md))。canonical 言語 = **EN 目標・移行は v1**〈ユーザ決定・v1.0.0 未満は日本語 canonical のまま living〉/ タクソノミー4分類 / **`rules.md` 新設 + AGENTS.md rule 段階移行**〈0152 整合はユーザ承認要〉/ ADR 不可変性 = v1.0.0 未満 living→v1 immutable〈go モデル翻案〉/ per-package README。`rules.md` は新設済みで、EN canonical 化は v1 で行う
-- **D2(ADR 0141・実装 ⚠️)**: `docs/portal/manifest.yaml` によるキュレーション、`scripts/portal/` の生成(判断は純粋関数・FS 入出力は CLI)、独立 workspace の `docs-viewer/`、GitHub Pages への配信 workflow を実装済み。**残るのは Pages の有効化(リポジトリ設定のためユーザが実施)と、manifest の drift を検出する `portal-manifest-sync` スキルの移植**([移植バックログ](#go-boilerplate-claude-資産-移植バックログ)の「対象外(D)」からの復活)
+- **D2(ADR 0141・実装 ✅)**: `docs/portal/manifest.yaml` によるキュレーション、`scripts/portal/` の生成(判断は純粋関数・FS 入出力は CLI)、独立 workspace の `docs-viewer/`、GitHub Pages への配信 workflow を実装済み。`portal-manifest-sync` スキルも移植済みで、判定基準は `readme-review` を実行時に読む。配信先の設定(Pages を Actions 配信にし、`github-pages` environment へ配信元ブランチを許可する)は `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ。**許可が無いと `docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない** —— `docs-build` は緑のままなので、配信の緑赤は `deploy-docs.yaml` の `docs-deploy` の結果で見る
 - **D3(ADR 0142 として策定済み)**: 2026-07-13 に成文化([ADR 0142](0142-license.md))。MIT 採用根拠(最大許容・エコシステム標準・go-boilerplate と統一・低儀式性)/ OSS 寄与 = **inbound=outbound・CLA なし**(DCO は必要時 `CONTRIBUTING.md`)/ 同梱ライブラリのライセンス整合は [0004](0004-library-management.md) 許可リストが担保 / `package.json` の `private:true` は npm publish ガードで MIT と別レイヤ・両立。**follow-up: `package.json` に `"license": "MIT"` 追加はルート設定保護のためユーザ指示待ち**
 - **D6 ⚠️**: 開発系 5 件は A7 ([0030](0030-environment-variable-management.md)) の構造へ揃済。`new-env` は `src/config/` の目的別 config モジュールを対象とするが、`src/config/` の着地は A7 実装 PR (v1 計画 P3-3) のため、それまで実行不可 (スキル側がガードして停止する)
 
@@ -342,7 +342,7 @@ D4 (AGENTS.md) ─ D5 (スキル運用系) / D6 (スキル開発系)
 
 - **移植済(既存)**(スキル 10 / エージェント 2): canonicalize-doc / commit / impl-review / new-env / readme-review / release-notes / submit-pr / sync-readme / tool-map / tools-upgrade、agent: adversarial-reviewer / review-verifier
 - **移植済(A: 技術非依存)**(スキル 3 / エージェント 4): full-verify(+prompts+run.sh)/ full-apply / manage-skill(上乗せ規約を [0140](0140-documentation-operations.md) の対訳ペアと [0154](0154-claude-skills-operations.md) / [0155](0155-claude-skills-development.md) の配置・命名規約へ差し替え)、agent: arch-verifier / impl-verifier / doc-reviewer / comment-reviewer(godoc→TSDoc/JSDoc、正を AGENTS.md+一般原則へ)
-- **移植済(B: 変換)**(スキル 4): node-upgrade(← go-upgrade。mise.toml SSOT のみ伝播)、repo-ops(器のみ。Docker/sqlc 項目は ADR 0011 で不適用)、actions-pin(GB-6。Go 実装を TypeScript へ書き換え。`supply-chain-triage` 未移植のため triage への連鎖は「証拠を添えてユーザへ委ねる」に置換)、test-review(GB-5。Go の規約読み取りを [0090](0090-testing-strategy.md) / [0091](0091-test-verification-methods.md) と層 README の `test-requirement` の実行時読込へ差し替え)、scaffold-test(GB-5。ケースを対象の分岐から導き、対象は read-only。検証不能な分岐は skip せず切り出しの提案として返す)、scaffold-integration-test(GB-5。Echo + httptest を契約生成 MSW ハンドラへ翻案し、HTTP 境界のみへ限定)
+- **移植済(B: 変換)**(スキル 7): node-upgrade(← go-upgrade。mise.toml SSOT のみ伝播)、repo-ops(器のみ。Docker/sqlc 項目は ADR 0011 で不適用)、actions-pin(GB-6。Go 実装を TypeScript へ書き換え。`supply-chain-triage` 未移植のため triage への連鎖は「証拠を添えてユーザへ委ねる」に置換)、test-review(GB-5。Go の規約読み取りを [0090](0090-testing-strategy.md) / [0091](0091-test-verification-methods.md) と層 README の `test-requirement` の実行時読込へ差し替え)、scaffold-test(GB-5。ケースを対象の分岐から導き、対象は read-only。検証不能な分岐は skip せず切り出しの提案として返す)、scaffold-integration-test(GB-5。Echo + httptest を契約生成 MSW ハンドラへ翻案し、HTTP 境界のみへ限定)、portal-manifest-sync(D2。pair_drift preflight を落とし、N1 の除外先を godoc から Storybook + TSDoc へ、drift の機械検出を `portal:guides` / `portal:docs` の読み取りへ差し替え。判定基準は `readme-review` が SSOT)
 - **対象外(D)**(スキル 2): `images-pin`([0011](0011-no-docker.md) no-docker)/ `scaffold-infra-db`(表示層に DB を持たない — [0070](0070-backend-role-separation.md))
 - **本リポジトリ固有**: adr-scan(go 側に現存しない。走査を nextjs 化・枠 ID 体系へ分類 / PROVISIONAL)。上記の資産数には数えない
 - **実行可能条件つき**: `new-env` は A7([0030](0030-environment-variable-management.md))の `src/config/` 構造へ再設計済。`src/config/` が着地したため実行可能
@@ -355,7 +355,6 @@ D4 (AGENTS.md) ─ D5 (スキル運用系) / D6 (スキル開発系)
 
 | 資産 | 種別 | 依存 | 内容要旨 |
 | --- | --- | --- | --- |
-| `portal-manifest-sync` | スキル | — | `docs/portal/manifest.yaml` と実際の README 群の drift 検出。portal が着地したため対象外(D)から復活 |
 | `sync-ai` | スキル | — | `.claude/` ↔ `.codex/` の双方向同期(handoff スクリプト同梱) |
 | `supply-chain-triage` | スキル | — | 検疫に掛かったアーティファクトを直接証拠でスコアリングする report-only スキル。移植までの間、`actions-pin` はステップバック先が無い事例を証拠付きでユーザへ提示して止まる |
 | `dep-vuln-upgrade` | スキル | `supply-chain-triage` | CVE / GHSA を名指しした単発の依存更新 |

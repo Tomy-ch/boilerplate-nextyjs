@@ -40,6 +40,7 @@ Accepted
 | pre-commit | 「壊れた diff を commit に乗せない」 | `pnpm lint:ci` (biome 完全版 = `biome.ci.jsonc` + `--error-on-warnings`。ESLint 導入後は境界検査も直列 — [0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm md-lint` = markdownlint + mermaid 構文 + `.claude/**` の意味検査 (`skill-lint`)。対象ファイルが staged のときのみ) / ワークフロー検査 (`make actionlint` = 構文 + `run:` のシェル / `make actions-shellcheck` = composite action の `run:` のシェル / `make actions-pin-check` = `uses:` の SHA ピン / `make actions-comment-secret-lint` = PR コメントを投稿するジョブへの secret 混入。ワークフロー / composite action の定義が staged のときのみ — [0153](0153-ci-configuration.md)) | < 5 秒 |
 | commit-msg | 「規約外のコミットメッセージを積ませない」 | commitlint ([0150](0150-git-workflow.md) の prefix 11 種を検証) | < 5 秒 |
 | pre-push | 「壊れた push・秘密を含む push を上げない」 | 型チェック (`pnpm typecheck` = `tsc --noEmit`) / 秘密スキャン (`make secret-scan` = push 予定コミット範囲) / テスト (整備後) | < 30 秒 |
+| post-checkout / post-merge | 「基準画像の実体を、指し先から取り残さない」 | サブモジュールの同期 (`make baseline-sync`)。移動と pull のたび | < 1 秒 |
 | (CI) | 権威ある検査 | lint / 型 / test / build / e2e 等 | 制約なし |
 
 - pre-commit で走らせる biome は、エディタ保存時の簡易版ではなく **完全版** (`pnpm lint:ci`)。保存時は軽量・commit 時は厳格という二段構え（プロファイル分割の詳細は [0002-formatter-linter.md](0002-formatter-linter.md)）
@@ -56,6 +57,7 @@ Accepted
 
 ### 設計原則
 
+- **post-checkout / post-merge は検査ではない。** 壊れを止めるのではなく、git が動かさない実体をブランチの記録へ合わせるだけである。落ちる余地を持たせない —— 取り込んでいない作業ツリーでは何もせず、撮影の前提検査が名指しで案内する側に任せる
 - **pre-commit は速さ優先**。重い処理 (テスト全件 / `pnpm build` / e2e) は入れない
 - **pre-push は中速まで許容**。push の機会は commit より少ないため
 - **CI が権威**。hook は「早く気づく」ための補助層であり、hook 通過 = 正しい状態ではない

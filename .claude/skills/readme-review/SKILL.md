@@ -1,6 +1,6 @@
 ---
 name: readme-review
-description: Review a single canonical README and judge whether it has "manual-worthy" characteristics for inclusion in the portal manifest curated per ADR 0141. The evaluation criteria are derived from patterns observed in currently-registered manifest entries (Role / Design Intent / Rules / Architecture diagram / Navigation / Notes / substantive prose). Produces a scorecard with strengths, gaps, concrete improvement suggestions, and a final classification (manual-worthy / borderline / not-yet-manual-grade / out-of-scope-for-portal). Read-only by default; never edits the README or the manifest. For a README under `src/features/`, it additionally grades the required sections a feature README must carry (route + contract, state-to-story map, kernel dependencies, Server Action contract, test viewpoints), reading that list from `docs/templates/feature-readme.md` at runtime and resolving every story id, operationId, spec link and Action name the README asserts; a missing or thin required section caps the verdict at `borderline`. When the result is manual-worthy, the skill suggests chaining into `portal-manifest-sync` (curation flow) as the natural next step; it does not perform the addition itself.
+description: Review a single canonical README and judge whether it has "manual-worthy" characteristics for inclusion in the portal manifest curated per ADR 0141. The evaluation criteria are derived from patterns observed in currently-registered manifest entries (役割と境界 / 設計判断 / 規約 / 実行機序 / 索引 / 運用 / substantive prose), and exclude the two shapes that are deliberately not portal content: the per-component reference READMEs Storybook and TSDoc already carry, and feature slices graded by their own required-section check. Produces a scorecard with strengths, gaps, concrete improvement suggestions, and a final classification (manual-worthy / borderline / not-yet-manual-grade / out-of-scope-for-portal). Read-only by default; never edits the README or the manifest. For a README under `src/features/`, it additionally grades the required sections a feature README must carry (route + contract, state-to-story map, kernel dependencies, Server Action contract, test viewpoints), reading that list from `docs/templates/feature-readme.md` at runtime and resolving every story id, operationId, spec link and Action name the README asserts; a missing or thin required section caps the verdict at `borderline`. When the result is manual-worthy, the skill suggests chaining into `portal-manifest-sync` (curation flow) as the natural next step; it does not perform the addition itself.
 ---
 
 # Readme Review
@@ -15,12 +15,12 @@ Use this skill when:
 
 - You wrote a new README and want to know whether it's polished enough for the portal manual.
 - `portal-manifest-sync` surfaced a README under `borderline` or `not-yet-manual-grade` and you want a deeper, per-criterion read before deciding to add or improve.
-- You suspect a README is documenting things that should be in godoc instead of the portal.
+- You suspect a README is documenting a component's surface, which Storybook and its TSDoc already carry, rather than something the portal should expose.
 - You want a checklist of what's missing from a thin README before extending it.
 
 Do NOT use this skill for:
 
-- Mass-reviewing the entire repo — use `portal-manifest-sync` for the high-level four-class classification (which applies the same criteria defined here, batched). Use this skill for individual deep dives on borderline cases.
+- Mass-reviewing the entire repo — use `portal-manifest-sync` for the high-level four-class classification (which applies the same criteria defined here, batched, after filtering out the component references and routing feature slices to Step 2b). Use this skill for individual deep dives on borderline cases.
 - Editing the README content — use `sync-readme` (drift fixes) or hand-edit.
 - Adding to the manifest — chain into `portal-manifest-sync` (curation flow) after this skill's verdict.
 
@@ -32,30 +32,47 @@ This skill remains the canonical place to invoke for **deep-dive single-file ana
 
 ## How the Criteria Were Derived
 
-The evaluation pattern is not hardcoded from theory — it was reverse-engineered by reading every entry currently in `docs/portal/manifest.yaml` (53 unique English srcs at initial skill creation, later expanded) and identifying what they have in common. Findings: <!-- skill-lint-ignore -->
+The evaluation pattern is not hardcoded from theory — it was read off the entries currently in
+`docs/portal/manifest.yaml`, which are the only worked examples of "this belongs in the manual" that
+this repository has. What those 16 entries have in common:
 
-- median prose length ≈ 225 words; max 1358
-- 27/53 use Mermaid diagrams
-- 48/53 use tables
-- 38/53 have at least one "concept" H2 heading
-- top H2 frequencies: Notes (20), Directory Structure (12), Design Policy (11), Role (7), Public API (6), Rules (5), Architecture/Architectural Position (8), Test Strategy (4), Design Principles (4)
+- The headings are Japanese, and most of them state a claim rather than name a category —
+  「値の分類は取得の口が宣言する」「なぜ別パッケージなのか」「面と文字で明度を分ける」
+- Top H2 frequencies: 運用 (12), 受け入れないもの (10), 受け入れるもの (10), 構成 (4),
+  テストの責務 (2), モジュール (2), 実行機序 (2)
+- 15/16 use tables; **0/16 use a Mermaid diagram**, so a diagram is a bonus here, not an expectation
+- Prose length: median 1462 characters, min 399, max 15737 (measured in characters, not words — the
+  prose is Japanese)
+- 6.7 H2 headings on average
 
-The 6 `Public API`-bearing entries that ARE in the manifest are all hybrid — they have Public API plus substantial conceptual sections (Role, Architecture, Design Principles, How It Works). That distinguishes them from pure API references, which belong to godoc.
+Re-derive these numbers when the manifest changes materially; ADR
+[0141](../../../docs/adr/0141-portal-operations.md) makes the registered set the reference for what
+manual-worthy means, so the criteria follow the manifest rather than the other way round.
+
+### The two shapes that are deliberately not manual-worthy
+
+Both are large enough that mistaking them for candidates makes any repo-wide report unreadable.
+
+- **Per-component reference** — the READMEs under `src/components/**` share a fixed section shape
+  (用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト). They document one component's
+  surface, and this repository answers that with Storybook (a standing `meta.reference_links` entry
+  in the manifest) plus the component's own TSDoc. That is this repo's reading of N1.
+- **Feature slice** — a README under `src/features/` is graded by the required-section check in
+  Step 2b instead, against the sections `docs/templates/feature-readme.md` declares.
 
 ### Keyword evolution log
 
-The keyword sets in Step 2 were extended after observing false-negatives during runs of `portal-manifest-sync`. Add to a P-criterion's keyword list when:
+The keyword sets in Step 2 are extended when a run of `portal-manifest-sync` shows a false negative.
+Add a heading to a P-criterion's list when:
 
-- A genuinely manual-quality README uses a synonym that wasn't in the original list (e.g., `Conventions` is functionally a Rules section).
-- The synonym appears in at least one currently-registered manifest entry, OR in a README that the user explicitly judges manual-worthy.
+- A genuinely manual-quality README uses a wording that wasn't in the list.
+- That wording appears in at least one currently-registered manifest entry, OR in a README the user
+  explicitly judges manual-worthy.
 
-Do NOT expand keywords to admit clearly low-quality READMEs; the goal is to capture the spectrum of legitimate phrasings, not to inflate scores.
-
-Examples already added:
-
-- P2: `How It Works`, `Strategy`, `Trigger Strategy`, `Test Strategy`, `Application Policy`
-- P3: `Conventions`, `Naming Convention`, `Naming`, `Policy`
-- P5: `Workflow List`, `Command List`, `File List`, `Module List`
+Do NOT expand the lists to admit clearly low-quality READMEs; the goal is to capture the spectrum of
+legitimate phrasings, not to inflate scores. Match by content in any case — this repository writes
+the claim itself as the heading, so a criterion whose wording is absent may still be satisfied by a
+section that answers it.
 
 ## Step 0. Confirm Target
 
@@ -75,7 +92,7 @@ Read the full README. Capture:
 - All H2 headings (lines starting with two hash marks and a space)
 - Presence and count of ` ```mermaid ` blocks
 - Presence of tables (`|...|` lines)
-- Prose word count (text excluding code blocks, tables, headings)
+- Prose length in characters (text excluding code blocks, tables, headings)
 - Cross-reference to translation (`README.ja.md`) — its existence and sync convention compliance
 
 ## Step 2. Evaluate Each Criterion
@@ -86,31 +103,35 @@ Score each of the following criteria. Match by content, not just exact heading t
 
 | # | 観点 | シグナル |
 | --- | --- | --- |
-| P1 | **Role / Position** | H2 in `{Role, Position, Overview, Role in Onion Architecture, Architectural Position, Role in This Project}`, with prose explaining what this package/layer is and where it sits |
-| P2 | **Design Intent / Why** | H2 in `{Design Policy, Design Principles, Design Intent, Why, Why ..., Rationale, Approach, Necessity, How It Works, Strategy, Trigger Strategy, Test Strategy, Application Policy}`, explaining the reasoning, not just listing rules |
-| P3 | **Rules / Boundaries** | H2 in `{Rules, Do / Don't, Don'ts, Prohibited Practices, Forbidden, Constraints, Allowed dependencies, Disallowed, Implementation Rules, Conventions, Naming Convention, Naming, Policy}` — explicit prescriptive guidance |
-| P4 | **Architecture diagram** | At least one ` ```mermaid ` block accompanied by 1+ sentence of explanatory text |
-| P5 | **Navigation** | H2 in `{Directory Structure, Subdirectories, Subdirectory Roles, Subpackages, Package List, Workflow List, Command List, File List, Module List}` — for layers/groups that have substructure |
-| P6 | **Notes / caveats** | H2 `Notes` (or similar) with non-trivial content describing pitfalls / operational caveats |
-| P7 | **Substantive prose** | Prose word count ≥ 150 (excluding code/tables/headings) |
+| P1 | **Role / boundary** | The pair `受け入れるもの` / `受け入れないもの`, or `役割` / `境界` / `なぜ〜なのか` — and the "not" side names where the excluded work goes, rather than only saying it is excluded |
+| P2 | **Design intent** | A section arguing a judgment: a claim written as the heading itself (「値の分類は取得の口が宣言する」), or `設計` / `トリガ戦略` / `切替の軸` / `この層が持つ判断`. Reasoning, not a list of rules |
+| P3 | **Rules / conventions** | `規約` / `配置・命名` / `TSDoc の基準` / `Storybook の表示規約`, or a table pairing what is allowed against what is not — prescriptive guidance a reader can be held to |
+| P4 | **Mechanism** | `実行機序` / `実行機序と評価タイミング` / `生成と検査` / `Config の配線` — when each part runs and what triggers it |
+| P5 | **Index into the substructure** | `構成` / `モジュール` / `〜一覧` / `〜目録` / `置いている hook` — for a directory that has one |
+| P6 | **Operations** | `運用` (the most frequent heading in the registered set) with non-trivial content: what to re-run after a change, what breaks, what to watch |
+| P7 | **Substantive prose** | Prose ≥ 800 characters, excluding code blocks, tables and headings. Characters, not words — the prose is Japanese |
+
+A Mermaid diagram is a bonus, not a criterion: no registered entry uses one.
 
 ### Negative criteria (each −2 when triggered)
 
 | # | 兆候 | 判定 |
 | --- | --- | --- |
-| N1 | **Pure API reference** | `## Public API` is present AND H2 count ≤ 3 AND prose < 150 words AND no Role/Design/Architecture section. → "godoc 領域" — out-of-scope-for-portal |
-| N2 | **Stub** | H2 count ≤ 1 AND prose < 50 words |
-| N3 | **Index-only** | Only H2 is `Subpackages` or `Subdirectories` and it just lists items without narrative |
-| N4 | **Operational reference** | H2 set looks like `{Command, Flags, Usage, Notes}` or `{Commands, Flags, Usage, Notes}` — CLI usage reference, belongs in CLI docs or godoc-cli, not portal manual |
+| N1 | **Per-component reference** | The component-README shape (用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト), carrying nothing beyond it that speaks for anything larger than the one component. A section about that component's own behavior does not lift it out. → Storybook and the component's TSDoc own this — out-of-scope-for-portal |
+| N2 | **Stub** | H2 count ≤ 1 AND prose < 200 characters |
+| N3 | **Index-only** | The only H2 is `構成` (or an equivalent listing) and it enumerates without narrative |
+| N4 | **Operational reference** | Command / flags / usage only — the invocation surface of a script, with no judgment recorded. Belongs next to the script |
 
-Apply N1–N4 conservatively. If the README has *any* substantial Design / Role / Architecture content, do not trigger N1 / N3 / N4 even if API/Subpackages/Command headings are present.
+Apply N1–N4 conservatively. If the README carries *any* substantial role, design, or mechanism
+content, do not trigger N1 / N3 / N4 even when the listing or component headings are present —
+`src/components/README.md` is registered precisely because it says far more than the shape.
 
 ### Classification thresholds
 
 - **manual-worthy**: positive score ≥ 3 AND no negative trigger AND (for a feature README) every required section from Step 2b is present and substantive
 - **borderline**: positive score 1–2 AND no negative trigger
 - **not-yet-manual-grade**: positive score 0 (or any positive but with N2/N3 triggered)
-- **out-of-scope-for-portal**: N1 (godoc territory) or N4 (CLI reference) triggered
+- **out-of-scope-for-portal**: N1 (component reference) or N4 (script invocation reference) triggered
 
 ## Step 2b. Feature READMEs: Required-Section Check
 
@@ -172,14 +193,14 @@ README Review: <path>
 [判定] manual-worthy | borderline | not-yet-manual-grade | out-of-scope-for-portal
 
 [強み] (positive criteria met)
-  ✓ P1 Role: "Role in Onion Architecture" で層境界を明示（〜「the core of the business」）
-  ✓ P4 Architecture diagram: Mermaid 図 2 件 + 解説 prose
-  ✓ P6 Notes: 運用上の caveats 3 項目（"transaction boundaries are managed by..."）
-  ✓ P7 散文 534 語
+  ✓ P1 役割 / 境界: 「受け入れないもの」が渡し先（components / model）を名指ししている
+  ✓ P4 実行機序: いつ評価されるかを起動境界と RSC の 2 経路で書き分けている
+  ✓ P6 運用: 変更後に回すものが 3 点（生成 / 突合 / 撮り直し）
+  ✓ P7 散文 1,462 字
 
 [ギャップ] (positive criteria absent)
-  ✗ P2 Design Intent / Why セクションなし
-  ✗ P3 Rules / Do-Don't の明文化なし
+  ✗ P2 設計判断を述べた節が無い
+  ✗ P3 規約 / 禁止の明文化が無い
 
 [B1 必須節] (feature README のときだけ出す)
   ✓ Route と契約: 2 route と 4 operationId。spec への link も解決する
@@ -189,20 +210,20 @@ README Review: <path>
 [アンチパターン] (negative triggers)
   なし
   ※（または該当する場合）
-  ⚠ N1 Pure API reference: `## Public API` が支配的（他 H2 ≤2, prose 43 語）→ godoc 領域
+  ⚠ N1 部品リファレンス: 用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト の定型のみ → Storybook と TSDoc の領域
 
 [補強提案]
-  - "Why this layer exists" を 1〜2 段落追加すると、新規開発者・AI エージェントが層を必要性で理解できる
-  - "Forbidden / Don't" を箇条書きで明示すると、規約逸脱を自動チェックしやすくなる（arch-check スキルとも連動）
+  - 「この層が要る理由」を 1〜2 段落足すと、読み手が層を必要性から理解できる
+  - 「受け入れないもの」に渡し先を書き足すと、境界が判断に使える形になる
 
 [portal 適性]
-  manual-worthy → portal-manifest-sync の curation flow で追加候補
+  manual-worthy → /portal-manifest-sync を回し、レポートを見たうえでこのパスを名指しして追加する
   （または）borderline → README 補強後に再 review 推奨
   （または）not-yet-manual-grade → 内容拡充が先、または portal 対象外でよい
-  （または）out-of-scope-for-portal → godoc 領域、portal 不要
+  （または）out-of-scope-for-portal → Storybook / TSDoc の領域、portal 不要
 ```
 
-For verbose mode, additionally include the raw H2 list, prose word count, mermaid/table counts, and the detected H2 → criterion mapping.
+For verbose mode, additionally include the raw H2 list, prose character count, table count, and the detected H2 → criterion mapping.
 
 ## Step 4. Suggest Next Action
 
@@ -210,10 +231,10 @@ Print a one-line suggestion based on the verdict:
 
 | Verdict | Suggestion |
 | --- | --- |
-| manual-worthy | "/portal-manifest-sync の curation flow でこの README を追加候補として指定するか、手動で manifest に追加してください" |
+| manual-worthy | "/portal-manifest-sync を回し、レポートを見たうえでこのパスを名指しして追加してください" |
 | borderline | "P2/P3 等の不足 section を補ってから再 review を推奨" |
 | not-yet-manual-grade | "/sync-readme で内容を拡充するか、portal 対象外として扱ってください" |
-| out-of-scope-for-portal | "godoc / CLI ドキュメント側で扱うべき内容です。portal manifest への追加は不要" |
+| out-of-scope-for-portal | "Storybook と TSDoc、あるいはスクリプトの隣で扱うべき内容です。portal manifest への追加は不要" |
 
 ## AI Modification Scope
 
@@ -244,8 +265,8 @@ Before reporting completion, confirm:
 - [ ] Target README path was confirmed via `AskUserQuestion`
 - [ ] Full README content was read
 - [ ] All H2 headings were enumerated and mapped to criteria
-- [ ] Prose word count was computed (excluding code/tables/headings)
-- [ ] Mermaid / table presence was checked
+- [ ] Prose length was computed in characters (excluding code/tables/headings)
+- [ ] Table presence was checked (and a Mermaid diagram noted as a bonus if present)
 - [ ] Each positive criterion (P1–P7) was evaluated with a Yes/No + evidence
 - [ ] Each negative criterion (N1–N4) was checked
 - [ ] For a feature README, the required sections were read from `docs/templates/feature-readme.md` and each was graded present / thin / missing

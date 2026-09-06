@@ -22,7 +22,7 @@
 | 24 | スクロール復元はルーティング既定を尊重する。modal / drawer は body scroll を適切に lock し、アニメーションだけのために全体へ `scroll-behavior` を強制しない。 | interaction テストと手動確認。 | — |
 | 26 | clipboard 操作には成功・失敗のフィードバックを付け、権限拒否や非対応環境のフォールバックを表示する。 | feature テスト。 | — |
 | 29 | 画面は viewport を明示し、safe area、十分なタッチターゲット、hover 非依存を満たす。 | a11y lint、Storybook、手動確認。 | [ADR 0044](adr/0044-seo-metadata-strategy.md) |
-| 33 | アイコンは `src/components/` の方針に従い、原則 lucide-react を使う。自作 SVG は `currentColor` を継承し、配置と用途を明示する。 | P3-8 の component review。 | [ADR 0052](adr/0052-ui-component-policy.md) |
+| 33 | アイコンは `src/components/icon.ts` から取る。供給元を直接 import しない。自作 SVG は `currentColor` を継承し、配置と用途を明示する。 | P3-8 の component review。 | [ADR 0052](adr/0052-ui-component-policy.md) |
 | 34 | Tailwind class は読みやすいまとまりで記述する。長い class 列は component / variant に分け、`@apply` は使わない。 | Biome formatter と review。 | [ADR 0050](adr/0050-styling-strategy.md) |
 | 35 | component API は意味のある props 名を使う。状態差分は variant、複合的な部品は compound component を検討し、無目的な `...rest` 転送を避ける。 | component テストと review。 | [ADR 0021](adr/0021-frontend-responsibility.md) |
 | 38 | TypeScript は `type` を優先し、`enum` と `namespace` を使わない。`any` と型アサーション (`as`) は全面禁止し、型ガード・`satisfies`・パースで表現する。 | `erasableSyntaxOnly`、Biome `noExplicitAny`、ESLint の型アサーション禁止。 | [ADR 0020](adr/0020-adopted-architecture.md) |

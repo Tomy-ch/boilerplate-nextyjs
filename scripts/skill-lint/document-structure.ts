@@ -78,8 +78,6 @@ export function parseFrontmatterKeys(fmLines: string[]): Map<string, string> {
   return keys;
 }
 
-// name / description の必須検査と配置名（ディレクトリ名 / ファイル名）との一致検査。
-
 export function extractHeadings(content: string): Heading[] {
   const headings: Heading[] = [];
   for (const { line, lineNo } of eachLineOutsideFence(content)) {
@@ -88,6 +86,3 @@ export function extractHeadings(content: string): Heading[] {
   }
   return headings;
 }
-
-// 対訳（SKILL.ja.md）が canonical（SKILL.md）と 1:1 であることを検査する。
-// ファイルの有無だけでは節の欠落・ずれを検出できないため、見出しレベル列の一致まで見る。

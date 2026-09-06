@@ -41,7 +41,7 @@ client island です。scroll 位置の観測と要素の寸法変化の検出�
 
 registry の `message-scroller` は `@shadcn/react` を前提とするため copy-in せず、この 4 つを自前で実装しています。上流が持つ項目単位の可視判定、scroll anchor、先頭への追加時の位置保持、仮想化のための描画制御は持ちません。
 
-vendor 依存はありません。アイコンに `lucide-react`、操作に `Button` を使います。
+vendor 依存はありません。アイコンは `components` の [`icon.ts`](../../../icon.ts)、操作に `Button` を使います。
 
 ## Storybook とテスト
 

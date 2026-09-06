@@ -78,19 +78,37 @@ export function planReleaseBranch(input: {
       runStep("pnpm", ["install", "--frozen-lockfile", "--ignore-scripts"]),
       // 版はここで焼き込む。切った時点がその版を決めた時点であり、後から気づく機会は無い ——
       // production へ入ってしまえば、出荷した版と `package.json` が名乗る版がずれたまま残る。
-      // **書き換えが起きたときだけコミットする判断は、焼き込む側が持つ。**ここで無条件に
-      // コミットすると、既に名乗りどおりだったときにステージが空のまま `git commit` が落ち、
-      // 手順が push の手前で止まる（タグを打つ前に 2 本目を切ると実際に起きる）。
+      // コミットを作るかどうかは焼き込む側が決める（`.makefiles/README.md` の「版の焼き込み関連」）。
       runStep("make", ["version-stamp-commit", `REF=${branchName}`]),
       // push も `--no-verify`。押すのは production が全ゲートを通過した木と、その上へブランチ名
-      // から導いた 1 行だけで、フックを回しても新しい情報は出ず、テスト一式の実行時間だけが乗る。
-      // 版が名乗りどおりかは、押した先で CI が同じ規則から導き直して見る。
+      // から導いた 1 行だけ。bypass の可否は [0151](../../docs/adr/0151-git-hooks.md) に従う。
       runStep("git", ["push", "--no-verify", "origin", branchName]),
       logStep(`⚙️ GitHub上のデフォルトブランチを ${branchName} に設定します。`),
       runStep("gh", ["repo", "edit", "--default-branch", branchName]),
       logStep(`✅ デフォルトブランチを ${branchName} に切り替えて、プッシュしました。`),
     ],
   };
+}
+
+/** 基準画像ストアを取り込んでいる位置。 */
+const BASELINE_STORE_PATH = "baseline/images";
+
+/**
+ * 汚れがストアの指し先のずれだけか。
+ *
+ * @remarks
+ * **ここを分けないと、案内が嘘になります。** ずれは撮り直しでポインタが進んだ後に実体が
+ * 追いつかないと起き、`git status` には他の変更と同じ顔で出ます。案内どおり commit すると
+ * **間違った基準画像の指し先を保護ブランチへ載せる**ことになり、押した後では取り消せません。
+ */
+function isOnlyBaselinePointer(workTreeStatus: string): boolean {
+  const paths = workTreeStatus
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "")
+    .map((line) => line.slice(line.indexOf(" ") + 1).trim());
+
+  return paths.length > 0 && paths.every((path) => path === BASELINE_STORE_PATH);
 }
 
 /**
@@ -113,6 +131,15 @@ export function branchCreationBlocker(input: {
   }
 
   if (input.workTreeStatus.trim() !== "") {
+    if (isOnlyBaselinePointer(input.workTreeStatus)) {
+      return [
+        logStep(
+          `❌ ${BASELINE_STORE_PATH} の実体が、いま居るブランチの指す版とずれています。` +
+            `git submodule update --init ${BASELINE_STORE_PATH} で合わせてから再実行してください。`,
+        ),
+      ];
+    }
+
     return [
       logStep(
         "❌ 作業ツリーに未コミットの変更があります。変更をコミットまたは退避してから再実行してください。",

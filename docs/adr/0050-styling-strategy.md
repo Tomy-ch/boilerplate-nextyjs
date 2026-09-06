@@ -72,6 +72,6 @@ Accepted
 - [0027-directory-structure.md](0027-directory-structure.md) — スタイルの co-location 方針(`globals.css` 集約 / ユーティリティ既定 / `*.module.css` の局所化)
 - [0004-library-management.md](0004-library-management.md) — `cn()` 実装ライブラリ等の採用フロー(exact pin / audit)。CSS Modules 自体は標準機能のため追加 pin は生じない
 - [0051-styling-system.md](0051-styling-system.md) — 本 ADR が定めた器の中身(デザイントークン体系 / レスポンシブ / モーション / 印刷)。token の SSOT と semantic 層の規律は 0051 側が持つ
-- [0052-ui-component-policy.md](0052-ui-component-policy.md)(B2)— UI ライブラリ(shadcn/ui + lucide)採用(本 ADR の Tailwind 主軸と接続)
+- [0052-ui-component-policy.md](0052-ui-component-policy.md)(B2)— UI ライブラリ(shadcn/ui + Tabler アイコン)採用(本 ADR の Tailwind 主軸と接続)
 - [0060-state-management.md](0060-state-management.md)(B5)— テーマ切替状態の置き場(local state 既定 / 横断状態は `stores`)
 - [master-plan §1.2 採用ロードマップ](../plan/master-plan.md) — v1 バッテリー採用の全体像(CSS Modules のみ限定許可の確定)

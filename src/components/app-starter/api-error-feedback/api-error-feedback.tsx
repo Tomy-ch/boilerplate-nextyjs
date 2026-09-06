@@ -1,6 +1,5 @@
 "use client";
 
-import { CircleXIcon, TriangleAlertIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/design-system/action/button/button";
 import {
@@ -13,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/design-system/overlay/alert-dialog/alert-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/design-system/status/alert/alert";
+import { AlertTriangleIcon, CircleXIcon } from "@/components/icon";
 
 /**
  * {@link ApiErrorAlert} と {@link ApiErrorDialog} が表示できる形へ正規化した API 失敗。
@@ -42,7 +42,7 @@ function getTitle(kind: ApiError["kind"]) {
 
 function ErrorIcon({ kind }: { kind: ApiError["kind"] }) {
   return kind === "client" ? (
-    <TriangleAlertIcon aria-hidden="true" />
+    <AlertTriangleIcon aria-hidden="true" />
   ) : (
     <CircleXIcon aria-hidden="true" />
   );

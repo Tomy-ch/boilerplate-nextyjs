@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { MoreHorizontalIcon } from "lucide-react";
 import { useState } from "react";
+
+import { EllipsisIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import {
@@ -81,7 +82,7 @@ function VisibleEquivalentRow() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button aria-label="項目の操作" size="sm" variant="ghost">
-            <MoreHorizontalIcon aria-hidden="true" />
+            <EllipsisIcon aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

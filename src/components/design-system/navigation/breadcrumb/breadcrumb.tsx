@@ -1,8 +1,8 @@
-import { ChevronRight, MoreHorizontal } from "lucide-react";
 import { Slot } from "radix-ui";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronRightIcon, EllipsisIcon } from "@/components/icon";
 
 /**
  * 現在地までの階層を示す、SSR first の navigation landmark。
@@ -136,7 +136,7 @@ function BreadcrumbSeparator({ children, className, ...props }: ComponentProps<"
       role="presentation"
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? <ChevronRightIcon />}
     </li>
   );
 }
@@ -161,7 +161,7 @@ function BreadcrumbEllipsis({ className, ...props }: ComponentProps<"span">) {
     >
       {/* 隠すのは記号だけ。外側に付けると子孫ごとアクセシビリティツリーから外れ、
           sr-only の文言も一緒に消える。 */}
-      <MoreHorizontal aria-hidden="true" className="size-4" />
+      <EllipsisIcon aria-hidden="true" className="size-4" />
       <span className="sr-only">省略された階層</span>
     </span>
   );

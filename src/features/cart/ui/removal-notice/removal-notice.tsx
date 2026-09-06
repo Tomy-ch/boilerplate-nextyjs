@@ -1,9 +1,9 @@
 "use client";
 
-import { Undo2Icon } from "lucide-react";
 import { useActionState } from "react";
 
 import { Button } from "@/components/design-system/action/button/button";
+import { UndoIcon } from "@/components/icon";
 import { idleActionState } from "@/model/action-state";
 
 import { type CartActionState, setCartItemQuantityAction } from "../../actions";
@@ -56,7 +56,7 @@ export function CartRemovalNotice({ removed }: CartRemovalNoticeProps) {
           type="submit"
           variant="outline"
         >
-          <Undo2Icon aria-hidden="true" className="size-4" />
+          <UndoIcon aria-hidden="true" className="size-4" />
           カートに戻す
         </Button>
       </form>

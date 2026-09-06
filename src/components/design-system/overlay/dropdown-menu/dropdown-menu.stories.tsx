@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { EllipsisIcon } from "lucide-react";
 import { useCallback, useState } from "react";
+
+import { EllipsisIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { Kbd } from "../../display/kbd/kbd";

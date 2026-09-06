@@ -190,7 +190,7 @@ i18n / a11y / パフォーマンス予算 / ブラウザサポート 等、boile
 | 枠 ID | ADR # | タイトル | 選定済み | 実装済み | 依存 | 内容要旨 |
 | --- | --- | --- | --- | --- | --- | --- |
 | **D1** | 0140 | ドキュメント運用ポリシー | ✅ | ⬜ | — | canonical 言語 = EN 目標・移行は v1(0.0.x は日本語 living)/ タクソノミー4分類(decision・exclusion=ADR / rule=rules.md 新設 / inventory=BACKLOG)/ ADR 不可変性(0.0.x living→v1 immutable)/ per-package README |
-| **D2** | 0141 | ポータル運用 | ✅ | ⚠️ | D1 | `docs/portal/manifest.yaml` = 構造制御のみ(curated manual)/ コード README 手動登録・`docs/*` 自動発見 / GitHub Pages 配信 |
+| **D2** | 0141 | ポータル運用 | ✅ | ✅ | D1 | `docs/portal/manifest.yaml` = 構造制御のみ(curated manual)/ コード README 手動登録・`docs/*` 自動発見 / GitHub Pages 配信 |
 | **D3** | 0142 | ライセンス選定 | ✅ | ✅ | — | MIT 採用根拠(最大許容・エコシステム標準・go 統一)/ OSS 寄与 = inbound=outbound・CLA なし / 同梱ライブラリ整合は 0004 / `private:true` は publish ガードで MIT と両立 |
 | **D4** | 0152 | AGENTS.md 構成方針 | ✅ | ✅ | D1 | ファイル配置 / 本文言語 / 節構成 / Instruction Priority / `## [TODO]` セクション運用 |
 | **D5** | 0154 | Claude スキル運用方針 (運用系) | ✅ | ✅ | D4, G1, G2, T3, T4 | 配置・命名・frontmatter / 本文構造 / カバー範囲 / 商用操作前ユーザ確認 |
@@ -199,7 +199,7 @@ i18n / a11y / パフォーマンス予算 / ブラウザサポート 等、boile
 ### Tier 6 の de facto 状態
 
 - **D1(ADR 0140 として策定済み・実装未)**: 2026-07-13 に決定 5 バッチとして成文化([ADR 0140](0140-documentation-operations.md))。canonical 言語 = **EN 目標・移行は v1**〈ユーザ決定・v1.0.0 未満は日本語 canonical のまま living〉/ タクソノミー4分類 / **`rules.md` 新設 + AGENTS.md rule 段階移行**〈0152 整合はユーザ承認要〉/ ADR 不可変性 = v1.0.0 未満 living→v1 immutable〈go モデル翻案〉/ per-package README。`rules.md` は新設済みで、EN canonical 化は v1 で行う
-- **D2(ADR 0141・実装 ⚠️)**: `docs/portal/manifest.yaml` によるキュレーション、`scripts/portal/` の生成(判断は純粋関数・FS 入出力は CLI)、独立 workspace の `docs-viewer/`、GitHub Pages への配信 workflow を実装済み。`portal-manifest-sync` スキルも移植済みで、判定基準は `readme-review` を実行時に読む。**残るのは `github-pages` environment の deployment branch policy に配信元ブランチを許可すること**(リポジトリ設定のためユーザが実施)。許可が無い間、`docs-deploy` は step を 1 つも実行せずに落ちるため、配信の緑赤は `deploy-docs.yaml` の結果で見る
+- **D2(ADR 0141・実装 ✅)**: `docs/portal/manifest.yaml` によるキュレーション、`scripts/portal/` の生成(判断は純粋関数・FS 入出力は CLI)、独立 workspace の `docs-viewer/`、GitHub Pages への配信 workflow を実装済み。`portal-manifest-sync` スキルも移植済みで、判定基準は `readme-review` を実行時に読む。配信先の設定(Pages を Actions 配信にし、`github-pages` environment へ配信元ブランチを許可する)は `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ。**許可が無いと `docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない** —— `docs-build` は緑のままなので、配信の緑赤は `deploy-docs.yaml` の `docs-deploy` の結果で見る
 - **D3(ADR 0142 として策定済み)**: 2026-07-13 に成文化([ADR 0142](0142-license.md))。MIT 採用根拠(最大許容・エコシステム標準・go-boilerplate と統一・低儀式性)/ OSS 寄与 = **inbound=outbound・CLA なし**(DCO は必要時 `CONTRIBUTING.md`)/ 同梱ライブラリのライセンス整合は [0004](0004-library-management.md) 許可リストが担保 / `package.json` の `private:true` は npm publish ガードで MIT と別レイヤ・両立。**follow-up: `package.json` に `"license": "MIT"` 追加はルート設定保護のためユーザ指示待ち**
 - **D6 ⚠️**: 開発系 5 件は A7 ([0030](0030-environment-variable-management.md)) の構造へ揃済。`new-env` は `src/config/` の目的別 config モジュールを対象とするが、`src/config/` の着地は A7 実装 PR (v1 計画 P3-3) のため、それまで実行不可 (スキル側がガードして停止する)
 

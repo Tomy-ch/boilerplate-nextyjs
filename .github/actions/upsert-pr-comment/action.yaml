@@ -13,14 +13,13 @@ inputs:
     default: ""
     description: >-
       呼び出し元の判定。`success` だけがコメントの新規作成を抑止し、それ以外の値 —— 空文字を含む
-      —— は投稿する。空文字を投稿側へ倒すのは、判定を書けなかったジョブが打ち切られたジョブと
-      区別できないため。既存コメントの更新は `success` でも行う（FAIL → PASS の直しで古い赤が
+      —— は投稿する。既存コメントの更新は `success` でも行う（FAIL → PASS の直しで古い赤が
       残らない）
   body-file:
     required: true
     description: >-
-      コメント本文として読むファイルのパス。存在しない場合は失敗させず、打ち切られたジョブとして
-      報告する
+      コメント本文として読むファイルのパス。存在しない場合はジョブが打ち切られたことを意味し、
+      失敗も投稿もせずに戻る
   title:
     required: false
     default: ""
@@ -84,16 +83,19 @@ runs:
             return;
           }
           // 本文が無いことは、このステップの失敗ではなく**ジョブが打ち切られたこと**を意味する。
-          // 打ち切られたジョブは本文を書くステップまで到達しない。ここで失敗させると、打ち切りの
-          // report が投稿されないまま投稿ステップだけが赤くなり、PR には何も残らない。
-          const cutOff = !fs.existsSync(bodyFile);
-          if (cutOff) {
-            core.warning(`${bodyFile} not found; reporting the job as cut off`);
+          // 打ち切られたジョブは本文を書くステップまで到達しない。ここで失敗させると、投稿ステップ
+          // だけが赤くなる。
+          //
+          // **何も投稿せずに戻る。**打ち切られたことはチェック一覧が既に示しており、コメントは
+          // それを言い換えるだけである。加えて費用の形が悪い —— 打ち切りは判定を持たないため
+          // 下の抑止を通り抜けて必ず書き込みを起こし、それが出る状況（ジョブの中断）は push が
+          // 連続している状況と重なる。API の枠が一番苦しいときに消費が跳ねることになる。
+          if (!fs.existsSync(bodyFile)) {
+            core.warning(`${bodyFile} not found; the job was cut off. Nothing to post.`);
+            return;
           }
 
-          let content = cutOff
-            ? `結果が出ていません: ジョブが \`${bodyFile}\` を書くステップまで到達しませんでした。どこまで進んだかは実行ログを参照してください。`
-            : fs.readFileSync(bodyFile, 'utf8').trimEnd();
+          let content = fs.readFileSync(bodyFile, 'utf8').trimEnd();
           if (content.length > maxLength) {
             content = content.slice(0, maxLength) + '\n... (truncated)';
           }
@@ -135,21 +137,18 @@ runs:
           // 呼び出し元が値を濾してから組み立てた本文は、表なら表として読めたほうがよい
           // （0153 §5 の「許可した集合は markup も mention も作れない」）。濾していない本文は、
           // 折り畳もうと折り畳むまいと囲む。
-          // 打ち切りの本文はこのアクションが書いたものなので、囲む相手が居ない。折り畳みも外す
-          // —— 折り畳んだ先にあるのが「結果が無い」の 1 行では、開くまで何も分からない。
-          const rendered = (bodySanitized || cutOff)
+          const rendered = bodySanitized
             ? content
             : [fenceFor(content), content, fenceFor(content)].join('\n');
-          const summary = cutOff ? '' : detailsSummary;
-          const main = summary
-            ? [`<details><summary>${summary}</summary>`, '', rendered, '', '</details>'].join('\n')
+          const main = detailsSummary
+            ? [`<details><summary>${detailsSummary}</summary>`, '', rendered, '', '</details>'].join('\n')
             : rendered;
 
           // 添える散文はフェンスへ入れない。フェンスの中身は Markdown として描画されないので、
           // 表も、コピーさせたいコマンドのブロックも、そこでは字面のまま出てしまう。
           // 入れてよいのはワークフローが書いた文だけである — 呼び出し元が本文と分けて渡す。
           let notes = '';
-          if (notesFile && !cutOff) {
+          if (notesFile) {
             if (!fs.existsSync(notesFile)) {
               core.setFailed(`${notesFile} not found`);
               return;
@@ -157,10 +156,7 @@ runs:
             notes = fs.readFileSync(notesFile, 'utf8').trimEnd();
           }
 
-          // 打ち切りの見出しは呼び出し元の `title` を置き換える。「結果が出ていない」と述べる本文に
-          // 検査の判定を名乗る見出しは付けられない。原因は名乗らない —— timeout と手前の失敗を
-          // 区別できるのは実行ログだけである。
-          const heading = cutOff ? '## ⚠️ CUT OFF (結果が出ていません)' : title;
+          const heading = title;
 
           const parts = [marker];
           if (heading) parts.push(heading, '');
@@ -187,34 +183,12 @@ runs:
           );
 
           // `success` が抑止するのは**新規作成だけ**で、更新は抑止しない。直した PR が自分の赤い
-          // コメントをその場で上書きできなくなるためである。判定を持たない打ち切りは常に投稿する。
-          const quiet = !cutOff && status === 'success';
+          // コメントをその場で上書きできなくなるためである。
+          const quiet = status === 'success';
 
           if (!existing && quiet) {
             core.info(`status=success and no existing ${marker} comment; nothing to post`);
             return;
-          }
-
-          // 上書きではなく削除する唯一のコメント。打ち切りは判定を記録していないので、後から来た
-          // 成功はそれを「上書きする」のではなく「答える」ことになる。見出しで同定するのは、本文を
-          // 書いている途中で打ち切られた実行がファイルを残しうるため。削除が拒まれたら上書きへ倒す。
-          const headingLine = (existing?.body || '').split('\n')[1] || '';
-          const staleCutOff = quiet
-            && headingLine.startsWith('## ')
-            && headingLine.includes('CUT OFF');
-
-          if (existing && staleCutOff) {
-            try {
-              await github.rest.issues.deleteComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-              });
-              core.info(`removed the stale cut-off ${marker} comment`);
-              return;
-            } catch (error) {
-              core.warning(`could not delete the stale cut-off comment (${error.message}); updating it instead`);
-            }
           }
 
           if (existing) {

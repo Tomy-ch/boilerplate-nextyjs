@@ -10,8 +10,7 @@ packages:
 # pnpm は semver 種別ごとの冷却期間を設定できないため、minor の7日を一律下限にする。
 minimumReleaseAge: 10080
 # 緊急のセキュリティ修正は、影響を受ける特定バージョンだけを一時的に例外化する。(パッケージ名だけの例外は禁止)
-minimumReleaseAgeExclude:
-  - conventional-commits-parser@7.1.1 # 2026-08-02 20:34 JST 以降に削除する。@commitlint の開発時依存であり、既知脆弱性なしを確認済み。
+minimumReleaseAgeExclude: []
 # 冷却期間を満たす版がなければ解決を失敗させる。
 minimumReleaseAgeStrict: true
 # 公開日時を返さないレジストリの依存は解決を失敗させる。

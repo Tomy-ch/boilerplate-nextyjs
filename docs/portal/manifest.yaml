@@ -84,3 +84,9 @@ operations:
     dst: docs/portal/guides/tokens.md
   - src: docs-viewer/README.md
     dst: docs/portal/guides/docs-viewer.md
+  - src: vrt/README.md
+    dst: docs/portal/guides/vrt.md
+  - src: e2e/README.md
+    dst: docs/portal/guides/e2e.md
+  - src: mocks/README.md
+    dst: docs/portal/guides/mocks.md

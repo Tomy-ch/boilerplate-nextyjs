@@ -165,6 +165,15 @@ export const ENTRY_POINTS = [
  *   ここへ降りてくる経路になります。受け口の本体を隣のモジュールへ薄く出す形（`app` 内の相互参照）
  *   は残ります
  *
+ * - `app-server-action`: `"use server"` の変更口。action id を知る者は任意の route から呼べるため、
+ *   **主体の断言をここで行う**公開の口です（[0025](docs/adr/0025-app-layer-elements.md)）。持てるのは
+ *   `adapters/server` と feature、`model` / `errors` / `logging` だけなので、UI 部品・横断状態と
+ *   `observability` を落とします —— 計装の mount は `route-segment` の名指しの例外であって、変更の口が
+ *   span を立てる場所ではありません（[0021](docs/adr/0021-frontend-responsibility.md)）。**`config` は
+ *   落としていません**: [0025](docs/adr/0025-app-layer-elements.md) が禁じるのは server config の直読で、
+ *   `actions.ts` が読んでいるのは `NEXT_PUBLIC` の公開定数です。層の粒度ではその 2 つを分けられないため、
+ *   扱いは [BACKLOG](docs/adr/BACKLOG.md) の GB-1 が持ちます
+ *
  * - `app-metadata`: クローラと共有先が読む配信物（[0044](docs/adr/0044-seo-metadata-strategy.md)）。
  *   `config`（外から見た origin・索引の可否）と `model`（保護している経路の宣言）を読み、要求時に
  *   一覧を辿る `sitemap.ts` だけが `adapters/server` と feature の `facade/` へ届きます
@@ -172,12 +181,11 @@ export const ENTRY_POINTS = [
  *   文書 1 つで、画面ではないためです。判定を持つ `sitemap.ts` / `robots.ts` は `unit` で検証し、
  *   絵を返すだけの 3 つは判定を持たないので単体では回しません（`scripts/lib/untested-modules.ts`）
  *
- * `route-segment` / `server-action` はまだこの表に無く、`app` の粒度で検査されます。**したがって
- * `observability` は、[0021](docs/adr/0021-frontend-responsibility.md) が `route-segment` の計装 mount
- * だけに許した口であるにもかかわらず、`server-action` からも届きます。**ここで塞げるのは `route.ts`
- * だけで、残りは意味的な監査と人のレビューが拾います。表を実態へ揃える作業は
- * [BACKLOG](docs/adr/BACKLOG.md) の GB-1 が持ちます —— `server-action` を宣言するには、既に
- * `config` を読んでいる `actions.ts` をどう扱うかを先に決める必要があり、この 1 行では済みません。
+ * `route-segment` はまだこの表に無く、`app` の粒度で検査されます。`observability` も `config` も、
+ * [0021](docs/adr/0021-frontend-responsibility.md) が許したのは計装の mount と Next.js の規約が
+ * route segment に置くことを要求する値だけですが、その限定は「何を import してよいか」ではなく
+ * 「どう使ってよいか」なので、層の許可を削る形では表せません。残りは意味的な監査と人のレビューが
+ * 拾います。表を実態へ揃える作業は [BACKLOG](docs/adr/BACKLOG.md) の GB-1 が持ちます。
  *
  * `testRequirement` をここが持つのは、負う観点を決めるのが**置き場ではなく element** だからです。
  * ディレクトリから遡る README は、`api/` の外に置いた Route Handler へ届きません。対象のテストは
@@ -189,6 +197,12 @@ export const APP_ELEMENTS = [
     patterns: ["src/app/**/route.ts", "src/app/**/route.dev.ts"],
     forbidden: ["components", "capabilities", "stores", "config", "features", "observability"],
     testRequirement: "integration",
+  },
+  {
+    category: "app-server-action",
+    patterns: ["src/app/**/actions.ts"],
+    forbidden: ["components", "capabilities", "stores", "observability"],
+    testRequirement: "route",
   },
   {
     category: "app-metadata",

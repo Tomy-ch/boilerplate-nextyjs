@@ -237,6 +237,19 @@
       "Write(.claude/settings.json)"
     ]
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" --hook || true"
+          }
+        ]
+      }
+    ]
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {

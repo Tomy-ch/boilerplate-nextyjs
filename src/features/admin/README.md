@@ -2,6 +2,11 @@
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
 forbidden: [features] # 画面まるごとの story は例外 (ADR 0021)
 test-requirement: feature
+coverage-exclusions:
+  - "src/features/admin/analytics/analytics.fixture.ts"
+  - "src/features/admin/products/products.fixture.ts"
+  - "src/features/admin/products/list/list.fixture.ts"
+  - "src/features/admin/users/users.fixture.ts"
 ---
 
 # admin

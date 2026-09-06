@@ -127,6 +127,10 @@ const TEST_FIXTURE_MODULES = [
   "src/features/account/account.fixture.ts", // sample:line
   "src/features/cart/cart.fixture.ts", // sample:line
   "src/features/checkout/checkout.fixture.ts", // sample:line
+  "src/features/admin/analytics/analytics.fixture.ts", // sample:line
+  "src/features/admin/products/products.fixture.ts", // sample:line
+  "src/features/admin/products/list/list.fixture.ts", // sample:line
+  "src/features/admin/users/users.fixture.ts", // sample:line
 ] as const;
 
 /**

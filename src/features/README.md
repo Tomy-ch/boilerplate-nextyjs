@@ -83,9 +83,8 @@ export const XxxPageContent = withScreenSpan(
 しか通らないので、部品が表せる残りの状態（帯ごとの幅・契約上の最大長・送信中・拒まれた結果）は
 そこに現れない。
 
-story を持てないのは**ブラウザで描けない部品だけ**である。server でしか成立しない取得を中に持つもの
-（[`cart/ui/shell-slots`](cart/ui/shell-slots/shell-slots.tsx)）がそれで、持てない理由と、中身が
-どこで見られるかを本体の doc に書く。
+story を持てないのは**ブラウザで描けない部品だけ**である。`server-only` を辿る取得を中に持つ
+async な合成がそれにあたる。持てない理由と、中身がどこで見られるかを本体の doc に書く。
 
 - **`title` の体系は [`components/README.md`](../components/README.md) が持つ。** ADR 0054 が所有者をそこ 1 か所に定めているので、ここには写さない
 - **`@see Storybook` は自分の story を指す。** 画面の story を指していると、その部品を直す人が

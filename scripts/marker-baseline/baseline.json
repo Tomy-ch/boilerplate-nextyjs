@@ -31,7 +31,7 @@
   "performance-budget.yaml": 11,
   "scripts/README.md": 2,
   "scripts/e2e-routes.gate.test.ts": 2,
-  "scripts/lib/untested-modules.ts": 11,
+  "scripts/lib/untested-modules.ts": 15,
   "scripts/setup/lib/markers.test.ts": 11,
   "src/adapters/README.md": 2,
   "src/adapters/server/auth/resolver.test.ts": 3,

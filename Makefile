@@ -13,6 +13,7 @@ include .makefiles/github/lint/actionlint.mk
 include .makefiles/github/lint/actions-shellcheck.mk
 include .makefiles/github/lint/actions-comment-secret-lint.mk
 include .makefiles/github/lint/actions-mise-pin-lint.mk
+include .makefiles/github/lint/issue-field-lint.mk
 include .makefiles/github/lint/actions-required-check-lint.mk
 include .makefiles/github/lint/actions-zizmor.mk
 include .makefiles/github/lint/shellcheck.mk

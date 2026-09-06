@@ -14,10 +14,3 @@ reason = "image-size の ICNS パーサが無限ループする。修正版が�
 id = "GHSA-5p2g-fcmc-qvqq"
 reason = "同上（JXL / HEIF パーサ）。同じ依存・同じ経路・同じ撤去条件。"
 
-[[IgnoredVulns]]
-id = "GHSA-4mjr-xmp4-gh2g"
-reason = "qs の配列・オブジェクトの解析が入力長に対して伸びる。修正版 6.16.0 は在るが、2026-08-29 公開で pnpm-workspace.yaml の冷却期間（7 日）の内側にあり、こちらの供給網の検疫が先に止めている。経路は shadcn CLI > @modelcontextprotocol/sdk > express > body-parser > qs で、開発時の CLI にしか現れず配信物にもテストの実行にも入らない。冷却が明ける 2026-09-05 以降、または依存更新で 6.16.0 以上へ上がった時点で削除する。"
-
-[[IgnoredVulns]]
-id = "GHSA-x5fp-wj9c-mxmx"
-reason = "同上（qs の同じ解析経路）。同じ依存・同じ経路・同じ撤去条件。"

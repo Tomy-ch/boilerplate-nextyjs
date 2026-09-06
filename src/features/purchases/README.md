@@ -2,6 +2,8 @@
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
 forbidden: [features] # 相方の facade/ と、画面まるごとの story は例外 (ADR 0021)
 test-requirement: feature
+coverage-exclusions:
+  - "src/features/purchases/__mocks__/**"
 ---
 
 # purchases
@@ -74,6 +76,7 @@ test-requirement: feature
 | `purchases.fixture.ts` | story とテストが使う固定の購入 |
 | `facade/purchase.fixture.ts` | `facade/` の 3 つと、それを借りる `checkout` が読む固定値 |
 | `actions.ts` | 状態を進める送信。契約の遷移を呼び、競合だけ言い分ける |
+| `__mocks__/actions.ts` | カタログでの Server Action の差し替え（[0054](../../../docs/adr/0054-ui-catalog-storybook.md)） |
 | `form-names.ts` | 送信が持つ項目の名前 |
 | `form-state.ts` | 送信の結果の器と、状況で拒まれたときの文言 |
 | `history/query.ts` | 画面が受け取る素の条件と、ページ送りの寸法（件数・カーソルのキー） |

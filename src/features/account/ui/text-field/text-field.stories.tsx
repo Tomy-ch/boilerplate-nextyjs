@@ -21,9 +21,9 @@ const meta = {
     docs: {
       description: {
         component: [
-          "登録情報の 1 行入力です。`useProfileFields` が組んだ props を、そのまま `FormField` と",
-          "`Input` へ配るだけの薄い項目です —— 検証も配線もここは持ちません。必須の印・補足・誤りの",
-          "文言の置き場は `FormField` が決めます。",
+          "登録情報の 1 行入力です。`useProfileFields` が組んだ props をそのまま `FormField` と `Input` へ配るだけで、",
+          "検証も配線もここは持ちません。",
+          "必須の印・補足・誤りの文言の置き場は `FormField` が決めます。",
         ].join(""),
       },
     },

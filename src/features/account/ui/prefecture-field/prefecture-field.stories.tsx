@@ -22,9 +22,8 @@ const meta = {
     docs: {
       description: {
         component: [
-          "都道府県の項目です。**検索つきの client island を使いません** —— 契約が全 47 件を固定で返す",
-          "静的な候補なので、持ち込む理由がありません。入力欄が `SelectNative` になるだけで、",
-          "`TextField` と配線の規則は変わりません。",
+          "都道府県の項目です。**native の `select`** で、検索つきの client island は使いません（契約が全 47 件を固定で返すため）。",
+          "入力欄が変わるだけで、`Features/Account/TextField` と配線の規則は同じです。",
         ].join(""),
       },
     },

@@ -63,8 +63,7 @@ jobs:
       pull-requests: write
       actions: read
 
-    # The app id is not a secret, and a step's `if` cannot read the `secrets` context —
-    # only `env`. This is what lets the mint stand down on a fork that has no app.
+    # A step's `if` cannot read `secrets`, only `env`. The app id is not a secret.
     env:
       BASELINE_APP_ID: ${{ secrets.BASELINE_APP_ID }}
 

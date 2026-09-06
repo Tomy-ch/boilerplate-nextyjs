@@ -36,8 +36,7 @@ jobs:
       contents: read
       issues: write
 
-    # The app id is not a secret, and a step's `if` cannot read the `secrets` context —
-    # only `env`. This is what lets the mint stand down on a fork that has no app.
+    # A step's `if` cannot read `secrets`, only `env`. The app id is not a secret.
     env:
       BASELINE_APP_ID: ${{ secrets.BASELINE_APP_ID }}
 
@@ -81,12 +80,8 @@ jobs:
           SUPPRESSION_REPORT: /tmp/suppression-expiry.md
         run: make suppression-expiry
 
-      # One issue for the subject, commented on while it stays open. A fresh issue each
-      # week would bury the thread where the decision to keep or drop was argued.
-      # Opening the issue runs on an app installation token rather than `GITHUB_TOKEN`,
-      # whose 1,000 requests per hour are shared across every workflow and every open
-      # pull request in this repository. A fork without the app falls back and still
-      # opens the issue; it just draws on the smaller budget.
+      # Minted rather than using `GITHUB_TOKEN` for its rate limit; falls back when the app
+      # is absent (README § PR コメント).
       - name: Mint a token for the issue
         id: api-token
         if: env.BASELINE_APP_ID != ''
@@ -98,6 +93,8 @@ jobs:
           permission-issues: write
           permission-contents: read
 
+      # One issue for the subject, commented on while it stays open. A fresh issue each
+      # week would bury the thread where the decision to keep or drop was argued.
       - name: Raise it where it has an owner
         if: ${{ steps.expiry.outcome == 'failure' }}
         uses: ./.github/actions/upsert-issue

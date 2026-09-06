@@ -80,7 +80,6 @@ describe("UnsavedChangesGuard", () => {
 });
 
 describe("useUnsavedChanges", () => {
-  // ----- 正常系 -----
   it("書きかけがあることを器へ申告する", () => {
     render(
       <UnsavedChangesGuard>
@@ -109,7 +108,6 @@ describe("useUnsavedChanges", () => {
     expect(guard.when).toBe(false);
   });
 
-  // ----- 異常系 -----
   it("器の外で申告されても壊れない", () => {
     expect(() => render(<Declaring hasUnsavedChanges={true} />)).not.toThrow();
     expect(screen.getByText("画面")).toBeInTheDocument();

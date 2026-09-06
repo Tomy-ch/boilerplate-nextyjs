@@ -31,6 +31,12 @@ describe("RangeDialog", () => {
     );
   });
 
+  it("いまこの期間で見ていなければ引き金に aria-current を付けない", () => {
+    render(<RangeDialog selected={false} />);
+
+    expect(screen.getByRole("button", { name: "期間を指定" })).not.toHaveAttribute("aria-current");
+  });
+
   // ----- 開いているとき -----
   it("両端の入力欄が出る", async () => {
     render(<RangeDialog selected={false} />);

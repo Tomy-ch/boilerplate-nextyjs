@@ -206,6 +206,22 @@ describe("DevSessionForm", () => {
     for (const label of ["誰として入るか", "失効までの秒数", "Access Token（任意）"]) {
       expect(screen.getByLabelText(label)).toHaveAttribute("aria-invalid", "true");
     }
+
+    expect(screen.queryByText("session を発行できませんでした")).not.toBeInTheDocument();
+  });
+
+  it("認可の理由も送信の理由も無ければ、送信の下に何も出さない", () => {
+    render(
+      <DevSessionForm
+        action={issue}
+        authorization={{ state: "tx-state", notice: null }}
+        connectsLiveApi={false}
+        defaultIssuer="https://idp.example.test"
+        returnUrl="/"
+      />,
+    );
+
+    expect(screen.queryByText("session を発行できませんでした")).not.toBeInTheDocument();
   });
 
   it("実物の API へ繋ぐとき、接続先の理由もその欄の隣に出す", async () => {

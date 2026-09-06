@@ -44,7 +44,8 @@ const meta = {
           "読み進められる商品の一覧です。**取得と見た目をつなぐだけ**で、見た目は `LoadMoreList` が、",
           "取得と末尾到達の検知は `useInfiniteProducts` が持ちます。分けてあるのは、見え方の確認に取得を",
           "必要としないようにするためです（見た目そのものは `Features/Products/List/LoadMoreList` で",
-          "全状態を見られます）。",
+          "全状態を見られます）。**canvas では一覧が短く末尾の目印が最初から見えている**ため、開いた時点で",
+          "続きを取りに行きます。返すのはカタログ自身で、届く続きは 1 度きりです。",
         ].join(""),
       },
     },
@@ -55,10 +56,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** 続きがある状態。末尾へ届くと自分で取りに行く。 */
+/** 開いた直後。末尾の目印が見えているので、その場で続きを取りに行き、届いた分まで並ぶ。 */
 export const Default: Story = {};
 
-/** 最後まで読み終えた状態。続きが無いので取りに行かない。 */
+/** 最初から続きが無い状態。取りに行かないので、渡された分だけが並ぶ。 */
 export const ReachedEnd: Story = {
   args: { initial: { items: ITEMS, nextCursor: null } },
 };

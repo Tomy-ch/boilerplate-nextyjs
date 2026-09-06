@@ -103,6 +103,16 @@ describe("ProductGallery", () => {
     expect(third).toHaveAttribute("loading", "lazy");
   });
 
+  it("紙には先頭の 1 枚だけを残す", () => {
+    render(<ProductGallery imageUrls={THREE_IMAGE_URLS} productName={PRODUCT_NAME} />);
+
+    const [first, second, third] = screen.getAllByRole("group");
+
+    expect(first).not.toHaveClass("print-hidden");
+    expect(second).toHaveClass("print-hidden");
+    expect(third).toHaveClass("print-hidden");
+  });
+
   it("実画像には拡大する操作を出す", () => {
     render(<ProductGallery imageUrls={IMAGE_URLS} productName={PRODUCT_NAME} />);
 

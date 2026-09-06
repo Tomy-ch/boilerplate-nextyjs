@@ -3,7 +3,9 @@ import type { RequestHandler } from "msw";
 // sample:replace-begin
 import { HttpResponse, http } from "msw";
 import { ADDRESS_CANDIDATES, SINGLE_ADDRESS_CANDIDATE } from "@/features/account/account.fixture";
+import { LOADED_ENTRIES } from "@/features/purchases/purchases.fixture";
 import type { AddressCandidate } from "@/model/user/user";
+import { SAMPLE_ITEM_URLS } from "../lib/sample-asset";
 
 /**
  * カタログで引ける郵便番号。
@@ -30,6 +32,27 @@ const UNAVAILABLE_POSTAL_CODE = "000-0000";
 
 /** 確定前の条件で数えた件数。どの条件でも同じ数を返す。 */
 const FILTERED_COUNT = 42;
+
+/**
+ * 読み進めた先で届く一覧。
+ *
+ * @remarks
+ * **続きを持たせません**（`nextCursor` は `null`）。カタログの一覧は 4〜5 件しか置かないので
+ * 末尾の目印が最初から見えており、続きを持たせると届いた先でまた末尾が見えて、際限なく取りに
+ * 行きます。DOM が静止しないので基準画像も撮れません。
+ */
+const NEXT_PRODUCT_PAGE = Array.from({ length: 4 }, (_, index) => ({
+  id: `0195f0c2-0000-7000-8000-0000002000${String(index).padStart(2, "0")}`,
+  name: `続きの商品 ${index + 1}`,
+  price: "24.00",
+  quantity: 6,
+  categoryName: "アクセサリ",
+  statusName: "公開",
+  imageUrl: index % 2 === 0 ? SAMPLE_ITEM_URLS[1] : null,
+}));
+
+/** 読み進めた先で届く購入履歴。続きを持たせない理由は {@link NEXT_PRODUCT_PAGE} と同じ。 */
+const NEXT_PURCHASE_PAGE = LOADED_ENTRIES.slice(4, 8);
 // sample:replace-with
 // sample:replace-end
 
@@ -53,6 +76,12 @@ export const handlers: readonly RequestHandler[] = [
     });
   }),
   http.get("/api/products/count", () => HttpResponse.json({ count: FILTERED_COUNT })),
+  http.get("/api/products", () =>
+    HttpResponse.json({ items: NEXT_PRODUCT_PAGE, nextCursor: null }),
+  ),
+  http.get("/api/purchases", () =>
+    HttpResponse.json({ items: NEXT_PURCHASE_PAGE, nextCursor: null }),
+  ),
 ];
 // sample:replace-with
 // = export const handlers: readonly RequestHandler[] = [];

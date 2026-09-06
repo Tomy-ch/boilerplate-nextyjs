@@ -104,6 +104,19 @@ describe("AddToCartButton", () => {
     expect(screen.queryByText("カートに追加できませんでした")).not.toBeInTheDocument();
   });
 
+  it("失敗の理由が無ければ、見出しごと出さない", async () => {
+    const user = userEvent.setup();
+
+    addToCartAction.mockResolvedValue(failedActionState({}));
+
+    render(<AddToCartButton productId={PRODUCT_ID} stockQuantity={3} />);
+    await user.click(screen.getByRole("button", { name: "カートに追加" }));
+
+    await waitFor(() => expect(addToCartAction).toHaveBeenCalled());
+
+    expect(screen.queryByText("カートに追加できませんでした")).not.toBeInTheDocument();
+  });
+
   it("置き場所を渡さないとき、画面の主操作として幅を占める", () => {
     render(<AddToCartButton productId={PRODUCT_ID} stockQuantity={3} />);
 

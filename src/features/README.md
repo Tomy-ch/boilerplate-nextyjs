@@ -77,7 +77,8 @@ export const XxxPageContent = withScreenSpan(
 
 ## カタログに載せる
 
-画面は `Page/`、部品は `Features/` に置く。**`<screen>/ui/**` と `facade/**` の描画する部品は、
+画面は `Page/`、部品は `Features/` に置く（先頭セグメントの決まりは
+[`components/README.md`](../components/README.md)）。**`<screen>/ui/**` と `facade/**` の描画する部品は、
 すべて自分の story を持つ。** 画面の story から届く状態であっても持つ —— 画面は部品を 1 つの姿で
 しか通らないので、部品が表せる残りの状態（帯ごとの幅・契約上の最大長・送信中・拒まれた結果）は
 そこに現れない。
@@ -86,7 +87,7 @@ story を持てないのは**ブラウザで描けない部品だけ**である�
 （[`cart/ui/shell-slots`](cart/ui/shell-slots/shell-slots.tsx)）がそれで、持てない理由と、中身が
 どこで見られるかを本体の doc に書く。
 
-- `title` は `Features/<slice>/<部品名>`。画面ごとに割れている slice は `Features/<slice>/<画面>/<部品名>`
+- **`title` の体系は [`components/README.md`](../components/README.md) が持つ。** ADR 0054 が所有者をそこ 1 か所に定めているので、ここには写さない
 - **`@see Storybook` は自分の story を指す。** 画面の story を指していると、その部品を直す人が
   確かめる先を見つけられない
 - 送信中は解決しない送信先（[`~catalog/lib/pending-action`](../../.storybook/lib/pending-action.ts)）で

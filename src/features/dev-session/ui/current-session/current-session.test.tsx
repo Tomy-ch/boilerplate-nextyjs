@@ -72,6 +72,20 @@ describe("CurrentSession", () => {
     expect(screen.getByText("現在サービスを利用できません。")).toBeVisible();
   });
 
+  it("捨てられなかった理由が無ければ、見出しごと出さない", async () => {
+    const user = userEvent.setup();
+    const silentDiscard: DiscardDevSessionAction = async () => failedActionState({});
+
+    render(<CurrentSession action={silentDiscard} session={SESSION} />);
+    await user.click(screen.getByRole("button", { name: "session を捨てる" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "session を捨てる" })).toBeEnabled(),
+    );
+
+    expect(screen.queryByText("session を捨てられませんでした")).not.toBeInTheDocument();
+  });
+
   it("Access Token を出さない", () => {
     render(<CurrentSession action={discard} session={SESSION} />);
 

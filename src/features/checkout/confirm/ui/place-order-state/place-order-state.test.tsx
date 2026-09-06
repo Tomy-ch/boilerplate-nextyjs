@@ -3,6 +3,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 
 const { placeOrderAction } = vi.hoisted(() => ({ placeOrderAction: vi.fn() }));
 
@@ -95,6 +96,18 @@ describe("PlaceOrderStateProvider", () => {
 
     expect(await screen.findByText("脇:待っている")).toBeVisible();
     expect(screen.getByText("帯:待っている")).toBeVisible();
+  });
+
+  it("a11y 自動検査に違反しない。包んだだけで支援技術への見え方を変えない", async () => {
+    const { container } = render(
+      <PlaceOrderStateProvider idempotencyKey={KEY}>
+        <Consumer name="脇" />
+      </PlaceOrderStateProvider>,
+    );
+
+    expect(
+      (await axe(container, { rules: { "color-contrast": { enabled: false } } })).violations,
+    ).toEqual([]);
   });
 });
 

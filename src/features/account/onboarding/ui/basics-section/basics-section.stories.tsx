@@ -26,7 +26,6 @@ function LiveBasicsSection({
 
 const meta = {
   title: "Features/Account/Onboarding/BasicsSection",
-  component: RegistrationBasicsSection,
   parameters: {
     layout: "padded",
     docs: {
@@ -40,7 +39,7 @@ const meta = {
   },
   render: () => <LiveBasicsSection profile={null} state={idleActionState()} />,
   decorators: [(Story) => <div className="max-w-2xl">{Story()}</div>],
-} satisfies Meta<typeof RegistrationBasicsSection>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

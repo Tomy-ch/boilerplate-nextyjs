@@ -16,7 +16,6 @@ function LiveAddressSection({ profile }: { profile: UserProfile | null }) {
 
 const meta = {
   title: "Features/Account/Onboarding/AddressSection",
-  component: RegistrationAddressSection,
   parameters: {
     layout: "padded",
     docs: {
@@ -30,7 +29,7 @@ const meta = {
   },
   render: () => <LiveAddressSection profile={null} />,
   decorators: [(Story) => <div className="max-w-2xl">{Story()}</div>],
-} satisfies Meta<typeof RegistrationAddressSection>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

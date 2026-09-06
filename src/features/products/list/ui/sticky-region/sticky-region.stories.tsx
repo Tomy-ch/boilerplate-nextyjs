@@ -2,12 +2,17 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { ProductStickyAside, ProductStickyBar, ProductStickyRegion } from "./sticky-region";
 
+/** 送れるだけの高さを作る行。中身は主題ではないので、番号だけの名前で並べる。 */
+const ROW_LABELS = Array.from({ length: 20 }, (_, index) => `商品 ${index + 1}`);
+
 /** 貼り付きが効く高さを与える。器の外に本文が無いと、そもそも送れない。 */
 function TallBody() {
   return (
     <div className="flex flex-col gap-4">
-      {Array.from({ length: 20 }, (_, index) => (
-        <div className="rounded-md border p-6" key={index}>{`商品 ${index + 1}`}</div>
+      {ROW_LABELS.map((label) => (
+        <div className="rounded-md border p-6" key={label}>
+          {label}
+        </div>
       ))}
     </div>
   );

@@ -139,7 +139,9 @@ describe("PurchaseTransitionButton", () => {
     });
 
     expect(pending).toBeDisabled();
-    expect(within(dialog).queryByRole("button", { name: "キャンセルする" })).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole("button", { name: "キャンセルする" }),
+    ).not.toBeInTheDocument();
 
     settle?.();
     await waitFor(() =>

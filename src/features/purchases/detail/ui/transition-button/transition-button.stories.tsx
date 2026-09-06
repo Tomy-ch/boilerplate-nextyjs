@@ -23,6 +23,9 @@ const UNAVAILABLE: PurchaseTransitionState = failedActionState({
   kind: ErrorKind.UNAVAILABLE,
 });
 
+/** canvas では送らない。`fn()` の型ではなく props の型で持ち、story ごとに差し替えられるようにする。 */
+const idleFormAction: (formData: FormData) => void = fn();
+
 /** 確認を開く。dialog は portal で `body` の側へ出るため、canvas の内側からは辿れない。 */
 async function openConfirm(canvasElement: HTMLElement, label: string) {
   await userEvent.click(within(canvasElement).getByRole("button", { name: label }));
@@ -47,7 +50,7 @@ const meta = {
   },
   args: {
     purchaseCode: "0195f0c2-0000-7000-9000-000000000001",
-    formAction: fn(),
+    formAction: idleFormAction,
     label: CANCEL.label,
     pendingLabel: CANCEL.pendingLabel,
     confirmTitle: CANCEL.confirmTitle,

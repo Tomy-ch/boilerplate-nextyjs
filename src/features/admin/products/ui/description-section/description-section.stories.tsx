@@ -7,7 +7,11 @@ import type { ProductDescriptionSectionProps } from "./description-section";
 import { ProductDescriptionSection } from "./description-section";
 
 /** 書いた内容を保つ形で包む。値の持ち主は器なので、包まないと打っても hidden の欄が動かない。 */
-function LiveDescriptionSection({ value, onValueChange, ...props }: ProductDescriptionSectionProps) {
+function LiveDescriptionSection({
+  value,
+  onValueChange,
+  ...props
+}: ProductDescriptionSectionProps) {
   const [current, setCurrent] = useState(value);
   const change = useCallback(
     (next: string) => {

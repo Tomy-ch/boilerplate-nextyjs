@@ -15,7 +15,6 @@ function LiveConfirmSection({ profile }: { profile: UserProfile | null }) {
 
 const meta = {
   title: "Features/Account/Onboarding/ConfirmSection",
-  component: RegistrationConfirmSection,
   parameters: {
     layout: "padded",
     docs: {
@@ -29,7 +28,7 @@ const meta = {
   },
   render: () => <LiveConfirmSection profile={PROFILE} />,
   decorators: [(Story) => <div className="max-w-2xl">{Story()}</div>],
-} satisfies Meta<typeof RegistrationConfirmSection>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

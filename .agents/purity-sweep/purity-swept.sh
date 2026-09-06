@@ -29,14 +29,14 @@ usage() {
 使い方:
   purity-swept.sh <path>...   パスごとに判定を出す
   purity-swept.sh --remaining 走査対象のうち、まだ記帳されていないパスを並べる
-  purity-swept.sh --pending   還元先が無くて止まっているパスを、理由付きで並べる
+  purity-swept.sh --pending   止まっているパスを、消せる条件付きで並べる
   purity-swept.sh --stale     台帳に在るが、走査対象ではないパスを並べる
   purity-swept.sh --stat      走査対象・記帳済み・保留・残量の数を出す
   purity-swept.sh --hook      PreToolUse ペイロードを標準入力から読み、フック JSON を出す
 
 判定:
   対応不要        台帳の [swept] に在るか、純化する在庫を持たない。括弧がどちらかを述べる。
-  純化は保留中    走査は済んでいるが、還元先が無くて止まっている。括弧がその理由を述べる。
+  純化は保留中    走査は済んでいるが止まっている。括弧が、何が真になれば消せるかを述べる。
   純化パスが要る  同じディレクトリの purity-sweep.prompt を読み、そのとおりにする。
 USAGE
 }
@@ -364,6 +364,17 @@ case "${1:-}" in
     printf '走査対象 %s / 記帳済み %s / 保留 %s / 残量 %s\n' \
       "${targets}" "${swept}" "${pending}" "${remaining}"
     [ "${stale}" -eq 0 ] || printf '台帳に、走査対象ではない鍵が %s 件（--stale で並ぶ）\n' "${stale}"
+
+    # 保留は数ではなく中身を毎回出す。件数だけだと、誰も retire できない行が積まれても
+    # 数字が 1 増えるだけで、消せる条件が読まれない。読まれない条件は書かれなくなる。
+    if [ "${pending}" -gt 0 ]; then
+      printf '\n保留（消せる条件つき。条件が満たされた行は消すこと）:\n'
+      awk '
+        { sub(/\r$/, "") }
+        /^\[[a-z]+\]$/ { table = substr($0, 2, length($0) - 2); next }
+        table == "pending" && index($0, "\"") == 1 { print "  " $0 }
+      ' "${LEDGER}"
+    fi
     ;;
   -h | --help | '')
     usage

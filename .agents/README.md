@@ -26,7 +26,7 @@
 
 | ファイル | 役割 |
 | --- | --- |
-| `purity-swept.toml` | 台帳。走査済み（`[swept]`）と、還元先が無くて止まったもの（`[pending]`） |
+| `purity-swept.toml` | 台帳。走査済み（`[swept]`）と、止まったもの（`[pending]`。値は**消せる条件**） |
 | `purity-swept.sh` | 照会。下記 |
 | `purity-sweep.prompt` | 手順。判定が「純化パスが要る」を返したときに読む |
 
@@ -34,7 +34,7 @@
 .agents/purity-sweep/purity-swept.sh <path>...   # パスごとの判定
 .agents/purity-sweep/purity-swept.sh --stat      # 走査対象 / 記帳済み / 保留 / 残量
 .agents/purity-sweep/purity-swept.sh --remaining # 未記帳のパスを並べる
-.agents/purity-sweep/purity-swept.sh --pending   # 止まっているものを理由付きで並べる
+.agents/purity-sweep/purity-swept.sh --pending   # 止まっているものを、消せる条件付きで並べる
 .agents/purity-sweep/purity-swept.sh --stale     # 台帳に在るが走査対象ではない鍵を並べる
 ```
 

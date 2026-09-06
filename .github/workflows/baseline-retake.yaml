@@ -107,15 +107,28 @@ jobs:
       #
       # A fork that has not registered the app falls back to `GITHUB_TOKEN`. The retake
       # still works there; it just draws on the smaller budget.
+      #
+      # **The mint is allowed to fail.** Asking for a permission the installation has not
+      # granted 422s, and without this that would take the whole job down — worse than the
+      # rate limit it is here to avoid. Failing leaves the output empty, so every call below
+      # falls back to `GITHUB_TOKEN` and the retake proceeds on the smaller budget. The
+      # `setup-baselines` call further down narrows `pull-requests` by route for the same
+      # reason; this one cannot, because the calls that need write run before the route is
+      # known.
       - name: Mint a token for the API calls
         id: api-token
         if: env.BASELINE_APP_ID != ''
+        continue-on-error: true
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ secrets.BASELINE_APP_ID }}
           private-key: ${{ secrets.BASELINE_APP_PRIVATE_KEY }}
+          # `pull-requests: write` covers the comments and the label edit; `actions: read`
+          # covers `gh run download`, which reads the triggering run's artifacts.
           permission-pull-requests: write
+          permission-issues: write
           permission-checks: read
+          permission-actions: read
           permission-contents: read
 
       # `workflow_run` carries the commit but not the pull request, so everything the

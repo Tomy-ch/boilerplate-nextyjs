@@ -5,16 +5,16 @@ import userEvent from "@testing-library/user-event";
 import { useCallback } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+const { push, replace } = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace }) }));
 
 import { PurchaseFilterDraftProvider, usePurchaseFilterDraft } from "./filter-draft";
 import type { PeriodSelection } from "./period";
 
 /** 下書きの中身と操作を、押せる形で覗く。 */
 function Probe() {
-  const { draft, applied, change, apply, reset } = usePurchaseFilterDraft();
+  const { draft, applied, change, apply, applyInPlace, reset } = usePurchaseFilterDraft();
   const buildMonth = useCallback(
     () => change({ ...draft, kind: "month", month: "2026-07" }),
     [change, draft],
@@ -30,6 +30,9 @@ function Probe() {
       </button>
       <button onClick={apply} type="button">
         反映する
+      </button>
+      <button onClick={applyInPlace} type="button">
+        積まずに反映する
       </button>
       <button onClick={reset} type="button">
         全期間へ戻す
@@ -48,6 +51,7 @@ function renderProbe(period: PeriodSelection = { kind: "all" }) {
 
 beforeEach(() => {
   push.mockClear();
+  replace.mockClear();
 });
 
 describe("PurchaseFilterDraftProvider", () => {
@@ -74,12 +78,22 @@ describe("PurchaseFilterDraftProvider", () => {
     expect(push).toHaveBeenCalledWith("/purchases?period=month&month=2026-07");
   });
 
-  it("全期間へ戻すと、下書きも一覧も全期間になる", async () => {
+  it("積まずに反映すると、履歴を増やさずに同じ URL へ移る", async () => {
+    renderProbe();
+    await userEvent.click(screen.getByRole("button", { name: "月を組む" }));
+    await userEvent.click(screen.getByRole("button", { name: "積まずに反映する" }));
+
+    expect(replace).toHaveBeenCalledWith("/purchases?period=month&month=2026-07");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("全期間へ戻すと、下書きも一覧も全期間になり、履歴は差し替わる", async () => {
     renderProbe({ kind: "month", month: "2026-07" });
     await userEvent.click(screen.getByRole("button", { name: "全期間へ戻す" }));
 
     expect(screen.getByTestId("kind")).toHaveTextContent("all");
-    expect(push).toHaveBeenCalledWith("/purchases");
+    expect(replace).toHaveBeenCalledWith("/purchases");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("効いている期間が外から変わったら、下書きを捨ててそちらへ揃える", async () => {
@@ -104,15 +118,17 @@ describe("PurchaseFilterDraftProvider", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "月にする" }));
     await userEvent.click(screen.getByRole("button", { name: "反映する" }));
+    await userEvent.click(screen.getByRole("button", { name: "積まずに反映する" }));
 
     expect(screen.getByTestId("applied")).toHaveTextContent("不成立");
     expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 });
 
 /** 必須を欠いたまま反映を押すための覗き窓。 */
 function Incomplete() {
-  const { draft, applied, change, apply } = usePurchaseFilterDraft();
+  const { draft, applied, change, apply, applyInPlace } = usePurchaseFilterDraft();
   const toMonth = useCallback(() => change({ ...draft, kind: "month" }), [change, draft]);
 
   return (
@@ -123,6 +139,9 @@ function Incomplete() {
       </button>
       <button onClick={apply} type="button">
         反映する
+      </button>
+      <button onClick={applyInPlace} type="button">
+        積まずに反映する
       </button>
     </>
   );

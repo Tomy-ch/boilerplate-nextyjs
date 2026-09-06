@@ -24,9 +24,25 @@ export type PeriodFilterDraft = {
   readonly pending: boolean;
   /** 期間を差し替える。一覧はまだ変わらない。 */
   readonly change: (next: PeriodDraft) => void;
-  /** 組み立てた期間を一覧へ反映する。 */
+  /** 組み立てた期間を一覧へ反映する。履歴を 1 つ積む。 */
   readonly apply: () => void;
-  /** 全期間へ戻し、そのまま一覧へ反映する。 */
+  /**
+   * 組み立てた期間を、いま居る履歴を差し替えて反映する。
+   *
+   * @remarks
+   * **overlay の中の確定はこちらを使います。** 背面を塞ぐ overlay は開いた時点で履歴を 1 つ
+   * 積んでおり（`use-overlay-history.ts`）、そのうえで積むと、戻る操作が 1 度は同じ URL へ
+   * 落ちて何も起きない回になります。差し替えれば、overlay が積んだ 1 件が結果の 1 件へ
+   * 置き換わり、戻る操作は期間を絞る前の一覧へ 1 度で戻ります。
+   */
+  readonly applyInPlace: () => void;
+  /**
+   * 全期間へ戻し、そのまま一覧へ反映する。
+   *
+   * @remarks
+   * こちらは常に履歴を差し替えます。全期間へ戻す操作は overlay の中にしか無く、条件を外すのも
+   * overlay の中からの遷移なので、確定と同じ扱いになります。
+   */
   readonly reset: () => void;
 };
 
@@ -77,9 +93,17 @@ export function PurchaseFilterDraftProvider({
   const applied = toAppliedPeriod(draft);
 
   const navigate = useCallback(
-    (next: PeriodSelection) => {
+    (next: PeriodSelection, inPlace = false) => {
       startTransition(() => {
-        router.push(toPurchaseHistoryHref(next));
+        const href = toPurchaseHistoryHref(next);
+
+        if (inPlace) {
+          router.replace(href);
+
+          return;
+        }
+
+        router.push(href);
       });
     },
     [router],
@@ -95,14 +119,20 @@ export function PurchaseFilterDraftProvider({
     }
   }, [applied, navigate]);
 
+  const applyInPlace = useCallback(() => {
+    if (applied !== null) {
+      navigate(applied, true);
+    }
+  }, [applied, navigate]);
+
   const reset = useCallback(() => {
     setDraft(toPeriodDraft(ALL_PERIOD));
-    navigate(ALL_PERIOD);
+    navigate(ALL_PERIOD, true);
   }, [navigate]);
 
   const value = useMemo(
-    () => ({ draft, applied, pending, change, apply, reset }),
-    [draft, applied, pending, change, apply, reset],
+    () => ({ draft, applied, pending, change, apply, applyInPlace, reset }),
+    [draft, applied, pending, change, apply, applyInPlace, reset],
   );
 
   return <PeriodFilterDraftContext value={value}>{children}</PeriodFilterDraftContext>;

@@ -45,6 +45,7 @@ Accepted
 | `canonicalize-doc` | EN / JA ペア同期 | canonical 英ドキュメントと日本語翻訳の同期 / 新規作成 |
 | `sync-readme` | README ↔ ディスク同期 | 単一 README の記述を実ディレクトリ状態に合わせて更新。子ディレクトリの README は digest + 参照リンクのみ |
 | `readme-review` | README の portal 価値評価 | 単一 README を `docs/portal/manifest.yaml` 登録基準で採点 |
+| `portal-manifest-sync` | portal manifest の監査 | `docs/portal/manifest.yaml` を、実在する README と 2 つの生成スクリプト（`pnpm portal:guides` / `portal:docs`）の双方に突き合わせる。生成側が既に決めている stale と構造警告は再実装せず読み取り、生成側が黙って飲み込む「`Other` へ落ちる登録」と、部品リファレンス README の除外、残る curation 候補の分類を担う。判定基準は持たず `readme-review` を実行時に読む。書き込みは `manifest.yaml` だけで、未登録 README を drift 扱いした自動追加はしない |
 | `new-env` | 環境変数の e2e 追加 | 目的別 config モジュール / env ファイル / 変数表 docs を一括で同期 (対象構造は A7 = [0030](0030-environment-variable-management.md)、後述) |
 | `impl-review` | adversarial code review | 5 観点 (correctness / security / architecture / cohesion / runtime-gap) の subagent fanout + verifier による多段検証。`cohesion` は「1 つの単位が変わる理由を複数持つ」を見る単位内の観点で、カーネル跨ぎの配置を持つ `architecture` とは重ならない。対象は変更そのものだけで、ソースへは書き込まず、指摘は PR へインライン投稿する |
 | `scaffold-test` | テストの新規作成 (unit / component) | テストを持たない対象の**集合**について、対象自身の分岐からケースを導き `<subject>.test.ts(x)` を書く。画面 1 枚分の一斉配置を単位とし、`test-requirement` の宣言元ディレクトリごとに確認を取る。規則は焼き込まず [0090](0090-testing-strategy.md) / [0091](0091-test-verification-methods.md) / 最近傍 README の `test-requirement` / 1:1 ゲート自身を実行時に読む。責務はディレクトリではなくシンボルに従い、HTTP 境界を跨ぐものは `scaffold-integration-test` へ残す。対象は read-only で、検証できない分岐は skip せず所見として報告する |
@@ -106,6 +107,7 @@ subagent 自身が read-only である規約は例外を持たない。書き込
 
 | スキル | 入力 | 出力 | 用途 |
 | --- | --- | --- | --- |
+| `portal-manifest-sync` | manifest + 実在 README + 生成スクリプトの出力 | manifest の編集（stale 削除と、名指しされた追加のみ） | portal に何を載せるかのキュレーション |
 | `comment-sweep` | 1 ディレクトリのコメント在庫 | 5 判定の適用（コードと移設先の両方を書く。3 適用モード） | 置き場所の誤りと、同じ内容の分散を在庫から抜く |
 | `scaffold-test` | テストを持たない対象の集合 | 対象ごとの `<subject>.test.ts(x)` | 1:1 ゲートとカバレッジゲートを満たすテストの新規作成 |
 | `scaffold-integration-test` | HTTP 境界を持つ継ぎ目 | `<subject>.contract.test.ts` 1 ファイル | 契約駆動のハンドラで境界を固定する |
@@ -129,7 +131,7 @@ subagent 自身が read-only である規約は例外を持たない。書き込
 
 - **AGENTS.md の Instruction Priority と Language Rules**: [0152](0152-agents-md-policy.md)
 - **ドキュメント運用ポリシー**: [0140](0140-documentation-operations.md) (D1・Accepted) — canonical EN / 翻訳 JA の同期方針
-- **`canonicalize-doc` / `sync-readme` / `readme-review` のドメイン分担**: 本 ADR の「ドキュメント系の責務分担」表
+- **`canonicalize-doc` / `sync-readme` / `readme-review` / `portal-manifest-sync` のドメイン分担**: 本 ADR の「ドキュメント系の責務分担」表
 
 ## 禁止事項
 
@@ -137,7 +139,7 @@ subagent 自身が read-only である規約は例外を持たない。書き込
 - ❌ subagent をモデル分散 (reviewer ≠ implementer) なしで「念のため」増やすこと (コスト見合いに合わない)
 - ❌ subagent に code edit 権限を渡すこと (read-only 原則)
 - ❌ `new-env` に config カーネル (`src/config/` / スキーマ / 検証呼び出し / `env/`) を新規作成させること (A7 実装 PR の担当)
-- ❌ ドキュメント系 3 件 (`canonicalize-doc` / `sync-readme` / `readme-review`) の責務を重複させること
+- ❌ ドキュメント系 4 件 (`canonicalize-doc` / `sync-readme` / `readme-review` / `portal-manifest-sync`) の責務を重複させること。とくに **`portal-manifest-sync` に判定基準を持たせないこと** — 基準の単一ソースは `readme-review` であり、複製した瞬間に片方だけが更新される
 
 ## 補足
 

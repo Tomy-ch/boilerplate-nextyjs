@@ -50,6 +50,12 @@
 - **[C] 保留** — ADR 未決。該当枠が Accepted になってから着手
 - **[D] 対象外** — 本リポジトリの ADR と非互換。記録のみ残す
 
+**[A] は「判定基準まで無翻案」を意味しない。** 資産が判定基準を持つ場合、その基準は輸入元の実物から
+逆算されている。パスを差し替えただけでは、本リポジトリの実物に当たらない基準がそのまま動く。
+IM-29 では `readme-review` の基準が go の英語見出しを前提にしており、本リポジトリの登録済みエントリ
+16 件にほとんど一致しなかった（頻出見出しが違い、Mermaid は 0/16、散文は語数ではなく字数で測る必要が
+あった）。**基準を持つ資産は、輸入先の実物を数えて再導出するまで動かさないこと。**
+
 ---
 
 ## 2. 作業一覧
@@ -113,7 +119,7 @@
 | IM-28 | `scaffold-test` / `test-review`(GB-5) | C | P4-0 | P3-6 完了 | `test-review` 完了 / `scaffold-test` 未着手 |
 | IM-49 | `scripts/` の 1:1 テスト対応ゲート + ツールのディレクトリ化 | B | — | なし | 完了(PR #143) |
 | **W9: docs portal**(v1 Phase 8) | | | | | |
-| IM-29 | `portal-manifest-sync` 復活 | A | P8-2 | P5-16 | 未着手 |
+| IM-29 | `portal-manifest-sync` 復活 | A | P8-2 | P5-16 | 完了 |
 | IM-30 | `docs/maintenance/` の新設 | B | P3-10 | P3-10 | 未着手 |
 | **W10: 外部スキル** | | | | | |
 | IM-31 | graphify 導入(pin / bootstrap / 権限境界 / 除外) | B | — | go 側の検証決着 | 完了(issue #102) |
@@ -561,7 +567,7 @@ v1 計画 Phase 2 の各 PR へ、以下を輸入元・輸入内容として書�
 
 #### IM-29: `portal-manifest-sync` 復活(受け皿 P8-2)
 
-P8-2 に受け皿があり、そこへ書き足す: pair_drift preflight → N1(API ドキュメント)フィルタ → manual-worthiness 判定の順。判定基準は `readme-review` が SSOT で、`portal-manifest-sync` は基準を持たない。
+判定基準は `readme-review` が SSOT で、`portal-manifest-sync` は基準を持たない。**輸入元との差は 3 点ある。**(1) go 側の pair_drift preflight は落とした —— 対訳が要るのは v1.0.0 以降で、いま `.ja.md` を持つのは portal の走査対象外である `.claude/**` だけであり、ペアの所管は `canonicalize-doc` にある。(2) N1 の除外先は godoc ではなく Storybook と TSDoc で、対象は `src/components/**` の定型 README になる。(3) drift の機械検出は生成スクリプトが既に持つため再実装せず、スキルは生成側が黙って飲み込む配置(`meta.subgroups` に無い guide id が `Other` へ落ちる)を担当する。
 
 **追随分**: go 側はポータルを独立パッケージ(`docs-viewer/`)へ再編し、その型検査とテストを専用 workflow で持つ。本リポジトリは `docs-viewer/` を既に持ち、テストとカバレッジは主 suite に含めているため、追加で要るのは**型検査を CI のどこが持つかの確認**だけである。
 

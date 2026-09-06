@@ -43,13 +43,13 @@ BACKLOG D2 は、`docs/portal/manifest.yaml` への登録基準・portal ↔ doc
 
 ### 5. 運用スキルループ
 
-- **readme-review**(内容の manual-worthy 判定 = 基準の単一ソース)→ **portal-manifest-sync**(manifest への登録キュレーション。編集は `manifest.yaml` のみ・自動追加しない)/ **sync-readme**(構造ドリフト整合)。スキル体系は [0155](0155-claude-skills-development.md)(開発系。配置・命名・frontmatter は [0154](0154-claude-skills-operations.md) と共通)。`portal-manifest-sync` は未移植 — portal 導入時に 0155 カバー範囲へ追加(リスト追加は軽微編集)
-- 判定基準は現行 manifest から runtime 参照する(基準を複製しない)。本リポの portal 立ち上げ後に基準語彙を再導出する
+- **readme-review**(内容の manual-worthy 判定 = 基準の単一ソース)→ **portal-manifest-sync**(manifest への登録キュレーション。編集は `manifest.yaml` のみ・自動追加しない)/ **sync-readme**(構造ドリフト整合)。スキル体系は [0155](0155-claude-skills-development.md)(開発系。配置・命名・frontmatter は [0154](0154-claude-skills-operations.md) と共通)
+- 判定基準は現行 manifest から runtime 参照する(基準を複製しない)。基準語彙は登録済みエントリから再導出済みで、**部品リファレンス README(`src/components/**` の定型)と feature slice は判定の対象外**とする —— 前者は Storybook と TSDoc が、後者は `docs/templates/feature-readme.md` の必須節検査が持つ
 
 ### 6. 実装状況
 
-- portal の生成と GitHub Pages 配信は実装済みとする。Pages の有効化はリポジトリ設定のためユーザが行う
-- `portal-manifest-sync` スキルは manifest が着地したため移植可能になった。移植までの間、manifest の drift 検出は行われない
+- portal の生成と GitHub Pages 配信は実装済みとする。**Pages 自体の有効化ではなく、`github-pages` environment の deployment branch policy に配信元ブランチを許可することが要る** —— 許可が無いと `docs-deploy` は step を 1 つも実行せずに落ちる。リポジトリ設定のためユーザが行う
+- `portal-manifest-sync` スキルは移植済み。drift の機械検出は生成スクリプトが持ち(`portal:guides` は stale で非 0、`portal:docs` は構造の警告を出す)、スキルはそれを読み取ったうえで、生成側が黙って飲み込む配置(`Other` へ落ちる登録)と curation 候補の分類を担う
 
 ## 禁止事項
 
@@ -66,5 +66,5 @@ BACKLOG D2 は、`docs/portal/manifest.yaml` への登録基準・portal ↔ doc
 
 - [0140-documentation-operations.md](0140-documentation-operations.md)(D1)— canonical / 三層戦略・per-package README(本 ADR の親決定。portal は第 3 層)
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 層別 README(portal カードの供給元)
-- [0155-claude-skills-development.md](0155-claude-skills-development.md) — readme-review / sync-readme の公認(開発系。配置・命名・frontmatter は [0154-claude-skills-operations.md](0154-claude-skills-operations.md) と共通)。`portal-manifest-sync` は portal 導入時に同体系へ追加
+- [0155-claude-skills-development.md](0155-claude-skills-development.md) — readme-review / sync-readme / portal-manifest-sync の公認(開発系。配置・命名・frontmatter は [0154-claude-skills-operations.md](0154-claude-skills-operations.md) と共通)
 - BACKLOG B9(CI 構成)— GitHub Pages 配信の workflow

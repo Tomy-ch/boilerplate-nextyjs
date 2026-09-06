@@ -14,6 +14,9 @@ const meta = {
   parameters: {
     layout: "centered",
     docs: {
+      // story ごとに iframe を分ける。開いた状態と閉じた状態を同じ docs ページへ載せるが、
+      // 開閉を持つ store は 1 つしかないので、同じ木で描くと後の story の値が先へも及ぶ。
+      story: { inline: false, iframeHeight: 240 },
       description: {
         component: [
           "脇に常設できる幅での、カートの入口です（常設できない幅は `Features/Cart/HeaderDrawer` が受け持ちます）。",

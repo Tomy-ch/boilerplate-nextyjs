@@ -1,5 +1,9 @@
 import type { Preview } from "@storybook/nextjs-vite";
-import { sb } from "storybook/test"; // sample:line
+// sample:replace-begin
+import { resetAllMocks, sb } from "storybook/test";
+// sample:replace-with
+// = import { resetAllMocks } from "storybook/test";
+// sample:replace-end
 
 import { FONT_VARIABLES } from "@/app/fonts";
 import { ToastProvider } from "@/components/shell/toaster/toaster";
@@ -38,6 +42,12 @@ const preview: Preview = {
       await startMockWorker();
     },
   ],
+  // story が置いた戻り値を次の story へ持ち越さない。mock はモジュール共有で、docs は同じ
+  // ページの story を同時に描くため、戻さないと隣の story が別の story の結果を出す。
+  // `fn(impl)` に渡した実装まで戻るので、差し替え先の既定の応答が復帰する。
+  beforeEach: () => {
+    resetAllMocks();
+  },
   globalTypes: {
     theme: {
       description: "配色テーマ",

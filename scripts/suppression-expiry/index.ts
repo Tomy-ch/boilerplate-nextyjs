@@ -18,9 +18,9 @@ import { COMMENT_BORNE_SOURCES, scanSuppressions } from "./scan.js";
  * 判定の基準日。
  *
  * @remarks
- * **抑止の条件は日本時間で書かれている**（`# 2026-08-02 20:34 JST 以降に削除する` のように）ので、
- * 暦日も日本時間で取る。時刻まで持ち込まないのは、実行が CI のどの時間帯かで結果を揺らさない
- * ためで、暦をどこに合わせるかとは別の話である。
+ * **抑止の条件は日本時間の暦日で書かれている**ので、暦日も日本時間で取る。UTC で取ると、日付を
+ * またぐ時間帯に走った実行だけ判定が 1 日ずれる。時刻までは持ち込まない —— 条件に時刻を書く
+ * 宣言は無い（`rules.ts` の `DATE_PATTERN`）。
  */
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());
 

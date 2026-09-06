@@ -37,8 +37,6 @@ describe("expiredSuppressions", () => {
   });
 
   it("日付が複数あれば、最も遅いものを期限として読む", () => {
-    // 「2026-08-29 公開で、冷却が明ける 2026-09-05 以降」のように、条件は経緯の日付も含む。
-    // 早い側を取ると、まだ来ていない期限を過ぎたと報告する。
     expect(
       expiredSuppressions(
         [suppression("2026-08-29 公開。冷却が明ける 2026-09-05 以降")],
@@ -64,7 +62,6 @@ describe("expiredSuppressions", () => {
 
   // ----- 異常系 -----
   it("日付を持たない条件は、満たされたと判定しない", () => {
-    // 「上流が N 以上を要求したら」「サンプル破棄が働いた後」は機械では決まらない。
     expect(
       expiredSuppressions(
         [suppression("Storybook が image-size を引かなくなった時点で削除する")],

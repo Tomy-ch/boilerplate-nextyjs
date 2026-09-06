@@ -7,9 +7,8 @@ import type { ExpiredSuppression, Suppression } from "./rules.js";
  * 全件を 1 行ずつ並べる。
  *
  * @remarks
- * **期限を過ぎたものだけでなく、全件を出します。** 機械が決められるのは日付だけで、「上流が N
- * 以上を要求したら」「サンプル破棄が働いた後」は決まりません。落ちた件だけを出すと、決まらない
- * 条件が誰にも読まれないまま残ります。
+ * **期限を過ぎたものだけでなく、全件を出します。** 落ちた件だけを出すと、機械が判定できない条件が
+ * 誰にも読まれないまま残るためです（ADR 0110 §3.4）。
  *
  * @param suppressions - 読み取った宣言の全件
  */
@@ -34,10 +33,9 @@ export function renderExpired(expired: readonly ExpiredSuppression[]): string {
  * issue へ載せる本文。
  *
  * @remarks
- * **本文は `composeIssueBody` に組ませます。** 撤回条件の散文はこのリポジトリが書いたものでは
- * なく、抑止を足す PR の提出者が書きます。素の markdown として描くと、mention や偽のリンクが
- * CI の名義で公開の issue に載ります。`tool-output` は字下げで記法を殺します
- * （[0153](../../docs/adr/0153-ci-configuration.md) §5）。
+ * **本文は `composeIssueBody` に組ませ、生の markdown 連結はしません。** 撤回条件の散文を書くのは
+ * 抑止を足す PR の提出者だからです（無害化を観点に含める理由は [README](../README.md)、根拠は
+ * [0153](../../docs/adr/0153-ci-configuration.md) §5）。`tool-output` は字下げで記法を殺します。
  *
  * @param input.expired - 撤回条件を満たした宣言
  * @param input.suppressions - 読み取った宣言の全件

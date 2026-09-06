@@ -148,7 +148,7 @@ function rowKey(item: AdminProductRow): string {
  * **行を押す・在庫を押すのどちらも、明示的に選ぶ道を menu が残します**（理由は `docs/spec/route/admin/products/page.function.md`
  * 「行から進める先」）。
  *
- * @see Storybook `Page/Admin/Products/List`
+ * @see Storybook `Features/Admin/Products/List/Table`
  */
 export const AdminProductTable = withPartSpan(
   "features/admin/products/list/ui/table/table",

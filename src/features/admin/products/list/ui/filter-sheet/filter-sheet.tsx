@@ -52,7 +52,7 @@ function countActive(conditions: AdminProductListConditions): number {
  * （[0051](../../../../../../../docs/adr/0051-styling-system.md) §2）。検索語をここへ入れないのは、
  * 入力欄が幅によらず画面の上に出ているためで、同じ条件を 2 か所から確定できる形にしません。
  *
- * @see Storybook `Page/Admin/Products/List`
+ * @see Storybook `Features/Admin/Products/List/FilterSheet`
  */
 export function AdminProductFilterSheet({
   conditions,

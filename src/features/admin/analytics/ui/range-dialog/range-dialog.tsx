@@ -56,7 +56,7 @@ const LABEL = "期間を指定";
  * いま書き換えている途中の値ではありません。入れ替わった組を送れてしまうので、送った先で
  * 誤りとして返ってきます（[0062](../../../../../../docs/adr/0062-form-input-validation.md)）。
  *
- * @see Storybook `Page/Admin/Analytics`
+ * @see Storybook `Features/Admin/Analytics/RangeDialog`
  */
 export function RangeDialog({ selected, from, to }: RangeDialogProps) {
   const fromId = useId();

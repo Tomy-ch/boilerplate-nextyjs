@@ -83,7 +83,7 @@ function rowKey(row: AdminRankingRow): string {
  * ではありません。一覧（`../../products/ui/table/`）が行いっぱいの導線を持つのは、そこが操作を
  * 目的にした画面だからです。ここは読む画面なので、押せる範囲を名前に留めます。
  *
- * @see Storybook `Page/Admin/Analytics`
+ * @see Storybook `Features/Admin/Analytics/RankingTable`
  */
 export const RankingTable = withPartSpan(
   "features/admin/analytics/ui/ranking-table/ranking-table",

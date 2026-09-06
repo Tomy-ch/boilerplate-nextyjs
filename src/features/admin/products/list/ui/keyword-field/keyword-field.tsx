@@ -31,7 +31,7 @@ export type AdminProductKeywordFieldProps = {
  * **空のまま押せるのは、いま検索語が効いているときだけです。** 効いている検索語を消すには空の
  * 送信が要る一方、何も効いていない状態での送信は結果が変わりません。
  *
- * @see Storybook `Page/Admin/Products/List`
+ * @see Storybook `Features/Admin/Products/List/KeywordField`
  */
 export function AdminProductKeywordField({ conditions }: AdminProductKeywordFieldProps) {
   const router = useRouter();

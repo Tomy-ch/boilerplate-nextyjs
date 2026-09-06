@@ -494,6 +494,38 @@ So `/impl-review` audits the change and nothing else — it owns no test lens an
 it hands nothing off. `/test-review` and `/comment-sweep` are invoked in their own right, whether or
 not `/impl-review` runs.
 
+<!-- boilerplate-only:begin -->
+## Purity Sweep
+
+Every file in this repository is walked once, and the ledger at
+`.agents/purity-sweep/purity-swept.toml` remembers which ones have been. A `PreToolUse` hook looks
+the path up before you edit it and, when the file is not yet recorded, tells you where the procedure
+is. **It never blocks** — refusing an edit to an unswept file would make every one-line fix drag a
+whole-file sweep behind it, and a sweep you cannot decline in the middle of other work is a sweep
+that gets bypassed.
+
+The pass asks three questions of the **whole file**, not of your diff:
+
+1. **Purity** — can a fork resolve every reference here, and is every statement still true once this
+   repository is a template rather than the repository that produced it?
+2. **Distillation** — what design judgment does this file embody?
+3. **Routing** — which document owns that judgment: an ADR, a layer `README.md`, a feature
+   `README.md`, `docs/rules.md`, or the code itself?
+
+The hook only reaches files you touch, so the entry point for walking the repository deliberately is
+`.agents/purity-sweep/purity-swept.sh --remaining` (`--stat` for the counts, `--pending` for what is
+blocked). Edits made through `Bash` rather than the file-editing tools do not trigger the hook; the
+rule below still applies to them.
+
+The criteria are in `.agents/purity-sweep/purity-sweep.prompt`. Read it when the hook says so, and
+record the file only once you have seen all of it — an entry claiming a sweep that did not happen is
+worse than no entry, because nothing will look at that file again. `.agents/README.md` owns what the
+mechanism is and how it ends; this section does not restate either.
+
+This is not a review lane. The three skills under `Review Phase Protocol` judge **a change**; this
+pass judges the **accumulated state of a file**, and it runs as a side effect of touching one.
+<!-- boilerplate-only:end -->
+
 ## Protected Documentation
 
 The following files require deliberate human review before modification:

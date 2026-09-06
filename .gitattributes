@@ -4,3 +4,7 @@ openapi/*.gen.yaml linguist-generated=true
 # 契約から生成する wire 型 / zod スキーマ / MSW ハンドラ。make gen-api が書き出す。
 src/adapters/gen/** linguist-generated=true
 mocks/*/** linguist-generated=true
+
+# デザイントークンから生成する CSS と型。tokens/scripts/gen-tokens.ts が書き出す。
+src/app/generated/** linguist-generated=true
+src/model/generated/** linguist-generated=true

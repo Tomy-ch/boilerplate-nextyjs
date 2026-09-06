@@ -47,6 +47,11 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   // サンプル破棄（`scripts/setup/remove-sample`）は、これが先に走った場合に備えて、引き直しを
   // 存在の確認で囲んである。
   "scripts/marker-baseline",
+  // 純化パスの台帳と照会フック。答えている問い（どのファイルが純化を通ったか）は、配る側にしか
+  // 開いていない —— fork が受け取るのは通り終えたツリーである。ディレクトリまるごと消すため
+  // マーカーは持てず、ここで宣言する。`.claude/settings.json` のフック定義は JSON なので同じ手が
+  // 使えないが、スクリプトの不在を確かめてから呼ぶ形にしてあり、残っても何もしない。
+  ".agents/purity-sweep",
 ];
 
 /**

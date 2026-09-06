@@ -24,7 +24,7 @@ import noMarkupOutsideUiLayers from "./eslint-rules/no-markup-outside-ui-layers"
 import noRawFontWeight from "./eslint-rules/no-raw-font-weight";
 import noUserScopedInCachedModule from "./eslint-rules/no-user-scoped-in-cached-module";
 
-/** client の束へ載った時点で壊れるものの締め出し。 */
+/** Node の組み込みモジュールの締め出し。 */
 const nodeBuiltinImports = {
   group: ["node:*"],
   message:

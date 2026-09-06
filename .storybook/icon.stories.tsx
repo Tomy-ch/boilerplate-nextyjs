@@ -17,8 +17,15 @@ const CATALOG: readonly (readonly [string, ComponentType<ComponentProps<"svg">>]
   icons,
 ).sort(([left], [right]) => left.localeCompare(right));
 
-/** 部品が実際に使っている大きさ。この 3 つ以外の指定はカタログにも実装にも無い。 */
-const SIZES = ["size-3", "size-3.5", "size-4"] as const;
+/**
+ * 部品がアイコンへ与えている大きさ。
+ *
+ * @remarks
+ * 実装から取った実測で、既定は `size-4` です。`size-2` は含めません —— そこに置かれるのは
+ * menu の選択を示す点（`CircleIcon`）と掴む場所の手掛かり（`GripVerticalIcon`）で、字形を
+ * 読ませていないためです。
+ */
+const SIZES = ["size-3", "size-3.5", "size-4", "size-5", "size-6"] as const;
 
 function Catalog() {
   return (
@@ -72,8 +79,7 @@ function SizeLadder() {
 /**
  * アプリが使うアイコンの目録。
  *
- * 名前は公開面から実行時に読むので、`icon.ts` へ足せばこの画面に出ます。供給元を差し替えても、
- * 出るのは新しい字面で、名前の列は動きません。
+ * `icon.ts` へ足せばこの画面に出ます（{@link CATALOG}）。
  */
 const meta = {
   title: "Icons/Catalog",

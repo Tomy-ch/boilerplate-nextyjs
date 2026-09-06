@@ -707,9 +707,9 @@ describe("vendorImportsOf", () => {
     expect(
       vendorImportsOf([
         'import { cn } from "@/components/cn";\nimport { Foo } from "./foo";\nimport { X } from "radix-ui";',
-        'import { Y } from "radix-ui";\nimport { Z } from "lucide-react";',
+        'import { Y } from "radix-ui";\nimport { Z } from "input-otp";',
       ]),
-    ).toEqual(["lucide-react", "radix-ui"]);
+    ).toEqual(["input-otp", "radix-ui"]);
   });
 
   it("react と react-dom は実行環境として数えない", () => {

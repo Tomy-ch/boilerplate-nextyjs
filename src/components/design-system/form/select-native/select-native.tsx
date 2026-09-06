@@ -1,7 +1,7 @@
-import { ChevronDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronDownIcon } from "@/components/icon";
 
 /** {@link SelectNative} の props。 */
 export type SelectNativeProps = Omit<ComponentProps<"select">, "size"> & {

@@ -1,7 +1,7 @@
-import { KeyRoundIcon, LockIcon, SearchXIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/design-system/action/button/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/design-system/status/alert/alert";
+import { KeyIcon, LockIcon, SearchOffIcon } from "@/components/icon";
 import {
   AUTH_STATE,
   AUTH_STATE_MESSAGE,
@@ -23,9 +23,9 @@ export type AuthStateFeedbackProps = {
 
 function StateIcon({ state }: { state: AuthState }) {
   if (state === AUTH_STATE.FORBIDDEN) return <LockIcon aria-hidden="true" />;
-  if (state === AUTH_STATE.NOT_FOUND) return <SearchXIcon aria-hidden="true" />;
+  if (state === AUTH_STATE.NOT_FOUND) return <SearchOffIcon aria-hidden="true" />;
 
-  return <KeyRoundIcon aria-hidden="true" />;
+  return <KeyIcon aria-hidden="true" />;
 }
 
 /**

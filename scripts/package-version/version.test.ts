@@ -9,6 +9,7 @@ import {
   reportPlan,
   selectRef,
   stampCommitMessage,
+  stampEffects,
 } from "./version";
 
 const manifest = [
@@ -31,6 +32,21 @@ describe("isStampMode", () => {
   it("走らせ方でない指定を拒否する", () => {
     expect(isStampMode("apply")).toBe(false);
     expect(isStampMode("")).toBe(false);
+  });
+});
+
+describe("stampEffects", () => {
+  // ----- 正常系 -----
+  it("突き合わせるだけの走らせ方では書き換えない", () => {
+    expect(stampEffects("check")).toEqual({ write: false, commit: false });
+  });
+
+  it("書く走らせ方では、書き換えるが記録は残さない", () => {
+    expect(stampEffects("stamp")).toEqual({ write: true, commit: false });
+  });
+
+  it("記録まで行う走らせ方では、書き換えてコミットする", () => {
+    expect(stampEffects("commit")).toEqual({ write: true, commit: true });
   });
 });
 
@@ -82,6 +98,15 @@ describe("deriveVersion", () => {
     expect(deriveVersion("release-notes/v1.2.3")).toBeNull();
   });
 
+  it("リリース版を名乗る綴りが ref の途中に埋め込まれているだけでは拾わない", () => {
+    expect(deriveVersion("prerelease/v1.0.0")).toBeNull();
+    expect(deriveVersion("not-a-hotfix/v1.0.0")).toBeNull();
+  });
+
+  it("v を伴わない版表記を拾わない", () => {
+    expect(deriveVersion("release/1.2.3")).toBeNull();
+  });
+
   it("版として読めない末尾を拒否する", () => {
     expect(deriveVersion("release/v1.2")).toBeNull();
     expect(deriveVersion("release/v1.2.3-rc.1")).toBeNull();
@@ -119,7 +144,11 @@ describe("replaceVersion", () => {
   });
 
   it("置換パターンを含む版を文字列としてそのまま書く", () => {
-    expect(readVersion(replaceVersion(manifest, "$&"))).toBe("$&");
+    expect(replaceVersion(manifest, "$&")).toBe(
+      ["{", '  "name": "nextjs-boilerplate",', '  "version": "$&",', '  "private": true', "}"].join(
+        "\n",
+      ),
+    );
   });
 });
 
@@ -186,9 +215,13 @@ describe("reportPlan", () => {
   it("突き合わせる側では、同じ差し替えを焼き込み忘れとして落とす", () => {
     const report = reportPlan({ kind: "write", from: "0.5.0", to: "0.7.0", content: "" }, "check");
 
-    expect(report.failed).toBe(true);
-    expect(report.message).toContain("package.json: 0.5.0 / ブランチ: 0.7.0");
-    expect(report.message).toContain("make version-stamp");
+    expect(report).toEqual({
+      message: [
+        "❌ version がブランチ名と食い違っています（package.json: 0.5.0 / ブランチ: 0.7.0）",
+        "➡️ make version-stamp を実行し、差分をコミットしてください",
+      ].join("\n"),
+      failed: true,
+    });
   });
 
   it("version が無ければ、書き込む側でも落とす", () => {

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SearchIcon, XIcon } from "lucide-react";
 import { useId } from "react";
+
+import { SearchIcon, XIcon } from "@/components/icon";
 
 import { Label } from "../label/label";
 import {

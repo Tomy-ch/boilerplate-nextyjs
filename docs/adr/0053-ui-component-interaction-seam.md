@@ -1,6 +1,6 @@
 # UI コンポーネント方針とインタラクション a11y seam
 
-[0052](0052-ui-component-policy.md) は UI コンポーネント基盤(shadcn/ui + lucide-react + 複雑入力部品)を **v1 で採用**し、複雑入力(日付ピッカー等)は `components` カーネルの shadcn 系部品として同梱済みだが、そこで扱うのは「どの部品を持つか(同梱可否)」であって、**インタラクションを持つ UI の相互作用品質**(キーボード操作・フォーカス管理・ARIA・live region・ドラッグ代替等の a11y seam)は別主題として残る。本 ADR は 0052 とは主題を分け、interaction UI の **a11y interaction seam**(sanitizer port / WCAG 2.2 ドラッグ代替 IF・モーダルの focus/scroll 契約等)を 1 本に束ねる。0052 が v1 で採る部品(複雑入力 / リッチテキスト = TipTap)にも、v2 で採る局所ライブラリ(DnD = dnd-kit 等)にも共通して要求される相互作用 a11y 契約を、本 ADR が所有する(triage #15 / #16 / #22 / #25 / #27)。
+[0052](0052-ui-component-policy.md) は UI コンポーネント基盤(shadcn/ui + @tabler/icons-react + 複雑入力部品)を **v1 で採用**し、複雑入力(日付ピッカー等)は `components` カーネルの shadcn 系部品として同梱済みだが、そこで扱うのは「どの部品を持つか(同梱可否)」であって、**インタラクションを持つ UI の相互作用品質**(キーボード操作・フォーカス管理・ARIA・live region・ドラッグ代替等の a11y seam)は別主題として残る。本 ADR は 0052 とは主題を分け、interaction UI の **a11y interaction seam**(sanitizer port / WCAG 2.2 ドラッグ代替 IF・モーダルの focus/scroll 契約等)を 1 本に束ねる。0052 が v1 で採る部品(複雑入力 / リッチテキスト = TipTap)にも、v2 で採る局所ライブラリ(DnD = dnd-kit 等)にも共通して要求される相互作用 a11y 契約を、本 ADR が所有する(triage #15 / #16 / #22 / #25 / #27)。
 
 ## Status
 
@@ -143,7 +143,7 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 
 ## 関連 ADR
 
-- [0052-ui-component-policy.md](0052-ui-component-policy.md) — UI 部品の採用・同梱可否(shadcn/ui + lucide + 複雑入力 + リッチテキスト = v1 / DnD = v2)。本 ADR はその部品が満たす相互作用 a11y 品質を別主題として所有する
+- [0052-ui-component-policy.md](0052-ui-component-policy.md) — UI 部品の採用・同梱可否(shadcn/ui + Tabler アイコン + 複雑入力 + リッチテキスト = v1 / DnD = v2)。本 ADR はその部品が満たす相互作用 a11y 品質を別主題として所有する
 - [0100-accessibility-target.md](0100-accessibility-target.md) — WCAG 2.x AA / biome a11y / 手動チェック(全 interaction の a11y 契約の正)
 - [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — route-as-modal(intercepting / parallel routes)採否の管轄(本 ADR では確定しない)
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — 標準準拠 + 非ロックイン(§1 built-in 優先の vendor-independent 正当化の土台)

@@ -1,6 +1,5 @@
 "use client";
 
-import { Settings2Icon } from "lucide-react";
 import { useCallback } from "react";
 
 import { Button } from "@/components/design-system/action/button/button";
@@ -14,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/design-system/overlay/dropdown-menu/dropdown-menu";
+import { SlidersIcon } from "@/components/icon";
 import { TABLE_DENSITY, type TableDensity } from "./table-view-options.definition";
 
 /** 表示を切り替えられる列 1 つ。 */
@@ -80,7 +80,7 @@ export function TableViewOptions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button data-slot="table-view-options-trigger" size="sm" type="button" variant="outline">
-          <Settings2Icon aria-hidden="true" />
+          <SlidersIcon aria-hidden="true" />
           {label}
         </Button>
       </DropdownMenuTrigger>

@@ -1,4 +1,3 @@
-import { ExternalLink } from "lucide-react";
 import { useId } from "react";
 
 import {
@@ -7,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/design-system/container/accordion/accordion";
+import { ExternalLinkIcon } from "@/components/icon";
 
 import type { PortalGroup, PortalReferenceLink } from "../docs-json/docs-json";
 import { formatHashRoute } from "../hash-route/hash-route";
@@ -79,7 +79,7 @@ export function PortalSidebar({ activeGroupSlug, groups, referenceLinks }: Porta
                   target="_blank"
                 >
                   {link.title}
-                  <ExternalLink aria-hidden className="size-3.5 shrink-0" />
+                  <ExternalLinkIcon aria-hidden className="size-3.5 shrink-0" />
                 </a>
               </li>
             ))}

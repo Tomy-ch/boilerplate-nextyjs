@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowDownIcon } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -16,6 +15,7 @@ import {
 } from "react";
 
 import { cn } from "@/components/cn";
+import { ArrowDownIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "../../action/button/button.definition";

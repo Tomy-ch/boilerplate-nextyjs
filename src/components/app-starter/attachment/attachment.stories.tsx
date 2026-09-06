@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { FileTextIcon, ImageIcon, RotateCcwIcon, XIcon } from "lucide-react";
 import {
   type Dispatch,
   type RefObject,
@@ -9,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { FileTextIcon, ImageIcon, RotateIcon, XIcon } from "@/components/icon";
 import { SAMPLE_DOCUMENT_URL } from "~catalog/lib/sample-asset";
 import { Button } from "../../design-system/action/button/button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "../../design-system/action/button/button.definition";
@@ -96,7 +96,7 @@ function AllStates() {
         </AttachmentContent>
         <AttachmentActions>
           <AttachmentAction aria-label="仕様書.pdf を再送する">
-            <RotateCcwIcon aria-hidden="true" />
+            <RotateIcon aria-hidden="true" />
           </AttachmentAction>
         </AttachmentActions>
       </Attachment>

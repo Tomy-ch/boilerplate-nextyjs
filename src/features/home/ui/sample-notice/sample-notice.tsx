@@ -1,4 +1,3 @@
-import { AlertTriangleIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/design-system/action/button/button";
@@ -7,6 +6,7 @@ import {
   BUTTON_VARIANT,
 } from "@/components/design-system/action/button/button.definition";
 import { Alert, AlertDescription, AlertTitle } from "@/components/design-system/status/alert/alert";
+import { AlertTriangleIcon } from "@/components/icon";
 import { TERMS_PATH } from "@/features/site-info/facade/paths/paths";
 import { withPartSpan } from "@/observability/render-span";
 

@@ -24,6 +24,34 @@ import noMarkupOutsideUiLayers from "./eslint-rules/no-markup-outside-ui-layers"
 import noRawFontWeight from "./eslint-rules/no-raw-font-weight";
 import noUserScopedInCachedModule from "./eslint-rules/no-user-scoped-in-cached-module";
 
+/** Node の組み込みモジュールの締め出し。 */
+const nodeBuiltinImports = {
+  group: ["node:*"],
+  message:
+    "Node の組み込みモジュールは client の束へ載った時点で壊れます。server 側へ寄せるか、config カーネルを通してください。",
+};
+
+/**
+ * アイコンの供給元の締め出し。
+ *
+ * 供給元を名指しできるのは `src/components/icon.ts` だけで、そこは締め出しの側から外してある
+ * （[0052](docs/adr/0052-ui-component-policy.md)）。散らすと差し替えのときに取り残しが出る。
+ */
+const iconVendorImports = {
+  group: ["@tabler/icons-react"],
+  message:
+    "アイコンの供給元は `@/components/icon` へ閉じます（ADR 0052）。アイコンはそこから import してください。",
+};
+
+/**
+ * どのファイルでも締め出すもの。
+ *
+ * **新しい締め出しは原則ここへ足す。**flat config は同名ルールを配列ごと後勝ちで置き換えるので、
+ * 適用範囲の広いブロックの側だけへ足すと、それを外している例外ファイルには黙って効かない。
+ * 例外ファイルを持つ締め出しは、この基底へではなく、例外を外した側のブロックで足す。
+ */
+const commonImportRestrictions = [nodeBuiltinImports];
+
 const elements = [
   // 層より先に並べる。区画は層の内側にあるため、層の要素が先に一致すると区画としては
   // 見えなくなり、層の粒度の許可がそのまま区画への許可になる。
@@ -212,16 +240,25 @@ export default [
       ],
       "no-restricted-imports": [
         "error",
-        {
-          patterns: [
-            {
-              group: ["node:*"],
-              message:
-                "Node の組み込みモジュールは client の束へ載った時点で壊れます。server 側へ寄せるか、config カーネルを通してください。",
-            },
-          ],
-        },
+        { patterns: [...commonImportRestrictions, iconVendorImports] },
       ],
+    },
+  },
+  {
+    // アイコンの公開面そのもの。ここだけが供給元を名指しするので、締め出しの側から外す。
+    files: ["src/components/icon.ts"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: commonImportRestrictions }],
+    },
+  },
+  {
+    // ビューアーは `@` alias でアプリ本体のソースを直接参照する（`docs-viewer/README.md`）ので、
+    // アイコンも同じ公開面から取る。ここを締め出さないと、供給元を名指しできる場所が
+    // ワークスペースに 2 つできる。
+    files: ["docs-viewer/src/**/*.{js,jsx,ts,tsx}"],
+    languageOptions: { parser: tseslint.parser },
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [iconVendorImports] }],
     },
   },
   {

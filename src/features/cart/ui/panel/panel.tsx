@@ -1,10 +1,10 @@
 "use client";
 
-import { XIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback } from "react";
 
 import { Button } from "@/components/design-system/action/button/button";
+import { XIcon } from "@/components/icon";
 import type { Cart } from "@/model/cart/cart";
 import { useCartStore } from "@/stores/cart-store";
 import { usePendingRemovals } from "../../removal-memory";

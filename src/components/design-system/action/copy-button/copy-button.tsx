@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckIcon, CopyIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { CheckIcon, CopyIcon } from "@/components/icon";
 
 import { Button, type ButtonProps } from "../button/button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "../button/button.definition";

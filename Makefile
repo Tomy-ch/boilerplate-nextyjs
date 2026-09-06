@@ -8,6 +8,7 @@ include .makefiles/github/operation/release-version.mk
 include .makefiles/github/setting/github.mk
 include .makefiles/github/setting/branch-ruleset.mk
 include .makefiles/github/setting/label-setting.mk
+include .makefiles/github/setting/pages-delivery.mk
 include .makefiles/github/lint/actionlint.mk
 include .makefiles/github/lint/actions-shellcheck.mk
 include .makefiles/github/lint/actions-comment-secret-lint.mk
@@ -42,6 +43,7 @@ include .makefiles/security/opengrep.mk
 include .makefiles/security/osv.mk
 include .makefiles/security/bearer.mk
 include .makefiles/security/dast.mk
+include .makefiles/security/suppression.mk
 
 # 一括実行系ファイル
 # GitHub関連

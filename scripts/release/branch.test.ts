@@ -106,8 +106,6 @@ describe("branchCreationBlocker", () => {
   });
 
   it("同名のブランチが在り作業ツリーも汚れていれば、存在の方を理由に出す", () => {
-    // 見る順そのものが契約。入れ替わると、既に在るブランチを作りに行ったのに無関係な
-    // `git status` を見せられる。
     expect(
       branchCreationBlocker({
         branchName: "release/v0.7.0",
@@ -128,6 +126,40 @@ describe("branchCreationBlocker", () => {
         branchName: "release/v1.3.0",
         branchExists: false,
         workTreeStatus: " M src/app/page.tsx\n",
+      }),
+    ).toEqual([
+      {
+        kind: "log",
+        message:
+          "❌ 作業ツリーに未コミットの変更があります。変更をコミットまたは退避してから再実行してください。",
+      },
+      { kind: "run", command: "git", args: ["status", "--short"] },
+    ]);
+  });
+
+  it("汚れが基準画像の指し先だけなら、合わせ直す手を案内する", () => {
+    expect(
+      branchCreationBlocker({
+        branchName: "release/v1.3.0",
+        branchExists: false,
+        workTreeStatus: "M  baseline/images\n",
+      }),
+    ).toEqual([
+      {
+        kind: "log",
+        message:
+          "❌ baseline/images の実体が、いま居るブランチの指す版とずれています。" +
+          "git submodule update --init baseline/images で合わせてから再実行してください。",
+      },
+    ]);
+  });
+
+  it("指し先のずれに他の変更が混じっていれば、commit か退避を案内する", () => {
+    expect(
+      branchCreationBlocker({
+        branchName: "release/v1.3.0",
+        branchExists: false,
+        workTreeStatus: "M  baseline/images\n M src/app/page.tsx\n",
       }),
     ).toEqual([
       {

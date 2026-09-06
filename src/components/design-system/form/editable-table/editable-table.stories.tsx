@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CheckIcon } from "lucide-react";
 import { useId } from "react";
+
+import { CheckIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { FieldError } from "../field/field";

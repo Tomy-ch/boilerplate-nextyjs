@@ -43,7 +43,7 @@ SSR first の選定では `△` に当たります。既定は通常の link / b
 
 内容は Portal で `body` 直下へ描画されますが、React の木構造としては呼び出し元の配下に残ります。sheet の内部に置いた `form` は通常どおり submit され、`name` / `value` はそのまま送信値になります。
 
-vendor は現在 Radix と lucide ですが、公開 API に vendor 名は含めません。`side` の位置決めと animation の class は shadcn の生成物をそのまま保持しており、animation plugin を採用していないため現状 animation の CSS は出力されません。
+vendor は現在 Radix ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。`side` の位置決めと animation の class は shadcn の生成物をそのまま保持しており、animation plugin を採用していないため現状 animation の CSS は出力されません。
 
 ## Storybook とテスト
 

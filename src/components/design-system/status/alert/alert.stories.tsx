@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AlertTriangleIcon, CircleAlertIcon, InfoIcon } from "lucide-react";
+
+import { AlertTriangleIcon, CircleAlertIcon, InfoIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { Alert, AlertDescription, AlertTitle } from "./alert";

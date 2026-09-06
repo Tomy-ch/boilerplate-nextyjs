@@ -1,6 +1,5 @@
 "use client";
 
-import { UploadIcon } from "lucide-react";
 import {
   type ChangeEvent,
   type ComponentProps,
@@ -12,6 +11,7 @@ import {
 } from "react";
 
 import { cn } from "@/components/cn";
+import { UploadIcon } from "@/components/icon";
 import { ProgressClient } from "../../design-system/status/progress-client/progress-client";
 import { FILE_UPLOAD_REJECTION_REASON, type FileUploadRejection } from "./file-upload.definition";
 

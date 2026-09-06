@@ -133,6 +133,21 @@ pre-commit:
         - ".github/**"
       run: make images-pin-check
 
+post-checkout:
+  commands:
+    baseline-sync:
+      # ブランチを移っても git は基準画像の実体を動かさない。指し先と食い違ったまま残り、
+      # その汚れを commit すると間違った指し先が保護ブランチへ載る (ADR 0151)。
+      #
+      # {3} はブランチの移動なら 1、ファイルの取り出しなら 0。後者では指し先が動かない。
+      run: test "{3}" = "1" && make baseline-sync
+
+post-merge:
+  commands:
+    baseline-sync:
+      # pull でも指し先だけが進む。移動と同じ理由でここでも合わせる。
+      run: make baseline-sync
+
 commit-msg:
   commands:
     commitlint:

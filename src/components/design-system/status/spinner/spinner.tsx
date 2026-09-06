@@ -1,7 +1,7 @@
-import { Loader2Icon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { LoaderIcon } from "@/components/icon";
 
 /** {@link Spinner} の props。 */
 export type SpinnerProps = Omit<ComponentProps<"svg">, "aria-hidden" | "aria-label" | "role"> & {
@@ -43,7 +43,7 @@ export type SpinnerProps = Omit<ComponentProps<"svg">, "aria-hidden" | "aria-lab
  */
 export function Spinner({ className, label, ...props }: SpinnerProps) {
   return (
-    <Loader2Icon
+    <LoaderIcon
       aria-hidden={label === undefined ? "true" : undefined}
       aria-label={label}
       className={cn("size-4 animate-spin motion-reduce:animate-none", className)}

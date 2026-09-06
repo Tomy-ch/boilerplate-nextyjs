@@ -1,10 +1,10 @@
 "use client";
 
 import { Command as CommandPrimitive } from "cmdk";
-import { SearchIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { SearchIcon } from "@/components/icon";
 
 import {
   Dialog,

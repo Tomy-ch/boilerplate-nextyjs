@@ -30,7 +30,7 @@ client runtime を必要としない SSR first の表示部品です。現在の
 
 リポジトリ内の遷移には `asChild` で `next/link` の `Link` を渡します。既定の `a` は外部リンクや、遷移先が props 経由で決まる場合に使います。
 
-vendor は現在 Radix（`Slot`）と lucide ですが、公開 API に vendor 名は含めません。
+vendor は現在 Radix（`Slot`）ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。
 
 ## アクセシビリティ
 

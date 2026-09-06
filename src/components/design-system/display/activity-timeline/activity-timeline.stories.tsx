@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CircleDollarSignIcon, PencilIcon, PlusIcon, UploadIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -7,6 +6,7 @@ import {
   ListItemDescription,
   ListItemTitle,
 } from "@/components/design-system/display/list/list";
+import { CoinIcon, PencilIcon, PlusIcon, UploadIcon } from "@/components/icon";
 import { ActivityTimeline, ActivityTimelineItem, ActivityTimelineTime } from "./activity-timeline";
 
 const meta = {
@@ -41,7 +41,7 @@ const EVENTS: readonly Event[] = [
     description: "変更前は ¥980 でした。",
     at: "2026-08-03T18:40:00+09:00",
     display: "2026-08-03 18:40",
-    marker: <CircleDollarSignIcon aria-hidden="true" />,
+    marker: <CoinIcon aria-hidden="true" />,
   },
   {
     id: "2",

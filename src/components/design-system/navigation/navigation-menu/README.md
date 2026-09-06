@@ -38,7 +38,7 @@ PC の header で、カテゴリなど階層のあるサイト遷移を提供す
 
 mobile での表示形式は持ちません。狭い viewport で別の導線にするかは、利用する画面側で決めます。
 
-vendor は現在 Radix と lucide ですが、公開 API に vendor 名は含めません。
+vendor は現在 Radix ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。
 
 ## Storybook とテスト
 

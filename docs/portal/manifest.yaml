@@ -16,7 +16,7 @@ meta:
     - title: Get Started
       sections: [overview, get-started]
     - title: Architecture
-      sections: [layers, design, adr]
+      sections: [layers, design, spec, adr]
     - title: Build & Operations
       sections: [operations]
     - title: Project
@@ -26,6 +26,7 @@ meta:
     overview: Overview
     get-started: Get Started
     design: Design
+    spec: Spec
     adr: Decisions (ADR)
     layers: Layers
     operations: Build & Operations
@@ -83,3 +84,9 @@ operations:
     dst: docs/portal/guides/tokens.md
   - src: docs-viewer/README.md
     dst: docs/portal/guides/docs-viewer.md
+  - src: vrt/README.md
+    dst: docs/portal/guides/vrt.md
+  - src: e2e/README.md
+    dst: docs/portal/guides/e2e.md
+  - src: mocks/README.md
+    dst: docs/portal/guides/mocks.md

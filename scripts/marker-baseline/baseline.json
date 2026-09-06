@@ -43,6 +43,7 @@
   "src/app/api/auth/logout/route.ts": 2,
   "src/app/sitemap.test.ts": 9,
   "src/app/sitemap.ts": 10,
+  "src/components/icon.ts": 2,
   "src/features/README.md": 2,
   "src/model/README.md": 6,
   "src/model/authz.ts": 4,

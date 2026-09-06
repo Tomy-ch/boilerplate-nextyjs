@@ -26,7 +26,7 @@
 ### 1.2 採用ロードマップ(v1 / v2 二段構え)
 
 - **方針**: v1 = 一般的な Next.js アプリケーション基盤に必要な汎用・常用ライブラリを全採用 / v2 = 局所的(用途依存)なライブラリを順次同梱していく
-- **v1 採用**(ADR 反映済みのため参照のみ): [0052](../adr/0052-ui-component-policy.md)(shadcn/ui + lucide)/ [0060](../adr/0060-state-management.md)(react-hook-form + zod + Zustand。横断 client 状態は `stores` = [0023](../adr/0023-stores-kernel.md))/ [0051](../adr/0051-styling-system.md)(Framer Motion)/ [0081](../adr/0081-observability-logging.md)(OTLP vendor-neutral)/ [0120](../adr/0120-locale-aware-formatting.md)(date-fns + Intl)/ [0050](../adr/0050-styling-strategy.md)(CSS Modules 限定許可)/ [0053](../adr/0053-ui-component-interaction-seam.md)(**TipTap**)/ [0131](../adr/0131-cookie-consent.md)(**軽量 consent 機構 + ゲートの裏のタグマネージャ**)
+- **v1 採用**(ADR 反映済みのため参照のみ): [0052](../adr/0052-ui-component-policy.md)(shadcn/ui + Tabler アイコン)/ [0060](../adr/0060-state-management.md)(react-hook-form + zod + Zustand。横断 client 状態は `stores` = [0023](../adr/0023-stores-kernel.md))/ [0051](../adr/0051-styling-system.md)(Framer Motion)/ [0081](../adr/0081-observability-logging.md)(OTLP vendor-neutral)/ [0120](../adr/0120-locale-aware-formatting.md)(date-fns + Intl)/ [0050](../adr/0050-styling-strategy.md)(CSS Modules 限定許可)/ [0053](../adr/0053-ui-component-interaction-seam.md)(**TipTap**)/ [0131](../adr/0131-cookie-consent.md)(**軽量 consent 機構 + ゲートの裏のタグマネージャ**)
 
 #### v2 採用マトリクス(局所・用途依存 → 順次同梱)
 

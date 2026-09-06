@@ -1,11 +1,11 @@
 "use client";
 
-import { ShoppingCartIcon } from "lucide-react";
 import { useActionState, useCallback } from "react";
 import { useFormStatus } from "react-dom";
 
 import { FormFeedback } from "@/components/app-starter/form-feedback/form-feedback";
 import { Button } from "@/components/design-system/action/button/button";
+import { ShoppingCartIcon } from "@/components/icon";
 import { type ActionState, idleActionState } from "@/model/action-state";
 import { useCartStore } from "@/stores/cart-store";
 

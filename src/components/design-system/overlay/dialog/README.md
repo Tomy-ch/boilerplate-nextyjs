@@ -35,7 +35,7 @@ focus trap・Escape・開閉・背面の inert 化のため hydration が必要�
 
 面はページ内容の上へ重なるため、背景は `bg-background`、境界は `border-border` の semantic token で不透明に描画します。トークンに定義のない class は Tailwind が CSS を出力せず、面が透明のまま背後の文字と重なって contrast を失います。
 
-vendor は現在 Radix と lucide ですが、公開 API に vendor 名は含めません。
+vendor は現在 Radix ですが、公開 API に vendor 名は含めません。アイコンは `components` の [`icon.ts`](../../../icon.ts) から取ります。
 
 ## Storybook とテスト
 

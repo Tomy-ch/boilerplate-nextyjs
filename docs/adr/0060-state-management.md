@@ -136,5 +136,5 @@ Server Actions と Server Component fetch を既定に置くのは、**画面側
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 昇格ルール(横断 client 状態 → `stores` の出口)/ カーネル配置・命名規律
 - [0071-bff-api-integration.md](0071-bff-api-integration.md) — クライアント側データ取得・キャッシュ設計 / server state 境界
 - [0011-no-docker.md](0011-no-docker.md) — 表示層ロール(初期 exclusion の根拠。v1 でアプリ基盤へ性格更新)
-- [0052-ui-component-policy.md](0052-ui-component-policy.md)(B2)— 同じく v1 バッテリー採用へ転換(shadcn/ui + lucide + 複雑入力)
+- [0052-ui-component-policy.md](0052-ui-component-policy.md)(B2)— 同じく v1 バッテリー採用へ転換(shadcn/ui + Tabler アイコン + 複雑入力)
 - [master-plan §1.2 採用ロードマップ](../plan/master-plan.md) — v1 バッテリー同梱の全体像(react-hook-form + zod / Zustand)

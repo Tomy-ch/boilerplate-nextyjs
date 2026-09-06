@@ -8,6 +8,7 @@
 .PHONY: vrt-record-verified ## 検査が通った時点の入力のハッシュを記録する (全 shard が緑のときだけ)
 .PHONY: vrt-retake ## story の基準画像を撮り直して置き場へ送る (手元からの撮り直しはこれ)
 .PHONY: vrt-update ## story の基準画像を撮り直す (置き場へは送らない)
+.PHONY: baseline-sync ## 基準画像の実体を、いま居るブランチが指す版へ合わせる (hook から呼ぶ)
 .PHONY: baseline-push ## 撮り直した基準画像を置き場へ送り、サブモジュールのポインタを進める
 .PHONY: a11y ## 全 story に axe を掛ける (コンテナ内で実行)
 .PHONY: vrt-report ## 直前の実行の HTML レポートを開く
@@ -145,6 +146,15 @@ vrt-update: build-storybook
 vrt-retake:
 	@$(MAKE) vrt-update
 	@$(MAKE) baseline-push
+
+# ブランチを移っても git は基準画像の実体を動かさない。記録された指し先と食い違ったまま残り、
+# `git status` には他の変更と同じ顔で出る。**その汚れを commit すると間違った指し先が載る**。
+# hook から呼んで、移動のたびに実体を指し先へ合わせる（ADR 0151）。
+#
+# --init は付けない。付けると worktree を足すたびに置き場を丸ごと取りに行く。取り込んでいない
+# 作業ツリーは撮影の前提検査が名指しで案内するので、ここは在るものを合わせるだけに留める。
+baseline-sync:
+	@if [ -e baseline/images/.git ]; then git submodule update baseline/images; fi
 
 # 撮り直した一式を置き場へ送るのはここだけ。手元でサブモジュール内を直接コミットすると
 # 撮り直しどうしが繋がり、掃除でどれも落とせなくなる。

@@ -8,12 +8,12 @@
 
 - 新規 README を書いたあと、portal の manual として十分か知りたい
 - `portal-manifest-sync` が `borderline` / `not-yet-manual-grade` に分類した README を深堀したい
-- README が godoc 領域の内容を書いていないか疑いたい
+- README が component の表面（Storybook と TSDoc が既に持つもの）を書いているだけではないか疑いたい
 - 薄い README を厚くする前に「何が足りないか」のチェックリストが欲しい
 
 以下の用途には使いません:
 
-- リポジトリ全体のレビュー → `portal-manifest-sync` が同じ基準（後述）で 4 クラスに batch 分類する。本スキルは borderline ケースの個別深堀用
+- リポジトリ全体のレビュー → `portal-manifest-sync` が同じ基準（後述）で 4 クラスに batch 分類する（部品リファレンスを外し、feature slice を Step 2b へ回したうえで）。本スキルは borderline ケースの個別深堀用
 - README 編集 → `sync-readme`（drift 修正）または手動編集
 - manifest 追加 → `portal-manifest-sync`（curation flow）に chain
 
@@ -25,30 +25,42 @@
 
 ## 評価基準の導出根拠
 
-評価パターンはハードコードした理論ではなく、`docs/portal/manifest.yaml` 登録済み 53 件（スキル初期作成時点。以降拡張）を読み込んで共通点を抽出して作りました: <!-- skill-lint-ignore -->
+評価パターンはハードコードした理論ではなく、`docs/portal/manifest.yaml` に現在登録されているエントリ
+——「これは手引きに載る」の唯一の実例——から読み取ったものです。その 16 件の共通点:
 
-- 散文 median 約 225 語、最大 1358
-- 27/53 が Mermaid 使用
-- 48/53 がテーブル使用
-- 38/53 が概念系 H2 を持つ
-- H2 頻度トップ: Notes (20), Directory Structure (12), Design Policy (11), Role (7), Public API (6), Rules (5), Architecture/Architectural Position (8), Test Strategy (4), Design Principles (4)
+- 見出しは日本語で、その多くが分類名ではなく主張そのものになっている ——
+  「値の分類は取得の口が宣言する」「なぜ別パッケージなのか」「面と文字で明度を分ける」
+- H2 頻度トップ: 運用 (12), 受け入れないもの (10), 受け入れるもの (10), 構成 (4),
+  テストの責務 (2), モジュール (2), 実行機序 (2)
+- 15/16 がテーブルを使う。**Mermaid は 0/16** —— 図はここでは加点であって前提ではない
+- 散文の量: 中央値 1462 字、最小 399 字、最大 15737 字（語数ではなく字数。散文が日本語のため）
+- H2 は平均 6.7 個
 
-`## Public API` を持ちつつ manifest に登録されている 6 件は、すべて Role / Architecture / Design Principles / How It Works 等の概念セクションも豊富な「ハイブリッド型」でした。純粋な API ref とは異なります。
+manifest が大きく変わったらこの数値を取り直します。ADR
+[0141](../../../docs/adr/0141-portal-operations.md) は登録済み集合を manual-worthy の基準としているので、
+基準が manifest に追随するのであって逆ではありません。
+
+### 意図的に manual-worthy でない 2 つの形
+
+どちらも件数が多く、候補と取り違えるとリポジトリ全体のレポートが読めなくなります。
+
+- **部品リファレンス** —— `src/components/**` の README は固定の節の形を共有します
+  （用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト）。1 つの component の表面を
+  書いたもので、このリポジトリの答えは Storybook（manifest の `meta.reference_links` の常設項目）と
+  component 自身の TSDoc です。これが本リポジトリでの N1 の読み方です
+- **feature slice** —— `src/features/` 配下の README は代わりに Step 2b の必須節検査で採点します。
+  対象は `docs/templates/feature-readme.md` が宣言する節です
 
 ### キーワード更新ログ
 
 Step 2 のキーワード集合は、`portal-manifest-sync` の実行で false-negative を観測するたびに拡張します。追加基準:
 
-- 本当に manual 品質の README が、当初リストにない言い換えを使っている（例: `Conventions` は実質的に Rules セクション）
-- その言い換えが既存 manifest 登録エントリの少なくとも 1 件、またはユーザーが明示的に manual-worthy と判断した README に使われている
+- 本当に manual 品質の README が、リストにない言い回しを使っている
+- その言い回しが既存 manifest 登録エントリの少なくとも 1 件、またはユーザーが明示的に manual-worthy と判断した README に使われている
 
-低品質 README を通すためのキーワード追加はしない。正当な言い換えのスペクトルを取りこぼさないことが目的。
-
-追加済みの例:
-
-- P2: `How It Works`, `Strategy`, `Trigger Strategy`, `Test Strategy`, `Application Policy`
-- P3: `Conventions`, `Naming Convention`, `Naming`, `Policy`
-- P5: `Workflow List`, `Command List`, `File List`, `Module List`
+低品質 README を通すための追加はしない。正当な言い換えのスペクトルを取りこぼさないことが目的です。
+いずれにせよ内容で判定します —— このリポジトリは主張そのものを見出しに書くため、リストの語が無くても
+問いに答えている節があれば観点は満たされます。
 
 ## Step 0. ターゲット確認
 
@@ -68,7 +80,7 @@ README 全文を読む。抽出:
 - 全 H2 見出し
 - ` ```mermaid ` ブロックの有無 / 件数
 - テーブル (`|...|`) の有無
-- 散文語数（コード / テーブル / 見出しを除く）
+- 散文の字数（コード / テーブル / 見出しを除く）
 - 翻訳 sibling (`README.ja.md`) の有無と sync convention 準拠
 
 ## Step 2. 各観点の評価
@@ -79,31 +91,35 @@ H2 見出しテキストだけでなく、各セクションの内容を読ん�
 
 | # | 観点 | シグナル |
 | --- | --- | --- |
-| P1 | **Role / Position** | H2 が `{Role, Position, Overview, Role in Onion Architecture, Architectural Position, Role in This Project}` のいずれかで、パッケージ／層が何でどこに位置するかを散文で説明 |
-| P2 | **Design Intent / Why** | H2 が `{Design Policy, Design Principles, Design Intent, Why, Why ..., Rationale, Approach, Necessity, How It Works, Strategy, Trigger Strategy, Test Strategy, Application Policy}` のいずれかで、ルール列挙でなく理由を語っている |
-| P3 | **Rules / Boundaries** | H2 が `{Rules, Do / Don't, Don'ts, Prohibited Practices, Forbidden, Constraints, Allowed dependencies, Disallowed, Implementation Rules, Conventions, Naming Convention, Naming, Policy}` — 明示的な指示 |
-| P4 | **Architecture diagram** | ` ```mermaid ` ブロック + 解説 prose 1 文以上 |
-| P5 | **Navigation** | H2 が `{Directory Structure, Subdirectories, Subdirectory Roles, Subpackages, Package List, Workflow List, Command List, File List, Module List}` — 内部構造案内 |
-| P6 | **Notes / caveats** | H2 `Notes` 等で運用上の注意 / pitfalls |
-| P7 | **Substantive prose** | 散文語数 ≥ 150 |
+| P1 | **役割 / 境界** | `受け入れるもの` / `受け入れないもの` の対、または `役割` / `境界` / `なぜ〜なのか`。「受け入れない」側が、外した仕事の行き先を名指ししていること（外したとだけ書いていないこと） |
+| P2 | **設計判断** | 判断を論じた節。主張そのものを見出しにしたもの（「値の分類は取得の口が宣言する」）や `設計` / `トリガ戦略` / `切替の軸` / `この層が持つ判断`。ルールの列挙ではなく理由 |
+| P3 | **規約 / 禁止** | `規約` / `配置・命名` / `TSDoc の基準` / `Storybook の表示規約`、または許可と禁止を突き合わせた表 —— 読み手を拘束できる形の指示 |
+| P4 | **実行機序** | `実行機序` / `実行機序と評価タイミング` / `生成と検査` / `Config の配線` —— 何がいつ動き、何が引き金かを書いている |
+| P5 | **配下への索引** | `構成` / `モジュール` / `〜一覧` / `〜目録` / `置いている hook` —— 配下を持つディレクトリについて |
+| P6 | **運用** | `運用`（登録済み集合で最頻の見出し）に実のある内容: 変更後に何を回すか、何が壊れるか、何を見るか |
+| P7 | **散文の量** | 散文 800 字以上（コードブロック / テーブル / 見出しを除く）。語数ではなく字数 —— 散文が日本語のため |
+
+Mermaid 図は加点であって観点ではありません。登録済みエントリで使っているものはありません。
 
 ### Negative 観点（トリガすると −2）
 
 | # | 兆候 | 判定 |
 | --- | --- | --- |
-| N1 | **Pure API reference** | `## Public API` あり、H2 ≤3、prose <150 語、Role/Design/Architecture なし → "godoc 領域" / out-of-scope-for-portal |
-| N2 | **Stub** | H2 ≤1、prose <50 語 |
-| N3 | **Index-only** | H2 が `Subpackages` / `Subdirectories` のみで narrative なし |
-| N4 | **Operational reference** | H2 set が `{Command, Flags, Usage, Notes}` 系の CLI usage ref → portal manual 不向き、CLI ドキュメント / godoc-cli 領域 |
+| N1 | **部品リファレンス** | component README の形（用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト）を持ち、その 1 つの component より大きなものを語る節を他に持たない。その component 自身の振る舞いを書いた節が増えても外れない → Storybook と component の TSDoc の領域 / out-of-scope-for-portal |
+| N2 | **Stub** | H2 ≤1 かつ散文 200 字未満 |
+| N3 | **Index-only** | 唯一の H2 が `構成`（または同等の列挙）で、列挙するだけで叙述が無い |
+| N4 | **Operational reference** | コマンド / フラグ / 使い方だけ —— スクリプトの起動面であって、判断が何も記録されていない。スクリプトの隣が置き場 |
 
-N1〜N4 は保守的に適用。Design / Role / Architecture セクションがあれば、API / Subpackages / Command 見出しがあっても N1 / N3 / N4 をトリガしない。
+N1〜N4 は保守的に適用します。役割・設計・実行機序の内容が実質的にあれば、列挙や component の見出しが
+あっても N1 / N3 / N4 をトリガしないこと —— `src/components/README.md` が登録されているのは、まさに
+その形をはるかに超えて語っているからです。
 
 ### 分類しきい値
 
 - **manual-worthy**: positive ≥ 3 かつ negative トリガなし。feature README の場合は Step 2b の必須節がすべて present であることも要る
 - **borderline**: positive 1〜2 かつ negative トリガなし
 - **not-yet-manual-grade**: positive 0、または positive あっても N2/N3 がトリガ
-- **out-of-scope-for-portal**: N1（godoc 領域）または N4（CLI ref）トリガ
+- **out-of-scope-for-portal**: N1（部品リファレンス）または N4（スクリプトの起動面リファレンス）トリガ
 
 ## Step 2b. feature README の必須節チェック
 
@@ -163,31 +179,31 @@ README Review: <path>
 [判定] manual-worthy | borderline | not-yet-manual-grade | out-of-scope-for-portal
 
 [強み] (満たす positive 観点)
-  ✓ P1 Role: "Role in Onion Architecture" で層境界を明示（〜「the core of the business」）
-  ✓ P4 Architecture diagram: Mermaid 図 2 件 + 解説 prose
-  ✓ P6 Notes: 運用上の caveats 3 項目（"transaction boundaries are managed by..."）
-  ✓ P7 散文 534 語
+  ✓ P1 役割 / 境界: 「受け入れないもの」が渡し先（components / model）を名指ししている
+  ✓ P4 実行機序: いつ評価されるかを起動境界と RSC の 2 経路で書き分けている
+  ✓ P6 運用: 変更後に回すものが 3 点（生成 / 突合 / 撮り直し）
+  ✓ P7 散文 1,462 字
 
 [ギャップ] (満たさない positive 観点)
-  ✗ P2 Design Intent / Why セクションなし
-  ✗ P3 Rules / Do-Don't の明文化なし
+  ✗ P2 設計判断を述べた節が無い
+  ✗ P3 規約 / 禁止の明文化が無い
 
 [アンチパターン] (トリガした negative)
   なし
-  ※（または）⚠ N1 Pure API reference: `## Public API` 支配的（他 H2 ≤2, prose 43 語）→ godoc 領域
+  ※（または）⚠ N1 部品リファレンス: 用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト の定型のみ → Storybook と TSDoc の領域
 
 [補強提案]
-  - "Why this layer exists" を 1〜2 段落追加すると、新規開発者・AI エージェントが層を必要性で理解できる
-  - "Forbidden / Don't" を箇条書きで明示すると、規約逸脱を自動チェックしやすくなる（arch-check スキルとも連動）
+  - 「この層が要る理由」を 1〜2 段落足すと、読み手が層を必要性から理解できる
+  - 「受け入れないもの」に渡し先を書き足すと、境界が判断に使える形になる
 
 [portal 適性]
-  manual-worthy → portal-manifest-sync の curation flow で追加候補
+  manual-worthy → /portal-manifest-sync を回し、レポートを見たうえでこのパスを名指しして追加する
   （または）borderline → README 補強後に再 review 推奨
   （または）not-yet-manual-grade → 内容拡充が先、または portal 対象外でよい
-  （または）out-of-scope-for-portal → godoc 領域、portal 不要
+  （または）out-of-scope-for-portal → Storybook / TSDoc の領域、portal 不要
 ```
 
-verbose 時は、raw H2 リスト / 散文語数 / Mermaid・テーブル件数 / H2 → 観点マッピング も併記。
+verbose 時は、raw H2 リスト / 散文の字数 / テーブル件数 / H2 → 観点マッピング も併記。
 
 ## Step 4. 次アクション提案
 
@@ -195,10 +211,10 @@ verbose 時は、raw H2 リスト / 散文語数 / Mermaid・テーブル件数 
 
 | 判定 | サジェスト |
 | --- | --- |
-| manual-worthy | "/portal-manifest-sync の curation flow でこの README を追加候補として指定するか、手動で manifest に追加してください" |
+| manual-worthy | "/portal-manifest-sync を回し、レポートを見たうえでこのパスを名指しして追加してください" |
 | borderline | "P2/P3 等の不足 section を補ってから再 review を推奨" |
 | not-yet-manual-grade | "/sync-readme で内容を拡充するか、portal 対象外として扱ってください" |
-| out-of-scope-for-portal | "godoc / CLI ドキュメント側で扱うべき内容です。portal manifest への追加は不要" |
+| out-of-scope-for-portal | "Storybook と TSDoc、あるいはスクリプトの隣で扱うべき内容です。portal manifest への追加は不要" |
 
 ## AI 修正スコープ
 
@@ -226,7 +242,7 @@ verbose 時は、raw H2 リスト / 散文語数 / Mermaid・テーブル件数 
 - [ ] 対象 README パスを `AskUserQuestion` で確認した
 - [ ] README 全文を読んだ
 - [ ] 全 H2 見出しを列挙し観点にマッピングした
-- [ ] 散文語数を算出した（コード / テーブル / 見出しを除く）
+- [ ] 散文の字数を算出した（コード / テーブル / 見出しを除く）
 - [ ] Mermaid / テーブルの有無を確認した
 - [ ] 各 positive 観点（P1〜P7）を Yes/No + 根拠で評価した
 - [ ] 各 negative 観点（N1〜N4）をチェックした

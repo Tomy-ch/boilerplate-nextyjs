@@ -1,0 +1,102 @@
+name: Suppression Expiry
+
+# Weekly re-read of the suppressions this repository declares (ADR 0110 §3.4).
+#
+# Why the rule needs a job that looks is ADR 0110 §3.4; this file is that job.
+#
+# Two limits are deliberate, and the report states both rather than reading as complete.
+# Only dates are decided: "once upstream requires N or later" and "after the sample purge
+# runs" cannot be evaluated, so every declaration is listed, not only the judged ones.
+# And the surfaces that keep their reason in a comment (gitleaks, zizmor, the pnpm
+# cooldown block, sonar) cannot be read per declaration at all — a parser drops comments —
+# so only their date-bearing lines appear.
+#
+# Not attached to pull requests. Nothing a pull request changes can make a date arrive,
+# and running it there would spend a job on every change to say the same thing.
+
+on:
+  schedule:
+    # Weekly, offset from the other Monday jobs so the runner queue is not asked for
+    # several at the same minute.
+    - cron: '15 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  suppression-expiry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            *.githubapp.com:443
+            prod.app-api.stepsecurity.io:443
+            mise-versions.jdx.dev:443
+            nodejs.org:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup mise and the pinned tools
+        uses: ./.github/actions/setup-mise
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        uses: ./.github/actions/setup-deps
+
+      # `continue-on-error` rather than a trailing `|| true`: the outcome is needed twice
+      # below, and a swallowed exit code would report every week as green.
+      - name: Read each suppression against its withdrawal condition
+        id: expiry
+        continue-on-error: true
+        env:
+          SUPPRESSION_REPORT: /tmp/suppression-expiry.md
+        run: make suppression-expiry
+
+      # One issue for the subject, commented on while it stays open. A fresh issue each
+      # week would bury the thread where the decision to keep or drop was argued.
+      - name: Raise it where it has an owner
+        if: ${{ steps.expiry.outcome == 'failure' }}
+        uses: ./.github/actions/upsert-issue
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title: '[Suppression] 撤回条件を満たした抑止が残っている'
+          body-file: /tmp/suppression-expiry.md
+          label: chore
+
+      - name: Fail if a condition is met
+        if: ${{ steps.expiry.outcome == 'failure' }}
+        run: exit 1
+
+  # See README.md § 通知 (why only scheduled runs notify, and why cancelled counts).
+  notify-failure:
+    needs: suppression-expiry
+    if: ${{ always() && github.event_name == 'schedule' && contains(fromJSON('["failure", "cancelled"]'), needs.suppression-expiry.result) }}
+    uses: ./.github/workflows/notify.yaml
+    with:
+      failed-job: suppression-expiry
+    secrets:
+      slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}

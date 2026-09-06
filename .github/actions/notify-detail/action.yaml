@@ -11,8 +11,10 @@ description: Turn a scanner's log into a compact notification body of identifier
 # for a fixed identifier shape cannot carry one out by accident, whereas any "first N
 # lines" rule eventually would.
 #
-# Falling back to the leading lines matters because a scanner that stops printing
-# identifiers is a formatting change, not a reason to notify with an empty body.
+# When no identifier matches, the body carries one fixed line pointing at the run rather
+# than any part of the log. A scanner that stops printing identifiers is a formatting
+# change, not a reason to notify with an empty body — and not a reason to relax the rule
+# above either, since the run link is what a reader follows in that case anyway.
 
 inputs:
   log-file:
@@ -52,17 +54,21 @@ runs:
           exit 0
         fi
 
-        detail=$(grep -oE '(CVE-[0-9]{4}-[0-9]+|GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4})' \
-          "${LOG_FILE}" | sort -u | sed 's/^/- /' || true)
-        if [ -z "${detail}" ]; then
-          detail=$(head -n "${MAX_LINES}" "${LOG_FILE}")
-        fi
+        # MAL- is OSV's malicious-package series, which carries neither a CVE nor a GHSA.
+        identifiers=$(grep -oE '(CVE-[0-9]{4}-[0-9]+|GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}|MAL-[0-9]{4}-[0-9]+|OSV-[0-9]{4}-[0-9]+)' \
+          "${LOG_FILE}" | sort -u || true)
 
-        total=$(printf '%s\n' "${detail}" | wc -l | tr -d ' ')
-        if [ "${total}" -gt "${MAX_LINES}" ]; then
-          detail=$(printf '%s\n- … and %d more (see the run)' \
-            "$(printf '%s\n' "${detail}" | head -n "${MAX_LINES}")" \
-            "$((total - MAX_LINES))")
+        if [ -z "${identifiers}" ]; then
+          detail='- (no advisory identifier in the log — see the run)'
+        else
+          # Counted before the prefix so the remainder is a number of identifiers.
+          total=$(printf '%s\n' "${identifiers}" | wc -l | tr -d ' ')
+          detail=$(printf '%s\n' "${identifiers}" | head -n "${MAX_LINES}" | sed 's/^/- /')
+
+          if [ "${total}" -gt "${MAX_LINES}" ]; then
+            detail=$(printf '%s\n- … and %d more (see the run)' \
+              "${detail}" "$((total - MAX_LINES))")
+          fi
         fi
 
         {

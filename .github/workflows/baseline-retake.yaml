@@ -63,6 +63,11 @@ jobs:
       pull-requests: write
       actions: read
 
+    # The app id is not a secret, and a step's `if` cannot read the `secrets` context —
+    # only `env`. This is what lets the mint stand down on a fork that has no app.
+    env:
+      BASELINE_APP_ID: ${{ secrets.BASELINE_APP_ID }}
+
     outputs:
       comment: ${{ steps.outcome.outputs.comment }}
 
@@ -88,6 +93,31 @@ jobs:
             mcr.microsoft.com:443
             *.data.mcr.microsoft.com:443
 
+      # The REST calls below run on an app installation token rather than `GITHUB_TOKEN`.
+      # `GITHUB_TOKEN` is capped at 1,000 requests per hour per repository, shared across
+      # every workflow and every open pull request; an installation token carries 5,000.
+      # This job is the one that ran out first — it fires on every VRT and E2E completion
+      # and makes about ten calls each time, so a busy day took it down while nothing was
+      # wrong with the change under test.
+      #
+      # The permissions are the union of what the steps below need and nothing else:
+      # reading the pull request and its check runs, and taking the label off once the
+      # pointer has moved. Pushing is a separate mint inside `setup-baselines`, narrowed
+      # to what pushing needs.
+      #
+      # A fork that has not registered the app falls back to `GITHUB_TOKEN`. The retake
+      # still works there; it just draws on the smaller budget.
+      - name: Mint a token for the API calls
+        id: api-token
+        if: env.BASELINE_APP_ID != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BASELINE_APP_ID }}
+          private-key: ${{ secrets.BASELINE_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+          permission-checks: read
+          permission-contents: read
+
       # `workflow_run` carries the commit but not the pull request, so everything the
       # later steps branch on is resolved here in one API call.
       #
@@ -101,7 +131,7 @@ jobs:
       - name: Resolve the pull request
         id: pr
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
         run: |
@@ -130,7 +160,7 @@ jobs:
           steps.pr.outputs.found == 'true' &&
           steps.pr.outputs.head_repo != github.repository
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           PR: ${{ steps.pr.outputs.number }}
         run: |
           gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body \
@@ -180,7 +210,7 @@ jobs:
         id: gate
         if: steps.mode.outputs.mode != 'none' && steps.mode.outputs.mode != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           STORIES: ${{ steps.trigger.outputs.stories }}
           # Everything whose failure can change what a story renders as.
@@ -235,7 +265,7 @@ jobs:
       - name: Refuse a branch that is behind its base
         if: steps.gate.outputs.deferred == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           PR: ${{ steps.pr.outputs.number }}
           BASE: ${{ steps.pr.outputs.base_ref }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -253,7 +283,7 @@ jobs:
         id: route
         if: steps.gate.outputs.deferred == 'false'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           BRANCH: ${{ steps.pr.outputs.head_ref }}
         run: |
           set -euo pipefail
@@ -309,7 +339,7 @@ jobs:
           steps.mode.outputs.mode == 'reported' &&
           steps.trigger.outputs.stories == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name vrt-report --dir tmp/vrt || {
@@ -338,7 +368,7 @@ jobs:
           steps.gate.outputs.deferred == 'false' &&
           steps.mode.outputs.mode == 'reported'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           STORIES: ${{ steps.trigger.outputs.stories }}
@@ -695,7 +725,7 @@ jobs:
           steps.screens.outputs.pending != 'true'
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           PR: ${{ steps.pr.outputs.number }}
         run: |
           gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label baseline-retake

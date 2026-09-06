@@ -36,6 +36,11 @@ jobs:
       contents: read
       pull-requests: read
 
+    # The app id is not a secret, and a step's `if` cannot read the `secrets` context —
+    # only `env`. This is what lets the mint stand down on a fork that has no app.
+    env:
+      BASELINE_APP_ID: ${{ secrets.BASELINE_APP_ID }}
+
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -87,6 +92,21 @@ jobs:
         if: steps.moved.outputs.moved == 'false'
         run: echo '基準画像は動いていません。' >> "$GITHUB_STEP_SUMMARY"
 
+      # The REST calls here run on an app installation token rather than `GITHUB_TOKEN`,
+      # whose 1,000 requests per hour are shared across every workflow and every open
+      # pull request in this repository. A fork without the app falls back and still
+      # works; it just draws on the smaller budget.
+      - name: Mint a token for the API calls
+        id: api-token
+        if: steps.moved.outputs.moved == 'true' && env.BASELINE_APP_ID != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BASELINE_APP_ID }}
+          private-key: ${{ secrets.BASELINE_APP_PRIVATE_KEY }}
+          permission-pull-requests: read
+          permission-issues: read
+          permission-contents: read
+
       # The label alone is not the gate: an acceptance given before the current images
       # existed accepted something else. The pointer's own commit date is the line.
       #
@@ -96,7 +116,7 @@ jobs:
       - name: Require an acceptance newer than the baselines
         if: steps.moved.outputs.moved == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.api-token.outputs.token || secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         shell: bash

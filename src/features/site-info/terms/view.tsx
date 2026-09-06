@@ -1,7 +1,7 @@
-import { AlertTriangleIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/design-system/status/alert/alert";
+import { AlertTriangleIcon } from "@/components/icon";
 import { withScreenSpan } from "@/observability/render-span";
 import { ABOUT_PATH, PRIVACY_PATH } from "../facade/paths/paths";
 

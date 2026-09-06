@@ -1,9 +1,9 @@
 "use client";
 
-import { MessageCircleIcon } from "lucide-react";
 import { useCallback } from "react";
 
 import { Button } from "@/components/design-system/action/button/button";
+import { MessageCircleIcon } from "@/components/icon";
 import { useToast } from "@/components/shell/toaster/toaster";
 
 /** 問い合わせの受け口がまだ無いことを伝える文言。 */

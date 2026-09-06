@@ -1,12 +1,12 @@
 "use client";
 
-import { MinusIcon, PlusIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { CART_ITEM_MAX_QUANTITY } from "@/adapters/client/api/cart";
 import { Button } from "@/components/design-system/action/button/button";
+import { MinusIcon, PlusIcon } from "@/components/icon";
 import { idleActionState } from "@/model/action-state";
 
 import { type CartActionState, setCartItemQuantityAction } from "../../actions";

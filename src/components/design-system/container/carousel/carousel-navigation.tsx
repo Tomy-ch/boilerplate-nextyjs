@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -12,6 +11,7 @@ import {
 } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icon";
 import { CarouselNav } from "./carousel";
 import { alignSlideToStart, CAROUSEL_CONTENT_SLOT, CAROUSEL_ITEM_SLOT } from "./carousel-scroll";
 

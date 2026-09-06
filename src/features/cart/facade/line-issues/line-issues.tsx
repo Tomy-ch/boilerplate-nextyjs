@@ -1,6 +1,5 @@
-import { CircleAlertIcon, TriangleAlertIcon } from "lucide-react";
-
 import { cn } from "@/components/cn";
+import { AlertTriangleIcon, CircleAlertIcon } from "@/components/icon";
 import type { CartLineIssue } from "@/model/cart/cart";
 import { cartIssueNotice } from "@/model/cart/issue-notice";
 
@@ -52,7 +51,7 @@ export function CartLineIssues({ issues, availableQuantity, note }: CartLineIssu
             {notice.blocking ? (
               <CircleAlertIcon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
             ) : (
-              <TriangleAlertIcon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+              <AlertTriangleIcon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
             )}
             {notice.message}
           </li>

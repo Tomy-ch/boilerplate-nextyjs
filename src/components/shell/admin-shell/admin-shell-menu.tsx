@@ -1,6 +1,5 @@
 "use client";
 
-import { MenuIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -12,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/design-system/overlay/sheet/sheet";
+import { MenuIcon } from "@/components/icon";
 import type { AdminShellNavGroup } from "./admin-shell.definition";
 import { AdminShellNav } from "./admin-shell-nav";
 

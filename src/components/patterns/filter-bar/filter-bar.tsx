@@ -1,4 +1,3 @@
-import { ListFilterIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps, MouseEvent, ReactNode } from "react";
 
@@ -6,6 +5,7 @@ import { cn } from "@/components/cn";
 import { Button } from "@/components/design-system/action/button/button";
 import { Badge } from "@/components/design-system/display/badge/badge";
 import { BADGE_VARIANT } from "@/components/design-system/display/badge/badge.definition";
+import { FilterIcon, XIcon } from "@/components/icon";
 
 /** {@link FilterBar} の props。 */
 export type FilterBarProps = ComponentProps<"section"> & {
@@ -87,7 +87,7 @@ export function FilterBarTrigger({
 }: FilterBarTriggerProps) {
   return (
     <Button data-slot="filter-bar-trigger" variant={variant} {...props}>
-      <ListFilterIcon aria-hidden="true" />
+      <FilterIcon aria-hidden="true" />
       {children}
       {count === 0 ? null : (
         <Badge aria-label={`${count} 件の条件が有効`} variant={BADGE_VARIANT.SECONDARY}>

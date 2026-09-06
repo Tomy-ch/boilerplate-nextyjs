@@ -1,6 +1,5 @@
 "use client";
 
-import { SearchIcon, XIcon } from "lucide-react";
 import {
   type ChangeEvent,
   type KeyboardEvent,
@@ -9,6 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { SearchIcon, XIcon } from "@/components/icon";
 
 import {
   InputGroup,

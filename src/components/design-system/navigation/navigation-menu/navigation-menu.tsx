@@ -1,11 +1,11 @@
 "use client";
 
 import { cva } from "class-variance-authority";
-import { ChevronDownIcon } from "lucide-react";
 import { NavigationMenu as NavigationMenuPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { ChevronDownIcon } from "@/components/icon";
 
 /**
  * サイト構造の中の主要な遷移先を並べる、client island の navigation root。

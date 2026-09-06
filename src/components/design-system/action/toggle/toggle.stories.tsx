@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { WrapTextIcon } from "lucide-react";
 import { useCallback, useState } from "react";
+
+import { TextWrapIcon } from "@/components/icon";
 
 import { Toggle } from "./toggle";
 
@@ -78,7 +79,7 @@ export const Sizes: Story = {
 
 /** icon だけの場合。名前は `aria-label` で与え、状態では変えない。 */
 export const IconOnly: Story = {
-  args: { "aria-label": "折り返す", children: <WrapTextIcon aria-hidden="true" />, pressed: true },
+  args: { "aria-label": "折り返す", children: <TextWrapIcon aria-hidden="true" />, pressed: true },
 };
 
 /** 操作できない状態。 */

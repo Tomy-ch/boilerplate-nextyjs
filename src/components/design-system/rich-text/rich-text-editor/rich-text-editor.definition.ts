@@ -13,23 +13,23 @@ import { Paragraph } from "@tiptap/extension-paragraph";
 import { Strike } from "@tiptap/extension-strike";
 import { Text } from "@tiptap/extension-text";
 import { UndoRedo } from "@tiptap/extensions";
+
 import {
   BoldIcon,
   CodeIcon,
   Heading2Icon,
   Heading3Icon,
   Heading4Icon,
+  type IconComponent,
   ItalicIcon,
   ListIcon,
   ListOrderedIcon,
-  type LucideIcon,
   MinusIcon,
   QuoteIcon,
-  Redo2Icon,
+  RedoIcon,
   StrikethroughIcon,
-  Undo2Icon,
-} from "lucide-react";
-
+  UndoIcon,
+} from "@/components/icon";
 import { RICH_TEXT_LINK_PROTOCOLS } from "@/model/rich-text/rich-text.definition";
 import { SHORTCUT_MODIFIER } from "../../display/keyboard-shortcut/keyboard-shortcut.definition";
 
@@ -124,7 +124,7 @@ export type RichTextEditorToggleAction = {
   /** toolbar のボタンのアクセシブルな名前。 */
   readonly label: string;
   /** ボタンに表示する図案。 */
-  readonly Icon: LucideIcon;
+  readonly Icon: IconComponent;
   /** 同じことを起こすキー。押す順に並べる。持たない操作もある。 */
   readonly shortcut?: readonly string[];
   /** 選択範囲へ適用されているかどうかを返す。 */
@@ -146,7 +146,7 @@ export type RichTextEditorCommandAction = {
   /** toolbar のボタンのアクセシブルな名前。 */
   readonly label: string;
   /** ボタンに表示する図案。 */
-  readonly Icon: LucideIcon;
+  readonly Icon: IconComponent;
   /** 同じことを起こすキー。押す順に並べる。持たない操作もある。 */
   readonly shortcut?: readonly string[];
   /** いま実行できるかどうかを返す。実行できない間はボタンを disabled にする。 */
@@ -273,7 +273,7 @@ export const RICH_TEXT_EDITOR_COMMAND_ACTIONS: readonly RichTextEditorCommandAct
   {
     id: "undo",
     label: "元に戻す",
-    Icon: Undo2Icon,
+    Icon: UndoIcon,
     shortcut: [SHORTCUT_MODIFIER.MOD, "Z"],
     isEnabled: (editor) => editor.can().undo(),
     run: (editor) => void editor.chain().focus().undo().run(),
@@ -281,7 +281,7 @@ export const RICH_TEXT_EDITOR_COMMAND_ACTIONS: readonly RichTextEditorCommandAct
   {
     id: "redo",
     label: "やり直す",
-    Icon: Redo2Icon,
+    Icon: RedoIcon,
     shortcut: [SHORTCUT_MODIFIER.MOD, SHORTCUT_MODIFIER.SHIFT, "Z"],
     isEnabled: (editor) => editor.can().redo(),
     run: (editor) => void editor.chain().focus().redo().run(),

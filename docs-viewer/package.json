@@ -12,7 +12,6 @@
     "hast-util-from-html": "2.0.3",
     "hast-util-sanitize": "5.0.2",
     "hast-util-to-jsx-runtime": "2.3.6",
-    "lucide-react": "1.26.0",
     "marked": "18.0.7",
     "mermaid": "11.16.1",
     "react": "19.2.8",

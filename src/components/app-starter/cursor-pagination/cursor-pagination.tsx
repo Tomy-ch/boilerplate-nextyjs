@@ -1,5 +1,6 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import type { ComponentProps } from "react";
+
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icon";
 
 import {
   Pagination,

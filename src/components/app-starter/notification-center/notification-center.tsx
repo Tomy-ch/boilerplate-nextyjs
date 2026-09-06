@@ -1,4 +1,3 @@
-import { BellIcon } from "lucide-react";
 import type { ComponentProps, MouseEvent, ReactNode } from "react";
 import { FeedbackState } from "@/components/app-starter/feedback-state/feedback-state";
 import { FEEDBACK_STATE_KIND } from "@/components/app-starter/feedback-state/feedback-state.definition";
@@ -8,6 +7,7 @@ import { BUTTON_VARIANT } from "@/components/design-system/action/button/button.
 import { Badge } from "@/components/design-system/display/badge/badge";
 import { BADGE_VARIANT } from "@/components/design-system/display/badge/badge.definition";
 import { List, ListItem, ListItemMedia } from "@/components/design-system/display/list/list";
+import { BellIcon } from "@/components/icon";
 
 /** {@link NotificationTrigger} の props。 */
 export type NotificationTriggerProps = Omit<ComponentProps<typeof Button>, "asChild"> & {

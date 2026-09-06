@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
 
 import { cn } from "@/components/cn";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@/components/icon";
 
 /** {@link SelectClient} の props。 */
 export type SelectClientProps = React.ComponentProps<typeof SelectPrimitive.Root>;

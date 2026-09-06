@@ -1,11 +1,11 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { XIcon } from "@/components/icon";
 
 import { useOverlayHistory } from "../use-overlay-history";
 

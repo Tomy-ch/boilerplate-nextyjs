@@ -1,8 +1,8 @@
-import { CheckIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/components/cn";
 import { List, ListItem, ListItemMedia } from "@/components/design-system/display/list/list";
+import { CheckIcon } from "@/components/icon";
 import {
   STEPPER_ORIENTATION,
   STEPPER_PASSED_CURRENT_LABEL,

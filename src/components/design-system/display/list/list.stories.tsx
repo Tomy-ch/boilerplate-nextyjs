@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { BellIcon, ShieldIcon } from "lucide-react";
 import Link from "next/link";
 import { useId } from "react";
+
+import { BellIcon, ShieldIcon } from "@/components/icon";
 
 import { Button } from "../../action/button/button";
 import { Input } from "../../form/input/input";

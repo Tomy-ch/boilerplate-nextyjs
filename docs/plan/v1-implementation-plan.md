@@ -835,7 +835,7 @@ test-requirement: unit
 - **目的**: shadcn/ui を起点に、**コードを SSOT とするデザインシステム**を立ち上げる(§3.11)。P3-7 のトークン確定はこの改修の結果として決まる
 - **対象 ADR**: [0052](../adr/0052-ui-component-policy.md) / [0053](../adr/0053-ui-component-interaction-seam.md) / [0054](../adr/0054-ui-catalog-storybook.md) / [0051](../adr/0051-styling-system.md) / [0100](../adr/0100-accessibility-target.md)
 - **主な変更先**:
-  - `src/components/` — shadcn/ui + lucide-react + 複雑入力を import(`cva` 込み。§3.10)
+  - `src/components/` — shadcn/ui + @tabler/icons-react + 複雑入力を import(`cva` 込み。§3.10)
   - `.storybook/` — builder / framework 統合
   - `*.stories.tsx` — 対象コンポーネントへ co-location([0027](../adr/0027-directory-structure.md))
   - `src/components/component-template.md` — component README の必須見出しを固定するコピー元

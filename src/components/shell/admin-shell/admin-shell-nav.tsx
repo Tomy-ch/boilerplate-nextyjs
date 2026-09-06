@@ -1,10 +1,10 @@
 "use client";
 
-import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/components/cn";
+import { ChevronRightIcon } from "@/components/icon";
 
 import type { AdminShellNavGroup } from "./admin-shell.definition";
 

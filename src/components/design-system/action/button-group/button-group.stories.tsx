@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ChevronDownIcon, ListIcon, MapIcon, TableIcon } from "lucide-react";
 import { useId } from "react";
+
+import { ChevronDownIcon, ListIcon, MapIcon, TableIcon } from "@/components/icon";
 
 import { Input } from "../../form/input/input";
 import {

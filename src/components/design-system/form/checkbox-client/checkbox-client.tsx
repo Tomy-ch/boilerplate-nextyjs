@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckIcon, MinusIcon } from "lucide-react";
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
 import type * as React from "react";
 
 import { cn } from "@/components/cn";
+import { CheckIcon, MinusIcon } from "@/components/icon";
 
 /** {@link CheckboxClient} の props。 */
 export type CheckboxClientProps = React.ComponentProps<typeof CheckboxPrimitive.Root>;

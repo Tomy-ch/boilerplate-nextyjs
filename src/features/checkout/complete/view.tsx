@@ -1,8 +1,8 @@
-import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/design-system/action/button/button";
 import { BUTTON_VARIANT } from "@/components/design-system/action/button/button.definition";
+import { CircleCheckIcon } from "@/components/icon";
 import { PurchaseAmountSummary } from "@/features/purchases/facade/amount-summary/amount-summary";
 import { PurchaseLineList } from "@/features/purchases/facade/lines/lines";
 import { PurchaseReceiptCard } from "@/features/purchases/facade/receipt/receipt";
@@ -35,7 +35,7 @@ export const CheckoutCompleteView = withScreenSpan(
     return (
       <div className="flex flex-col gap-6">
         <p className="flex items-center gap-2 font-emphasis text-lg">
-          <CheckCircle2Icon aria-hidden="true" className="size-5 text-primary" />
+          <CircleCheckIcon aria-hidden="true" className="size-5 text-primary" />
           ご注文ありがとうございます。
         </p>
 

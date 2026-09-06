@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ClockIcon, InfoIcon } from "lucide-react";
 import Link from "next/link";
+
+import { ClockIcon, InfoIcon } from "@/components/icon";
 
 import { Marker, MarkerContent, MarkerIcon } from "./marker";
 import { MARKER_VARIANT, type MarkerVariant } from "./marker.definition";

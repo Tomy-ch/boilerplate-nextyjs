@@ -110,7 +110,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0045](docs/adr/0045-fonts-and-images.md) | Fonts / images | `next/font` / `next/image` policy |
 | [0050](docs/adr/0050-styling-strategy.md) | Styling strategy | Tailwind v4 + design tokens / `cn()` helper / CSS Modules limited allowance |
 | [0051](docs/adr/0051-styling-system.md) | Styling system | design tokens / responsive / motion (Framer Motion) / print |
-| [0052](docs/adr/0052-ui-component-policy.md) | UI component policy | shadcn/ui + lucide adopted |
+| [0052](docs/adr/0052-ui-component-policy.md) | UI component policy | shadcn/ui + @tabler/icons-react adopted / icon vendor closed into `src/components/icon.ts` |
 | [0053](docs/adr/0053-ui-component-interaction-seam.md) | UI interaction seam | UI component policy + interaction a11y seam |
 | [0054](docs/adr/0054-ui-catalog-storybook.md) | UI catalog | Storybook policy |
 | [0060](docs/adr/0060-state-management.md) | State management | react-hook-form / Zustand adopted / server-state policy |

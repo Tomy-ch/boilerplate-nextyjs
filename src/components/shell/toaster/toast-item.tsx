@@ -1,11 +1,11 @@
 "use client";
 
-import { XIcon } from "lucide-react";
 import type { PointerEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/design-system/action/button/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/design-system/status/alert/alert";
 import { ProgressClient } from "@/components/design-system/status/progress-client/progress-client";
+import { XIcon } from "@/components/icon";
 
 import {
   TOAST_POSITION,

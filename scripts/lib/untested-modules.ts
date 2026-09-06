@@ -65,6 +65,9 @@ export const GENERATED_MODULES = ["src/adapters/gen/**", "mocks/api/**"] as cons
  *   絵を渡すだけ。分岐を持たず、単体で回しても渡した JSX をラスタライザが受け取ったことしか
  *   確かめられない。絵として返ることは `make e2e-metadata` が起動したアプリから取って見ている
  *   （`e2e/metadata/`）。
+ * - `src/components/icon.ts` — 供給元のアイコンを名前を付け替えて再輸出するだけ。分岐も式も持たず、
+ *   回しても「再輸出したものが再輸出されている」しか確かめられない。名前が実在することは型検査が、
+ *   使っていないものが束へ乗らないことは `pnpm bundle-budget` の予算が見ている。
  * - `src/model/generated/design-token.ts` — トークン名の一覧を並べた生成物。分岐も式も持たず、
  *   読み手はカタログの story だけで、値そのものは表示する側が実行時に CSS から読む。名前が
  *   SSOT と一致することは `check:tokens` の再生成比較が見ている。
@@ -91,6 +94,7 @@ const NON_DECIDING_MODULES = [
   "src/app/icon.tsx",
   "src/app/apple-icon.tsx",
   "src/app/opengraph-image.tsx",
+  "src/components/icon.ts",
   "src/model/generated/design-token.ts",
   "docs-viewer/src/main.tsx",
   "vrt/lib/settle.ts",

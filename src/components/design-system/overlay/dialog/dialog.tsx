@@ -1,10 +1,10 @@
 "use client";
 
-import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { XIcon } from "@/components/icon";
 
 import { useOverlayHistory } from "../use-overlay-history";
 

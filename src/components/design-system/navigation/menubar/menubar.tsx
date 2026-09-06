@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import { Menubar as MenubarPrimitive } from "radix-ui";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/components/cn";
+import { CheckIcon, ChevronRightIcon, CircleIcon } from "@/components/icon";
 import { KbdGroup } from "../../display/kbd/kbd";
 import { MENUBAR_ITEM_VARIANT, type MenubarItemVariant } from "./menubar.definition";
 

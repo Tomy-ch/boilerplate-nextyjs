@@ -1,5 +1,6 @@
-import { SearchIcon } from "lucide-react";
 import type { ComponentProps } from "react";
+
+import { SearchIcon } from "@/components/icon";
 
 import {
   InputGroup,

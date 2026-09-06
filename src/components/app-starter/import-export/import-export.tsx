@@ -1,4 +1,3 @@
-import { DownloadIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/components/cn";
@@ -13,6 +12,7 @@ import {
 } from "@/components/design-system/display/table/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/design-system/status/alert/alert";
 import { Spinner } from "@/components/design-system/status/spinner/spinner";
+import { DownloadIcon } from "@/components/icon";
 
 /** {@link ImportSummary} の props。 */
 export type ImportSummaryProps = ComponentProps<"div"> & {

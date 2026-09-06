@@ -48,7 +48,7 @@ BACKLOG D2 は、`docs/portal/manifest.yaml` への登録基準・portal ↔ doc
 
 ### 6. 実装状況
 
-- portal の生成と GitHub Pages 配信は実装済みとする。**Pages 自体の有効化ではなく、`github-pages` environment の deployment branch policy に配信元ブランチを許可することが要る** —— 許可が無いと `docs-deploy` は step を 1 つも実行せずに落ちる。リポジトリ設定のためユーザが行う
+- portal の生成と GitHub Pages 配信は実装済みとする。**Pages の有効化と、`github-pages` environment の deployment branch policy への配信元ブランチの許可は `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ**。許可が無いと `docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない —— 配信元は workflow の push トリガと 1 箇所で揃える必要があり、人手の手順に置くと落ちても気付けない
 - `portal-manifest-sync` スキルは移植済み。drift の機械検出は生成スクリプトが持ち(`portal:guides` は stale で非 0、`portal:docs` は構造の警告を出す)、スキルはそれを読み取ったうえで、生成側が黙って飲み込む配置(`Other` へ落ちる登録)と curation 候補の分類を担う
 
 ## 禁止事項

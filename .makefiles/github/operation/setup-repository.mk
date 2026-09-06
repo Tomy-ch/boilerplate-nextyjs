@@ -90,6 +90,10 @@ setup-repo:
 	@make apply-branch-protection
 	@echo "✅ ルールセットの適用を終了します。"
 
+	@echo "🔧 Pages の配信設定を開始します..."
+	@make apply-pages-delivery
+	@echo "✅ Pages の配信設定を終了します。"
+
 	@echo "🔧 ラベルの初期化を開始します..."
 	@make delete-all-labels
 	@make create-default-labels

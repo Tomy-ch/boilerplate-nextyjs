@@ -33,7 +33,7 @@ export type UserScopeSelectProps = {
  * 範囲の名前を載せると受け取った側で確定し直すことになり、どの範囲でもない値が来た場合という
  * 到達しない道が残ります。行き先を載せれば、選ばれたものがそのまま移動先になります。
  *
- * @see Storybook `Page/Admin/Users`
+ * @see Storybook `Features/Admin/Users/ScopeSelect`
  */
 export function UserScopeSelect({ value }: UserScopeSelectProps) {
   const router = useRouter();

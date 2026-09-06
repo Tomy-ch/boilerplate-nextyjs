@@ -1,7 +1,5 @@
 // リリースブランチ名から `package.json` の version を決める判断。
-//
-// 版の出所はブランチ名 1 つで、`package.json` はそこから導かれる側に置く。両方を人が書くと、
-// 出荷した版と名乗る版が黙ってずれる。
+// 版の出所をブランチ名へ一本化する理由は [0150](../../docs/adr/0150-git-workflow.md)。
 
 import { normalizeVersion } from "../semver/bump.js";
 
@@ -10,10 +8,8 @@ import { normalizeVersion } from "../semver/bump.js";
  *
  * @remarks
  * `release` と `hotfix` の双方を数えます。どちらも出荷される版であり、片方だけを数えると
- * hotfix で出した版だけが `package.json` に載らないまま残ります。
- *
- * 版として読めるかの判断は [bump.ts](../semver/bump.ts) へ委ねます。ここで綴り直すと、
- * リリースを切る側が読める表記とこちらが読める表記が別々に動きます。
+ * hotfix で出した版だけが `package.json` に載らないまま残ります。捕まえるのは版らしき文字列
+ * までで、読めるかどうかの判断は呼び出し元の `deriveVersion` が持ちます。
  */
 const RELEASE_BRANCH_PATTERN = /^(?:release|hotfix)\/(v.+)$/;
 
@@ -36,13 +32,32 @@ export function isStampMode(value: string): value is StampMode {
   return (STAMP_MODES as readonly string[]).includes(value);
 }
 
+/** 走らせ方が踏む副作用。plan が `write` のときに、どこまで進むかを決める。 */
+export type StampEffects = {
+  readonly write: boolean;
+  readonly commit: boolean;
+};
+
+/**
+ * 走らせ方から、書き換えとその記録をどこまで行うかを決める。
+ *
+ * @remarks
+ * **`check` が書かないことがこの機構の要です。**突き合わせるだけのはずの CI が `package.json`
+ * を書き換えると、検査が検査対象を作ってしまいます。入口へ置くと検査の母数から外れ
+ * （[untested-modules.ts](../lib/untested-modules.ts) の入口の線引き）、この 1 行を誰も
+ * 見張らなくなります。
+ */
+export function stampEffects(mode: StampMode): StampEffects {
+  return { write: mode !== "check", commit: mode === "commit" };
+}
+
 /**
  * 版を導く ref を、優先順に選ぶ。
  *
  * @remarks
- * ブランチ名は**シェルを経由せず**環境変数として届きます。make の変数として recipe 行へ
- * 展開すると、`"` や `;` を含むブランチ名（git が許す）でクォートが破れ、任意のコマンドが
- * 走ります。優先順をここに置くのは、渡し口が増えても選び方が 1 箇所に残るためです。
+ * ブランチ名は**シェルを経由せず**環境変数として届きます（引数で渡さない理由は
+ * [.makefiles/README.md](../../.makefiles/README.md) の「版の焼き込み関連」）。優先順をここへ
+ * 置くのは、渡し口が増えても選び方が 1 箇所に残るためです。
  *
  * @param candidates - 優先順に並べた候補。空文字列と `undefined` は「指定なし」として次へ送る
  * @returns 最初に指定されていた候補。1 つも無ければ `null`
@@ -65,6 +80,9 @@ export function selectRef(candidates: readonly (string | undefined)[]): string |
  * @remarks
  * リリース版を名乗らない ref は「刻まない」であって「エラー」ではないため `null` を返し、
  * 落とすかどうかを呼び出し側に選ばせます。feature ブランチの PR でも同じ検査が走ります。
+ *
+ * 版として読めるかの判断は [bump.ts](../semver/bump.ts) へ委ねます。ここで綴り直すと、
+ * リリースを切る側が読める表記とこちらが読める表記が別々に動きます。
  */
 export function deriveVersion(ref: string): string | null {
   const captured = RELEASE_BRANCH_PATTERN.exec(ref)?.[1];

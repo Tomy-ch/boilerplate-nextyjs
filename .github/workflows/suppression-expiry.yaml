@@ -72,7 +72,9 @@ jobs:
       - name: Read each suppression against its withdrawal condition
         id: expiry
         continue-on-error: true
-        run: make suppression-expiry SUPPRESSION_REPORT=/tmp/suppression-expiry.md
+        env:
+          SUPPRESSION_REPORT: /tmp/suppression-expiry.md
+        run: make suppression-expiry
 
       # One issue for the subject, commented on while it stays open. A fresh issue each
       # week would bury the thread where the decision to keep or drop was argued.

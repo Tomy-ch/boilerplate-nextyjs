@@ -59,6 +59,14 @@ function isExcludedPrefix(rel: string): boolean {
 // 実在するかどうかに関わらず対象外にする。
 const PATH_ROOT_DENY = new Set(["tmp", ".git", "graphify-out"]);
 
+// 追跡していない生成物のうち、参照先として名指しされるもの。portal の成果物は `docs/` の内側にあり、
+// `docs/` 自体は検査したいので PATH_ROOT_DENY（先頭セグメント）では表せない。
+//
+// 配下ではなく**この 2 つだけ**を完全一致で許すのは、`guides/` の中身が manifest の `dst` から一意に
+// 決まる決定的な集合だからである。前方一致で配下ごと許すと、`guides/` を指す綴り違いや改名後の
+// 陳腐化した参照が恒久的に検出されなくなる（`tmp/` のように中身が不定形な出力とはここが違う）。
+const GENERATED_ARTIFACT_PATHS = new Set(["docs/portal/guides", "docs/portal/docs.json"]);
+
 // 意図的に実在しない参照（仮定の例示・任意配置）を抑止するための行内ディレクティブ。
 const IGNORE_DIRECTIVE = "<!-- skill-lint-ignore -->";
 
@@ -144,7 +152,6 @@ function checkFrontmatter(rel: string, content: string, expectedName: string): v
 // 対訳ペア
 // ---------------------------------------------------------------------------
 
-// フェンス外の見出しを (レベル, テキスト) で抽出する。
 // 対訳（SKILL.ja.md）が canonical（SKILL.md）と 1:1 であることを検査する。
 // ファイルの有無だけでは節の欠落・ずれを検出できないため、見出しレベル列の一致まで見る。
 function checkTranslationPair(canonicalRel: string, translationRel: string): void {
@@ -353,6 +360,7 @@ function isUncreatedKernelPath(text: string): boolean {
 function repoPathExists(candidate: string, fromDir: string): boolean {
   const bases = [REPO_ROOT, path.join(REPO_ROOT, fromDir)];
   return expandBraces(candidate).some((text) => {
+    if (GENERATED_ARTIFACT_PATHS.has(text)) return true;
     if (!WILDCARD_RE.test(text))
       return bases.some((base) => {
         const abs = path.join(base, text);

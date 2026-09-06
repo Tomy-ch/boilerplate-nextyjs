@@ -2,12 +2,14 @@
 
 // 抑止の撤回条件を週に一度見る入口。運用と、見る機構が要る理由は ADR 0110 §3.4 が持つ。
 //
-//   pnpm exec tsx scripts/suppression-expiry            期限を過ぎた宣言があれば 1 で落ちる
-//   pnpm exec tsx scripts/suppression-expiry --report <path>   issue の本文を書き出す
+//   pnpm exec tsx scripts/suppression-expiry     期限を過ぎた宣言があれば 1 で落ちる
+//
+// SUPPRESSION_REPORT を環境から渡すと、その先へ issue の本文を書き出す。引数ではなく環境から
+// 受けるのは、呼ぶ側の make が外から来る値を recipe 行へ展開しないためである
+// （.makefiles/README.md）。
 
 import fs from "node:fs";
 
-import { parseOptions } from "../lib/cli-options.js";
 import { renderDigest, renderExpired, renderIssueBody } from "./report.js";
 import { expiredSuppressions } from "./rules.js";
 import { COMMENT_BORNE_SOURCES, scanSuppressions } from "./scan.js";
@@ -22,12 +24,11 @@ import { COMMENT_BORNE_SOURCES, scanSuppressions } from "./scan.js";
  */
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());
 
-const options = parseOptions(process.argv.slice(2));
 const suppressions = scanSuppressions();
 const expired = expiredSuppressions(suppressions, today);
-const reportPath = options.get("report");
+const reportPath = process.env.SUPPRESSION_REPORT;
 
-if (reportPath !== undefined) {
+if (reportPath !== undefined && reportPath !== "") {
   fs.writeFileSync(
     reportPath,
     renderIssueBody({

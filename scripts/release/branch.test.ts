@@ -106,8 +106,6 @@ describe("branchCreationBlocker", () => {
   });
 
   it("同名のブランチが在り作業ツリーも汚れていれば、存在の方を理由に出す", () => {
-    // 見る順そのものが契約。入れ替わると、既に在るブランチを作りに行ったのに無関係な
-    // `git status` を見せられる。
     expect(
       branchCreationBlocker({
         branchName: "release/v0.7.0",

@@ -7,13 +7,21 @@
 //   package-version check    ブランチ名の版と一致するかを見る（書き込まない）
 //
 // ブランチ名は環境変数で受け取る（`PACKAGE_VERSION_REF` → `GITHUB_REF_NAME` → 現在のブランチ）。
-// 引数で受け取らないのは、make の変数として recipe 行へ展開するとブランチ名がシェルの構文として
-// 解釈されうるため。何を書くか・何を落とすかは [version.ts](version.ts) が持つ。
+// **引数では受け取らない** —— 引数にすると make の変数展開を経由するため（理由は
+// [.makefiles/README.md](../../.makefiles/README.md) の「版の焼き込み関連」）。
+// 何を書くか・何を落とすかは [version.ts](version.ts) が持つ。
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { isStampMode, planStamp, reportPlan, selectRef, stampCommitMessage } from "./version.js";
+import {
+  isStampMode,
+  planStamp,
+  reportPlan,
+  selectRef,
+  stampCommitMessage,
+  stampEffects,
+} from "./version.js";
 
 const MANIFEST = "package.json";
 
@@ -29,10 +37,12 @@ function main(argv: readonly string[]): void {
   const manifest = path.join(process.cwd(), MANIFEST);
   const plan = planStamp(ref, () => readFileSync(manifest, "utf8"));
 
-  if (plan.kind === "write" && mode !== "check") {
+  const effects = stampEffects(mode);
+
+  if (plan.kind === "write" && effects.write) {
     writeFileSync(manifest, plan.content);
 
-    if (mode === "commit") {
+    if (effects.commit) {
       record(plan.to);
     }
   }

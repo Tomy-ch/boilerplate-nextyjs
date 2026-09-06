@@ -135,6 +135,13 @@ describe("ExportButton", () => {
     expect(link).toHaveAttribute("download", "plans.csv");
   });
 
+  it("前の出力を持ったまま生成中なら、受け取る link を出さない", () => {
+    render(<ExportButton fileName="plans.csv" href="/exports/plans.csv" pending />);
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "書き出しています" })).toBeDisabled();
+  });
+
   it("文言を呼び出し元が差し替えられる", () => {
     render(<ExportButton label="CSV を書き出す" />);
 

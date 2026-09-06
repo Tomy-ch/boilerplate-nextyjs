@@ -91,13 +91,18 @@ export const RowLevelError: Story = {
   ),
 };
 
-/** 書き出しの 3 状態。生成前・生成中・受け取り可能。 */
+/**
+ * 書き出しの 3 状態。生成前・生成中・受け取り可能。
+ *
+ * 末尾は前の出力を持ったまま次を生成している組で、生成中が勝つ。
+ */
 export const ExportStates: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       <ExportButton />
       <ExportButton pending />
       <ExportButton fileName="plans.csv" href="/exports/plans.csv" />
+      <ExportButton fileName="plans.csv" href="/exports/plans.csv" pending />
     </div>
   ),
 };

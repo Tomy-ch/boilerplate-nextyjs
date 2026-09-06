@@ -51,10 +51,26 @@ describe("AnalyticsSummarySection", () => {
     ).toBeInTheDocument();
   });
 
-  it("促す文言は読み上げにも届く", async () => {
+  it("これから選ぶ案内は誤りの色で出さない", async () => {
     render(await AnalyticsSummarySection({ request: { status: "incomplete" } }));
 
-    expect(screen.getByRole("alert")).toHaveTextContent("開始日と終了日の両方を選んでください。");
+    expect(screen.getByText("開始日と終了日の両方を選んでください。")).toHaveClass(
+      "text-muted-foreground",
+    );
+  });
+
+  it("前後が逆であることは誤りの色で出す", async () => {
+    render(await AnalyticsSummarySection({ request: { status: "reversed" } }));
+
+    expect(screen.getByText("終了日は開始日と同じ日か、それより後を選んでください。")).toHaveClass(
+      "text-destructive",
+    );
+  });
+
+  it("最初から画面にある文言なので読み上げの役を持たせない", async () => {
+    render(await AnalyticsSummarySection({ request: { status: "incomplete" } }));
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("取得を試みない", async () => {

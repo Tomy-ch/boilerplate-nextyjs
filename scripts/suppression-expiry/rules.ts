@@ -4,7 +4,13 @@
 export type Suppression = {
   /** 宣言が置かれている面。報告でそのまま出す。 */
   readonly source: string;
-  /** 抑止している対象。脆弱性 ID・パッケージ・規則番号のいずれか。 */
+  /**
+   * 抑止している対象。
+   *
+   * @remarks
+   * 面によって粒度が違います —— 脆弱性 ID（osv-scanner / trivy）、検出のフィンガープリント
+   * （bearer）、規則番号（ZAP）、行ラベル `L<行>`（条件をコメントに持つ面）。
+   */
   readonly subject: string;
   /** 撤回条件として添えられた散文。 */
   readonly condition: string;

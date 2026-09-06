@@ -108,11 +108,11 @@ export function readWorkflowContexts(file: string, source: string): WorkflowCont
   const jobs = jobsNode.items.map((pair) => {
     const id = readJobId(file, pair.key);
     const job = (resolved.jobs?.[id] ?? null) as Record<string, unknown> | null;
-    const name = job?.name;
+    const name = job?.["name"];
     return {
       context: typeof name === "string" ? name : id,
-      matrix: (job?.strategy as { matrix?: unknown } | undefined)?.matrix !== undefined,
-      reusable: typeof job?.uses === "string",
+      matrix: (job?.["strategy"] as { matrix?: unknown } | undefined)?.matrix !== undefined,
+      reusable: typeof job?.["uses"] === "string",
     };
   });
 
@@ -128,13 +128,13 @@ function readPullRequestTrigger(on: unknown): PullRequestTrigger | null {
   if (on === null || typeof on !== "object") return null;
 
   if (!("pull_request" in on)) return null;
-  const trigger = (on as Record<string, unknown>).pull_request;
+  const trigger = (on as Record<string, unknown>)["pull_request"];
   if (trigger === null || typeof trigger !== "object") return empty;
 
   const declared = trigger as Record<string, unknown>;
   return {
     filters: REPORT_NARROWING_FILTERS.filter((key) => key in declared),
-    types: Array.isArray(declared.types) ? declared.types.map(String) : null,
+    types: Array.isArray(declared["types"]) ? declared["types"].map(String) : null,
   };
 }
 

@@ -4,7 +4,7 @@
  * Edge runtime ではファイル読込を行わず、Node.js runtime に限って server Config の bootstrap を委譲する。
  */
 export async function register(): Promise<void> {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
+  if (process.env["NEXT_RUNTIME"] === "nodejs") {
     const [
       { bootstrapConfig },
       { getObservabilityConfig },

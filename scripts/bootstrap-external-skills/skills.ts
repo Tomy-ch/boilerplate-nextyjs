@@ -24,7 +24,7 @@ export type ExternalSkill = {
  * `~/.claude` を見て失敗します。
  */
 export function claudeConfigDir(env: ClaudeEnv = process.env): string {
-  return env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude");
+  return env["CLAUDE_CONFIG_DIR"] || path.join(os.homedir(), ".claude");
 }
 
 /**

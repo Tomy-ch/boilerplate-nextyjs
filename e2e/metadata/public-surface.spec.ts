@@ -17,7 +17,7 @@ import {
 } from "../lib/public-surface";
 
 /** 起動側が `SITE_PUBLIC_ORIGIN` に渡した値と同じ。canonical と sitemap はこれを土台に組まれる。 */
-const PUBLIC_ORIGIN = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000";
+const PUBLIC_ORIGIN = process.env["E2E_BASE_URL"] ?? "http://127.0.0.1:3000";
 
 /**
  * アイコンと OG 画像を名乗る画面。

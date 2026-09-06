@@ -46,7 +46,7 @@ function readRscManifest(path: string, pagePath: string): RscManifest | undefine
   }
 
   const context: { __RSC_MANIFEST?: Record<string, RscManifest> } & Record<string, unknown> = {};
-  context.globalThis = context;
+  context["globalThis"] = context;
   runInNewContext(readFileSync(path, "utf8"), context);
 
   return context.__RSC_MANIFEST?.[pagePath];
@@ -132,7 +132,7 @@ function measure(dir: string): Survey {
 
 function main(): void {
   const [current = ".next", base] = process.argv.slice(2);
-  const mode = growthModeFor(process.env.GITHUB_BASE_REF);
+  const mode = growthModeFor(process.env["GITHUB_BASE_REF"]);
   const budget = parseBudget(readFileSync(BUDGET_FILE, "utf8"));
   const survey = measure(current);
   const missing = missingRoutes(survey.measurements, budget);

@@ -25,7 +25,7 @@ const stories = selectStories(
     parseStoryIndex(readFileSync(`${STORYBOOK_DIR}/index.json`, "utf8")),
     EXCLUDED_STORIES,
   ),
-  process.env.VRT_ONLY,
+  process.env["VRT_ONLY"],
 );
 
 const test = base.extend<Record<never, never>, { storybookURL: string }>({

@@ -88,7 +88,7 @@ function getPayloadConfigFromPayload(
     return undefined;
   }
 
-  const nestedPayload = isRecord(payload.payload) ? payload.payload : undefined;
+  const nestedPayload = isRecord(payload["payload"]) ? payload["payload"] : undefined;
   const configKey =
     readStringField(payload, key) ??
     (nestedPayload ? readStringField(nestedPayload, key) : undefined) ??

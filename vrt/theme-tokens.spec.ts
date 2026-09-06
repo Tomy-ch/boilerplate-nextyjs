@@ -73,7 +73,7 @@ async function readTokens(
         const parent = document.createElement("div");
         parent.style.color = inherited;
         parent.append(document.createElement("div"));
-        if (surfaceName !== undefined) parent.dataset.surface = surfaceName;
+        if (surfaceName !== undefined) parent.dataset["surface"] = surfaceName;
         document.body.append(parent);
 
         return parent;
@@ -111,7 +111,7 @@ async function readOther(
   return page.evaluate(
     ([entries, surfaceName]) => {
       const host = document.createElement("div");
-      if (surfaceName !== undefined) host.dataset.surface = surfaceName;
+      if (surfaceName !== undefined) host.dataset["surface"] = surfaceName;
       const probe = document.createElement("div");
       host.append(probe);
       document.body.append(host);
@@ -152,7 +152,7 @@ test.describe("配色トークン", () => {
     const own = await readTokens(page, TOKENS);
     await page.evaluate(
       (theme) => {
-        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset["theme"] = theme;
       },
       testInfo.project.name === "dark" ? "light" : "dark",
     );

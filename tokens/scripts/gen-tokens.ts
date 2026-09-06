@@ -192,7 +192,7 @@ function declarationsFor(surface: string, scheme: Scheme, declared: ReadonlySet<
  * 差し替えたときに CSS と JS で境界がずれ、両方出る幅か両方消える幅ができます。
  */
 export function generateBreakpointTs(primitives: TokenGroup): string {
-  const group = primitives.breakpoint;
+  const group = primitives["breakpoint"];
 
   if (group === undefined || isToken(group)) {
     throw new Error("primitives.json に breakpoint の段がありません");

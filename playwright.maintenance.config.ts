@@ -17,7 +17,7 @@ import { deviceFor, SHOT_ENGINE } from "./e2e/lib/browsers";
  * 開く先はこの手元の宿に固定します。測る相手は**この設定自身が起動させたアプリ**であり、
  * 繋ぎ先が配信物に入ることはありません。別の宿へ向けるときだけ `E2E_BASE_URL` を渡します。
  */
-const BASE_URL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000"; // DevSkim: ignore DS162092
+const BASE_URL = process.env["E2E_BASE_URL"] ?? "http://127.0.0.1:3000"; // DevSkim: ignore DS162092
 
 export default defineConfig({
   testDir: "./e2e/maintenance",

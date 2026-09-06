@@ -53,6 +53,7 @@ make help
 | `make delete-all-labels` | GitHub リポジトリ上の既存ラベルをすべて削除します。 | なし |
 | `make create-default-labels` | `.github/settings/labels.json` をもとに、デフォルトラベルを作成します。 | 宣言の読み取りと、宣言と実在の差分は [`scripts/github-settings/labels.ts`](../scripts/github-settings/labels.ts) が持ちます。名前が実在するラベルは色や説明が宣言と違っても触りません。 |
 | `make apply-branch-protection` | `.github/settings/branch-protection.json` をもとに、対象リポジトリへブランチルールセットを適用します。 | なし |
+| `make apply-pages-delivery [PAGES_DELIVERY_BRANCH=<branch>]` | GitHub Pages を Actions 配信にし、`github-pages` environment へ配信元ブランチを許可します。 | 既定の配信元は `production` で、[`deploy-docs.yaml`](../.github/workflows/deploy-docs.yaml) の push トリガと揃える必要があります。3 段とも現状を読んでから書くため、適用済みのリポジトリで実行しても何も変えません。**許可が無いと `docs-deploy` は step を 1 つも実行せずに落ちます**（job 自体は起動するので、失敗の理由がログに出ません）。 |
 
 ### GitHub リポジトリ初期化関連
 
@@ -66,6 +67,7 @@ make help
 - `develop` / `staging` / `production` ブランチの作成
 - GitHub デフォルトブランチの設定
 - ブランチルールセット適用
+- Pages の配信設定（Actions 配信への切り替えと、`production` からの配信許可）
 - ラベル初期化
 - **`.github/release/` 配下のリリースノートを `v0.0.0.md` を除いて全削除**
 - **`upstream` リモートの削除**

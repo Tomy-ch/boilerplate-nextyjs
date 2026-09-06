@@ -1,0 +1,76 @@
+name: Issue Field Lint
+
+# Checks that an implementation-task issue actually carries the fields its template
+# marks required (ADR 0140 / the v1 plan's traceability ledger).
+#
+# The template's `required: true` binds the GitHub web form and nothing else.
+# `gh issue create --body-file` walks straight past it — and that is the path an agent
+# takes. An issue filed without the enforcement field is indistinguishable, later, from
+# one whose decision genuinely had no mechanical enforcement, which is exactly the
+# distinction the ledger is built to record.
+#
+# Runs on the issue itself rather than on a pull request: a pull request creates no
+# issue, so a PR gate would never see the moment the field goes missing. The job
+# comments on the issue instead of failing a check, because an issue has no check to
+# fail — the author is the one who has to act, and they are reading the issue.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  issue-field-lint:
+    # Only implementation tasks carry this template. Everything else has its own shape.
+    if: startsWith(github.event.issue.title, '[P')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+
+      # The body is read through the API rather than from the event payload, so an edit
+      # that lands while this job is queued is judged on what the issue now says.
+      - name: Say which required fields are missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+
+          body="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json body --jq .body)"
+          missing=""
+          for heading in 目的 強制手段 完了条件; do
+            case "$body" in
+              *"### ${heading}"*) ;;
+              *) missing="${missing}- 「${heading}」"$'\n' ;;
+            esac
+          done
+
+          if [ -z "$missing" ]; then
+            echo "必須項目はすべて埋まっています。"
+            exit 0
+          fi
+
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+            "実装タスクのテンプレートが必須にしている項目が本文にありません。
+
+          ${missing}
+          テンプレートの \`required: true\` が縛るのは GitHub の Web フォームだけで、\`gh issue create --body-file\` は素通りします。追記してください。
+
+          **「強制手段」に散文と書く場合も、機械強制へ寄せられない理由を添えてください** —— 後から台帳を作る側は、書き忘れと「散文しか無い」を区別できません。"

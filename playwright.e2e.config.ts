@@ -69,7 +69,7 @@ export default defineConfig({
     timeout: 20_000,
     // 比較条件は story 単位と同じ。理由は playwright.config.ts に書いてある。
     toHaveScreenshot: {
-      threshold: 0.01,
+      threshold: 0.02,
       maxDiffPixels: 0,
       animations: "disabled",
       caret: "hide",

@@ -208,7 +208,7 @@ seed は要求の URL から導かれるので、暦日で区切る画面が実�
 「いま」は合成の入口が解決して props で配る。
 
 ログイン済みの状態は、テスト専用の session 発行の口
-（`src/app/api/auth/test-session/route.ts`）から作る。認証は OpenAPI 契約の外にあり、契約から
+（`src/app/api/auth/test-session/route.dev.ts`）から作る。認証は OpenAPI 契約の外にあり、契約から
 生成したモックでは偽装できないためである。口が開くのは `local` / `ci` だけで、開いていない環境では
 `signIn` が落ちる。
 

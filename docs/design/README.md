@@ -27,6 +27,7 @@
 | [auth.md](auth.md) | 認証の前側 | 中継するが検証しない責務線、session の持ち方、保護の掛かる場所、開発用の口 |
 | [security.md](security.md) | 防御 | 配信ヘッダと CSP、データの分類、`NEXT_PUBLIC_` の境界、入口が持つもの |
 | [observability.md](observability.md) | 観測 | 2 つのカーネルの分担、1 本の trace の繋がり方、中継の口、描画の計装 |
+| [realtime-delivery.md](realtime-delivery.md) | 購読と配信 | **まだ実体の無い** 購読 seam を実体化するときの形。発券から整列・再接続まで、どの層が何を持つか |
 | [vrt.md](vrt.md) | 見た目の固定 | 基準画像が何を守り、何を守らないか。揺らぎの止め方 |
 
 ## 読み方

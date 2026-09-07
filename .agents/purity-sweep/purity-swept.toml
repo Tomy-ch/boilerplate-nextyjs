@@ -51,3 +51,5 @@
 "scripts/gen/feature-placement.ts" = "2026-09-07"
 "scripts/gen/option-value.ts" = "2026-09-07"
 "docs/templates/feature-readme.md" = "2026-09-07"
+"docs/tutorial/README.md" = "2026-09-07"
+"docs/tutorial/build-a-screen.md" = "2026-09-07"

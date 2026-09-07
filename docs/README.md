@@ -60,6 +60,7 @@
 | [`adr/`](adr/) | **何を決め、何を却下したか** | 記録。v1.0.0 未満は living document として本文を上書きする（[0140](adr/0140-documentation-operations.md)） |
 | [`design/`](design/README.md) | **目の前の case をどう裁くか** | **育つ。** 基準が鋭くなるたび書き足す |
 | [`rules.md`](rules.md) | **何をしたら違反か** | 強制可能な禁止だけ。判断の根拠は持たず、上の 2 つへリンクする |
+| [`tutorial/`](tutorial/README.md) | **実際にどう書くのか** | 1 画面を端から端まで。**サンプルを消したあとの状態から始まる** |
 | [`project/`](project/README.md) | **このプロジェクトが何であって何でないか** | スコープ・対象外・方針・版・方向。作った側が最初に置き換える |
 | [`reference/`](reference/README.md) | **いま何が入っているか** | **コードに追随する目録。** ADR と違い、変わることを前提とした参照 |
 

@@ -78,9 +78,11 @@ export function toSummary(
   placeholder: string,
   format: (labels: readonly string[]) => string,
 ): string {
-  if (labels.length === 0) return placeholder;
+  const [only, ...rest] = labels;
 
-  return labels.length === 1 ? labels[0] : format(labels);
+  if (only === undefined) return placeholder;
+
+  return rest.length === 0 ? only : format(labels);
 }
 
 /**

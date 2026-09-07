@@ -118,7 +118,7 @@ function parseArgs(argv: string[]): Options {
   }
 
   ensureRepositoryReference(options.repository);
-  ensurePackageName(options.repository.split("/")[1]);
+  ensurePackageName(options.repository.slice(options.repository.indexOf("/") + 1));
 
   // 検証しただけの生値を後段へ流さない。戻り値を捨てると入口の検査が意味を失う
   if (options.portalUrl !== undefined) {

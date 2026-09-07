@@ -156,7 +156,9 @@ export function WizardForm({
   const { currentIndex, furthestIndex } = progress;
   const panelId = useId();
   const movedRef = useRef(false);
-  const currentPanelId = `${panelId}-${steps[currentIndex].id}`;
+  // 段が減って現在地が並びの外へ出たら、先頭の段を現在地とみなす。
+  const current = steps[currentIndex] ?? steps[0];
+  const currentPanelId = `${panelId}-${current.id}`;
 
   // 段階が変わったときだけ focus を移す。最初の表示で移すと、開いた直後に読み上げが飛ぶ。
   useEffect(() => {
@@ -178,8 +180,6 @@ export function WizardForm({
       return { currentIndex: next, furthestIndex: Math.max(moved.furthestIndex, next) };
     });
   }, [steps.length]);
-
-  const current = steps[currentIndex];
 
   /**
    * その段へ移れるか。

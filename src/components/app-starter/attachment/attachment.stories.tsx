@@ -387,16 +387,17 @@ function UploadFlowFixture({ autoDismiss = false }: { autoDismiss?: boolean }) {
 
   const handleSelect = useCallback((files: File[]) => {
     const added = files.map((file) => ({
-      id: nextIdRef.current++,
-      name: file.name,
-      description: "送信中",
-      state: ATTACHMENT_STATE.UPLOADING,
+      file,
+      entry: {
+        id: nextIdRef.current++,
+        name: file.name,
+        description: "送信中",
+        state: ATTACHMENT_STATE.UPLOADING,
+      },
     }));
-    setEntries((current) => [...current, ...added]);
+    setEntries((current) => [...current, ...added.map(({ entry }) => entry)]);
 
-    for (const [index, entry] of added.entries()) {
-      const file = files[index];
-
+    for (const { file, entry } of added) {
       timersRef.current.push(
         setTimeout(() => {
           // 消すかどうかは一覧を持つ側の判断。error は対処が要るので対象にしない。

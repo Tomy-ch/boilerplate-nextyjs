@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type MouseEventHandler, useId } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -181,6 +181,11 @@ function watchPreventDefault(): { get prevented(): boolean } {
   };
 }
 
+/** slide の中に置かれた送りの link。 */
+function linkIn(slide: string, name: string): HTMLElement {
+  return within(screen.getByRole("group", { name: slide })).getByRole("link", { name });
+}
+
 describe("CarouselThumbnails", () => {
   beforeEach(() => {
     observed.length = 0;
@@ -304,7 +309,7 @@ describe("CarouselPrevious", () => {
     layOutSlides(container);
     const click = watchPreventDefault();
 
-    await userEvent.click(screen.getAllByRole("link", { name: "次へ" })[0]);
+    await userEvent.click(linkIn("1 / 3", "次へ"));
 
     expect(click.prevented).toBe(true);
     expect(scrollBy).toHaveBeenCalledWith({ left: SLIDE_WIDTH });
@@ -314,7 +319,7 @@ describe("CarouselPrevious", () => {
     const { container } = render(<StepFixture />);
     layOutSlides(container, (SLIDES.length - 1) * SLIDE_WIDTH);
 
-    await userEvent.click(screen.getAllByRole("link", { name: "前へ" })[1]);
+    await userEvent.click(linkIn("3 / 3", "前へ"));
 
     expect(scrollBy).toHaveBeenCalledWith({ left: -SLIDE_WIDTH });
   });
@@ -322,7 +327,7 @@ describe("CarouselPrevious", () => {
   it("見た目の円より広い当たり判定を持つ", () => {
     render(<StepFixture />);
 
-    expect(screen.getAllByRole("link", { name: "次へ" })[0]).toHaveClass(
+    expect(linkIn("1 / 3", "次へ")).toHaveClass(
       "size-9",
       "after:absolute",
       "after:-inset-4.5",
@@ -339,7 +344,7 @@ describe("CarouselPrevious", () => {
     const click = watchPreventDefault();
 
     await user.keyboard("{Meta>}");
-    await user.click(screen.getAllByRole("link", { name: "次へ" })[0]);
+    await user.click(linkIn("1 / 3", "次へ"));
     await user.keyboard("{/Meta}");
 
     expect(click.prevented).toBe(false);
@@ -366,7 +371,7 @@ describe("CarouselPrevious", () => {
     const { container } = render(<StepFixture onClick={onClick} />);
     layOutSlides(container);
 
-    await userEvent.click(screen.getAllByRole("link", { name: "次へ" })[0]);
+    await userEvent.click(linkIn("1 / 3", "次へ"));
 
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(scrollBy).not.toHaveBeenCalled();
@@ -398,7 +403,7 @@ describe("CarouselNext", () => {
   it("次のスライドを指す link として slot つきで描画する", () => {
     render(<StepFixture />);
 
-    expect(screen.getAllByRole("link", { name: "次へ" })[0]).toHaveAttribute(
+    expect(linkIn("1 / 3", "次へ")).toHaveAttribute(
       "data-slot",
       "carousel-next",
     );
@@ -409,7 +414,7 @@ describe("CarouselNext", () => {
     const { container } = render(<StepFixture onClick={onClick} />);
     layOutSlides(container);
 
-    await userEvent.click(screen.getAllByRole("link", { name: "次へ" })[0]);
+    await userEvent.click(linkIn("1 / 3", "次へ"));
 
     expect(onClick).toHaveBeenCalledOnce();
   });

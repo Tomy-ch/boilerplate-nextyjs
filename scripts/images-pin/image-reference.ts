@@ -63,9 +63,9 @@ const FROM_STAGE_NAME = /\bas[ \t]+(\S+)/i;
 // 区別しないため、比較は小文字へ揃える。
 function dockerfileExemptTagless(data: string): ReadonlySet<string> {
   const exempt = new Set(["scratch"]);
-  for (const match of data.matchAll(dockerfileFromPattern())) {
-    // 接尾辞のグループは空にも一致するため、常に文字列として得られる。
-    const stage = FROM_STAGE_NAME.exec(match[3])?.[1];
+  for (const [, , , suffix] of data.matchAll(dockerfileFromPattern())) {
+    // 接尾辞が無ければステージ名も無い。
+    const stage = FROM_STAGE_NAME.exec(suffix ?? "")?.[1];
     if (stage) exempt.add(stage.toLowerCase());
   }
 
@@ -101,7 +101,8 @@ export function refKey(ref: ImageRef): string {
  * ファイルが持つためです。
  */
 export function parseRef(reference: string): ImageRef | null {
-  const [name] = reference.split("@");
+  const digestAt = reference.indexOf("@");
+  const name = digestAt < 0 ? reference : reference.slice(0, digestAt);
   const separator = name.lastIndexOf(":");
   if (separator < 0) return null;
   const image = name.slice(0, separator);
@@ -160,8 +161,9 @@ export function collectRefs(targets: PinTarget[]): Map<string, ImageRef> {
   const refs = new Map<string, ImageRef>();
   for (const target of targets) {
     const data = fs.readFileSync(target.file, "utf8");
-    for (const match of data.matchAll(target.pattern)) {
-      const ref = parseRef(match[2]);
+    for (const [, , reference] of data.matchAll(target.pattern)) {
+      if (reference === undefined) continue;
+      const ref = parseRef(reference);
       if (ref) refs.set(refKey(ref), ref);
     }
   }
@@ -205,7 +207,8 @@ function taglessLines(data: string, target: PinTarget): number[] {
   const exempt = target.exemptTagless?.(data) ?? new Set<string>();
   const lines: number[] = [];
   for (const match of data.matchAll(target.pattern)) {
-    const reference = match[2];
+    const [, , reference] = match;
+    if (reference === undefined) continue;
     if (parseRef(reference) || exempt.has(reference.toLowerCase())) continue;
     lines.push(lineNumberAt(data, match.index));
   }

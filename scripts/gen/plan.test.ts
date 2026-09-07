@@ -5,11 +5,14 @@ import { describe, expect, it } from "vitest";
 
 import type { LayerContract } from "./layer-contract";
 import {
+  type GeneratedFile,
   type GenerationInput,
   featureLocation,
   isGenerationKind,
   planGeneration,
 } from "./plan";
+
+type FeatureInput = Extract<GenerationInput, { kind: "feature" }>;
 
 const contract: LayerContract = {
   forbidden: ["features", "business-logic"],
@@ -68,7 +71,7 @@ function featureInput({
   name = "report-detail",
   screen = "list",
   readmeTemplate = FEATURE_README_TEMPLATE,
-}: { name?: string; screen?: string; readmeTemplate?: string } = {}): GenerationInput {
+}: { name?: string; screen?: string; readmeTemplate?: string } = {}): FeatureInput {
   return {
     kind: "feature",
     name,
@@ -97,14 +100,25 @@ function componentInput(
 
 /** テンプレート冒頭のコメントが宣言する必須節。 */
 function requiredSectionsOf(template: string): string[] {
-  const declared = /required-sections:\n((?: {2}- .+\n)+)/.exec(template);
+  const declared = /required-sections:\n((?: {2}- .+\n)+)/.exec(template)?.[1];
 
-  return declared === null
+  return declared === undefined
     ? []
-    : declared[1]
+    : declared
         .split("\n")
         .filter((line) => line !== "")
         .map((line) => line.replace(/^ {2}- /, ""));
+}
+
+/** 計画からファイル名で 1 つ引く。計画に無ければテストを落とす。 */
+function fileNamed(files: readonly GeneratedFile[], fileName: string): GeneratedFile {
+  const file = files.find((candidate) => candidate.path.endsWith(`/${fileName}`));
+
+  if (file === undefined) {
+    throw new Error(`${fileName} が計画に無い`);
+  }
+
+  return file;
 }
 
 describe("featureLocation", () => {
@@ -155,7 +169,10 @@ describe("planGeneration", () => {
   });
 
   it("2 つ目の画面の識別子と span 名と story の title を、その画面名から組む", () => {
-    const [view, story, , pageContent] = planGeneration(secondScreenInput());
+    const files = planGeneration(secondScreenInput());
+    const view = fileNamed(files, "view.tsx");
+    const story = fileNamed(files, "view.stories.tsx");
+    const pageContent = fileNamed(files, "page-content.tsx");
 
     expect(view.content).toContain("export const DetailView = withScreenSpan(");
     expect(view.content).toContain('"features/report-detail/detail/view"');
@@ -175,7 +192,9 @@ describe("planGeneration", () => {
   it("design-system 以外の層の component は、見出しの中間ディレクトリを持たない", () => {
     const files = planGeneration(componentInput({ layer: "patterns", as: "container" }));
 
-    expect(files[0].path).toBe("src/components/patterns/report-detail/README.md");
+    expect(fileNamed(files, "README.md").path).toBe(
+      "src/components/patterns/report-detail/README.md",
+    );
   });
 
   it("adapter を server 配下へ実装とテストの 2 ファイルで計画する", () => {
@@ -186,7 +205,7 @@ describe("planGeneration", () => {
   });
 
   it("feature の README はテンプレートの写しで、feature 名だけを入れる", () => {
-    const readme = planGeneration(featureInput())[0].content;
+    const readme = fileNamed(planGeneration(featureInput()), "README.md").content;
 
     expect(readme).toContain("# report-detail\n");
     expect(readme).not.toContain("<feature 名>");
@@ -194,7 +213,7 @@ describe("planGeneration", () => {
   });
 
   it("feature の README の frontmatter は、テンプレートの写しではなく層の契約から組む", () => {
-    const readme = planGeneration(featureInput())[0].content;
+    const readme = fileNamed(planGeneration(featureInput()), "README.md").content;
 
     expect(readme.startsWith("---\n")).toBe(true);
     expect(readme).toContain("imports-allowed: [model, components]\n");
@@ -205,7 +224,10 @@ describe("planGeneration", () => {
   });
 
   it("frontmatter を持たないテンプレートにも、層の契約の frontmatter を付ける", () => {
-    const readme = planGeneration(featureInput({ readmeTemplate: "# <feature 名>\n" }))[0].content;
+    const readme = fileNamed(
+      planGeneration(featureInput({ readmeTemplate: "# <feature 名>\n" })),
+      "README.md",
+    ).content;
 
     expect(readme).toBe(
       "---\nimports-allowed: [model, components]\nforbidden: [features, business-logic]\ntest-requirement: feature\n---\n\n# report-detail\n",
@@ -214,9 +236,10 @@ describe("planGeneration", () => {
 
   it("実物のテンプレートを写すと、宣言された必須節の見出しをすべて持つ", () => {
     const sections = requiredSectionsOf(REAL_FEATURE_README_TEMPLATE);
-    const readme = planGeneration(
-      featureInput({ readmeTemplate: REAL_FEATURE_README_TEMPLATE }),
-    )[0].content;
+    const readme = fileNamed(
+      planGeneration(featureInput({ readmeTemplate: REAL_FEATURE_README_TEMPLATE })),
+      "README.md",
+    ).content;
 
     expect(sections.length).toBeGreaterThan(0);
 
@@ -228,7 +251,9 @@ describe("planGeneration", () => {
   });
 
   it("feature の view と page-content を、画面名の識別子と置き場と一致する span 名で出す", () => {
-    const [, view, , , pageContent] = planGeneration(featureInput());
+    const files = planGeneration(featureInput());
+    const view = fileNamed(files, "view.tsx");
+    const pageContent = fileNamed(files, "page-content.tsx");
 
     expect(view.content).toContain("export const ListView = withScreenSpan(");
     expect(view.content).toContain('"features/report-detail/list/view"');
@@ -239,7 +264,9 @@ describe("planGeneration", () => {
   });
 
   it("呼び出しの 1 行目が 100 桁に収まるなら、最後の引数だけを開いた形で出す", () => {
-    const [, view, , , pageContent] = planGeneration(featureInput({ name: "abc-def" }));
+    const files = planGeneration(featureInput({ name: "abc-def" }));
+    const view = fileNamed(files, "view.tsx");
+    const pageContent = fileNamed(files, "page-content.tsx");
 
     expect(view.content).toContain(
       [
@@ -258,19 +285,21 @@ describe("planGeneration", () => {
   });
 
   it("1 行目がちょうど 100 桁なら開いた形、101 桁なら折った形で出す", () => {
-    const hugged = planGeneration(featureInput({ name: "abc-def" }))[1].content;
-    const broken = planGeneration(featureInput({ name: "abcd-efg" }))[1].content;
+    const hugged = fileNamed(planGeneration(featureInput({ name: "abc-def" })), "view.tsx");
+    const broken = fileNamed(planGeneration(featureInput({ name: "abcd-efg" })), "view.tsx");
 
-    expect(hugged).toContain(
+    expect(hugged.content).toContain(
       'export const ListView = withScreenSpan("features/abc-def/list/view", ({ title }: ListViewProps) => {\n',
     );
-    expect(broken).toContain(
+    expect(broken.content).toContain(
       'export const ListView = withScreenSpan(\n  "features/abcd-efg/list/view",\n  ({ title }: ListViewProps) => {\n',
     );
   });
 
   it("呼び出しの 1 行目が 100 桁を超えるなら、引数ごとに折った形で出す", () => {
-    const [, view, , , pageContent] = planGeneration(featureInput({ name: "abcd-efgh-ijkl" }));
+    const files = planGeneration(featureInput({ name: "abcd-efgh-ijkl" }));
+    const view = fileNamed(files, "view.tsx");
+    const pageContent = fileNamed(files, "page-content.tsx");
 
     expect(view.content).toContain(
       [
@@ -292,7 +321,9 @@ describe("planGeneration", () => {
   });
 
   it("feature の view は取得を持たず、page-content が view を組み立てる", () => {
-    const [, view, , , pageContent] = planGeneration(featureInput());
+    const files = planGeneration(featureInput());
+    const view = fileNamed(files, "view.tsx");
+    const pageContent = fileNamed(files, "page-content.tsx");
 
     expect(view.content).not.toContain("@/adapters");
     expect(pageContent.content).toContain("async () => {");
@@ -300,7 +331,7 @@ describe("planGeneration", () => {
   });
 
   it("feature の story の title を Page/<feature>/<画面> で組み、view を指す", () => {
-    const story = planGeneration(featureInput())[2];
+    const story = fileNamed(planGeneration(featureInput()), "view.stories.tsx");
 
     expect(story.path).toBe("src/features/report-detail/list/view.stories.tsx");
     expect(story.content).toContain('title: "Page/ReportDetail/List"');
@@ -309,7 +340,7 @@ describe("planGeneration", () => {
   });
 
   it("feature の story に読み幅の器と説明の置き場、既定の story を入れる", () => {
-    const story = planGeneration(featureInput())[2].content;
+    const story = fileNamed(planGeneration(featureInput()), "view.stories.tsx").content;
 
     expect(story).toContain("<ContentContainer className=\"py-8\">");
     expect(story).toContain("parameters: {\n    layout: \"fullscreen\",\n    docs: {");
@@ -318,7 +349,9 @@ describe("planGeneration", () => {
   });
 
   it("feature のテストの describe に、view と page-content の識別子を使う", () => {
-    const [, , , viewTest, , pageContentTest] = planGeneration(featureInput());
+    const files = planGeneration(featureInput());
+    const viewTest = fileNamed(files, "view.test.tsx");
+    const pageContentTest = fileNamed(files, "page-content.test.tsx");
 
     expect(viewTest.content).toContain('describe("ListView"');
     expect(viewTest.content).toContain('import { ListView } from "./view"');
@@ -335,7 +368,7 @@ describe("planGeneration", () => {
   });
 
   it("component の README はテンプレートの写しで、component 名だけを PascalCase で入れる", () => {
-    const readme = planGeneration(componentInput())[0].content;
+    const readme = fileNamed(planGeneration(componentInput()), "README.md").content;
 
     expect(readme).toBe(README_TEMPLATE.replaceAll("{{ComponentName}}", "ReportDetail"));
     expect(readme).not.toContain("{{ComponentName}}");
@@ -343,11 +376,16 @@ describe("planGeneration", () => {
   });
 
   it("component の README は frontmatter を持たない", () => {
-    expect(planGeneration(componentInput())[0].content.startsWith("# ")).toBe(true);
+    const readme = fileNamed(planGeneration(componentInput()), "README.md").content;
+
+    expect(readme.startsWith("# ")).toBe(true);
   });
 
   it("component の story の title を、見出しの表示名と PascalCase の識別子で組む", () => {
-    const story = planGeneration(componentInput({ layer: "patterns", as: "rich-text" }))[2];
+    const story = fileNamed(
+      planGeneration(componentInput({ layer: "patterns", as: "rich-text" })),
+      "report-detail.stories.tsx",
+    );
 
     expect(story.path).toBe("src/components/patterns/report-detail/report-detail.stories.tsx");
     expect(story.content).toContain('title: "Rich Text/ReportDetail"');
@@ -355,7 +393,7 @@ describe("planGeneration", () => {
   });
 
   it("component の story に component の説明の置き場と既定の story を入れる", () => {
-    const story = planGeneration(componentInput())[2].content;
+    const story = fileNamed(planGeneration(componentInput()), "report-detail.stories.tsx").content;
 
     expect(story).toContain("parameters: {\n    docs: {\n      description: {\n        component:");
     expect(story).toContain("export const Default: Story = {};");
@@ -364,8 +402,10 @@ describe("planGeneration", () => {
   it("component の実装とテストの describe に PascalCase の識別子を使う", () => {
     const files = planGeneration(componentInput());
 
-    expect(files[1].content).toContain("export function ReportDetail(");
-    expect(files[3].content).toContain('describe("ReportDetail"');
+    expect(fileNamed(files, "report-detail.tsx").content).toContain(
+      "export function ReportDetail(",
+    );
+    expect(fileNamed(files, "report-detail.test.tsx").content).toContain('describe("ReportDetail"');
   });
 
   it("生成するテストへ観点の区切りを入れる", () => {
@@ -377,6 +417,8 @@ describe("planGeneration", () => {
   });
 
   it("adapter の実装へ server-only の宣言を入れる", () => {
-    expect(planGeneration(ADAPTER)[0].content).toContain('import "server-only"');
+    expect(fileNamed(planGeneration(ADAPTER), "report-detail.ts").content).toContain(
+      'import "server-only"',
+    );
   });
 });

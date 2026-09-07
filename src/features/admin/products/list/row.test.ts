@@ -8,10 +8,10 @@ import { toAdminProductRows } from "./row";
 
 const STATUS_ID = "6b0f2f3e-0000-4000-8000-000000000001";
 
-const STATUSES: readonly ProductStatus[] = [
+const STATUSES = [
   { id: STATUS_ID, name: "在庫切れ", code: 2 },
   { id: "6b0f2f3e-0000-4000-8000-000000000002", name: "在庫あり", code: 1 },
-];
+] satisfies readonly [ProductStatus, ...ProductStatus[]];
 
 function product(overrides: Partial<Product> = {}): Product {
   return {

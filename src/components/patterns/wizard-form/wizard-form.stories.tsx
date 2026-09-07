@@ -71,11 +71,11 @@ function Confirmation() {
   );
 }
 
-const STEPS: WizardSteps = [
+const STEPS = [
   { id: "applicant", title: "申請者", content: <ApplicantFields /> },
   { id: "purpose", title: "利用目的", content: <PurposeFields /> },
   { id: "confirm", title: "確認", content: <Confirmation /> },
-];
+] satisfies WizardSteps;
 
 /**
  * 3 段階の申請。段階を移っても隠れた段階の入力値は form に残るため、最後の送信で全段階ぶんが

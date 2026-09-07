@@ -86,8 +86,8 @@ describe("getProductStatuses", () => {
     serveJson(STATUSES_URL, wireStatuses);
 
     await expect(getProductStatuses()).resolves.toEqual([
-      { id: wireStatuses[0].id, name: "在庫あり", code: 1 },
-      { id: wireStatuses[1].id, name: "在庫切れ", code: 2 },
+      { id: wireStatuses[0]?.id, name: "在庫あり", code: 1 },
+      { id: wireStatuses[1]?.id, name: "在庫切れ", code: 2 },
     ]);
   });
 

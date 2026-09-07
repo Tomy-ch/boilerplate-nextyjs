@@ -10,7 +10,6 @@ const execFileAsync = promisify(execFile);
 
 const NETWORK_TIMEOUT_MS = 30_000;
 const MS_PER_DAY = 86_400_000;
-const LS_REMOTE_COLUMNS = 2;
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
 const MOVING_TAG_PATTERN = /^v?\d+$/;
@@ -84,9 +83,8 @@ export function selectSHA(out: string, tag: string): string {
   let tagSHA = "";
   let headSHA = "";
   for (const line of out.trim().split("\n")) {
-    const columns = line.split(/\s+/).filter((column) => column !== "");
-    if (columns.length !== LS_REMOTE_COLUMNS) continue;
-    const [sha, name] = columns;
+    const [sha, name, ...extra] = line.split(/\s+/).filter((column) => column !== "");
+    if (sha === undefined || name === undefined || extra.length > 0) continue;
     if (name === `refs/tags/${tag}^{}`) derefSHA = sha;
     else if (name === `refs/tags/${tag}`) tagSHA = sha;
     else if (name === `refs/heads/${tag}`) headSHA = sha;

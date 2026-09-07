@@ -181,11 +181,12 @@ const componentManifestSchema = z.object({
   ),
 });
 
-const upstreamCommitsSchema = z
-  .array(
-    z.object({ sha: z.string(), commit: z.object({ committer: z.object({ date: z.string() }) }) }),
-  )
-  .min(1);
+const upstreamCommitSchema = z.object({
+  sha: z.string(),
+  commit: z.object({ committer: z.object({ date: z.string() }) }),
+});
+
+const upstreamCommitsSchema = z.tuple([upstreamCommitSchema], upstreamCommitSchema);
 
 type RegistrySource = z.infer<typeof registrySourceSchema>;
 
@@ -230,15 +231,15 @@ export async function checkUpstreamDrift(
       result.checked += 1;
       try {
         // biome-ignore lint/performance/noAwaitInLoops: 記録件数ぶんの GitHub API 呼び出しを並列化すると、subprocess の大量生成と API のレート制限を同時に踏む
-        const commits = upstreamCommitsSchema.parse(await fetchUpstreamJson(commitsUrl(source)));
-        if (commits[0].sha === source.commit) continue;
+        const [latest] = upstreamCommitsSchema.parse(await fetchUpstreamJson(commitsUrl(source)));
+        if (latest.sha === source.commit) continue;
         result.drifted.push({
           component,
           kind: entry.kind,
           path: source.path,
           recorded: source.commit,
-          latest: commits[0].sha,
-          latestCommittedAt: commits[0].commit.committer.date,
+          latest: latest.sha,
+          latestCommittedAt: latest.commit.committer.date,
         });
       } catch (error) {
         result.failed.push(
@@ -271,8 +272,8 @@ const RUNTIME_PACKAGES: ReadonlySet<string> = new Set(["react", "react-dom"]);
  * 「どの package を参照しているか」であって、その package のどの入口を使ったかではない。
  */
 export function packageOf(specifier: string): string {
-  const segments = specifier.split("/");
-  return specifier.startsWith("@") ? segments.slice(0, 2).join("/") : segments[0];
+  const name = /^(?:@[^/]+\/)?[^/]+/.exec(specifier);
+  return name === null ? specifier : name[0];
 }
 
 /**
@@ -286,8 +287,8 @@ export function packageOf(specifier: string): string {
 export function vendorImportsOf(sources: readonly string[]): string[] {
   const packages = new Set<string>();
   for (const source of sources) {
-    for (const match of source.matchAll(/from "([^"]+)"/g)) {
-      const specifier = match[1];
+    for (const [, specifier] of source.matchAll(/from "([^"]+)"/g)) {
+      if (specifier === undefined) continue;
       if (specifier.startsWith(".") || specifier.startsWith("@/")) continue;
       const name = packageOf(specifier);
       if (RUNTIME_PACKAGES.has(name)) continue;

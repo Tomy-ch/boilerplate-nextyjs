@@ -80,13 +80,15 @@ const INTENTIONALLY_UNRESOLVED: ReadonlySet<string> = new Set([
  * @param source - `.storybook/main.ts` の中身
  */
 export function parseStaticDirs(source: string): string[] {
-  const declaration = /staticDirs:\s*\[([^\]]*)\]/.exec(source);
+  const declaration = /staticDirs:\s*\[([^\]]*)\]/.exec(source)?.[1];
 
-  if (declaration === null) {
+  if (declaration === undefined) {
     throw new Error("`.storybook/main.ts` に `staticDirs` の宣言が見つかりません。");
   }
 
-  const dirs = [...declaration[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+  const dirs = [...declaration.matchAll(/"([^"]+)"/g)].flatMap(([, dir]) =>
+    dir === undefined ? [] : [dir],
+  );
 
   if (dirs.length === 0) {
     throw new Error("`.storybook/main.ts` の `staticDirs` が空です。");
@@ -135,8 +137,8 @@ export function findUnresolvedAssets(
   const unresolved: UnresolvedAsset[] = [];
 
   content.split("\n").forEach((text, index) => {
-    for (const match of text.matchAll(ASSET_URL)) {
-      const url = match[1];
+    for (const [, url] of text.matchAll(ASSET_URL)) {
+      if (url === undefined) continue;
       const line = index + 1;
 
       if (url.startsWith("/src/")) {

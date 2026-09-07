@@ -158,13 +158,14 @@ export function findViolations(
         .map((job) => ({ workflow: candidate, job })),
     );
 
-    if (declaring.length === 0) {
+    const [only, ...others] = declaring;
+    if (only === undefined) {
       violations.push(
         `\`${context}\`: この名前を宣言する job がありません。報告されない context は永久に待たれます`,
       );
       continue;
     }
-    if (declaring.length > 1) {
+    if (others.length > 0) {
       const where = [...new Set(declaring.map((entry) => entry.workflow.file))].join(" / ");
       violations.push(
         `\`${context}\`: ${declaring.length} 個の job が同じ名前を宣言しています（${where}）。どの結果を必須にしているのか決まりません`,
@@ -172,7 +173,6 @@ export function findViolations(
       continue;
     }
 
-    const only = declaring[0];
     violations.push(
       ...findJobViolations(context, only.workflow, only.job),
       ...findTriggerViolations(context, only.workflow),

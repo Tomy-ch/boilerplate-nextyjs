@@ -117,7 +117,7 @@ describe("readWorkflowContexts", () => {
       "on:\n  pull_request:\njobs:\n  lint:\n    name: Lint everything\n",
     );
 
-    expect(parsed.jobs[0].context).toBe("Lint everything");
+    expect(parsed.jobs).toEqual([expect.objectContaining({ context: "Lint everything" })]);
   });
 
   it("matrix と reusable workflow の呼び出しを見分ける", () => {

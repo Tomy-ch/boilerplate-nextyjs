@@ -13,10 +13,10 @@ type ImageConfig = { created?: unknown };
 
 /** inspect 出力から index digest を取り出す。 */
 export function parseDigest(out: string): string {
-  const match = DIGEST_PATTERN.exec(out);
-  if (!match) throw new Error("Digest 行を解釈できません");
+  const digest = DIGEST_PATTERN.exec(out)?.[1];
+  if (digest === undefined) throw new Error("Digest 行を解釈できません");
 
-  return match[1];
+  return digest;
 }
 
 /**

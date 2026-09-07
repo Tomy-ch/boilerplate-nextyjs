@@ -107,9 +107,10 @@ export function collectRefs(files: string[]): Map<string, ActionRef> {
   const refs = new Map<string, ActionRef>();
   for (const file of files) {
     const data = fs.readFileSync(file, "utf8");
-    for (const match of data.matchAll(usesPattern())) {
-      const ref = parseUses(match[2], match[3], match[4]);
-      if (ref) refs.set(refKey(ref), ref);
+    for (const [, , usesPath, ref, comment] of data.matchAll(usesPattern())) {
+      if (usesPath === undefined || ref === undefined) continue;
+      const parsed = parseUses(usesPath, ref, comment);
+      if (parsed) refs.set(refKey(parsed), parsed);
     }
   }
   return refs;
@@ -162,8 +163,10 @@ export function unparsedUsesLines(data: string): number[] {
 export function unsupportedTagLines(data: string): number[] {
   const lines: number[] = [];
   for (const match of data.matchAll(usesPattern())) {
-    const ref = parseUses(match[2], match[3], match[4]);
-    if (ref === null || isSupportedTag(ref.tag)) continue;
+    const [, , usesPath, ref, comment] = match;
+    if (usesPath === undefined || ref === undefined) continue;
+    const parsed = parseUses(usesPath, ref, comment);
+    if (parsed === null || isSupportedTag(parsed.tag)) continue;
     lines.push(lineNumberAt(data, match.index));
   }
   return lines;

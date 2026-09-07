@@ -26,7 +26,8 @@ export type ReadmeReader = (directory: string) => string | null;
  * @param pattern - リポジトリルート相対のパターン(区切りは `/`)
  */
 function literalDirectory(pattern: string): string {
-  const literal = pattern.split("*")[0];
+  const wildcardAt = pattern.indexOf("*");
+  const literal = wildcardAt < 0 ? pattern : pattern.slice(0, wildcardAt);
   const segments = literal.split("/");
 
   // 末尾が区切りで終わっていれば、その手前までが確定したディレクトリ。そうでなければ最後の

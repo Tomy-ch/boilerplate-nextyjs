@@ -46,7 +46,9 @@ describe("AspectRatio", () => {
   it("client runtime を必要としない Server Component として描画する", () => {
     render(<AspectRatio ratio={16 / 9}>内容</AspectRatio>);
 
-    const origins = [...source.matchAll(VALUE_IMPORT)].map(([, origin]) => origin);
+    const origins = [...source.matchAll(VALUE_IMPORT)].flatMap(([, origin]) =>
+      origin === undefined ? [] : [origin],
+    );
     const clientOnly = origins.filter((origin) =>
       CLIENT_ONLY_ORIGINS.some((prefix) => origin.startsWith(prefix)),
     );

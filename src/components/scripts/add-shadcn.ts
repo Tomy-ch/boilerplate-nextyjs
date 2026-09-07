@@ -132,14 +132,12 @@ const registryItemSchema = z.object({
   files: z.array(z.object({ path: z.string() })).min(1),
 });
 
-const upstreamCommitsSchema = z
-  .array(
-    z.object({
-      sha: z.string(),
-      commit: z.object({ committer: z.object({ date: z.iso.datetime() }) }),
-    }),
-  )
-  .min(1);
+const upstreamCommitSchema = z.object({
+  sha: z.string(),
+  commit: z.object({ committer: z.object({ date: z.iso.datetime() }) }),
+});
+
+const upstreamCommitsSchema = z.tuple([upstreamCommitSchema], upstreamCommitSchema);
 
 type ComponentManifest = z.infer<typeof componentManifestSchema>;
 
@@ -493,14 +491,14 @@ async function resolveUpstreamItem(
     item.files.map(async (file) => {
       const path = `${UPSTREAM_REGISTRY_ROOT}/${file.path}`;
       const commitsUrl = `${UPSTREAM_API_URL}/repos/${UPSTREAM_REPOSITORY}/commits?path=${encodeURIComponent(path)}&per_page=1`;
-      const commits = upstreamCommitsSchema.parse(await fetchJson(commitsUrl));
+      const [latest] = upstreamCommitsSchema.parse(await fetchJson(commitsUrl));
 
       return {
         repository: UPSTREAM_REPOSITORY,
         path,
         localPath: `${componentDirectory(component, as, layer)}/${basename(file.path)}`,
-        commit: commits[0].sha,
-        committedAt: commits[0].commit.committer.date,
+        commit: latest.sha,
+        committedAt: latest.commit.committer.date,
       };
     }),
   );

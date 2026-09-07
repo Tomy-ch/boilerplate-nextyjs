@@ -40,6 +40,7 @@ export const SupplementOpen: Story = {
   globals: { viewport: { value: "desktop", isRotated: false } },
   play: async ({ canvasElement }) => {
     const [first] = within(canvasElement).getAllByRole("button", { name: "リポジトリの補足" });
+    if (first === undefined) throw new Error("リポジトリの補足を開く操作が無い");
 
     await userEvent.click(first);
     await within(document.body).findByText(REPOSITORIES[0].purpose);

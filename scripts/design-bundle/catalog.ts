@@ -47,7 +47,7 @@ export function sectionOf(markdown: string, heading: string): string {
 
 /** README の先頭見出しを component の表示名として使う。 */
 export function titleOf(markdown: string, fallback: string): string {
-  return /^# (.+)$/m.exec(markdown)?.[1].trim() ?? fallback;
+  return /^# (.+)$/m.exec(markdown)?.[1]?.trim() ?? fallback;
 }
 
 /** `design-system` の部品だけを `registry:ui` とし、それ以外の層は `registry:component` にする。 */

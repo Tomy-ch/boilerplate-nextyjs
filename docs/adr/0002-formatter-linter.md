@@ -64,7 +64,7 @@ Biome は `next` / `react` の lint ドメインルールを内蔵しており�
 | `exactOptionalPropertyTypes` | **見送り** | React props との摩擦が高い。残る穴（「未指定」と「明示的 `undefined`」を型で区別できない）は下記の実行時機構で埋める |
 | `noUnusedLocals` / `noUnusedParameters` | **入れない** | biome が `correctness/noUnusedVariables` / `noUnusedFunctionParameters` で error として捕捉する（同じ検査を 2 つ持つと食い違う） |
 
-- **`target` は Next.js 16 / [0102](0102-browser-support.md) のサポート範囲に合わせて引き上げる**（`ES2017` 据え置きは実態と釣り合わない）。具体値は実装 PR で確定する
+- **`target` は `ES2022`**。[0102](0102-browser-support.md) が追認する Next.js の既定 browserslist（Chrome 111 / Edge 111 / Firefox 111 / Safari 16.4）のすべてが実装している最も新しい ECMAScript 版（ES2023 の配列複製系 `toSorted` 等は Firefox 111 に無い）。`tsc` は `noEmit` であり配布物の構文はビルド（SWC）が browserslist から決めるため、この値が定めるのは型検査の前提だけである
 - **`exactOptionalPropertyTypes` 見送りの穴を埋める機構**: `JSON.stringify` は値が `undefined` のキーを落とすため、`{name: undefined}` と `{}` はワイヤ上で同一になる。危険が残るのは直列化より手前のローカル組み立てだけなので、**`adapters` に PATCH ペイロードの正規化関数を置いて閉じ込める**。「触らない」= キーを含めない / 「消す」= `null` を明示とし、`undefined` に意味を持たせない。adapters の公開面は正規化済みの型でしか受け付けない形にする（散文の規約にしない）
 
 ## ESLint による補完

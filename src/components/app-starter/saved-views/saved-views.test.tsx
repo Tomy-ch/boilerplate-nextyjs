@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
 
-import { SavedViews } from "./saved-views";
+import { type SavedView, SavedViews } from "./saved-views";
 
 beforeAll(() => {
   // Radix の menu と dialog は位置計算に使う API を jsdom が持たないため、実装を変えずにここで補う。
@@ -20,7 +20,7 @@ beforeAll(() => {
 const VIEWS = [
   { id: "recent", name: "最近更新した順" },
   { id: "mine", name: "自分の担当" },
-];
+] satisfies readonly [SavedView, ...SavedView[]];
 
 function renderSavedViews(overrides: Partial<Parameters<typeof SavedViews>[0]> = {}) {
   const props = {

@@ -26,10 +26,10 @@ async function openMenu(name: string) {
 
 type Item = { id: string; name: string; retired: boolean };
 
-const ITEMS: Item[] = [
+const ITEMS = [
   { id: "1", name: "標準プラン", retired: false },
   { id: "2", name: "旧プラン", retired: true },
-];
+] satisfies readonly [Item, ...Item[]];
 
 function itemRowKey(item: Item) {
   return item.id;

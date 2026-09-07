@@ -20,6 +20,7 @@ const rejecting: DeliveryAction = () =>
 /** 先頭の注文を配達済みにする。 */
 async function confirmFirst(canvasElement: HTMLElement) {
   const [first] = within(canvasElement).getAllByRole("button", { name: "配達済みにする" });
+  if (first === undefined) throw new Error("配達済みにする操作が無い");
 
   await userEvent.click(first);
 }

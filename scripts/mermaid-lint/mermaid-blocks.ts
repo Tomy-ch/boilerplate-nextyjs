@@ -21,30 +21,30 @@ export function extractMermaidBlocks(content: string): MermaidBlock[] {
   const lines = content.split("\n");
   const blocks: MermaidBlock[] = [];
 
-  for (let i = 0; i < lines.length; i++) {
-    const opening = FENCE_PATTERN.exec(lines[i]);
+  // 閉じフェンスまでの行（開いたまま終わるときは末尾まで）は本文であって、次の開きを探す対象では
+  // ない。
+  let consumedThrough = -1;
 
-    if (!opening) {
+  for (const [i, line] of lines.entries()) {
+    if (i <= consumedThrough) {
       continue;
     }
 
-    const marker = opening[2];
+    const [, , marker] = FENCE_PATTERN.exec(line) ?? [];
+
+    if (marker === undefined) {
+      continue;
+    }
+
     const closing = new RegExp(
       `^\\s*${marker.startsWith("`") ? "`" : "~"}{${marker.length},}\\s*$`,
     );
-    const body: string[] = [];
-    let j = i + 1;
-
-    for (; j < lines.length; j++) {
-      if (closing.test(lines[j])) {
-        break;
-      }
-
-      body.push(lines[j]);
-    }
+    const rest = lines.slice(i + 1);
+    const closingAt = rest.findIndex((candidate) => closing.test(candidate));
+    const body = closingAt === -1 ? rest : rest.slice(0, closingAt);
 
     blocks.push({ startLine: i + 1, code: body.join("\n") });
-    i = j;
+    consumedThrough = closingAt === -1 ? lines.length : i + 1 + closingAt;
   }
 
   return blocks;

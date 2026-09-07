@@ -24,7 +24,11 @@ function write(relative: string, content: string): void {
 
 /** 走査対象の 1 件目。テストは 1 ファイルだけを置いて呼ぶ。 */
 function firstTarget(): PinTarget {
-  return targetFiles(root)[0];
+  const [target] = targetFiles(root);
+  if (target === undefined) {
+    throw new Error("走査対象のファイルが置かれていません");
+  }
+  return target;
 }
 
 const lock = (entries: [string, string][]) => new Map(entries);

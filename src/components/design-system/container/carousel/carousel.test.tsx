@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { useId } from "react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
@@ -170,42 +170,39 @@ describe("Carousel", () => {
   });
 
   it("先頭の slide は前を持たず、次だけを指す", () => {
-    const { container } = render(<StepFixture />);
-    const items = [...container.querySelectorAll('[data-slot="carousel-item"]')];
-    const first = items[0];
+    render(<StepFixture />);
+    const first = screen.getByRole("group", { name: "1 / 3" });
 
-    expect(first.querySelector('[data-slot="carousel-previous"]')).not.toBeInTheDocument();
-    expect(first.querySelector('[data-slot="carousel-next"]')).toHaveAttribute(
+    expect(within(first).queryByRole("link", { name: "前へ" })).not.toBeInTheDocument();
+    expect(within(first).getByRole("link", { name: "次へ" })).toHaveAttribute(
       "href",
-      `#${items[1].id}`,
+      `#${screen.getByRole("group", { name: "2 / 3" }).id}`,
     );
   });
 
   it("中間の slide は前後どちらの slide も指す", () => {
-    const { container } = render(<StepFixture />);
-    const items = [...container.querySelectorAll('[data-slot="carousel-item"]')];
-    const middle = items[1];
+    render(<StepFixture />);
+    const middle = screen.getByRole("group", { name: "2 / 3" });
 
-    expect(middle.querySelector('[data-slot="carousel-previous"]')).toHaveAttribute(
+    expect(within(middle).getByRole("link", { name: "前へ" })).toHaveAttribute(
       "href",
-      `#${items[0].id}`,
+      `#${screen.getByRole("group", { name: "1 / 3" }).id}`,
     );
-    expect(middle.querySelector('[data-slot="carousel-next"]')).toHaveAttribute(
+    expect(within(middle).getByRole("link", { name: "次へ" })).toHaveAttribute(
       "href",
-      `#${items[2].id}`,
+      `#${screen.getByRole("group", { name: "3 / 3" }).id}`,
     );
   });
 
   it("末尾の slide は次を持たず、前だけを指す", () => {
-    const { container } = render(<StepFixture />);
-    const items = [...container.querySelectorAll('[data-slot="carousel-item"]')];
-    const last = items[items.length - 1];
+    render(<StepFixture />);
+    const last = screen.getByRole("group", { name: "3 / 3" });
 
-    expect(last.querySelector('[data-slot="carousel-previous"]')).toHaveAttribute(
+    expect(within(last).getByRole("link", { name: "前へ" })).toHaveAttribute(
       "href",
-      `#${items[items.length - 2].id}`,
+      `#${screen.getByRole("group", { name: "2 / 3" }).id}`,
     );
-    expect(last.querySelector('[data-slot="carousel-next"]')).not.toBeInTheDocument();
+    expect(within(last).queryByRole("link", { name: "次へ" })).not.toBeInTheDocument();
   });
 
   it("端の送りの名前を呼び出し元が言い換えられる", () => {

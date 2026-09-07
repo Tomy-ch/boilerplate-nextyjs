@@ -91,7 +91,9 @@ export function runtimeSpecifiers(content: string): string[] {
         : statement,
     );
 
-  return [...withoutTypes.matchAll(SPECIFIER)].map(([, specifier]) => specifier);
+  return [...withoutTypes.matchAll(SPECIFIER)].flatMap(([, specifier]) =>
+    specifier === undefined ? [] : [specifier],
+  );
 }
 
 /**

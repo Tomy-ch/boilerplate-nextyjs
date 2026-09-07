@@ -49,7 +49,10 @@ export function applyRepositoryReference(
   currentName: string,
   repository: string,
 ): ReferenceReplacement {
-  const newName = repository.split("/")[1];
+  const [, newName] = repository.split("/");
+  if (newName === undefined) {
+    throw new Error(`<owner>/<repo> 形式ではありません: ${JSON.stringify(repository)}`);
+  }
   const slugPattern = buildSlugPattern(currentName);
   const namePattern = buildNamePattern(currentName);
 

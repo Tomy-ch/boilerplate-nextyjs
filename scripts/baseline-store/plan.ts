@@ -115,11 +115,11 @@ export function formatPrunePlan(plan: PrunePlan, repositoryMiB: number): string 
  * 置き場を作った人が既定ブランチ名を変えていても追随するためです。
  */
 export function parseDefaultBranch(lsRemoteOutput: string): string {
-  const match = /^ref:\s+refs\/heads\/(\S+)\s+HEAD$/m.exec(lsRemoteOutput);
-  if (match === null) {
+  const branch = /^ref:\s+refs\/heads\/(\S+)\s+HEAD$/m.exec(lsRemoteOutput)?.[1];
+  if (branch === undefined) {
     throw new Error("置き場の既定ブランチを解決できません。");
   }
-  return match[1];
+  return branch;
 }
 
 /**

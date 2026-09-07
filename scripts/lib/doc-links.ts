@@ -79,9 +79,9 @@ function scannableLines(file: string, content: string): string[] {
     return lines.map((line) => {
       if (COMMENT_LINE.test(line)) return withoutSpans(line);
 
-      const trailing = TRAILING_COMMENT.exec(line);
+      const trailing = TRAILING_COMMENT.exec(line)?.[1];
 
-      return trailing === null ? "" : withoutSpans(trailing[1]);
+      return trailing === undefined ? "" : withoutSpans(trailing);
     });
   }
 
@@ -104,11 +104,15 @@ function scannableLines(file: string, content: string): string[] {
 
 /** その行に書かれた相対リンクをすべて取り出す。 */
 function hrefsIn(text: string): string[] {
-  const definition = LINK_DEFINITION.exec(text);
+  const definition = LINK_DEFINITION.exec(text)?.[1];
 
   return [
-    ...[...text.matchAll(LINK)].map((match) => match[1] ?? match[2]),
-    ...(definition ? [definition[1]] : []),
+    ...[...text.matchAll(LINK)].flatMap(([, bracketed, bare]) => {
+      const href = bracketed ?? bare;
+
+      return href === undefined ? [] : [href];
+    }),
+    ...(definition === undefined ? [] : [definition]),
   ];
 }
 
@@ -137,6 +141,7 @@ export function findBrokenDocLinks(file: string, content: string, root: string):
       if (NOT_RELATIVE.test(href)) continue;
 
       const [path, fragment] = href.split("#");
+      if (path === undefined) continue;
       const target = path === "" ? resolve(root, file) : resolve(root, dirname(file), path);
       const line = index + 1;
 

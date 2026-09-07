@@ -61,7 +61,9 @@ function main(): void {
     return;
   }
 
-  if (!file || !["names", "orphans", "missing"].includes(command)) fail(USAGE);
+  if (command === undefined || !file || !["names", "orphans", "missing"].includes(command)) {
+    fail(USAGE);
+  }
 
   try {
     const json = readFileSync(file, "utf8");

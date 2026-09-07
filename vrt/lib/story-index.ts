@@ -101,7 +101,10 @@ function isStory(
  * 基準画像を系統ごとに分ける理由は [README](../README.md#基準画像は別のリポジトリに置く)。
  */
 export function storyGroup(title: string): string {
-  return title.split("/")[0].trim().toLowerCase().replace(/\s+/g, "-");
+  const separator = title.indexOf("/");
+  const head = separator === -1 ? title : title.slice(0, separator);
+
+  return head.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
 /**

@@ -295,7 +295,13 @@ describe("collectRefs", () => {
 });
 
 describe("unparsedLines", () => {
-  const target = (): PinTarget => targetFiles(root)[0];
+  const target = (): PinTarget => {
+    const [first] = targetFiles(root);
+    if (first === undefined) {
+      throw new Error("走査対象のファイルが置かれていません");
+    }
+    return first;
+  };
 
   // ----- 正常系 -----
   it("解釈できた参照を取りこぼしとして数えない", () => {

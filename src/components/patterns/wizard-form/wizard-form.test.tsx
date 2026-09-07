@@ -8,7 +8,7 @@ import { axe } from "vitest-axe";
 import { Button } from "@/components/design-system/action/button/button";
 import { WizardForm, type WizardSteps } from "./wizard-form";
 
-const STEPS: WizardSteps = [
+const STEPS = [
   {
     id: "applicant",
     title: "申請者",
@@ -20,7 +20,7 @@ const STEPS: WizardSteps = [
     content: <input aria-label="用途" defaultValue="開発" name="purpose" />,
   },
   { id: "confirm", title: "確認", content: <p>この内容で申請します。</p> },
-];
+] satisfies WizardSteps;
 
 function WizardFixture({ steps = STEPS }: { steps?: WizardSteps } = {}) {
   return (

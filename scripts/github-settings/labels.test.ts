@@ -21,7 +21,7 @@ describe("parseLabelSpecs", () => {
   it("説明が空のラベルも読み取る", () => {
     const source = JSON.stringify([{ name: "wontfix", description: "", color: "ffffff" }]);
 
-    expect(parseLabelSpecs(source)[0].description).toBe("");
+    expect(parseLabelSpecs(source)).toEqual([expect.objectContaining({ description: "" })]);
   });
 
   // ----- 異常系 -----

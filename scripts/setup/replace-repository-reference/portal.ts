@@ -39,6 +39,9 @@ const PORTAL_URL_PLACEHOLDER = "__PORTAL_URL__";
  */
 export function buildDefaultPortalUrl(repository: string): string {
   const [owner, name] = repository.split("/");
+  if (owner === undefined || name === undefined) {
+    throw new Error(`<owner>/<repo> 形式ではありません: ${JSON.stringify(repository)}`);
+  }
   const host = `${owner.toLowerCase()}.github.io`;
 
   return name.toLowerCase() === host ? `https://${host}/` : `https://${host}/${name}/`;

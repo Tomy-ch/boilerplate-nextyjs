@@ -55,11 +55,11 @@ export function collectAnchors(markdown: string): Set<string> {
       continue;
     }
 
-    const heading = inFence ? null : HEADING.exec(line);
+    const heading = inFence ? undefined : HEADING.exec(line)?.[1];
 
-    if (!heading) continue;
+    if (heading === undefined) continue;
 
-    const base = toAnchor(heading[1].trimEnd().replace(CLOSING_HASHES, ""));
+    const base = toAnchor(heading.trimEnd().replace(CLOSING_HASHES, ""));
     const count = seen.get(base) ?? 0;
 
     seen.set(base, count + 1);

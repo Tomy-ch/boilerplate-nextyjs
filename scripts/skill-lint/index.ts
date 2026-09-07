@@ -255,14 +255,16 @@ function collectMakeTargets(): MakeTargets {
   for (const file of files) {
     for (const line of fs.readFileSync(file, "utf8").split("\n")) {
       if (line.startsWith("\t")) continue;
-      const phony = /^\.PHONY:\s*(.+)$/.exec(line);
-      if (phony) {
-        for (const name of phony[1].split("##")[0].trim().split(/\s+/)) addTarget(name);
+      const phony = /^\.PHONY:\s*(.+)$/.exec(line)?.[1];
+      if (phony !== undefined) {
+        const commentAt = phony.indexOf("##");
+        const names = commentAt < 0 ? phony : phony.slice(0, commentAt);
+        for (const name of names.trim().split(/\s+/)) addTarget(name);
         continue;
       }
-      const rule = /^([A-Za-z0-9_%.+/ -]+):(?!=)/.exec(line);
-      if (rule) {
-        for (const name of rule[1].trim().split(/\s+/)) addTarget(name);
+      const rule = /^([A-Za-z0-9_%.+/ -]+):(?!=)/.exec(line)?.[1];
+      if (rule !== undefined) {
+        for (const name of rule.trim().split(/\s+/)) addTarget(name);
       }
     }
   }
@@ -338,7 +340,7 @@ function asRepoPath(span: string): string | null {
   if (text.includes("...")) return null;
   const isDirRef = text.endsWith("/");
   if (isDirRef) text = text.slice(0, -1);
-  if (!rootEntries.has(text.split("/")[0])) return null;
+  if (!rootEntries.has(text.slice(0, text.indexOf("/")))) return null;
   if (!isDirRef && !path.basename(text).includes(".")) return null;
   if (isUncreatedKernelPath(text)) return null;
   return text;
@@ -350,9 +352,9 @@ function asRepoPath(span: string): string | null {
 // 実体化した時点で配下のパスは自動的に検査対象へ入り、以後は rename / 削除が検出される
 // （= 骨組みの現状を恒久ルールとして焼き込まない）。
 function isUncreatedKernelPath(text: string): boolean {
-  const segments = text.split("/");
-  if (segments[0] !== "src" || segments.length < 2) return false;
-  return !fs.existsSync(path.join(REPO_ROOT, segments[0], segments[1]));
+  const [top, kernel] = text.split("/");
+  if (top !== "src" || kernel === undefined) return false;
+  return !fs.existsSync(path.join(REPO_ROOT, top, kernel));
 }
 
 // パス参照の実在性を判定する。スキルは自身が同梱するファイル（`prompts/verify-arch.md` など）も
@@ -400,7 +402,8 @@ function asLinkPath(target: string): string | null {
   // （`docs/<name>/x.md`）とは別物。囲みを外してから中身をプレースホルダとして判定する。
   const unwrapped = /^<[^<>]*>$/.test(target) ? target.slice(1, -1) : target;
   if (/<[^>]*>/.test(unwrapped)) return null;
-  const withoutFragment = unwrapped.split("#")[0];
+  const fragmentAt = unwrapped.indexOf("#");
+  const withoutFragment = fragmentAt < 0 ? unwrapped : unwrapped.slice(0, fragmentAt);
   return withoutFragment === "" ? null : withoutFragment;
 }
 
@@ -416,7 +419,8 @@ function linkPathExists(target: string, fromDir: string): boolean {
   if (rel.startsWith("..")) return false;
   if (isExcludedPrefix(rel)) return false;
   // tmp/ 配下はスキル実行中に生成されるため、静的検査では存在しないのが正常。
-  if (PATH_ROOT_DENY.has(rel.split(path.sep)[0])) return true;
+  const separatorAt = rel.indexOf(path.sep);
+  if (PATH_ROOT_DENY.has(separatorAt < 0 ? rel : rel.slice(0, separatorAt))) return true;
   return fs.existsSync(abs);
 }
 
@@ -455,10 +459,11 @@ function checkReferences(rel: string): void {
     }
     const { spans, withoutCode } = scanInlineCode(line);
     // コードスパンの中のリンクはリンク記法そのものの例示であり、実在するファイルを指す主張ではない。
-    for (const match of withoutCode.matchAll(MD_LINK_RE)) {
-      const target = asLinkPath(match[1]);
+    for (const [, href] of withoutCode.matchAll(MD_LINK_RE)) {
+      if (href === undefined) continue;
+      const target = asLinkPath(href);
       if (target !== null && !linkPathExists(target, fromDir)) {
-        report(rel, lineNo, "link-ref", `存在しないパスへリンクしています: \`${match[1]}\``);
+        report(rel, lineNo, "link-ref", `存在しないパスへリンクしています: \`${href}\``);
       }
     }
     for (const span of spans) {

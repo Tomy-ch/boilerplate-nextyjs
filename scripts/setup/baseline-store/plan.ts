@@ -39,11 +39,11 @@ export const DEFAULT_VISIBILITY = "private";
 
 /** `owner/repo` を owner と repo に割る。 */
 export function splitRepository(repository: string): { owner: string; name: string } {
-  const match = /^([^/\s]+)\/([^/\s]+)$/.exec(repository);
-  if (match === null) {
+  const [, owner, name] = /^([^/\s]+)\/([^/\s]+)$/.exec(repository) ?? [];
+  if (owner === undefined || name === undefined) {
     throw new Error(`owner/repo の形ではありません: ${JSON.stringify(repository)}`);
   }
-  return { owner: match[1], name: match[2] };
+  return { owner, name };
 }
 
 /** 親リポジトリから導く置き場の既定名。 */
@@ -171,12 +171,12 @@ export function isAffirmative(answer: string): boolean {
  * 番号は App の General ページに出ているので、控える手間は URL を控えるのと変わりません。
  */
 export function parseAppId(input: string): string {
-  const matched = /^(?:App ID[:：]?\s*)?(\d+)$/.exec(input.trim());
+  const appId = /^(?:App ID[:：]?\s*)?(\d+)$/.exec(input.trim())?.[1];
 
-  if (matched === null) {
+  if (appId === undefined) {
     throw new Error(
       `App ID（General ページに出ている数字）を入力してください（受け取った値: ${JSON.stringify(input)}）`,
     );
   }
-  return matched[1];
+  return appId;
 }

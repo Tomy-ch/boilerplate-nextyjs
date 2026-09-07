@@ -65,7 +65,9 @@ describe("collisionsOf", () => {
 
   it("feature 以外は、生成物と同じパスが在れば止める", () => {
     const files = planGeneration(ADAPTER);
+    const testPath = "src/adapters/server/report-detail/report-detail.test.ts";
 
-    expect(collisionsOf(ADAPTER, files, treeWith(files[1].path))).toEqual([files[1].path]);
+    expect(files.map((file) => file.path)).toContain(testPath);
+    expect(collisionsOf(ADAPTER, files, treeWith(testPath))).toEqual([testPath]);
   });
 });

@@ -19,7 +19,7 @@ export type Repository = {
  * フッターの導線・「このサイトについて」のカード・補足の面が同じ表を読みます。別々に持つと、
  * 片方だけ名前や URL が古いまま残ります。
  */
-export const REPOSITORIES: readonly Repository[] = [
+export const REPOSITORIES = [
   {
     name: "nextjs-boilerplate",
     url: "https://github.com/Tomy-ch/nextjs-boilerplate",
@@ -51,4 +51,4 @@ export const REPOSITORIES: readonly Repository[] = [
       "環境設定とマイグレーションを内蔵した単一のバイナリになります",
     ],
   },
-];
+] satisfies readonly [Repository, ...Repository[]];

@@ -160,10 +160,11 @@ describe("NotificationItem", () => {
   it("未読を印だけでなく語でも示す", () => {
     render(<PanelFixture />);
 
-    const items = screen.getAllByRole("listitem");
+    const unreadMarks = screen
+      .getAllByRole("listitem")
+      .map((item) => within(item).queryByText("未読") !== null);
 
-    expect(within(items[0]).getByText("未読")).toBeInTheDocument();
-    expect(within(items[2]).queryByText("未読")).not.toBeInTheDocument();
+    expect(unreadMarks).toEqual(NOTIFICATIONS.map((notification) => notification.unread));
   });
 
   it("未読の語を呼び出し元が差し替えられる", () => {

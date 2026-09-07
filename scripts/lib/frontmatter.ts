@@ -18,9 +18,7 @@ const FRONTMATTER_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---(\r?\n|$)/;
  * @returns frontmatter が無ければ null
  */
 export function extractFrontmatter(source: string): string | null {
-  const matched = FRONTMATTER_PATTERN.exec(source);
-
-  return matched === null ? null : matched[1];
+  return FRONTMATTER_PATTERN.exec(source)?.[1] ?? null;
 }
 
 /** 宣言の対応表として読める形か。 */

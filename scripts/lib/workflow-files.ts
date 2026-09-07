@@ -78,8 +78,9 @@ export function parseWorkflowDocument(
   lineCounter?: LineCounter,
 ): Document {
   const doc = parseDocument(source, lineCounter === undefined ? {} : { lineCounter });
-  if (doc.errors.length > 0) {
-    throw new Error(`${file}: YAML として読めません: ${doc.errors[0].message}`);
+  const [parseError] = doc.errors;
+  if (parseError !== undefined) {
+    throw new Error(`${file}: YAML として読めません: ${parseError.message}`);
   }
   return doc;
 }

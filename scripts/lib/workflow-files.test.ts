@@ -146,14 +146,14 @@ describe("readJobId", () => {
   it("jobs: のキーを job の ID として読む", () => {
     const doc = parseWorkflowDocument("w.yaml", "jobs:\n  lint:\n");
 
-    expect(readJobId("w.yaml", readWorkflowMaps("w.yaml", doc).jobs.items[0].key)).toBe("lint");
+    expect(readJobId("w.yaml", readWorkflowMaps("w.yaml", doc).jobs.items[0]?.key)).toBe("lint");
   });
 
   // ----- 異常系 -----
   it("文字列でないキーを落とす", () => {
     const doc = parseWorkflowDocument("w.yaml", "jobs:\n  2026:\n");
 
-    expect(() => readJobId("w.yaml", readWorkflowMaps("w.yaml", doc).jobs.items[0].key)).toThrow(
+    expect(() => readJobId("w.yaml", readWorkflowMaps("w.yaml", doc).jobs.items[0]?.key)).toThrow(
       "w.yaml: ジョブ名が文字列として読めません",
     );
   });

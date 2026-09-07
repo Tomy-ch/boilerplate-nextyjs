@@ -327,11 +327,7 @@ describe("CarouselPrevious", () => {
   it("見た目の円より広い当たり判定を持つ", () => {
     render(<StepFixture />);
 
-    expect(linkIn("1 / 3", "次へ")).toHaveClass(
-      "size-9",
-      "after:absolute",
-      "after:-inset-4.5",
-    );
+    expect(linkIn("1 / 3", "次へ")).toHaveClass("size-9", "after:absolute", "after:-inset-4.5");
   });
 
   it("修飾キーを伴う押下は browser の既定動作に任せる", async () => {
@@ -403,10 +399,7 @@ describe("CarouselNext", () => {
   it("次のスライドを指す link として slot つきで描画する", () => {
     render(<StepFixture />);
 
-    expect(linkIn("1 / 3", "次へ")).toHaveAttribute(
-      "data-slot",
-      "carousel-next",
-    );
+    expect(linkIn("1 / 3", "次へ")).toHaveAttribute("data-slot", "carousel-next");
   });
 
   it("呼び出し元の onClick も呼ぶ", async () => {

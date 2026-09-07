@@ -63,8 +63,14 @@ export type PurchasePeriodSheetProps = {
  */
 export function PurchasePeriodSheet({ period }: PurchasePeriodSheetProps) {
   const [open, setOpen] = useState(false);
-  const { draft, applied: draftPeriod, pending, change, applyInPlace, reset } =
-    usePurchaseFilterDraft();
+  const {
+    draft,
+    applied: draftPeriod,
+    pending,
+    change,
+    applyInPlace,
+    reset,
+  } = usePurchaseFilterDraft();
   const applied = describePeriod(period);
   const missing = describeMissing(draft);
   const appliedHref = toPurchaseHistoryHref(period);

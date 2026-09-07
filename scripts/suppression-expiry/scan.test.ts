@@ -184,7 +184,7 @@ describe("scanSuppressions", () => {
   it("コメントに条件を持つ面からは、日付を含む行だけを拾う", () => {
     place(
       "pnpm-workspace.yaml",
-      "overrides:\n  # 2026-08-02 に markdownlint-cli2 を上げた時点で撤去する。\n  \"js-yaml@>=5 <5.2.2\": \">=5.2.2 <6\"\n",
+      'overrides:\n  # 2026-08-02 に markdownlint-cli2 を上げた時点で撤去する。\n  "js-yaml@>=5 <5.2.2": ">=5.2.2 <6"\n',
     );
 
     expect(scanSuppressions(root)).toEqual([

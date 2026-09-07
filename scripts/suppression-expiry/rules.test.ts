@@ -85,7 +85,9 @@ describe("malformedSuppressions", () => {
 
   it("免除でない宣言は、理由さえあれば日付を求めない", () => {
     expect(
-      malformedSuppressions([suppression("Storybook が image-size を引かなくなった時点で削除する")]),
+      malformedSuppressions([
+        suppression("Storybook が image-size を引かなくなった時点で削除する"),
+      ]),
     ).toEqual([]);
   });
 

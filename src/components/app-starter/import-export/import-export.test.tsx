@@ -80,7 +80,11 @@ describe("ImportErrorList", () => {
     const table = screen.getByRole("table", { name: "取り込めなかった行" });
     const cells = within(table)
       .getAllByRole("row")
-      .map((row) => within(row).queryAllByRole("cell").map((cell) => cell.textContent));
+      .map((row) =>
+        within(row)
+          .queryAllByRole("cell")
+          .map((cell) => cell.textContent),
+      );
 
     expect(cells).toEqual([
       [],

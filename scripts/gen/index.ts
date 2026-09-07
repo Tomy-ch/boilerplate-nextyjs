@@ -7,12 +7,7 @@ import { readFeaturePlacement } from "./feature-placement";
 import { readLayerContract } from "./layer-contract";
 import { componentManifestEntry, isRecorded, recordComponent } from "./manifest";
 import { validateName } from "./naming";
-import {
-  type GenerationInput,
-  featureLocation,
-  isGenerationKind,
-  planGeneration,
-} from "./plan";
+import { featureLocation, type GenerationInput, isGenerationKind, planGeneration } from "./plan";
 
 /**
  * 雛形生成の入口。`pnpm gen <kind> <name> [--screen=<画面>] [--as=<見出し>] [--layer=<層>]` から呼ばれる。

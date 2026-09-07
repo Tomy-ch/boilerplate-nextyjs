@@ -10,13 +10,7 @@
 import fs from "node:fs";
 
 import { diffBaseline } from "./rules.js";
-import {
-  BASELINE_PATH,
-  REPO_ROOT,
-  readBaseline,
-  scanRowsOutsideTable,
-  scanTree,
-} from "./scan.js";
+import { BASELINE_PATH, REPO_ROOT, readBaseline, scanRowsOutsideTable, scanTree } from "./scan.js";
 
 const actual = scanTree(REPO_ROOT);
 

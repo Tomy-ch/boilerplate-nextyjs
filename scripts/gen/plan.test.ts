@@ -5,9 +5,9 @@ import { describe, expect, it } from "vitest";
 
 import type { LayerContract } from "./layer-contract";
 import {
+  featureLocation,
   type GeneratedFile,
   type GenerationInput,
-  featureLocation,
   isGenerationKind,
   planGeneration,
 } from "./plan";
@@ -71,7 +71,11 @@ function featureInput({
   name = "report-detail",
   screen = "list",
   readmeTemplate = FEATURE_README_TEMPLATE,
-}: { name?: string; screen?: string; readmeTemplate?: string } = {}): FeatureInput {
+}: {
+  name?: string;
+  screen?: string;
+  readmeTemplate?: string;
+} = {}): FeatureInput {
   return {
     kind: "feature",
     name,
@@ -272,7 +276,7 @@ describe("planGeneration", () => {
       [
         'export const ListView = withScreenSpan("features/abc-def/list/view", ({ title }: ListViewProps) => {',
         "  return (",
-        '    <section aria-label={title}>',
+        "    <section aria-label={title}>",
         "      <h2>{title}</h2>",
         "    </section>",
         "  );",
@@ -342,8 +346,8 @@ describe("planGeneration", () => {
   it("feature の story に読み幅の器と説明の置き場、既定の story を入れる", () => {
     const story = fileNamed(planGeneration(featureInput()), "view.stories.tsx").content;
 
-    expect(story).toContain("<ContentContainer className=\"py-8\">");
-    expect(story).toContain("parameters: {\n    layout: \"fullscreen\",\n    docs: {");
+    expect(story).toContain('<ContentContainer className="py-8">');
+    expect(story).toContain('parameters: {\n    layout: "fullscreen",\n    docs: {');
     expect(story).toContain("description: {\n        component:");
     expect(story).toContain("export const Default: Story = {};");
   });

@@ -48,7 +48,10 @@ function attributesOf(tag: string): Map<string, string> {
       continue;
     }
 
-    const name = before.slice(0, -1).split(/[\s<]+/).at(-1);
+    const name = before
+      .slice(0, -1)
+      .split(/[\s<]+/)
+      .at(-1);
 
     if (name === undefined) {
       continue;

@@ -1,4 +1,4 @@
-import { type GeneratedFile, type GenerationInput, featureLocation } from "./plan";
+import { featureLocation, type GeneratedFile, type GenerationInput } from "./plan";
 
 /**
  * 計画が既に在るものへ触らないかを判定する。

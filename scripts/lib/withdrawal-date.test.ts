@@ -46,15 +46,11 @@ describe("dayAfter", () => {
 describe("daysSince", () => {
   // ----- 正常系 -----
   it("経過した日数を返す", () => {
-    expect(daysSince(new Date("2026-03-30T00:00:00Z"), new Date("2026-04-13T00:00:00Z"))).toBe(
-      14,
-    );
+    expect(daysSince(new Date("2026-03-30T00:00:00Z"), new Date("2026-04-13T00:00:00Z"))).toBe(14);
   });
 
   // ----- 異常系 -----
   it("1 日に満たない端数は切り捨て、まだ次の日を満たしたとは数えない", () => {
-    expect(daysSince(new Date("2026-03-30T00:00:00Z"), new Date("2026-04-12T23:00:00Z"))).toBe(
-      13,
-    );
+    expect(daysSince(new Date("2026-03-30T00:00:00Z"), new Date("2026-04-12T23:00:00Z"))).toBe(13);
   });
 });

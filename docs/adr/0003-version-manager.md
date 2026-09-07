@@ -47,7 +47,7 @@ mise の現状シェアは asdf / nodenv / nvm / volta 等と拮抗しており�
 │   └ ツール・言語バージョンの宣言（唯一の真実）            │
 ├─────────────────────────────────────────────────────────┤
 │ 契約層        :  Makefile                                │
-│   └ make install-tools / make sync-versions など        │
+│   └ make install-tools / make actions-pin-check など    │
 │     開発者が叩く I/F。実装の差し替え点はここに集約        │
 ├─────────────────────────────────────────────────────────┤
 │ 配送層        :  レイヤごとに別実装                       │
@@ -93,9 +93,9 @@ mise への依存は **配送層 (host)** に閉じている。SSOT / 契約 / �
 
 ### Docker
 
-- 公式 base image (`node:X.Y.Z-alpine`) を使う。Docker レイヤキャッシュとの相性を優先
-- Dockerfile 内で `mise install` を実行しない（mise を Docker に持ち込むと、配送層に mise 依存が広がるため）
-- Dockerfile の `FROM` タグと `mise.toml` の整合性は **`make sync-versions` 相当の仕組み** で担保する（未整備の場合は手動で同期し、PR でレビューする）
+- **アプリ本体を動かす `Dockerfile` は同梱しない**([0011](0011-no-docker.md))。したがって配送する image のタグと `mise.toml` を突き合わせる問題は起きない
+- **開発を支える周辺サービス**（観測基盤 / 開発用 IdP 等）だけが container で立つ。そこへ mise を持ち込まない —— 配送層に mise 依存を広げないため
+- 周辺サービスの image は**タグではなく digest で固定**し、固定値はロックファイルが持つ（`make images-pin-check` が差分で落とす）。人が写す工程を作らない
 
 ### CI
 

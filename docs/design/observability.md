@@ -129,6 +129,10 @@ trace の口はさらに 2 つを持つ。**`service.name` の上書き** ——
 
 **例外**（`window` の `error` / `unhandledrejection`）は同じ口へ送り、サーバ側で `getLogger().error(...)` の構造化ログに **`exception.type` / `exception.message` / `exception.stacktrace` / `http.route`** を付けて載せる。記録は `withRemoteTraceContext(report.traceparent, ...)` の中で行うので、**`trace_id` は画面を組んだ要求のもの**になる。渡ってこなければ `ROOT_CONTEXT` で記録し、中継要求の span には紐づけない。1 回のページ読み込みで送るのは **8 件**まで（`Telemetry` island が数える）。
 
+**エラー境界が捕まえた例外は、この経路に乗らない。** React は明示的な境界（自前の `error.tsx` / `global-error.tsx`）が捕まえた例外を `onCaughtError` から`console.error` へ流すだけで、**`window` の `error` を発火しない**。`window` へ上がるのは組み込みの暗黙境界に落ちたときだけである。取得の失敗は大半が `error.tsx` に捕まるので、**いちばん記録したい経路がここで抜ける。**
+
+境界で受けた失敗も残したいなら、**境界の側から報告を呼ぶ**しかない。ただし`global-error.tsx` は root layout ごと差し替わるので、**そのとき島は既に居ない** ——報告の口を島の外から引ける形にしておく必要がある。
+
 ## 秘匿と query の境界
 
 伏せる名前の表は **`src/logging/logger.ts` の `REDACTED_FIELD_NAMES`（`authorization` / `cookie` / `password` / `token`）1 つ**で、ログと span の双方がこれを見る。掛かる場所は 3 つある。

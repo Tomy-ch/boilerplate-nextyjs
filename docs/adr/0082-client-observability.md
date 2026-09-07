@@ -53,9 +53,10 @@ Accepted (一部 exclusion)
 
 ### 2. client エラー収集 = 採用
 
-- `window.onerror` / `unhandledrejection`、および `error.tsx` / `global-error.tsx` 到達([0080](0080-error-handling.md))時のエラーを捕捉し、BFF 中継で **サーバログ**(0081)へ送る。
+- `window` の `error` / `unhandledrejection` を捕捉し、BFF 中継で **サーバログ**(0081)へ送る。**エラー境界が捕まえた例外はこの経路に乗らない** —— React は明示的な境界の捕捉を`console.error` へ流すだけで `error` を発火しないため、境界でも記録したいなら境界の側から報告する。
 - **記録は画面を組んだ要求の trace へ紐づける**(§0 の `traceparent` を報告に載せて返す)。渡らなければ trace を付けない —— 中継要求の span を付けると、例外が起きていない要求と親子になる。
-- エラー分類は `errors` カーネルのセンチネル([0080](0080-error-handling.md))を用い、**PII / token の redact**([0080](0080-error-handling.md) / [0081](0081-observability-logging.md) の masking と一致)・**サンプリング / レート制御** を送信前に掛ける。
+- エラー分類は `errors` カーネルのセンチネル([0080](0080-error-handling.md))を用いる。**送る側は 1 回のページ読み込みで打ち切り件数まで**とし、**サンプリングは持たない** —— 率が要るなら作った側が中継の口の手前へ足す。
+- **伏せるのは受け側**で、[0081](0081-observability-logging.md) の名前の表に当たる属性だけを落とす。**例外の文言と stack の中身は無害化しない** —— この層が始末できるのは自分が組み立てた値だけである([0070](0070-backend-role-separation.md) 境界値の所有)。文言に載せてよいものは呼び出し側が決める。
 - **vendor-independent**: ブラウザ側エラーの可視化は 0080 / 0081 がサーバ側で完結していた観測性の片翼を埋めるもので、収集経路は構造化ログ / OTLP(0081)= vendor-neutral。エラー監視 SaaS の同梱は作った側の判断(§1 と同じ exclusion 論理)。
 - **運用テレメトリ扱い**(consent gate 対象外。0131。§4)。
 
@@ -89,14 +90,15 @@ Accepted (一部 exclusion)
 - ❌ `dataLayer` を同意ゲートの島(§3)以外から触ること。作った側が発火 IF を立てた後は、その IF を通さず直書きすることも同じく禁じる([0031](0031-policy-state-supply.md))
 - ❌ プロダクト分析を consent gate 無しで発火させること(0031 gate 述語必須。[0131](0131-cookie-consent.md))
 - ❌ 訪問を繋ぐ識別子を未同意のうちに配ること / 同意が外れた後も残すこと(§4)
-- ❌ client エラー / RUM ペイロードに PII / token を redact せず載せること([0080](0080-error-handling.md) / [0081](0081-observability-logging.md) masking)
+- ❌ [0081](0081-observability-logging.md) の名前の表に当たる属性を、伏せずに載せること
+- ❌ 例外の文言や stack が伏せられている前提で、そこへ主体固有の値を載せること(中身は無害化しない)
 - ❌ ブラウザ発の送信面を `adapters/client` 以外(feature / component の生 fetch 等)に置くこと([0071](0071-bff-api-integration.md) / [0024](0024-adapters-server-client-split.md))
 
 ## 補足
 
 - **consent の結線**: プロダクト分析は [0031](0031-policy-state-supply.md) の gate 述語で結線する(掛け方は島を mount しない形。§3)。RUM / client エラーの consent 要否は **法域依存で本体では確定せず**、operational = gate 対象外の保守的既定 + 0031 述語の再利用拡張点、に留める(§4)。
 - **保護は [0077](0077-bff-abuse-protection-boundary.md) へ委譲**(§5)。無防備な公開中継エンドポイントの保護は別ドメイン寄りの境界 seam であり、参照先が本 ADR 外に分散する点を明示。
-- 送信・redact・サンプリングの具体実装(バッチ / `sendBeacon` vs `fetch` / サンプリング率)は用途依存(本体が備えるのは seam までで、§1 RUM / §2 client エラーの話である)。
+- 送信の具体実装(バッチ / `sendBeacon` vs `fetch` / サンプリング率)は用途依存(本体が備えるのは seam までで、§1 RUM / §2 client エラーの話である)。
 - **計測製品そのものを本体が選ぶことはしない**: 同梱するのはタグマネージャ(容器を読み込む口)までで、容器の中に何を入れるかは作った側の判断である。SaaS の SDK を直接同梱すると、その 1 つを選んだことが作った側の選択肢を狭める —— タグマネージャなら、繋ぎ替えは容器の中身の入れ替えで済む。作った側がタグから値を送るようになったとき発火 IF をどこへ立てるかは §3 が持つ。**consent gate 述語は [0131](0131-cookie-consent.md) / [0031](0031-policy-state-supply.md) 側に実在する**。なお §1 RUM / §2 client エラーは運用テレメトリ(0081・OTLP)であり、本注記の対象外。
 
 ## 関連 ADR

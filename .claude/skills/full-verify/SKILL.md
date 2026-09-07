@@ -50,14 +50,12 @@ in scope.
 
 ## Repository fit (Next.js boilerplate)
 
-This repository's architecture / directory / naming conventions are **still pending** (see
-[`docs/adr/BACKLOG.md`](../../../docs/adr/BACKLOG.md) A1 / A3 / A5 / A6). `AGENTS.md` and its
-`## [TODO]` sections are the current basis (source of truth). Because so much is undecided, this skill
-is used here primarily in its **language-agnostic "general principles + AGENTS.md provisional rules"**
-mode: it flags implementation-cleanliness problems and violations of the documented provisional
-behavior, and it treats genuinely-undecided design areas as "unverifiable (basis pending)" rather than
-as defects. `run.sh` auto-detects `js` as the primary language and picks up `AGENTS.md` / `CLAUDE.md`
-/ `docs/adr/**` as the basis automatically. Build artifacts (`.next/` / `out/` / `coverage/`) and
+This repository's architecture / directory / naming conventions are decided by the Accepted ADRs
+under `docs/adr/` (indexed in `AGENTS.md` "Accepted Rules (ADRs)"); those and `AGENTS.md` are the
+basis. The skill flags implementation-cleanliness problems and violations of the intent the ADRs
+declare, and treats the areas [`docs/adr/BACKLOG.md`](../../../docs/adr/BACKLOG.md) still leaves
+blank as "unverifiable (basis pending)" rather than as defects. `run.sh` auto-detects `js` as the
+primary language and picks up `AGENTS.md` / `CLAUDE.md` / `docs/adr/**` as the basis automatically. Build artifacts (`.next/` / `out/` / `coverage/`) and
 `next-env.d.ts` are excluded by default.
 
 ## When to Use

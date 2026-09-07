@@ -95,7 +95,7 @@ error は route の `error` 境界（`src/app/(shop)/checkout/error.tsx`）が�
 | `confirm/ui/place-order-form/` | 確定の送信。そのまま送る姿 |
 | `confirm/ui/price-change-confirm/` | 金額が変わったときに確かめてから送る姿 |
 | `confirm/ui/place-order-submit/` | 送信部と失敗の表示。2 つの姿が共有する |
-| `confirm/ui/place-order-state/` | 確定の結果を 2 つの姿へ配る器。鍵ごとに鮮度を持つ |
+| `confirm/ui/place-order-state/` | 確定の送信状態を画面に 1 つだけ置き、2 つの姿へ配る器 |
 | `confirm/ui/skeleton/` | 購入確認の待機表示 |
 | `complete/page-content.tsx` | 成立した購入の取得。指し先が読めなければ `not-found` |
 | `complete/purchase-code.ts` | 完了画面が見せる購入を検索条件から読む |

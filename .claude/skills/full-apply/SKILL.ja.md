@@ -16,7 +16,7 @@
   ルート設定ファイル(`package.json` / `tsconfig.json` / `next.config.ts` / `mise.toml` / `biome.json` /
   `postcss.config.mjs` / `Makefile`)、`.makefiles/`、`.github/`、エージェント設定(`.claude/`)、
   `.claude/settings.json` の `permissions.deny` 配下。これらに対する指摘は「ソース側を直す」(あれば)か見送り。
-- **保留中の決定を尊重**(AGENTS.md `## [TODO]` / BACKLOG): 該当 ADR が未確定なのに、指摘を満たすために新しい
+- **保留中の決定を尊重**(`docs/adr/BACKLOG.md`): 該当 ADR が未確定なのに、指摘を満たすために新しい
   規約・パターン・ディレクトリ・ライブラリを導入しない。そうした指摘は「保留 ADR(BACKLOG <id>)」を理由に見送る
   ── 決定はユーザのものであり本スキルのものではない。
 - 可視出力・コメント・コミットメッセージは**日本語**(CLAUDE.md 言語規約)。
@@ -128,7 +128,7 @@ done
 
 **見送り(怪しい=触らない)**:
 
-- **保留 ADR 領域**(AGENTS.md `## [TODO]` / BACKLOG)に落ちる: 新しいディレクトリ・層・命名規則・スタイリング
+- **保留 ADR 領域**(`docs/adr/BACKLOG.md`)に落ちる: 新しいディレクトリ・層・命名規則・スタイリング
   ヘルパ・状態ライブラリ・エラー規約 等が要る。「保留 ADR(BACKLOG <id>)」と記録。決めるのはユーザ、本スキルでない。
 - 複数アプローチ間の**方針選択**が要る(例:「契約を docs に書く」vs「防御コードを足す」)。
 - 公開 API を壊す、または影響が mod 単独に収まらない。
@@ -148,25 +148,23 @@ done
 
 ## Step 5. 検証
 
-変更コードに対し、最低限 **fix → lint → build** を通す(テストがあれば併せて):
+**ゲートを先回りして回さない**(`AGENTS.md`「Do not pre-run the gates」)。lint の full profile・カバレッジゲート付きの
+テスト・型検査は pre-commit / pre-push の hook と CI が回し、判定は CI が正。コミット前に `pnpm lint` / `pnpm build` /
+`make test-full` を手で回すのは同じ時間を二度使うことであり、負荷の高いホストでは修正と無関係な失敗を生む。
 
-```bash
-pnpm fix          # biome 自動修正(ADR 0002)
-pnpm lint         # biome check ── 残エラーはゼロに
-pnpm build        # next build ── 成功必須
-```
+この手順で行うのは、修正が触ったファイルに絞ったものだけ:
 
 ```sh
-make test-full    # Vitest。カバレッジゲート付き(4 指標 100%) ── 緑必須
-make scripts-test # scripts/ の suite。同じゲート
+pnpm fix                                      # 作業ツリーの自動修正可能な整形 / lint
+pnpm exec vitest run <触った対象のテストファイル>
 ```
 
-`make test-full` は**任意ではなく必須**である。修正の影響範囲を見えるようにしているのがカバレッジゲートであり、
-ADR [0090](../../../docs/adr/0090-testing-strategy.md) は呼べる export すべてに 1:1 の `describe` を要求する。
-分岐を未カバーのまま残した修正は、黙って通らずゲートで落ちる。これらで拾えないランタイム UI 挙動に触れる変更なら、
-`run` スキルで実際に動かすか、残存リスクを台帳に記す。
+修正の影響範囲を見えるようにしているのがカバレッジゲートであり、ADR
+[0090](../../../docs/adr/0090-testing-strategy.md) は呼べる export すべてに 1:1 の `describe` を要求する。
+分岐を未カバーのまま残した修正は、黙って通らず hook で落ちる。その判定は hook(Step 6)か CI から読み、ここで
+再現しない。ゲートで拾えないランタイム UI 挙動に触れる変更なら、`run` スキルで実際に動かすか、残存リスクを台帳に記す。
 
-グリーンにならない修正はコミットしない。原因に判断が要るなら見送りへ戻す。
+hook が落とした修正はコミットしない。原因に判断が要るなら見送りへ戻す。
 
 ## Step 6. コミット
 

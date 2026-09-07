@@ -8,8 +8,6 @@ hover または keyboard focus に応じて、trigger の近くへ短い補足�
 
 | Component | 役割 |
 | --- | --- |
-| Component | 役割 |
-| --- | --- |
 | `HoverCard` | 開閉状態と hover / focus の interaction を管理する client-side root です。 |
 | `HoverCardTrigger` | HoverCard を開く trigger です。link や button を使う場合は `asChild` で合成します。 |
 | `HoverCardContent` | Portal に表示する補足内容です。位置は `align` と `sideOffset` で調整できます。 |

@@ -22,13 +22,10 @@ name: SAST
 # variables there, because a gate and an alert list describing different scans is
 # worse than either one alone.
 #
-# THE RULES DO NOT COME FROM THE REGISTRY. `--config p/javascript` would fetch them from
-# semgrep.dev under the Semgrep Rules License, which permits internal use only and forbids
-# redistribution — handing a generated repository exactly the licence judgement that
-# choosing the OSS engine was meant to avoid. They are pinned to a commit of
-# `opengrep/opengrep-rules` and
-# fetched by `scripts/opengrep-rules`, which verifies a digest over the extracted rules
-# (ADR 0110 §3).
+# THE RULES DO NOT COME FROM THE REGISTRY. They are pinned to a commit of
+# `opengrep/opengrep-rules` and fetched by `scripts/opengrep-rules`, which verifies a digest
+# over the extracted rules. The licence reason and the extraction constraints are owned by
+# `README.md` § "SAST のルールをレジストリから引かない".
 #
 # Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
 # in README.md.

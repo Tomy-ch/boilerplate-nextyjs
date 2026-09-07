@@ -24,29 +24,6 @@ export type PullGesture = {
 };
 
 /**
- * 画面の上端から引き下げる操作を観測する。
- *
- * @remarks
- * 使うのがこの器だけなので中へ置いています。
- *
- * **ブラウザ既定の引き下げ更新を、この観測が生きている間だけ止めます。** 静的な CSS へ
- * `overscroll-behavior` を書くと、この機構を載せていないページでも既定が消え、引いても何も
- * 起きない状態が残ります。要素の生存期間に紐付けて付け外しします。
- *
- * サーバでは `enabled` が false になり、何も描かれません。引くまで見えるものが無いので、
- * hydration の前後で配置は動きません（[rendering.md](../../../../docs/design/rendering.md)）。
- *
- * 引き量に抵抗を掛け、上限を設けています。等倍かつ無制限だと、指を少し動かしただけで実行の域に
- * 入り、引き続けるほど画面がずれ続けます。
- *
- * 監視は passive で登録します。`preventDefault` に頼らず `overscroll-behavior` で既定を止めて
- * いるため、scroll を止める必要がありません。
- *
- * modal が開いている間は拾いません（{@link isModalOpen}）。
- *
- * @param onRelease - 実行の域まで引いた状態で指を離したときに呼ばれる
- */
-/**
  * 画面のどこかに modal が開いているか。
  *
  * @remarks
@@ -70,6 +47,29 @@ function isModalOpen(): boolean {
   return main !== null && main.closest('[aria-hidden="true"], [inert]') !== null;
 }
 
+/**
+ * 画面の上端から引き下げる操作を観測する。
+ *
+ * @remarks
+ * 使うのがこの器だけなので中へ置いています。
+ *
+ * **ブラウザ既定の引き下げ更新を、この観測が生きている間だけ止めます。** 静的な CSS へ
+ * `overscroll-behavior` を書くと、この機構を載せていないページでも既定が消え、引いても何も
+ * 起きない状態が残ります。要素の生存期間に紐付けて付け外しします。
+ *
+ * サーバでは `enabled` が false になり、何も描かれません。引くまで見えるものが無いので、
+ * hydration の前後で配置は動きません（[rendering.md](../../../../docs/design/rendering.md)）。
+ *
+ * 引き量に抵抗を掛け、上限を設けています。等倍かつ無制限だと、指を少し動かしただけで実行の域に
+ * 入り、引き続けるほど画面がずれ続けます。
+ *
+ * 監視は passive で登録します。`preventDefault` に頼らず `overscroll-behavior` で既定を止めて
+ * いるため、scroll を止める必要がありません。
+ *
+ * modal が開いている間は拾いません（{@link isModalOpen}）。
+ *
+ * @param onRelease - 実行の域まで引いた状態で指を離したときに呼ばれる
+ */
 export function usePullGesture(onRelease: () => void): PullGesture {
   const [enabled, setEnabled] = useState(false);
   const [state, setState] = useState<PullState>(PULL_STATE.IDLE);

@@ -68,10 +68,12 @@ bootstrap が失敗した場合（ネットワーク不通 / `claude` CLI 不在
 
 ### 新規スキルの所属を決める
 
-| 系統 | ADR | 定義 | 既存例 |
-| --- | --- | --- | --- |
-| 運用系 | [0154](../../../docs/adr/0154-claude-skills-operations.md) | 開発プロセスを進めるためのオペレーション — Git / GitHub、リリース、依存・ツール監査、`.claude/` のメタ inventory。コード生成・編集を主目的としないもの | `commit` / `submit-pr` / `release-notes` / `tools-upgrade` / `node-upgrade` / `repo-ops` / `tool-map` |
-| 開発系 | [0155](../../../docs/adr/0155-claude-skills-development.md) | コード / ドキュメント / 設定の生成・編集・レビュー | `canonicalize-doc` / `sync-readme` / `readme-review` / `new-env` / `impl-review` / `full-verify` / `full-apply` / `adr-scan` |
+| 系統 | ADR | 定義 |
+| --- | --- | --- |
+| 運用系 | [0154](../../../docs/adr/0154-claude-skills-operations.md) | 開発プロセスを進めるためのオペレーション — Git / GitHub、リリース、依存・ツール監査、`.claude/` のメタ inventory。コード生成・編集を主目的としないもの |
+| 開発系 | [0155](../../../docs/adr/0155-claude-skills-development.md) | コード / ドキュメント / 設定の生成・編集・レビュー |
+
+各系統の現在の構成員は、その ADR のカバー範囲テーブルが持つ。ここに一覧を置かず、今回の実行で読む。
 
 提案されたスキルが、`BACKLOG.md` でまだ未決の領域に新しい規約・パターン・ライブラリを持ち込むことになる場合は、**そこで止めて ADR の判断をユーザへ委ねる**（`AGENTS.md`「Pending Decisions」）。スキルを、規約が暗黙に決まる場所にしてはならない。
 

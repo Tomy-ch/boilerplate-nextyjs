@@ -10,8 +10,7 @@ import { findBoundaryDrift, parseBoundaryFrontmatter } from "./readme-boundaries
  * @remarks
  * **カーネル直下だけを見ません。** 宣言はカーネルの下の階層にも置かれます（feature ごとにも
  * 同じ frontmatter を持つ README が要ります）。カーネル直下だけを突き合わせると、その下の宣言は
- * 誰も読まないまま `architecture.ts` から離れていきます。実際に離れました —— feature の
- * 宣言は 10 本すべてが `observability` を落としたまま残っていました。
+ * 誰も読まないまま `architecture.ts` から離れていきます。
  *
  * 属するカーネルは `src/` の直下のディレクトリ名で決まります。宣言の一覧を持たないのは、
  * 一覧の外へ宣言を書けてしまい、しかもその取りこぼしが無言だからです。

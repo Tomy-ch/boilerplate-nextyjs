@@ -27,7 +27,7 @@ verify → commit → record into the ledger and mod."
   `postcss.config.mjs` / `Makefile`), `.makefiles/`, `.github/`, agent config (`.claude/`), and
   anything under `permissions.deny` in `.claude/settings.json`. For a finding on one of these, either
   "fix the source" (if it has one) or defer.
-- **Respect pending decisions** (AGENTS.md `## [TODO]` / BACKLOG): do NOT introduce a new convention,
+- **Respect pending decisions** (`docs/adr/BACKLOG.md`): do NOT introduce a new convention,
   pattern, directory, or library to satisfy a finding when the relevant ADR is unsettled. Such a
   finding is deferred with "pending ADR (BACKLOG <id>)" as the reason — the decision belongs to the
   user, not this skill.
@@ -153,7 +153,7 @@ When the fixes for a file (or directory) are gathered, do **5. verify → 6. com
 
 **Defer (suspicious = do not handle)**:
 
-- Lands in a **pending ADR area** (AGENTS.md `## [TODO]` / BACKLOG): needs a new directory, layer,
+- Lands in a **pending ADR area** (`docs/adr/BACKLOG.md`): needs a new directory, layer,
   naming rule, styling helper, state library, error convention, etc. Record "pending ADR (BACKLOG
   <id>)." The user decides; this skill does not.
 - Requires a **policy choice** among multiple approaches (e.g. "state the contract in docs" vs "add
@@ -178,27 +178,25 @@ When in doubt, defer. Deferral is not a demerit; leaving a reason is the value.
 
 ## Step 5. Verify
 
-For the changed code, pass at minimum **fix → lint → build** (and tests when the repo has them):
+**Do not pre-run the gates** (`AGENTS.md` § Do not pre-run the gates): the pre-commit / pre-push hooks
+and CI run the lint profile, the coverage-gated test suite, and the type check, and CI is the
+authority. Running `pnpm lint` / `pnpm build` / `make test-full` by hand before committing spends the
+time twice and, on a loaded host, produces failures that have nothing to do with the fix.
 
-```bash
-pnpm fix          # biome auto-fix (ADR 0002)
-pnpm lint         # biome check — remaining errors must be zero
-pnpm build        # next build — must succeed
-```
+What this step does is scoped to the files the fix touched:
 
 ```sh
-make test-full    # Vitest, coverage-gated (100 % on all four metrics) — must be green
-make scripts-test # the `scripts/` suite, same gate
+pnpm fix                                      # autofixable formatting / lint on the working tree
+pnpm exec vitest run <the test files of the touched subjects>
 ```
 
-`make test-full` is **required**, not optional: the coverage gate is what makes a fix's blast radius
-visible, and ADR [0090](../../../docs/adr/0090-testing-strategy.md) holds every callable export to a
-1:1 `describe`. A fix that leaves a branch uncovered fails the gate rather than passing quietly. If a
-change touches runtime UI behavior that none of these can catch, drive it via the `run` skill, or
-note the residual risk in the ledger.
+The coverage gate is what makes a fix's blast radius visible — ADR
+[0090](../../../docs/adr/0090-testing-strategy.md) holds every callable export to a 1:1 `describe`,
+so a fix that leaves a branch uncovered is rejected by the hook rather than passing quietly. Read
+that verdict from the hook (Step 6) or CI; do not reproduce it here. If a change touches runtime UI
+behavior that no gate can catch, drive it via the `run` skill, or note the residual risk in the ledger.
 
-Do not commit a fix that does not go green, and if the cause requires judgment, roll it back to
-deferred.
+A fix the hook rejects is not committed; if the cause requires judgment, roll it back to deferred.
 
 ## Step 6. Commit
 

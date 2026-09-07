@@ -46,9 +46,9 @@ below. Then the orchestrator dedups against the existing BACKLOG frames.
 1. **Existing ADR + board** — `docs/adr/*.md` + `docs/adr/BACKLOG.md`. Build the baseline set of
    *already-tracked* frames (so discoveries can be diffed against it). Note any ADR whose Status or
    BACKLOG status pair looks inconsistent with reality.
-2. **AGENTS.md** — the `## [TODO]` sections (each is a pending area — confirm it maps to a BACKLOG
-   frame), the "AI Modification Scope" / "Protected Documentation" / "Git Rules" / "Language Rules"
-   sections. Separate genuine decisions from rules.
+2. **AGENTS.md** — the "Pending Decisions" section (the undecided areas it points at live in
+   BACKLOG — confirm each maps to a frame), the "AI Modification Scope" / "Protected Documentation" /
+   "Git Rules" / "Language Rules" sections. Separate genuine decisions from rules.
 3. **Config & tooling (latent decisions)** — `package.json` (deps, scripts, `packageManager`),
    `tsconfig.json`, `next.config.ts`, `biome.json`, `postcss.config.mjs`, `mise.toml`, `.makefiles/**`,
    `.github/**`. A pinned tool, an enabled compiler flag, a CI job, a `browserslist` — each may be a

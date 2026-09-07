@@ -31,7 +31,7 @@ SSR first の選定では `○` に当たります。送りは CSS Scroll Snap �
 
 ### 送り操作だけを client island にする
 
-`CarouselPrevious` / `CarouselNext` / `CarouselLink` の 3 つだけが client island です。markup は `href` を持つ link のままなので hydration 前でも押せば送れますが、fragment 遷移は carousel を画面内へ引き寄せるためにページごとスクロールさせ、履歴も 1 件積みます。hydration 後は既定動作を止めて `CarouselContent` だけを横へ送るため、ページも履歴も URL も動きません。
+client island は `CarouselPrevious` / `CarouselNext` / `CarouselLink` と、`CarouselLink` を束ねて現在地に追従させる `CarouselThumbnails` の 4 つです。markup は `href` を持つ link のままなので hydration 前でも押せば送れますが、fragment 遷移は carousel を画面内へ引き寄せるためにページごとスクロールさせ、履歴も 1 件積みます。hydration 後は既定動作を止めて `CarouselContent` だけを横へ送るため、ページも履歴も URL も動きません。
 
 修飾キーを伴う押下と、行き先の slide が存在しない場合は browser の既定動作に任せます。
 

@@ -15,13 +15,7 @@ vi.mock("../auth/session", () => ({ getAccessToken }));
 import { toProductId } from "@/model/product/product";
 import { getProduct, getProductRanking, getProducts } from "./products";
 
-/**
- * 表示用の商品が公開する項目。
- *
- * @remarks
- * 並びごと照合します。生成ハンドラは契約の全項目を返すため、`toMatchObject` で数項目だけを
- * 見ると、写し漏れも wire の項目の漏れ出しも通ります。
- */
+/** 商品の口の URL。wire を割り当てるケースが指す。 */
 const PRODUCTS_URL = `${PARSED_ENVIRONMENT.APP_API_BASE_URL}/v1/products`;
 
 /**
@@ -46,6 +40,13 @@ const wireProduct = {
   version: 1,
 };
 
+/**
+ * 表示用の商品が公開する項目。
+ *
+ * @remarks
+ * 並びごと照合します。生成ハンドラは契約の全項目を返すため、`toMatchObject` で数項目だけを
+ * 見ると、写し漏れも wire の項目の漏れ出しも通ります。
+ */
 const PRODUCT_KEYS = [
   "category",
   "description",

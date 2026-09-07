@@ -34,7 +34,7 @@
 
 import { useCallback, useState } from "react";
 
-import { SavedViews, type SavedView } from "@/components/ui/saved-views/saved-views";
+import { SavedViews, type SavedView } from "@/components/app-starter/saved-views/saved-views";
 
 export function ListToolbar({ initialViews }: { initialViews: readonly SavedView[] }) {
   const [views, setViews] = useState(initialViews);

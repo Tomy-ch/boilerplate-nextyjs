@@ -61,7 +61,7 @@ JavaScript が無くても送信できる形が要る場合や、検索が主導
 
 支援技術の landmark 一覧から到達できます。同じ画面に検索欄を複数置く場合は、`aria-label` で landmark を区別します。
 
-`commit` が `typing` のときは form ではないため、Enter による送信は行いません。`submit` を選ぶと form になり、Enter でも送信ボタンでも確定します。
+`commit` が `typing` のときは Enter による確定は行いません。`submit` を選ぶと Enter でも送信ボタンでも確定しますが、どちらの場合も form は持ちません。form にすると hydration が終わる前の操作で browser の既定の送信が走り、いま効いている条件を伴わないまま現在の URL へ遷移するためです。
 
 landmark は `role="search"` 属性ではなく HTML の `search` 要素で表します。browser は `search` 要素を `search` role へマップしますが、テストで使う `aria-query` 5.3.0 はまだこの要素を登録していないため、`getByRole("search")` からは引けません。これはツール側の未対応であり、実装を `div role="search"` へ戻して回避することはしません。テストは `data-slot` で要素を取得し、`search` 要素であることを直接検証します。
 

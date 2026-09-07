@@ -94,7 +94,7 @@ SSOT は `tokens/primitives.json`（生の値）と `tokens/themes/<系統>/<配
 4. **役割が 1 つに閉じるか。** 閉じるなら `design-system/<目的>/`、複数を合成するなら `patterns`
 5. 目的が 2 つに跨がるときは、**その部品が無いと成立しない側**を採る（`copy-button` は押す行為が主なので `action`、`selection-toolbar` は選択という面の状態に従属するので `container`）
 
-置き場が決まったら、台帳へ `layer` / `as` / `directory` を書き、README・story・test を co-locate する。shadcn 由来なら `pnpm add:ui` がこの大半を代行する（次節）。自前なら `pnpm gen component <name> [区画]` が README と実装と test の雛形を出すが、**story と台帳の行は出さない** —— 後述の落とし穴。
+置き場が決まったら、台帳へ `layer` / `as` / `directory` を書き、README・story・test を co-locate する。shadcn 由来なら `pnpm add:ui` がこの大半を代行する（次節）。自前なら `pnpm gen component <name> --as=<見出し> [--layer=<層>]` が README・実装・test・story の 4 つを出し、`shadcn-manifest.yaml` へ `kind: original` の行も足す。**生成直後のまま `pnpm check:ui` を通る。**
 
 ### 候補として名前だけがある部品
 
@@ -262,9 +262,15 @@ focus 表示は `focus-visible:outline-2 focus-visible:outline-offset-2 focus-vi
 
 この 2 つは面と図形のための色で、地に対して 3:1 しか満たさない。`text-primary` をリンクや状態の文言に使うと 4.5:1 を割る。文字には `secondary` / `success` / `warning` / `destructive` / `info` を使う。アイコンは非テキストなので `primary` でよい。同じく `font-bold` のような太さの直指定は `eslint-rules/no-raw-font-weight` が落とす —— 段は `font-emphasis` の 1 つしか無く、和文を OS 同梱の書体に委ねている限り 2 段目は多くの環境で描き分けられない。
 
-### `pnpm gen component` は story も台帳の行も出さない
+### `pnpm gen component` は置き場をオプションで受け取る
 
-雛形が出すのは README・実装・test の 3 つで、置き場の既定は `patterns/`（`pnpm gen component <name> design-system/status` のように区画を渡せる）。しかし **story は出ず、`shadcn-manifest.yaml` にも行が増えない**ので、そのまま commit すると `pnpm check:ui` が「記録の無いディレクトリ」で落ち、[0054](../adr/0054-ui-catalog-storybook.md) の「story を持たない component を作らない」にも触れる。加えて雛形の README は層 README の形（受け入れるもの / 受け入れないもの / 構成 / 運用）で出るが、component の README に要るのは `component-template.md` の形（用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト）であり、`design:bundle` が読むのは後者の `## 用途` / `## 責務境界` である。雛形を使ったら、story・台帳・README の形の 3 つを自分で揃える。
+`--as=<見出し>` が必須で、`--layer` の既定は `design-system`。見出しの集合は台帳の検査側が持つ
+ので、雛形が独自の一覧を抱えることはない。**位置引数で区画を渡す形は受け付けない** —— `patterns/` のように層だけでは見出しが決まらない置き場があるため。
+
+出るのは README・実装・test・story の 4 つで、README は `component-template.md` の写しである
+（目録を組む側がその節名を読むので、層 README の節構成では載らない）。台帳にも `kind: original`
+の行が足される —— 上流を持たない部品はこの `kind` しか取れず、検査側は `original` に取り込み元の
+宣言が**無い**ことを要求する。
 
 ### `pnpm exec shadcn add` を直接叩くと、何も書かれずに止まる
 

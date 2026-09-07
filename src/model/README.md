@@ -38,6 +38,10 @@ coverage-exclusions:
 | `idempotency-key.ts` | 変更 1 回ぶんを指す鍵と、それを載せるフォーム項目の名前 |
 | `consent.ts` | 任意の用途に cookie を使ってよいかという意思と、その区分ごとのゲート述語 |
 | `money.ts` | 最小単位の整数で持つ金額を、locale に沿った通貨表記へ整える |
+| `session.ts` | 認証済み利用者の身元と役割。cookie へ載せる payload はこの型に閉じ、Access Token も PII も持たない |
+| `authz.ts` | 経路の接頭辞ごとに許す役割。認証だけを要求する経路は全役割を並べて表す |
+| `return-url.ts` | 検証を通った復帰先。同一 origin の相対パスだけを通し、外れた値は既定の行き先へ倒す |
+| `cross-origin.ts` | 要求の origin の判定と、CORS / preflight の応答ヘッダの組み立て |
 | `cart/cart.ts` | サンプル画面が扱うカートの表示用の型 <!-- sample:line --> |
 | `dashboard/dashboard.ts` | サンプル画面が扱う管理側の横断集計の表示用の型と、集計対象期間の語彙 <!-- sample:line --> |
 | `product/product.ts` | サンプル画面が扱う商品の表示用の型 <!-- sample:line --> |

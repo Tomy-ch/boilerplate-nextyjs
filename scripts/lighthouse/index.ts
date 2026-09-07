@@ -80,20 +80,6 @@ const OUTPUT_DIR = "tmp/lighthouse";
 const LIGHTHOUSE_CLI = createRequire(import.meta.url).resolve("lighthouse/cli/index.js");
 
 /**
- * 役割を持つ session を発行し、それを送るためのヘッダの宣言をファイルへ書き出す。
- *
- * @remarks
- * cookie の名前を写さず、返ってきた `Set-Cookie` をそのまま組み直します。名前を書き写すと、
- * 封緘の実装が名前を変えたときにここだけが古い名前を送り続け、ログインへ送られた画面を
- * 計測してしまいます。
- *
- * **返すのは値ではなくファイルの場所です。** `--extra-headers` は JSON そのものも受け取りますが、
- * それだと session が子プロセスの起動引数に載り、同じ機械の他の利用者が `ps` で読めます。この
- * session は役割を持つ本物で、読めた相手は同じ待ち受けへ admin として振る舞えます。
- *
- * @returns 書き出したヘッダ宣言のパス。
- */
-/**
  * 同意を選び終えたことをブラウザへ伝える cookie。
  *
  * @remarks

@@ -13,15 +13,9 @@
 # 同じ対象・同じルール・同じ除外でなければ、落ちた内容と Security タブの一覧が食い違う。
 # 変数へ括り出してあるのはそれを構造的に保証するためで、両方の行に書き写さない。
 
-# ルールセット。**レジストリ（semgrep.dev）は引かない。**
-#
-# `--config p/javascript` の類が取ってくる集合は Semgrep Rules License v1.0 で、「自社内部の
-# 目的に限る」「再頒布不可」「サービスとして提供不可」を課す。エンジンを OSS fork の opengrep へ
-# 替えた判断（作った側へライセンスの判断を渡さない）は、ルールをそこから引いている限り成立せず、
-# 判断の所在が層をずれただけになる（docs/adr/0110-security-operations.md 3）。
-#
-# 代わりに、ライセンス変更前から分岐している opengrep-rules を commit で固定して読む。取得と
-# 照合は scripts/opengrep-rules が担い、置き場・選別・digest の宣言もそちらが持つ。
+# ルールセット。**レジストリ（semgrep.dev）は引かず**、opengrep-rules を commit で固定して読む。
+# 理由と取り出し方は .github/workflows/README.md の「SAST のルールをレジストリから引かない」が
+# 持つ。取得と照合は scripts/opengrep-rules が担い、置き場・選別・digest の宣言もそちらが持つ。
 OPENGREP_RULES_DIR := tmp/opengrep-rules
 OPENGREP_CONFIGS := --config $(OPENGREP_RULES_DIR)
 

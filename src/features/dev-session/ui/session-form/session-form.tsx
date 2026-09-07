@@ -85,8 +85,7 @@ const ROLE_LABEL: Readonly<Record<SessionRole, string>> = {
  * 項目ごとの補足。
  *
  * @remarks
- * 同じ文言を複数の項目が使うため、リテラルを埋め込まず束ねます。外枠と入力欄の両方へ配るのは
- * `FormField` の側の仕事です。
+ * 外枠と入力欄の両方へ配るのは `FormField` の側の仕事です。
  */
 const SUBJECT_DESCRIPTION = "この値がそのまま session の利用者 ID になります。";
 const EXPIRES_DESCRIPTION = "短くすると、失効したあとの見え方をその場で確かめられます。";

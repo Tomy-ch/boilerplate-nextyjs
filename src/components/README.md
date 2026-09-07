@@ -190,7 +190,7 @@ Next.js と React は、`components/` 配下のディレクトリ構造・ディ
 - **`design-system/<目的>/` のようなまとめるためのディレクトリには README を置かない。** 置くとそれ自体が component として数えられ、台帳に記録が無いものとして落ちる。まとめるためのディレクトリが何を受け持つかは、この README の下の一覧が持つ
 - component かどうかを実装ファイルの有無で判定しない。`layout-patterns` のように story だけを持つ component が実在するため、内容から身元を推測すると破綻する
 - 同じ UI 概念に SSR first と client island の実装が並ぶ場合、ディレクトリ・ファイル名は `<concept>-native` / `<concept>-client`、公開 component 名は `ConceptNative` / `ConceptClient` にする。`client` は利用上の境界を表し、現在の Radix など vendor 名は README にだけ記す
-- `native` / `client` の対は runtime 実装だけを分ける。取り込み監査の時点でもサイズ・semantic token・focus・disabled・invalid の基本設計を可能な限り揃え、SSR・form・a11y と公開 API を確認する。layout・motion・visual regression を含む完全整合は P3-8 のデザインシステム構築で Storybook を見ながら仕上げる。OS が描画する popup など native 固有の部分まで pixel-perfect に一致させる必要はない
+- `native` / `client` の対は runtime 実装だけを分ける。取り込み監査の時点でもサイズ・semantic token・focus・disabled・invalid の基本設計を可能な限り揃え、SSR・form・a11y と公開 API を確認する。layout・motion・visual regression を含む完全整合は、デザインシステムの構築で Storybook を見ながら仕上げる。OS が描画する popup など native 固有の部分まで pixel-perfect に一致させる必要はない
 - コンポーネントの静的な定数・値集合・型・見た目の定義は `<コンポーネント名>.definition.ts` に置く。描画・操作を担う公開コンポーネントは `<コンポーネント名>.tsx` に置き、静的定義を import して使う
 - 値集合の公開定数は `export const BUTTON_SIZE: Readonly<{ ... }> = { ... }` の形式で定義する
 - 公開 API でなくても、複数ファイルが同じ UI 概念の値を使う場合は owner を一つ決めて定義し、各ファイルから参照する。native HTML 要素名など JSX／型構文そのものを表す値は直接記述してよい

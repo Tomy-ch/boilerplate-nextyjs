@@ -48,7 +48,7 @@ The orchestrator gives you the scope — the changed-file list / diff, or explic
 - **Why / design intent / rationale** — docs *should* explain these (`docs/adr/`, design sections). Not a finding (this is the key difference from `comment-reviewer`).
 - **How / usage / tutorials / runnable steps** — docs *should* explain these. Not a finding.
 - **Structural completeness vs disk** — that is `sync-readme`'s job. Note it in passing only if you happen to see it; do not make it your focus.
-- **Pending-decision placeholders** — an `AGENTS.md` `## [TODO]` section or a BACKLOG entry that documents an *undecided* area is intentional scaffolding, not drifted prose. Do not flag it as filler or inaccuracy.
+- **Pending-decision placeholders** — a `docs/adr/BACKLOG.md` entry that documents an *undecided* area is intentional scaffolding, not drifted prose. Do not flag it as filler or inaccuracy.
 - **Generated docs** — `.next/**`, `coverage/**`, and any `<!-- generated -->` output: these are regenerated from sources; review the source, not the output.
 
 ## How to review

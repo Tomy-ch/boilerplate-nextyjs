@@ -55,19 +55,22 @@ route ごとに決まることがここにあります。**そのうちいくつ
 
 | 判断 | 宣言する場所 | 答えを持つ文書 |
 | --- | --- | --- |
-| 描画の時点（`dynamic` / `revalidate`） | `page.tsx` | その画面の機能要件（[`docs/spec/route/**`](../../docs/spec/README.md)） |
+| 殻を配れないこと（`instant = false`） | `page.tsx` / `layout.tsx` | その画面の機能要件（[`docs/spec/route/**`](../../docs/spec/README.md)） + [0041](../../docs/adr/0041-cache-components-decision.md) |
 | 待ちの境界（`Suspense` をどこへ掛けるか） | `page.tsx` | 同上 |
 | 失敗と不在の面 | `error.tsx` / `not-found.tsx` | 同上 + [0080](../../docs/adr/0080-error-handling.md) |
 | metadata | `page.tsx` / `layout.tsx` | [0044](../../docs/adr/0044-seo-metadata-strategy.md) |
 | 横断 UI と Provider の mount | `layout.tsx` **だけ** | [0026](../../docs/adr/0026-layout-shell-mount.md) |
 | 外部との往復 | `api/**/route.ts` | [0071](../../docs/adr/0071-bff-api-integration.md) / [0025](../../docs/adr/0025-app-layer-elements.md) |
 
-**描画の時点は画面ごとに選びます。**この層のどこかに宣言があっても、それは boilerplate 全体の
-既定ではありません（[0040](../../docs/adr/0040-routing-rendering-strategy.md)）。宣言しなければ
-動的な API を使わない画面は build 時に 1 度だけ描かれるので、**選ばないことも選択**になります。
+**描くモードを画面が宣言しません。** 殻と穴の分かれ目は器の形 —— 何を `Suspense` の外に置き、
+何を内に置くか —— で決まります（[0041](../../docs/adr/0041-cache-components-decision.md)）。
+`dynamic` / `revalidate` のような segment config は持ちません。**殻を配れない画面だけが
+`export const instant = false` を理由つきで名乗り**、`scripts/render-mode` が prerender の結果と
+突き合わせます。
 
-**選んだ理由は仕様書へ書きます。** route の隣の doc コメントだけに置くと、その画面がいつ描かれる
-かを文書から辿れなくなります。コードのコメントに残すのは、その場で効く注意だけです。
+**殻を配れないと判断した理由は仕様書へ書きます。** route の隣の doc コメントだけに置くと、その
+画面がいつ描かれるかを文書から辿れなくなります。コードのコメントに残すのは、その場で効く注意
+だけです。
 
 **待ちの境界も同じです。** 節ごとに分けるか画面全体で 1 つにするかは、何を同時に待つかで決まる
 画面の判断であり、層の既定ではありません。
@@ -133,7 +136,7 @@ ADR は番号も節も動くので、動いたことに気づける場所を 1 �
 
 ### route segment（`page.tsx` / `layout.tsx` / `error.tsx` / `not-found.tsx`）
 
-- [0040](../../docs/adr/0040-routing-rendering-strategy.md) — App Router の採用と、描画の時点（CSR / SSR / SSG / ISR）を画面ごとに選ぶこと
+- [0040](../../docs/adr/0040-routing-rendering-strategy.md) — App Router の採用と、描画のモードを boilerplate として強制しないこと
 - [0041](../../docs/adr/0041-cache-components-decision.md) — Cache Components（PPR）の採否。殻と穴の分け方
 - [0026](../../docs/adr/0026-layout-shell-mount.md) — 横断 UI と Provider を mount してよいのは layout だけ
 - [0079](../../docs/adr/0079-auth-frontend-seam.md) — 入口の前捌きと、画面で通す確定認可の置き場

@@ -39,8 +39,9 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 
 ## What this skill reads and writes
 
-Everything below is read **at runtime**. Nothing about the conventions is copied into this file,
-because a copy drifts and the gates follow the sources, not this skill.
+Everything below is read **at runtime**. The lists later in this file say how the skill applies the
+conventions; they are not the rules, and where they and the sources differ the sources win — the
+gates follow the sources, not this skill.
 
 | Source | What it decides |
 | --- | --- |
@@ -332,7 +333,7 @@ whether the layer's duty is actually exercised.
 - ❌ Write `it.skip` / `it.todo` to make the file pass
 - ❌ Write a test for a subject the 1:1 gate does not report as missing
 - ❌ Hand-roll a `fetch` stub where MSW owns the boundary
-- ❌ Copy the conventions into this file instead of reading them
+- ❌ Treat the lists in this file as the rules — where they and the sources differ, the sources win
 
 ## Checklist
 

@@ -56,8 +56,9 @@ coverage-exclusions:
 | | 買える明細が 1 つも無い | `Page/Cart/WithoutPurchasable` |
 | 脇の領域 | 中身あり / 空 / 閉じている | `Features/Cart/Panel/{WithLines,Empty,Closed}` |
 | header の入口 | 帯ごとの姿 | `Features/Cart/HeaderAction/{PC,Tablet,Mobile}` |
+| 待機表示 | loading | `Features/Cart/Skeleton` |
 
-**loading を持ちません。**理由は「運用」の 1 つめ。**error も画面としては持たず**、操作の失敗は
+**loading は画面に 1 つだけです。**置き方は「運用」の 1 つめ。**error も画面としては持たず**、操作の失敗は
 その操作の隣に出ます（`ui/action-error/`）。取得の失敗は route の `error` 境界
 （`src/app/(shop)/cart/error.tsx`）が受けます。
 
@@ -78,6 +79,8 @@ coverage-exclusions:
 | `use-dock-visibility.ts` | 画面の下から出す器を、出すかどうかの判断 |
 | `paths.ts` | この feature が指す行き先（カート・購入手続き） |
 | `shell-cart.ts` | 外枠に出すカートの取得。読めなくても投げない |
+| `ui/shell-slots/` | 外枠の header と脇に出すカート。取得を穴の内側に閉じる |
+| `ui/skeleton/` | カートの待機表示。実物と同じ段組みで、1 画面に収まる数の枠を出す |
 | `cart.fixture.ts` | story とテストが読む固定のカート |
 | `facade/add-to-cart/` | 商品をカートへ入れる操作。**他の feature が使う口** |
 | `facade/add-to-cart/__mocks__/` | 同じ口のカタログでの差し替え |

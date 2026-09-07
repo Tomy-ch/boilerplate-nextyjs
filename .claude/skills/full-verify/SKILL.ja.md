@@ -32,11 +32,11 @@ read-only 検証し、Markdown の指摘集を生成するスキル。
 
 ## 本リポジトリでの適合(Next.js boilerplate)
 
-本リポジトリはアーキテクチャ/ディレクトリ/命名規約が**未確定**([`docs/adr/BACKLOG.md`](../../../docs/adr/BACKLOG.md)
-A1 / A3 / A5 / A6)。`AGENTS.md` とその `## [TODO]` セクションが現時点の基準(正)。未確定が多いため、本スキルは
-ここでは主に**言語非依存の「一般原則 + AGENTS.md 暫定ルール」**モードで使う: 実装の綺麗さの問題と、文書化された
-暫定挙動への違反を指摘し、真に未決の設計領域は欠陥ではなく「検証不能(基準保留)」として扱う。`run.sh` は主要言語
-`js` を自動検出し、`AGENTS.md` / `CLAUDE.md` / `docs/adr/**` を基準として自動的に拾う。ビルド成果物
+本リポジトリのアーキテクチャ/ディレクトリ/命名規約は `docs/adr/` の Accepted ADR が決めている(`AGENTS.md`
+「Accepted Rules (ADRs)」の索引)。それらと `AGENTS.md` が基準。本スキルは実装の綺麗さの問題と、ADR が宣言した意図への
+違反を指摘し、[`docs/adr/BACKLOG.md`](../../../docs/adr/BACKLOG.md) がまだ空けている領域は欠陥ではなく
+「検証不能(基準保留)」として扱う。`run.sh` は主要言語 `js` を自動検出し、`AGENTS.md` / `CLAUDE.md` / `docs/adr/**` を
+基準として自動的に拾う。ビルド成果物
 (`.next/` / `out/` / `coverage/`)と `next-env.d.ts` は既定で除外。
 
 ## 使うとき

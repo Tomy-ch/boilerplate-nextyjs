@@ -113,10 +113,13 @@ option and let the user confirm it.
 
 ### Deciding where a new skill belongs
 
-| Family | ADR | Definition | Existing examples |
-| --- | --- | --- | --- |
-| Operational | [0154](../../../docs/adr/0154-claude-skills-operations.md) | Operations that advance the development process — Git / GitHub, release, dependency and tool audits, `.claude/` meta inventory. Not primarily generating or editing code | `commit`, `submit-pr`, `release-notes`, `tools-upgrade`, `node-upgrade`, `repo-ops`, `tool-map` |
-| Development | [0155](../../../docs/adr/0155-claude-skills-development.md) | Generating, editing, or reviewing code / docs / configuration | `canonicalize-doc`, `sync-readme`, `readme-review`, `new-env`, `impl-review`, `full-verify`, `full-apply`, `adr-scan` |
+| Family | ADR | Definition |
+| --- | --- | --- |
+| Operational | [0154](../../../docs/adr/0154-claude-skills-operations.md) | Operations that advance the development process — Git / GitHub, release, dependency and tool audits, `.claude/` meta inventory. Not primarily generating or editing code |
+| Development | [0155](../../../docs/adr/0155-claude-skills-development.md) | Generating, editing, or reviewing code / docs / configuration |
+
+The current members of each family are the coverage table of that ADR — read it this run rather
+than a list kept here.
 
 If the proposed skill would establish a new convention, pattern, or library in an area `BACKLOG.md`
 still leaves undecided, **stop and defer the ADR decision to the user** (`AGENTS.md`, "Pending

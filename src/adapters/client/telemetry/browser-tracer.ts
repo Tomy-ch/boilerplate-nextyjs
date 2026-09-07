@@ -62,20 +62,6 @@ class DocumentRootContextManager extends StackContextManager {
  */
 let started = false;
 
-/**
- * ブラウザ側の計装を立ち上げる。
- *
- * @remarks
- * **呼び出し元は mount した後に、動的な import でこの面を読み込みます。** OTel の実装を初期の
- * 読み込みへ載せると、計装のために最初の描画が遅れ、測っている当のものを悪くします。
- *
- * 有効にすると、ブラウザが出す要求はすべて span になります —— BFF への取得だけでなく、router が
- * 画面遷移と先読みで出す RSC の要求も含みます。span は `traceparent` を親に取り、画面を組んだ
- * 要求と同じ trace に載ります。この設計の理由は [adapters の README](../../README.md) が持ちます。
- *
- * @param traceparent - 画面を組んだ要求の trace。静的生成された画面では渡らず、その場合は
- *   ブラウザ側で新しい trace が始まる
- */
 /** span を OTLP の JSON へ直列化し、中継へ送る。公式 exporter の再送・圧縮の機構は要らない。 */
 const relayExporter = {
   export: (spans: ReadableSpan[], done: (result: { code: number }) => void): void => {
@@ -91,6 +77,20 @@ const relayExporter = {
   forceFlush: async (): Promise<void> => undefined,
 };
 
+/**
+ * ブラウザ側の計装を立ち上げる。
+ *
+ * @remarks
+ * **呼び出し元は mount した後に、動的な import でこの面を読み込みます。** OTel の実装を初期の
+ * 読み込みへ載せると、計装のために最初の描画が遅れ、測っている当のものを悪くします。
+ *
+ * 有効にすると、ブラウザが出す要求はすべて span になります —— BFF への取得だけでなく、router が
+ * 画面遷移と先読みで出す RSC の要求も含みます。span は `traceparent` を親に取り、画面を組んだ
+ * 要求と同じ trace に載ります。この設計の理由は [adapters の README](../../README.md) が持ちます。
+ *
+ * @param traceparent - 画面を組んだ要求の trace。静的生成された画面では渡らず、その場合は
+ *   ブラウザ側で新しい trace が始まる
+ */
 export function startBrowserTracing(traceparent: string | undefined): void {
   if (started) {
     return;

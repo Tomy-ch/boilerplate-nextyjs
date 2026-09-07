@@ -31,7 +31,11 @@ Accepted (一部 exclusion)
 - **GitHub Releases(`aqua:` / `ubi:` backend)= 14 日**。Actions の pin(`ACTIONS_PIN_MIN_AGE_DAYS`・[0153](0153-ci-configuration.md))と配布経路が同じで、検知レイテンシも揃うため同じ窓を当てる
 - bump では「最新」ではなく**「窓を満たす最新」**を採る。窓のために意図的に 1 つ前を採った pin は、その旨を `mise.toml` のコメントに書く(でないと次の担当者が「古い pin」として無条件に上げる)
 - **検疫が買うのは時間であって、版の年齢の証明ではない。** 読めるのは release の公開日時と commit の日付だけで、どちらも解決した SHA そのものを語らず、両方揃えても意図した公開者には破れる。窓は自動化された侵害に対する遅延であり、保証ではない
-- 窓の実装は `tools-upgrade` スキルの `min_age_days`
+- **npm レジストリ(`npm:` backend)= 7 日**。PyPI と同じ根拠
+- **言語ランタイム(`core:` backend)は窓の対象から外す —— 受容するリスクとして。** 配布物が汚染される事態は 1 つの依存が乗っ取られた話ではなく**言語の信頼モデルそのものの失敗**で、待っても検知が回ってくる保証が無い。窓は自動化された侵害への遅延であって、この形には効かない。**棚卸しには載せるが、窓では落とさない。**
+  > **「除外」と「引けなかった」を同じ出口へ倒さない。** 前者は検査しないと決めたもの、後者は検査が成立していないもので、後者は落とす([0157](0157-inspection-declaration-discipline.md))
+- 免除は pin の直上のコメントに、**理由と窓が明ける日**を添えて書く。日付の無い免除、窓を満たした pin に残った免除は落とす(下記 3.4)
+> 強制: `make tools-cooldown-check`(差分で動いた pin)/ `make tools-cooldown-audit`(週次・全件)。窓の値は `.makefiles/` の変数が持ち、GitHub Releases は Actions の pin と同じ変数を直接読む —— 同じ窓であることを散文ではなく構造で持つ
 
 **エージェントスキルを配布するツールは審査項目が 1 つ増える**。ライブラリはビルド成果物に載るが、この種のツールは**開発者の権限で動き、何をマシン外へ送るかを自分で決める**。したがって pin の bump 時は版番号だけでなく、次の 2 つもレビュー対象とする。
 
@@ -133,6 +137,8 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 | `sonar-project.properties` | ルール 1 件 × パスの組(`sonar.issue.ignore.multicriteria`)。**SonarCloud は hotspot を UI で review する仕組みを持つが、それはリポジトリの外に決定を置く** —— 作った側が同じ判断を引き継げないので、リポジトリが持つ抑止はこのファイルに限る <!-- boilerplate-only:line --> |
 | `bearer.ignore` | 検出 1 件(フィンガープリント)。`comment` に理由を書く。**JSON なので冒頭のポリシー明記が置けない** —— 様式は `bearer ignore add` が決め、理由は各エントリが持つ |
 | `.github/zizmor.yml` | ファイル 1 件(`ignore`)。**ファイルで絞れない audit は severity の remap(監査 ID 単位)** —— composite action は全て `action.yaml` で、`ignore` はベース名一致のため 1 つ挙げると全ての composite action が黙る(zizmor 1.29.0 の制約。ファイル単位の remap が入ったら remap は撤回する) |
+| `mise.toml` | pin 1 件(直上のコメント `tools-cooldown-ignore:`)。**窓が明ける日を必ず添える** —— 検疫の免除は日付でしか撤去条件を書けない |
+| `pnpm-workspace.yaml` | 検疫の免除 1 件(`minimumReleaseAgeExclude` の `<name>@<version>`)。**版を名指しし、直上のコメントに理由と窓が明ける日を書く** —— 名前だけの免除はその依存の以後すべての版を素通しにする |
 
 - **ソース側の抑止は行 1 件に限る**。`// nosemgrep: <rule-id>`(Opengrep) と `// DevSkim: ignore <rule-id>`(DevSkim) は、抑止ファイルを持たないスキャナの様式であり、**規則 1 件 × 行 1 件**まで絞れるためこのポリシーを満たす。理由はその場に書く。**DevSkim は所見と同じ行に置いたものしか読まない** —— 直前の行へ置くと黙って効かず、抑止したつもりの所見が Security タブに残り続ける
 - **抑止した所見を code scanning へ渡さない**。Opengrep は `// nosemgrep:` で消した所見を SARIF には `suppressions` 付きで残し、GitHub はそれを閉じた alert として扱わない。渡すと**ゲートは緑のまま Security タブにだけ所見が積み上がり**、上記 3 の「落とさない」と「見せない」の分離が、意図しない側へ崩れる。取り込みの手前で落とす(`scripts/sarif`)

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { renderDigest, renderExpired, renderIssueBody } from "./report";
-import type { ExpiredSuppression, Suppression } from "./rules";
+import { renderDigest, renderExpired, renderIssueBody, renderMalformed } from "./report";
+import type { ExpiredSuppression, MalformedSuppression, Suppression } from "./rules";
 
 const SUPPRESSION: Suppression = {
   source: "osv-scanner.toml",
@@ -10,6 +10,14 @@ const SUPPRESSION: Suppression = {
 };
 
 const EXPIRED: ExpiredSuppression = { ...SUPPRESSION, dueDate: "2026-08-02" };
+
+const MALFORMED: MalformedSuppression = {
+  source: "pnpm-workspace.yaml",
+  subject: "pkg@1.2.3",
+  condition: "",
+  kind: "cooldown-exemption",
+  defects: ["理由と撤回条件が書かれていない", "撤回条件に日付が無い（窓が明ける日を YYYY-MM-DD で書く）"],
+};
 
 describe("renderDigest", () => {
   // ----- 正常系 -----
@@ -35,6 +43,19 @@ describe("renderExpired", () => {
   });
 });
 
+describe("renderMalformed", () => {
+  // ----- 正常系 -----
+  it("面・対象・欠けているものを並べる", () => {
+    expect(renderMalformed([MALFORMED])).toBe(
+      "pnpm-workspace.yaml の pkg@1.2.3: 理由と撤回条件が書かれていない / 撤回条件に日付が無い（窓が明ける日を YYYY-MM-DD で書く）",
+    );
+  });
+
+  it("様式を欠くものが無ければ空を返す", () => {
+    expect(renderMalformed([])).toBe("");
+  });
+});
+
 describe("renderIssueBody", () => {
   // ----- 正常系 -----
   it("条件の散文を、記法として描かせない", () => {
@@ -42,6 +63,7 @@ describe("renderIssueBody", () => {
     // CI の名義で公開の issue に載る。
     const body = renderIssueBody({
       expired: [EXPIRED],
+      malformed: [],
       suppressions: [{ ...SUPPRESSION, condition: "[緊急](https://evil.example/login) @team" }],
       commentBorneSources: [".github/zizmor.yml"],
     });
@@ -53,6 +75,7 @@ describe("renderIssueBody", () => {
   it("満たした件数を見出しに出す", () => {
     const body = renderIssueBody({
       expired: [EXPIRED],
+      malformed: [],
       suppressions: [SUPPRESSION],
       commentBorneSources: [],
     });
@@ -60,9 +83,22 @@ describe("renderIssueBody", () => {
     expect(body).toContain("1 件が撤回条件を満たしています。");
   });
 
+  it("様式を欠く件数も見出しに出し、その一覧を証拠に含める", () => {
+    const body = renderIssueBody({
+      expired: [EXPIRED],
+      malformed: [MALFORMED],
+      suppressions: [SUPPRESSION],
+      commentBorneSources: [],
+    });
+
+    expect(body).toContain("1 件が撤回条件を満たしています。 1 件が様式を満たしていません。");
+    expect(body).toContain("    pnpm-workspace.yaml の pkg@1.2.3: 理由と撤回条件が書かれていない");
+  });
+
   it("満たしたものが無ければ、その旨を見出しに出す", () => {
     const body = renderIssueBody({
       expired: [],
+      malformed: [],
       suppressions: [SUPPRESSION],
       commentBorneSources: [],
     });
@@ -74,6 +110,7 @@ describe("renderIssueBody", () => {
     // 見えていない範囲を書かないと、この報告が全件を見たものとして読まれる。
     const body = renderIssueBody({
       expired: [],
+      malformed: [],
       suppressions: [SUPPRESSION],
       commentBorneSources: [".gitleaks.toml", ".github/zizmor.yml"],
     });
@@ -85,6 +122,7 @@ describe("renderIssueBody", () => {
     // 常に渡す実装へ戻しても、渡した側のケースだけでは落ちない。
     const body = renderIssueBody({
       expired: [],
+      malformed: [],
       suppressions: [SUPPRESSION],
       commentBorneSources: [],
     });
@@ -95,6 +133,7 @@ describe("renderIssueBody", () => {
   it("実行の URL を渡せば本文に載せる", () => {
     const body = renderIssueBody({
       expired: [],
+      malformed: [],
       suppressions: [SUPPRESSION],
       commentBorneSources: [],
       runUrl: "https://github.test/run/1",

@@ -151,3 +151,6 @@ audit:
     ときにしか動かない）。外す条件は、実際に通知が飛んだ実行のログで宛先を確認すること。
   baseline-prune: >-
     月次でしか動かず、実行の記録がまだ無い。外す条件は同上。
+  tools-cooldown: >-
+    pin の公開日時を api.github.com / pypi.org / registry.npmjs.org から引くが、
+    実行の記録がまだ無い。外す条件は、mise.toml を動かした PR の実行ログで宛先を確認すること。

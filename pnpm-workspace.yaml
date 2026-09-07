@@ -10,6 +10,8 @@ packages:
 # pnpm は semver 種別ごとの冷却期間を設定できないため、minor の7日を一律下限にする。
 minimumReleaseAge: 10080
 # 緊急のセキュリティ修正は、影響を受ける特定バージョンだけを一時的に例外化する。(パッケージ名だけの例外は禁止)
+# 項目は `name@version` で書き、直上のコメントに理由と、窓が明ける日（YYYY-MM-DD）を添える。
+# 週次の棚卸し（make suppression-expiry）が宣言単位で読み、どちらか欠けていれば落ちる。
 minimumReleaseAgeExclude: []
 # 冷却期間を満たす版がなければ解決を失敗させる。
 minimumReleaseAgeStrict: true

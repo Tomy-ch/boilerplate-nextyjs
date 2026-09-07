@@ -21,7 +21,9 @@ Do NOT use this skill for:
 
 - Upgrading Node.js itself — use `/node-upgrade`, which reviews the release notes and breaking changes of that Node line
 - Updating npm dependencies (`package.json`) — use `pnpm add` / `pnpm update` directly ([0004](../../../docs/adr/0004-library-management.md))
-- One-off ad-hoc version bumps — just edit `mise.toml` and run `make install-tools`
+- One-off ad-hoc version bumps — edit `mise.toml` and run `make install-tools`. The quarantine
+  still applies: `make tools-cooldown-check` fails a pin whose upstream release is younger than
+  its window, whichever path put it there
 - Upgrading **mise itself** — `mise.toml` declares what mise resolves and cannot declare mise, so its
   version lives in `.github/actions/setup-mise/action.yaml` and is out of this skill's reach. The
   procedure, including the three places that must agree, is item 8 of the `repo-ops` runbook

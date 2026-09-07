@@ -268,7 +268,7 @@
 
 ## 生成物と補助スクリプト
 
-> Rationale: [ADR 0072](adr/0072-api-type-generation.md) / [ADR 0110](adr/0110-security-operations.md) / [ADR 0153](adr/0153-ci-configuration.md) / [ADR 0054](adr/0054-ui-catalog-storybook.md) / [ADR 0091](adr/0091-test-verification-methods.md) / [ADR 0157](adr/0157-inspection-declaration-discipline.md); enforced via `scripts/catalog-assets.gate.test.ts`、`make actions-pin-check`、`make actionlint` / `make actions-shellcheck` / `make actions-required-check-lint`、`scripts/markdown-exclusions.gate.test.ts`。
+> Rationale: [ADR 0072](adr/0072-api-type-generation.md) / [ADR 0110](adr/0110-security-operations.md) / [ADR 0153](adr/0153-ci-configuration.md) / [ADR 0054](adr/0054-ui-catalog-storybook.md) / [ADR 0091](adr/0091-test-verification-methods.md) / [ADR 0157](adr/0157-inspection-declaration-discipline.md); enforced via `scripts/catalog-assets.gate.test.ts`、`make actions-pin-check`、`make actionlint` / `make actions-shellcheck` / `make actions-required-check-lint`、`scripts/markdown-exclusions.gate.test.ts`、`make tools-cooldown-check`（手で入れた pin の検疫）、`make suppression-expiry`（抑止の期限）。
 
 - **required check へ登録するのは、全 PR でその context 名を報告し続ける job だけにする。** `paths:` で絞った job、第三者のアカウント（外部解析サービスのトークン）の有無で降りる job、作った側の初期化で消える job を登録すると、報告されない PR が必須チェック待ちのまま止まり、コードでは直せない。降ろすときは `on:` から外さず、job は起動させて `if:` でステップだけを降ろす。Security 群を差分で降ろせるのは、週次スケジュールが残りの走査を引き受け、かつ required に載っていないからで、どちらかを外すなら絞りも外す —— 片方だけ外すと書き漏らしが恒久の死角になる。
 

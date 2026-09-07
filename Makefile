@@ -45,6 +45,7 @@ include .makefiles/security/osv.mk
 include .makefiles/security/bearer.mk
 include .makefiles/security/dast.mk
 include .makefiles/security/suppression.mk
+include .makefiles/security/tools-cooldown.mk
 
 # 一括実行系ファイル
 # GitHub関連

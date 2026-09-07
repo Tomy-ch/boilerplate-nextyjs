@@ -20,7 +20,8 @@
 
 - Node.js 自体のアップグレード → `/node-upgrade` を使う（その Node ラインのリリースノート / 破壊的変更をレビューする）
 - npm 依存のアップデート（`package.json`）→ `pnpm add` / `pnpm update` を直接使う（[0004](../../../docs/adr/0004-library-management.md)）
-- 単発のアドホックなバージョン bump → `mise.toml` を直接編集して `make install-tools`
+- 単発のアドホックなバージョン bump → `mise.toml` を直接編集して `make install-tools`。
+  **検疫はこの経路にも掛かる** —— `make tools-cooldown-check` が、窓を満たさない pin をどの経路で入れたかに依らず落とす
 - **mise 自身**のアップグレード → `mise.toml` が宣言するのは mise が解決する対象であって mise 自身は
   宣言できないため、版は `.github/actions/setup-mise/action.yaml` にあり本スキルの射程外。揃えるべき
   3 箇所を含む手順は `repo-ops` runbook の項目 8

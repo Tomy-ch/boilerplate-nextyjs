@@ -22,7 +22,10 @@ export default defineConfig({
       // 母数はディレクトリの列挙ではなく全 `.ts` に取る。ツールのディレクトリを足したとき
       // 黙って母数から漏れるのを避ける。外すのは除外宣言だけ。
       include: ["scripts/**/*.ts"],
-      exclude: [...EXCLUDED_FROM_CHECKS],
+      // `src/**` は本体側の設定が母数に持つ。ここで外すのは免除ではなく**境界**で、
+      // `scripts/` の道具が `src/` の宣言を引くと、引かれた側がこちらの母数へ紛れ込む。
+      // 二重に数えると、片方のしきい値がもう片方の被覆で決まる。
+      exclude: [...EXCLUDED_FROM_CHECKS, "src/**"],
       reporter: ["text"],
       thresholds: {
         branches: 100,

@@ -36,7 +36,7 @@ out-of-scope は「**ロール境界の外**」（バックエンド業務ロジ
 
 ## 同梱サンプルと破棄境界
 
-本 boilerplate は題材を持つサンプル（画面・feature・ルート・E2E・モック・生成物からなるジャーニー）を同梱し、fork はセットアップ時にそれを破棄してコアだけを受け取る（`make setup-remove-sample`）。
+本 boilerplate は題材を持つサンプル（画面・feature・ルート・E2E・モック・生成物からなるジャーニー）を同梱し、テンプレートから作った側はセットアップ時にそれを破棄してコアだけを受け取る（`make setup-remove-sample`）。
 
 - **サンプルは、component を実データ・実操作へ配線した実装例として作る。** `components` に持っている部品を、画面要件に直接現れないことだけを理由に使わずに終えない。API から取得した実データ・form の実入力・Server Action の実送信へ繋ぐ
 - **残す / 破棄するの判定基準は「用途特化か汎用か」。** 破棄するのはジャーニーと、題材でしか使わない部品・装飾目的の部品。残すのはドメインを持たないもの — どのプロジェクトでも使う汎用 UI 部品・機構（`cn()` / `ActionState<T>` / 画像ローディングの仕組み等）・デザイントークン・認証・認可の機構
@@ -114,21 +114,21 @@ Docker を維持する場合、以下を毎リリースで同期する必要が�
 | 呼び名 | `APP_ENV` | 何をする場所か |
 | --- | --- | --- |
 | **stand-alone** | `local` / `ci` | 何も契約せずに全画面が動く。compose を上げれば IdP も画像配信も API も揃い、外部サービスの account を持たない人がその日のうちに触れる |
-| **cloud** | `dev` / `stg` / `prd` | `env/.env.<環境>` の接続先を、fork 先自身の IdP / CDN / API へ向ける。fork が本番でやることと同じ経路を通す |
+| **cloud** | `dev` / `stg` / `prd` | `env/.env.<環境>` の接続先を、作った側自身の IdP / CDN / API へ向ける。作った側が本番でやることと同じ経路を通す |
 
 各環境の位置づけ:
 
 - **`local`** — 手元の開発。開発専用の口が開く
 - **`ci`** — 自動検査。手元と同じ相手(mock)へ向き、人手を介さず全画面が動く必要がある。開発専用の
   口が開く
-- **`dev`** — fork 先が最初に外部サービスへ繋ぐ場所。実 IdP・実 API を相手にし、**開発専用の口は
+- **`dev`** — 作った側が最初に外部サービスへ繋ぐ場所。実 IdP・実 API を相手にし、**開発専用の口は
   閉じる**
 - **`stg`** — 本番と同じ構成での確認
 - **`prd`** — 本番
 
 ### 同梱サンプルはどちらでも動く
 
-**サンプルは cloud でもフル構成で動かす。** backend と実 IdP を立て、fork が本番でやることと同じ
+**サンプルは cloud でもフル構成で動かす。** backend と実 IdP を立て、作った側が本番でやることと同じ
 経路を通す。**frontend だけを mock のまま cloud に置く形は採らない** —— それは IdP 無しで session を
 出す口を cloud で開くことであり、`load-environment.ts` が名指しで閉じているものになる。
 
@@ -151,7 +151,7 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 
 `APP_MODE` のような「stand-alone / cloud」を値に持つ軸は**置かない**。束ねると
 **IdP は Cognito・ストレージは自前**や **IdP は Keycloak・配信は CloudFront** のような組み合わせが
-表現できなくなる。fork の現実はその組み合わせであり、束ねることは
+表現できなくなる。作った側の現実はその組み合わせであり、束ねることは
 [0010](0010-standards-and-non-lockin.md) の非ロックインを config の形で否定することになる。
 **実装が本当に割れる点だけ、割れた分だけ独立した指定を置く。**
 
@@ -181,7 +181,7 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 | Object Storage | `http://gobp-local.web.garage.localhost:3902` | 画像配信（virtual-host 形式のみ。[0045](0045-fonts-and-images.md)） |
 | 認証 | `http://localhost:4000` | 疑似 OIDC（[0079](0079-auth-frontend-seam.md)） |
 
-フロント単独で作業する場合は **MSW モック**へ切り替える（`APP_API_MODE=mock`）。接続先はすべて env 経由で差し替え可能とし、コードに焼き込まない（[0030](0030-environment-variable-management.md)）。上記は開発時の既定値であり、fork 先が別 backend を持つ場合は env の差し替えだけで足りる。
+フロント単独で作業する場合は **MSW モック**へ切り替える（`APP_API_MODE=mock`）。接続先はすべて env 経由で差し替え可能とし、コードに焼き込まない（[0030](0030-environment-variable-management.md)）。上記は開発時の既定値であり、作った側が別 backend を持つ場合は env の差し替えだけで足りる。
 
 ### 対象になりうる用途
 
@@ -217,11 +217,11 @@ registry の tag は同じ名前のまま別の中身を指せるため、tag �
 
 ここで挙げた用途も、PaaS / SaaS で代替可能なものが多い（モック API は MSW のような Node 内モック、OpenAPI viewer は Stoplight Studio / Postman、docs viewer は GitHub Pages 等）。**Docker でないと解決できないか** を一度問うこと。
 
-## 自己ホスト・コンテナ化したい場合（fork 先向け）
+## 自己ホスト・コンテナ化したい場合（作った側向け）
 
-本 boilerplate を fork したプロジェクトが、Docker / self-host が必要なロールに拡張する場合の指針:
+本 boilerplate から作ったプロジェクトが、Docker / self-host が必要なロールに拡張する場合の指針:
 
-1. 本 ADR を fork プロジェクト側で superseded（廃止）扱いとし、別 ADR で「本プロジェクトでは Docker を採用する」と上書き宣言する
+1. 本 ADR を、作った側のプロジェクトで superseded（廃止）扱いとし、別 ADR で「本プロジェクトでは Docker を採用する」と上書き宣言する
 2. `Dockerfile` を新規作成する
 3. 以下を SSOT と整合させる:
    - `FROM node:<X.Y.Z>-alpine` を `mise.toml` の `node` と一致
@@ -239,7 +239,7 @@ registry の tag は同じ名前のまま別の中身を指せるため、tag �
 
 ## 禁止事項
 
-- ❌ **アプリケーション本体の `Dockerfile`** や **本体配送目的の `docker-compose.yml`**（無印）を主要構成として復活させること（fork 先での個別判断は対象外）
+- ❌ **アプリケーション本体の `Dockerfile`** や **本体配送目的の `docker-compose.yml`**（無印）を主要構成として復活させること（作った側での個別判断は対象外）
 - ❌ README / ドキュメントで「Docker での起動」を **アプリ本体の推奨デプロイ手段** として記載すること
 - ❌ CI / scripts に **アプリ本体の** Docker build を組み込むこと
 - ❌ `stand-alone` / `cloud` を値に持つ config の軸を置くこと(呼び名は 2 群の別名であって独立した軸ではない。組み合わせが表現できなくなる。§環境の定義)
@@ -252,7 +252,7 @@ registry の tag は同じ名前のまま別の中身を指せるため、tag �
 ## 補足
 
 - 本 ADR が否定するのは **「アプリ本体の配送手段としての Docker」**（Type A）。**「補助ツール群を docker-compose で立ち上げる」**（Type B、例: モック API / OpenAPI viewer / docs viewer）は対象外であり、専用ファイル名で導入してよい
-- 「Docker を全否定する」のではなく、「本 boilerplate のロール定義（表示層）には Type A が不要」という整理。fork 先で必要になったら導入すればよい
+- 「Docker を全否定する」のではなく、「本 boilerplate のロール定義（表示層）には Type A が不要」という整理。作った側で必要になったら導入すればよい
 - 本 ADR は **ロール定義の文書化** でもある。boilerplate を採用する開発者は、本 ADR を読むことで「このリポジトリで何を作る前提か」を理解できる
 
 ## 関連 ADR

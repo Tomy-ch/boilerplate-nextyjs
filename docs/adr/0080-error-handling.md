@@ -101,7 +101,7 @@ App Router の `error.tsx` / `not-found.tsx` / `global-error.tsx` の責務・Er
   どこからも参照されない skeleton が残る。**所有しないと決めたことと、その理由を README に書く**
 - **Suspense × PPR の相互作用**: `Cache Components` は有効なので([0041](0041-cache-components-decision.md))、`<Suspense>` の位置は待機表示の話ではなく**静的な殻と動的な穴の境界そのもの**である。上の「待つ部分の近くへ置く」は、有効化後は性能の助言ではなく**殻を配れるかどうかの条件**になる —— 境界より外にある取得が 1 つでも残っていれば、その route は殻を配れない
 - **fallback は場所を取る。** 穴が埋まる瞬間に周りが動かないよう、待機表示は実物と同じ大きさの枠を出す(`docs/rules.md` #17 / #17b)。描くものを持たない穴(計測など)だけが `null` を fallback にしてよい
-- fallback の**見た目(スケルトン / スピナー)の UI 規約**は用途依存であり、fork 先で確定する
+- fallback の**見た目(スケルトン / スピナー)の UI 規約**は用途依存であり、テンプレートから作った側で確定する
 
 ### 5. swallow 禁止・cause chain・redact
 

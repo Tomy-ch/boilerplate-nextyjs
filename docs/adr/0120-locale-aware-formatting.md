@@ -39,7 +39,7 @@ Accepted
 ### 4. 既定 locale の供給 seam
 
 - **既定 locale は `model` 内の単一の名前付き定数(例: `defaultLocale`)に集約**し、フォーマッタは **locale を明示引数で受け取り、省略時に既定 locale を用いる**形とする。既定 locale を各コンポーネントにハードコード直書きしない(単一 seam に寄せる)
-- この単一 seam が、**i18n 採用時([0121](0121-i18n-strategy.md))の差し替え点**となる。fork 先が next-intl 等を導入した時点で、この seam を「アクティブ locale を `proxy.ts` / `[locale]` セグメント([0121](0121-i18n-strategy.md) / [0043](0043-middleware-policy.md) / [0040](0040-routing-rendering-strategy.md))から解決した値」で供給する形へ差し替える。本体は**単一定数という最小の seam**に留め、多 locale 解決機構(resolver / port)は敷かない(具体は i18n 採用時 / fork 先で確定。「補足」参照)
+- この単一 seam が、**i18n 採用時([0121](0121-i18n-strategy.md))の差し替え点**となる。テンプレートから作った側が next-intl 等を導入した時点で、この seam を「アクティブ locale を `proxy.ts` / `[locale]` セグメント([0121](0121-i18n-strategy.md) / [0043](0043-middleware-policy.md) / [0040](0040-routing-rendering-strategy.md))から解決した値」で供給する形へ差し替える。本体は**単一定数という最小の seam**に留め、多 locale 解決機構(resolver / port)は敷かない(具体は i18n 採用時 / 作った側で確定。「補足」参照)
 
 ## 禁止事項
 
@@ -71,4 +71,4 @@ Accepted
 - [0030-environment-variable-management.md](0030-environment-variable-management.md) — 既定 locale を env 駆動にする場合の `config` 昇格先
 - [0140-documentation-operations.md](0140-documentation-operations.md) — タクソノミー(本 ADR = decision / 使用 rule は rules.md)
 - [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — TZ / hydration・相対時刻の描画パターンの Rationale(本 ADR の射程外境界)
-- [0004-library-management.md](0004-library-management.md) — `date-fns` 採用フロー(exact pin + `pnpm audit`)/ fork 先が追加ライブラリを入れる場合の採用フロー
+- [0004-library-management.md](0004-library-management.md) — `date-fns` 採用フロー(exact pin + `pnpm audit`)/ 作った側が追加ライブラリを入れる場合の採用フロー

@@ -9,8 +9,9 @@ name: Dead Code
 # "code that survived a refactor".
 #
 # The published surface is declared as entry points in `knip.ts`. A boilerplate exports the
-# components a fork consumes, so "unused inside this repository" is the expected steady
-# state there and is not a finding; everything else is internal and is.
+# components a repository created from this template consumes, so "unused inside this
+# repository" is the expected steady state there and is not a finding; everything else is
+# internal and is.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on every PR
 # is in README.md.

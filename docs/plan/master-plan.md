@@ -21,7 +21,7 @@
 
 - **定義**: out-of-scope ≠ 沈黙の省略。フロント領域の関心事なら、一概に切り捨てず **滑走路**(明示的な名前を付けた拡張点 = seam)を敷く。境界判定は **「別ドメイン(infra / backend)の責務か?」** の一問。純粋な除外で終わってよいのは (a) 別ドメインの責務、(b) 機能 seam でない非機能 tooling 選択、の 2 つのみ。**「白紙 = 名もなき省略」が共通の敵**であり、滑走路はそれへの構造的回答である
 - **設置面のない滑走路は敷かない**: 滑走路は **① 動くローカル最小機構**(local 代替のクラス / 機構)としてのみ置く。**② 空のインターフェース(IF / port)定義は採用しない** — 使われない IF は腐り、実装時に必ず書き直されるため。したがって seam は**設置面(実使用箇所)が実在する場合にのみ**敷く
-- **ライフサイクル**: 滑走路は v2 採用まで存続する(fork 先は随時採用してよい)
+- **ライフサイクル**: 滑走路は v2 採用まで存続する(テンプレートから作った側は随時採用してよい)
 
 ### 1.2 採用ロードマップ(v1 / v2 二段構え)
 
@@ -39,7 +39,7 @@
 | feature flag | env 既定 + adapter | Thin | `adapters` | [0078](../adr/0078-dynamic-feature-flag-seam.md) |
 | PWA | Serwist(`@serwist/next`) | Medium | `app/manifest.*` | [0130](../adr/0130-pwa-strategy.md) |
 
-- **濃淡の定義**: Full = 常用・深く統合・参照実装まで同梱 / Medium = 統合するが既定は控えめ(必要時に使う)/ Thin = seam + 配線 + 最小デモのみ(実使用は fork 次第)
+- **濃淡の定義**: Full = 常用・深く統合・参照実装まで同梱 / Medium = 統合するが既定は控えめ(必要時に使う)/ Thin = seam + 配線 + 最小デモのみ(実使用は作った側次第)
 - **1.1 の改訂に伴い、上記 6 件は v1 では何も置かない**(設置面が実在しないため)
 - **v1 採用へ移した 3 件**: リッチテキスト(TipTap)は商品説明で実使用するため / Cookie 同意は [0031](../adr/0031-policy-state-supply.md) が状態供給を規定済みで設置面があり、かつサードパーティスクリプトのゲートは後付けコストが高いため / **プロダクト分析**は同意ゲートの裏へタグマネージャを同梱したことで seam が v1 に在る([0131](../adr/0131-cookie-consent.md) §2 / [0082](../adr/0082-client-observability.md) §3)—— 特定の SaaS(PostHog 等)を本体が選ぶことはせず、繋ぐのは容器の中身の入れ替えで済むため、**ライブラリとして v2 で同梱する対象ではなくなった**
 - **プラットフォーム機能**(ライブラリとは別軸): Cache Components([0041](../adr/0041-cache-components-decision.md))/ React Compiler([0042](../adr/0042-react19-rendering-api.md))/ React taint API([0030](../adr/0030-environment-variable-management.md))—— Cache Components は **v1 で採用**、React taint API は **v1 で採用**(experimental を承知の例外)、React Compiler は**基盤の必須機能にせず opt-in の性能最適化手段として扱う**([0042](../adr/0042-react19-rendering-api.md) 決定 4)
@@ -56,7 +56,7 @@
 
 | # | 仕掛け | 効く柱 | 形態 | 要点 |
 | --- | --- | --- | --- | --- |
-| B1 | feature README = 仕様書テンプレート | ②① | rule+decision | 必須セクション(route / 使う operationId / **状態表 × デザイン参照** / 依存カーネル / Action 戻り値契約 / テスト観点)。参照先の形式(Figma フレーム / story)は fork 先が決める。テンプレ置き場 = `docs/templates/feature-readme.md`。readme-review の採点基準に接続 |
+| B1 | feature README = 仕様書テンプレート | ②① | rule+decision | 必須セクション(route / 使う operationId / **状態表 × デザイン参照** / 依存カーネル / Action 戻り値契約 / テスト観点)。参照先の形式(Figma フレーム / story)は作った側が決める。テンプレ置き場 = `docs/templates/feature-readme.md`。readme-review の採点基準に接続 |
 | B2 | スキャフォールドジェネレータ `pnpm gen` | ①③ | tooling+decision | `gen feature/component/adapter` で命名・配置・境界・テストを生成時点で正に |
 | B3 | 契約駆動モック一気通貫(orval→MSW) | ①② | decision+tooling | OpenAPI → MSW + faker を生成し dev モック / integration / e2e を 1 パイプに |
 | B4 | アーキテクチャ・マニフェスト SSOT | ③ | tooling+rule | `architecture.ts` に依存マトリクス・公開面・禁止名を宣言 → 各成果物生成 + drift ゲート |

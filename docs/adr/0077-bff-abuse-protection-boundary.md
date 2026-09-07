@@ -10,7 +10,7 @@ Accepted
 
 [0070](0070-backend-role-separation.md) が `/api/*` を **thin proxy** に限定し、[0081](0081-observability-logging.md) が「ブラウザ → BFF 中継」をテレメトリの seam にした結果、本体構成に**認証を要求しない公開エンドポイント**が生じる:
 
-- `/api/*`(テレメトリ中継含む)へのレート制限・ボディサイズ上限・認証なしエンドポイントの保護を、本体で持つか PaaS / fork 先に委ねるかの線引きが要る。
+- `/api/*`(テレメトリ中継含む)へのレート制限・ボディサイズ上限・認証なしエンドポイントの保護を、本体で持つか PaaS / テンプレートから作った側に委ねるかの線引きが要る。
 - [0081](0081-observability-logging.md) の中継 seam が生む無防備な公開エンドポイントに、防御方針が無いままでは置けない。
 
 本 ADR は [0010](0010-standards-and-non-lockin.md) の 2 原則(§1 デファクトへの準拠 / §2 vendor-independent な正当性材料の必須化)と、**境界判定**(「別ドメイン(infra / backend)の責務か?」の一問)を適用して abuse 保護を仕分ける。
@@ -21,7 +21,7 @@ Accepted
 
 ### 1. PaaS / edge へ委譲する防御(infra 境界 seam)
 
-レート制限・IP / bot フィルタ・DDoS 緩和・大域的な WAF は Vercel / Cloudflare / AWS 等の edge / WAF 機能で敷く。本体はこれを前提とし、fork 先が自身の PaaS で設定する拡張点として明示する([0081](0081-observability-logging.md) が生む無防備エンドポイント = テレメトリ中継 `/api/*` の保護もここに載る)。
+レート制限・IP / bot フィルタ・DDoS 緩和・大域的な WAF は Vercel / Cloudflare / AWS 等の edge / WAF 機能で敷く。本体はこれを前提とし、作った側が自身の PaaS で設定する拡張点として明示する([0081](0081-observability-logging.md) が生む無防備エンドポイント = テレメトリ中継 `/api/*` の保護もここに載る)。
 
 - **vendor-independent 正当性材料([0010](0010-standards-and-non-lockin.md) §2)**: 公開エンドポイントを edge で多層防御する構造は OWASP / 一般的 web セキュリティの原則であって特定 PaaS 機能に依存しない(Vercel / Cloudflare / AWS WAF いずれでも成立)。
 
@@ -37,7 +37,7 @@ Accepted
 
 ### 3. 線引きの範囲
 
-本 ADR が確定するのは「rate limit / DDoS / WAF = infra 境界 seam で切る」「入力・サイズ検証の最小防御 = 本体 Route Handler 規約」という **帰属の骨格**と、同梱する中継の参照形(§2)に留める。他の公開エンドポイントの具体値(上限・許容する content-type)は用途 / PaaS 依存であり、fork 先が §2 の形に倣って Route Handler ごとに置く。
+本 ADR が確定するのは「rate limit / DDoS / WAF = infra 境界 seam で切る」「入力・サイズ検証の最小防御 = 本体 Route Handler 規約」という **帰属の骨格**と、同梱する中継の参照形(§2)に留める。他の公開エンドポイントの具体値(上限・許容する content-type)は用途 / PaaS 依存であり、作った側が §2 の形に倣って Route Handler ごとに置く。
 
 ## 禁止事項
 

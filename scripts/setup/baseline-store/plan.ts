@@ -5,7 +5,7 @@
  * 置き場の既定名を作る接尾辞。
  *
  * @remarks
- * fork 先の名前置換に追随するよう、親の名前から導きます。
+ * テンプレートから作った側の名前置換に追随するよう、親の名前から導きます。
  *
  * `images` まで含めるのは、**`.gitmodules` で置き場のパスと URL が隣り合わせに並ぶ**ためです。
  * 配線先は `baseline/images` なので、名前を揃えると 2 行が同じものを指していると読めます。
@@ -29,7 +29,7 @@ export const VISIBILITIES: readonly string[] = ["public", "private", "internal"]
  *
  * @remarks
  * 基準画像は画面の見た目そのものなので、公開側へ倒れる既定は取れません。親に合わせると、
- * 公開リポジトリを fork した非公開プロジェクトが黙って画面を公開します。
+ * 公開のテンプレートから作った非公開プロジェクトが黙って画面を公開します。
  *
  * 代償として、**置き場が非公開だと fork からの PR で `vrt` が落ちます**。fork の PR には
  * secrets が渡らず、App のトークンを取れないためです。公開のまま運用するリポジトリは、
@@ -89,7 +89,7 @@ export function normalizeVisibility(value: string): string {
  * サブモジュールへ書く URL。
  *
  * @remarks
- * HTTPS を使うのは、CI と fork 先が鍵の配置なしに読めるためです。撮り直しの push は
+ * HTTPS を使うのは、CI とテンプレートから作った側が鍵の配置なしに読めるためです。撮り直しの push は
  * GitHub App のトークンを `http.extraheader` へ載せて通します。
  */
 export function cloneUrl(repository: string): string {

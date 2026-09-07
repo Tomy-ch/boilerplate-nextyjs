@@ -3,21 +3,22 @@ name: Purge Verify
 # Runs the sample purge on a throwaway checkout and proves the repository still
 # builds and passes every gate without the sample.
 #
-# This job exists because the fork-side verifier self-destructs after its single
-# successful run (`scripts/setup/verify-sample-removal`). Nothing else would notice
-# if the purge stopped working: a marker added outside a stripped region, a new
-# import that reaches into the sample, or a manifest entry that went stale would
-# all stay green until someone actually forked and ran it.
+# This job exists because the verifier a repository created from this template runs
+# self-destructs after its single successful run (`scripts/setup/verify-sample-removal`).
+# Nothing else would notice if the purge stopped working: a marker added outside a
+# stripped region, a new import that reaches into the sample, or a manifest entry that
+# went stale would all stay green until someone actually created a repository from the
+# template and ran it.
 #
 # The checkout is disposable, so the job deliberately deletes tracked files and
 # never pushes anything back.
 #
-# A fork that has already purged no longer has the tooling this job drives, because
-# the purge manifest removes it. The job then fails on a missing script, which is
-# the intended signal: the guard step below turns that into an explicit instruction
-# instead of a puzzling "file not found". Deleting this workflow as part of the purge
-# was considered and rejected — a fork that later grows its own sample would have
-# lost the mechanism with no trace that it ever existed.
+# A repository created from this template that has already purged no longer has the
+# tooling this job drives, because the purge manifest removes it. The job then fails on
+# a missing script, which is the intended signal: the guard step below turns that into
+# an explicit instruction instead of a puzzling "file not found". Deleting this workflow
+# as part of the purge was considered and rejected — a generated repository that later
+# grows its own sample would have lost the mechanism with no trace that it ever existed.
 #
 # ## What this job does NOT run
 #

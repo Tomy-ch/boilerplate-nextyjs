@@ -38,7 +38,7 @@ mock app はどちらでもない。読み手に何かを説明するもので�
 
 ## exclusion の扱い
 
-- 本 ADR は「意図的にやらない」判断の記録である([0140](0140-documentation-operations.md) タクソノミー: exclusion = ADR)。fork 先が自分の判断で mock app を公開する分には、この exclusion は障害にならない
+- 本 ADR は「意図的にやらない」判断の記録である([0140](0140-documentation-operations.md) タクソノミー: exclusion = ADR)。テンプレートから作った側が自分の判断で mock app を公開する分には、この exclusion は障害にならない
 
 ## 禁止事項
 

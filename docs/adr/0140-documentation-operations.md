@@ -43,7 +43,7 @@ boilerplate のドキュメントは、日本語の読者と、英語の frontma
 | **rule** | **`docs/rules.md`**(下記 3) |
 | **inventory** | ADR には入れない。生きた参照(`docs/adr/BACKLOG.md` の枠 ID 体系を含む) |
 
-- **exclusion** はフォークのセットアップ時に直接編集して独自ベースラインを敷けるものとする(supersede-by-new-ADR モデルは setup 後の変更にのみ適用)
+- **exclusion** はテンプレートから作った側のセットアップ時に直接編集して独自ベースラインを敷けるものとする(supersede-by-new-ADR モデルは setup 後の変更にのみ適用)
 - **ADR の decision から自然に決まるものを、別の ADR で二重に決定しない。** tooling や reference は ADR を要さず、規約に昇格するものだけを ADR 化する
 
 ### 3. `rules.md` = rule の集約先(AGENTS.md には積まない)

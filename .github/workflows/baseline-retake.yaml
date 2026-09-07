@@ -104,8 +104,8 @@ jobs:
       # pointer has moved. Pushing is a separate mint inside `setup-baselines`, narrowed
       # to what pushing needs.
       #
-      # A fork that has not registered the app falls back to `GITHUB_TOKEN`. The retake
-      # still works there; it just draws on the smaller budget.
+      # A repository created from this template that has not registered the app falls back
+      # to `GITHUB_TOKEN`. The retake still works there; it just draws on the smaller budget.
       #
       # **The mint is allowed to fail.** Asking for a permission the installation has not
       # granted 422s, and without this that would take the whole job down — worse than the

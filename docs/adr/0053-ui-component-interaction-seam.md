@@ -16,13 +16,13 @@ interaction UI は次の 5 つに分かれ、それぞれ本 ADR が持つもの
 - **キーボードショートカット**(除外)= 採らず、登録機構も置かない
 - **ドラッグ&ドロップ**(ライブラリ非同梱)= 本体は **WCAG 2.2 ドラッグ代替を満たす a11y 準拠 DnD seam/IF**。DnD ライブラリ(dnd-kit 等)は本体に同梱しない
 
-これらはいずれも **インタラクションが a11y 事故の最頻発地点**(モーダルの focus / DnD のドラッグ代替 / ショートカットの誤発火)であり、[0100](0100-accessibility-target.md) の WCAG 2.x AA 目標と直結するという共通性を持つ。0052 が採る部品も、fork 先が採る局所ライブラリも、相互作用 a11y 契約なしに実装される余地を残さないため、本 ADR は **a11y 拡張点(名前付き seam + a11y 契約)を必ず敷く**。
+これらはいずれも **インタラクションが a11y 事故の最頻発地点**(モーダルの focus / DnD のドラッグ代替 / ショートカットの誤発火)であり、[0100](0100-accessibility-target.md) の WCAG 2.x AA 目標と直結するという共通性を持つ。0052 が採る部品も、テンプレートから作った側が採る局所ライブラリも、相互作用 a11y 契約なしに実装される余地を残さないため、本 ADR は **a11y 拡張点(名前付き seam + a11y 契約)を必ず敷く**。
 
 ## 決定
 
 ### 1. 貫く原則: プラットフォーム標準・built-in 優先(0010 標準準拠)
 
-interaction UI は、**ライブラリより先にプラットフォーム標準(HTML/CSS/DOM の built-in)を第一候補とする**([0010](0010-standards-and-non-lockin.md) §1 標準準拠)。built-in で要件を満たせないと判明した時にのみ、用途依存の判断として fork 先がライブラリを足す。
+interaction UI は、**ライブラリより先にプラットフォーム標準(HTML/CSS/DOM の built-in)を第一候補とする**([0010](0010-standards-and-non-lockin.md) §1 標準準拠)。built-in で要件を満たせないと判明した時にのみ、用途依存の判断として作った側がライブラリを足す。
 
 - **vendor-independent 正当性材料**([0010](0010-standards-and-non-lockin.md) §2): built-in 優先は「フレームワークが推奨するから」ではなく、web プラットフォーム標準に固有の独立根拠で正当化する ——(a) top-layer / focus / `inert` / `::backdrop` 等の a11y 機構を**ブラウザが既定で供給**する(自前 focus-trap の車輪の再発明を避ける)、(b) **JS ライブラリ依存ゼロ = 任意フレームワークへ可搬**(0010 の運用テスト「ベンダーを正当化から抜いても正当か」= Yes)、(c) **最小依存**(バンドル増を伴わない)。これは 0052 が採る shadcn/ui(Radix = WAI-ARIA 準拠 primitive)とも整合する —— built-in で満たせる相互作用は built-in を先に使い、built-in で足りない範囲を shadcn 系部品 / 局所ライブラリで補う、という優先順である
 
@@ -35,8 +35,8 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 ### 3. リッチテキスト/エディタ = TipTap を採用 + sanitizer port + 表示 seam
 
 - **WYSIWYG エディタは TipTap を採用**する。エディタ本体は `components` カーネルに置き、[0052](0052-ui-component-policy.md) の配置・exact-pin 要件に従う
-- **採る理由はエディタ本体ではなく、その隣に要る表示側の継ぎ目にある。** 利用者が書いた内容を安全に表示する経路は、**後から足すと「通し忘れ」が既に散った後**になる。同梱するのは、その経路を型で塞いだ形(下記の port と nominal type)を実物として置くためであり、fork 先がエディタ本体を差し替えてもこの形は残る
-- 実使用面は、**利用者が書いた長文が他の利用者へ表示される欄**である。そういう欄を持たない fork は、エディタごと落として sanitizer port だけを残してよい <!-- sample:line -->
+- **採る理由はエディタ本体ではなく、その隣に要る表示側の継ぎ目にある。** 利用者が書いた内容を安全に表示する経路は、**後から足すと「通し忘れ」が既に散った後**になる。同梱するのは、その経路を型で塞いだ形(下記の port と nominal type)を実物として置くためであり、作った側がエディタ本体を差し替えてもこの形は残る
+- 実使用面は、**利用者が書いた長文が他の利用者へ表示される欄**である。そういう欄を持たない作った側は、エディタごと落として sanitizer port だけを残してよい <!-- sample:line -->
 - 「表示」側の拡張点(seam): **信頼できない HTML を安全な表示へ変換する sanitizer を、差し替え可能な named port(seam)として扱う**(rehype/rehype-sanitize / DOMPurify 等は port の実装であって本体前提ではない)。リッチテキスト表示は、この sanitizer port を必ず通す
 - sanitizer port は外部ライブラリの wrap であり、[0021](0021-frontend-responsibility.md) のカーネル受入基準(複数箇所参照 or 外部ライブラリ wrap → カーネル)に従って **`model` カーネル**に置く。表示 seam(sanitize 済みコンテンツの描画)は `components` に置く
 - **port は sanitize 済みであることを型で表す。** 通過後の値を nominal type として返し、表示側はその型だけを受け取る。生の HTML 文字列を props に取らないため、**sanitizer を迂回する経路が公開 API にも実装にも存在しない**。「通し忘れ」を規約ではなく型で塞ぐ形である
@@ -58,7 +58,7 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 ### 5. キーボードショートカット = 除外
 
 - **グローバルキーボードショートカットは採らない**(exclusion)。後付けで散在実装すると input フォーカス時の誤発火等の事故が起きるが、それは採る場合の話であり、本体は機構も置かない
-- **登録機構(shortcut registry)の seam も置かない**。設置面(実使用箇所)が存在しない seam は敷かない方針のため、fork 先が採用する際に `capabilities` へ足す拡張点として名前だけを記録するに留める
+- **登録機構(shortcut registry)の seam も置かない**。設置面(実使用箇所)が存在しない seam は敷かない方針のため、作った側が採用する際に `capabilities` へ足す拡張点として名前だけを記録するに留める
 - 個々の UI のキーボード操作性(タブ順序 / Enter・Escape 等)は a11y 契約の一部であり、[0100](0100-accessibility-target.md)(WCAG 2.x AA)を正とする。本項が除外するのは**グローバルショートカット機構**のみ
 - **その component 自身の UI 内で完結するキー操作は例外で、component に置いてよい**(自身が出した領域へ focus を移す hotkey 等)。除外するのは、任意の操作を任意のキーへ結び付ける汎用の登録機構である
 - **キー操作の「案内」を表示する部品は持てる。** 何が起きるかとどのキーかの対を表示する UI は、登録も `keydown` の待ち受けも持たない純粋な表示 primitive であり、機構ではない。ただし **`components` はこの案内が実際に効くことを担保できない** —— 案内部品と結線は層が違い(`components` は `capabilities` を import できない)、キーと handler を結ぶのは両方を import できる `features` 以上である。したがって**案内を載せた側が、そのキーで実行できることまでを負う**。キーボードから実行できない操作を案内に載せない
@@ -75,7 +75,7 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 拡張点は **設置面(実使用箇所)が実在する場合にのみコードとして実体化する**。空の IF / port 定義は置かない(使われない IF は腐り、実装時に必ず書き直されるため)。
 
 - **sanitizer port は `model` カーネルに実体化済み**(§3)。エディタの採用により表示側の設置面が実在する
-- **shortcut registry は置かない** — 設置面が無い(§5)。本 ADR は「名前 + 家 + a11y 契約」を記録し、fork 先が採用する時点で実体化する
+- **shortcut registry は置かない** — 設置面が無い(§5)。本 ADR は「名前 + 家 + a11y 契約」を記録し、作った側が採用する時点で実体化する
 - **DnD のドラッグ代替は、ライブラリを要さない範囲では component の実装として実体化済み**(§6)。ライブラリを要する DnD の代替 IF は、設置面が現れるまで置かない
 
 ### 部品が持つ状態と、外から渡すもの
@@ -136,7 +136,7 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 ## 補足
 
 - **0052 との主題分担**: [0052](0052-ui-component-policy.md) は「どの UI 部品を持つか(採用・同梱可否)」を所有し、本 ADR は「持った interaction UI の相互作用 a11y 品質(seam + 契約)」を所有する。両者は主題が重複しない。日常強制の粒度規約(rule)は 0110(XSS)/ 0100(a11y チェック)/ [docs/rules.md](../rules.md) が持つ
-- **採用区分**: リッチテキスト(TipTap)= 採用(§3)。DnD(dnd-kit)= 本体非同梱・fork 先の局所採用。キーボードショートカット = 除外(§5)。いずれの場合も本体は seam と a11y 契約を保持し、ライブラリは [0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + カーネル境界の裏で差替可能・vendor 直参照を feature/component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。§1 built-in 優先と §3〜6 の a11y 契約は採用区分によらず不変
+- **採用区分**: リッチテキスト(TipTap)= 採用(§3)。DnD(dnd-kit)= 本体非同梱・作った側の局所採用。キーボードショートカット = 除外(§5)。いずれの場合も本体は seam と a11y 契約を保持し、ライブラリは [0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + カーネル境界の裏で差替可能・vendor 直参照を feature/component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。§1 built-in 優先と §3〜6 の a11y 契約は採用区分によらず不変
 
 ## 関連 ADR
 
@@ -150,4 +150,4 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 - [0050-styling-strategy.md](0050-styling-strategy.md) — Tailwind 主軸 + CSS Modules 限定許可(styled-components / emotion は非採用。採用 UI のスタイル手段)
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — カーネル配置・命名規律・受入基準(sanitizer port / 表示 seam の物理配置の根拠)
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) — 構造で担保する原則(許容範囲の異なる sanitizer をパッケージ境界で隔てる根拠)
-- [0004-library-management.md](0004-library-management.md) — exact pin / audit(fork 先が interaction UI ライブラリを採る際の枠)
+- [0004-library-management.md](0004-library-management.md) — exact pin / audit(作った側が interaction UI ライブラリを採る際の枠)

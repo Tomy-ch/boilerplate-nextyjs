@@ -12,9 +12,9 @@ name: E2E
 #   * Responsive     — the three bands ADR 0051 §2 fixes, read from the design tokens.
 #   * Cross browser  — Chromium, Firefox and WebKit. Those are the three rendering
 #                      engines modern browsers reduce to (ADR 0102 defers the version
-#                      floor to the fork), and they are ALL this job looks at: no
-#                      browser brands, no versions. The versions are whatever the
-#                      pinned Playwright image ships.
+#                      floor to the repository created from this template), and they are
+#                      ALL this job looks at: no browser brands, no versions. The versions
+#                      are whatever the pinned Playwright image ships.
 #
 # The application runs on the runner and only the browsers run inside the digest-pinned
 # Playwright container. `node_modules` is resolved for the OS and CPU that installed it,

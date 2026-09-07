@@ -69,7 +69,7 @@ export type CatalogHeading = (typeof CATALOG_HEADING)[keyof typeof CATALOG_HEADI
  * - `design-system` — 契約を知らず、読んでも役割が増えない。目的別に置く
  * - `patterns` — 契約は知らないが、複数の役割を合成する。目的を一つに決められないので割らない
  * - `shell` — アプリのどこに・いくつ置くかが部品側で決まっている。mount 位置が制約になる
- * - `app-starter` — バックエンドの契約を知っている。fork 先が作り替える前提
+ * - `app-starter` — バックエンドの契約を知っている。テンプレートから作った側が作り替える前提
  */
 export const COMPONENT_LAYER = {
   DESIGN_SYSTEM: "design-system",

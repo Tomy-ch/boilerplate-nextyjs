@@ -55,7 +55,8 @@ jobs:
         #
         # Four is where the curve flattens. The fixed cost per machine (setup, dependency
         # install) is roughly 30s against a run of roughly 100s, so a fifth machine buys
-        # seconds while every machine is billed to whoever forked this.
+        # seconds while every machine is billed to whoever created their repository from this
+        # template.
         shard: [1, 2, 3, 4]
 
     steps:

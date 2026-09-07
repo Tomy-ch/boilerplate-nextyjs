@@ -8,7 +8,7 @@ Accepted
 
 ## 背景
 
-本 boilerplate は「一般的な Next.js アプリケーション基盤」である。UI コンポーネント・アイコン・複雑入力部品は、一般的なアプリ基盤に **汎用・常用** で必要な要素であり、用途依存として fork 先へ委ねる対象ではない。したがって本体に採用し、shadcn/ui の採否・アイコンライブラリ・form コンポーネント・Headless UI 系の扱いをここで確定する。
+本 boilerplate は「一般的な Next.js アプリケーション基盤」である。UI コンポーネント・アイコン・複雑入力部品は、一般的なアプリ基盤に **汎用・常用** で必要な要素であり、用途依存としてテンプレートから作った側へ委ねる対象ではない。したがって本体に採用し、shadcn/ui の採否・アイコンライブラリ・form コンポーネント・Headless UI 系の扱いをここで確定する。
 
 ## 決定: shadcn/ui + @tabler/icons-react + 複雑入力を採用
 
@@ -20,7 +20,7 @@ Accepted
 - boilerplate 本体の UI は、これら採用部品に加えて **Tailwind ユーティリティ**([0050](0050-styling-strategy.md))と feature 内 UI([0021](0021-frontend-responsibility.md))で構成する。**utility で足りる配置(stack / inline / grid)は component で包まない。** `<Stack gap={4}>` と `<div className="flex flex-col gap-4">` の間に抽象の利得は無く、包んでも Tailwind の表現力は増えない。増えるのは「utility と component のどちらで書くか」を利用側が毎回迷う面だけである。骨格を utility だけで組む合成例はカタログ([0054](0054-ui-catalog-storybook.md))が示す
 - **variant 定義 = `class-variance-authority`(cva)**。shadcn/ui の公式コンポーネントが cva を使った状態で配布されるため採用する(採らなければ配布物を毎回書き換えることになる)。置き場・使い方の規約は [0050](0050-styling-strategy.md) が持つ。**`tailwind-variants` は採らない** —— variant / slots / responsive / merge を束ねて責務を 1 語で言えず([0004](0004-library-management.md) の一次判定)、cva と責務が重なる
 - **リッチテキスト(TipTap)を採用する**。エディタ本体と表示側 sanitizer の a11y 契約・seam は [0053](0053-ui-component-interaction-seam.md) が所有し、本 ADR は `components` カーネルへの配置と exact-pin 要件のみを持つ
-- **本体スコープの線引き**: 本体が抱えるのは上記の汎用 UI 基盤 + リッチテキストまで。これを超える局所的な UI 要件(並べ替え等のライブラリを要する DnD = dnd-kit 等)は本体に同梱せず、[0053](0053-ui-component-interaction-seam.md) が seam と a11y 契約を持つ。それらは **fork 先が必要時に追加**する
+- **本体スコープの線引き**: 本体が抱えるのは上記の汎用 UI 基盤 + リッチテキストまで。これを超える局所的な UI 要件(並べ替え等のライブラリを要する DnD = dnd-kit 等)は本体に同梱せず、[0053](0053-ui-component-interaction-seam.md) が seam と a11y 契約を持つ。それらは **作った側が必要時に追加**する
 
 ### 部品を得るために上流を増やさない
 
@@ -87,7 +87,7 @@ shadcn/ui から取り込んだ実装は**参照実装**として持つ。取り
 - ❌ @tabler/icons-react 以外のアイコンライブラリを追加同梱すること(差し替えは可だが並行同梱はしない)
 - ❌ 別の headless 上流を、registry item が要求するという理由だけで併存させること(合成か自前実装で組む。上流の追加は現行からの移行判断としてのみ扱う)
 - ❌ 採用ライブラリを exact-pin / `pnpm audit` を経ずに追加すること([0004](0004-library-management.md))
-- ❌ 本体スコープを超える局所的な UI 要件(ライブラリを要する DnD 等)を本 ADR の範囲で本体へ持ち込むこと(seam と契約は [0053](0053-ui-component-interaction-seam.md) / ライブラリは fork 先)
+- ❌ 本体スコープを超える局所的な UI 要件(ライブラリを要する DnD 等)を本 ADR の範囲で本体へ持ち込むこと(seam と契約は [0053](0053-ui-component-interaction-seam.md) / ライブラリは作った側)
 - ❌ リッチテキストの表示を sanitizer を通さずに行うこと(生の `dangerouslySetInnerHTML` は禁止。sanitizer port は [0053](0053-ui-component-interaction-seam.md))
 
 ## 関連 ADR

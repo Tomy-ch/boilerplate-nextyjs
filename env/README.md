@@ -66,7 +66,7 @@ build 中にも呼ばれます。`APP_API_MODE=live` で取得先へ到達でき
 | Variable Name | Description | Type | Example | Notes |
 | --- | --- | --- | --- | --- |
 | `AUTH_MODE` | 認可の開始先 | `idp` / `dev` | `idp` | Code default `idp`。`dev` は IdP を立てずに `/dev/session` から session を発行させる。開発専用の口が開く環境（`local` / `ci`）でしか効かない |
-| `AUTH_ISSUER` | OIDC issuer と Discovery の起点 | URL | `https://idp.example.com/realms/main` | Required。**同梱の `local` / `ci` が指すのは開発用の IdP**で、fork は最初に自分の IdP へ差し替える |
+| `AUTH_ISSUER` | OIDC issuer と Discovery の起点 | URL | `https://idp.example.com/realms/main` | Required。**同梱の `local` / `ci` が指すのは開発用の IdP**で、テンプレートから作った側は最初に自分の IdP へ差し替える |
 | `AUTH_CLIENT_ID` | Authorization Code + PKCE の public client ID | string | `<IdP が発行した public client ID>` | Required。client secret は不要。同梱の値は開発用の IdP に登録されたものなので、自分の IdP へ登録し直した ID に差し替える |
 | `AUTH_REDIRECT_URI` | OIDC callback URL | URL | `http://localhost:3000/api/auth/callback` | Required。IdP 登録値と完全一致させる |
 | `AUTH_SCOPES` | 認可リクエストの space-delimited scope | string | `openid profile email api.read api.write` | Required |
@@ -94,7 +94,7 @@ build 中にも呼ばれます。`APP_API_MODE=live` で取得先へ到達でき
 
 | Variable Name | Description | Type | Example | Notes |
 | --- | --- | --- | --- | --- |
-| `NEXT_PUBLIC_ANALYTICS_GTM_CONTAINER_ID` | 同意ゲートの裏で読み込むタグマネージャの容器 ID | string | `GTM-ABC1234` | Optional。**空は「未設定」ではなく「読み込まない」** —— fork が Google への依存を外す口がこれで、外した状態でも画面は成立する（[0131](../docs/adr/0131-cookie-consent.md) §2）。secret ではない（容器 ID はタグを読む URL に現れるため、使っているサイトでは常に公開されている）。値を入れる配備は、`script-src` / `connect-src` / `img-src` が Google の origin を許し、`Cross-Origin-Embedder-Policy` が降りることを受け入れる |
+| `NEXT_PUBLIC_ANALYTICS_GTM_CONTAINER_ID` | 同意ゲートの裏で読み込むタグマネージャの容器 ID | string | `GTM-ABC1234` | Optional。**空は「未設定」ではなく「読み込まない」** —— 作った側が Google への依存を外す口がこれで、外した状態でも画面は成立する（[0131](../docs/adr/0131-cookie-consent.md) §2）。secret ではない（容器 ID はタグを読む URL に現れるため、使っているサイトでは常に公開されている）。値を入れる配備は、`script-src` / `connect-src` / `img-src` が Google の origin を許し、`Cross-Origin-Embedder-Policy` が降りることを受け入れる |
 
 ## 運用
 

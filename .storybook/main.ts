@@ -35,7 +35,7 @@ const config: StorybookConfig = {
   // カタログの build は CI の全 workflow の中で最も多く回る（vrt / a11y / storybook-build /
   // deploy-docs）。既定のままだと、そのたびに storybook.js.org へ使用状況と更新確認が出る。
   // 送る相手はこのリポジトリの利用者ではなく、雛形として配られた先の CI であり、送る値の
-  // 中身も送り先も、fork した側が選んだものではない。
+  // 中身も送り先も、テンプレートから作った側が選んだものではない。
   core: {
     disableTelemetry: true,
     disableWhatsNewNotifications: true,

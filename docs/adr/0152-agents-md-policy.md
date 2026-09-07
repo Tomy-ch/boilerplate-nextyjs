@@ -11,7 +11,7 @@ Accepted
 - 複数の AI エージェントが共通して読む規約のサーフェイスを **1 本に集約** し、エージェントごとの設定ファイル (`.claude/` / `.cursor/` / `.gemini/` / `.github/copilot-instructions.md` 等) は AGENTS.md を参照する建付けにする
 - 確定済み ADR の本文を AGENTS.md に二重化しない (一次情報は `docs/adr/` 配下)
 - 未策定領域に対する暫定運用 (どこまでなら勝手にやってよいか) を明示し、ADR が無い領域でも作業が破綻しないようにする
-- boilerplate として fork 先が「最初に読むエージェント規約」を辿れる入口を残す
+- boilerplate としてテンプレートから作った側が「最初に読むエージェント規約」を辿れる入口を残す
 
 ## ファイル配置と参照関係
 
@@ -51,7 +51,7 @@ Accepted
 | 1 | Project Overview | リポジトリの役割 / ロール / バックエンド分離前提 |
 | 1.5 | Temporary Operating Rules until v1.0.0 | **v1.0.0 未満の期間限定節**。Protected Documentation / AI Modification Scope の一時解除を宣言する。v1.0.0 到達時に削除する([0140](0140-documentation-operations.md) の同名節と対) |
 | 2 | Instruction Priority | 指示の優先度 (後述) |
-| 2.5 | What to Recommend | **boilerplate 限定節**。推奨 (行為ではなく助言) を何に向けて最適化するかを定める。本文を `boilerplate-only:begin` / `end` で囲み、fork 作成時に節ごと削除する <!-- boilerplate-only:line --> |
+| 2.5 | What to Recommend | **boilerplate 限定節**。推奨 (行為ではなく助言) を何に向けて最適化するかを定める。本文を `boilerplate-only:begin` / `end` で囲み、作った側の初期化で節ごと削除する <!-- boilerplate-only:line --> |
 | 3 | Accepted Rules (ADRs) | 確定済み ADR の表で要約。詳細は `docs/adr/` に委譲 |
 | 4 | Pending Decisions | 未策定領域の扱い (後述) |
 | 5 | AI Modification Scope | 編集可 / 編集禁止 / エージェント設定保護 / Skill 実行時 Exception |
@@ -72,15 +72,15 @@ Accepted
 <!-- boilerplate-only:begin -->
 ### boilerplate 限定の記述
 
-**この template を配る側にしか意味を持たない記述**は `boilerplate-only` マーカーで囲み、fork 作成時に剥がす。#2.5 がその筆頭だが、対象は AGENTS.md に限らずリポジトリ全体である。
+**この template を配る側にしか意味を持たない記述**は `boilerplate-only` マーカーで囲み、作った側の初期化で剥がす。#2.5 がその筆頭だが、対象は AGENTS.md に限らずリポジトリ全体である。
 
 マーカーの形は `sample` 族と同一で、`boilerplate-only:begin` / `:end` / `:line` / `:replace-begin` / `:replace-with` / `:replace-end` を持つ。機構は `scripts/setup/lib/markers.ts` が共有し、剥がしは `make setup-remove-boilerplate-only` が行う。
 
-**族を分けてあるのは、消える契機が違うためである。** サンプルは題材を使うかで選べる任意の破棄だが、boilerplate 限定の記述は fork を作った時点で前提が失効するので選択の余地が無い —— 残せば fork 先が自分に効かない規則に従うことになる。同じ族にすると、サンプルを残す fork が両方を残す。剥がしの道具そのものも、この理由から破棄の道具とは独立に自消滅する。
+**族を分けてあるのは、消える契機が違うためである。** サンプルは題材を使うかで選べる任意の破棄だが、boilerplate 限定の記述はテンプレートから作った時点で前提が失効するので選択の余地が無い —— 残せば作った側が自分に効かない規則に従うことになる。同じ族にすると、サンプルを残す作った側が両方を残す。剥がしの道具そのものも、この理由から破棄の道具とは独立に自消滅する。
 
-**剥がしが壊れていないことは CI が恒常的に検証する。** 剥がしは一度きりで自分ごと消える道具なので、対の無いマーカー・他の文書がリンクする見出しを持つ節の消失・古くなった台帳の項目は、誰かが実際に fork して剥がすまで誰にも見えない。台帳の隣のユニットテストは剥がしを実行しないため、剥がしたあとの木は見られない。よって CI が使い捨てのチェックアウトで剥がしを実行し、残った木が全ゲートを通ることを PR ごとに確かめる (job の分割は [0153](0153-ci-configuration.md))。
+**剥がしが壊れていないことは CI が恒常的に検証する。** 剥がしは一度きりで自分ごと消える道具なので、対の無いマーカー・他の文書がリンクする見出しを持つ節の消失・古くなった台帳の項目は、誰かが実際にテンプレートから作って剥がすまで誰にも見えない。台帳の隣のユニットテストは剥がしを実行しないため、剥がしたあとの木は見られない。よって CI が使い捨てのチェックアウトで剥がしを実行し、残った木が全ゲートを通ることを PR ごとに確かめる (job の分割は [0153](0153-ci-configuration.md))。
 
-**囲んだ節は、剥がしのあとも残るものから参照しない。** fork へ渡るコードや文書がここを指すと、参照先だけが消えて宛先の無いリンクが残る。剥がしの検査（`.github/workflows/strip-verify.yaml`）が見るのはマーカーの語の残留だけで、宛先を失った参照は捕まえない。fork も読む根拠は、剥がされない側の ADR へ置く。
+**囲んだ節は、剥がしのあとも残るものから参照しない。** 作った側へ渡るコードや文書がここを指すと、参照先だけが消えて宛先の無いリンクが残る。剥がしの検査（`.github/workflows/strip-verify.yaml`）が見るのはマーカーの語の残留だけで、宛先を失った参照は捕まえない。作った側も読む根拠は、剥がされない側の ADR へ置く。
 <!-- boilerplate-only:end -->
 
 ## Instruction Priority

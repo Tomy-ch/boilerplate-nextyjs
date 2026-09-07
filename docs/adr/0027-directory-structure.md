@@ -99,7 +99,7 @@ src/
 - **スタイルは Tailwind ユーティリティを既定**とし([0050](0050-styling-strategy.md))、別ファイルの CSS は最小化する。グローバル CSS は `src/app/globals.css` に集約する。design token / `cn()` ヘルパの置き場は [0050](0050-styling-strategy.md) が正
 - **契約から生成するモック**(MSW ハンドラ等)は `src/` 外の **`mocks/`** に置き、生成型([0072](0072-api-type-generation.md) の do-not-edit)と分離する
 - **カタログが差し替えるモジュールの実体は、対象と同じディレクトリの `__mocks__/<対象と同じ名前>` に置く**([0054](0054-ui-catalog-storybook.md))。これは種類による掘り下げではなく、差し替えの道具が名前と位置を固定するための例外であり、`facade/<part>/__mocks__/` のように深さの上限を 1 段超える形もこの理由の範囲でだけ許す。置けるのは**カタログでしか読まれない差し替え**に限り、本番の経路が import するものを置かない
-- **破棄対象(同梱サンプル)をディレクトリ名で隔離しない。** `_sample/` のような区画は採らない。サンプルは production 品質で書かれた参照実装であり、隔離名はそれを仮のコードに見せる。また fork 先が自分で書くときには存在しない階層を、参照実装だけが持つことになる。破棄対象かどうかは、ファイル / ディレクトリ丸ごとなら破棄 manifest(`scripts/setup/remove-sample/sample-manifest.ts`)への明示列挙、共有ファイル内の混在行ならファイル内マーカー(`sample:begin` / `sample:end` / `sample:line` / `sample:replace-*`)で宣言する。コードは自然な場所・自然な名前のまま置き、破棄対象かどうかは manifest とマーカーを読めば判る
+- **破棄対象(同梱サンプル)をディレクトリ名で隔離しない。** `_sample/` のような区画は採らない。サンプルは production 品質で書かれた参照実装であり、隔離名はそれを仮のコードに見せる。またテンプレートから作った側が自分で書くときには存在しない階層を、参照実装だけが持つことになる。破棄対象かどうかは、ファイル / ディレクトリ丸ごとなら破棄 manifest(`scripts/setup/remove-sample/sample-manifest.ts`)への明示列挙、共有ファイル内の混在行ならファイル内マーカー(`sample:begin` / `sample:end` / `sample:line` / `sample:replace-*`)で宣言する。コードは自然な場所・自然な名前のまま置き、破棄対象かどうかは manifest とマーカーを読めば判る
 
 ### 共有モジュールの粒度
 

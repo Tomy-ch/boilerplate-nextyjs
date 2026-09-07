@@ -5,12 +5,13 @@ name: SAST
 # vulnerable pattern" (ADR 0110 §3).
 #
 # GitHub's own analysis cannot leave GitHub and is licensed for a private repository,
-# so a fork cannot count on it. This one is a pinned binary in mise.toml and runs
-# anywhere, which is why the portable layer is the one that ships.
+# so a repository created from this template cannot count on it. This one is a pinned
+# binary in mise.toml and runs anywhere, which is why the portable layer is the one that
+# ships.
 #
 # Opengrep rather than Semgrep itself: the rule syntax is the same and `// nosemgrep:`
 # suppressions still apply, but the fork is OSS, so the boilerplate does not hand a
-# licence decision to whoever forks it.
+# licence decision to whoever creates a repository from it.
 #
 # The scan holds a ZERO-FINDING BASELINE, which is the point — a new finding is signal
 # rather than something to scroll past. Accepted exceptions are pinned in the source
@@ -23,8 +24,9 @@ name: SAST
 #
 # THE RULES DO NOT COME FROM THE REGISTRY. `--config p/javascript` would fetch them from
 # semgrep.dev under the Semgrep Rules License, which permits internal use only and forbids
-# redistribution — handing a fork exactly the licence judgement that choosing the OSS
-# engine was meant to avoid. They are pinned to a commit of `opengrep/opengrep-rules` and
+# redistribution — handing a generated repository exactly the licence judgement that
+# choosing the OSS engine was meant to avoid. They are pinned to a commit of
+# `opengrep/opengrep-rules` and
 # fetched by `scripts/opengrep-rules`, which verifies a digest over the extracted rules
 # (ADR 0110 §3).
 #

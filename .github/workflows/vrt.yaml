@@ -135,7 +135,8 @@ jobs:
         #
         # Four is where the curve flattens. The fixed cost per machine (setup, Storybook build,
         # image pull) is roughly 80s against a comparison of roughly 380s, so a fifth machine
-        # buys seconds while every machine is billed to whoever forked this.
+        # buys seconds while every machine is billed to whoever created their repository from
+        # this template.
         shard: [1, 2, 3, 4]
 
     steps:

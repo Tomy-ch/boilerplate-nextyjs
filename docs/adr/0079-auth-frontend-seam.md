@@ -1,6 +1,6 @@
 # 認証のフロント側 seam
 
-**認証本体(IdP・ユーザDB・資格情報検証・トークン発行・session の永続実装)は本 boilerplate の out of scope である**([0070](0070-backend-role-separation.md))。この宣言を前提に本 ADR は、fork 先がどの認証プロバイダを選んでも変わらない **フロント側の seam(接続点)の形** のみを定める。すなわち session の保管場所規約 / 認可 2 層(optimistic + 確定認可)の分担 / 保護ルートの表現 / 未認証時リダイレクトと `returnUrl` / ログアウト時の状態破棄を、[0021](0021-frontend-responsibility.md) のカーネル上の座標として確定する。seam の形は発明せず、**Next.js 公式 auth ガイドの文書化パターンに乗る**([0010](0010-standards-and-non-lockin.md) §1)。
+**認証本体(IdP・ユーザDB・資格情報検証・トークン発行・session の永続実装)は本 boilerplate の out of scope である**([0070](0070-backend-role-separation.md))。この宣言を前提に本 ADR は、テンプレートから作った側がどの認証プロバイダを選んでも変わらない **フロント側の seam(接続点)の形** のみを定める。すなわち session の保管場所規約 / 認可 2 層(optimistic + 確定認可)の分担 / 保護ルートの表現 / 未認証時リダイレクトと `returnUrl` / ログアウト時の状態破棄を、[0021](0021-frontend-responsibility.md) のカーネル上の座標として確定する。seam の形は発明せず、**Next.js 公式 auth ガイドの文書化パターンに乗る**([0010](0010-standards-and-non-lockin.md) §1)。
 
 ## Status
 
@@ -10,7 +10,7 @@ Accepted
 
 認証は out of scope でありながら、**seam なしでは保護ページが 1 枚も書けない**という点で、out-of-scope 領域の中で最も「seam の欠落」が濃い。関連する断片は複数 ADR に散っている:
 
-- [0070](0070-backend-role-separation.md) — 「認証・セッションの具体モデルは fork 先判断」「thin proxy / token 交換の seam は許す」「確定的な認可はデータ境界」
+- [0070](0070-backend-role-separation.md) — 「認証・セッションの具体モデルは作った側の判断」「thin proxy / token 交換の seam は許す」「確定的な認可はデータ境界」
 - [0043](0043-middleware-policy.md) — 「`proxy.ts` は optimistic チェックのみ / 確定認可はデータ境界 / Node.js runtime / 唯一の防御線にしない」
 - [0021](0021-frontend-responsibility.md) — `adapters/server`(secret 可・`server-only`)/ `model`(表示用 VO)/ app の thin 原則
 - [0040](0040-routing-rendering-strategy.md) — Server Component 既定 / `"use client"` を葉へ / Server Action は編成のみ
@@ -19,7 +19,7 @@ Accepted
 
 **裏取り元**: `node_modules/next/dist/docs/01-app/02-guides/authentication.md`(実装前確認。「This is NOT the Next.js you know」— Next.js 16)。同ガイドの Authorization 節は (1) httpOnly session cookie に最小 payload を格納、(2) 認可を 2 層(optimistic checks with Proxy〈optional〉+ Data Access Layer の `verifySession()` を React `cache()` で memo 化した確定認可)、(3) DTO で必要データのみ返す、を推奨形として文書化している。
 
-**0070 の中立との整合**: 0070 が守る中立は **プロバイダ中立**であって **seam の形の中立ではない**。Next.js 自身が httpOnly cookie を標準推奨している以上、それに乗るのは特定方式の先取りではなく **プラットフォーム標準準拠**([0010](0010-standards-and-non-lockin.md) §1)であり、0070 の「特定の認証・セッションモデルを本体に前提として組み込まない」とは衝突しない。本 ADR が固定するのは seam の形(座標)のみで、プロバイダ・session 実装詳細(stateless vs DB / 暗号化方式)は fork 先に委ねる。
+**0070 の中立との整合**: 0070 が守る中立は **プロバイダ中立**であって **seam の形の中立ではない**。Next.js 自身が httpOnly cookie を標準推奨している以上、それに乗るのは特定方式の先取りではなく **プラットフォーム標準準拠**([0010](0010-standards-and-non-lockin.md) §1)であり、0070 の「特定の認証・セッションモデルを本体に前提として組み込まない」とは衝突しない。本 ADR が固定するのは seam の形(座標)のみで、プロバイダ・session 実装詳細(stateless vs DB / 暗号化方式)は作った側に委ねる。
 
 ## 決定
 
@@ -30,7 +30,7 @@ Accepted
 - **vendor-independent 正当性材料**(0010 §2 必須):
   - **httpOnly = XSS によるトークン窃取の緩和** — client-side JS から cookie を読めなくすることで、XSS 起点の session 窃取という web 一般の攻撃面を塞ぐ。これは Next.js 固有の話でなく MDN / OWASP 由来の web セキュリティ基本原理である。
   - **最小 payload = 最小権限(least privilege)/ 最小データ露出** — cookie は各リクエストで送出され改竄面でもあるため、載せる情報を必要最小に絞ることは attack surface と情報漏洩を減らす一般原則である。
-- session 実装詳細(stateless JWT 風 vs DB session id / 暗号化・署名方式)は **fork 先判断**([0070](0070-backend-role-separation.md))。boilerplate 本体は特定方式を組み込まない。
+- session 実装詳細(stateless JWT 風 vs DB session id / 暗号化・署名方式)は **作った側の判断**([0070](0070-backend-role-separation.md))。boilerplate 本体は特定方式を組み込まない。
 
 ### 2. 認可は 2 層(optimistic + 確定)/ 確定認可はデータ源に最も近い所
 
@@ -68,10 +68,10 @@ Next.js 文書化パターンに乗り、認可を **2 層**に分ける:
 
 ### 6. 動く最小 session 機構を本体へ同梱する(Resolver IF 方式)
 
-**IF 定義だけを置いて実装を fork 先に丸投げしない。** 使われない IF は腐り、実装時に必ず書き直されるため、**既定実装を 1 つ同梱して実際に動かす**。禁止事項の「特定の session 実装詳細を本体に前提として組み込まない」は、次の切り分けで満たす。
+**IF 定義だけを置いて実装を作った側に丸投げしない。** 使われない IF は腐り、実装時に必ず書き直されるため、**既定実装を 1 つ同梱して実際に動かす**。禁止事項の「特定の session 実装詳細を本体に前提として組み込まない」は、次の切り分けで満たす。
 
-- **コアに残すもの(fork 先が書き直さない部分)** — seam の座標 / 保護ルート判定 / `returnUrl` の検証 / ログアウト時の状態破棄 / RBAC ヘルパ / `verifySession()` の呼び出し規約
-- **Resolver の裏に隠すもの(各社の事情が入る部分)** — session の暗号化・署名方式 / バックエンドの認証エンドポイントの叩き方 / federation の開始と復帰 / トークンの保管形式。これらは **Resolver IF** の内部処理とし、fork 先は Resolver を差し替えるだけで自社方式へ移行できる
+- **コアに残すもの(作った側が書き直さない部分)** — seam の座標 / 保護ルート判定 / `returnUrl` の検証 / ログアウト時の状態破棄 / RBAC ヘルパ / `verifySession()` の呼び出し規約
+- **Resolver の裏に隠すもの(各社の事情が入る部分)** — session の暗号化・署名方式 / バックエンドの認証エンドポイントの叩き方 / federation の開始と復帰 / トークンの保管形式。これらは **Resolver IF** の内部処理とし、作った側は Resolver を差し替えるだけで自社方式へ移行できる
 - **既定実装を 1 つ同梱する**。サンプルが実際にこの既定 Resolver を使う(= 設置面が実在する)ため、空の IF 定義にはならない
 - 認証フローは **所有画面 + バックエンド仲介**とする。資格情報とチャレンジ応答は所有画面が受け取り、**Route Handler(`/api/auth/*`)がバックエンドへ中継する**。**IdP の API をこのリポジトリから直接叩かない** —— IdP 固有 SDK も IdP の資格情報もこのリポジトリの依存に入らない。ブラウザが持つのは httpOnly の BFF session cookie のみで、**Access Token をブラウザへ露出しない**
 - **バックエンドが返すチャレンジは正規化された形とする。** 追加入力が要るとき、バックエンドは「どの種類の入力が要るか」を中立の列挙で返し、このリポジトリは種類から画面を選ぶ。IdP 固有のチャレンジ名・継続用の文字列・エラーコードを画面と `features` へ持ち込まない([0070](0070-backend-role-separation.md) / [0020](0020-adopted-architecture.md) 型漏洩禁止)。**この正規化が無いと、IdP の語彙が画面まで到達する** —— 認証の本流が特定プロバイダへ結合し、差し替え可能性(0010)が Resolver の外で壊れる
@@ -79,7 +79,7 @@ Next.js 文書化パターンに乗り、認可を **2 層**に分ける:
 - 認証が要る API 呼び出しは、**BFF 経由で Bearer が自動付与される前提**で実装する(個別に Authorization ヘッダを組み立てない)
 - **401 = 未ログイン / セッション切れ → サインインへ**、**403 = 権限不足 → 導線ごと出し分け**([0080](0080-error-handling.md) の分類に対応させる)
 - Resolver の IF 形状 / 既定実装のライブラリ選定 / refresh の扱いは本 ADR では定めず、既定 Resolver(`src/adapters/server/auth/session-resolver.ts`)が持つ
-- **role の取得元はバックエンドとする。** IdP が持つのは身元（誰であるか）で、何をしてよいかは業務側のデータである([0070](0070-backend-role-separation.md))。ID Token の claim から読むと、IdP を差し替えるたびに役割の出所が変わり、IdP 側に業務の役割体系を持たせる圧力が生まれる。既定 Resolver は取得口を依存として受け取り、session を確立する途中で 1 度だけ引く。役割が 1 つも無い主体は権限を持たない側へ倒す。**本体が敷く役割の集合は「特権を持つ側」と「持たない側」の 2 つだけ**とする —— 実際の役割体系はバックエンドが所有するため、本体が持つのは機構を動かして確かめられる最小の集合であり、fork 先はこれを自分の体系へ置き換える
+- **role の取得元はバックエンドとする。** IdP が持つのは身元（誰であるか）で、何をしてよいかは業務側のデータである([0070](0070-backend-role-separation.md))。ID Token の claim から読むと、IdP を差し替えるたびに役割の出所が変わり、IdP 側に業務の役割体系を持たせる圧力が生まれる。既定 Resolver は取得口を依存として受け取り、session を確立する途中で 1 度だけ引く。役割が 1 つも無い主体は権限を持たない側へ倒す。**本体が敷く役割の集合は「特権を持つ側」と「持たない側」の 2 つだけ**とする —— 実際の役割体系はバックエンドが所有するため、本体が持つのは機構を動かして確かめられる最小の集合であり、作った側はこれを自分の体系へ置き換える
 
 ### 7. 未認証時の状態を、ログイン成立の時点で引き継ぐ
 

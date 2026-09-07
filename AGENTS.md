@@ -60,7 +60,7 @@ This section governs what you **recommend**, never what you may change. Authorit
 untouched: `Instruction Priority` above, the ADRs under `docs/adr/`, and `AI Modification Scope` /
 `Protected Documentation` below still decide that.
 
-This repository's product is **the state a fork receives when it is created from this template** —
+This repository's product is **the state a repository receives when it is created from this template** —
 not the history that produced it. So when you weigh options and state a preference, weigh them for
 that snapshot: what reads as coherent to someone who has never seen this repository and will never
 read its git log.
@@ -425,7 +425,7 @@ Technical terms (HTTP status code names / API names / command names, etc.) may s
 
 **Exception — comments in GitHub Actions workflow definitions (`.github/workflows/**`) are written in English.**
 Workflows are the part of a public boilerplate that is most often read from outside it: they get pasted
-into upstream bug reports, they are the first thing a fork adapts, and they carry the security-hardening
+into upstream bug reports, they are the first thing a repository created from this template adapts, and they carry the security-hardening
 rationale (SHA pinning / minimal permissions / fail-closed gates — ADR [0153](docs/adr/0153-ci-configuration.md))
 that an outside reader needs in order to judge it. They also sit directly against English-only tool output
 (`actionlint` / `shellcheck`). Everything else under `.github/` — issue and PR templates, `settings/` —
@@ -515,7 +515,7 @@ that gets bypassed.
 
 The pass asks three questions of the **whole file**, not of your diff:
 
-1. **Purity** — can a fork resolve every reference here, and is every statement still true once this
+1. **Purity** — can a repository created from this template resolve every reference here, and is every statement still true once this
    repository is a template rather than the repository that produced it?
 2. **Distillation** — what design judgment does this file embody?
 3. **Routing** — which document owns that judgment: an ADR, a layer `README.md`, a feature

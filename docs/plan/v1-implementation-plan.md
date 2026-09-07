@@ -129,7 +129,7 @@ nextjs-boilerplate は `docker-compose.yaml` を持たない([0011](../adr/0011-
 ```ts
 mediaUrl(path) => `${MEDIA_ORIGIN}/${path}`
 // サンプル時: MEDIA_ORIGIN = Garage の公開エンドポイント
-// 爆破後   : MEDIA_ORIGIN = fork 先の実ストレージ / CDN
+// 爆破後   : MEDIA_ORIGIN = テンプレートから作った側の実ストレージ / CDN
 ```
 
 - オブジェクトキーは backend が発行する `products/{uuid}.{ext}`。**表示 URL の組み立てはフロント責務**(backend はパスのみを持ち、フル URL を保存しない)
@@ -147,7 +147,7 @@ http://gobp-local.web.garage.localhost:3902/products/{uuid}.png
 
 ### 3.3 画像のローディング表現 — CSS Skeleton を既定にする
 
-EC サンプルのバックエンド由来画像は `imagePath` だけを API 契約にし、`blurDataURL` は載せない。後者は自前供給が必要で、一覧レスポンスが件数分肥大するためである。ただし `MediaImage` は Next.js 標準の `placeholder` / `blurDataURL` を透過し、static import や fork 後のプロダクト判断で利用側が明示指定できるようにする。
+EC サンプルのバックエンド由来画像は `imagePath` だけを API 契約にし、`blurDataURL` は載せない。後者は自前供給が必要で、一覧レスポンスが件数分肥大するためである。ただし `MediaImage` は Next.js 標準の `placeholder` / `blurDataURL` を透過し、static import やテンプレートから作った後のプロダクト判断で利用側が明示指定できるようにする。
 
 代わりに **`components` カーネルに画像用ローディングコンポーネント**を置く。
 
@@ -189,7 +189,7 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 破棄対象を `_sample/` 等の命名で隔離する方式は**採用しない**。理由は 2 つ。
 
 - **参照実装であることと矛盾する** — サンプルは B5 ゴールデンパスであり、production 品質で書かれた**模範コード**である。`_sample/` はこれを「仮のコード」に見せてしまう
-- **fork 先が見る構造が歪む** — 自分で書くときには存在しないディレクトリ階層を、参照実装だけが持つことになる
+- **作った側が見る構造が歪む** — 自分で書くときには存在しないディレクトリ階層を、参照実装だけが持つことになる
 
 代わりに go-boilerplate と同じ 2 系統で宣言する。
 
@@ -215,7 +215,7 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 **コア残留と差し替え可能性の両立 — Resolver IF 方式**: 0079:69 は「特定の session 実装詳細(暗号化方式 / stateless vs DB)を boilerplate 本体に前提として組み込む」ことを禁じている。これを次の形で満たす。
 
 - **大部分(seam・保護ルート判定・`returnUrl`・状態破棄・RBAC ヘルパ)はコア残留**
-- **各社の事情が入る箇所(暗号化 / OIDC クライアント)は IF で切り、Resolver として内部処理を隠蔽する**。既定実装を 1 つ同梱し、fork 先は Resolver を差し替えるだけで済む
+- **各社の事情が入る箇所(暗号化 / OIDC クライアント)は IF で切り、Resolver として内部処理を隠蔽する**。既定実装を 1 つ同梱し、作った側は Resolver を差し替えるだけで済む
 - これは §3.4 の改訂滑走路原則と整合する。**設置面(サンプルが実際に使う既定実装)を伴った IF** であり、禁じた「空の IF 定義」ではない
 
 実装時に確定する項目(§5 に登録): Resolver の IF 形状 / 既定実装のライブラリ選定 / refresh の扱い / role の取得元(IdP claim か `/v1/users/me` か)。
@@ -309,7 +309,7 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 - 個人開発では Figma を挟むメリットが薄い
 - Figma 領域まで保守する意思がない
 
-**これは恒久的な規約の変更ではなく、v1 における手順上の例外判断である。** fork 先が Figma を SSOT に据えるなら、B9(トークン同期パイプ)を足すだけで原則どおりに戻せる。
+**これは恒久的な規約の変更ではなく、v1 における手順上の例外判断である。** 作った側が Figma を SSOT に据えるなら、B9(トークン同期パイプ)を足すだけで原則どおりに戻せる。
 
 **v1 の実際の手順**:
 
@@ -336,7 +336,7 @@ shadcn/ui を import
 
 **v1 で実施しないもの**: **B9(Figma → CSS 変数の同期パイプ)**。原則としては master-plan 1.3 の記述が正だが、v1 は Figma を使わないため搬送すべき上流が存在しない。v1 では `tokens.json` を手書きの SSOT とし、`tokens.json → Tailwind @theme` の後段のみを実装する。
 
-**B1 テンプレの「状態表 × デザイン参照」**: 参照先の形式は fork 先が決める(Figma フレーム / Storybook story)。**v1 では Storybook story を参照先とする** — story は実在し CI で検証できるため、この repo の手順では強い。
+**B1 テンプレの「状態表 × デザイン参照」**: 参照先の形式は作った側が決める(Figma フレーム / Storybook story)。**v1 では Storybook story を参照先とする** — story は実在し CI で検証できるため、この repo の手順では強い。
 
 **代わりに必要になる規律**: Figma で全画面を並べて見る場が無いため、一貫性は **Storybook が唯一の在庫リストであること**で担保する。「**Storybook に story を持たないコンポーネントを feature 配下に新規作成しない**」を B11(構造 CI ゲート・v1.x.x)の検査項目に含める。
 
@@ -348,7 +348,7 @@ shadcn/ui を import
 
 - **設置面が実在する配線だけを置く。** 3.4 の滑走路原則をこの層へ適用したものであり、将来必要になりそうな階層・Provider・segment を先回りで置かない
 - **判断が要るものは画面実装まで持ち越す。** 情報設計に踏み込む変更(route group の切り方・shell の分割・具体的なタイトル文言)は、この段階では確定させない
-- **この層を構造の参考にしない。** fork 先および後続の実装が参考にしてよいのは mount の作法だけである
+- **この層を構造の参考にしない。** 作った側および後続の実装が参考にしてよいのは mount の作法だけである
 
 現時点で足場として置いてあるものと、置き換わる契機は次のとおり。
 
@@ -356,7 +356,7 @@ shadcn/ui を import
 | --- | --- | --- |
 | `layout.tsx` の html / body | 言語と font 変数、`min-h-full` の骨格のみ | app shell の実装 |
 | 横断通知の Provider mount | root layout へ mount 済み([0026](../adr/0026-layout-shell-mount.md) の薄い mount) | app shell の実装時に配置を見直す |
-| `metadata` の `title` / `description` | リポジトリ名と一行説明の**仮値**。恒久的なのは `title.template` の枠だけ | fork 先または画面実装 |
+| `metadata` の `title` / `description` | リポジトリ名と一行説明の**仮値**。恒久的なのは `title.template` の枠だけ | 作った側または画面実装 |
 | `metadata` の `metadataBase` | **未設定** | 公開 URL を保持する config を足す時点([0030](../adr/0030-environment-variable-management.md)) |
 | `page.tsx` | 動作確認用の最小ページ | 画面実装 |
 
@@ -665,9 +665,9 @@ master-plan 旧 2.1 の残り。lefthook + markdownlint + mermaid-lint は導入
   - `mise.toml` — actionlint を登録
   - `.makefiles/` — `make actionlint` / `make help` の未文書化ターゲット警告
   - `scripts/setup/` — repo 参照書換・`package.json` name 書換
-- **完了条件**: `make actionlint` が動作する。`make help` が未文書化ターゲットを警告する。setup スクリプトで fork 後の repo 名置換が完了する
+- **完了条件**: `make actionlint` が動作する。`make help` が未文書化ターゲットを警告する。setup スクリプトでテンプレートから作った後の repo 名置換が完了する
 - **依存**: なし
-- **状態**: **実施済み**(issue #35)。`mise.toml` に actionlint を登録し `.makefiles/github/lint/actionlint.mk` の `make actionlint` を新設 / `scripts/make-help.ts` に未文書化ターゲットの警告を追加 / `scripts/setup/replace-repository-reference.ts` で fork 後のリポジトリ参照とプロジェクト名を置換
+- **状態**: **実施済み**(issue #35)。`mise.toml` に actionlint を登録し `.makefiles/github/lint/actionlint.mk` の `make actionlint` を新設 / `scripts/make-help.ts` に未文書化ターゲットの警告を追加 / `scripts/setup/replace-repository-reference.ts` でテンプレートから作った後のリポジトリ参照とプロジェクト名を置換
   - **shellcheck も mise で版を固定**する。actionlint は `run:` ステップの検査で PATH 上の shellcheck を別バイナリとして呼ぶため、固定しないと検査結果が実行者の環境に依存する
   - ワークフロー定義の lint は [0153](../adr/0153-ci-configuration.md) へ明記のうえ、`.github/workflows/*` を glob とする pre-commit フックへ接続した(対象を含まないコミットでは発火しない)
   - 併せて輸入計画の同梱 2 件が着地 — `.editorconfig` の新設と、`.makefiles/README` + `make help` 警告。ただし README を EN 正典 + `.ja.md` 対訳とした形は [0140](../adr/0140-documentation-operations.md) の日本語 canonical 方針に反するため後に撤回し、日本語 1 本へ戻した
@@ -816,7 +816,7 @@ test-requirement: unit
   - `src/app/globals.css` — design token = CSS 変数 / テーマ・ダークモード(`prefers-color-scheme` 追従 + token 切替)
   - `src/components/cn.ts` — `cn()` ヘルパ
   - `.github/workflows/` — token の drift ゲート
-- **B9 の前段は v1 では実装しない**: §3.11 のとおり v1 は Figma を使わないため搬送すべき上流が無い。**原則としては master-plan 1.3 の B9 が正**であり、fork 先が Figma を SSOT に据えるなら前段を足せば戻せる。v1 は `tokens.json` を手書き SSOT とし後段のみ実装する
+- **B9 の前段は v1 では実装しない**: §3.11 のとおり v1 は Figma を使わないため搬送すべき上流が無い。**原則としては master-plan 1.3 の B9 が正**であり、作った側が Figma を SSOT に据えるなら前段を足せば戻せる。v1 は `tokens.json` を手書き SSOT とし後段のみ実装する
 - **スクリプトの配置判断**:
   - `scripts/`: リポジトリ全体に関わるが、特定のシステム・カーネル・機能の責務には属さない補助スクリプトを置く
   - `**/scripts/`: 特定のシステム・カーネル・機能が守る生成、検査、変換などのスクリプトを、その責務の近くに co-location する
@@ -852,7 +852,7 @@ test-requirement: unit
   4. プレビューを書き出し、外部のデザイン支援ツールへ push する(**依存の向きは repo → design の一本**)
 - **同時に実施**: **`MediaImage`**(本書 §3.3)。CSS のみの Skeleton + `aspect-ratio` を既定にし、`placeholder` / `blurDataURL` は明示指定をそのまま通す。error fallback などの client 版は opt-in
 - **注意**: vendor 直参照を feature / component に散らさない([0010](../adr/0010-standards-and-non-lockin.md))。interaction a11y seam は [0053](../adr/0053-ui-component-interaction-seam.md) に従う
-- **Story の中立性**: `components` / `Foundations` の Story は boilerplate 自体のカタログであり、EC などサンプル固有の業務語彙・API・route を props / 文言 / link に埋め込まない。汎用的な表示値で component 自身の状態・利用方法を示し、業務文脈を伴う実例は feature の Story または画面実装へ置く。fork 後の portal URL のような repository 固有値は P7 の setup 置換対象とする
+- **Story の中立性**: `components` / `Foundations` の Story は boilerplate 自体のカタログであり、EC などサンプル固有の業務語彙・API・route を props / 文言 / link に埋め込まない。汎用的な表示値で component 自身の状態・利用方法を示し、業務文脈を伴う実例は feature の Story または画面実装へ置く。テンプレートから作った後の portal URL のような repository 固有値は P7 の setup 置換対象とする
 - **Story と README の構成**: component は実装・test・Story・README を同じディレクトリへ置く。README は用途・役割・公開 component・利用ケース・責務境界・Storybook / test の確認範囲を見出しで示し、公開 component がある場合は名称と個別の役割を表にする。自身が状態を所有する UI だけが loading / empty / error / success を Story で示し、`Button` のように状態を所有しない UI は disabled / pending など当該部品の操作状態だけを示す。`native` / `client` の対は同じ選択肢・ラベル・配置で Story を作り、runtime の違いと見た目を比較できるようにする
 - **`rich-text` はここで完成させる**: port と両 component はいずれも業務型を持たず、実 API も生成型も参照しない。したがって **Phase 4 / 5 の到達を待たずに着手できる**。実装順は port の nominal type → sanitizer + allowlist → `RichTextContent` → allowlist から導出した extension 集合で `RichTextEditor`。feature 側の配線(description を渡す / Server Action で保存)だけが P5-1 / P5-12 に残る。§3.9 の CSP 検証もここで済ませる
 - **Typeset**: Markdown / sanitizer 済み HTML の組版は `typeset/` の CSS 基盤として持ち、Storybook は `Foundations/Typeset` に置く。renderer・sanitizer・layout の最大幅は持たず、`typeset` / preset・`not-typeset`・`typeset-scroll` を通じて適用範囲だけを定義する
@@ -929,7 +929,7 @@ test-requirement: unit
 - **目的**: 「デザイン + README を見れば実装できる」の器を作る
 - **対象 ADR**: [0140](../adr/0140-documentation-operations.md) / [0021](../adr/0021-frontend-responsibility.md)
 - **主な変更先**:
-  - `docs/templates/feature-readme.md` — **B1**。必須セクション = route / 使う operationId / **状態表 × デザイン参照** / 依存カーネル / Action 戻り値契約 / テスト観点。参照先の形式は fork 先が決め、**v1 では Storybook story を使う**(§3.11)
+  - `docs/templates/feature-readme.md` — **B1**。必須セクション = route / 使う operationId / **状態表 × デザイン参照** / 依存カーネル / Action 戻り値契約 / テスト観点。参照先の形式は作った側が決め、**v1 では Storybook story を使う**(§3.11)
   - `docs/playbook.md` — **B6**。意図 → 置き場 → 使う型 → 模範コードの逆引き + 決定木(「〜したくなったら」形式)
   - `.github/pull_request_template.md` — **B14**。DoD = 4 状態 / a11y 手動チェック / README 更新 / カバレッジ例外記録
 - `.claude/skills/readme-review/` — 採点基準を B1 テンプレへ接続
@@ -1075,7 +1075,7 @@ sources:
 
 **すべてサンプル = 破棄対象**(§3.5)。ただし**ディレクトリ名では隔離しない** — 破棄対象は爆破 manifest の明示パス宣言とマーカーで表現する。各 PR は「コア残留」と「破棄対象」を明記し、P7-1 の manifest 作成時の入力とする。
 
-**サンプルは component を実データ・実操作へ配線した実装例として作る。** `components` に持っている部品を、画面要件に直接現れないことだけを理由に使わずに終えない。API から取得した実データ・form の実入力・Server Action・4 状態へ接続した形で残すことが、fork 後に参照される実装パターンになる。部品を並べただけのカタログや固定ダミー値の story はこの代わりにならない(それは `components` 側の story の役割である)。主導線の UX を不自然に壊す部品は、画面内の補助導線・管理用の表示領域・専用のサンプル画面のいずれかへ置く。
+**サンプルは component を実データ・実操作へ配線した実装例として作る。** `components` に持っている部品を、画面要件に直接現れないことだけを理由に使わずに終えない。API から取得した実データ・form の実入力・Server Action・4 状態へ接続した形で残すことが、テンプレートから作った後に参照される実装パターンになる。部品を並べただけのカタログや固定ダミー値の story はこの代わりにならない(それは `components` 側の story の役割である)。主導線の UX を不自然に壊す部品は、画面内の補助導線・管理用の表示領域・専用のサンプル画面のいずれかへ置く。
 
 **shadcn/ui の Blocks は参照元として読む。** 完成したアプリ断片の copy-in であり、`components` としてそのまま採用しない。layout・responsive な部品合成・Story の実例を読み、依存境界・ディレクトリ規約・実 API 接続・型安全性の規約に合わせて必要な範囲だけを再構成する。`as React.CSSProperties` など規約に反する型指定は移植しない。どの Block を見るかは各 PR に記す。
 
@@ -1422,8 +1422,8 @@ sources:
   - `src/observability/web-vital-metric.server.ts` — Web Vitals を OTel の metric として記録する口
   - `src/app/api/telemetry/route.ts` / `traces/route.ts` — **ブラウザ → BFF 中継 seam**([0081](../adr/0081-observability-logging.md))。ブラウザから collector を直接叩かせない
   - `src/app/telemetry.tsx` / `src/app/layout.tsx` — 計装の mount
-- **注意**: RUM SaaS は [0081](../adr/0081-observability-logging.md) で exclusion(fork 先判断)。プロダクト分析はタグマネージャの容器の中身が持ち、本体は発火 IF を置かない([0082](../adr/0082-client-observability.md) §3)
-- **設計**: [0101](../adr/0101-performance-budget.md) は「計測の仕組みは持つ / 具体閾値は fork 先」なので、閾値は設定せず計測経路のみ作る。**収集と送信は `observability` ではなく `adapters` に置く** —— [0082](../adr/0082-client-observability.md) が送信面を `adapters/client`・受けを `adapters/server` と定めており、`observability` は末端カーネルで `adapters` を参照できないため、そこへ置くと送る先が無い。Web Vitals は指標ごとのヒストグラムで出す —— 公式 semconv は event 名(`browser.web_vital`)しか定めていないが、event で出すと 1 レコードごとに中継の POST の span が付き、測定が起きていない要求と親子になる
+- **注意**: RUM SaaS は [0081](../adr/0081-observability-logging.md) で exclusion(作った側の判断)。プロダクト分析はタグマネージャの容器の中身が持ち、本体は発火 IF を置かない([0082](../adr/0082-client-observability.md) §3)
+- **設計**: [0101](../adr/0101-performance-budget.md) は「計測の仕組みは持つ / 具体閾値は作った側」なので、閾値は設定せず計測経路のみ作る。**収集と送信は `observability` ではなく `adapters` に置く** —— [0082](../adr/0082-client-observability.md) が送信面を `adapters/client`・受けを `adapters/server` と定めており、`observability` は末端カーネルで `adapters` を参照できないため、そこへ置くと送る先が無い。Web Vitals は指標ごとのヒストグラムで出す —— 公式 semconv は event 名(`browser.web_vital`)しか定めていないが、event で出すと 1 レコードごとに中継の POST の span が付き、測定が起きていない要求と親子になる
 - **完了条件**: Web Vitals(LCP / CLS / INP)が Grafana に届く。client の未捕捉例外が中継経由で記録される
 - **依存**: P3-5, P4-5
 
@@ -1436,7 +1436,7 @@ sources:
   - `docs/adr/0111-csp-security-headers.md` — **CSP enforce seam の確定追補**(§3.9。P0-4 から移管)
   - `src/config/security-headers/` — ヘッダの組み立てと、その単体検査
   - `e2e/lib/test.ts` / `e2e/journeys/csp.spec.ts` — **enforce の結果を実ブラウザで見る側**。違反は `securitypolicyviolation` で受ける（ヘッダを読むだけの検査は `Report-Only` でも通る）
-- **設計**: `img-src` に `MEDIA_ORIGIN` を含める必要がある(本書 §3.2)。**`script-src` は seam A(静的)のまま**([0111](../adr/0111-csp-security-headers.md) §4)。nonce は Cache Components と両立しないため、strict 化は fork の opt-in として seam B に名前だけ与える。`next/script` の strategy 使い分けは `rules.md` #50
+- **設計**: `img-src` に `MEDIA_ORIGIN` を含める必要がある(本書 §3.2)。**`script-src` は seam A(静的)のまま**([0111](../adr/0111-csp-security-headers.md) §4)。nonce は Cache Components と両立しないため、strict 化は作った側の opt-in として seam B に名前だけ与える。`next/script` の strategy 使い分けは `rules.md` #50
 - **注意**: **[0111](../adr/0111-csp-security-headers.md)(実行時本体)と [0110](../adr/0110-security-operations.md)(CI 適合スライス)は両輪であり、片側だけでは閉じない**
 - **入力**: `.github/zap/rules.tsv` の一覧。DAST([0110](../adr/0110-security-operations.md) 3.5)を先に置いてあるので、**配信面に何が足りないかは実測済みで並んでいる**。本 PR は「その一覧を空にする作業」であり、1 行 = 1 ヘッダ = 1 作業単位として並行して潰せる
 - **完了条件**: 全画面が CSP 違反ゼロで動作する。宣言に無い配信元の script を差すと CI が fail する。**0111 に enforce seam の確定が記録されている**。**`rules.tsv` に残るヘッダ由来の行が、0111 が明示的に受け入れた弱い許可（`script-src` の `'unsafe-inline'`）だけになり、撤回条件を持っている**
@@ -1626,7 +1626,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 | 3 | **`verify` が過不足を両方見て最後に自爆する** | 不足(登録パスの残留)/ 過剰(`git status` 上の登録外削除)/ make ターゲット消失 / 残留参照 grep。検証後に自身とスナップショットを削除しコアのみを残す |
 
 - **安全策**: `assertWithinRoot`(`..` / 絶対パス / ROOT 自体を指す manifest ミスを検出)を移植する。`DRY_RUN` はプレビュー(空でない値はすべてプレビュー扱い)
-- **P4-4 からの申し送り — 画像の配信元を爆破後に切り替える**: サンプル在時の mock モードは **API だけを MSW で差し替え、画像は実配信(Garage の公開エンドポイント)から取得する**。バックエンドと同じ compose に居る別コンテナが配信しており、実物が取れる間はプレースホルダで代用する理由が無いためである。サンプルを破棄すると Garage も go-boilerplate も前提から外れるので、**`env/*` の `MEDIA_ORIGIN` を `sample:replace-*` で中立なプレースホルダへ切り替える**(§3.2 の「爆破後 = fork 先の実ストレージ / CDN」)。**取得経路そのものは動かさない** —— 爆破後のツリーに画像を取る画面は 1 つも残らず、MSW にプレースホルダを配らせると `mocks/` が手書きのハンドラを持つことになるためである。上の設計判断 1（`sample:replace-begin` / `replace-with` / `replace-end`）が効く箇所であり、`next.config.ts` の `images.remotePatterns` と CSP の `img-src` はどちらも検証済み ENV から組み立てているので、切り替えは env の 1 行で足りる
+- **P4-4 からの申し送り — 画像の配信元を爆破後に切り替える**: サンプル在時の mock モードは **API だけを MSW で差し替え、画像は実配信(Garage の公開エンドポイント)から取得する**。バックエンドと同じ compose に居る別コンテナが配信しており、実物が取れる間はプレースホルダで代用する理由が無いためである。サンプルを破棄すると Garage も go-boilerplate も前提から外れるので、**`env/*` の `MEDIA_ORIGIN` を `sample:replace-*` で中立なプレースホルダへ切り替える**(§3.2 の「爆破後 = テンプレートから作った側の実ストレージ / CDN」)。**取得経路そのものは動かさない** —— 爆破後のツリーに画像を取る画面は 1 つも残らず、MSW にプレースホルダを配らせると `mocks/` が手書きのハンドラを持つことになるためである。上の設計判断 1（`sample:replace-begin` / `replace-with` / `replace-end`）が効く箇所であり、`next.config.ts` の `images.remotePatterns` と CSP の `img-src` はどちらも検証済み ENV から組み立てているので、切り替えは env の 1 行で足りる
 - **BUILD_STEPS**: `gen-api → fix → lint:ci → typecheck → build → test`
 - **完了条件**: `DRY_RUN=1 make setup-remove-sample` がプレビューを出す。実行後に `verify` が過不足なしと判定する
 - **依存**: P5-16
@@ -1636,13 +1636,13 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 - **目的**: 実際に爆破できる状態にし、その状態が腐らないようにする
 - **主な変更先**:
   - 全サンプル箇所へのマーカー付与(`src/app/layout.tsx` の nav 配線 / `architecture.ts` の sample 層宣言 / `openapi/sources.yaml` の admin 契約 / `env/*` の `MEDIA_ORIGIN` 既定値 / `vitest.config.ts` の閾値・除外)
-  - `typeset` の Storybook 例に portal URL 用の置換マーカーを付与し、未設定時の汎用リンクと fork 後の portal リンクを切り替える
+  - `typeset` の Storybook 例に portal URL 用の置換マーカーを付与し、未設定時の汎用リンクとテンプレートから作った後の portal リンクを切り替える
   - `.github/workflows/purge-verify.yaml`
   - `scripts/marker-baseline/` — ファイルごとのマーカー行数を固定し、数が動いた PR を落とす。発火する
     マーカーと例示は同じ形なので、増えたことを「ベースラインを更新するか、リテラルとして宣言するか」の
     判断にする(移植 IM-55)
   - `scripts/setup/lib/sample-manifest.mjs` — **P6-4 の `e2e/` など Phase 6 で追加された破棄対象を追記**(P7-1 は Phase 5 分しか集約していないため)
-- **設計**: 使い捨てチェックアウトで `purge → gen-api → fix → lint:ci → typecheck → build → test` を回す。go 側の `verify` は fork 先で一度きり自爆する設計のため、**boilerplate 自身の腐敗防止にはこの CI ジョブが必要**
+- **設計**: 使い捨てチェックアウトで `purge → gen-api → fix → lint:ci → typecheck → build → test` を回す。go 側の `verify` は作った側で一度きり自爆する設計のため、**boilerplate 自身の腐敗防止にはこの CI ジョブが必要**
 - **カバレッジ**: 爆破でサンプルのテストが消えるため、purge スクリプトが `vitest.config.ts` の閾値・除外も書き換える
 - **完了条件**: 爆破後の CI が緑。爆破後の `src/` にドメインを持つコードが残っていない
 - **依存**: P7-1, P6-4
@@ -1732,7 +1732,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 | ADR | 確認すること |
 | --- | --- |
 | [0100](../adr/0100-accessibility-target.md) | biome の a11y ルールが `lint:ci` で効いている。UI feature の手動チェックが PR テンプレ(B14)に入っている |
-| [0101](../adr/0101-performance-budget.md) | 計測の仕組み(P6-1)が動いている。閾値は fork 先判断のまま |
+| [0101](../adr/0101-performance-budget.md) | 計測の仕組み(P6-1)が動いている。閾値は作った側の判断のまま |
 | [0102](../adr/0102-browser-support.md) | Next.js 既定 browserslist の追認で足りている |
 | [0121](../adr/0121-i18n-strategy.md) | 文言が feature 内定数に寄っている(`rules.md` #55)= 将来の i18n 移行が容易 |
 
@@ -1772,13 +1772,13 @@ IM-26 —— どちらも反映済み。**P4-6 の改修 PR は起票しない**
 
 ### P9-6: boilerplate 導入時の変更点を集約
 
-- **目的**: 各 README に分散する「boilerplate 導入時の変更点」を、fork / setup 時に最初に読むルート README へ集約する
+- **目的**: 各 README に分散する「boilerplate 導入時の変更点」を、テンプレートから作った直後の setup 時に最初に読むルート README へ集約する
 - **対象 ADR**: [0140](../adr/0140-documentation-operations.md)
 - **主な変更先**:
   - `README.md` — 導入先で見直す設定・契約・外部サービス・運用上の選択を集約する setup チェックリスト
   - 各カーネル README — 個別の「boilerplate 導入時の変更点」節を正として保ち、ルート README の集約先への導線を整える
 - **設計**: ルート README は項目一覧と参照先だけを持ち、詳細な理由・変更手順は所有者である各 README に残す。各項目は「既定値」「導入先での判断 / 変更箇所」「参照先」を明示し、契約依存の設定を暗黙知にしない
-- **完了条件**: ルート README の setup チェックリストから、全カーネル README の導入時変更点へ到達できる。fork 後に変更すべき契約・環境・外部接続・運用設定が一覧で確認できる
+- **完了条件**: ルート README の setup チェックリストから、全カーネル README の導入時変更点へ到達できる。テンプレートから作った後に変更すべき契約・環境・外部接続・運用設定が一覧で確認できる
 - **依存**: P9-2, P9-5
 
 ### P9-7: v1.0.0 リリース
@@ -1803,7 +1803,7 @@ IM-26 —— どちらも反映済み。**P4-6 の改修 PR は起票しない**
 
 3.13 の位置づけに従う。着手は backend の stream 機構が契約として公開されることを前提とする。
 
-3 本に割るのは、寿命が違うものを同じ diff に混ぜないためである。EX-1 は前提文書、EX-2 は fork 後も残る機構、EX-3 は fork 時に破棄するサンプルであり、破棄 manifest(P7-1)への入力もそれぞれ異なる。
+3 本に割るのは、寿命が違うものを同じ diff に混ぜないためである。EX-1 は前提文書、EX-2 はテンプレートから作った後も残る機構、EX-3 はテンプレートから作る時に破棄するサンプルであり、破棄 manifest(P7-1)への入力もそれぞれ異なる。
 
 会話系の component(`Message` / `Bubble` / `MessageScroller` / `Marker`)は、この枠以外に設置面を持たない。admin 画面をいくら積んでも埋まらないため、Phase 5 の他の PR では代替できない。
 

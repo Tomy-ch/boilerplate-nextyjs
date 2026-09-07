@@ -45,8 +45,8 @@ export const ENTRYPOINT_PATTERNS = [
  * 契約からの再生成が一致するか(drift ゲート)と、`mocks/contract-conformance.test.ts` の
  * 全ハンドラ検査が担保します。
  *
- * 並ぶのは題材の契約から生成したものだけなので、サンプルを破棄すると空になります。fork 先は
- * 自分の契約を生成した先をここへ並べます。
+ * 並ぶのは題材の契約から生成したものだけなので、サンプルを破棄すると空になります。テンプレートから
+ * 作った側は自分の契約を生成した先をここへ並べます。
  */
 // sample:replace-begin
 export const GENERATED_MODULES = ["src/adapters/gen/**", "mocks/api/**"] as const;
@@ -142,7 +142,7 @@ const TEST_FIXTURE_MODULES = [
  * Server Action がテストの対象です。
  *
  * `.storybook/msw/handlers.ts` も同じ genre で、カタログが自分で答える `/api/*` の据え置きです。
- * 郵便番号ごとの出し分けは題材そのもの（`sample:replace` で fork 時に空へ置き換わる）で、
+ * 郵便番号ごとの出し分けは題材そのもの（`sample:replace` でサンプル破棄時に空へ置き換わる）で、
  * 固定しても確かめられるのは並べた fixture が並べたとおりであることだけです。返す形が正しいことは
  * `adapters/client` の検証が担います。
  */

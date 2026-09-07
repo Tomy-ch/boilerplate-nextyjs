@@ -1,10 +1,11 @@
 name: SonarQube Cloud Scan
 
 # The one scanner here that needs an account somewhere else, and the whole file is shaped by
-# that. SonarCloud is free for a public repository and licensed for a private one, so a fork
-# must be able to receive this and have it cost nothing and break nothing.
+# that. SonarCloud is free for a public repository and licensed for a private one, so a
+# repository created from this template must be able to receive this and have it cost nothing
+# and break nothing.
 #
-# TWO PROTECTIONS, FOR TWO DIFFERENT FORKS.
+# TWO PROTECTIONS, FOR TWO DIFFERENT KINDS OF GENERATED REPOSITORY.
 #
 #   1. NO TOKEN, NO RED. `preflight` reads `SONAR_TOKEN` and, when it is unset, every job
 #      below is skipped and the run stays green. A missing account is a setup gap, not a
@@ -14,7 +15,7 @@ name: SonarQube Cloud Scan
 #   2. REMOVABLE. This file and `sonar-project.properties` are listed in
 #      `scripts/setup/remove-boilerplate-only/manifest.ts` (`SELF_DESTRUCT_PATHS`), so the
 #      strip takes them both. The project key here names THIS repository's SonarCloud
-#      organization; carried into a fork unchanged it is dead configuration.
+#      organization; carried into a generated repository unchanged it is dead configuration.
 #
 # It is NOT a required status check, and must not become one: a check whose verdict depends
 # on a third-party account cannot be a condition for merging in a repository that ships to

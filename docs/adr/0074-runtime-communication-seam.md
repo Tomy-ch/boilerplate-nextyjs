@@ -26,7 +26,7 @@ Accepted
 
 - **vendor-independent 正当性材料([0010](0010-standards-and-non-lockin.md) §2)**: `EventSource` / `WebSocket` は WHATWG / W3C の **web プラットフォーム標準**であり Next.js 固有 API ではない(= フレームワーク・ロックインを構成しない)。SSE を既定に置く独立根拠 = ① HTTP 上で動き既存の proxy / CDN / 認証(cookie)基盤をそのまま通る、② `EventSource` が**自動再接続を標準で内蔵**する、③ 供給元が無くてもバックエンド直結へ素直に degrade する —— いずれも「Next.js が推奨するから」ではない web 標準の性質。「数ある realtime 手段から、これらの独立根拠で SSE を 1 要因として選んだ」と位置づける。
 
-**request/response resilience との差(0071 との非重複を明示)**: [0071](0071-bff-api-integration.md) の resilience(dual timeout / idempotent retry / breaker)は**単発の往復**に効くもので、長寿命ストリームには**そのまま適用できない**。ストリーム側の resilience は形が異なる(**再接続 backoff + jitter / heartbeat・liveness / resume-from-cursor**)。本 ADR はこの**別形の resilience が `adapters/client` の購読 seam 側に属する**ことを名指すに留め、**具体機構は用途依存として fork 先へ委ねる**(§補足)。
+**request/response resilience との差(0071 との非重複を明示)**: [0071](0071-bff-api-integration.md) の resilience(dual timeout / idempotent retry / breaker)は**単発の往復**に効くもので、長寿命ストリームには**そのまま適用できない**。ストリーム側の resilience は形が異なる(**再接続 backoff + jitter / heartbeat・liveness / resume-from-cursor**)。本 ADR はこの**別形の resilience が `adapters/client` の購読 seam 側に属する**ことを名指すに留め、**具体機構は用途依存としてテンプレートから作った側へ委ねる**(§補足)。
 
 ## 禁止事項
 
@@ -38,7 +38,7 @@ Accepted
 
 ## 補足
 
-- 本 ADR は保守的に **IF/契約 + SSE 既定の指針**までを敷き、具体機構(再接続 / heartbeat を含む local subscription adapter)は fork 先へ委ねる。
+- 本 ADR は保守的に **IF/契約 + SSE 既定の指針**までを敷き、具体機構(再接続 / heartbeat を含む local subscription adapter)は作った側へ委ねる。
 - 本 ADR は exclusion(非同梱宣言 + named seam を併記する)である。polling / 相対時刻更新等の周期 client 取得の rule は本 ADR の対象外([docs/rules.md](../rules.md))。本 ADR は**双方向/ストリーム**の seam のみを扱う(動的配信フラグは [0078](0078-dynamic-feature-flag-seam.md))。
 - **購読 seam はコードとして置かない。** 設置面(実使用箇所)が存在せず、使われない IF は腐るためである。本 ADR が記すのは**採用時の拡張点の座標**(`adapters/client` の subscription adapter 契約)であり、実体化は最初の該当 feature 実装時に行う(既定 = native `EventSource` / `WebSocket` + 薄い client・Medium。§手段の優先順位=標準準拠は不変)。native で足りず外部クライアントを採る場合も本体は seam を保持し、[0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + adapters/カーネル境界の裏で差替可能・vendor 直参照を feature/component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。
 

@@ -48,15 +48,15 @@ logging は **抽象 `Logger` interface(ctx-native・実装ライブラリを隠
 **server 常駐の OTel exporter / batch 処理 / shutdown hook** を前提にした構成は、Next.js のブラウザ・serverless / edge には**そのまま載らない**ため、以下の形を採る:
 
 - **サーバ側(Node runtime)**: 上記 1〜4 の pino + otel-js 相当を適用。serverless では長寿命 exporter を前提にせず、リクエスト境界での flush / OTLP 送信を基本とする
-- **ブラウザ側テレメトリは BFF 中継を seam とする**: クライアントで計測した値は **`/api/*`(BFF)経由でサーバへ送り、サーバ側で OTLP export** する(ブラウザから直接 SaaS / collector へ送らない)。これは [0030](0030-environment-variable-management.md) の「secret を `NEXT_PUBLIC_` に出さない」「BFF runtime config」と整合し、vendor lock-in も避ける。fork が vendor SDK を使う場合も、ブラウザ→SaaS の直送でなく **自ドメイン `/api/*` 経由のリレー**でこの seam を保つ
+- **ブラウザ側テレメトリは BFF 中継を seam とする**: クライアントで計測した値は **`/api/*`(BFF)経由でサーバへ送り、サーバ側で OTLP export** する(ブラウザから直接 SaaS / collector へ送らない)。これは [0030](0030-environment-variable-management.md) の「secret を `NEXT_PUBLIC_` に出さない」「BFF runtime config」と整合し、vendor lock-in も避ける。テンプレートから作った側が vendor SDK を使う場合も、ブラウザ→SaaS の直送でなく **自ドメイン `/api/*` 経由のリレー**でこの seam を保つ
 - **ブラウザ側も OTel の SDK で計装する**: ブラウザは自分で span を作り、それを上記の中継へ流す。中継が受けるのは OTLP そのもので、サーバは読み替えずに collector へ渡す。**送り先だけがブラウザから見えない** —— collector の endpoint も資格情報もサーバ側に留まり、seam は変わらない。ブラウザは自分の trace を始めず、サーバが配った `traceparent` を親に取る(これが無いと、ブラウザ発の記録は中継要求の span に紐づき、測定が起きていない要求と親子になる)。**計装は最初の描画の後に読み込む** —— 計測のための資材を初期の読み込みへ載せると、測っている当のものを悪くする
 
 ### 6. 観測性バックエンド = OTLP/OTel(vendor-neutral・vendor SDK 非同梱)
 
-観測性の export transport は **OTLP / OTel 一本**(vendor-neutral)とし、**特定の観測性 / RUM SaaS SDK(Sentry / Datadog 等)を本体に同梱しない**(fork 先判断)。エラー通知・アラート等の運用機能は、fork が向け先に選ぶ **OTLP 互換バックエンド**(任意の OTLP Collector / SaaS = Grafana / Honeycomb / Datadog / Sentry 等)側で行う —— vendor SDK を同梱してまで本体が持つべき運用機能は無く、向け先の側で足りる。本体は OTLP export の口だけを持ち、vendor 固有 SDK に依存しない。
+観測性の export transport は **OTLP / OTel 一本**(vendor-neutral)とし、**特定の観測性 / RUM SaaS SDK(Sentry / Datadog 等)を本体に同梱しない**(作った側の判断)。エラー通知・アラート等の運用機能は、作った側が向け先に選ぶ **OTLP 互換バックエンド**(任意の OTLP Collector / SaaS = Grafana / Honeycomb / Datadog / Sentry 等)側で行う —— vendor SDK を同梱してまで本体が持つべき運用機能は無く、向け先の側で足りる。本体は OTLP export の口だけを持ち、vendor 固有 SDK に依存しない。
 
 - **差し替え可能性([0010](0010-standards-and-non-lockin.md))**: OTLP / OTel semconv は W3C / CNCF の公開標準であり、向け先を任意の OTLP バックエンドへ変えられる。vendor SDK を本体に持たないため lock-in が構造的に生じない(設計者が選択主体)。
-- vendor SDK を使う fork は、それを `observability` カーネルの **OTLP / OTel exporter 実装**として境界の裏に閉じ込める(アプリコードは `observability` の公開面〈構造的型〉に依存。vendor 具象を `features` / `components` / `model` へ散らさない。[0021](0021-frontend-responsibility.md))。導入時は exact-pin + `pnpm audit`([0004](0004-library-management.md))。
+- vendor SDK を使う作った側は、それを `observability` カーネルの **OTLP / OTel exporter 実装**として境界の裏に閉じ込める(アプリコードは `observability` の公開面〈構造的型〉に依存。vendor 具象を `features` / `components` / `model` へ散らさない。[0021](0021-frontend-responsibility.md))。導入時は exact-pin + `pnpm audit`([0004](0004-library-management.md))。
 
 ## 禁止事項
 
@@ -83,5 +83,5 @@ logging は **抽象 `Logger` interface(ctx-native・実装ライブラリを隠
 - [0077-bff-abuse-protection-boundary.md](0077-bff-abuse-protection-boundary.md) — 中継 seam が生む公開エンドポイントの保護
 - [0002-formatter-linter.md](0002-formatter-linter.md) — `noConsole`(console.log 抑止)
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — vendor-independent 正当化 / 差し替え可能性(vendor SDK を抜いても正当・OTLP 経由で非ロックイン)
-- [0004-library-management.md](0004-library-management.md) — fork が vendor 観測性 SDK を導入する場合の exact-pin + `pnpm audit`
+- [0004-library-management.md](0004-library-management.md) — 作った側が vendor 観測性 SDK を導入する場合の exact-pin + `pnpm audit`
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) / [0024-adapters-server-client-split.md](0024-adapters-server-client-split.md) — `observability` / `adapters` 境界(vendor SDK を裏に閉じ込める先)

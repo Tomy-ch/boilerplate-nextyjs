@@ -77,7 +77,7 @@ URL の形は Pages の有効化ではなく `<owner>/<repo>` が決めるため
 
 <!-- boilerplate-only:begin -->
 3 つ目は**この template を配る側にしか意味を持たない記述**を剥がす
-（[0152](../adr/0152-agents-md-policy.md)）。飛ばす選択肢は無い —— fork を作った時点で前提が
+（[0152](../adr/0152-agents-md-policy.md)）。飛ばす選択肢は無い —— テンプレートから作った時点で前提が
 失効しているので、残すと自分に効かない規則に従うことになる。剥がし終えると道具自身も消える。
 <!-- boilerplate-only:end -->
 

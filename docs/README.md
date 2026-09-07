@@ -90,8 +90,8 @@
 | [`playbook.md`](playbook.md) | 逆引きの索引。行き先が増えたら索引を更新するだけ |
 | [`traceability.md`](traceability.md) | 集計。自分でそう宣言している |
 | [`portal/`](portal/) | 生成ビュー。生成器が書き直す |
-| `plan/` | 過程の成果物。fork へ配るものではない |
-| `get-started/` | 手順。fork の前提が死ぬと消える |
+| `plan/` | 過程の成果物。テンプレートから作った側へ配るものではない |
+| `get-started/` | 手順。テンプレートから作る前提が死ぬと消える |
 | [`screens.md`](screens.md) | 輸入したサンプルの画面表。残す側の文書ではない <!-- boilerplate-only:line --> |
 
 **対訳（`*.ja.md`）は正典の写しであって、別の置き場ではない。** 知識を探すのも、判定を当てるのも、

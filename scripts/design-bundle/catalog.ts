@@ -7,9 +7,9 @@
  */
 
 const REGISTRY_ITEM_TYPE = {
-  /** 契約を知らない基礎部品。fork 先も土台として残す */
+  /** 契約を知らない基礎部品。テンプレートから作った側も土台として残す */
   UI: "registry:ui",
-  /** 契約や画面骨格を前提にする部品。fork 先が作り替える */
+  /** 契約や画面骨格を前提にする部品。テンプレートから作った側が作り替える */
   COMPONENT: "registry:component",
 } as const;
 

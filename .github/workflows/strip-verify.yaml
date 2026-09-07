@@ -8,15 +8,16 @@ name: Strip Verify
 # (`scripts/setup/remove-boilerplate-only`). Nothing else would notice if it stopped
 # working: a marker whose pair was lost, a stripped section that takes a heading another
 # document links to, or a manifest entry gone stale would all stay green until someone
-# actually forked and ran it. The unit tests beside the manifest never run the strip, so
+# actually created a repository from the template and ran it. The unit tests beside the
+# manifest never run the strip, so
 # they cannot see the tree it leaves behind.
 #
 # The checkout is disposable, so the job deliberately deletes tracked files and never
 # pushes anything back.
 #
 # The strip deletes this file too — it is declared in `SELF_DESTRUCT_PATHS`. Do not
-# add the guard step `purge-verify.yaml` carries: the strip is mandatory, so every fork
-# would fail it on every PR forever.
+# add the guard step `purge-verify.yaml` carries: the strip is mandatory, so every
+# repository created from this template would fail it on every PR forever.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
 # every PR is in README.md.

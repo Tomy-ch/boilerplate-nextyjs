@@ -36,11 +36,11 @@ registry の形式を採るのは、部品を取り込むときに使ってい�
 
 **デザインツールが生成したものを、書き出しの経路から repo へ書き戻さない。** token も、部品のソースも、screenshot も戻さない。ツールの出力は**こう見えるべきという提案**であり、repo は**実際に出荷されるもの**である。提案を実装するなら、それは人が読んで何を採るかを決める、通常の実装作業である。
 
-提案を自動で流し込む経路を置くと、コードが誰も検証しないツールの出力を追い始め、そのツールが fork 全部の上流になる。そのとき正はツール側へ移っており、[0010](0010-standards-and-non-lockin.md) の「デザインシステムの正は repo にある」が崩れる。
+提案を自動で流し込む経路を置くと、コードが誰も検証しないツールの出力を追い始め、そのツールがテンプレートから作ったリポジトリ全部の上流になる。そのとき正はツール側へ移っており、[0010](0010-standards-and-non-lockin.md) の「デザインシステムの正は repo にある」が崩れる。
 
 **却下した案: 自動で取り込む(design tool → token の同期パイプ)。** token の値をツール側で編集し、それを `tokens/` へ同期させる案は、編集の場をツールへ移すことで一見便利に見える。しかし token の SSOT は `tokens/primitives.json` と系統ごとの semantic 定義であり([0051](0051-styling-system.md))、生成物の整合はそこから生成することで強制している。ツールから逆向きに流すと、その整合をツール側の制約で表現し直すことになり、表現できない部分から黙って壊れる。
 
-[0051](0051-styling-system.md) が「デザインツールとの同期方式は fork 先で確定する」と射程外に置いているのは、この向きの決定と矛盾しない。本体は逆向きの経路を持たない。fork 先がそれを敷くなら、それは fork 先が自分で下す判断であり、本体の書き出しがそれを前提にすることはない。
+[0051](0051-styling-system.md) が「デザインツールとの同期方式は作った側で確定する」と射程外に置いているのは、この向きの決定と矛盾しない。本体は逆向きの経路を持たない。作った側がそれを敷くなら、それは作った側が自分で下す判断であり、本体の書き出しがそれを前提にすることはない。
 
 ## bundle は生成物であり、追跡しない
 
@@ -63,7 +63,7 @@ bundle に**描画した HTML も screenshot も入らない**。story は JavaS
 ## 関連 ADR
 
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — 依存の向き(repo → ツールの一方向)と、ツール固有の手順を恒久文書へ書かない原則。本 ADR はその決定本体
-- [0050-styling-strategy.md](0050-styling-strategy.md) / [0051-styling-system.md](0051-styling-system.md) — token の器と体系。`tokens.css` の出所と、同期方式を fork 先へ委ねる位置づけ
+- [0050-styling-strategy.md](0050-styling-strategy.md) / [0051-styling-system.md](0051-styling-system.md) — token の器と体系。`tokens.css` の出所と、同期方式を作った側へ委ねる位置づけ
 - [0052-ui-component-policy.md](0052-ui-component-policy.md) — shadcn registry の形式と、部品の層・置き場・説明の正が README にあること
 - [0054-ui-catalog-storybook.md](0054-ui-catalog-storybook.md) — Storybook が部品の唯一の在庫リストであること(目録の story 名の出所)
 - [0154-claude-skills-operations.md](0154-claude-skills-operations.md) — 送り先ごとの配送手順を持つ skill の置き場

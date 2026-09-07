@@ -20,7 +20,7 @@ function escapeReplacement(value: string): string {
 const NAME_TAIL_BOUNDARY = "(?![A-Za-z0-9_-])";
 const NAME_HEAD_BOUNDARY = "(?<![A-Za-z0-9._-])";
 
-// <owner>/<現プロジェクト名> 形式のリポジトリ参照。owner 部分もフォーク先へ差し替える
+// <owner>/<現プロジェクト名> 形式のリポジトリ参照。owner 部分もテンプレートから作った側へ差し替える
 function buildSlugPattern(currentName: string): RegExp {
   return new RegExp(
     `${NAME_HEAD_BOUNDARY}[A-Za-z0-9._-]+/${escapeRegExp(currentName)}${NAME_TAIL_BOUNDARY}`,
@@ -34,7 +34,7 @@ function buildNamePattern(currentName: string): RegExp {
 }
 
 /**
- * リポジトリ参照とプロジェクト名をフォーク先のものへ書き換える。
+ * リポジトリ参照とプロジェクト名を、テンプレートから作った側のものへ書き換える。
  *
  * @remarks
  * `<owner>/<現プロジェクト名>` 形式のスラッグを先に潰してから、残った単独の名前を書き換えます。

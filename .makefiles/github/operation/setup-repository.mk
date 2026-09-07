@@ -1,7 +1,7 @@
 ## リポジトリの初期化
 .PHONY: setup-repo ## リポジトリの初期化
 .PHONY: setup-replace-license-copyright ## LICENSEの著作権表示を更新
-.PHONY: setup-replace-repository-reference ## リポジトリ参照とプロジェクト名をフォーク先へ置換
+.PHONY: setup-replace-repository-reference ## リポジトリ参照とプロジェクト名をテンプレートから作った側へ置換
 # boilerplate-only:begin
 .PHONY: setup-remove-boilerplate-only ## boilerplate 限定の記述を剥がす
 # boilerplate-only:end
@@ -134,8 +134,8 @@ setup-replace-repository-reference:
 # boilerplate-only:begin
 # boilerplate 限定の記述（この template を配る側にしか意味を持たない規則・注記）を剥がす。
 #
-# サンプル破棄と違い、飛ばす選択肢が無い。fork を作った時点で前提が失効するため、残すと fork 先が
-# 自分に効かない規則に従うことになる。破棄と同じく、剥がしの道具そのものも消える。
+# サンプル破棄と違い、飛ばす選択肢が無い。テンプレートから作った時点で前提が失効するため、残すと
+# 作った側が自分に効かない規則に従うことになる。破棄と同じく、剥がしの道具そのものも消える。
 #
 # 剥がすのは散文だけなので build / test は連鎖させない。手順の最後の確認でまとめて通す。
 setup-remove-boilerplate-only:

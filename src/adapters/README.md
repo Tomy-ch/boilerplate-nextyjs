@@ -55,15 +55,15 @@ user-scoped な値をキャッシュしたいときの手段は `use cache: priv
 二重に持つと内側が切れないぶん、外側が取り直しても同じ古い応答を掴みます。
 
 **寿命は profile の名前で名乗り、秒数は `next.config.ts` の `cacheLife` が持ちます。** 口の側は「何の
-寿命か」だけを言い、fork は口を触らずに値を動かせます。**殻へ載る取得の profile に `expire` を置きません**
+寿命か」だけを言い、テンプレートから作った側は口を触らずに値を動かせます。**殻へ載る取得の profile に `expire` を置きません**
 —— `expire` はその時間トラフィックが途絶えた直後の 1 要求へ同期の取り直しを課すので、そこで取得先へ届かないと
 殻を配れていたはずの route が丸ごと失敗へ倒れます。
 
 **確実に残るのは、組み立て時に殻へ焼かれた分だけです。** `use cache` の既定の入れ物はプロセスのメモリなので、
 serverless では要求ごとに別のインスタンスへ着地しえて再利用が起きない回があり、デプロイをまたぐと鍵ごと
 捨てられます。`fetch` の `cache: "force-cache"` が持っていた「デプロイとインスタンスをまたいで残る」性質は
-ここで失われるもので、**request 時の再利用を保証と読まないでください**。必要になった fork は `cacheHandlers`
-か `use cache: remote` を選びます（配備先に依存するので本体は選びません）。
+ここで失われるもので、**request 時の再利用を保証と読まないでください**。必要になったテンプレートから作った側は
+`cacheHandlers` か `use cache: remote` を選びます（配備先に依存するので本体は選びません）。
 
 **`use cache` を持つモジュールは `createHttpClient` を直に引けません。** 直に引けるモジュールは
 user-scoped な client も組める状態にあり、`project-rules/no-user-scoped-in-cached-module` が止めます。
@@ -127,8 +127,8 @@ cookie がまだ無い session 確立の 1 往復だけは `bearerToken` とい�
 <!-- sample:end -->
 
 閾値は `NEXT_PUBLIC_HTTP_MAX_URL_BYTES` が持ちます（[env/README](../../env/README.md)）。直値で
-持たないのは、経路のどこが最初に弾くかが配信構成で決まるためです。fork は自分の経路の最小値へ
-書き換えてください。`NEXT_PUBLIC_` はビルド時にリテラルへ置換されるため、変更には再ビルドが要ります。
+持たないのは、経路のどこが最初に弾くかが配信構成で決まるためです。テンプレートから作った側は自分の経路の
+最小値へ書き換えてください。`NEXT_PUBLIC_` はビルド時にリテラルへ置換されるため、変更には再ビルドが要ります。
 
 判定は `http/url-budget.ts` の 1 つで、呼ぶのは 2 つの要求境界——`server/http/request.ts` と
 `client/http/request.ts`——だけです。**画面ごとの事前チェックは置きません。** 閾値は画面からは

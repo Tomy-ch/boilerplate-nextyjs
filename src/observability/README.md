@@ -85,7 +85,7 @@ OTel を用いた server-side の trace、metrics、logs のためのカーネ�
 
 **dev では同じ測定が 2 回届く。** React の Strict Mode が effect を 2 度呼び、`useReportWebVitals` は購読を解除しないため、計測器への登録が 2 つ残る。production build では 1 回である。
 
-**閾値はここに置かない。** [0101](../../docs/adr/0101-performance-budget.md) が持つのは計測の仕組みであり、good / poor の境界をどこに引くかは fork 先の判断である。属性の `rating` は web.dev が公表している境界による評価で、このリポジトリが引いた線ではない。
+**閾値はここに置かない。** [0101](../../docs/adr/0101-performance-budget.md) が持つのは計測の仕組みであり、good / poor の境界をどこに引くかはテンプレートから作った側の判断である。属性の `rating` は web.dev が公表している境界による評価で、このリポジトリが引いた線ではない。
 
 **伏せる項目は中継が伏せる。** ブラウザが作った span の属性のうち、`logging` が持つ表（`authorization` / `cookie` / `password` / `token`）に当たる名前は、collector へ渡す前に censor へ置き換わる。掛ける場所が中継なのは、そこが全部を通る唯一の場所だからである —— ブラウザ側で掛けても送信者は差し替えられる。**値の中身は見ない**（名前で持ち回っている限り効き、そうでないものは元の設計が誤っている）。
 
@@ -119,5 +119,5 @@ Next.js は Node.js サーバーを準備すると `src/instrumentation.ts` の 
 - OTLP と公式 semconv のみを使用する
 - 実装時に設定値を注入し、vendor 固定を避ける
 - local 開発では go 側 compose の `observability` が公開する OTLP HTTP `http://localhost:4318` と Grafana `http://localhost:3000` を使う
-- fork 先のバックエンドや collector に合わせて endpoint、`service.name`(`OBS_SERVICE_NAME`)、signal 有効化を設定する。`service.name` は同じ trace に載る他サービスと異なる値にする。Grafana、Sentry、Faro などの SDK をこのカーネルへ直接固定しない
+- テンプレートから作った側のバックエンドや collector に合わせて endpoint、`service.name`(`OBS_SERVICE_NAME`)、signal 有効化を設定する。`service.name` は同じ trace に載る他サービスと異なる値にする。Grafana、Sentry、Faro などの SDK をこのカーネルへ直接固定しない
 - Next.js が自前で張る `fetch` span は、span 名に query 付きの URL をそのまま載せる。名前が要求ごとに散って集計の単位にならないので、抑止するなら `NEXT_OTEL_FETCH_DISABLED=1` を使う。同じ外向き通信は Undici instrumentation の span が覆い、そちらの名前は経路だけを持つ

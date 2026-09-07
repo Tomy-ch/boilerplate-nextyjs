@@ -51,7 +51,7 @@ const nextConfig = async (phase: string): Promise<NextConfig> => {
     cacheComponents: true,
     // リクエストをまたいで残す取得の寿命（[0041](docs/adr/0041-cache-components-decision.md) /
     // [0071](docs/adr/0071-bff-api-integration.md)）。**取得の口は profile の名前だけを名乗り、秒数は
-    // ここが持つ。** fork は口を 1 つも触らずにこの値だけを動かせる。
+    // ここが持つ。** テンプレートから作った側は口を 1 つも触らずにこの値だけを動かせる。
     cacheLife: {
       // バックエンドが持ち、この面からは更新しないマスタ（分類・状態・都道府県）。
       //

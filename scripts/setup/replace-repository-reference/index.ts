@@ -50,7 +50,7 @@ const TARGET_EXTENSIONS = new Set([
 ]);
 const TARGET_FILE_NAMES = new Set(["Makefile"]);
 
-// docs は boilerplate 自身の設計記録であり、フォーク先の名前へ書き換える対象ではない。
+// docs は boilerplate 自身の設計記録であり、作った側の名前へ書き換える対象ではない。
 // .claude はエージェント設定と worktree の実体を含む。
 const EXCLUDED_DIRECTORIES = new Set([
   "node_modules",

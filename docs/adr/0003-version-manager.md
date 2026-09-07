@@ -86,7 +86,7 @@ mise への依存は **配送層 (host)** に閉じている。SSOT / 契約 / �
 ### host（開発者ワークステーション）
 
 - mise を既定の backend として推奨。`make install-tools` がエントリポイント
-- フォーク先や個人開発で mise を使いたくない場合、`.makefiles/tools/setup.mk` の `install-tools` ターゲットを別実装（nodenv / volta 等）に差し替えれば済む。SSOT (`mise.toml`) はそのままで読める
+- テンプレートから作った側や個人開発で mise を使いたくない場合、`.makefiles/tools/setup.mk` の `install-tools` ターゲットを別実装（nodenv / volta 等）に差し替えれば済む。SSOT (`mise.toml`) はそのままで読める
 
 ### Docker
 

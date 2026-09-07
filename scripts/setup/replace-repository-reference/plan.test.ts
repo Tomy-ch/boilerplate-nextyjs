@@ -30,7 +30,7 @@ describe("planReplacement", () => {
     });
   });
 
-  it("リポジトリ名を据え置く fork でも、差し込んだ URL の host を壊さない", () => {
+  it("テンプレートからリポジトリ名を据え置いて作った場合でも、差し込んだ URL の host を壊さない", () => {
     const planned = planReplacement(
       "story.tsx",
       MARKED_SOURCE,

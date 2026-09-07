@@ -50,7 +50,7 @@ function toProductCategories(wire: WireCategories): readonly ProductCategory[] {
  *
  * **このリポジトリから {@link PRODUCT_MASTERS_TAG} を撃つ経路はありません。** マスタの更新は
  * バックエンド側で起きるためで、古さの上限を決めているのは profile の時間だけです。タグは
- * webhook などの無効化口を持つ fork のために置いてあります。
+ * webhook などの無効化口を持つ、テンプレートから作った側のために置いてあります。
  *
  * 外側の `cache()` は同一リクエスト内の重複を畳みます。`use cache` はリクエストをまたぐ層で、
  * 別物です。

@@ -44,7 +44,7 @@ implementation task where a human decides what to take.
 
 The reason is that a design tool's output is a *proposal about how things should look*, while the
 repository is *what actually ships*. Letting the proposal flow back automatically means the code
-starts tracking a tool nobody validates, and the tool becomes an upstream that every fork inherits.
+starts tracking a tool nobody validates, and the tool becomes an upstream that every repository created from this template inherits.
 
 ## Step 1. Confirm the destination and the scope
 

@@ -10,7 +10,7 @@ import { ENTRYPOINT_PATTERNS, GENERATED_MODULES } from "./scripts/lib/untested-m
  * 対応する describe があるかを見ますが、その export をどこかが呼んでいるかは見ません。ここが
  * その隙間を埋めます。
  *
- * **公開面と内部で扱いを変えます。** boilerplate は fork 先が使う口を意図的に export するため、
+ * **公開面と内部で扱いを変えます。** boilerplate はテンプレートから作った側が使う口を意図的に export するため、
  * `src/components/**` は内部から呼ばれないことが正常であり、未使用がそのまま欠陥になりません。
  * これらを入口として宣言し、export の未使用を問いません。それ以外の層（`features` / `app` /
  * `adapters` / `capabilities` / `stores` / `model` / `config` / `errors` / `logging` /
@@ -21,15 +21,15 @@ import { ENTRYPOINT_PATTERNS, GENERATED_MODULES } from "./scripts/lib/untested-m
  * 2 箇所に書くと、片方だけを直したときに黙ってずれます。
  */
 
-/** fork 先が使う口。内部から呼ばれないことが正常な層。 */
+/** テンプレートから作った側が使う口。内部から呼ばれないことが正常な層。 */
 const PUBLISHED_SURFACE = ["src/components/**/*.{ts,tsx}"];
 
 /**
  * import では現れない依存。
  *
  * - `date-fns` — 日付演算の採用ライブラリ（[0120](docs/adr/0120-locale-aware-formatting.md)）。
- *   置いてあること自体が提供物で、fork 先が日付を扱い始めた時点で使われる。撤去条件は、採用
- *   そのものを取り下げたとき。
+ *   置いてあること自体が提供物で、テンプレートから作った側が日付を扱い始めた時点で使われる。
+ *   撤去条件は、採用そのものを取り下げたとき。
  * - `@commitlint/cli` — `make commitlint` が binary として起動する。knip は Makefile を読まない。
  *   撤去条件は、起動元が TypeScript 側へ移ったとき。
  * - `lefthook` — git hook から起動する。knip は `.git/hooks` の中身で使用を判定するため、hook を

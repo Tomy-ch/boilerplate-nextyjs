@@ -80,8 +80,8 @@ export default defineConfig({
   // [themes](vrt/lib/themes.ts)。
   //
   // 全 story を撮り axe を掛けるのは `SHOT_THEMES` のテーマだけ。もう片方は配色が `:root` へ
-  // 届いているかだけを見る spec に絞る。両方で全 story を回すと実行が倍になり、fork 先の CI が
-  // その分だけ課金される。
+  // 届いているかだけを見る spec に絞る。両方で全 story を回すと実行が倍になり、テンプレートから
+  // 作った側の CI がその分だけ課金される。
   projects: THEMES.map((name) => ({
     name,
     ...(SHOT_THEMES.some((shot) => shot === name) ? {} : { testMatch: "**/theme-tokens.spec.ts" }),

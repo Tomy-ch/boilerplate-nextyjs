@@ -11,8 +11,8 @@ export const contentType = "image/png";
  * タブに載るアイコン（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §5）。
  *
  * @remarks
- * 生成するのは印を 1 文字描くだけの絵で、fork 先が自分の印へ差し替える枠です。同じ印を
- * `apple-icon.tsx` が大きな枠で描きます。隣の `favicon.ico` は `<link>` を読まずに `/favicon.ico`
+ * 生成するのは印を 1 文字描くだけの絵で、テンプレートから作った側が自分の印へ差し替える枠です。
+ * 同じ印を `apple-icon.tsx` が大きな枠で描きます。隣の `favicon.ico` は `<link>` を読まずに `/favicon.ico`
  * を直接取りに来る経路のために残してあり、差し替えるときは 3 つを揃えます。
  */
 export default function Icon() {

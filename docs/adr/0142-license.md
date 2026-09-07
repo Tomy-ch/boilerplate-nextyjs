@@ -10,7 +10,7 @@ Accepted
 
 前提:
 
-- 本リポジトリは **fork / テンプレートとして複製されることを目的とした表示層 boilerplate**([0011](0011-no-docker.md))であり、npm パッケージとして配布・`install` される性質ではない
+- 本リポジトリは **テンプレートとして複製されることを目的とした表示層 boilerplate**([0011](0011-no-docker.md))であり、npm パッケージとして配布・`install` される性質ではない
 - 依存ライブラリの許容ライセンスは [0004](0004-library-management.md) が規定する(MIT / Apache-2.0 / BSD-3-Clause / ISC / 0BSD のみ許可、GPL / AGPL / SSPL / 不明は不可)
 
 ## 決定
@@ -18,7 +18,7 @@ Accepted
 ### 1. ライセンス = MIT
 
 - 本リポジトリのライセンスは **MIT** とする(`LICENSE`: Copyright (c) 2026 Tomy-ch)。根拠:
-  - **最大限の許容性**: 商用・改変・再配布・sublicense を制約なく許可し、boilerplate を fork して任意の用途(商用含む)に使う目的に最も適う
+  - **最大限の許容性**: 商用・改変・再配布・sublicense を制約なく許可し、boilerplate を複製して任意の用途(商用含む)に使う目的に最も適う
   - **エコシステム標準**: Next.js・React をはじめ本リポの依存の大半が MIT / permissive であり、フレームワーク文化と摩擦がない
   - **姉妹リポジトリとの統一**: 同一著者の boilerplate 群(go-boilerplate)とライセンスを揃える
   - **低儀式性**: CLA・コピーレフトの義務を持ち込まず、テンプレート用途の障壁を最小化する
@@ -38,13 +38,13 @@ Accepted
 
 ### 4. `package.json` の `private: true` と MIT の関係
 
-- `package.json` は **`"private": true`** であり、これは **npm レジストリへの誤 publish を防ぐガード**である。boilerplate は npm 配布物ではなく clone / fork して使うテンプレートであるため、publish を意図的に無効化している
-- `private: true`(npm 公開の抑止)と MIT(ソースの複製・改変・再配布の許諾)は**別レイヤの関心事**であり両立する。MIT は本リポのソースを fork / 複製する権利を付与し、`private` は npm パッケージとしての配布経路を閉じるだけである
+- `package.json` は **`"private": true`** であり、これは **npm レジストリへの誤 publish を防ぐガード**である。boilerplate は npm 配布物ではなく、テンプレートとして複製して使うものであるため、publish を意図的に無効化している
+- `private: true`(npm 公開の抑止)と MIT(ソースの複製・改変・再配布の許諾)は**別レイヤの関心事**であり両立する。MIT は本リポのソースを複製・改変・再配布する権利を付与し、`private` は npm パッケージとしての配布経路を閉じるだけである
 - `package.json` は SPDX 準拠のツール可読性のため **`"license": "MIT"`** を持つ。`private: true` と併記して矛盾しない(上記のとおり別レイヤ)
 
-### 5. fork 先の application ライセンス
+### 5. テンプレートから作った側の application ライセンス
 
-- fork 先が本 boilerplate を土台に構築する **application 自体のライセンスは fork 先の判断**とする(out of scope)。MIT は派生物の再ライセンスを許すため、fork 先は自プロジェクトに任意のライセンスを付与できる。ただし MIT の条件により、**boilerplate 由来部分の著作権表記・許諾表記の保持**が求められる点は Next.js 等の依存と同様に扱う
+- 作った側が本 boilerplate を土台に構築する **application 自体のライセンスは作った側の判断**とする(out of scope)。MIT は派生物の再ライセンスを許すため、作った側は自プロジェクトに任意のライセンスを付与できる。ただし MIT の条件により、**boilerplate 由来部分の著作権表記・許諾表記の保持**が求められる点は Next.js 等の依存と同様に扱う
 
 ## 禁止事項
 
@@ -56,6 +56,6 @@ Accepted
 ## 関連 ADR
 
 - [0004-library-management.md](0004-library-management.md) — 依存ライセンス許可リスト(MIT 配布との整合を担保)
-- [0011-no-docker.md](0011-no-docker.md) — fork / テンプレート用途の表示層ロール(MIT 選定の背景)
+- [0011-no-docker.md](0011-no-docker.md) — テンプレート用途の表示層ロール(MIT 選定の背景)
 - [0152-agents-md-policy.md](0152-agents-md-policy.md) / AGENTS.md — `LICENSE` は Protected Documentation(直接編集禁止)
 - [0140-documentation-operations.md](0140-documentation-operations.md) — per-package README 運用

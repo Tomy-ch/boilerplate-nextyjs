@@ -2,7 +2,7 @@
 //
 // 帯そのものは [0051](../../docs/adr/0051-styling-system.md) §2 が 3 つに固定しており、境界の値は
 // design token（`tokens/primitives.json`）が持つ。ここに数値を書かないのは、token を差し替えた
-// fork 先で、レイアウトの分岐と撮影の幅が別々に動き始めるためである。
+// テンプレートから作った側で、レイアウトの分岐と撮影の幅が別々に動き始めるためである。
 import { readFileSync } from "node:fs";
 
 /** ブレークポイントの宣言を持つ design token。 */
@@ -92,7 +92,7 @@ const BAND_EDGES = ["md", "lg"] as const;
  * 最も本文を圧迫するのも `lg` ちょうどです。
  *
  * モバイルだけは下端を token が持ちません（対応する下限は
- * [0102](../../docs/adr/0102-browser-support.md) が fork 先へ委ねています）。代わりに上端
+ * [0102](../../docs/adr/0102-browser-support.md) が作った側へ委ねています）。代わりに上端
  * （`md - 1`）を撮ります。この帯は幅が広いほど余白が伸びるため、崩れるとすれば上端です。
  */
 export function responsiveBands(breakpoints: ReadonlyMap<string, number>): readonly Band[] {

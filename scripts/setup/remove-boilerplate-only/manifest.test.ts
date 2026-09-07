@@ -114,7 +114,7 @@ const TIMEOUT_MS = 300_000;
 describe("BOILERPLATE_ONLY_MARKER", () => {
   // ----- 正常系 -----
   // サンプル側の定数を import せず literal で持つ。`remove-sample/` はサンプル破棄で消えるため、
-  // 破棄を先に走らせた fork でこのテストが解決不能な import で落ちる。
+  // テンプレートから作って破棄を先に走らせた側でこのテストが解決不能な import で落ちる。
   it("サンプル破棄とは別の族を指す", () => {
     expect(BOILERPLATE_ONLY_MARKER).not.toBe("sample");
   });

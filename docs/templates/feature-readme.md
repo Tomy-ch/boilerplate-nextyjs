@@ -7,7 +7,8 @@ test-requirement: feature
 # <feature 名>
 
 <!--
-feature を追加するとき、このファイルを src/features/<feature-name>/README.md へコピーして記入する。
+src/features/<feature-name>/README.md は docs/templates/feature-readme.md の写しである。
+`pnpm gen feature` が置くか、手でコピーして記入する。
 
 書く前に置き場を決める。この README が持つのは、この slice に固有の役割論と、契約・仕様・
 デザインへの索引だけである。次の 3 つはここには書かない。

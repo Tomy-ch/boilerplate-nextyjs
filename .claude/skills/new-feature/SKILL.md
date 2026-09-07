@@ -81,7 +81,7 @@ product behavior. The user is the author-of-record for what the screen promises.
 
 ## Step 3. Story first (order step 2)
 
-Run `pnpm gen feature <name>` for the slice, plus `pnpm gen component <name> --as=<heading>` for any shared part the
+Run `pnpm gen feature <name> --screen=<screen>` for the slice, plus `pnpm gen component <name> --as=<heading>` for any shared part the
 design calls for. Let the generator place, name, and bound the files — never hand-place them, and
 never pass it an input other than the one it takes (`architecture.ts` + the layer README are its
 single source; `docs/spec/**` is **not** a generation input).

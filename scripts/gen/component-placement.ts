@@ -3,6 +3,7 @@ import {
   catalogHeadingSchema,
   componentLayerSchema,
 } from "../../src/components/scripts/check-shadcn";
+import { optionValue } from "./option-value";
 import type { ComponentPlacement } from "./plan";
 
 /**
@@ -22,12 +23,6 @@ const LAYER_OPTION = "--layer";
 export type PlacementResult =
   | { readonly placement: ComponentPlacement }
   | { readonly error: string };
-
-function optionValue(options: readonly string[], option: string): string | undefined {
-  const prefix = `${option}=`;
-
-  return options.find((argument) => argument.startsWith(prefix))?.slice(prefix.length);
-}
 
 /**
  * オプション列から、component を置く層と見出しを決める。

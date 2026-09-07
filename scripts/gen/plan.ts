@@ -4,6 +4,7 @@ import {
   type ComponentLayer,
   componentDirectoryOf,
 } from "../../src/components/scripts/check-shadcn";
+import type { FeaturePlacement } from "./feature-placement";
 import type { LayerContract } from "./layer-contract";
 import { toPascalCase } from "./naming";
 
@@ -39,10 +40,14 @@ export type GenerationInput =
       readonly kind: "feature";
       /** kebab-case の名前。 */
       readonly name: string;
+      /** 最初の画面。`features/<name>/<screen>/` を掘る。 */
+      readonly placement: FeaturePlacement;
       /** 生成先の層が `architecture.ts` で import を許されている層。 */
       readonly importsAllowed: readonly string[];
       /** 生成先の層 README が宣言する契約。 */
       readonly contract: LayerContract;
+      /** `feature-readme.md` の全文。README はこの写しとして出す。 */
+      readonly readmeTemplate: string;
     }
   | {
       readonly kind: "component";
@@ -72,46 +77,171 @@ function frontmatter(importsAllowed: readonly string[], contract: LayerContract)
   ].join("\n");
 }
 
+/** テンプレートが feature 名を受け取る placeholder。 */
+const FEATURE_NAME_PLACEHOLDER = "<feature 名>";
+
+/** テンプレート冒頭の frontmatter。本文とは別に扱う。 */
+const TEMPLATE_FRONTMATTER = /^---\n[\s\S]*?\n---\n*/;
+
 /**
- * 生成先から、リポジトリの根までさかのぼる段数を組む。
+ * feature の README。`feature-readme.md` の写しに、feature 名だけを入れて出す。
  *
  * @remarks
- * 書き出す文字列の中の相対パスは、書き出す先を基準に組みます。段数を書き固めると、
- * 生成先の深さが変わったときにリンクが解決しません。
+ * 節の構成はテンプレートが正で、ここでは持ちません。frontmatter だけはテンプレートの写しではなく、
+ * `architecture.ts` と層 README から組みます —— 境界の宣言の正はそちらで、写しを持つと
+ * 片方だけが動いたときに生成物が古い宣言を運びます。
  */
-function toRoot(directory: string): string {
-  return "../".repeat(directory.split("/").length);
+function featureReadme(input: Extract<GenerationInput, { kind: "feature" }>): string {
+  const body = input.readmeTemplate.replace(TEMPLATE_FRONTMATTER, "");
+
+  return `${frontmatter(input.importsAllowed, input.contract)}\n\n${body.replaceAll(
+    FEATURE_NAME_PLACEHOLDER,
+    input.name,
+  )}`;
 }
 
-/** feature の README。層の必須節をすべて持つ。 */
-function featureReadme(
-  name: string,
-  importsAllowed: readonly string[],
-  contract: LayerContract,
-  directory: string,
+/** formatter が 1 行に許す幅。`biome.json` の `formatter.lineWidth` と同じ値。 */
+const LINE_WIDTH = 100;
+
+/**
+ * `withScreenSpan` で包んだ export を、formatter が出す形で組む。
+ *
+ * @remarks
+ * 呼び出しの 1 行目が幅に収まるなら最後の引数だけを開き、収まらなければ引数ごとに折る、という
+ * formatter の規則は識別子と置き場の長さで結果が変わります。生成物を整形に掛けずに規約へ
+ * 載せるため、同じ判定をここで行います。
+ *
+ * @param parameters - 描画関数の引数部。`({ title }: Props)` / `async ()` の形
+ * @param body - 描画関数の本文。インデント無しの行の並び
+ */
+function screenSpanExport(
+  symbol: string,
+  spanName: string,
+  parameters: string,
+  body: readonly string[],
 ): string {
-  return `${frontmatter(importsAllowed, contract)}
+  const head = `export const ${symbol} = withScreenSpan(`;
+  const hugged = `${head}"${spanName}", ${parameters} => {`;
+  const indent = (depth: number) => body.map((line) => `${" ".repeat(depth)}${line}`).join("\n");
 
-# ${name}
+  if (hugged.length <= LINE_WIDTH) {
+    return `${hugged}\n${indent(2)}\n});\n`;
+  }
 
-<!-- TODO: この feature が何のために在るかを 1 文で書いてください。 -->
+  return `${head}\n  "${spanName}",\n  ${parameters} => {\n${indent(4)}\n  },\n);\n`;
+}
 
-## 受け入れるもの
+/**
+ * 画面の表示（`view.tsx`）の雛形。
+ *
+ * @remarks
+ * 取得を持たず、値を props で受けて組み立てるだけの形で出します。取得を `page-content` の側へ
+ * 寄せておくと、画面が取る状態を取得なしで story とテストから出せます。
+ */
+function featureView(symbol: string, spanName: string, screen: string): string {
+  return `import { withScreenSpan } from "@/observability/render-span";
 
-<!-- TODO: ここが引き受ける関心を列挙してください。 -->
+/** \`${symbol}\` の props。 */
+export type ${symbol}Props = {
+  /** 見出しに表示する文言。 */
+  readonly title: string;
+};
 
-## 受け入れないもの
+/**
+ * ${screen} の表示。
+ *
+ * @remarks
+ * 取得を持ちません。\`page-content\` が取った値を props で受け、画面を組み立てるだけにします。
+ *
+ * TODO: 受け入れる関心と、受け入れない関心を README と揃えてから実装してください。
+ */
+${screenSpanExport(symbol, spanName, `({ title }: ${symbol}Props)`, [
+  "return (",
+  "  <section aria-label={title}>",
+  "    <h2>{title}</h2>",
+  "  </section>",
+  ");",
+])}`;
+}
 
-- ${contract.forbidden.join(" / ")}
+/** 画面の取得と組み立て（`page-content.tsx`）の雛形。 */
+function featurePageContent(symbol: string, viewSymbol: string, spanName: string): string {
+  return `import { withScreenSpan } from "@/observability/render-span";
+import { ${viewSymbol} } from "./view";
 
-## 構成
+/**
+ * 取得と組み立て。
+ *
+ * @remarks
+ * TODO: \`adapters\` から取得し、表示モデルへ写した値を \`${viewSymbol}\` へ渡してください。
+ * 生成型（\`src/adapters/gen/\`）はここへ持ち込まないこと。
+ */
+${screenSpanExport(symbol, spanName, "async ()", [`return <${viewSymbol} title="見出し" />;`])}`;
+}
 
-<!-- TODO: 公開する要素と、その責務を列挙してください。 -->
+/**
+ * 画面まるごとの story。`title` は `Page/<feature>/<画面>` で、`components/README.md` の体系に従う。
+ *
+ * @remarks
+ * route と同じ器で包むのは実装する人の仕事です。ここは読み幅の器と既定の 1 本、説明を書く場所
+ * だけを出します。
+ */
+function featureStory(symbol: string, title: string): string {
+  return `import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-## 運用
+import { ContentContainer } from "@/components/shell/content-container/content-container";
 
-- import してよい層は \`${importsAllowed.join(" / ")}\` です（\`architecture.ts\` が正）。
-- テスト責務は \`${contract.testRequirement}\` です（[0090](${toRoot(directory)}docs/adr/0090-testing-strategy.md)）。
+import { ${symbol} } from "./view";
+
+const meta = {
+  title: "${title}",
+  component: ${symbol},
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      story: { inline: false, iframeHeight: 900 },
+      description: {
+        component:
+          "TODO: この画面が何のためにあるかと、カタログで確かめられる範囲を書いてください。",
+      },
+    },
+  },
+  decorators: [
+    // TODO: route の layout が置く shell と、page が置く見出し・読み幅をここで再現してください。
+    (Story) => (
+      <ContentContainer className="py-8">
+        <Story />
+      </ContentContainer>
+    ),
+  ],
+  args: { title: "見出し" },
+} satisfies Meta<typeof ${symbol}>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/** 既定の見え方。TODO: 画面が取る状態（loading / empty / error / success）ごとに story を足してください。 */
+export const Default: Story = {};
+`;
+}
+
+/** `page-content.tsx` に対応するテスト。取得の差し替えと組み立ての観点は scaffold-test へ渡す。 */
+function featurePageContentTest(symbol: string): string {
+  return `// @vitest-environment jsdom
+
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+
+import { ${symbol} } from "./page-content";
+
+describe("${symbol}", () => {
+  // ----- 正常系 -----
+  it("取得した値で画面を組み立てる", async () => {
+    render(await ${symbol}());
+
+    expect(screen.getByRole("heading", { name: "見出し" })).toBeVisible();
+  });
+});
 `;
 }
 
@@ -284,17 +414,32 @@ export function planGeneration(input: GenerationInput): readonly GeneratedFile[]
     ];
   }
 
+  const { screen } = input.placement;
+  const screenSymbol = toPascalCase(screen);
+  const viewSymbol = `${screenSymbol}View`;
+  const pageContentSymbol = `${screenSymbol}PageContent`;
   const directory = `src/features/${input.name}`;
+  const screenDirectory = `${directory}/${screen}`;
+  const spanPrefix = `features/${input.name}/${screen}`;
 
   return [
+    { path: `${directory}/README.md`, content: featureReadme(input) },
     {
-      path: `${directory}/README.md`,
-      content: featureReadme(input.name, input.importsAllowed, input.contract, directory),
+      path: `${screenDirectory}/view.tsx`,
+      content: featureView(viewSymbol, `${spanPrefix}/view`, screen),
     },
     {
-      path: `${directory}/${input.name}.tsx`,
-      content: componentSource(symbol, `${input.name} の画面スライス`),
+      path: `${screenDirectory}/view.stories.tsx`,
+      content: featureStory(viewSymbol, `Page/${symbol}/${screenSymbol}`),
     },
-    { path: `${directory}/${input.name}.test.tsx`, content: componentTest(symbol, importPath) },
+    { path: `${screenDirectory}/view.test.tsx`, content: componentTest(viewSymbol, "./view") },
+    {
+      path: `${screenDirectory}/page-content.tsx`,
+      content: featurePageContent(pageContentSymbol, viewSymbol, `${spanPrefix}/page-content`),
+    },
+    {
+      path: `${screenDirectory}/page-content.test.tsx`,
+      content: featurePageContentTest(pageContentSymbol),
+    },
   ];
 }

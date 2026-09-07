@@ -48,3 +48,6 @@
 "scripts/gen/index.ts" = "2026-09-07"
 "scripts/gen/component-placement.ts" = "2026-09-07"
 "scripts/gen/manifest.ts" = "2026-09-07"
+"scripts/gen/feature-placement.ts" = "2026-09-07"
+"scripts/gen/option-value.ts" = "2026-09-07"
+"docs/templates/feature-readme.md" = "2026-09-07"

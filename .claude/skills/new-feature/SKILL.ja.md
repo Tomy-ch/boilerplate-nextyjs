@@ -72,7 +72,7 @@
 
 ## Step 3. story 先行（工程 2）
 
-スライスに `pnpm gen feature <name>` を、設計が要求する共有部品に `pnpm gen component <name> --as=<見出し>` を回す。
+スライスに `pnpm gen feature <name> --screen=<画面>` を、設計が要求する共有部品に `pnpm gen component <name> --as=<見出し>` を回す。
 配置・命名・境界は生成器に委ね、**手で置かない**。生成器が取る入力以外を渡さない（`architecture.ts`
 ＋層 README が唯一の入力であり、`docs/spec/**` は**生成入力ではない**）。
 

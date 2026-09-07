@@ -18,9 +18,13 @@ Accepted
 - **`.stories.*` ファイルは対象コンポーネントに co-locate する**([0027](0027-directory-structure.md) の co-location に story ファイルを乗せる)
 - Storybook 本体および addon の依存追加は **exact pin + `pnpm audit`**([0004](0004-library-management.md))。CI 上のビルド組込は [0153](0153-ci-configuration.md) が持つ(本 ADR では二重に決めない)
 - **story は「そのコンポーネントが何のためにあるか」を、開いた canvas から読める形で示す。** default 1 本で終えず、その部品自身が表現する状態(variant / disabled / invalid / 開いた状態など)へ canvas 上で到達できるようにする。**story 名が約束した状態に canvas が届いていないものはカタログとして成立していない**
+  - **hover でだけ現れる面は、play で focus まで進めて開く。** 撮影は pointer を持たないため、hover に任せた面は開いた姿が基準画像に一度も写らない。focus で同じ面が開くことは a11y 契約([0053](0053-ui-component-interaction-seam.md))が要求しており、play はその経路を使う
 - **画面固有の業務語彙・API・route を story に埋め込まない。** カタログは boilerplate を利用する人が参照する中立な面であり、業務文脈を伴う実例は feature 側の story か画面実装に置く
 - **story の表示分類は実装の配置や依存方向を決めない。** 分類は閲覧のためのものであり、`title` の具体的な体系は `components/README.md` が所有する(本 ADR では固定しない)。ただし**画面まるごとの story は feature を跨いで合成してよい**([0021](0021-frontend-responsibility.md) の昇格ルールの例外)。これは分類が依存を決めるのではなく、確認専用の面に限って製品コードと別の権限を与える判断である
 - **画面まるごとの story は route と同じ器で包む。** その route の layout が置く shell と、page が置く見出し・階層・読み幅を story 側で再現する。再現しないと余白と重心が実物とずれ、画面がどう収まるかを取得なしで確かめるというこの story の目的を果たせない
+  - **再現に含めるのは layout / page が置くものだけではない。** 本文の取り分を変える常設領域(脇に開く panel など)の開閉と、`Suspense` の殻の側に居て view の外にある節も含める。前者は開閉で本文の幅が変わり、後者は枠に置かないと段の見え方が実物とずれる
+  - **story のための種まきが立てた副作用は、その場で畳む。** 初期状態を作るために store へ値を入れると、実際の操作と同じ通知や要求が立つことがある。種まきは初期状態の再現であって利用者の追加操作ではないので、それらは畳んでから描く
+- **story ごとに違う値を要る器は、decorator ではなく component として組む。** decorator は `parameters` 経由でしか値を受けられず、効いている条件が型を失う。component なら条件を story の args として型のまま扱える
 - **a11y の自動検査を Storybook に載せる。** story 全数へ検査を効かせ、違反ゼロを取り込みの完了条件に含める([0100](0100-accessibility-target.md) の自動検査手段の 1 つ)。検査の実体は **visual regression と同じコンテナで走る axe**([0091](0091-test-verification-methods.md) §2)で、`addon-a11y` は対話パネルとして手元の確認に使う
 
 ## 1 部品あたりの主題
@@ -42,6 +46,7 @@ Accepted
 - 差し替えの**実体は対象の隣の `__mocks__/`** に置く([0027](0027-directory-structure.md) が置き場の例外を持つ)。実体を持たない自動差し替えは元のモジュールの import をそのまま残すため、`adapters/server` と `config` がブラウザで読まれる状態が消えない
 - 既定の戻り値は**成功**とする。失敗の見え方を出す story は `mocked()` で戻り値を差し替える
 - **送信を起こさない口も解決済みで返す。** 押した先で何も起きないことを、待ち続けない形で示す(永久 pending にしない)
+- **submit を持つ部品の story は、`action` を持つ `form` で包む。** `action` の無い `form` の submit は現在 URL への GET になり、押した瞬間にカタログごと読み込み直される。送信先は実物でも器が配るので、story でも器が配る
 - カタログのために**本番コードへ口を足さない**(Server Action を props で受け取る形へ変える等。[0090](0090-testing-strategy.md) の禁止事項と同じ線)
 
 ### Route Handler — 同一オリジンの `/api/*` を横取りする

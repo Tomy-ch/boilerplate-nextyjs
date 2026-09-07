@@ -56,9 +56,14 @@ flowchart TD
 [`features/products/README.md`](../src/features/products/README.md) が持つ。
 <!-- sample:end -->
 
+<!-- sample:replace-begin -->
 **層ごとの README も同じ役割を持つ。**入口は
 [`src/features/README.md`](../src/features/README.md) で、そこから各カーネルの README へ辿れる。
 サンプルを捨てた後に残るのはこちらである。
+<!-- sample:replace-with -->
+<!-- = **同じ形の実物がまだ無いなら、層ごとの README が同じ役割を持つ。**入口は -->
+<!-- = [`src/features/README.md`](../src/features/README.md) で、そこから各カーネルの README へ辿れる。 -->
+<!-- sample:replace-end -->
 
 ## 画面を作るときの順序
 

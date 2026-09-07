@@ -92,7 +92,7 @@
 | [`portal/`](portal/) | 生成ビュー。生成器が書き直す |
 | `plan/` | 過程の成果物。テンプレートから作った側へ配るものではない |
 | `get-started/` | 手順。テンプレートから作る前提が死ぬと消える |
-| [`screens.md`](spec/screens.md) | 輸入したサンプルの画面表。残す側の文書ではない <!-- boilerplate-only:line --> |
+| [`screens.md`](spec/screens.md) | 輸入したサンプルの画面表。残す側の文書ではない <!-- sample:line --> |
 
 **対訳（`*.ja.md`）は正典の写しであって、別の置き場ではない。** 知識を探すのも、判定を当てるのも、
 書き換えるのも正典に対して行い、対訳はそれに追従する（[0140](adr/0140-documentation-operations.md)）。

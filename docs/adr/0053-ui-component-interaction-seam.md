@@ -36,7 +36,7 @@ interaction UI は、**ライブラリより先にプラットフォーム標準
 
 - **WYSIWYG エディタは TipTap を採用**する。エディタ本体は `components` カーネルに置き、[0052](0052-ui-component-policy.md) の配置・exact-pin 要件に従う
 - **採る理由はエディタ本体ではなく、その隣に要る表示側の継ぎ目にある。** 利用者が書いた内容を安全に表示する経路は、**後から足すと「通し忘れ」が既に散った後**になる。同梱するのは、その経路を型で塞いだ形(下記の port と nominal type)を実物として置くためであり、作った側がエディタ本体を差し替えてもこの形は残る
-- 実使用面は、**利用者が書いた長文が他の利用者へ表示される欄**である。そういう欄を持たない作った側は、エディタごと落として sanitizer port だけを残してよい <!-- sample:line -->
+- **エディタ本体が要るのは、利用者が書いた長文が他の利用者へ表示される欄を持つときだけ**である。そういう欄を持たない作った側は、エディタごと落として sanitizer port だけを残してよい。差し替えても落としても、残るべき形(port と nominal type)は変わらない
 - 「表示」側の拡張点(seam): **信頼できない HTML を安全な表示へ変換する sanitizer を、差し替え可能な named port(seam)として扱う**(rehype/rehype-sanitize / DOMPurify 等は port の実装であって本体前提ではない)。リッチテキスト表示は、この sanitizer port を必ず通す
 - sanitizer port は外部ライブラリの wrap であり、[0021](0021-frontend-responsibility.md) のカーネル受入基準(複数箇所参照 or 外部ライブラリ wrap → カーネル)に従って **`model` カーネル**に置く。表示 seam(sanitize 済みコンテンツの描画)は `components` に置く
 - **port は sanitize 済みであることを型で表す。** 通過後の値を nominal type として返し、表示側はその型だけを受け取る。生の HTML 文字列を props に取らないため、**sanitizer を迂回する経路が公開 API にも実装にも存在しない**。「通し忘れ」を規約ではなく型で塞ぐ形である

@@ -126,9 +126,10 @@ cookie がまだ無い session 確立の 1 往復だけは `bearerToken` とい�
 広げた時点でこの計算は崩れます。
 <!-- sample:end -->
 
-閾値は `NEXT_PUBLIC_HTTP_MAX_URL_BYTES` が持ちます（[env/README](../../env/README.md)）。直値で
-持たないのは、経路のどこが最初に弾くかが配信構成で決まるためです。テンプレートから作った側は自分の経路の
-最小値へ書き換えてください。`NEXT_PUBLIC_` はビルド時にリテラルへ置換されるため、変更には再ビルドが要ります。
+**閾値は経路が最初に弾く長さで、実務上は 8 KB 前後です。** 値は `NEXT_PUBLIC_HTTP_MAX_URL_BYTES` が
+持ちます（[env/README](../../env/README.md)）。直値で持たないのは、経路のどこが最初に弾くかが配信構成で
+決まるためです。テンプレートから作った側は自分の経路の最小値へ書き換えてください。`NEXT_PUBLIC_` は
+ビルド時にリテラルへ置換されるため、変更には再ビルドが要ります。
 
 判定は `http/url-budget.ts` の 1 つで、呼ぶのは 2 つの要求境界——`server/http/request.ts` と
 `client/http/request.ts`——だけです。**画面ごとの事前チェックは置きません。** 閾値は画面からは

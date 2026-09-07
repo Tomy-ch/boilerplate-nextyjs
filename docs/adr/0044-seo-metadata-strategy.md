@@ -32,6 +32,8 @@ Accepted
 - サイトマップは **`app/sitemap.(xml|ts)`**、クローラ制御は **`app/robots.(txt|ts)`** で Next.js 規約に従い生成する(独自の静的ファイル配置・手書き XML 生成を作らない)。URL 数が多い場合は **`generateSitemaps`** で分割する
 - 収録 URL・`Disallow` パス・`changefreq` 等の**具体内容は用途依存**(ルート構成に従属)のため作った側で確定。boilerplate 本体は仕組み(このファイル規約を使う方針)を定める
 - **索引させてよいかは環境が宣言する**(`SITE_INDEXABLE`。[0030](0030-environment-variable-management.md))。宣言の無い環境は `robots.txt` が巡回を拒み、画面が `noindex` を出す。索引を許す側だけが明示する
+- **サイトマップが一覧を末尾まで辿るなら、辿った結果は要求をまたいで持つ**(`use cache`。所有と寿命の規約は [0071](0071-bff-api-integration.md))。クローラは同じ URL を繰り返し開くため、開くたびに辿ると 1 要求が一覧の件数ぶんのバックエンド呼び出しへ膨らむ
+- **メタデータの route は部分的に劣化させる。** 動的な一覧の取得が失敗しても、取得できた分と、バックエンドに依らない静的な経路は返す。1 系統の失敗で全体を 500 にすると、クローラは静的な画面の存在まで知れなくなる
 
 ### 3. canonical / alternates
 
@@ -76,6 +78,7 @@ Accepted
 - ❌ 手書き `<link rel="canonical">` を置くこと(`alternates.canonical` を使う)
 - ❌ `proxy.ts` でメタデータファイルを巻き込むこと(Proxy の対象外とする)
 - ❌ 公開面の検査を存在確認だけで済ませること(§7)
+- ❌ 動的な一覧の取得が失敗したとき、`sitemap` 全体を 500 で返すこと(§2。静的な経路まで一緒に落とさない)
 - ❌ 用途依存の具体値(タイトル文言・収録 URL・JSON-LD type)を boilerplate 本体で固定すること(枠のみ・値は作った側)
 
 ## 関連 ADR

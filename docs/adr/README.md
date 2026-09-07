@@ -39,10 +39,12 @@
 - [0044-seo-metadata-strategy.md](0044-seo-metadata-strategy.md) - SEO / メタデータ戦略（Metadata API / sitemap・robots / canonical / JSON-LD / アイコン体系）
 - [0045-fonts-and-images.md](0045-fonts-and-images.md) - フォント・画像（next/font / next/image / public/ / 動的 OG）
 - [0050-styling-strategy.md](0050-styling-strategy.md) - スタイリング戦略（Tailwind 主軸 + CSS Modules 限定許可 / `cn()` / design token = CSS 変数）
-- [0051-styling-system.md](0051-styling-system.md) - スタイリング体系（デザイントークン / レスポンシブ / モーション = Framer Motion / 印刷）
+- [0051-styling-system.md](0051-styling-system.md) - スタイリング体系（デザイントークン / レスポンシブ / モーション = Framer Motion / 印刷 / 重なり順の帯）
 - [0052-ui-component-policy.md](0052-ui-component-policy.md) - UI コンポーネント方針（shadcn/ui + Tabler アイコン採用）
 - [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) - UI コンポーネント方針とインタラクション a11y seam
 - [0054-ui-catalog-storybook.md](0054-ui-catalog-storybook.md) - UI カタログ（Storybook）方針
+- [0055-design-system-export.md](0055-design-system-export.md) - デザインシステムの外部書き出し（成果物は tool 非依存 / 配送だけが vendor を知る / 取り込みは一方向）
+- [0056-mock-app-exclusion.md](0056-mock-app-exclusion.md) - mock app を公開しない（exclusion）
 - [0060-state-management.md](0060-state-management.md) - 状態管理方針（Server state = fetch 既定 / Client = local 既定 / react-hook-form・Zustand 採用）
 - [0061-form-mutation-ux.md](0061-form-mutation-ux.md) - フォーム送信フローの canonical 機構（`<form action>` + `useActionState` + `useFormStatus`）
 - [0062-form-input-validation.md](0062-form-input-validation.md) - フォーム入力検証 UX（client 検証 / 生成 zod の再利用境界）
@@ -72,6 +74,7 @@
 <!-- boilerplate-only:replace-end -->
 - [0111-csp-security-headers.md](0111-csp-security-headers.md) - CSP・セキュリティヘッダ（実行時）
 - [0112-data-classification-cache-boundary.md](0112-data-classification-cache-boundary.md) - データ分類とキャッシュ境界（PII / user-scoped / secret の置き場と段ごとの関所）
+- [0113-development-access-surface.md](0113-development-access-surface.md) - 開発用の口の制御面（到達したい状態で決める / build 除外と実行時判定は別の保証）
 - [0120-locale-aware-formatting.md](0120-locale-aware-formatting.md) - ロケール対応フォーマット（日付・数値 + Intl / date-fns 日付演算）
 - [0121-i18n-strategy.md](0121-i18n-strategy.md) - i18n 戦略（本体非同梱 = exclusion / 採用時の seam）
 - [0130-pwa-strategy.md](0130-pwa-strategy.md) - PWA 戦略（Manifest / SW / オフライン本体非同梱 = exclusion）
@@ -79,6 +82,9 @@
 - [0140-documentation-operations.md](0140-documentation-operations.md) - ドキュメント運用ポリシー（EN canonical 方向・移行 v1 / タクソノミー / rules.md 新設 / ADR 不可変性）
 - [0141-portal-operations.md](0141-portal-operations.md) - ポータル運用（manifest = 構造制御 / 登録基準 / GitHub Pages / 実装は Phase 3）
 - [0142-license.md](0142-license.md) - ライセンス選定（MIT 採用根拠 / OSS 寄与 = inbound=outbound / 同梱ライブラリ整合 / private:true との関係）
+- [0143-spec-driven-development.md](0143-spec-driven-development.md) - 仕様書駆動（画面要件を仕様書として持つ / 生成 scaffold を持たない / v1.0.0 到達前に構築を完了する）
+- [0144-decision-enforcement-pairing.md](0144-decision-enforcement-pairing.md) - 決定と強制手段の併記（散文へ逃がす前に機械強制を検討する / 寄せられない理由を書く）
+- [0145-docs-viewer-package-boundary.md](0145-docs-viewer-package-boundary.md) - docs-viewer のパッケージ境界（依存分離をパッケージ境界で担保する）
 - [0150-git-workflow.md](0150-git-workflow.md) - Git ブランチ・コミット運用方針
 - [0151-git-hooks.md](0151-git-hooks.md) - Pre-commit / Pre-push hook 運用方針（lefthook 採用）
 - [0152-agents-md-policy.md](0152-agents-md-policy.md) - AGENTS.md 運用方針
@@ -86,3 +92,6 @@
 - [0154-claude-skills-operations.md](0154-claude-skills-operations.md) - Claude スキル運用方針（運用系）
 - [0155-claude-skills-development.md](0155-claude-skills-development.md) - Claude スキル運用方針（開発系）
 - [0156-browser-observation-tooling.md](0156-browser-observation-tooling.md) - ブラウザ実測ツール（3 レーンの分担 / CLI 前提・MCP 登録なし / 実プロファイル非接続 / 取得経路は pnpm と mise の使い分け）
+- [0157-inspection-declaration-discipline.md](0157-inspection-declaration-discipline.md) - 検査の宣言規律（成立しない検査を「違反なし」へ倒さない / 抑止は理由と撤去条件を持つ）
+- [0158-code-search-tooling.md](0158-code-search-tooling.md) - コード検索・影響解析ツール（採用範囲 / 導入経路 / allow・deny 境界）
+- [0159-script-structure.md](0159-script-structure.md) - 補助スクリプトの言語と構造（TypeScript / 1 ツール 1 ディレクトリ / 入口と判定の分離）

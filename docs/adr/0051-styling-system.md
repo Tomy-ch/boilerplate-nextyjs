@@ -31,7 +31,7 @@ Accepted
   - **系統は `:root` ではなく部分木に置く。** App Router では入れ子の layout から `<html>` の属性を触れないため、経路として成立するのは部分木だけである。ただし **Portal の出口を含む位置でなければならない** —— overlay は `document.body` 直下へ出るため、本文の内側に置くと overlay だけ既定の系統で描かれる(経路の分担は [0050](0050-styling-strategy.md))。
   - **既定の系統は属性を置かない木に出す。** 詳細度は系統が `(0,1,0)`、配色が `(0,2,0)`、両方揃った範囲が `(0,3,0)` と積み上がり、同じ木では系統と配色の両方を指定した宣言が勝つ。
   - **`color-scheme` は配色の軸だけが宣言する。** 系統の側にも出すと同じ条件を二重に持ち、片方だけがずれる。
-- **スケールの対象軸**: color / spacing / typography(size・line-height・weight・tracking)/ radius / shadow / text-shadow / blur。z-index スケールの token 化は本 ADR の 2 層モデルに乗る同型の関心だが、レイヤリング規約として `docs/rules.md` 側で扱う(本 ADR は「z も token 化する」土台のみ示す)。
+- **スケールの対象軸**: color / spacing / typography(size・line-height・weight・tracking)/ radius / shadow / text-shadow / blur。z-index は token 化していない。段階値のどれがどの帯を意味するかは本 ADR の「重なり順の帯」が持ち、段階値だけを使う日常 rule は `docs/rules.md` 側にある。
 
 ### 2. レスポンシブ = viewport ブレークポイント(mobile-first)+ コンテナクエリ
 
@@ -131,6 +131,25 @@ component 層を認めるのは、破棄の機構が入ったためである。*
 
 器の幅で決める部品は、**親が `container-type` を持つことを前提にする**。その前提は story でも満たすこと(器を固定せずに撮った基準画像は実物と一致しない)。
 
+### 重なり順の帯
+
+z-index は Tailwind の段階値だけを使い、任意値で段を増やさない(日常 rule は [`docs/rules.md`](../rules.md))。ここが持つのは、**どの段階値がどの帯を意味するか**である。帯は 4 つで、帯の間の値(`z-20`)は空けておく。
+
+| 帯 | 値 | 何が乗るか |
+| --- | --- | --- |
+| **本文の中の重なり** | `z-10` | 本文の流れの中で貼り付くもの。内容の中の sticky な header / footer、表の固定列、scroll 領域の下端に貼り付ける操作(`sticky`) |
+| **画面が自分で貼る帯** | `z-30` | 1 つの画面が骨格の内側に置く貼り付き。header の直下へ貼る検索の帯、下端から出し入れする集計の器 |
+| **画面の骨格** | `z-40` | shell の header と、viewport の下端に固定する操作(`fixed`) |
+| **overlay** | `z-50` | `document.body` へ出るものすべて。dialog / sheet / menu / popover / tooltip、toast の領域、同意を尋ねる面、focus で現れる skip link、引き下げ更新の表示 |
+
+上の帯は下の帯の**全部**より上に来る。**帯の中の前後は DOM 順が決め、値では解かない** —— 同じ帯で「こちらを上に」が要るなら、それは帯の割り当てが違う合図である。
+
+**部品の内側の重なりは帯ではない。** 重なる avatar、focus で持ち上げる境界線、上へ被せる押下面のような部品の内側の重なりは、部品自身が作る stacking context の中で閉じる。その中の値は帯と競合しないため `z-10` / `z-20` を使ってよいが、部品の外へ効かせない。
+
+**重なる面は不透明にする。** どの帯でも、貼り付いているあいだ本文がその下を通る。透けると文字が重なって読めない。
+
+**safe area は、viewport の下端に固定する面が取る。** `z-40` で下端に固定する操作は、下端の余白を通常の余白と `env(safe-area-inset-bottom)` の大きいほうにする。scroll 領域に貼り付けるだけの面(`z-10` の `sticky`)は取らない —— 文書の下端は system UI の手前で終わり、貼り付く面がその下へ入らない。`env()` が 0 でない値を返すかは viewport の宣言(`viewport-fit`)が決め、その宣言は画面の側が持つ。部品はどちらでも成立する形で余白を書き、宣言の有無で部品を変えない。
+
 ## 禁止事項
 
 - ❌ semantic 層を飛ばして primitive(生スケール)や色リテラルをコンポーネントに直接撒くこと(テーマ切替が token 差し替えに閉じなくなる。§1)
@@ -146,6 +165,8 @@ component 層を認めるのは、破棄の機構が入ったためである。*
 - ❌ Framer Motion 以外の別モーションライブラリ(GSAP / React Spring 等)を勝手に併存させること(採用は Framer Motion に一本化。追加が必要なら ADR 改定でユーザ確定)
 - ❌ 表示層で PDF をサーバ生成する実装を持ち込むこと(backend 境界 seam を越える。§4)
 - ❌ 器の導線(header / footer / skip link)を紙に出すこと、および画面が落とす中身を器に判定させること(§4)
+- ❌ 同じ帯の中の前後関係を新しい段階値で解くこと、および部品の内側の重なりに使う値を部品の外へ効かせること(§重なり順の帯)
+- ❌ viewport の下端に固定する面から safe area の余白を落とすこと、または viewport の宣言の有無で部品を変えること(§重なり順の帯)
 
 ## 補足
 
@@ -163,5 +184,6 @@ component 層を認めるのは、破棄の機構が入ったためである。*
 - [0100-accessibility-target.md](0100-accessibility-target.md) — a11y 目標(WCAG AA)。reduced-motion 尊重は WCAG SC 2.3.3(AAA)に対応し AA 直接義務ではないため、その根拠水準は本 ADR §3 側で明記(Framer Motion 使用時も同じく必須)
 - [0052-ui-component-policy.md](0052-ui-component-policy.md) — UI コンポーネントライブラリの採用(shadcn/ui 等)。モーションライブラリの採用帰属は本 ADR 側に一元化(補足参照)
 - [0045-fonts-and-images.md](0045-fonts-and-images.md) — `next/font` の読み方(§5 の和文本文書体の相方)
+- [0055-design-system-export.md](0055-design-system-export.md) — token と部品をデザインツールへ渡す向き(repo → ツールの一方向。補足の「同期方式は射程外」の相方)
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) / [0026-layout-shell-mount.md](0026-layout-shell-mount.md) — 局所性原則 / レイアウトシェル(§2 の viewport vs コンテナクエリ使い分けの土台。§4 の器が紙に出さない判断の主体)
 - [0070-backend-role-separation.md](0070-backend-role-separation.md) — PDF サーバ生成を切り出す backend 境界(§4)

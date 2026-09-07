@@ -109,10 +109,12 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0044](docs/adr/0044-seo-metadata-strategy.md) | SEO / metadata | metadata API strategy |
 | [0045](docs/adr/0045-fonts-and-images.md) | Fonts / images | `next/font` / `next/image` policy |
 | [0050](docs/adr/0050-styling-strategy.md) | Styling strategy | Tailwind v4 + design tokens / `cn()` helper / CSS Modules limited allowance |
-| [0051](docs/adr/0051-styling-system.md) | Styling system | design tokens / responsive / motion (Framer Motion) / print |
+| [0051](docs/adr/0051-styling-system.md) | Styling system | design tokens / responsive / motion (Framer Motion) / print / z-index bands |
 | [0052](docs/adr/0052-ui-component-policy.md) | UI component policy | shadcn/ui + @tabler/icons-react adopted / icon vendor closed into `src/components/icon.ts` |
 | [0053](docs/adr/0053-ui-component-interaction-seam.md) | UI interaction seam | UI component policy + interaction a11y seam |
 | [0054](docs/adr/0054-ui-catalog-storybook.md) | UI catalog | Storybook policy |
+| [0055](docs/adr/0055-design-system-export.md) | デザイン書き出し | 成果物は tool 非依存 / 配送だけが vendor を知る / 取り込みは一方向 |
+| [0056](docs/adr/0056-mock-app-exclusion.md) | mock app（除外） | 公開面として持たない（negative decision） |
 | [0060](docs/adr/0060-state-management.md) | State management | react-hook-form / Zustand adopted / server-state policy |
 | [0061](docs/adr/0061-form-mutation-ux.md) | Form submission UX | `<form action>` + `useActionState` + `useFormStatus` canonical mechanism |
 | [0062](docs/adr/0062-form-input-validation.md) | Form validation UX | client validation / generated-zod reuse boundary |
@@ -138,6 +140,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0110](docs/adr/0110-security-operations.md) | Security ops | Dependabot + cooldown / gitleaks secret scan (fail-closed) / vulnerability scan is report-only / suppression-policy format |
 | [0111](docs/adr/0111-csp-security-headers.md) | CSP / security headers | runtime CSP & security headers |
 | [0112](docs/adr/0112-data-classification-cache-boundary.md) | データ分類 / キャッシュ境界 | PII・user-scoped・secret の置き場 / 分類は取得の口が持つ / 段ごとの関所 |
+| [0113](docs/adr/0113-development-access-surface.md) | 開発用の口 | 制御面は到達したい状態で決める / build 除外と実行時判定は別の保証 |
 | [0120](docs/adr/0120-locale-aware-formatting.md) | Locale formatting | date/number formatting + date-fns date arithmetic |
 | [0121](docs/adr/0121-i18n-strategy.md) | i18n (exclusion) | i18n not adopted (negative decision) |
 | [0130](docs/adr/0130-pwa-strategy.md) | PWA (exclusion) | PWA not adopted (negative decision) |
@@ -145,6 +148,9 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0140](docs/adr/0140-documentation-operations.md) | Documentation ops | Japanese canonical on suffix-less paths below v1.0.0 / EN canonical + `.ja.md` mirror from v1.0.0 |
 | [0141](docs/adr/0141-portal-operations.md) | Portal ops | `docs/portal/manifest.yaml` curation |
 | [0142](docs/adr/0142-license.md) | License | MIT / OSS contribution policy / `private` flag alignment |
+| [0143](docs/adr/0143-spec-driven-development.md) | 仕様書駆動 | 画面要件を仕様書として持つ / 生成 scaffold を持たない |
+| [0144](docs/adr/0144-decision-enforcement-pairing.md) | 決定と強制手段 | 散文へ逃がす前に機械強制を検討する / 寄せられない理由を書く |
+| [0145](docs/adr/0145-docs-viewer-package-boundary.md) | docs-viewer 境界 | 依存分離をパッケージ境界で担保する |
 | [0150](docs/adr/0150-git-workflow.md) | Git workflow | Branch strategy / commit convention / PR operations / release process |
 | [0151](docs/adr/0151-git-hooks.md) | Git hooks | pre-commit / pre-push via lefthook |
 | [0152](docs/adr/0152-agents-md-policy.md) | AGENTS.md policy | File placement / language / 13-section structure / Instruction Priority / `## [TODO]` convention |
@@ -152,6 +158,9 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0154](docs/adr/0154-claude-skills-operations.md) | Claude skills (operations) | Operational skill placement / naming / frontmatter / commercial-action confirmation |
 | [0155](docs/adr/0155-claude-skills-development.md) | Claude skills (development) | Development skill placement / subagent pattern / `new-env` target structure |
 | [0156](docs/adr/0156-browser-observation-tooling.md) | Browser observation tooling | Three lanes (see / measure / dig) / CLI only, no MCP registration / no real-profile access / gates untouched |
+| [0157](docs/adr/0157-inspection-declaration-discipline.md) | 検査の宣言規律 | 成立しない検査を「違反なし」へ倒さない / 抑止は理由と撤去条件を持つ |
+| [0158](docs/adr/0158-code-search-tooling.md) | コード検索ツール | 採用範囲 / 導入経路 / allow・deny 境界 |
+| [0159](docs/adr/0159-script-structure.md) | スクリプト構造 | TypeScript / 1 ツール 1 ディレクトリ / 入口と判定の分離 |
 
 > **ADR numbering is finalized (2026-07-14): topical decade-bands.** Numbers are grouped by subject into decade bands (e.g. `002x` architecture, `004x` routing/rendering, `005x` styling/UI, `007x` data/BFF, `008x` error/observability, `015x` process/dev-ops); the former `Toolchain-` / `Dev-` prefixed ADRs were folded into the numeric sequence (`0150`+). Gaps between bands are reserved for future insertion. Each ADR body remains authoritative.
 

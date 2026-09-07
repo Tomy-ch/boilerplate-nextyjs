@@ -1,14 +1,19 @@
 // @vitest-environment jsdom
 
-import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
-
 import { AspectRatio } from "./aspect-ratio";
+import rawSource from "./aspect-ratio.tsx?raw";
 
-/** 実装そのもの。client boundary の有無は描画の結果に出ないため、宣言を文面として読む。 */
-const source = readFileSync(new URL("./aspect-ratio.tsx", import.meta.url), "utf8");
+/**
+ * 実装そのもの。client boundary の有無は描画の結果に出ないため、宣言を文面として読む。
+ *
+ * @remarks
+ * バンドラの生読み込みで引きます。`import.meta.url` から辿ると、ブラウザを模した環境では
+ * 文書の URL になって `file:` で解決できません。
+ */
+const source: string = rawSource;
 
 /** それだけで 1 行になった `"use client"`。あるとこの部品から先が client の束へ入る。 */
 const USE_CLIENT_DIRECTIVE = /^\s*(["'])use client\1;?\s*$/m;

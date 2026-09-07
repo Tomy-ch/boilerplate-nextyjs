@@ -27,7 +27,7 @@ Accepted
 
 ### 2. 本体に最小限残す防御(フロント領域で表現可能な防御)
 
-個々の Route Handler が **ボディサイズ上限・content-type 検証・入力バリデーション** を forwarding 前に行うことは、Next.js 公式 BFF ガイドの「proxy する前に validation を足す」パターンに乗る範囲であり、edge の有無に関わらず本体が持つ最小防御として Route Handler 規約(`docs/rules.md` #8)側で受ける。
+個々の Route Handler が **ボディサイズ上限・content-type 検証・入力バリデーション** を forwarding 前に行うことは、Next.js 公式 BFF ガイドの「proxy する前に validation を足す」パターンに乗る範囲であり、edge の有無に関わらず本体が持つ最小防御として Route Handler 規約(`docs/rules.md`「層境界と依存」の「Route Handler は Node runtime の薄い proxy に留める」)側で受ける。
 
 本体が同梱するテレメトリ中継(`/api/telemetry`)がその参照形である:
 
@@ -46,7 +46,7 @@ Accepted
 
 ## 補足
 
-- **タクソノミー**([0140](0140-documentation-operations.md)): 本 ADR は decision(abuse 保護の帰属確定)に属する。日常強制される rule(Route Handler 実装規約)は `docs/rules.md` #8 が持ち、本 ADR から逆参照する。
+- **タクソノミー**([0140](0140-documentation-operations.md)): 本 ADR は decision(abuse 保護の帰属確定)に属する。日常強制される rule(Route Handler 実装規約)は `docs/rules.md`「層境界と依存」の「Route Handler は Node runtime の薄い proxy に留める」が持ち、本 ADR から逆参照する。
 - **トピック上の関連**: 本 ADR(infra abuse 保護)は観測性 ADR([0081](0081-observability-logging.md))の中継 seam と密接に関連する(0081 が保護対象の無防備エンドポイントを生む起点であるため)。関連は索引・相互参照で表現する。
 
 ## 関連 ADR

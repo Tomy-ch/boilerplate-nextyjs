@@ -1,10 +1,26 @@
 // @vitest-environment jsdom
 
+import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
 import { AspectRatio } from "./aspect-ratio";
+
+/** 実装そのもの。client boundary の有無は描画の結果に出ないため、宣言を文面として読む。 */
+const source = readFileSync(new URL("./aspect-ratio.tsx", import.meta.url), "utf8");
+
+/** それだけで 1 行になった `"use client"`。あるとこの部品から先が client の束へ入る。 */
+const USE_CLIENT_DIRECTIVE = /^\s*(["'])use client\1;?\s*$/m;
+
+/** 値として引いている出所。`import type` は束に残らないので数えない。 */
+const VALUE_IMPORT = /^import\s+(?!type\s)[^;]*?from\s+"([^"]+)";$/gm;
+
+/** 引いた時点で client runtime を要求する出所。 */
+const CLIENT_ONLY_ORIGINS = ["react-dom", "next/navigation", "@/capabilities/", "@/stores/"];
+
+/** hook の呼び出し。出所を跨がなくても、hook を使えば client runtime が要る。 */
+const HOOK_CALL = /\buse[A-Z]\w*\(/;
 
 describe("AspectRatio", () => {
   it("指定した比率を CSS の aspect-ratio として与える", () => {
@@ -30,7 +46,15 @@ describe("AspectRatio", () => {
   it("client runtime を必要としない Server Component として描画する", () => {
     render(<AspectRatio ratio={16 / 9}>内容</AspectRatio>);
 
+    const origins = [...source.matchAll(VALUE_IMPORT)].map(([, origin]) => origin);
+    const clientOnly = origins.filter((origin) =>
+      CLIENT_ONLY_ORIGINS.some((prefix) => origin.startsWith(prefix)),
+    );
+
     expect(screen.getByText("内容")).toBeInTheDocument();
+    expect(source).not.toMatch(USE_CLIENT_DIRECTIVE);
+    expect(clientOnly).toEqual([]);
+    expect(source).not.toMatch(HOOK_CALL);
   });
 
   it("className と style を呼び出し元が拡張できる", () => {

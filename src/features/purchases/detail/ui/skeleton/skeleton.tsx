@@ -12,7 +12,9 @@ const LINES = Array.from({ length: PLACEHOLDER_LINES }, (_, index) => index);
  * @remarks
  * **実物と同じ段組み・同じ高さで枠を出します。** 控えと集計の 2 枚、購入した商品の一覧、
  * 戻る導線まで、届いたときに位置が動く要素をすべて先に場所取りします。枠が実物より短いと、
- * 穴が埋まった瞬間に下の要素が押し下げられます（`docs/rules.md` #17 / #17b）。
+ * 穴が埋まった瞬間に下の要素が押し下げられます（`docs/rules.md`「状態表示と待機」の
+ * 「loading は形状が近い skeleton を優先する」と「UI 部品と操作」の
+ * 「状態で出入りする表示で操作の位置を動かさない」）。
  */
 export const PurchaseDetailSkeleton = withPartSpan(
   "features/purchases/detail/ui/skeleton/skeleton",

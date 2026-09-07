@@ -145,7 +145,7 @@ the `required-sections:` list its header comment declares. That template is the 
 truth for what a feature README must carry; if it gains or loses a section, this check follows
 without editing this skill. **Do not derive the set from the template's H2 headings** — the template
 also carries sections that are deliberately optional (a design-rationale section whose heading name
-is not fixed, and a fork-notes section that only some slices need), and treating those as required
+is not fixed, and a template-adaptation section that only some slices need), and treating those as required
 would fail every README in the repository.
 
 The table below explains what each currently-declared section means. It is a reading aid, not the

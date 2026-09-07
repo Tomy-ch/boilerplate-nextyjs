@@ -152,7 +152,7 @@ EC サンプルのバックエンド由来画像は `imagePath` だけを API �
 代わりに **`components` カーネルに画像用ローディングコンポーネント**を置く。
 
 - 既定は **CSS のみのスケルトン**(ラッパに `aspect-ratio` + スケルトン背景、その上に `<Image fill>`)。`"use client"` 不要で [0040](../adr/0040-routing-rendering-strategy.md) と整合
-- アスペクト比固定が CLS 対策を兼ねる(`rules.md` #17 の「スケルトンと実 UI の形状一致」)
+- アスペクト比固定が CLS 対策を兼ねる(`rules.md`「状態表示と待機」の「loading は形状が近い skeleton を優先する」)
 - エラー時フォールバックが必要な場合のみ `onError` を使う client 版を用意する(既定にはしない)
 - **LCP になる画像(一覧の先頭数枚・詳細のメイン画像)は `preload` を指定し、Skeleton を挟まない**
 - OpenAPI の契約は `imagePath` のみで確定する
@@ -232,7 +232,7 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 
 商品説明(description)がリッチテキストであるため([screens.md](../screens.md) A6 / A7)、TipTap は master-plan 1.2 の v2 マトリクスから外し **v1 採用**とする。[0053](../adr/0053-ui-component-interaction-seam.md) の「Thin: seam + sanitizer + デモ」が実使用へ格上げされる。
 
-- 表示側は **必ず sanitizer を通す**(`rules.md` #48。生の `dangerouslySetInnerHTML` は禁止)
+- 表示側は **必ず sanitizer を通す**(`rules.md`「セキュリティ」の「`dangerouslySetInnerHTML` は原則禁止する」)
 - TipTap が inline style を出力するため、CSP の `style-src` が論点になる(§3.9)
 
 ### 3.9 CSP — enforce seam は seam A で確定した
@@ -266,9 +266,9 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 
 > **`clsx` は release が止まっているが採用してよい**: 最新版 `2.1.1` から更新が無いが、未修正の既知脆弱性が無いため [0004](../adr/0004-library-management.md) の不採用理由に当たらない。実装が数十行で **fork コスト実質ゼロ**(最悪 `components` カーネルへコピーインすれば自前実装と等価)であり、`class-variance-authority@0.7.1` が `clsx ^2.1.1` に依存するため**どのみち推移依存に入る**。
 
-**`cva`(class-variance-authority): 採用。** shadcn/ui の公式コンポーネントは cva を使った状態で配布されるため、入れないと配布物を毎回書き換えることになる。[0010](../adr/0010-standards-and-non-lockin.md)「独自に機構を発明しない」とも整合する。`rules.md` #34 / #35 の規約はこれに従う形で埋まる。
+**`cva`(class-variance-authority): 採用。** shadcn/ui の公式コンポーネントは cva を使った状態で配布されるため、入れないと配布物を毎回書き換えることになる。[0010](../adr/0010-standards-and-non-lockin.md)「独自に機構を発明しない」とも整合する。`rules.md`「レイアウトと帯」の「Tailwind class は読みやすいまとまりで記述する」と「UI 部品と操作」の「component API は意味のある props 名を使う」はこれに従う形で埋まる。
 
-**リッチテキストの sanitize = `hast-util-from-html` + `hast-util-sanitize` + `hast-util-to-jsx-runtime`。** HTML 文字列を経由せず hast から直接 React 要素を組むため `dangerouslySetInnerHTML` を使わず、`rules.md` #48 と biome `noDangerouslySetInnerHtml` に抵触しない。`parse5` による仕様準拠パースの後に木を検査するので、文字列ベース sanitizer の parser differential(sanitizer とブラウザの解釈差)を構造的に避けられる。3 本とも単一責務・単一 upstream・MIT・未修正脆弱性ゼロで [0004](../adr/0004-library-management.md) を通る。**代替は `sanitize-html` + `html-react-parser`** — 推移依存が 1/3 に収まる一方、sanitizer 本体に advisory 11 件の履歴があり、allowlist がライブラリ固有形式になる。`interweave` は責務を 1 語で言えず一次判定で落選、`isomorphic-dompurify` は jsdom を引く bridge のため採らない。
+**リッチテキストの sanitize = `hast-util-from-html` + `hast-util-sanitize` + `hast-util-to-jsx-runtime`。** HTML 文字列を経由せず hast から直接 React 要素を組むため `dangerouslySetInnerHTML` を使わず、`rules.md`「セキュリティ」の「`dangerouslySetInnerHTML` は原則禁止する」と biome `noDangerouslySetInnerHtml` に抵触しない。`parse5` による仕様準拠パースの後に木を検査するので、文字列ベース sanitizer の parser differential(sanitizer とブラウザの解釈差)を構造的に避けられる。3 本とも単一責務・単一 upstream・MIT・未修正脆弱性ゼロで [0004](../adr/0004-library-management.md) を通る。**代替は `sanitize-html` + `html-react-parser`** — 推移依存が 1/3 に収まる一方、sanitizer 本体に advisory 11 件の履歴があり、allowlist がライブラリ固有形式になる。`interweave` は責務を 1 語で言えず一次判定で落選、`isomorphic-dompurify` は jsdom を引く bridge のため採らない。
 
 **TipTap は `@tiptap/starter-kit` を採らず extension を個別に入れる。** starter-kit は要件外を含む 24 個を引く。**editor が出せるタグ ⊆ sanitizer が通すタグ** を保たないと、入力できるのに保存後に落ちる不整合が生じるため、extension 集合は allowlist から導出する。
 
@@ -279,10 +279,10 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 | フラグ | 採否 | 理由 |
 | --- | --- | --- |
 | `noUncheckedIndexedAccess` | 採用 | 配列 / インデックス参照の undefined を型で捕まえる |
-| `erasableSyntaxOnly` | 採用 | `enum` / `namespace` を禁止し、`rules.md` #38 の「enum 可否」を機械的に決着させる |
+| `erasableSyntaxOnly` | 採用 | `enum` / `namespace` を禁止し、`rules.md`「型とコード」の「`type` を優先し、`enum` と `namespace` を使わない」を機械的に決着させる |
 | `verbatimModuleSyntax` | 採用 | `import type` の規律 |
 | `noImplicitOverride` | 採用 | 低摩擦 |
-| `noPropertyAccessFromIndexSignature` | 採用 | index signature へのドット参照を禁止。流入口([0030](../adr/0030-environment-variable-management.md) の `process.env` / `rules.md` #42 の searchParams)が既に塞がれているため**実質ゼロコストで決定論が得られる** |
+| `noPropertyAccessFromIndexSignature` | 採用 | index signature へのドット参照を禁止。流入口([0030](../adr/0030-environment-variable-management.md) の `process.env` / `rules.md`「URL と条件」の「`searchParams` は zod で検証する」)が既に塞がれているため**実質ゼロコストで決定論が得られる** |
 | `exactOptionalPropertyTypes` | **見送り** | React props との摩擦が高い。残る穴(「未指定」と「明示的 undefined」を型で区別できない)は下記の実行時機構で埋める |
 | `noUnusedLocals` / `noUnusedParameters` | **入れない** | biome が `correctness/noUnusedVariables` / `noUnusedFunctionParameters` で **error として捕捉することを実測で確認済み**。[0002](../adr/0002-formatter-linter.md) の重複禁止に従う |
 
@@ -297,7 +297,7 @@ master-plan 1.1 の滑走路原則を次のとおり改める。
 
 **`nuqs` 等 searchParams ヘルパ: v1 不採用。** [0004](../adr/0004-library-management.md) の一次判定(単一責務 × 単一 upstream)は通るが、[screens.md](../screens.md) U2 の主眼が **RSC 再取得**であり client state 同期層を必要としない。§3.4「設置面が実在する時のみ」に従い、実装して不足を感じてから入れる。
 
-**ただし「入れない」は「何も決めない」ではない。** `searchParams` の標準形(zod スキーマ / パース関数 / URL 更新ヘルパの置き場)を **scaffold(B2 = P4-6)の生成物に含める**ことで、各画面がバラバラに実装するのを防ぐ。`rules.md` #42 は「この生成物を使う」という参照に留める。
+**ただし「入れない」は「何も決めない」ではない。** `searchParams` の標準形(zod スキーマ / パース関数 / URL 更新ヘルパの置き場)を **scaffold(B2 = P4-6)の生成物に含める**ことで、各画面がバラバラに実装するのを防ぐ。`rules.md`「URL と条件」の「`searchParams` は zod で検証する」は「この生成物を使う」という参照に留める。
 
 ### 3.11 デザインワークフロー — v1 は Figma を使わない(手順上の例外)
 
@@ -825,7 +825,7 @@ test-requirement: unit
   - **`tailwind-merge` は Tailwind のメジャーに連動する**(v3 → 2.6.0 / v4 → 3.x)。現行 `tailwindcss 4.3.2` に対し `tailwind-merge 3.6.0` が対応。**Tailwind のメジャー更新時は両者をセットで 1 PR に乗せる**([0004](../adr/0004-library-management.md) の「メジャー更新は別 PR」)
   - **shadcn の既定の置き場は `lib/utils` だが、[0050](../adr/0050-styling-strategy.md) は `components` カーネル内を指定**している(`utils/` / `lib/` は [0021](../adr/0021-frontend-responsibility.md) の命名規律で禁止)。copy-in 時に import パスの付け替えが要る
   - design token で独自ユーティリティを増やすと `tailwind-merge` のヒューリスティックが誤マージしうるため、`extendTailwindMerge` の設定が必要になる場合がある
-- **注意**: CSS Modules は限定許可。styled-components / emotion は非採用。`@apply` は抑制(`rules.md` #34)
+- **注意**: CSS Modules は限定許可。styled-components / emotion は非採用。`@apply` は抑制(`rules.md`「レイアウトと帯」の「Tailwind class は読みやすいまとまりで記述する」)
 - **強制手段**: CI(token の drift ゲート)+ 生成物 do-not-edit
 - **完了条件**: token の drift ゲートが CI で動く。ダークモードが token 切替で動作する
 - **依存**: P3-1
@@ -933,7 +933,7 @@ test-requirement: unit
   - `docs/playbook.md` — **B6**。意図 → 置き場 → 使う型 → 模範コードの逆引き + 決定木(「〜したくなったら」形式)
   - `.github/pull_request_template.md` — **B14**。DoD = 4 状態 / a11y 手動チェック / README 更新 / カバレッジ例外記録
 - `.claude/skills/readme-review/` — 採点基準を B1 テンプレへ接続
-- **注意**: B7(UI 状態契約)の 4 状態は B1 テンプレの「状態表」として実体化する。`rules.md` #18 と同じものを二重に定義しない
+- **注意**: B7(UI 状態契約)の 4 状態は B1 テンプレの「状態表」として実体化する。`rules.md`「状態表示と待機」の「各画面は loading、empty、error、success の 4 状態を設計する」と同じものを二重に定義しない
 - **持越し**: `readme-review` の B1 必須節チェックは、Claude 利用可能後の P4-0 で接続する。P3-10 ではテンプレート・playbook・PR DoD を先行して整備する
 - **完了条件**: B1 テンプレート、B6 playbook、B14 PR DoD が存在する。`readme-review` による B1 必須節の欠落検出は P4-0 で完了する
 - **依存**: P3-1
@@ -1016,8 +1016,8 @@ sources:
   - fetch wrapper — dual timeout / idempotent retry / retry budget / circuit breaker(go ADR 0019 の翻案)
   - response の zod 検証(P4-2 の生成スキーマを使用)
   - 生 status → errors カーネル分類への正規化(**1 回だけ**)
-  - React `cache()` / fetch memoization の組込(`rules.md` #5。呼び出し側責務にしない)
-  - `import "server-only"`(`rules.md` #67)
+  - React `cache()` / fetch memoization の組込(`rules.md`「描画とキャッシュ」の「同一 render 内で重複し得る取得は adapters 側で `cache()` を使う」。呼び出し側責務にしない)
+  - `import "server-only"`(`rules.md`「層境界と依存」の「server 専用モジュールは先頭で `import "server-only"` する」)
 - **注意**: 型漏洩禁止。`gen/` の型を features / components へ渡さず adapters で変換する。POST の retry は opt-in
 - **強制手段**: 型(公開面は正規化済み型のみ受け付ける)+ ESLint boundaries(`gen/` の型漏洩検出)+ テスト
 - **P3-3 の fail-safe をここで検証する**: adapters が config を実際に読む最初の層であり、ここで初めて ENV の欠落が「落ちる先」を持つ。必須 ENV を落としてビルドが失敗すること、`NEXT_PUBLIC_` 境界を越えた secret 参照が型で防がれることを確認し、BACKLOG A7 の実装済みを ✅ にする
@@ -1101,7 +1101,7 @@ sources:
   - `src/app/global-error.tsx`
   - `src/features/products/detail/` — `model/rich-text` の port を通した description を `RichTextContent` へ渡す配線(component と port 自体は P3-8 で完成済み)
 - **設計**: `error.tsx` / `not-found.tsx` / `global-error.tsx` は**表示のみ**([0080](../adr/0080-error-handling.md))。分類・正規化は adapters が済ませている。関連商品は一覧 API をカテゴリフィルタで再利用する(専用 API なし)
-- **注意**: description はリッチテキストなので**必ず sanitizer を通す**(`rules.md` #48)。sanitizer スタックと port の設計は §3.10 で確定済みであり、ここでは選定を行わない。feature は port の戻り値をそのまま component へ渡すだけで、生の HTML 文字列を扱わない
+- **注意**: description はリッチテキストなので**必ず sanitizer を通す**(`rules.md`「セキュリティ」の「`dangerouslySetInnerHTML` は原則禁止する」)。sanitizer スタックと port の設計は §3.10 で確定済みであり、ここでは選定を行わない。feature は port の戻り値をそのまま component へ渡すだけで、生の HTML 文字列を扱わない
 - **画面判断**: **商品画像が単一か複数かをここで確定する。** 複数なら `Carousel` を使い、単一なら使わない(部品は `components` にあるので、判断は使う / 使わないだけである)
 - **完了条件**: 存在しない ID で `not-found.tsx` が出る。adapters が投げた分類ごとに適切なエラー画面が出る。`reset()` による再試行が動く。XSS ペイロードを含む description が無害化される
 - **依存**: P4-5
@@ -1116,11 +1116,11 @@ sources:
   - `src/model/pagination.ts` — **cursor 型(コア残留)**
   - `src/features/products/` — フィルタ UI
   - `src/adapters/server/api/products.ts` — 一覧と総件数の取得口
-- **設計**: **`searchParams` が変わるたびに RSC が再取得する構成が主眼**。URL とフィルタ状態を同期させる。`searchParams` は zod で検証する(`rules.md` #42)
+- **設計**: **`searchParams` が変わるたびに RSC が再取得する構成が主眼**。URL とフィルタ状態を同期させる。`searchParams` は zod で検証する(`rules.md`「URL と条件」の「`searchParams` は zod で検証する」)
 - **画面判断**: **一覧を URL 遷移型で通すか、client island で即時反映にするかをここで確定する。**この決定は A2(P5-11)/ A5(P5-13)の一覧も従う基盤側の判断であり、画面ごとに割らない。即時反映へ倒す場合に使う部品(`ComboboxClient` / `PopoverContent` / table の client 拡張)は `components` に揃っているので、判断は方式の選択だけである
 - **確定した方式**: 絞り込みは脇に常設できる幅では選ぶたびに反映し、それ未満では overlay の中でまとめて確定する(帯の境界は [0051](../adr/0051-styling-system.md) §2)。並び替えは幅によらず即時。増分取得は無限スクロールで、続きを読む操作は失敗したときだけ出す。読み進めた件数を `first` として URL へ書き戻し、戻る操作と再読み込みで復元する(契約の `first` 上限までが復元できる範囲)
 - **総件数**: cursor ページネーションは総数を持たないため、一覧の応答からは取り出せない。`GET /v1/products/count` が一覧と同じ条件を受け取って返す。条件を渡さない口にすると、絞り込んだ後も絞り込む前の数が出て並んでいる件数と食い違う
-- **完了条件**: フィルタ / sort / keyword が URL に反映され、リロード・共有で再現する。不正な `searchParams` で 400 相当の表示になる。ブラウザバックでスクロール位置が復元される(`rules.md` #24)。条件を変えると総件数が追随し、総件数の取得だけが失敗しても一覧は出る
+- **完了条件**: フィルタ / sort / keyword が URL に反映され、リロード・共有で再現する。不正な `searchParams` で 400 相当の表示になる。ブラウザバックでスクロール位置が復元される(`rules.md`「UI 部品と操作」の「スクロール復元はルーティング既定を尊重する」)。条件を変えると総件数が追随し、総件数の取得だけが失敗しても一覧は出る
 - **依存**: P4-5
 - **状態**: **完了**。#158 で着地し、#248 で絞り込みを作り直し、#263 で URL 長の予算ガードを足した
 
@@ -1130,7 +1130,7 @@ sources:
 - **対象 ADR**: [0040](../adr/0040-routing-rendering-strategy.md) / [0071](../adr/0071-bff-api-integration.md)
 - **主な変更先**: `src/app/(shop)/page.tsx` / `src/features/home/` / `src/adapters/server/ranking-client.ts` / `category-client.ts`(いずれも**破棄対象**)
 - **設計**: ランキング・新着・カテゴリ導線を並置するだけなので RSC 内で `Promise.all`。パーソナライズなし。マスタ系(categories / statuses)はキャッシュ opt-in の対象([0040](../adr/0040-routing-rendering-strategy.md))
-- **完了条件**: 3 系統が並行取得される(直列になっていないことをテストで確認)。一部の系統が失敗しても他が表示される(部分エラー = `rules.md` #18)
+- **完了条件**: 3 系統が並行取得される(直列になっていないことをテストで確認)。一部の系統が失敗しても他が表示される(部分エラー = `rules.md`「状態表示と待機」の「各画面は loading、empty、error、success の 4 状態を設計する」が言う部分失敗)
 - **依存**: P5-2
 - **状態**: **完了**（#187）
 
@@ -1208,7 +1208,7 @@ sources:
   - `src/features/checkout/actions.ts` — Server Action(**Idempotency-Key 必須**)
   - `src/components/` — toast / live region(**コア残留**)
 - **設計**: `<form action>` + `useActionState` + `useFormStatus` を canonical 機構とする([0061](../adr/0061-form-mutation-ux.md))。client 検証は P4-2 の生成 zod を再利用([0062](../adr/0062-form-input-validation.md))。通知は inline / toast / redirect の使い分け + live region([0063](../adr/0063-mutation-result-notification.md))
-- **注意**: **二重送信防止 = submit disabled + Idempotency-Key**(`rules.md` #12)。二重クリック / リロードでの二重購入を防ぐ。409(在庫不足)の表示経路を持つ。CSRF は Server Actions の `allowedOrigins`(`rules.md` #47)
+- **注意**: **二重送信防止 = submit disabled + Idempotency-Key**(`rules.md`「フォームと送信」の「mutation 中は submit を無効化して二重送信を防ぎ、idempotency key を付与する」)。二重クリック / リロードでの二重購入を防ぐ。409(在庫不足)の表示経路を持つ。CSRF は Server Actions の `allowedOrigins`(`rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」)
 - **完了条件**: 成功 / 検証エラー / 在庫不足 409 の 3 経路が動く。同じ Idempotency-Key での再送で二重購入が発生しない。`ActionState<T>` が `model` にあり、全 Server Action がこれを返す。live region がスクリーンリーダに読まれる
 - **依存**: P5-6
 - **状態**: **完了**。#261 で P5-6 と同一 PR として着地した
@@ -1436,7 +1436,7 @@ sources:
   - `docs/adr/0111-csp-security-headers.md` — **CSP enforce seam の確定追補**(§3.9。P0-4 から移管)
   - `src/config/security-headers/` — ヘッダの組み立てと、その単体検査
   - `e2e/lib/test.ts` / `e2e/journeys/csp.spec.ts` — **enforce の結果を実ブラウザで見る側**。違反は `securitypolicyviolation` で受ける（ヘッダを読むだけの検査は `Report-Only` でも通る）
-- **設計**: `img-src` に `MEDIA_ORIGIN` を含める必要がある(本書 §3.2)。**`script-src` は seam A(静的)のまま**([0111](../adr/0111-csp-security-headers.md) §4)。nonce は Cache Components と両立しないため、strict 化は作った側の opt-in として seam B に名前だけ与える。`next/script` の strategy 使い分けは `rules.md` #50
+- **設計**: `img-src` に `MEDIA_ORIGIN` を含める必要がある(本書 §3.2)。**`script-src` は seam A(静的)のまま**([0111](../adr/0111-csp-security-headers.md) §4)。nonce は Cache Components と両立しないため、strict 化は作った側の opt-in として seam B に名前だけ与える。`next/script` の strategy 使い分けは `rules.md`「セキュリティ」の「第三者 script は同意ゲートの裏に置く」
 - **注意**: **[0111](../adr/0111-csp-security-headers.md)(実行時本体)と [0110](../adr/0110-security-operations.md)(CI 適合スライス)は両輪であり、片側だけでは閉じない**
 - **入力**: `.github/zap/rules.tsv` の一覧。DAST([0110](../adr/0110-security-operations.md) 3.5)を先に置いてあるので、**配信面に何が足りないかは実測済みで並んでいる**。本 PR は「その一覧を空にする作業」であり、1 行 = 1 ヘッダ = 1 作業単位として並行して潰せる
 - **完了条件**: 全画面が CSP 違反ゼロで動作する。宣言に無い配信元の script を差すと CI が fail する。**0111 に enforce seam の確定が記録されている**。**`rules.tsv` に残るヘッダ由来の行が、0111 が明示的に受け入れた弱い許可（`script-src` の `'unsafe-inline'`）だけになり、撤回条件を持っている**
@@ -1453,7 +1453,7 @@ sources:
   - `src/app/(shop)/products/[id]/page.tsx` — `generateMetadata` / `alternates.canonical` / JSON-LD
   - `src/app/fonts.ts` — `next/font`
   - `src/proxy.ts` — matcher から metadata ルートを除外
-- **注意**: preview / staging は `noindex` を強制する(`rules.md` #63)。アイコン体系は [0044](../adr/0044-seo-metadata-strategy.md) が持ち、[0045](../adr/0045-fonts-and-images.md) は静的 favicon の配置のみ
+- **注意**: preview / staging は `noindex` を強制する(`rules.md`「設定と環境」の「索引させてよい環境だけが `SITE_INDEXABLE=on` を宣言する」)。アイコン体系は [0044](../adr/0044-seo-metadata-strategy.md) が持ち、[0045](../adr/0045-fonts-and-images.md) は静的 favicon の配置のみ
 - **設計**: **検査は「在るか」ではなく「公開面として成立しているか」を見る。** 存在検査だけを置くと、空の `sitemap.xml`・他人を指す canonical・実行時に落ちる OG 画像が、いずれも緑で通る。metadata は**中身が壊れていても画面が壊れない**ため、通常のテストとレビューでは気づけない。見る対象は 4 つ:
   - `sitemap.xml` が挙げる URL が実在する(404 を挙げていない)
   - 各ページの canonical が自分自身を指す
@@ -1525,7 +1525,7 @@ sources:
   - `src/components/shell/consent-banner/` — 同意バナー(**コア残留**)
   - `src/app/consent.tsx` — **同意が無いとサードパーティスクリプトを読み込まないゲート**
   - `src/app/analytics.tsx` / `src/config/analytics/` — ゲートの裏へ置くタグマネージャと容器 ID
-- **設計**: 計測用 cookie_id はここで発行する。cookie の命名・属性(SameSite / Secure / HttpOnly / Max-Age)は `rules.md` #44、スクリプト読み込みは `next/script` の strategy(`rules.md` #50)に従う
+- **設計**: 計測用 cookie_id はここで発行する。cookie の命名・属性(SameSite / Secure / HttpOnly / Max-Age)は `rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を用途ごとに明示する」、スクリプト読み込みは `next/script` の strategy(`rules.md`「セキュリティ」の「第三者 script は同意ゲートの裏に置く」)に従う
 - **スコープ外**: **PostHog 本体は入れない**。CMP・IAB TCF 等の本格的な同意管理も対象外
 - **注意**: CSP(P6-2)の `script-src` と連動する。同意前はゲート対象のスクリプトが DOM に存在しないことをテストで担保する
 - **完了条件**: 同意前後でゲート対象スクリプトの読み込み有無が切り替わる。同意状態が cookie で永続化され、前捌きとブラウザの双方から同じ綴りで読める。バナーが a11y 要件(フォーカストラップ / キーボード操作)を満たす
@@ -1688,7 +1688,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 - **主な変更先**: `docs/rules.md`
 - **設計**: 各エントリが**実在のコード / 設定 / 生成物を指す**状態にする。実装で採らなかった選択肢の記述を削る。Rationale ADR のリンクが生きていることを確認する
 - **完了条件**: 全エントリが実在の参照先を持つ。**強制手段列に「散文のみ」が残るものが棚卸しされている**（寄せられるか / 寄せられない理由を各行が持つ。決着は P9-4）。`doc-reviewer` が accuracy の指摘を出さない
-- **依存**: P7-2, **Phase 6 全 PR / Phase 8 全 PR**(#44 / #50 は P6-7、#66 は P6-8 の実装を参照先にするため)
+- **依存**: P7-2, **Phase 6 全 PR / Phase 8 全 PR**(`rules.md` の cookie 属性と第三者 script の規約は P6-7、`next/dynamic` の規約は P6-8 の実装を参照先にするため)
 
 ### P9-2: EN canonical 化 + `.ja.md` mirror
 
@@ -1734,7 +1734,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 | [0100](../adr/0100-accessibility-target.md) | biome の a11y ルールが `lint:ci` で効いている。UI feature の手動チェックが PR テンプレ(B14)に入っている |
 | [0101](../adr/0101-performance-budget.md) | 計測の仕組み(P6-1)が動いている。閾値は作った側の判断のまま |
 | [0102](../adr/0102-browser-support.md) | Next.js 既定 browserslist の追認で足りている |
-| [0121](../adr/0121-i18n-strategy.md) | 文言が feature 内定数に寄っている(`rules.md` #55)= 将来の i18n 移行が容易 |
+| [0121](../adr/0121-i18n-strategy.md) | 文言が feature 内定数に寄っている(`rules.md`「文言」の「UI 文言は feature 内の定数へ寄せる」)= 将来の i18n 移行が容易 |
 
 #### 併せて開封する: spec 駆動の How(GB-3 / IM-26)
 
@@ -1914,7 +1914,7 @@ IM-26 —— どちらも反映済み。**P4-6 の改修 PR は起票しない**
 | 3 | **admin 判定の手段** — go 側の契約に `roles` が 1 度も出てこない(実測 0 件)。`UserResponse` にも roles が無く **admin かどうかを型から導けない**。[screens.md](../screens.md) §0 の「UI 上は導線ごと出し分ける」が実装できないため、go 側へ roles 露出を依頼するか別手段を設計する | **P5-11 着手前**(必要なら go 側へ起票) |
 | 4 | **`*.localhost` の名前解決** — `next/image` はサーバ側 fetch のため Next.js 実行ホストでの解決が要る。Linux コンテナ / CI では `/etc/hosts` 追記が必要な見込みで、IPv6(`::1`)解決の可能性もある(§3.2) | **P4-5 着手前に実測** |
 | 5 | **U10 登録フローの方式**(JIT 自動プロビジョニング / 明示オンボーディング)。[screens.md](../screens.md) の推奨に従い後者で実装し、確定後に差分吸収する | P5-10 |
-| 6 | **sanitizer ライブラリの選定**(`rules.md` #48) | P5-1 |
+| 6 | **sanitizer ライブラリの選定**(`rules.md`「セキュリティ」の「`dangerouslySetInnerHTML` は原則禁止する」) | P5-1 |
 | 7 | **status を持たない失敗の分類** — [0080](../adr/0080-error-handling.md) は一次キーを HTTP status とし、timeout / abort / DNS 失敗の分類を「実装 PR で判断」と保留している | P4-3 |
 | 9 | `ActionState<T>` の具体型(判別子 / fieldErrors の形 / sentinel の直列化)。**B1 テンプレ(P3-10)と scaffold(P4-6)が P5-7 より先行するため、P4-6 時点で草案を切る** | P4-6 で草案 → P5-7 で確定 |
 | 10 | **外部デザイン支援ツール連携スキルの仕様**(書き出し形式 / 同期手順 / 対象パス)。§3.11 の方針変更で新たに生じた | P3-8 |
@@ -1929,7 +1929,7 @@ IM-26 —— どちらも反映済み。**P4-6 の改修 PR は起票しない**
 | OpenAPI 契約の本数 | **本体 API + 認証の 2 本**。本体(実測 133.9 KB / 3376 行)は admin と一般が同居し tags / security / scope で区別できないため分割不可能で `api` 1 ユニット。認証は別サービスの契約なので `auth` として並べる |
 | `mock_auth_server` の PKCE / OIDC discovery | **完全対応**。`redirect_uri` も nextjs 前提で登録済み。ただし refresh 無し / subject が admin 固定 / logout は POST のみ(P5-4 に反映済み) |
 | `cn()` の実装ライブラリ | **`clsx` + `tailwind-merge`**。[0052](../adr/0052-ui-component-policy.md) が既に名指ししており追認(§3.10) |
-| `rules.md` #69(生 `<a>` 禁止) | **ESLint で拾う**。`next/link` を必須にするため機械強制が要る(P3-2) |
+| `rules.md`「URL と条件」の「内部リンクは `next/link` を使い、生の `<a>` を使わない」 | **ESLint で拾う**。`next/link` を必須にするため機械強制が要る(P3-2) |
 | Figma Variables の輸出経路 | §3.11 の方針変更により**消滅**(SSOT がコード側) |
 | CSP の enforce seam / CSP 本体 / `injectCSS: false` の採否(旧 #1 / #1b / #1c) | **seam A(`next.config.ts` の `headers()`)で確定**([0111](../adr/0111-csp-security-headers.md) §4)。実体は `src/config/security-headers/` が組み立て、enforce の結果は実ブラウザの `securitypolicyviolation` が見張る。`style-src` は割らない —— 属性側は Radix と `next/image` が要求して降りられず、要素側だけ厳格にする案は Safari が割った指定を持たないため費用に見合わない。`injectCSS: false` はその前提条件だったので**採らない**(同 §4 の撤回条件が両方を持つ) |
 | Phase 2 の残余候補(sync-versions-check / auto-generate-docs)の採否(旧 #11) | **どちらも不採用**。前者は版の宣言が 2 箇所以上あって初めて意味を持つ検査で、本リポジトリは Docker を持たず `mise.toml` が唯一の宣言である(workflow が版を名乗る面は `make actions-mise-pin-lint` が見ている)。後者は生成物を bot が commit する形だが、本リポジトリの生成物は `gen-drift` / `tokens-drift` / `shadcn-drift` が**落とす**側で守っている。撤回条件は BACKLOG W51 / W52 |

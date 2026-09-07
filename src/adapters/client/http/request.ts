@@ -14,9 +14,16 @@ import { ErrorKind, type ErrorKind as ErrorKindType } from "@/errors/error-kind"
  *
  * `414` を載せるのは、経路の中継が返すためです。予算を広く取りすぎた設定では送信前の判定を
  * すり抜け、ブラウザには中継が組み立てた応答だけが返ります。
+ *
+ * **`401` を内部の失敗へ畳みません。** 認証の内側にある口は、読み進めている最中に session が
+ * 切れることがあります。畳むと画面に出せるのは読み直す操作だけで、押しても同じ経路を辿るので
+ * 永久に直りません。分類が分かれていれば、呼び出し側は入り直しを促せます
+ * （[0080](../../../../docs/adr/0080-error-handling.md) は `unauthenticated` を独立した分類として
+ * 持ち、生の status からの変換を境界で 1 度だけ行うと定めています）。
  */
 const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
   400: ErrorKind.INVALID_ARGUMENT,
+  401: ErrorKind.UNAUTHENTICATED,
   414: ErrorKind.URI_TOO_LONG,
 };
 

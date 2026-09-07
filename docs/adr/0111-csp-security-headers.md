@@ -41,7 +41,7 @@ CSP 適合の検査は **CI 時点で払える**ため [0110](0110-security-oper
 | `Cross-Origin-Resource-Policy` | `same-origin` | 自分の応答を別 origin の文書へ埋め込ませない。効くのは `no-cors` の読み込み（`<img>` / `<script>` / nested navigation）だけで、§5 の CORS で開いた `fetch` には掛からない |
 | `Strict-Transport-Security` | `max-age=31536000` | **https で配信しているときだけ出す**(下記)。1 年は preload list の下限と同じ値。`includeSubDomains` / `preload` の付与と PaaS/CDN 側での終端は **作った側の判断**(§5) |
 
-**https で配信しているかの判定は `isServedOverTls()`(`src/config/auth/auth.schema.ts`)が持つ。** callback URL(`AUTH_REDIRECT_URI`)の scheme を読む —— あれは IdP がブラウザを戻す先、すなわち自分の origin であり、環境の種類を別の変数で持たずに scheme を知れる唯一の既存の値である。cookie の `secure`(`docs/rules.md` #44)と同じ述語を使い、綴りを 2 つにしない。
+**https で配信しているかの判定は `isServedOverTls()`(`src/config/auth/auth.schema.ts`)が持つ。** callback URL(`AUTH_REDIRECT_URI`)の scheme を読む —— あれは IdP がブラウザを戻す先、すなわち自分の origin であり、環境の種類を別の変数で持たずに scheme を知れる唯一の既存の値である。cookie の `secure`(`docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を用途ごとに明示する」)と同じ述語を使い、綴りを 2 つにしない。
 
 ### 3. CSP ポリシー本体(ディレクティブ基線)
 
@@ -66,7 +66,7 @@ upgrade-insecure-requests                      ← https で配信している�
 - **`'unsafe-eval'` は開発サーバーだけ。** React が server 側のエラースタックをブラウザで組み直すのに eval を使う。本番の React も Next.js も eval を使わない
 - **`upgrade-insecure-requests` は https で配信しているときだけ。** http の開発環境で出すと `http://localhost` の副資源まで https へ書き換えられる
 - **`connect-src 'self'`**: ブラウザからの送信先は BFF(`/api/*`)に限る。観測性のシグナルも中継 seam を通る([0081](0081-observability-logging.md))。OTLP を直接叩かせない
-- **外部オリジン**(タグマネージャ・分析 SDK 等)は、[0131](0131-cookie-consent.md) §2 の同意ゲートと連動して `script-src` / `connect-src` / `img-src` に載る。**同梱するタグマネージャのぶんは本体が宣言し、それ以外を足すのは作った側の拡張点**とする。サードパーティスクリプト規約は `docs/rules.md` #50
+- **外部オリジン**(タグマネージャ・分析 SDK 等)は、[0131](0131-cookie-consent.md) §2 の同意ゲートと連動して `script-src` / `connect-src` / `img-src` に載る。**同梱するタグマネージャのぶんは本体が宣言し、それ以外を足すのは作った側の拡張点**とする。サードパーティスクリプト規約は `docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの裏に置く」
 - **`Cross-Origin-Embedder-Policy` は降ろす。** `require-corp` は副資源に `Cross-Origin-Resource-Policy` か CORS を要求するが、タグマネージャが注入するタグの配信元はそれを返さない。**cross-origin isolation を失うことを受け入れた結果**であり、`SharedArrayBuffer` 等の isolation を前提とする機能はこの構成では使えない。isolation が要る作った側は容器 ID を空にして本ヘッダを戻す
 - **`Content-Security-Policy-Report-Only` は経由しない。** 違反は CI が実ブラウザで検知する(§6)ので、可視化のためだけの段階導入は要らない。外部オリジンを足す作った側が衝突を見たいときの手段として残す
 
@@ -90,7 +90,7 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 | nonce CSP(seam B) | `src/proxy.ts` | per-request。opt-in。dynamic 固定 |
 | **資格情報を載せた要求への `Cache-Control`** | **`src/proxy.ts`** | **要求に依る**(下記) |
 | **許可した別 origin への `Access-Control-*`** | **`src/proxy.ts`** | 要求の `Origin` に依る。宣言は `HTTP_ALLOWED_ORIGINS`(下記) |
-| **origin 検証(許可外 origin からの書き込みを 403)** | **`src/proxy.ts`** | 同じ宣言を読む。`docs/rules.md` #47 |
+| **origin 検証(許可外 origin からの書き込みを 403)** | **`src/proxy.ts`** | 同じ宣言を読む。`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」 |
 | HSTS の終端強制 | **PaaS/CDN も可(境界 seam)** | edge で一括付与する構成もある。二重掛けの整合は作った側が確認 |
 
 - **要求に依らないヘッダを `proxy.ts` で足さない。** 前捌きを通る経路にしか載らず、静的に配れる応答が漏れる。
@@ -121,8 +121,8 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 
 ## 補足
 
-- **CSRF / Server Actions の origin 検証**(`serverActions.allowedOrigins` / SameSite cookie 前提)は **`docs/rules.md` #47(主 Rationale [0070](0070-backend-role-separation.md))** に置き、本 ADR には**同居させない**。本 ADR は CSP・レスポンスヘッダの実行時本体に射程を限る。
-- 本 ADR は [0140](0140-documentation-operations.md) のタクソノミーで **decision** 分類に属する。日常強制される rule(サードパーティスクリプト #50・XSS/サニタイズ #48 等)は `docs/rules.md` 側に置き、本 ADR を Rationale として逆参照する。
+- **CSRF / Server Actions の origin 検証**(`serverActions.allowedOrigins` / SameSite cookie 前提)は **`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」(主 Rationale [0070](0070-backend-role-separation.md))** に置き、本 ADR には**同居させない**。本 ADR は CSP・レスポンスヘッダの実行時本体に射程を限る。
+- 本 ADR は [0140](0140-documentation-operations.md) のタクソノミーで **decision** 分類に属する。日常強制される rule(「セキュリティ」の「第三者 script は同意ゲートの裏に置く」・「`dangerouslySetInnerHTML` は原則禁止する」等)は `docs/rules.md` 側に置き、本 ADR を Rationale として逆参照する。
 
 ## 関連 ADR
 
@@ -134,4 +134,4 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 - [0041-cache-components-decision.md](0041-cache-components-decision.md) — Cache Components は v1 採用。nonce と非互換のため seam A を確定する根拠
 - [0076-payment-ui-seam.md](0076-payment-ui-seam.md) — 決済 UI はフロントに置かない。`Permissions-Policy` の `payment` と `Cross-Origin-Embedder-Policy` の前提
 - [0131-cookie-consent.md](0131-cookie-consent.md) — 同意ゲート(外部スクリプトの CSP allowlist と連動)
-- [0070-backend-role-separation.md](0070-backend-role-separation.md) — #47 CSRF/origin 検証の主 Rationale(本 ADR には同居させない)
+- [0070-backend-role-separation.md](0070-backend-role-separation.md) — CSRF/origin 検証(`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」)の主 Rationale(本 ADR には同居させない)

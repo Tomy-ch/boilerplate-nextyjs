@@ -2,7 +2,7 @@ import { expect, test } from "../lib/test";
 import { loadBands, loadBreakpoints, VIEWPORT_HEIGHT } from "../lib/viewports";
 
 /**
- * 帯ごとの出し分け（`docs/rules.md` #71）。
+ * 帯ごとの出し分け（`docs/rules.md`「レイアウトと帯」の「脇に常設する領域は `lg` 以上でだけ出す」）。
  *
  * @remarks
  * 規約が決めているのは「本文の脇に常設する領域は `lg` 以上でだけ出す」ことです。幅は design token

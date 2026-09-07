@@ -25,7 +25,7 @@ Accepted
 
 ### 1. session の保管 = httpOnly cookie / payload 最小
 
-- session の保管場所の seam は **httpOnly cookie**(Next.js `cookies()` API)とする。cookie は **server で set** し、`httpOnly` / `Secure` / `SameSite` / `Max-Age`(or `Expires`)/ `Path` を既定属性とする(具体既定値・アプリ cookie 規約は rules.md #44 が保持)。
+- session の保管場所の seam は **httpOnly cookie**(Next.js `cookies()` API)とする。cookie は **server で set** し、`httpOnly` / `Secure` / `SameSite` / `Max-Age`(or `Expires`)/ `Path` を既定属性とする(具体既定値・アプリ cookie 規約は `docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を用途ごとに明示する」が保持)。
 - **payload は最小**(id / role 等の後続リクエストで使う一意データのみ)。PII(電話番号・メール・カード情報)や機微情報(パスワード)を **cookie に入れない**。
 - **vendor-independent 正当性材料**(0010 §2 必須):
   - **httpOnly = XSS によるトークン窃取の緩和** — client-side JS から cookie を読めなくすることで、XSS 起点の session 窃取という web 一般の攻撃面を塞ぐ。これは Next.js 固有の話でなく MDN / OWASP 由来の web セキュリティ基本原理である。
@@ -85,7 +85,7 @@ Next.js 文書化パターンに乗り、認可を **2 層**に分ける:
 
 未認証のまま操作を始められる機能は、ログイン成立の時点でその状態を認証済みの主体へ**引き継ぐ**必要がある。§5 がログアウト時の破棄を扱うのに対し、本節は逆向きの接続点を敷く。
 
-- **引き継ぎ元の識別子は httpOnly cookie に置き、BFF が持つ**。ブラウザへ露出させない理由は §1 の session と同じ(XSS 起点の窃取の緩和)。**session cookie とは別の cookie** にする — 未認証でも発行され、寿命も主体も session と一致しないため、session payload へ混ぜると §1 の「payload は最小」に反する。用途接頭辞と `Secure` / `HttpOnly` / `SameSite` / `Max-Age` の明示は `rules.md` #44 に従う。
+- **引き継ぎ元の識別子は httpOnly cookie に置き、BFF が持つ**。ブラウザへ露出させない理由は §1 の session と同じ(XSS 起点の窃取の緩和)。**session cookie とは別の cookie** にする — 未認証でも発行され、寿命も主体も session と一致しないため、session payload へ混ぜると §1 の「payload は最小」に反する。用途接頭辞と `Secure` / `HttpOnly` / `SameSite` / `Max-Age` の明示は `docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を用途ごとに明示する」に従う。
 - **引き継ぎを起こすのは `/api/auth/*` の callback ただ 1 箇所**。未認証時の識別子と確立直後の session が同時に手元にあるのはここだけで、1 回の認証往復につき 1 回だけ走る。`proxy.ts` は不可(§2 / [0043](0043-middleware-policy.md) — optimistic 層に副作用を置かない)。画面側からも呼ばない(ブラウザは Access Token を持たない。§6)。
 - **引き継ぎの失敗でログインを失敗させない**。ログインの成否は認証の成否で決まる。引き継ぎは付随する処理であり、失敗はログに残して利用者にはログイン成功として見せる。
 - **引き継ぎの規則はバックエンドが持つ**([0070](0070-backend-role-separation.md))。合算・上限・優先といった判断は業務ロジックであり、BFF は起点を与えるだけで規則を実装しない。
@@ -176,9 +176,9 @@ federation の連携先と IdP の終了口だけであり、そこには意匠�
 ## 補足
 
 - 本 ADR は **seam の座標(どの層が session verify / DTO / cookie を所有するか)** に加えて、**動く最小 session 機構の同梱**(§6 Resolver IF + 既定実装 1 本)を確定する。boilerplate 本体が持つのは既定実装であって「唯一の実装」ではない。
-- **CSRF / origin 検証は本 ADR に同居させない。** それは日常強制される rule であり、`docs/rules.md` #47 が持つ。本 ADR の httpOnly / SameSite cookie 前提がその rule の土台を提供する関係のみを明記する([0140](0140-documentation-operations.md) 「decision と rule を分ける」タクソノミー)。
+- **CSRF / origin 検証は本 ADR に同居させない。** それは日常強制される rule であり、`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」が持つ。本 ADR の httpOnly / SameSite cookie 前提がその rule の土台を提供する関係のみを明記する([0140](0140-documentation-operations.md) 「decision と rule を分ける」タクソノミー)。
 - **CSP / セキュリティヘッダ([0111](0111-csp-security-headers.md))との境界**: 認証 seam(本 ADR)と CSP 実行時本体は別関心。cookie 属性・認可分担は本 ADR、`Content-Security-Policy` / `X-Frame-Options` 等のヘッダ配置は 0111 が所有する。両者を同居させない(局所推論の維持)。
-- 本 ADR は [0140](0140-documentation-operations.md) タクソノミーにおいて **decision**(seam 定義)分類に属する。日常強制される rule(cookie 属性既定値 = `docs/rules.md` #44 / CSRF = #47)は `docs/rules.md` 側が持つ。
+- 本 ADR は [0140](0140-documentation-operations.md) タクソノミーにおいて **decision**(seam 定義)分類に属する。日常強制される rule(cookie 属性既定値 = 「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を用途ごとに明示する」/ CSRF = 「認可と入口」の「状態を変える要求の送信元を検証する」)は `docs/rules.md` 側が持つ。
 
 ## 関連 ADR
 
@@ -191,4 +191,4 @@ federation の連携先と IdP の終了口だけであり、そこには意匠�
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) — 型漏洩禁止(session・secret を内層へ漏らさない)
 - [0111-csp-security-headers.md](0111-csp-security-headers.md) — CSP / セキュリティヘッダ(本 ADR と同居させない別関心)
 - [0080-error-handling.md](0080-error-handling.md) — 401 / 403 の分類(§5 / §6 が対応させる先)
-- [0140-documentation-operations.md](0140-documentation-operations.md) — decision / rule タクソノミー(#44 cookie 属性・#47 CSRF は rules.md 側)
+- [0140-documentation-operations.md](0140-documentation-operations.md) — decision / rule タクソノミー(cookie 属性は `docs/rules.md`「データ分類と機微情報」・CSRF は「認可と入口」の側)

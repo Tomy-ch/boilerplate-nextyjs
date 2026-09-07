@@ -113,7 +113,8 @@ Mechanical adherence to ADR 0090. As of this writing that means:
     separator once it has cases on both sides.
   - **A subject that returns markup** (component / rendering hook / `page-content`) is **not divided
     that way at all.** Flag a `正常系` / `異常系` separator in such a file as a violation. When the
-    file is long enough to want grouping, the axis is `rules.md` #18's loading / empty / error /
+    file is long enough to want grouping, the axis is the four states of `rules.md` 「状態表示と待機」
+    (「各画面は loading、empty、error、success の 4 状態を設計する」) — loading / empty / error /
     success, named for the state.
 - **For a value-returning subject, which side a case belongs on follows the happy path, not how the
   failure is expressed.** ADR 0090 is explicit: throw / reject / returning an error state / dropping

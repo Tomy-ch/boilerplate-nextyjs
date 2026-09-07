@@ -2,7 +2,7 @@
 //
 // **なぜレジストリを引かないか。** `--config p/javascript` は semgrep.dev からルールを取る。
 // あの集合は Semgrep Rules License v1.0 で、「自社内部の目的に限る」「再頒布不可」「サービスと
-// して提供不可」を課す。エンジンを OSS fork の opengrep へ替えた判断（fork 先へライセンスの
+// して提供不可」を課す。エンジンを OSS fork の opengrep へ替えた判断（テンプレートから作った側へライセンスの
 // 判断を渡さない）は、ルールをレジストリから引いている限り成立しない —— 判断の所在が層を
 // ずれただけになる。判断の全文は docs/adr/0110-security-operations.md が持つ。
 

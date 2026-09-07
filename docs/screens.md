@@ -21,7 +21,7 @@
 - 通貨: 商品の `price` は USD の decimal 文字列、購入集計の金額は USD セント整数である。`displayCurrency=JPY` を明示指定した時だけ `referenceAmount` が参考値として付与される。フロントは「参考」であることを表示上明示する
 - カート(U4)は **バックエンドが持つ**(`/v1/carts/me`)。未ログインでも使え、主体はゲストが `X-Cart-Session`、ログイン済みが Bearer で、両方あればログイン済みが優先される。**取得は明細ごとの再評価つき**で、買えない明細・値の変わった明細に `issues` が立ち、小計は `issues` が空の明細だけの合算(参考値)である。ログイン時のゲストからの引き継ぎは BFF が callback で起こす([ADR 0079](adr/0079-auth-frontend-seam.md) §7)
 - 画像は `POST /v1/products/images`(multipart)でアップロードし、backend が発行したオブジェクトキー(`products/{uuid}.{ext}`)を保存する。配信元は Garage の公開エンドポイントで、`next/image` の `remotePatterns` へ allowlist 登録する。**ワイルドカードは使わない**
-- 商品説明(description)は **リッチテキスト**(TipTap で作成)。表示側は必ず sanitizer を通す(生の `dangerouslySetInnerHTML` 直接使用は禁止。`rules.md` #48)
+- 商品説明(description)は **リッチテキスト**(TipTap で作成)。表示側は必ず sanitizer を通す(生の `dangerouslySetInnerHTML` 直接使用は禁止。[実装規約「セキュリティ」](rules.md#セキュリティ)の「`dangerouslySetInnerHTML` は原則禁止する」)
 - ページネーションは基本 **cursor 方式**。無限スクロール(増分取得)の画面とページ送り相当の画面が混在するので、画面ごとの実装パターンに注意
 - Idempotency-Key が必要な書き込みは購入作成(U6)のみ。二重送信防止として実装すること
 

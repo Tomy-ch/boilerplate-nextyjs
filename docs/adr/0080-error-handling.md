@@ -96,11 +96,11 @@ App Router の `error.tsx` / `not-found.tsx` / `global-error.tsx` の責務・Er
   `not-found.tsx` が返す画面と、`notFound()` が挿す `<meta name="robots" content="noindex">` である。
   索引はこれで防げる。**防げないのは status で判定する読み手** —— 外形監視・DAST・非 JS クライアントからは
   成功と区別できない。この代償は [0041](0041-cache-components-decision.md) で引き受けた
-- **その結果、待機の状態を持たない画面がある。** `rules.md` #18 の 4 状態は「4 つ必ず作る」ではなく
+- **その結果、待機の状態を持たない画面がある。** `docs/rules.md`「状態表示と待機」の「各画面は loading、empty、error、success の 4 状態を設計する」は「4 つ必ず作る」ではなく
   「4 つを設計して、所有するものを実装・テストする」である。所有しない状態の部品を作ると、
   どこからも参照されない skeleton が残る。**所有しないと決めたことと、その理由を README に書く**
 - **Suspense × PPR の相互作用**: `Cache Components` は有効なので([0041](0041-cache-components-decision.md))、`<Suspense>` の位置は待機表示の話ではなく**静的な殻と動的な穴の境界そのもの**である。上の「待つ部分の近くへ置く」は、有効化後は性能の助言ではなく**殻を配れるかどうかの条件**になる —— 境界より外にある取得が 1 つでも残っていれば、その route は殻を配れない
-- **fallback は場所を取る。** 穴が埋まる瞬間に周りが動かないよう、待機表示は実物と同じ大きさの枠を出す(`docs/rules.md` #17 / #17b)。描くものを持たない穴(計測など)だけが `null` を fallback にしてよい
+- **fallback は場所を取る。** 穴が埋まる瞬間に周りが動かないよう、待機表示は実物と同じ大きさの枠を出す(`docs/rules.md`「状態表示と待機」の「loading は形状が近い skeleton を優先する」と、「UI 部品と操作」の「状態によって出入りする表示のせいで、操作の位置を動かさない」)。描くものを持たない穴(計測など)だけが `null` を fallback にしてよい
 - fallback の**見た目(スケルトン / スピナー)の UI 規約**は用途依存であり、テンプレートから作った側で確定する
 
 ### 5. swallow 禁止・cause chain・redact

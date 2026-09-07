@@ -104,8 +104,8 @@ function MeasurementId(): null {
  * [0131](../../docs/adr/0131-cookie-consent.md) §2）。
  *
  * **読み込みの strategy は選べません。** `GoogleTagManager` は prop を公開しておらず、`next/script`
- * の既定（`afterInteractive`）が効きます。`docs/rules.md` #50 が求める「明示」を宣言では満たせない
- * ため、いま効いている値をテストで固定し、ライブラリが既定を変えた時点で落ちるようにしています。
+ * の既定（`afterInteractive`）が効きます。`docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの
+ * 裏に置く」が求める strategy の「明示」を宣言では満たせないため、いま効いている値をテストで固定し、ライブラリが既定を変えた時点で落ちるようにしています。
  *
  * 計測 id はこの経路以外へ渡しません。運用テレメトリ（`telemetry.tsx`）とは主体を分けます
  * （[0082](../../docs/adr/0082-client-observability.md) §4 / 禁止事項）。

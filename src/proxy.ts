@@ -70,7 +70,8 @@ const BFF_PREFIX = "/api/";
 
 /**
  * 資格情報を載せた要求への応答に付ける `Cache-Control`。画面や handler ごとには書かない
- * （`docs/rules.md` #87 / [0112](../docs/adr/0112-data-classification-cache-boundary.md) 段 5）。
+ * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に書かない」
+ * / [0112](../docs/adr/0112-data-classification-cache-boundary.md) 段 5）。
  */
 const PRIVATE_CACHE_CONTROL = "private, no-store";
 
@@ -139,7 +140,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
     getHttpConfig().allowedOrigins,
   );
 
-  // 許していない origin からの書き込みは、handler へ届く前に止める（`docs/rules.md` #47）。
+  // 許していない origin からの書き込みは、handler へ届く前に止める
+  // （`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」）。
   // 読むだけの要求は止めない —— CORS ヘッダを付けないので、ブラウザ側で応答を読めない。
   if (verdict.kind === "untrusted" && isStateChanging(request.method)) {
     return new NextResponse(null, { status: 403 });
@@ -167,7 +169,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
  * **cookie を書き換えた応答は共有キャッシュへ載せません。** 資格情報を載せた要求への応答だけを
  * 外すと、**匿名で同意済みの訪問者へ計測 id を配る応答**が漏れます。固めて配れる画面は
  * `s-maxage` を伴うため、その応答を保存した CDN は以後の訪問者全員へ同じ id を配ります
- * （`docs/rules.md` #87 / [0112](../docs/adr/0112-data-classification-cache-boundary.md) 段 5）。
+ * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に書かない」
+ * / [0112](../docs/adr/0112-data-classification-cache-boundary.md) 段 5）。
  */
 function finalize(request: NextRequest, response: NextResponse, url: URL): NextResponse {
   syncMeasurementId(request, response, url);

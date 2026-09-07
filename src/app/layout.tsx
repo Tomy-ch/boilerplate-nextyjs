@@ -21,9 +21,9 @@ const site = getSiteConfig();
  * `metadataBase` があるので、各 segment は canonical と OG 画像を経路だけで宣言できます。
  * **canonical はここに置きません** —— 理由は [README](./README.md)「metadata の土台と差分」。
  *
- * 索引させない環境では `noindex` をここで宣言します（`docs/rules.md` #63）。個々の画面が `robots`
- * を持たない限り継承されるので、画面の側は索引させる環境でも隠すもの（認証の要る画面など）だけを
- * 宣言します。
+ * 索引させない環境では `noindex` をここで宣言します（`docs/rules.md`「設定と環境」の「索引させてよい
+ * 環境だけが `SITE_INDEXABLE=on` を宣言する」）。個々の画面が `robots` を持たない限り継承されるので、
+ * 画面の側は索引させる環境でも隠すもの（認証の要る画面など）だけを宣言します。
  */
 export const metadata: Metadata = {
   metadataBase: new URL(site.publicOrigin),

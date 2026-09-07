@@ -257,7 +257,8 @@ let client: UserScopedHttpClient | undefined;
  * [adapters](../../README.md) の「主体を名乗るかは、口ではなく client が決める」節。
  *
  * **だからこの口の分類は `user-scoped` で、キャッシュの指定は型として渡せません**
- * （`docs/rules.md` #86a）。入れてはいけない理由は同 #79b が持ちます。
+ * （`docs/rules.md`「データ分類と機微情報」の「取得の口は分類を宣言する」）。入れてはいけない理由は
+ * 同「描画とキャッシュ」の「Data Cache へ入れてよいのは主体を名乗らずに取れるものだけ」が持ちます。
  */
 function getClient(): UserScopedHttpClient {
   client ??= createHttpClient({

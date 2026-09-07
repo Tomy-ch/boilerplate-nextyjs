@@ -7,7 +7,7 @@
 #
 # Semgrep 本体ではなく OSS fork の opengrep を使う。ルール記法は互換で、抑止も
 # `// nosemgrep: <rule-id>` がそのまま効く。CodeQL は GitHub の外へ持ち出せないため、
-# private + GHAS 無しの fork 先では層ごと消える。持ち出せる SAST を別に持つのはそのため。
+# private + GHAS 無しのテンプレートから作った側では層ごと消える。持ち出せる SAST を別に持つのはそのため。
 #
 # **検査条件は 1 箇所に持つ。** ゲート（text）と code scanning への取り込み（SARIF）は
 # 同じ対象・同じルール・同じ除外でなければ、落ちた内容と Security タブの一覧が食い違う。
@@ -17,7 +17,7 @@
 #
 # `--config p/javascript` の類が取ってくる集合は Semgrep Rules License v1.0 で、「自社内部の
 # 目的に限る」「再頒布不可」「サービスとして提供不可」を課す。エンジンを OSS fork の opengrep へ
-# 替えた判断（fork 先へライセンスの判断を渡さない）は、ルールをそこから引いている限り成立せず、
+# 替えた判断（作った側へライセンスの判断を渡さない）は、ルールをそこから引いている限り成立せず、
 # 判断の所在が層をずれただけになる（docs/adr/0110-security-operations.md 3）。
 #
 # 代わりに、ライセンス変更前から分岐している opengrep-rules を commit で固定して読む。取得と

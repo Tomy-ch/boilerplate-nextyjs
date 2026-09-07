@@ -49,7 +49,8 @@ const VISIBLE_LIMIT = 10;
  *
  * **脇に集計を置ける幅では、その操作を器の下端へ貼り付けます。** 明細が画面の高さを超えても、
  * 畳む手段が読んでいる位置から届きます。それ未満の幅で貼り付けないのは、画面の下端を確定の帯が
- * 占めており、二つが重なるためです（`docs/rules.md` #72）。
+ * 占めており、二つが重なるためです（`docs/rules.md`「レイアウトと帯」の「常に届く操作は `lg` 未満で
+ * 画面下端に固定する」）。
  */
 export function OrderLines({ lines }: OrderLinesProps) {
   const [expanded, setExpanded] = useState(false);

@@ -144,7 +144,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0120](docs/adr/0120-locale-aware-formatting.md) | Locale formatting | date/number formatting + date-fns date arithmetic |
 | [0121](docs/adr/0121-i18n-strategy.md) | i18n (exclusion) | i18n not adopted (negative decision) |
 | [0130](docs/adr/0130-pwa-strategy.md) | PWA (exclusion) | PWA not adopted (negative decision) |
-| [0131](docs/adr/0131-cookie-consent.md) | Cookie consent (exclusion) | Consent management not adopted (negative decision) |
+| [0131](docs/adr/0131-cookie-consent.md) | Cookie consent | Lightweight consent mechanism + script gate bundled / full CMP (IAB TCF) not adopted |
 | [0140](docs/adr/0140-documentation-operations.md) | Documentation ops | Japanese canonical on suffix-less paths below v1.0.0 / EN canonical + `.ja.md` mirror from v1.0.0 |
 | [0141](docs/adr/0141-portal-operations.md) | Portal ops | `docs/portal/manifest.yaml` curation |
 | [0142](docs/adr/0142-license.md) | License | MIT / OSS contribution policy / `private` flag alignment |
@@ -153,7 +153,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0145](docs/adr/0145-docs-viewer-package-boundary.md) | docs-viewer 境界 | 依存分離をパッケージ境界で担保する |
 | [0150](docs/adr/0150-git-workflow.md) | Git workflow | Branch strategy / commit convention / PR operations / release process |
 | [0151](docs/adr/0151-git-hooks.md) | Git hooks | pre-commit / pre-push via lefthook |
-| [0152](docs/adr/0152-agents-md-policy.md) | AGENTS.md policy | File placement / language / 13-section structure / Instruction Priority / `## [TODO]` convention |
+| [0152](docs/adr/0152-agents-md-policy.md) | AGENTS.md policy | File placement / language / 13-section structure / Instruction Priority / how undecided areas are tracked |
 | [0153](docs/adr/0153-ci-configuration.md) | CI configuration | GitHub Actions job partitioning / workflow-definition lint (actionlint / zizmor) / hooks mirror CI / required checks / caching |
 | [0154](docs/adr/0154-claude-skills-operations.md) | Claude skills (operations) | Operational skill placement / naming / frontmatter / commercial-action confirmation |
 | [0155](docs/adr/0155-claude-skills-development.md) | Claude skills (development) | Development skill placement / subagent pattern / `new-env` target structure |
@@ -166,7 +166,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 
 ## Pending Decisions
 
-The major design decisions are now settled as ADRs (`0001`–`0156` across topical bands; the A / B / C / D groups are all authored, including the negative "exclusion" decisions). The `## [TODO]` placeholder sections that this file used to carry — one per undecided area, each with its own "provisional behavior" — have been removed because the corresponding ADRs are now authoritative. The remaining blank slots and not-yet-written design seams are tracked in [`docs/adr/BACKLOG.md`](docs/adr/BACKLOG.md); the ADR bodies are the source of truth and this file only summarizes them.
+The major design decisions are now settled as ADRs (`0001`–`0159` across topical bands; the A / B / C / D groups are all authored, including the negative "exclusion" decisions). The `## [TODO]` placeholder sections that this file used to carry — one per undecided area, each with its own "provisional behavior" — have been removed because the corresponding ADRs are now authoritative. The remaining blank slots and not-yet-written design seams are tracked in [`docs/adr/BACKLOG.md`](docs/adr/BACKLOG.md); the ADR bodies are the source of truth and this file only summarizes them.
 
 When a change forces you into an area that BACKLOG still leaves blank (no accepted ADR yet):
 

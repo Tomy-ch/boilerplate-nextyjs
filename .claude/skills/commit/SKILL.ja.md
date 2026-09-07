@@ -63,11 +63,13 @@ gh pr view --json number,state,mergedAt,baseRefName,headRefName,url 2>/dev/null
     - 「新しいブランチを切る（推奨）」 — 未コミットの変更内容から導いたブランチ名（例: `feature/<topic>`）を提案して確認し、base を最新化してから切り替える:
 
       ```sh
-      git fetch origin <baseRefName>
-      git switch -c <new-branch> origin/<baseRefName>
+      BASE=$(make -s base-branch)
+      test -n "$BASE" || { echo "ベースブランチを解決できませんでした"; exit 1; }
+      git fetch origin "$BASE"
+      git switch -c <new-branch> "origin/$BASE"
       ```
 
-      未コミットの作業ツリー変更は新ブランチへ持ち越される。以降は新ブランチ上で通常フロー（Step 2 以降）を続ける。**例外:** `--dry-run` のときはブランチを切り替えない — 警告と推奨コマンドを提示するだけにし、dry-run の提案を続ける。
+      ここでの base は**現行の**リリースラインであり、`make base-branch` が `origin` の実状態から解決する。マージ済み PR の `baseRefName` は使わない。あれは古い作業がマージされた先を記録しているだけで、その後に新しいリリースラインが開いていることは十分あり、そこから切ると新しい作業が 1 世代遅れて始まる。`gh repo view --json defaultBranchRef` が答えにならないのも同じ理由で、GitHub のデフォルトブランチも現行のラインより遅れうる。`git switch -c … origin/release/*` は新ブランチの upstream を**保護された** base に設定するため、最終的な push は明示 refspec（`git push -u origin <new-branch>`）を使い、素の `git push`（保護 base を対象にしてしまう）は決して使わないこと。未コミットの作業ツリー変更は新ブランチへ持ち越される。以降は新ブランチ上で通常フロー（Step 2 以降）を続ける。**例外:** `--dry-run` のときはブランチを切り替えない — 警告と推奨コマンドを提示するだけにし、dry-run の提案を続ける。
     - 「このブランチのまま続ける」 — マージ済みブランチ上でのコミットをユーザが受け入れた場合。現在のブランチで続行する。
 - **`state` が `CLOSED`**（マージされずクローズ）→ 中断はしないが、その旨を一度ユーザへ伝えて続行する。
 

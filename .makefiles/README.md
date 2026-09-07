@@ -172,6 +172,16 @@ pre-commit hook と CI の `actions-lint` job が実行します。actionlint �
 が持ちます。**同じ判断を検査ごとに書き起こすと、片方だけが直った状態が黙って生まれる**ため、
 `make actions-comment-secret-lint` と共有します。
 
+### ベースブランチの解決関連
+
+フィーチャーブランチの分岐元と、PR が無いときの base を答えます。判断は
+[`scripts/base-branch/resolve.ts`](../scripts/base-branch/resolve.ts) が持ち、出所を `origin` の実状態に
+限る理由は [`scripts/base-branch/README.md`](../scripts/base-branch/README.md) が持ちます。
+
+| コマンド | 説明 | 補足 |
+| --- | --- | --- |
+| `make base-branch` | 最新のリリースライン（`release/vX.Y.Z`）のブランチ名を 1 行で出力します。 | `git ls-remote` で `origin` の実状態を読むため、`git fetch` では更新されないローカルの `refs/remotes/origin/HEAD` が古くても、GitHub のデフォルトブランチが前のラインを指したままでも答えは変わりません。「最新」はコミット日時ではなく版の数値比較で、リリースブランチを切る側と同じ判定を使います。出力は装飾を持たないので `$(make -s base-branch)` でそのまま受けられます。リリースラインが 1 本も無ければ exit 1 で、空文字を返しません。PR が既にあるならその `baseRefName` が正で、これは PR が無いときの答えです。 |
+
 ### リリースブランチ関連
 
 いずれも取り消せない操作（`origin` への push / デフォルトブランチの張り替え）を含みます。何をどの順で

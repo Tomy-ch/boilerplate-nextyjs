@@ -294,6 +294,9 @@ make test-cached           # Default. Same tests through Vitest's cache — the 
 make test-full             # Full run with coverage against the 100% threshold (ADR 0090). The gate
                            #   itself — leave it to the hook and CI rather than running it by hand
 make load-status           # Show the current gate band and why (ADR 0151)
+make base-branch           # Print the latest release line, read from origin (ADR 0150).
+                           #   Branch from this, not from the default branch — a clone's
+                           #   origin/HEAD is fixed at clone time and never refetched
 make hotfix-patch          # Create a hotfix/v<patch> branch from production
 make tag-patch             # Tag production HEAD and create a GitHub Release
 make tag-minor             # Same (minor)
@@ -332,6 +335,9 @@ slow the gate feels.
 4. History rewrites (`git commit --amend` + force push / `git rebase`) are forbidden. Stack fixes as **new commits**.
 
 ### Branch Naming
+
+**Branch from `$(make -s base-branch)`**, never from `origin/HEAD` or the default branch —
+both drift silently behind the newest release line (ADR [0150](docs/adr/0150-git-workflow.md)).
 
 ```text
 feature/<issue-no>-<kebab-description>     e.g., feature/1234-add-login-form

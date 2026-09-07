@@ -218,7 +218,8 @@ PR タイトルも日本語で書き、関連 issue / ADR を本文末尾に記�
 
 - 「最新の `release/*` から派生する」ルールがあるため、複数の `release/*` が並行する期間は **どの release に乗せるかを issue / PR 段階で決める**。曖昧な場合は最新の `release/*` を採る
 - **GitHub のデフォルトブランチは最新の `release/vX.Y.Z`** とする。リポジトリを開いた人が「現在作業中のリリース」を最初に見る形にするためである。デフォルトブランチはリリースを切るたびに新しい `release/*` へ張り替える
-- **派生元と PR の base は、どちらもデフォルトブランチが指す `release/vX.Y.Z`。** 現行の `release/*` は `gh repo view --json defaultBranchRef` で引ける。デフォルトブランチが正しく張られていれば、`git switch -c <branch> origin/<release>` の宛先と、GitHub が PR で最初に提示する base が一致する
+- **派生元と PR の base は、どちらも最新の `release/vX.Y.Z`。** 引くのは `make base-branch` で、**origin の生の状態**（`ls-remote`）から版を数値で比べて決める。**ローカルの参照とデフォルトブランチを基準にしない** —— `refs/remotes/origin/HEAD` は clone 時に固定されて `git fetch` では動かず、デフォルトブランチの張り替えも人の操作なので、どちらも古いラインを指したまま黙って外れる。**release ラインが 1 本も無い remote では答えを返さず落ちる**（[0157](0157-inspection-declaration-discipline.md)）。
+  > 強制: `make base-branch`。`commit` / `submit-pr` の両スキルがこの口を通す
 - **`develop` を base に取ってよいのは `release/*` → `develop` の統合 PR だけ。** `feature/*` / `bugfix/*` の PR が `develop` を向いていたら、派生元を取り違えている。`develop` は統合先であり、開いている `release/*` より必ず後ろにいるため、そこを起点にすると既に載っている変更を差分として引き連れる
 - 本 ADR ではブランチ命名・保護対象・コミット粒度のみを宣言する。CI ジョブの具体構成 (どの job をどのブランチで走らせるか) や自動デプロイ連携の詳細は [0153](0153-ci-configuration.md) が扱う
 

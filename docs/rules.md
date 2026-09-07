@@ -44,7 +44,7 @@
 - **同一 render 内で重複し得る取得は adapters 側で `cache()` または fetch memoization を使い、呼び出し側に重複排除を委ねない。** 畳めていなければ `cache()` を外し、呼び出し側で 1 度だけ引く形へ倒す —— 効いていない機構をコメントで主張しない。ただし外す前に応答を見る —— 描画の span に同じ取得が複数本見えても、HTTP client の再試行は memo 化より内側で起きるので、効いていても本数は増える。
 - **キャッシュは既定で無い。** 残したいものに `use cache` を付け、寿命は `cacheLife`、捨てる印は `cacheTag` で持つ。下の所有境界とタグの綴りはそのまま効く。**user-scoped な値は既定 uncached で、`use cache` の下へ置かない**（[データ分類と機微情報](#データ分類と機微情報)）。
 - **`use cache` の内側の `fetch` に個別のキャッシュ指定（`cache` / `next.tags`）を置かない。** 内側の取得はまとめて外側の寿命に従うので、二重に持つと内側が切れないぶん、外側が再取得しても同じ古い応答を掴む。寿命は `cacheLife`、印は `cacheTag` が持つ。散文 —— **寄せられる**。`use cache` の内側で `cache` / `next.tags` を渡す形は、`no-user-scoped-in-cached-module` と同じ書き方で検出できる。
-- **`use cache` を持つモジュールは `createHttpClient` を直に引かない。** 分類ごとの接続口（`adapters/server/api/public-client.ts` の `getPublicClient`）を引く。直に引けるモジュールは user-scoped な client も組める状態にあり、キャッシュの下でそれを許すと主体の値が別の主体へ配られる。
+- **`use cache` を持つモジュールは `createHttpClient` を直に引かない。** **分類ごとに 1 つ置いた接続口**を引く。口は `adapters/server` が持ち、モジュールごとに組ませない。直に引けるモジュールは user-scoped な client も組める状態にあり、キャッシュの下でそれを許すと主体の値が別の主体へ配られる。
 - **Data Cache へ入れてよいのは、主体を名乗らずに取れるものだけ。** 入れ物は server 側で共有され、鍵は URL・method・ヘッダ・本文である。資格情報を載せる取得を入れると、鍵が主体ごとに割れて再利用はほぼ起きないのに、入れ物だけが主体の数だけ増える。**入れないものへ印を付けない** —— 印は入っているものにしか付かないので、付けた側も捨てる側も、動いていないのに動いて見える。
 - **mutation 後は、データの所有境界で `revalidateTag`、`revalidatePath`、または `router.refresh()` により UI を更新する。** 所有境界の決め方とタグの綴りは次の 2 つが持つ。
 - **捨てるのは、その mutation が変えたデータを実際に描いている route だけにする。** `revalidatePath("/", "layout")` はアプリ全体を捨てる呼び方であって所有境界ではない。捨てる先が複数の route にまたがるなら、route を並べるのではなく `revalidateTag` を使う。散文 —— **寄せられる**。`revalidatePath("/", "layout")` はリテラルの検出で落とせる。所有境界そのものの判定は人に残る。

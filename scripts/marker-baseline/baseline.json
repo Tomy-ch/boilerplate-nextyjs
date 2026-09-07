@@ -12,7 +12,7 @@
   "docs/adr/0110-security-operations.md": 25,
   "docs/adr/0152-agents-md-policy.md": 4,
   "docs/adr/0153-ci-configuration.md": 4,
-  "docs/adr/BACKLOG.md": 7,
+  "docs/adr/BACKLOG.md": 6,
   "docs/adr/README.md": 3,
   "docs/get-started/setup-repository.md": 4,
   "docs/playbook.md": 5,

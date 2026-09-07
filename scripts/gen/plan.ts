@@ -1,3 +1,9 @@
+import {
+  CATALOG_HEADING_TITLE,
+  type CatalogHeading,
+  type ComponentLayer,
+  componentDirectoryOf,
+} from "../../src/components/scripts/check-shadcn";
 import type { LayerContract } from "./layer-contract";
 import { toPascalCase } from "./naming";
 
@@ -6,7 +12,7 @@ import { toPascalCase } from "./naming";
  *
  * @remarks
  * 計画を先に確定させてから書くのは、途中で導出に失敗したときにファイルを half-written で
- * 残さないためです（IM-27 の halt / hand-off）。ここは純粋関数で、ファイルシステムに触りません。
+ * 残さないためです。ここは純粋関数で、ファイルシステムに触りません。
  */
 
 /** 生成できる雛形の種類。 */
@@ -21,18 +27,34 @@ export type GeneratedFile = {
   readonly content: string;
 };
 
-/** 計画の入力。 */
-export type GenerationInput = {
-  readonly kind: GenerationKind;
-  /** kebab-case の名前。 */
-  readonly name: string;
-  /** 生成先の層が `architecture.ts` で import を許されている層。 */
-  readonly importsAllowed: readonly string[];
-  /** 生成先の層 README が宣言する契約。 */
-  readonly contract: LayerContract;
-  /** `component` のときだけ使う配置区画（`design-system/status` など）。 */
-  readonly area?: string;
+/** component を置く層と、目録の見出し。`shadcn-manifest.yaml` の `layer` / `as` と同じ語彙。 */
+export type ComponentPlacement = {
+  readonly layer: ComponentLayer;
+  readonly as: CatalogHeading;
 };
+
+/** 計画の入力。種類ごとに、雛形の導出に要るものだけを持つ。 */
+export type GenerationInput =
+  | {
+      readonly kind: "feature";
+      /** kebab-case の名前。 */
+      readonly name: string;
+      /** 生成先の層が `architecture.ts` で import を許されている層。 */
+      readonly importsAllowed: readonly string[];
+      /** 生成先の層 README が宣言する契約。 */
+      readonly contract: LayerContract;
+    }
+  | {
+      readonly kind: "component";
+      readonly name: string;
+      readonly placement: ComponentPlacement;
+      /** `component-template.md` の全文。README はこの写しとして出す。 */
+      readonly readmeTemplate: string;
+    }
+  | {
+      readonly kind: "adapter";
+      readonly name: string;
+    };
 
 /** 引数が生成できる種類かを判定する。 */
 export function isGenerationKind(value: string): value is GenerationKind {
@@ -40,35 +62,39 @@ export function isGenerationKind(value: string): value is GenerationKind {
 }
 
 /** 層 README の frontmatter を組み立てる。 */
-function frontmatter(input: GenerationInput): string {
+function frontmatter(importsAllowed: readonly string[], contract: LayerContract): string {
   return [
     "---",
-    `imports-allowed: [${input.importsAllowed.join(", ")}]`,
-    `forbidden: [${input.contract.forbidden.join(", ")}]`,
-    `test-requirement: ${input.contract.testRequirement}`,
+    `imports-allowed: [${importsAllowed.join(", ")}]`,
+    `forbidden: [${contract.forbidden.join(", ")}]`,
+    `test-requirement: ${contract.testRequirement}`,
     "---",
   ].join("\n");
 }
 
-/** 生成物の README。層の必須節をすべて持つ。 */
 /**
  * 生成先から、リポジトリの根までさかのぼる段数を組む。
  *
  * @remarks
- * 生成先の深さは種類ごとに違う（feature は 3 段、component と adapter は 4 段）ため、段数を
- * 書き固めるとどれかの生成物でリンクが解決しません。**書き出す文字列の中の相対パスは、
- * 書き出す先を基準に組みます。**
+ * 書き出す文字列の中の相対パスは、書き出す先を基準に組みます。段数を書き固めると、
+ * 生成先の深さが変わったときにリンクが解決しません。
  */
 function toRoot(directory: string): string {
   return "../".repeat(directory.split("/").length);
 }
 
-function readme(input: GenerationInput, directory: string): string {
-  return `${frontmatter(input)}
+/** feature の README。層の必須節をすべて持つ。 */
+function featureReadme(
+  name: string,
+  importsAllowed: readonly string[],
+  contract: LayerContract,
+  directory: string,
+): string {
+  return `${frontmatter(importsAllowed, contract)}
 
-# ${input.name}
+# ${name}
 
-<!-- TODO: この ${input.kind} が何のために在るかを 1 文で書いてください。 -->
+<!-- TODO: この feature が何のために在るかを 1 文で書いてください。 -->
 
 ## 受け入れるもの
 
@@ -76,7 +102,7 @@ function readme(input: GenerationInput, directory: string): string {
 
 ## 受け入れないもの
 
-- ${input.contract.forbidden.join(" / ")}
+- ${contract.forbidden.join(" / ")}
 
 ## 構成
 
@@ -84,9 +110,23 @@ function readme(input: GenerationInput, directory: string): string {
 
 ## 運用
 
-- import してよい層は \`${input.importsAllowed.join(" / ")}\` です（\`architecture.ts\` が正）。
-- テスト責務は \`${input.contract.testRequirement}\` です（[0090](${toRoot(directory)}docs/adr/0090-testing-strategy.md)）。
+- import してよい層は \`${importsAllowed.join(" / ")}\` です（\`architecture.ts\` が正）。
+- テスト責務は \`${contract.testRequirement}\` です（[0090](${toRoot(directory)}docs/adr/0090-testing-strategy.md)）。
 `;
+}
+
+/** テンプレートが component 名を受け取る placeholder。 */
+const COMPONENT_NAME_PLACEHOLDER = "{{ComponentName}}";
+
+/**
+ * component の README。`component-template.md` の写しに、component 名だけを入れて出す。
+ *
+ * @remarks
+ * 節の構成はテンプレートが正で、ここでは持ちません。名前以外の placeholder は、実装に合わせて
+ * 具体化する人へそのまま渡します。
+ */
+function componentReadme(template: string, symbol: string): string {
+  return template.replaceAll(COMPONENT_NAME_PLACEHOLDER, symbol);
 }
 
 /** React component の雛形。1 つの export に 1 つの describe が対応する形で出す。 */
@@ -109,6 +149,40 @@ export function ${symbol}({ title }: ${symbol}Props) {
     </section>
   );
 }
+`;
+}
+
+/**
+ * component の story。`title` の先頭は目録の見出しで、`pnpm check:ui` が台帳の `as` と突き合わせる。
+ *
+ * @remarks
+ * 部品自身が表現する状態へ canvas から届く story を揃えるのは実装する人の仕事です。ここは
+ * 既定の 1 本と、説明を書く場所だけを出します。
+ */
+function componentStory(symbol: string, importPath: string, as: CatalogHeading): string {
+  return `import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+
+import { ${symbol} } from "${importPath}";
+
+const meta = {
+  title: "${CATALOG_HEADING_TITLE[as]}/${symbol}",
+  component: ${symbol},
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "TODO: この部品が何のためにあるかと、隣の似た部品との使い分けを書いてください。",
+      },
+    },
+  },
+  args: { title: "見出し" },
+} satisfies Meta<typeof ${symbol}>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/** 既定の見え方。TODO: 部品が表現する状態ごとに story を足してください。 */
+export const Default: Story = {};
 `;
 }
 
@@ -181,36 +255,46 @@ describe("${symbol}", () => {
  */
 export function planGeneration(input: GenerationInput): readonly GeneratedFile[] {
   const symbol = toPascalCase(input.name);
+  const importPath = `./${input.name}`;
 
   if (input.kind === "adapter") {
     const directory = `src/adapters/server/${input.name}`;
 
     return [
       { path: `${directory}/${input.name}.ts`, content: adapterSource(symbol) },
-      {
-        path: `${directory}/${input.name}.test.ts`,
-        content: adapterTest(symbol, `./${input.name}`),
-      },
+      { path: `${directory}/${input.name}.test.ts`, content: adapterTest(symbol, importPath) },
     ];
   }
 
-  const directory =
-    input.kind === "feature"
-      ? `src/features/${input.name}`
-      : `src/components/${input.area ?? "patterns"}/${input.name}`;
+  if (input.kind === "component") {
+    const { layer, as } = input.placement;
+    const directory = componentDirectoryOf(layer, as, input.name);
+
+    return [
+      { path: `${directory}/README.md`, content: componentReadme(input.readmeTemplate, symbol) },
+      {
+        path: `${directory}/${input.name}.tsx`,
+        content: componentSource(symbol, `${input.name} の表示部品`),
+      },
+      {
+        path: `${directory}/${input.name}.stories.tsx`,
+        content: componentStory(symbol, importPath, as),
+      },
+      { path: `${directory}/${input.name}.test.tsx`, content: componentTest(symbol, importPath) },
+    ];
+  }
+
+  const directory = `src/features/${input.name}`;
 
   return [
-    { path: `${directory}/README.md`, content: readme(input, directory) },
+    {
+      path: `${directory}/README.md`,
+      content: featureReadme(input.name, input.importsAllowed, input.contract, directory),
+    },
     {
       path: `${directory}/${input.name}.tsx`,
-      content: componentSource(
-        symbol,
-        input.kind === "feature" ? `${input.name} の画面スライス` : `${input.name} の表示部品`,
-      ),
+      content: componentSource(symbol, `${input.name} の画面スライス`),
     },
-    {
-      path: `${directory}/${input.name}.test.tsx`,
-      content: componentTest(symbol, `./${input.name}`),
-    },
+    { path: `${directory}/${input.name}.test.tsx`, content: componentTest(symbol, importPath) },
   ];
 }

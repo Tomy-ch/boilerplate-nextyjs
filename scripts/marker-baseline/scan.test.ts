@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { diffBaseline, EXCLUDED_DIRECTORIES } from "./rules";
-import { REPO_ROOT, readBaseline, scanTree } from "./scan";
+import { REPO_ROOT, readBaseline, scanRowsOutsideTable, scanTree } from "./scan";
 
 // リポジトリ全体を歩くため、既定の 5 秒では足りない（`docs/testing-conventions.md`）。
 const TIMEOUT_MS = 300_000;
@@ -57,6 +57,15 @@ describe("scanTree", () => {
     "実ツリーがベースラインと一致する",
     () => {
       expect(diffBaseline(scanTree(REPO_ROOT), readBaseline()).join("\n")).toBe("");
+    },
+    TIMEOUT_MS,
+  );
+
+  it(
+    "実ツリーの Markdown に、表として成立していない行が無い",
+    () => {
+      // ベースラインと違い基準値を持たない。0 件が唯一の合格で、数えて固定する対象ではない。
+      expect(scanRowsOutsideTable(REPO_ROOT)).toEqual({});
     },
     TIMEOUT_MS,
   );

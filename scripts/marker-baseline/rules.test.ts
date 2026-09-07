@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { countMarkerLines, diffBaseline, EXCLUDED_PATH_PREFIXES, isBaselineTarget } from "./rules";
+import {
+  countMarkerLines,
+  diffBaseline,
+  EXCLUDED_PATH_PREFIXES,
+  findRowsOutsideTable,
+  isBaselineTarget,
+} from "./rules";
 
 describe("countMarkerLines", () => {
   // ----- 正常系 -----
@@ -106,5 +112,57 @@ describe("diffBaseline", () => {
     const failures = diffBaseline({}, { "a.md": 2 });
 
     expect(failures).toEqual(["マーカー行が無くなりました: a.md — ベースラインのほうが古い"]);
+  });
+});
+
+describe("findRowsOutsideTable", () => {
+  const table = ["| a | b |", "| --- | --- |", "| 1 | 2 |"];
+
+  // ----- 正常系 -----
+  it("区切り行から始まる表は落とさない", () => {
+    expect(findRowsOutsideTable(table.join("\n"))).toEqual([]);
+  });
+
+  it("行内の `:line` は表を割らない", () => {
+    const content = [...table, "| 3 | 4 <!-- boilerplate-only:line --> |"].join("\n");
+
+    expect(findRowsOutsideTable(content)).toEqual([]);
+  });
+
+  it("表の直後に置いたブロックマーカーは表を割らない", () => {
+    const content = [...table, "", "<!-- sample:begin -->", "散文", "<!-- sample:end -->"].join(
+      "\n",
+    );
+
+    expect(findRowsOutsideTable(content)).toEqual([]);
+  });
+
+  it("囲みコードの中の `|` を表と見なさない", () => {
+    const content = ["```text", "| a | b |", "```"].join("\n");
+
+    expect(findRowsOutsideTable(content)).toEqual([]);
+  });
+
+  // ----- 異常系 -----
+  it("表の途中のブロックマーカーより後ろの行を落とす", () => {
+    const content = [
+      ...table,
+      "<!-- boilerplate-only:replace-begin -->",
+      "| 3 | 4 |",
+      "<!-- boilerplate-only:replace-with -->",
+      "<!-- = | 3 | 5 | -->",
+      "<!-- boilerplate-only:replace-end -->",
+      "| 6 | 7 |",
+    ].join("\n");
+
+    expect(findRowsOutsideTable(content)).toEqual([5, 9]);
+  });
+
+  it("表の途中の空行より後ろの行を落とす", () => {
+    expect(findRowsOutsideTable([...table, "", "| 3 | 4 |"].join("\n"))).toEqual([5]);
+  });
+
+  it("区切り行を持たない行の並びを落とす", () => {
+    expect(findRowsOutsideTable("| a | b |\n| 1 | 2 |")).toEqual([1, 2]);
   });
 });

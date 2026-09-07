@@ -10,7 +10,13 @@
 import fs from "node:fs";
 
 import { diffBaseline } from "./rules.js";
-import { BASELINE_PATH, REPO_ROOT, readBaseline, scanTree } from "./scan.js";
+import {
+  BASELINE_PATH,
+  REPO_ROOT,
+  readBaseline,
+  scanRowsOutsideTable,
+  scanTree,
+} from "./scan.js";
 
 const actual = scanTree(REPO_ROOT);
 
@@ -21,6 +27,15 @@ if (process.argv.includes("--write")) {
 }
 
 const failures = diffBaseline(actual, readBaseline());
+
+// 行数の差分とは別の検査。ベースラインは「数が動いたら判断せよ」だが、こちらは 0 件が唯一の合格
+// なので、`--write` では黙らせられない。
+for (const [file, rows] of Object.entries(scanRowsOutsideTable(REPO_ROOT))) {
+  failures.push(
+    `表として成立していない行があります: ${file}（${rows.join(" / ")} 行目）` +
+      " — 表の途中にブロックマーカーか空行が入っている。マーカーなら 1 行 1 実体にし、消える行は行内の `:line` で落とす",
+  );
+}
 
 if (failures.length === 0) {
   console.log(`✓ marker-baseline: ${Object.keys(actual).length} ファイル、差分なし`);

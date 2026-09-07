@@ -53,7 +53,7 @@ Accepted (一部 exclusion)
 ### 3. 脆弱性スキャン(多層防御)
 
 - **CodeQL SAST**: `languages: javascript-typescript`。trigger = PR + 保護ブランチ push + 週次 cron。`security-events: write` で SARIF アップロード。high-severity はマージブロック(ブロックの実体は branch protection / code scanning の required 設定側。workflow 内の hard-fail には依存しない) <!-- boilerplate-only:line -->
-- **portable SAST(Opengrep)**: CodeQL は **GitHub の外へ持ち出せない**。テンプレートから作った側が private かつ GHAS 無しなら SAST の層がまるごと消えるため、**同じ問いに答える持ち出せる実体**を別に持つ。実体は `mise.toml` にピンした 1 バイナリで、ローカルでも CI でも同じ `make sast` が回す。**Semgrep 本体ではなく OSS fork の Opengrep を採る** —— ルール記法は互換で `// nosemgrep:` の抑止もそのまま効くうえ、boilerplate が作った側へライセンス判断を渡さずに済む。**0 件の baseline を保つことがこのゲートの前提**であり、0 件だからこそ新しい所見が読み飛ばす対象ではなく信号になる。許容する所見はソースへ `// nosemgrep: <rule-id>` を理由付きで置き、判断をコードの側に残す。**検査条件(対象・ルール・除外)は 1 箇所に持つ** —— ゲートと code scanning への取り込みが違う走査を指すと、落ちた内容と Security タブの一覧が食い違う。**ルールはレジストリ(semgrep.dev)から引かない** —— `p/javascript` の類が返す集合は Semgrep Rules License v1.0 で「自社内部の目的に限る」「再頒布不可」「サービスとして提供不可」を課し、**エンジンだけ OSS へ替えても、ルールをそこから引いている限りこの判断は成立しない**(判断の所在が層をずれるだけになる)。代わりにライセンス変更前から分岐している `opengrep/opengrep-rules` を **commit で固定**する(固定値は `.github/actions-pin.toml` / `docker/images-pin.toml` と同じ形のロックファイルが持ち、**digest をソースへ書かない** —— 人が写す工程は写し間違いの工程である)。取り出すのは`security` 分類の javascript / typescript だけを取り出して読む。取り出したもの(アーカイブではない)に対する digest を照合し、一致しなければ何も置かずに落ちる —— GitHub の自動生成アーカイブはバイト単位で不変ではないため、包み方ではなく中身を照合対象にする。**`audit` 分類は取らない**(レジストリの既定パックも含めていない。読んで判断するための所見であって、0 件 baseline を保てる分類ではない)。**検体は 1 つもディスクへ置かない** —— 置き場はルールと同数の意図的に脆弱なソースを抱えており、`java/` `php/` には本物の webshell が含まれる。言語で絞ったうえで YAML だけを名指しで取り出す
+- **portable SAST(Opengrep)**: SAST の既定は**リポジトリと一緒に持ち出せる実体**で持つ。GitHub の code scanning が供給する解析は **GitHub の外へ持ち出せず**、テンプレートから作った側が private かつ GHAS 無しならその層がまるごと消えるため、**同じ問いに答える持ち出せる実体**を持つ。実体は `mise.toml` にピンした 1 バイナリで、ローカルでも CI でも同じ `make sast` が回す。**Semgrep 本体ではなく OSS fork の Opengrep を採る** —— ルール記法は互換で `// nosemgrep:` の抑止もそのまま効くうえ、boilerplate が作った側へライセンス判断を渡さずに済む。**0 件の baseline を保つことがこのゲートの前提**であり、0 件だからこそ新しい所見が読み飛ばす対象ではなく信号になる。許容する所見はソースへ `// nosemgrep: <rule-id>` を理由付きで置き、判断をコードの側に残す。**検査条件(対象・ルール・除外)は 1 箇所に持つ** —— ゲートと code scanning への取り込みが違う走査を指すと、落ちた内容と Security タブの一覧が食い違う。**ルールはレジストリ(semgrep.dev)から引かない** —— `p/javascript` の類が返す集合は Semgrep Rules License v1.0 で「自社内部の目的に限る」「再頒布不可」「サービスとして提供不可」を課し、**エンジンだけ OSS へ替えても、ルールをそこから引いている限りこの判断は成立しない**(判断の所在が層をずれるだけになる)。代わりにライセンス変更前から分岐している `opengrep/opengrep-rules` を **commit で固定**する(固定値は `.github/actions-pin.toml` / `docker/images-pin.toml` と同じ形のロックファイルが持ち、**digest をソースへ書かない** —— 人が写す工程は写し間違いの工程である)。取り出すのは`security` 分類の javascript / typescript だけを取り出して読む。取り出したもの(アーカイブではない)に対する digest を照合し、一致しなければ何も置かずに落ちる —— GitHub の自動生成アーカイブはバイト単位で不変ではないため、包み方ではなく中身を照合対象にする。**`audit` 分類は取らない**(レジストリの既定パックも含めていない。読んで判断するための所見であって、0 件 baseline を保てる分類ではない)。**検体は 1 つもディスクへ置かない** —— 置き場はルールと同数の意図的に脆弱なソースを抱えており、`java/` `php/` には本物の webshell が含まれる。言語で絞ったうえで YAML だけを名指しで取り出す
 <!-- boilerplate-only:replace-begin -->
 - **編集時 SAST(eslint-plugin-security)**: 上の 2 つと同じ問いに、**型を解決したうえで編集中に**答える層。走査が CI にしか無いと、指摘が届くのは push の後になる。ただし **[0002](0002-formatter-linter.md) の能力ベース分担に従い、推奨プリセットは当てない** —— 束を当てれば biome と重なる規則も、この層に対象の無い規則も同時に入る。**有効化するのは 0 件の baseline を保てる規則だけ**とし、落とした規則とその理由は `eslint.config.ts` に書く(ReDoS と path traversal は Opengrep / CodeQL が引き続き担うので、落としても検査面は消えない)
 <!-- boilerplate-only:replace-with -->
@@ -96,13 +96,11 @@ Accepted (一部 exclusion)
 
 | 配線 | 該当 | 何が赤にするか |
 | --- | --- | --- |
-| **ゲート** | gitleaks / Opengrep / eslint-plugin-security / 依存監査 / Trivy・OSV の昇格側 / Dependency Review | job 自身の exit code |
+| **ゲート** | gitleaks / Opengrep / eslint-plugin-security / 依存監査 / Trivy・OSV の昇格側 | job 自身の exit code |
+| **ゲート** | Dependency Review | job 自身の exit code <!-- boilerplate-only:line --> |
 | **報告専用** | Trivy・OSV の報告側 | 何も赤にしない(スキャナが走らなかったときだけ落ちる) |
-<!-- boilerplate-only:replace-begin -->
-| **code scanning へ送る** | CodeQL / Bearer / DevSkim / SonarQube Cloud | **その変更が新しく持ち込んだ所見**に対する GitHub 側の差分チェック |
-<!-- boilerplate-only:replace-with -->
-<!-- = | **code scanning へ送る** | Bearer / DevSkim | **その変更が新しく持ち込んだ所見**に対する GitHub 側の差分チェック | -->
-<!-- boilerplate-only:replace-end -->
+| **code scanning へ送る** | Bearer / DevSkim | **その変更が新しく持ち込んだ所見**に対する GitHub 側の差分チェック |
+| **code scanning へ送る** | CodeQL / SonarQube Cloud | 同上 <!-- boilerplate-only:line --> |
 
 3 つ目は「落とさない」と「見せない」を分けるための配線である。job は緑を返すが、**差分が持ち込んだ alert は PR を赤にする**。baseline を 0 件にできない層 —— 誤検知の傾向が強く、0 へ寄せるには規則単位の無効化が要る層 —— はここに置く。規則単位の無効化は下記 3.4 が禁じている。
 
@@ -119,6 +117,7 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 | 報告専用(Trivy / OSV の報告側) | 降りる | lockfile が動いていなければスキャナの答えは変わらない |
 | 依存監査ゲート(`pnpm audit`) | 降りる | base から引き継いだ判定は変更の作者がその場で解消できない(上記 3.1) |
 | 昇格ゲート(Trivy / OSV の release 側) | **降りない** | 昇格はツリーの現状を誰かが引き受ける場面であり、その PR の差分が lockfile に触れていないことは、ツリーが持つ脆弱性を引き受けない理由にならない |
+| code scanning へ送る層(3.2 の 3 つ目の配線) | **層ごとに別に決める** | alert を閉じるのは GitHub 側で、「後の解析がもう報告しない」ことでしか閉じない。降りた PR では閉じる契機が週次まで遅れる —— 判定を GitHub 側へ預けている層は、他の層と同じ差分判定で降ろす前に、その遅れを引き受けてよいかをその層について問う |
 | CodeQL | **降りない** | code scanning の alert は「後の解析がもう報告しない」ことでしか閉じない。走行回数を減らすと閉じる契機を落としうる <!-- boilerplate-only:line --> |
 
 ### 3.4 抑止(ignore)ポリシー

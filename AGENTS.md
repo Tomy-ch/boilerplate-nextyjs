@@ -124,7 +124,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0072](docs/adr/0072-api-type-generation.md) | API type generation | Generated from OpenAPI/GraphQL / generated-artifact "do not edit" rules |
 | [0073](docs/adr/0073-pagination-fetch-boundary.md) | Pagination fetch | pagination / infinite-scroll data-fetch boundary |
 | [0074](docs/adr/0074-runtime-communication-seam.md) | Realtime comm seam | WebSocket / SSE seam |
-| [0075](docs/adr/0075-file-upload-seam.md) | File upload seam | presigned direct PUT default / multipart proxy exception |
+| [0075](docs/adr/0075-file-upload-seam.md) | File receive / deliver | Server Action is the entry point / delivery from a public origin / no presigned direct PUT |
 | [0076](docs/adr/0076-payment-ui-seam.md) | Payment UI seam | mount seam & PCI boundary |
 | [0077](docs/adr/0077-bff-abuse-protection-boundary.md) | BFF abuse protection | infra / edge seam boundary |
 | [0078](docs/adr/0078-dynamic-feature-flag-seam.md) | Feature-flag seam | dynamic feature flag / staged rollout (A-B) seam |

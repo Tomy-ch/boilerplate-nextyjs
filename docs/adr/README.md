@@ -54,7 +54,7 @@
 - [0072-api-type-generation.md](0072-api-type-generation.md) - 型生成（orval + zod 生成 / gh 取込 + short SHA / do-not-edit / drift ゲート）
 - [0073-pagination-fetch-boundary.md](0073-pagination-fetch-boundary.md) - ページネーション・無限スクロールのデータ取得境界
 - [0074-runtime-communication-seam.md](0074-runtime-communication-seam.md) - 双方向 / ストリーム通信 seam（WebSocket / SSE）
-- [0075-file-upload-seam.md](0075-file-upload-seam.md) - ファイルアップロード seam（presigned 直 PUT 既定 / multipart proxy 例外）
+- [0075-file-upload-seam.md](0075-file-upload-seam.md) - ファイルの受け取りと配信（受け口は Server Action / 配信は公開の配信元 / 署名付き URL への直接送信は不採用）
 - [0076-payment-ui-seam.md](0076-payment-ui-seam.md) - 決済 UI seam（mount seam と PCI 境界）
 - [0077-bff-abuse-protection-boundary.md](0077-bff-abuse-protection-boundary.md) - BFF abuse 保護境界（infra / edge seam）
 - [0078-dynamic-feature-flag-seam.md](0078-dynamic-feature-flag-seam.md) - 動的 feature flag・段階的配信 seam（A-B / 段階的公開）

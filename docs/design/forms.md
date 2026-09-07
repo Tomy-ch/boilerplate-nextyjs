@@ -157,13 +157,14 @@ rhf を使うときの配線は次のとおり。
 
 ## ファイル添付の口
 
-[ADR 0075](../adr/0075-file-upload-seam.md) は 2 経路を対等に持つと定めるが、**実体があるのは multipart proxy の Server Action 経路だけ**である。
+受け口は **Server Action ひとつ**である（[ADR 0075](../adr/0075-file-upload-seam.md)）。
+`/api/*` に本体を受ける中継口は無く、署名付き URL へブラウザが直接送る形も採っていない。
 
-| 経路 | この repository での状態 |
-| --- | --- |
-| presigned 直 PUT | **無い。** 座標は `adapters/client`（送信）と `adapters/server`（署名の取得）だが、PUT を出す実装はまだ置かれていない |
-| multipart proxy（Server Action） | 有る。Server Action が `File` を受け取り、`adapters/server` の fetch wrapper が `multipart:` 指定で backend へ中継する |
-| multipart proxy（Route Handler） | **無い。** 進捗・中断を持つならこちらになるが、設置面が無い |
+Server Action が `File` を受け取り、`adapters/server` の fetch wrapper が `multipart:` 指定で
+backend の受け口へ送る。返るのは**保存キー**だけで、表示 URL への組み立ては `adapters/server` が
+起動時設定の配信元と結合して行う。**画面の層は配信元を読めない。**
+
+**配信は公開である。** 見せる相手を絞る必要があるものは、この経路へ載せられない。
 
 Server Action 経路で押さえること。
 
@@ -300,7 +301,7 @@ Server Action は「値を返す対象」として `unit` で扱い、`redirect(
 - [0061](../adr/0061-form-mutation-ux.md) — `<form action>` + `useActionState` + `useFormStatus` の正機構と `ActionState<T>` 契約
 - [0062](../adr/0062-form-input-validation.md) — 表示検証と契約検証の二層、いつ誤りを見せるか
 - [0063](../adr/0063-mutation-result-notification.md) — インライン / toast / redirect の使い分けと live region
-- [0075](../adr/0075-file-upload-seam.md) — presigned 直 PUT と multipart proxy の 2 経路
+- [0075](../adr/0075-file-upload-seam.md) — 受け口は Server Action ひとつ、配信は公開の配信元
 - [0029](../adr/0029-type-design-discipline.md) — 判別可能 union、境界での parse、`zod/mini` の選び方
 - [0025](../adr/0025-app-layer-elements.md) — 主体の断言が要る Server Action の置き場
 - [0072](../adr/0072-api-type-generation.md) — 生成スキーマを client へ載せない理由と `limits.ts`

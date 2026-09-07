@@ -7,6 +7,7 @@ import {
   collectActionDefinitions,
   readDirOrEmpty,
 } from "../lib/composite-action-files.js";
+import { groupsAt } from "../lib/regex-groups.js";
 
 // GitHub Actions の参照 1 件。repo は owner/repo、sub は `codeql-action/init` のようなサブパス、
 // tag は固定対象の版。
@@ -107,8 +108,8 @@ export function collectRefs(files: string[]): Map<string, ActionRef> {
   const refs = new Map<string, ActionRef>();
   for (const file of files) {
     const data = fs.readFileSync(file, "utf8");
-    for (const [, , usesPath, ref, comment] of data.matchAll(usesPattern())) {
-      if (usesPath === undefined || ref === undefined) continue;
+    for (const match of data.matchAll(usesPattern())) {
+      const [usesPath, ref, comment] = groupsAt(match, 2, 3, 4);
       const parsed = parseUses(usesPath, ref, comment);
       if (parsed) refs.set(refKey(parsed), parsed);
     }
@@ -163,8 +164,7 @@ export function unparsedUsesLines(data: string): number[] {
 export function unsupportedTagLines(data: string): number[] {
   const lines: number[] = [];
   for (const match of data.matchAll(usesPattern())) {
-    const [, , usesPath, ref, comment] = match;
-    if (usesPath === undefined || ref === undefined) continue;
+    const [usesPath, ref, comment] = groupsAt(match, 2, 3, 4);
     const parsed = parseUses(usesPath, ref, comment);
     if (parsed === null || isSupportedTag(parsed.tag)) continue;
     lines.push(lineNumberAt(data, match.index));

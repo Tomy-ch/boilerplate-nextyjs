@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { posix, resolve } from "node:path";
 
+import { groupAt } from "./regex-groups";
+
 /** なぜ解決しないか。 */
 type AssetFailure =
   /** 配信の根のどこにも実体が無い。 */
@@ -86,9 +88,7 @@ export function parseStaticDirs(source: string): string[] {
     throw new Error("`.storybook/main.ts` に `staticDirs` の宣言が見つかりません。");
   }
 
-  const dirs = [...declaration.matchAll(/"([^"]+)"/g)].flatMap(([, dir]) =>
-    dir === undefined ? [] : [dir],
-  );
+  const dirs = [...declaration.matchAll(/"([^"]+)"/g)].map((match) => groupAt(match, 1));
 
   if (dirs.length === 0) {
     throw new Error("`.storybook/main.ts` の `staticDirs` が空です。");
@@ -137,8 +137,8 @@ export function findUnresolvedAssets(
   const unresolved: UnresolvedAsset[] = [];
 
   content.split("\n").forEach((text, index) => {
-    for (const [, url] of text.matchAll(ASSET_URL)) {
-      if (url === undefined) continue;
+    for (const match of text.matchAll(ASSET_URL)) {
+      const url = groupAt(match, 1);
       const line = index + 1;
 
       if (url.startsWith("/src/")) {

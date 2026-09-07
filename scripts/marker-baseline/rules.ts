@@ -57,21 +57,19 @@ const CODE_FENCE = /^\s*(?:```|~~~)/;
 export function findRowsOutsideTable(content: string): number[] {
   const lines = content.split("\n");
   const outside: number[] = [];
-  let block: number[] = [];
+  let block: { index: number; line: string }[] = [];
   let fenced = false;
 
   const flush = (): void => {
-    const first = block[0];
-    const second = block[1];
+    const [first, second] = block;
     const isTable =
-      first !== undefined &&
-      lines[first]?.startsWith("|") === true &&
+      first?.line.startsWith("|") === true &&
       second !== undefined &&
-      TABLE_DELIMITER.test(lines[second] ?? "");
+      TABLE_DELIMITER.test(second.line);
 
     if (!isTable) {
-      for (const index of block) {
-        if (lines[index]?.startsWith("|") === true) outside.push(index + 1);
+      for (const { index, line } of block) {
+        if (line.startsWith("|")) outside.push(index + 1);
       }
     }
     block = [];
@@ -93,7 +91,7 @@ export function findRowsOutsideTable(content: string): number[] {
       flush();
       return;
     }
-    block.push(index);
+    block.push({ index, line });
   });
   flush();
 

@@ -1,4 +1,5 @@
 // client へ届く module が、重い検証の入口を引いていないかの判定。
+import { groupAt } from "./regex-groups";
 
 /** 走査する module 1 件。 */
 export type SourceModule = {
@@ -91,9 +92,7 @@ export function runtimeSpecifiers(content: string): string[] {
         : statement,
     );
 
-  return [...withoutTypes.matchAll(SPECIFIER)].flatMap(([, specifier]) =>
-    specifier === undefined ? [] : [specifier],
-  );
+  return [...withoutTypes.matchAll(SPECIFIER)].map((match) => groupAt(match, 1));
 }
 
 /**

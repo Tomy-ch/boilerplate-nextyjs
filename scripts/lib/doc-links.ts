@@ -2,6 +2,7 @@ import { readFileSync, statSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
 
 import { hasAnchor } from "./markdown-anchor";
+import { groupsAt } from "./regex-groups";
 
 /** 解決しなかったリンク 1 件。 */
 export type BrokenLink = {
@@ -107,10 +108,11 @@ function hrefsIn(text: string): string[] {
   const definition = LINK_DEFINITION.exec(text)?.[1];
 
   return [
-    ...[...text.matchAll(LINK)].flatMap(([, bracketed, bare]) => {
-      const href = bracketed ?? bare;
+    // 囲みと素書きは選択肢なので、参加したのはどちらか一方。
+    ...[...text.matchAll(LINK)].map((match) => {
+      const [bracketed, bare] = groupsAt(match, 1, 2);
 
-      return href === undefined ? [] : [href];
+      return bracketed || bare;
     }),
     ...(definition === undefined ? [] : [definition]),
   ];
@@ -140,8 +142,10 @@ export function findBrokenDocLinks(file: string, content: string, root: string):
     for (const href of hrefsIn(text)) {
       if (NOT_RELATIVE.test(href)) continue;
 
-      const [path, fragment] = href.split("#");
-      if (path === undefined) continue;
+      // `#` より前が指し先。見出しは `#` の直後の 1 区画。
+      const hashAt = href.indexOf("#");
+      const path = hashAt === -1 ? href : href.slice(0, hashAt);
+      const [, fragment] = href.split("#");
       const target = path === "" ? resolve(root, file) : resolve(root, dirname(file), path);
       const line = index + 1;
 

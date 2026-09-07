@@ -15,5 +15,5 @@
     "ui": "@/components/design-system",
     "utils": "@/components/cn"
   },
-  "iconLibrary": "lucide"
+  "iconLibrary": "tabler"
 }

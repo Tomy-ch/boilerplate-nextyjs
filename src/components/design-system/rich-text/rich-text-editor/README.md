@@ -61,7 +61,7 @@ toolbar の右端に**プレビュー**の切り替えを持ちます。押し�
 
 import { useCallback, useState } from "react";
 
-import { RichTextEditor } from "@/components/rich-text/rich-text-editor/rich-text-editor";
+import { RichTextEditor } from "@/components/design-system/rich-text/rich-text-editor/rich-text-editor";
 
 export function DescriptionField({ defaultHtml = "" }: { defaultHtml?: string }) {
   const [html, setHtml] = useState(defaultHtml);
@@ -95,7 +95,7 @@ const product = await fetchProduct(id);
 表示側は Server Component です。編集画面とは別のページに置けます。
 
 ```tsx
-import { RichTextContent } from "@/components/rich-text/rich-text-content/rich-text-content";
+import { RichTextContent } from "@/components/design-system/rich-text/rich-text-content/rich-text-content";
 import { SanitizedRichText } from "@/model/rich-text/sanitized-rich-text";
 
 export function Description({ html }: { html: string }) {
@@ -146,6 +146,12 @@ toolbar の「リンク」から入力するほか、URL を入力または貼�
 
 編集中はリンクを click しても開きません。編集面の中で意図せず遷移することを避けるためです。
 
+### toolbar の中の移動
+
+toolbar の中は矢印キーで隣の操作へ移り、Home / End で両端へ移ります。Tab の並びに残るのは最後に focus を持ったボタン 1 つだけで、toolbar 全体を Tab 1 回で通り抜けられます。押せない操作は飛ばします。
+
+**`role="toolbar"` は矢印キーでの移動を約束するため、移動を実装したうえで名乗っています。** 移動を持たない操作の群は toolbar を名乗りません（`SelectionToolbar` は `fieldset` の group で名前を与えています）。
+
 ### キー操作の案内
 
 toolbar のボタンには、**同じことを起こすキー**を hover / focus で添えます。キーの表示は `KeyboardShortcutKeys` が持ち、`⌘` と `Ctrl` の出し分けもその部品が引き受けます。
@@ -174,6 +180,6 @@ toolbar のボタンは `Toggle` と `Button` を合成して得ており、こ�
 
 Storybook は、何も書かれていない状態、保存済みの内容を読み込んだ状態、読み取り専用の状態、allowlist の外にあるタグを初期値へ渡した場合を確認します。呼び出し元へ渡る HTML を各 story に並べ、操作と出力の対応を実際に確かめられるようにしています。
 
-テストは、toolbar と名前を持つ編集面を描画すること、初期値の読み込みと allowlist 外のタグが落ちること、読み取り専用のときに編集できないこと、すべての書式ボタンが押下状態を切り替えること、段落の種類を変えると変更後の HTML を通知すること、取り消しとやり直しが実行できる間だけ押せること、リンクの入力・選択範囲の有無による適用・Enter での適用・allowlist 外の protocol と空入力を拒む理由の表示・解除、**案内するキーが extension の登録と一致すること**、a11y 自動検査を確認します。
+テストは、toolbar と名前を持つ編集面を描画すること、toolbar の中を矢印キーと Home / End で移れて押せない操作を飛ばすこと、Tab の並びに残るボタンが 1 つだけであること、初期値の読み込みと allowlist 外のタグが落ちること、読み取り専用のときに編集できないこと、すべての書式ボタンが押下状態を切り替えること、段落の種類を変えると変更後の HTML を通知すること、取り消しとやり直しが実行できる間だけ押せること、リンクの入力・選択範囲の有無による適用・Enter での適用・allowlist 外の protocol と空入力を拒む理由の表示・解除、**案内するキーが extension の登録と一致すること**、a11y 自動検査を確認します。
 
 **allowlist との関係は test で固定しています。** editor が読み書きする node と mark の一覧が導出した集合と一致すること、editor が出せるタグが `RICH_TEXT_TAG_NAMES` に収まること、editor の出力が sanitize を通しても要素と属性が変わらないこと、allowlist 外の protocol を editor 自身が出力しないことを確認します。extension を足すとこの 4 つが落ちます。

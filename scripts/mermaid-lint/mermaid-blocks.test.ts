@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { errorMessage, extractMermaidBlocks, isDependencyMissing } from "./mermaid-blocks";
+import { extractMermaidBlocks, isDependencyMissing } from "./mermaid-blocks";
 
 /** ``` で囲んだフェンスを組み立てる。 */
 const fence = (...lines: string[]): string => ["```mermaid", ...lines, "```"].join("\n");
@@ -50,23 +50,6 @@ describe("extractMermaidBlocks", () => {
 
   it("フェンスを持たない文書では空を返す", () => {
     expect(extractMermaidBlocks("# 見出し\n本文\n")).toEqual([]);
-  });
-});
-
-describe("errorMessage", () => {
-  // ----- 正常系 -----
-  it("Error の文言を前後の空白を落として返す", () => {
-    expect(errorMessage(new Error("  読めません  "))).toBe("読めません");
-  });
-
-  // ----- 異常系 -----
-  it("Error でない値は文字列化して返す", () => {
-    expect(errorMessage("失敗")).toBe("失敗");
-    expect(errorMessage(42)).toBe("42");
-  });
-
-  it("文言が空の Error は文字列化した表現を返す", () => {
-    expect(errorMessage(new Error(""))).toBe("Error");
   });
 });
 

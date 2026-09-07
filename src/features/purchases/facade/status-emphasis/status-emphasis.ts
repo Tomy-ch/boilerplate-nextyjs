@@ -18,12 +18,31 @@ const SETTLED_STATUS_CODES: ReadonlySet<number> = new Set([
 /** 取り消された購入のステータス。買ったものが届かない終端はこれだけです。 */
 const CANCELED_STATUS_CODES: ReadonlySet<number> = new Set([PURCHASE_STATUS.CANCELED]);
 
+/** 進行中のステータス。終端でも取り消しでもない、マスタに載っている業務キー。 */
+const IN_PROGRESS_STATUS_CODES: ReadonlySet<number> = new Set([
+  PURCHASE_STATUS.UNPROCESSED,
+  PURCHASE_STATUS.ACCEPTED,
+  PURCHASE_STATUS.CONFIRMING,
+  PURCHASE_STATUS.PROCESSING,
+  PURCHASE_STATUS.PAID,
+  PURCHASE_STATUS.SHIPPED,
+]);
+
+/**
+ * 知らない業務キーの見た目。
+ *
+ * @remarks
+ * **マスタはこちらの都合と関係なく増えます。** 知らない業務キーを 3 つのどれかへ寄せると、確かめて
+ * いない意味を主張することになります。装飾を持たない姿は「区分を決めていない」ことをそのまま示し、
+ * 名称は文字で出るので一覧は読めます。
+ */
+const UNKNOWN_STATUS_EMPHASIS: BadgeVariant = BADGE_VARIANT.GHOST;
+
 /**
  * ステータスの業務キーから、badge の見た目を選ぶ。
  *
  * @remarks
- * 知らない業務キーは進行中へ倒します。既定を終端側に置くと、マスタに増えたステータスがすべて
- * 「届いた」または「止まった」に見えます。
+ * マスタに無い業務キーは {@link UNKNOWN_STATUS_EMPHASIS} に倒し、進行中へは寄せません。
  *
  * `facade` に置くのは、購入完了とも共有する控え（`receipt.tsx`）がこの対応を必要とするためです
  * （README 参照）。
@@ -40,5 +59,9 @@ export function toStatusEmphasis(statusCode: number): BadgeVariant {
     return BADGE_VARIANT.DESTRUCTIVE;
   }
 
-  return BADGE_VARIANT.SECONDARY;
+  if (IN_PROGRESS_STATUS_CODES.has(statusCode)) {
+    return BADGE_VARIANT.SECONDARY;
+  }
+
+  return UNKNOWN_STATUS_EMPHASIS;
 }

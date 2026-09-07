@@ -1,3 +1,5 @@
+import { errorMessage } from "../lib/error-message.js";
+
 /** Markdown 中の mermaid フェンス 1 つ分。 */
 export type MermaidBlock = {
   /** フェンス開始行（1 始まり）。 */
@@ -46,11 +48,6 @@ export function extractMermaidBlocks(content: string): MermaidBlock[] {
   }
 
   return blocks;
-}
-
-/** 例外から表示用の 1 行を作る。 */
-export function errorMessage(error: unknown): string {
-  return (error instanceof Error && error.message ? error.message : String(error)).trim();
 }
 
 /**

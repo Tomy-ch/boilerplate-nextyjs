@@ -1,5 +1,7 @@
 import { parse } from "yaml";
 
+import { errorMessage } from "./error-message";
+
 /**
  * Markdown 冒頭の frontmatter。
  *
@@ -21,44 +23,49 @@ export function extractFrontmatter(source: string): string | null {
   return matched === null ? null : matched[1];
 }
 
-/**
- * 宣言の対応表として読める形か。
- *
- * @remarks
- * `null` を除くのは型のためである。YAML は空の本文も `null` へ解き、`typeof null` は `"object"` に
- * なるので、これが無いと `null` を対応表として narrow してしまう。**振る舞いとしては差が出ない** ——
- * 弾いた先も既定も同じ `null` なので、この 1 項を消してもテストは落ちない。
- */
+/** 宣言の対応表として読める形か。 */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/** YAML として解けなければ undefined を返す。 */
-function tryParse(block: string): unknown {
-  try {
-    return parse(block);
-  } catch {
-    return undefined;
-  }
 }
 
 /**
  * 冒頭の frontmatter を読み、宣言の対応表として返す。
  *
  * @remarks
- * YAML として解けない frontmatter は、宣言が無いのと同じに扱う。壊れた宣言を部分的に読むと、
- * 書いたつもりの宣言が効かないまま検査が緑になる。
+ * **無いことと壊れていることを分ける。** frontmatter が無い、または本文が空(YAML の `null`)なら
+ * 宣言を 1 つも持たないので `null` を返す。YAML として解けない、または対応表の形をしていない
+ * frontmatter は投げる —— 宣言が無いものとして素通しすると、書いたつもりの宣言が効かないまま
+ * 検査が緑になり、検査していないことと違反が無いことが見分けられなくなる。
  *
- * @returns frontmatter が無い、または対応表として読めなければ null
+ * @param source - Markdown の本文
+ * @param origin - 文書の名前。失敗の文言に載せ、どの文書が壊れているかを読めるようにする
+ * @returns frontmatter が無い、または本文が空なら null
+ * @throws Error frontmatter が YAML として解けない、または対応表として読めないとき
  */
-export function parseFrontmatter(source: string): Record<string, unknown> | null {
+export function parseFrontmatter(source: string, origin: string): Record<string, unknown> | null {
   const block = extractFrontmatter(source);
 
   if (block === null) {
     return null;
   }
 
-  const parsed = tryParse(block);
+  let parsed: unknown;
 
-  return isRecord(parsed) ? parsed : null;
+  try {
+    parsed = parse(block);
+  } catch (error) {
+    throw new Error(`${origin}: frontmatter が YAML として解けません: ${errorMessage(error)}`, {
+      cause: error,
+    });
+  }
+
+  if (parsed === null || parsed === undefined) {
+    return null;
+  }
+
+  if (!isRecord(parsed)) {
+    throw new Error(`${origin}: frontmatter が宣言の対応表(キーと値の組)になっていません`);
+  }
+
+  return parsed;
 }

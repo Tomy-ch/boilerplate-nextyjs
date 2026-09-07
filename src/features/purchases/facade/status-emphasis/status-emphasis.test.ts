@@ -25,7 +25,7 @@ describe("toStatusEmphasis", () => {
   });
 
   // ----- 異常系 -----
-  it("マスタに増えた業務キーは進行中へ倒す", () => {
-    expect(toStatusEmphasis(99)).toBe(BADGE_VARIANT.SECONDARY);
+  it("マスタに増えた業務キーは、どの区分にも寄せず装飾を持たない姿にする", () => {
+    expect(toStatusEmphasis(99)).toBe(BADGE_VARIANT.GHOST);
   });
 });

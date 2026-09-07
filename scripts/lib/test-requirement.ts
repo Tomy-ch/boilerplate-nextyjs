@@ -81,8 +81,8 @@ function isTestLayer(value: unknown): value is TestLayer {
  *
  * @returns 宣言が無ければ null。宣言があっても層として読めなければ空の並び
  */
-function parseTestRequirement(source: string): readonly TestLayer[] | null {
-  const frontmatter = parseFrontmatter(source);
+function parseTestRequirement(source: string, origin: string): readonly TestLayer[] | null {
+  const frontmatter = parseFrontmatter(source, origin);
 
   if (frontmatter === null || !(DECLARATION_KEY in frontmatter)) {
     return null;
@@ -143,10 +143,11 @@ export function resolveTestRequirement(
       continue;
     }
 
-    const layers = parseTestRequirement(source);
+    const declaredIn = directory === "" ? "README.md" : `${directory}/README.md`;
+    const layers = parseTestRequirement(source, declaredIn);
 
     if (layers !== null) {
-      return { declaredIn: directory === "" ? "README.md" : `${directory}/README.md`, layers };
+      return { declaredIn, layers };
     }
   }
 

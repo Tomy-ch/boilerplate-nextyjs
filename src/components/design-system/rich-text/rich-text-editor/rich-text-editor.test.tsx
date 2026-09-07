@@ -99,6 +99,75 @@ describe("RichTextEditor", () => {
     expect(textbox).toHaveAttribute("aria-multiline", "true");
   });
 
+  it("toolbar の中は矢印キーで隣の操作へ移る", () => {
+    renderEditor();
+
+    toolbarButton("太字").focus();
+    fireEvent.keyDown(toolbarButton("太字"), { key: "ArrowRight" });
+    expect(toolbarButton("斜体")).toHaveFocus();
+
+    fireEvent.keyDown(toolbarButton("斜体"), { key: "ArrowLeft" });
+    expect(toolbarButton("太字")).toHaveFocus();
+  });
+
+  it("矢印キーの移動は端で反対側へ回る", () => {
+    renderEditor();
+
+    toolbarButton("太字").focus();
+    fireEvent.keyDown(toolbarButton("太字"), { key: "ArrowLeft" });
+    expect(toolbarButton("プレビュー")).toHaveFocus();
+
+    fireEvent.keyDown(toolbarButton("プレビュー"), { key: "ArrowRight" });
+    expect(toolbarButton("太字")).toHaveFocus();
+  });
+
+  it("Home と End で toolbar の両端へ移る", () => {
+    renderEditor();
+
+    toolbarButton("斜体").focus();
+    fireEvent.keyDown(toolbarButton("斜体"), { key: "End" });
+    expect(toolbarButton("プレビュー")).toHaveFocus();
+
+    fireEvent.keyDown(toolbarButton("プレビュー"), { key: "Home" });
+    expect(toolbarButton("太字")).toHaveFocus();
+  });
+
+  it("押せない操作は矢印キーの移動で飛ばす", () => {
+    renderEditor();
+
+    toolbarButton("区切り線").focus();
+    fireEvent.keyDown(toolbarButton("区切り線"), { key: "ArrowRight" });
+
+    expect(toolbarButton("元に戻す")).toBeDisabled();
+    expect(toolbarButton("プレビュー")).toHaveFocus();
+  });
+
+  it("Tab の並びに残る toolbar のボタンは、最後に focus を持った 1 つだけ", () => {
+    renderEditor();
+
+    const toolbar = screen.getByRole("toolbar", { name: "書式" });
+    const tabStops = () =>
+      [...toolbar.querySelectorAll("button")].filter((button) => button.tabIndex === 0);
+
+    expect(tabStops()).toEqual([toolbarButton("太字")]);
+
+    toolbarButton("太字").focus();
+    fireEvent.keyDown(toolbarButton("太字"), { key: "ArrowRight" });
+
+    expect(tabStops()).toEqual([toolbarButton("斜体")]);
+  });
+
+  it("読み取り専用のときは、押せるプレビューだけが Tab の並びに残る", () => {
+    renderEditor({ disabled: true });
+
+    const toolbar = screen.getByRole("toolbar", { name: "書式" });
+    const tabStops = [...toolbar.querySelectorAll("button")].filter(
+      (button) => button.tabIndex === 0,
+    );
+
+    expect(tabStops).toEqual([toolbarButton("プレビュー")]);
+  });
+
   it("初期値の HTML を編集面へ読み込む", () => {
     renderEditor({ defaultValue: "<h2>見出し</h2><p>本文</p>" });
 

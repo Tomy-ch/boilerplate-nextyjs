@@ -4,10 +4,13 @@ import type { Editor } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import {
   type ChangeEvent,
+  type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
   useCallback,
+  useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 
@@ -43,6 +46,68 @@ const EDITOR_CONTENT_CLASS_NAME =
   "typeset typeset-docs min-h-40 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-active focus-visible:shadow-glow-primary";
 
 const TOOLBAR_BUTTON_CLASS_NAME = "size-8 min-w-8 p-0 [&_svg]:size-4";
+
+/**
+ * toolbar の中で矢印キーが行き来するボタンを、並び順に返します。
+ *
+ * 押せないボタンは focus も受けないため飛ばします。
+ *
+ * @param toolbar - `role="toolbar"` を持つ要素
+ * @returns いま押せるボタン
+ */
+function toolbarButtons(toolbar: HTMLElement): HTMLButtonElement[] {
+  return [...toolbar.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
+}
+
+/**
+ * 矢印キーで移った先の添字を返します。
+ *
+ * 端では反対側へ回ります。
+ *
+ * @param key - 押されたキー
+ * @param index - いま focus を持つボタンの添字
+ * @param count - 押せるボタンの数
+ * @returns 移る先の添字。toolbar の移動に使わないキーなら `undefined`
+ */
+function nextToolbarIndex(key: string, index: number, count: number): number | undefined {
+  switch (key) {
+    case "ArrowRight":
+      return (index + 1) % count;
+    case "ArrowLeft":
+      return (index - 1 + count) % count;
+    case "Home":
+      return 0;
+    case "End":
+      return count - 1;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * toolbar の tab stop を 1 つだけにします。
+ *
+ * `role="toolbar"` は Tab で 1 回に通り抜けられることを約束するため、最後に focus を持った
+ * ボタンだけを Tab の並びへ残し、ほかは矢印キーでだけ届くようにします。そのボタンが押せなく
+ * なっていれば、先頭の押せるボタンへ移します。
+ *
+ * @param toolbar - `role="toolbar"` を持つ要素
+ * @param active - 最後に focus を持ったボタン。まだ無ければ `null`
+ * @returns Tab の並びへ残したボタン。押せるボタンが 1 つも無ければ `null`
+ */
+function syncToolbarTabStops(
+  toolbar: HTMLElement,
+  active: HTMLButtonElement | null,
+): HTMLButtonElement | null {
+  const buttons = toolbarButtons(toolbar);
+  const stop = active !== null && buttons.includes(active) ? active : (buttons[0] ?? null);
+
+  for (const button of toolbar.querySelectorAll<HTMLButtonElement>("button")) {
+    button.tabIndex = button === stop ? 0 : -1;
+  }
+
+  return stop;
+}
 
 /**
  * 選択範囲にかかっている link の `href` を読み出します。
@@ -189,6 +254,49 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
     selector: (state) => state.editor.isActive("link"),
   });
   const isEditable = useEditorState({ editor, selector: (state) => state.editor.isEditable });
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const activeToolbarButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // 描画のたびに揃える。プレビューの切り替えでボタンが作り直され、押せる操作も編集の内容で
+  // 変わるため、依存の列挙では取り切れない。
+  useEffect(() => {
+    if (toolbarRef.current === null) {
+      return;
+    }
+
+    activeToolbarButtonRef.current = syncToolbarTabStops(
+      toolbarRef.current,
+      activeToolbarButtonRef.current,
+    );
+  });
+
+  const handleToolbarFocus = useCallback((event: FocusEvent<HTMLDivElement>) => {
+    const target = event.target;
+
+    if (!(target instanceof HTMLButtonElement)) {
+      return;
+    }
+
+    activeToolbarButtonRef.current = syncToolbarTabStops(event.currentTarget, target);
+  }, []);
+
+  const handleToolbarKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    const buttons = toolbarButtons(event.currentTarget);
+    const index = buttons.findIndex((button) => button === event.target);
+
+    if (index === -1) {
+      return;
+    }
+
+    const next = nextToolbarIndex(event.key, index, buttons.length);
+
+    if (next === undefined) {
+      return;
+    }
+
+    event.preventDefault();
+    buttons[next]?.focus();
+  }, []);
 
   const togglePreview = useCallback(() => {
     setIsLinkFormOpen(false);
@@ -307,6 +415,9 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
           aria-label="書式"
           className="flex flex-wrap items-center gap-1 border-border border-b p-1"
           data-slot="rich-text-editor-toolbar"
+          onFocus={handleToolbarFocus}
+          onKeyDown={handleToolbarKeyDown}
+          ref={toolbarRef}
           role="toolbar"
         >
           {isPreviewing

@@ -29,6 +29,10 @@ outbound HTTP が持つべき resilience は **dual timeout / idempotent retry /
 - **circuit breaker**: closed / half-open / open の状態機械(既定: 失敗率 0.5 / サンプル 20 / open 5s / half-open probe 3)。単一バックエンドでも、劣化時に叩き続けず fail-fast するために持つ
 - per-downstream の **Profile**(timeout / retry / breaker 設定)で調整し、未指定は既定 Profile を使う
 
+**接続口は downstream と分類([0112](0112-data-classification-cache-boundary.md))の組ごとに 1 つ置く。** retry budget と circuit breaker は client の中に状態として載るため、同じ downstream へ client を複数組むと、劣化したかどうかの判断が分けた数だけ割れ、budget も breaker も設計値どおりに働かない。public 側は「データ取得のキャッシュ・再検証」節の、分類ごとに 1 つ置いた接続口がこれを兼ねる。
+
+**user-scoped 側は 1 つの接続口へ寄せていない。** 寄せるには、資格情報の取得口を client へ渡す形を 1 か所へ集めることになり、[0112](0112-data-classification-cache-boundary.md) 決定 5 の検査(`project-rules/no-captured-bearer-token`: 取得口には import した口だけを渡せる)と正面から交差する —— 集めた側が取得口を引数で受け取れば検査が通さず、集めた側が取得口を自分で import して固定すれば、資格情報の解決経路が「呼ぶ口を読めば分かる」場所から 1 段離れ、検査が守っている前提が動く。どちらも決定 5 の検査の形と同時にしか決められないため、寄せるなら両方を 1 つの改定として扱う。それまで user-scoped の接続口は各取得口が自前で組み、その module 変数に固定する。**user-scoped でも downstream ごとに 1 つが原則で、破るなら理由をその場に書く。** 強制: 散文。「同じ downstream か」は `baseUrl` の実行時の値で決まりコードの形からは決まらないため、1 つへ寄せるまでは機械へ寄せられない。寄せた後は「client を組む kernel を直に引けるのは接続口だけ」という import 制限へ寄せられる(public 側で `project-rules/no-user-scoped-in-cached-module` が採る形)。
+
 ### エラー正規化(生 status を漏らさない)
 
 - 生の HTTP status を上位(feature / UI)に漏らさず、**`errors` カーネルの分類(sentinel)へ正規化**する([0021](0021-frontend-responsibility.md) errors)。HTTP status → 安定エラーコード(`NOT_FOUND` / `VALIDATION_FAILED` 等)の対応表を wrapper が持つ

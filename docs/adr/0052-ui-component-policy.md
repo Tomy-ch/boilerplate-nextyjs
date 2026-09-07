@@ -49,6 +49,14 @@ shadcn/ui から取り込んだ実装は**参照実装**として持つ。取り
 
 **これは重複の許可ではない。** 重複を 2 箇所目で統合する規律([0021](0021-frontend-responsibility.md))は `components` の内側にも等しく効く。
 
+### 台帳と上流追従
+
+**`components` 配下の部品は 1 つ残らず台帳([`src/components/shadcn-manifest.yaml`](../../src/components/shadcn-manifest.yaml))に名指しで載せ、上流との関係を `kind` で持つ。** copy-in した部品だけを記録する形は採らない —— 「台帳に無い」が自前実装なのか記録漏れなのかを区別できず、記録漏れが見過ごされる。上流を持つ行は取り込んだ時点の上流 commit を持つ。上流を参照実装として所有する(前節)以上、後で上流の差分を読むための base がこちら側に要るためである。**取り込みの入口は `pnpm add:ui` に限り、shadcn CLI を直接叩かない。** 台帳へ載せる操作が CLI の外にあるため、直接叩いた部品は台帳に載らない。台帳の項目の意味と取り込み手順は層 README が持ち、本 ADR は再掲しない。強制: `pnpm check:ui`(台帳と実配置の突合。記録の無い部品・実体を失った行・置き場の不一致で落ちる)。CLI の直接実行そのものは機械で止めていないが、その結果は同じ検査が「記録の無い部品」として落とす。
+
+**drift の検査は二段に分け、required にするのは前段だけとする。** 台帳と実配置の不一致は通信を要さず、原因はレビュー中の変更にあるため、PR のゲートにする。上流の変化は通信を要し、原因はレビュー中の変更に無いため、定期実行で報告するに留め、**required check に登録しない** —— 著者に直せない理由で PR が止まり、報告が途切れうる job を必須に載せると PR が永久に待たれる([0153](0153-ci-configuration.md) §5)。上流が動いたときに何をするか(差分を読んで取り込むか、据え置くか)は人の判断であり、bot が書き換えない([0072](0072-api-type-generation.md) の drift 検査と同じ形)。強制: `.github/workflows/shadcn-drift.yaml` の job 分割(`shadcn-manifest` は PR で走り required、`upstream` は schedule のみ)/ required の登録は `.github/settings/branch-protection.json` / PR で走らない job を required に載せないことは `make actions-required-check-lint`([0153](0153-ci-configuration.md) §5)。
+
+**`components` 配下に書かれた class は、実 CSS を build して出力と照合する。** Tailwind は知らない class に何も出力せず、何も失敗しない —— 面が透明になる、focus ring が出ない、選択状態が見えない、という欠陥が browser で見るまで現れない。copy-in は上流の theme が定義する token 前提の class を持ち込むため、これは取り込みのたびに起きうる常態であり、参照実装として改変する(前節)側の義務である。**出力が無いことと、書いてはいけないことは別とする** —— 意図して CSS を持たない class(animation plugin を採らないための装飾指定等)は検査側で理由付きで除外し、実装からは消さない。消すと生成物が持っていた情報が失われる。範囲は copy-in が着地する `components` 配下である。強制: `pnpm check:classes`(`component-classes` job。通信を要さず変更起因なので PR のゲート・required)。検査が見るのは class だけで、接頭辞の無い CSS 変数の混入には届かない —— そちらは取り込み時に人が見る(手順は層 README)。
+
 ### 振る舞いと見た目を分けるのは、振る舞いが 2 箇所目で要るときだけ
 
 振る舞いだけを hook や headless な部品へ出すのは、**同じ振る舞いを別の見た目で使う必要が実際に生じたとき**に限る。先回りして分けると、1 つの部品が 2 ファイルに割れるだけで、読む側は両方を追うことになる。
@@ -89,6 +97,8 @@ shadcn/ui から取り込んだ実装は**参照実装**として持つ。取り
 - ❌ 採用ライブラリを exact-pin / `pnpm audit` を経ずに追加すること([0004](0004-library-management.md))
 - ❌ 本体スコープを超える局所的な UI 要件(ライブラリを要する DnD 等)を本 ADR の範囲で本体へ持ち込むこと(seam と契約は [0053](0053-ui-component-interaction-seam.md) / ライブラリは作った側)
 - ❌ リッチテキストの表示を sanitizer を通さずに行うこと(生の `dangerouslySetInnerHTML` は禁止。sanitizer port は [0053](0053-ui-component-interaction-seam.md))
+- ❌ `components` 配下に台帳に無い部品を置くこと / shadcn CLI を直接叩いて取り込むこと(強制: `pnpm check:ui`)
+- ❌ 上流追従の検査を required check に登録すること(著者に直せない理由で PR が止まる。[0153](0153-ci-configuration.md) §5)
 
 ## 関連 ADR
 
@@ -101,3 +111,5 @@ shadcn/ui から取り込んだ実装は**参照実装**として持つ。取り
 - [0011-no-docker.md](0011-no-docker.md) — 表示層ロール
 - [0060-state-management.md](0060-state-management.md) — form state(react-hook-form + zod)採用。form 部品と対で機能する
 - [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) — リッチテキスト(TipTap)の a11y 契約 / sanitizer port、および DnD(dnd-kit)等、本体に同梱しない局所 UI の seam
+- [0153-ci-configuration.md](0153-ci-configuration.md) — required check の登録条件(上流追従の検査を必須に載せない根拠)
+- [0072-api-type-generation.md](0072-api-type-generation.md) — 陳腐化した写しは drift 検査が赤くして人が回す(台帳の上流追従と同じ形)

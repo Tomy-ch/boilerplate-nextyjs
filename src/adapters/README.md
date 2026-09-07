@@ -67,14 +67,15 @@ serverless では要求ごとに別のインスタンスへ着地しえて再利
 
 **`use cache` を持つモジュールは `createHttpClient` を直に引けません。** 直に引けるモジュールは
 user-scoped な client も組める状態にあり、`project-rules/no-user-scoped-in-cached-module` が止めます。
-公開の口は `server/api/public-client.ts` の `getPublicClient` を引きます —— そこが作れるのは公開の
-client だけなので、キャッシュの下で分類を取り違えようがありません。
+代わりに、**公開の分類だけを作る口を `server/` 側に 1 つ置き**、そこを引きます —— その口が作れる
+のは公開の client だけなので、キャッシュの下で分類を取り違えようがありません。
 
 その口が 1 つである理由はもう 1 つあります。retry budget と circuit breaker は client の中に状態として
 載るため、同じ downstream へ client を分けると、劣化したかどうかの判断が分けた数だけ割れます。**この理由は
-user-scoped 側にも同じだけ当てはまりますが、そちらはまだ各口が自前で組んでいます** —— 資格情報の取得口を
-どこへ寄せるかが `project-rules/no-captured-bearer-token` と交差するためで、扱いは
-[BACKLOG](../../docs/adr/BACKLOG.md) の Tier 4 が持ちます。
+user-scoped 側にも同じだけ当てはまりますが、そちらは各口が自前で組み、module 変数に固定します** ——
+資格情報の取得口をどこへ寄せるかが `project-rules/no-captured-bearer-token` と交差し、その検査の形と
+同時にしか決められないためです（[0071](../../docs/adr/0071-bff-api-integration.md)「fetch wrapper の
+resilience」）。user-scoped でも downstream ごとに 1 つが原則で、破るなら理由をその場に書きます。
 
 ## 主体を名乗るかは、口ではなく client が決める
 

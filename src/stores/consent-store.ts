@@ -76,7 +76,7 @@ function snapshot(): ConsentState {
  * **サーバ側とブラウザ側で同じ値を返します。** 別の値を返すと、`getServerSnapshot` が読まれる
  * たびに「まだ読んでいない」へ巻き戻ります —— Cache Components の下では穴が届いた時点で
  * subtree の hydration がもう一度走るため、**出したバナーがそこで一度消えて開き直り**、その消失が
- * layout shift として数えられます（[0041](../../docs/adr/0041-cache-components-decision.md)）。
+ * layout shift として数えられます。
  *
  * cookie を読むのは mount 後の 1 回だけです。サーバは同意状態を知らないので、**バナーはその読み
  * 取りの後に現れます**。知らないまま尋ねるか、知るまで待つかのどちらかしかありません。

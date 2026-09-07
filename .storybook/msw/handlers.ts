@@ -57,8 +57,7 @@ const NEXT_PURCHASE_PAGE = LOADED_ENTRIES.slice(4, 8);
 // sample:replace-end
 
 /**
- * カタログが自分で答える `/api/*` の口
- * （[0054](../../docs/adr/0054-ui-catalog-storybook.md)）。
+ * カタログが自分で答える `/api/*` の口。
  *
  * @remarks
  * 返すのは Route Handler が組み立てる表示用の形で、契約からの生成物ではありません（置き場を

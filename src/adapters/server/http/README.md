@@ -35,3 +35,17 @@ test-requirement: unit
 ## 受け入れないもの
 
 - 業務ロジック、特定の口に固有の契約
+
+## 関連する ADR
+
+この区画のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります**
+（[docs/rules.md](../../../../docs/rules.md)「コメントと文書」）。層全体の一覧は
+[親の README](../../README.md) が持ちます。
+
+- [0080](../../../../docs/adr/0080-error-handling.md) — 失敗の分類と status の対応表、応答に出す文言
+- [0071](../../../../docs/adr/0071-bff-api-integration.md) — fetch wrapper の責務と、timeout / retry / breaker の値
+- [0112](../../../../docs/adr/0112-data-classification-cache-boundary.md) — 取得の口の分類（`public` / `user-scoped`）と、キャッシュ・資格情報の関所
+- [0079](../../../../docs/adr/0079-auth-frontend-seam.md) — 資格情報を組むのは要求境界だけであること
+- [0077](../../../../docs/adr/0077-bff-abuse-protection-boundary.md) — 認証を要求しない口の最小の防御（型と大きさ）
+- [0075](../../../../docs/adr/0075-file-upload-seam.md) — 本体がバイト列になる要求の扱い
+- [0090](../../../../docs/adr/0090-testing-strategy.md) — 層別の検証責務（`integration` が掛かる範囲）

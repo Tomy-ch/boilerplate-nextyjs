@@ -157,7 +157,7 @@ Five verdicts. The first three already exist; the last two are what this skill a
 | **維持** | 1 | A correct What, or a constraint whose premise sits at that call site | Leave it |
 | **削除** | 1 | How-narration, restatement, 経緯, tautology, a marker the code already satisfies | Remove |
 | **書換** | 1 | Right content, wrong wording — drifted, ambiguous, or longer than the fact it delivers | Rewrite in place |
-| **移設** | 1 | Correct and worth keeping, but its premise is **not** at this call site and its reversal would oblige someone to update a document | Move it to that document; leave the operative residue and a one-line reference |
+| **移設** | 1 | Correct and worth keeping, but its premise is **not** at this call site and its reversal would oblige someone to update a document | Move it to that document; leave the operative residue and a one-line reference **to the README** |
 | **集約** | 2 | The same content is carried at several sites in one file (重複 / 分散 / 総量過多). **Not raised for a general-purpose part's public doc vs. its own README** — see the exception above | One site keeps it; the rest shrink to a pointer |
 
 **The 移設 test**: could someone make this statement false without editing this declaration? If yes,
@@ -285,7 +285,10 @@ For each approved item, write **both sides in the same step**:
 1. Append the relocated rationale to the destination document, in that document's voice and section
    structure. Do not paste the comment verbatim — a comment and a document read differently.
 2. Edit the code: remove the relocated prose, keep the operative residue, and add a one-line
-   reference to the destination.
+   reference **to the layer or feature README** — never to the ADR, even when the ADR is where the
+   prose landed. `docs/rules.md` forbids an ADR reference in a comment: an ADR's number, section and
+   owning record all move, while the README moves with the layer, so a README reference cannot go
+   stale unseen. The README is what lists the related ADRs.
 
 Never do one without the other. A rationale removed from code before its destination exists is
 information destroyed, and this skill is the only thing holding both ends.

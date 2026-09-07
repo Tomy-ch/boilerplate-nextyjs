@@ -27,7 +27,7 @@ export type AdminProductFilterControlProps = {
  *
  * @remarks
  * 選ばれた値をどう扱うかは持ちません。**同じ欄が、選んだ時点で反映する場所と、まとめて確定する
- * overlay の中の 2 か所に出る**ためです（[0052](../../../../../../../docs/adr/0052-ui-component-policy.md)）。
+ * overlay の中の 2 か所に出る**ためです。
  *
  * **複数を同時に効かせられます。** 候補は overlay の中の checkbox で、何も選ばれていない状態が
  * 「すべて」です。「すべて」を候補として置くと、それと具体的な値を同時に選べる形になります。

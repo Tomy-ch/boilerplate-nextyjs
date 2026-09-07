@@ -13,9 +13,8 @@ import { authorizeDevelopmentSession } from "../authorize-development-session";
  * 入口ごとに閉じていなければ、閉じたことになりません。
  *
  * **判定と組み立ては隣のモジュールが持ちます。** `route.ts` に許される import 先は
- * `adapters/server` / `errors` / `logging` で、原則は thin proxy です
- * （[0025](../../../../../docs/adr/0025-app-layer-elements.md)）。ここが持つのは、口を閉じることと、
- * 返ってきた結果を HTTP の形へ直すことだけです。
+ * `adapters/server` / `errors` / `logging` で、原則は thin proxy です。ここが持つのは、
+ * 口を閉じることと、返ってきた結果を HTTP の形へ直すことだけです。
  *
  * @returns 認可の応答・失敗の案内への 303。開けていない環境では 404、対応づける値が無ければ 400、
  *   本体が大きすぎれば 413

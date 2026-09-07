@@ -14,7 +14,7 @@ export const NO_IMAGE_URL = "/no-image.svg";
  * API が返すのはキー（`items/{uuid}.png`）だけで、URL は返しません。
  *
  * **組み立てた URL は必ず配信元の下に収まります。** キーは検証されないまま届く値であり、前置する
- * だけでは配信元の外を指す値を止められません（[0045](../../docs/adr/0045-fonts-and-images.md) §2.1）。
+ * だけでは配信元の外を指す値を止められません。
  *
  * @param origin - 配信元の origin。呼び出し側が設定から供給する
  * @param imagePath - バックエンドが返したオブジェクトキー。未設定なら null

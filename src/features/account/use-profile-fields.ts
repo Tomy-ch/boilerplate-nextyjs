@@ -62,8 +62,7 @@ export type ProfileFields = {
  * 誤りをいつ見せるかは {@link useErrorVisibility} が持ちます。
  *
  * `mode: "onTouched"` にするのは、一度 focus が外れた項目を変更のたびに見直すためです。rhf の
- * `reValidateMode` は **submit のあとにしか効かない**ので、これが無いと直しても消えません
- * （[0062](../../../docs/adr/0062-form-input-validation.md) 補足）。
+ * `reValidateMode` は **submit のあとにしか効かない**ので、これが無いと直しても消えません。
  *
  * 必須かどうかはスキーマへ空文字を通して判定します。列挙すると、規則を緩めたのに画面が必須の
  * ままという状態を作れます。

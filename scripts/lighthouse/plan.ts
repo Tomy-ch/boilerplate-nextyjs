@@ -6,7 +6,7 @@ import { type Shard, selectShard } from "./shard";
  *
  * @remarks
  * 開く画面は [`e2e/lib/screens.ts`](../../e2e/lib/screens.ts) の宣言をそのまま使い、一覧をここで
- * 持ち直しません（[0101](../../docs/adr/0101-performance-budget.md) §2）。
+ * 持ち直しません。
  */
 
 /** 計測 1 件ぶんの指示。 */
@@ -52,8 +52,7 @@ export type ScreenPlan = {
  * @remarks
  * **床の画面は、担当でない台でも測ります。** 落ちた画面と床が別の機械で測られていては、その
  * 画面が遅いのか機械が遅いのかを見比べられないためです
- * （[0101](../../docs/adr/0101-performance-budget.md) §2、`performance-budget.yaml` の
- * `floor.reason`）。
+ * （`performance-budget.yaml` の `floor.reason`）。
  *
  * **割らない実行では足しません。** 全画面が同じ機械で測られるので、床は既に居ます。
  *

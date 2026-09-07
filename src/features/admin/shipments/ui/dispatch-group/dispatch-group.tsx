@@ -33,8 +33,7 @@ export type DispatchGroupCardProps = {
  *
  * @remarks
  * `useFormStatus` は `form` の子でしか送信状態を読めないため、別の部品に切り出しています。
- * 二重送信を止めるのと、押した操作が進んでいることを示すのを兼ねます
- * （[0061](../../../../../../docs/adr/0061-form-mutation-ux.md)）。
+ * 二重送信を止めるのと、押した操作が進んでいることを示すのを兼ねます。
  */
 function ShipSubmit({
   label,

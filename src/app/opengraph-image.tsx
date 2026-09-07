@@ -17,8 +17,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
- * 共有されたときに出る画像（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §1 /
- * [0045](../../docs/adr/0045-fonts-and-images.md) §4）。
+ * 共有されたときに出る画像。
  *
  * @remarks
  * root に置くので、自分の画像を持たない全 route がこれを名乗ります。画面ごとの画像は、その

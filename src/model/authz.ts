@@ -82,8 +82,7 @@ export function allowedRolesFor(pathname: string): readonly SessionRole[] | null
  *
  * @remarks
  * **確定認可も、導線の出し分けも、この 1 つの述語を使います。** 判定が別々に書かれていると
- * 「入れないのに入口が出ている」状態を作れてしまいます
- * （[0079](../../docs/adr/0079-auth-frontend-seam.md)）。
+ * 「入れないのに入口が出ている」状態を作れてしまいます。
  *
  * **これは楽観的な判定です。** session の中身が正しいことは前提であり、それを保証するのは
  * cookie を復元する境界（`adapters/server`）の仕事です。

@@ -6,11 +6,10 @@
  * manifest の和集合（{@link initialChunks}）へ落とします。CSS は `entryCSSFiles`、遅延の側は
  * `deferred.ts` が引きます。
  *
- * **なぜ 4 つを測るのかは [0101](../../docs/adr/0101-performance-budget.md) §2 が持ちます。**
+ * **なぜ 4 つを測るのかは [README](../README.md) から辿ります。**
  *
  * `polyfillFiles` を数えないのは、Next.js がそれを `<script nomodule>` で出すためです。
- * [0102](../../docs/adr/0102-browser-support.md) が対応対象とするブラウザ（Next.js 既定の
- * browserslist = モダン）は一度も取得しません。
+ * 対応対象とするブラウザ（Next.js 既定の browserslist = モダン）は一度も取得しません。
  */
 
 /** `__RSC_MANIFEST` の 1 route ぶん。必要な形だけを受け取る。 */

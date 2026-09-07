@@ -10,10 +10,9 @@ import { toProductDetailHref } from "@/features/products/facade/detail-url/detai
  * 1 つのサイトマップに載せてよい URL の上限。
  *
  * @remarks
- * Sitemaps protocol の値です。超える規模は `generateSitemaps` で分割するのが規約であり
- * （[0044](../../docs/adr/0044-seo-metadata-strategy.md) §2）、分け方は経路の構成で決まるため
- * テンプレートから作った側の判断です。ここでは上限で打ち切り、載せ切れないものを黙って落とすのではなく、分割が
- * 要ることが挙げた件数から読めるようにします。
+ * Sitemaps protocol の値です。超える規模は `generateSitemaps` で分割するのが規約であり、
+ * 分け方は経路の構成で決まるためテンプレートから作った側の判断です。ここでは上限で打ち切り、
+ * 載せ切れないものを黙って落とすのではなく、分割が要ることが挙げた件数から読めるようにします。
  */
 const SITEMAP_URL_LIMIT = 50_000;
 
@@ -69,9 +68,9 @@ async function listProductPaths(): Promise<string[]> {
  * 商品の経路。取れなければ空。
  *
  * @remarks
- * 一覧の取得が失敗しても、backend に依らない経路まで一緒に落としません。500 を返すと、クローラ
- * は静的な画面の存在まで知れなくなります。失敗の分類と記録は `adapters` の境界が済ませている
- * ので、ここでは記録し直しません（[0080](../../docs/adr/0080-error-handling.md)）。
+ * 一覧の取得が失敗しても、backend に依らない経路まで一緒に落としません。500 を返すと、
+ * クローラは静的な画面の存在まで知れなくなります。失敗の分類と記録は `adapters` の境界が
+ * 済ませているので、ここでは記録し直しません。
  */
 async function findProductPaths(): Promise<string[]> {
   try {
@@ -83,7 +82,7 @@ async function findProductPaths(): Promise<string[]> {
 // sample:end
 
 /**
- * サイトマップ（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §2）。
+ * サイトマップ。
  *
  * @remarks
  * **build では組み立てません。** 挙げる経路にはバックエンドから取る一覧が混ざり、build 時に

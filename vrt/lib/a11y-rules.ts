@@ -12,12 +12,12 @@
  * 検査するルールの範囲。適合目標そのものを axe のタグで表す。
  *
  * @remarks
- * 目標は **WCAG 2.x レベル AA**（[0100](../../docs/adr/0100-accessibility-target.md) §1）。axe は
+ * 目標は **WCAG 2.x レベル AA** です（[README](../README.md)）。axe は
  * 既定で目標の外側（`best-practice` など）まで回すため、範囲を宣言しないと「目標として掲げて
  * いない水準」を全 story ぶん評価することになります。
  *
  * ここに AAA を入れません。入れた時点で、宣言した目標と機械が要求する水準が食い違います。
- * 目標を引き上げるなら 0100 を先に変えます。
+ * 目標を引き上げるなら、[README](../README.md) が挙げる決定を先に変えます。
  */
 export const CONFORMANCE_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] as const;
 

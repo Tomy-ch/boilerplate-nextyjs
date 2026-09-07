@@ -40,7 +40,7 @@ export type ProgressClientProps = Omit<
  * 名前が付かない。
  *
  * 完了時期が不明な進捗（indeterminate）は扱わない。待機の表現は `Skeleton` / `Shimmer` が担う
- * ため、進捗部品は値の判っている進捗だけを引き受ける（0051）。
+ * ため、進捗部品は値の判っている進捗だけを引き受ける。
  *
  * @see Storybook `Status/ProgressClient`
  */

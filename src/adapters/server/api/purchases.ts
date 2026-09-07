@@ -226,9 +226,8 @@ export const getMyPurchase = cache(async (purchaseCode: string): Promise<Purchas
  * 購入を作る。
  *
  * @remarks
- * **金額は送りません。** 単価も合計もバックエンドがその時点の価格から決めます。画面が見せていた
- * 金額を送り返せる口はなく、送れたとしても古い値になり得ます
- * （[0070](../../../../docs/adr/0070-backend-role-separation.md)）。
+ * **金額は送りません。** 単価も合計もバックエンドがその時点の価格から決めます。
+ * 画面が見せていた金額を送り返せる口はなく、送れたとしても古い値になり得ます。
  *
  * **冪等キーは必ず付けます。** 契約では任意ですが、購入は自然キーを持たないため、付けない再送は
  * そのまま 2 件目の購入になります。同じ主体が同じキーで送り直した要求は、初回の結果の再生として
@@ -300,7 +299,7 @@ export async function cancelMyPurchase(purchaseCode: string): Promise<void> {
  *
  * @remarks
  * **決済そのものは行いません。** 契約が擬似決済として定めており、金額も決済結果も検証されません
- * （`docs/screens.md` の除外事項）。未払い相当の状態からのみ通り、支払い済みへの再送は
+ * （`docs/spec/screens.md` の除外事項）。未払い相当の状態からのみ通り、支払い済みへの再送は
  * `conflict` として返ります。
  *
  * @param purchaseCode - 購入コード。利用者へ注文番号として見せている値

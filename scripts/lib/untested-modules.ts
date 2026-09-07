@@ -41,9 +41,8 @@ export const ENTRYPOINT_PATTERNS = [
  *
  * @remarks
  * 書き手が居ないコードにテストを課しても、検証しているのは生成器であって本リポジトリの
- * 判断ではありません([0072](../../docs/adr/0072-api-type-generation.md))。生成物の正しさは
- * 契約からの再生成が一致するか(drift ゲート)と、`mocks/contract-conformance.test.ts` の
- * 全ハンドラ検査が担保します。
+ * 判断ではありません。生成物の正しさは契約からの再生成が一致するか(drift ゲート)と、
+ * `mocks/contract-conformance.test.ts` の全ハンドラ検査が担保します。
  *
  * 並ぶのは題材の契約から生成したものだけなので、サンプルを破棄すると空になります。テンプレートから
  * 作った側は自分の契約を生成した先をここへ並べます。
@@ -118,8 +117,7 @@ const NON_DECIDING_MODULES = [
  * 実物どおりの件数でなければ器の幅を確かめられない入力があるためです。
  *
  * `experimental-react.fixture.ts` が返すのは Next.js 同梱の experimental React の位置です。本番は
- * Next.js が `react` の解決先を差し替えるため、この位置を綴るのはテストだけです
- * （[0030](../../docs/adr/0030-environment-variable-management.md) §8）。
+ * Next.js が `react` の解決先を差し替えるため、この位置を綴るのはテストだけです。
  */
 const TEST_FIXTURE_MODULES = [
   "src/config/environment.fixture.ts",
@@ -137,9 +135,8 @@ const TEST_FIXTURE_MODULES = [
  * カタログ専用の差し替え。
  *
  * @remarks
- * server の無いカタログで、押せる操作を押しても壊れない状態にするためだけの module です
- * ([0054](../../docs/adr/0054-ui-catalog-storybook.md))。判定は持たず、隣にある本物の
- * Server Action がテストの対象です。
+ * server の無いカタログで、押せる操作を押しても壊れない状態にするためだけの module です。
+ * 判定は持たず、隣にある本物の Server Action がテストの対象です。
  *
  * `.storybook/msw/handlers.ts` も同じ genre で、カタログが自分で答える `/api/*` の据え置きです。
  * 郵便番号ごとの出し分けは題材そのもの（`sample:replace` でサンプル破棄時に空へ置き換わる）で、
@@ -160,7 +157,7 @@ const CATALOG_MOCK_MODULES = [
  *
  * @remarks
  * route segment は `params` / `searchParams` が Promise である App Router の規約と生成型に依存し、
- * 検証は route の経路ごと通す必要があります([0091](../../docs/adr/0091-test-verification-methods.md))。
+ * 検証は route の経路ごと通す必要があります。
  * 通す先は `e2e/` で、開く画面は build の出力から列挙されるため、足した route は宣言を求められます
  * （`e2e/lib/screens.ts`）。ここから外れるのは、route segment が単体で回せるようになったときです。
  *

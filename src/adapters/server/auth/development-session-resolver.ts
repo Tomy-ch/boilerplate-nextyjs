@@ -16,9 +16,8 @@ import { toTestSessionRecord } from "./test-session-record";
  * 認可を始める代わりに開く面。
  *
  * @remarks
- * `features/dev-session` が同じ値を持ちますが、この層は `features` を参照できません。前捌きの
- * `proxy.ts` がログイン画面の場所を自前で持つのと同じ、層の境界による重複です
- * （[0021](../../../../docs/adr/0021-frontend-responsibility.md)）。
+ * `features/dev-session` が同じ値を持ちますが、この層は `features` を参照できません。
+ * 前捌きの `proxy.ts` がログイン画面の場所を自前で持つのと同じ、層の境界による重複です。
  */
 const DEV_SESSION_PATH = "/dev/session";
 

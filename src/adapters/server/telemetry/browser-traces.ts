@@ -111,10 +111,10 @@ function reportFailure(fields: Readonly<Record<string, unknown>>): void {
  *
  * @remarks
  * **ここで掛けるのは、ここが全部を通る唯一の場所だからです。** ブラウザ側で掛けても、送信者は
- * 差し替えられるので受け側の根拠になりません（[0077](../../../../docs/adr/0077-bff-abuse-protection-boundary.md)）。
- * 名前の表は `logging` が持ちます —— ログと span へ同じ redaction を求めているのは
- * [0081](../../../../docs/adr/0081-observability-logging.md) §3 の 1 つの規則で、表が 2 つに割れると
- * 片方だけが緩みます。
+ * 差し替えられるので受け側の根拠になりません。
+ *
+ * **名前の表は `logging` が持ちます。** ログと span へ同じ redaction を掛けるので、表が 2 つに
+ * 割れると片方だけが緩みます。
  *
  * **値の中身は見ません。** 上流や第三者が組んだ URL の中まで洗い出すことは表現層の設計目標に
  * 入れていません。名前で持ち回っている限り効き、そうでないものは元の設計が誤っています。

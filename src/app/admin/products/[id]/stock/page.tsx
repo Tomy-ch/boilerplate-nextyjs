@@ -22,9 +22,8 @@ export const metadata: Metadata = {
  * 補充の中身。
  *
  * @remarks
- * **`params` を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません
- * （[0041](../../../../../../docs/adr/0041-cache-components-decision.md)）。器は promise のまま
- * 渡し、穴の内側で解きます。
+ * **`params` を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません。
+ * 器は promise のまま渡し、穴の内側で解きます。
  */
 async function AdminProductStockContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

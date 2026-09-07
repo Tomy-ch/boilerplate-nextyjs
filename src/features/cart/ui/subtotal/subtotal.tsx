@@ -20,9 +20,9 @@ export type CartSubtotalProps = {
  *
  * @remarks
  * バックエンドが返した値をそのまま出します。買える明細だけを合算した参考値であり、ここでは
- * 足し直しません（[0070](../../../../../docs/adr/0070-backend-role-separation.md)）。
+ * 足し直しません。
  *
- * 金額の書式は locale に従います（[0120](../../../../../docs/adr/0120-locale-aware-formatting.md)）。
+ * 金額の書式は locale に従います。
  */
 export const CartSubtotal = withPartSpan(
   "features/cart/ui/subtotal/subtotal",

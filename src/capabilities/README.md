@@ -33,3 +33,10 @@ connectivity、media query、storage、clipboard など、複数 feature が使�
 | [`use-media-query`](use-media-query.ts) | 幅・入力方式などのメディア条件の一致 |
 | [`use-scroll-direction`](use-scroll-direction.ts) | 直近の scroll がどちらへ向いたか |
 | [`use-on-visible`](use-on-visible.ts) | 要素が見えたこと（`IntersectionObserver` の購読） |
+
+## 関連する ADR
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界
+- [0022](../../docs/adr/0022-capabilities-kernel.md) — このカーネルが受け持つ範囲と、単一 feature 用の hook を昇格させない線
+- [0040](../../docs/adr/0040-routing-rendering-strategy.md) — Server / Client Component の割り方と `"use client"` の置き場
+- [0090](../../docs/adr/0090-testing-strategy.md) — 層ごとのテストの受け持ちと co-location

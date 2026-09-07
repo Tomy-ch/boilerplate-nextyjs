@@ -47,8 +47,7 @@ function isDockerRef(value: string): boolean {
 // 固定対象になりうる値の形。owner/repo で始まるものだけを通す。
 const REPO_VALUE_PATTERN = /^[^/\s]+\/[^/\s]+/;
 
-// 版として受け付ける文字集合。GitHub の tag / branch 名として現実的な範囲だけを通す
-// （入口で 1 度絞る理由は [0153](../../docs/adr/0153-ci-configuration.md)）。
+// 版として受け付ける文字集合。GitHub の tag / branch 名として現実的な範囲だけを通す。
 const TAG_PATTERN = /^[A-Za-z0-9._+/-]+$/;
 
 const WORKFLOW_DIR = ".github/workflows";

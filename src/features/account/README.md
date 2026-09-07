@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 画面まるごとの story は例外
 test-requirement: feature
 coverage-exclusions:
   - "src/features/account/__mocks__/**"
@@ -66,15 +66,14 @@ error は route の `error` 境界（`src/app/(shop)/mypage/error.tsx` と
 
 ## 構成
 
-画面（`mypage` / `edit` / `onboarding`）ごとに掘り、その中を性質で分けます
-（[0027](../../../docs/adr/0027-directory-structure.md)）。どの画面にも属さないものは画面を挟まず
-直下へ置きます。**登録と編集は同じ 9 項目を同じ規則で扱う**ため、入力欄と検証まわりはその直下に
-あります。
+画面（`mypage` / `edit` / `onboarding`）ごとに掘り、その中を性質で分けます。どの画面にも属さない
+ものは画面を挟まず直下へ置きます。**登録と編集は同じ 9 項目を同じ規則で扱う**ため、入力欄と
+検証まわりはその直下にあります。
 
 | ファイル | 役割 |
 | --- | --- |
 | `actions.ts` | 登録・プロフィール更新・退会の Server Action。検証と分類だけを持ち、通信は `adapters` が行う |
-| `__mocks__/actions.ts` | カタログでの Server Action の差し替え（[0054](../../../docs/adr/0054-ui-catalog-storybook.md)）。押せる操作を成立させるためだけに置く |
+| `__mocks__/actions.ts` | カタログでの Server Action の差し替え。押せる操作を成立させるためだけに置く |
 | `form-state.ts` | Server Action の戻り値の型。`ActionState<T>` を画面の項目名で閉じる |
 | `paths.ts` | この feature が持つ 3 つのルートと、登録を促す行き先の組み立て |
 | `registration-gate.ts` | 保護された画面の入口。認証と登録の状態を行き先へ変える |
@@ -119,7 +118,7 @@ error は route の `error` 境界（`src/app/(shop)/mypage/error.tsx` と
 | 関心 | 持ち主 | 変わる理由 |
 | --- | --- | --- |
 | どの値が正しいか | `model/user/profile-schema.ts` | 契約や業務上の制約 |
-| 誤りをいつ見せるか | `use-error-visibility.ts` | [0062](../../../docs/adr/0062-form-input-validation.md) の改訂 |
+| 誤りをいつ見せるか | `use-error-visibility.ts` | 入力検証 UX の決まり（下記 [0062](../../../docs/adr/0062-form-input-validation.md)）の改訂 |
 | 検証を回し props を組む | `use-profile-fields.ts` | この画面の項目が増減したとき |
 | 住所を引く | `use-address-completion.ts` | 補完の契約や打ち切りの仕方 |
 | 補完をフォームへ当てる | `use-address-field.ts` | どの項目へ埋めるか |
@@ -166,14 +165,14 @@ error は route の `error` 境界（`src/app/(shop)/mypage/error.tsx` と
   失われ、戻る操作も共有もできなくなります
 - **合成はフロント側で行います**。編集画面が要る「自分の情報」と「都道府県マスタ」は互いに独立で、
   並べるだけで足ります。ドメインの計算を挟まない合成をバックエンドへ持たせると、画面の都合で契約が
-  1 本増えます（[screens.md](../../../docs/screens.md) §1）
+  1 本増えます（[screens.md](../../../docs/spec/screens.md) §1）
 - **識別子を画面へ渡しません**。更新と退会が対象を指すのに使う内部の識別子は `adapters` の中で
   解決します。フォームの hidden に載せると、ブラウザに置く理由の無い値が出ます
 - **都道府県は `SelectNative` です**。契約が全 47 件を固定で返す静的な候補なので、client island の
-  検索 UI を持ち込む理由がありません（[0053](../../../docs/adr/0053-ui-component-interaction-seam.md)）
+  検索 UI を持ち込む理由がありません
 - **検証は client と server の両方で通します**。同じ表示検証スキーマ（`model/user/profile-schema.ts`）
   を使いますが、client 側は即時に返すためのもので、通ったことは何の保証にもなりません。契約に
-  照らした検証は `adapters` の境界がさらに別に行います（[0062](../../../docs/adr/0062-form-input-validation.md)）
+  照らした検証は `adapters` の境界がさらに別に行います
 - **focus が当たっている項目へ新しい誤りを出しません**。焦点を当てた時点に出ていた文言を上限に
   して表示します。上限が無いと、書き直そうとして 1 文字消しただけで「入力してください」が
   現れます。直ったことはその場で消して反映します
@@ -181,7 +180,7 @@ error は route の `error` 境界（`src/app/(shop)/mypage/error.tsx` と
   先頭を無条件に採ると利用者が選んでいない住所が黙って入ります。番地は補完に含まれないため、
   町域を入れるのは丁目・番地が空のときだけです
 - **補完に失敗しても先へ進めます**。契約は外部 lookup の障害を `503` ではなく空の候補で返すと
-  定めており、画面は手入力を続けさせます（[0080](../../../docs/adr/0080-error-handling.md)）
+  定めており、画面は手入力を続けさせます
 - **「該当が無い」と「補完の機構が動いていない」を言い分けます**。前者は郵便番号を直せば埋まり
   ますが、後者は何度引いても埋まりません。契約が両者を別々に返すので、後者では検索の操作を閉じて
   手入力へ促します。押しても永久に何も起きない操作を残すと、利用者は自分の入力を疑って何度も試します
@@ -198,7 +197,7 @@ error は route の `error` 境界（`src/app/(shop)/mypage/error.tsx` と
   | `000-0000` | 無し（機構が動いていない） | 検索の操作を閉じ、手入力へ促すこと |
 
 - **保存は画面を移さず toast で伝え、退会は移します**。前者はフォームの文脈に留まる操作で、後者は
-  成立した時点で留まる先が無くなるためです（[0063](../../../docs/adr/0063-mutation-result-notification.md)）
+  成立した時点で留まる先が無くなるためです
 - **退会の文言で即時の反映を約束しません**。取り消しと在庫の戻しは結果整合で走るため、直後に古い
   状態を見た利用者が失敗を疑います
 - **退会の確認は `AlertDialogAction` を使いません**。押した時点で dialog が閉じる部品なので、
@@ -213,4 +212,20 @@ error は route の `error` 境界（`src/app/(shop)/mypage/error.tsx` と
 - **登録の二重送信は冪等キーが畳みます**。画面を組み立てた地点が 1 つ作って送信に載せるので、同じ
   画面から何度送っても利用者は 1 人のままです
 - **パンくずは編集画面だけが持ちます**。マイページは global nav が直接指すので、同じ導線を二重に
-  置くことになります（[0026](../../../docs/adr/0026-layout-shell-mount.md)）
+  置くことになります
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。検証と分類だけを Action に持たせる
+- [0026](../../../docs/adr/0026-layout-shell-mount.md) — 殻と Provider の据え付け。global nav とパンくずの分担
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面ごとに掘り、その中を性質で分ける
+- [0029](../../../docs/adr/0029-type-design-discipline.md) — 判別可能 union と境界での parse。登録の段と入力の解き方
+- [0053](../../../docs/adr/0053-ui-component-interaction-seam.md) — 操作の a11y 継ぎ目。入力欄と確認の継ぎ目
+- [0054](../../../docs/adr/0054-ui-catalog-storybook.md) — カタログの方針。Server Action と補完の応答の差し替え
+- [0061](../../../docs/adr/0061-form-mutation-ux.md) — `<form action>` + Server Action の正機構
+- [0062](../../../docs/adr/0062-form-input-validation.md) — 入力検証の UX。誤りをいつ見せるか、判定の正はどちらにあるか
+- [0063](../../../docs/adr/0063-mutation-result-notification.md) — 送信結果の伝え方。toast に留めるか画面を移すか
+- [0073](../../../docs/adr/0073-pagination-fetch-boundary.md) — ページ送り / 増分取得の境界。client から引くときの経路
+- [0079](../../../docs/adr/0079-auth-frontend-seam.md) — 認証の前面の継ぎ目。入れなかった主体の送り先
+- [0080](../../../docs/adr/0080-error-handling.md) — エラーの扱い。`error` 境界の受け持ちと degrade
+- [0101](../../../docs/adr/0101-performance-budget.md) — 性能予算。client の束に何を載せるか

@@ -29,13 +29,11 @@ function tickStyle(tick: number, index: number, axis: BarAxis): CSSProperties {
  *
  * @remarks
  * **これは補助であって、唯一の伝達手段ではありません。** 同じ内容は隣の表が数で持ちます
- * （`../status-breakdown/`）。形と色でしか読めない情報をここに置きません
- * （[0100](../../../../../docs/adr/0100-accessibility-target.md)）。
+ * （`../status-breakdown/`）。形と色でしか読めない情報をここに置きません。
  *
  * **作図の一式を持ち込まず、要素と CSS だけで描きます。** 描くのは 0 から始まる 1 系列の帯と
  * その軸だけで、作図の一式が備える座標系・凡例・tooltip・アニメーションのどれも使いません。
- * 持ち込むと、この画面を開いた人がその読み込みと評価を払います
- * （[0101](../../../../../docs/adr/0101-performance-budget.md) §4）。
+ * 持ち込むと、この画面を開いた人がその読み込みと評価を払います。
  *
  * **tooltip も凡例も置きません。** tooltip は pointer を合わせている間だけ現れるため touch と
  * keyboard から到達できず、凡例は系列が 1 本しかない場では色の対応を説明する相手がいません。

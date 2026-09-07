@@ -11,7 +11,7 @@
 export type LayerContract = {
   /** その層が受け付けない対象。README の語をそのまま引き継ぐ。 */
   readonly forbidden: readonly string[];
-  /** その層のテスト責務（[0090](../../docs/adr/0090-testing-strategy.md) の層別表を引く鍵）。 */
+  /** その層のテスト責務（層別責務表を引く鍵）。 */
   readonly testRequirement: string;
 };
 

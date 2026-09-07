@@ -25,7 +25,7 @@ function readField(formData: FormData, name: ProfileField): string {
  * あるのは、入力の読み取り方（`FormData` の形）と、更新の手順が別々の理由で変わるためです。
  *
  * 検証は client と同じスキーマで通し直します。client の検証は即時に返すためのもので、そこを
- * 通ったことは何の保証にもなりません（[0062](../../../docs/adr/0062-form-input-validation.md)）。
+ * 通ったことは何の保証にもなりません。
  */
 export function parseProfileForm(formData: FormData): ProfileFormParseResult {
   const parsed = profileSchema.safeParse({

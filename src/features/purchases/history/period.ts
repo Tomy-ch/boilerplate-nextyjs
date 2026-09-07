@@ -40,8 +40,7 @@ export const MAX_RECENT_DAYS: number = Math.max(...RECENT_DAYS_OPTIONS);
  * いま効いている期間の条件。
  *
  * @remarks
- * 区分ごとに必要な値が違うため、判別可能 union で表します
- * （[0029](../../../../docs/adr/0029-type-design-discipline.md)）。区分と値を別々の項目で持つと、
+ * 区分ごとに必要な値が違うため、判別可能 union で表します。区分と値を別々の項目で持つと、
  * 「暦月なのに日数が入っている」姿や「期間なのに終了日が無い」姿まで型として通ります。
  *
  * 区間へ解く側（{@link toPurchaseWindow}）も URL へ組む側（{@link toPeriodSearchParams}）もこの形を
@@ -134,8 +133,7 @@ export function describePeriod(period: PeriodSelection): string | null {
  *
  * @remarks
  * **区分を解くのは画面の側です。** 契約が受け取るのは瞬時の半開区間だけで、「今月」や「直近 30 日」を
- * 暦の上で解く役は持ちません。解く暦とタイムゾーンは `model` が持ちます
- * （[0120](../../../../docs/adr/0120-locale-aware-formatting.md)）。
+ * 暦の上で解く役は持ちません。解く暦とタイムゾーンは `model` が持ちます。
  *
  * **いまの時刻を引数で受けます。** 相対の期間は呼び出した瞬間で答えが変わるため、ページ送りの
  * 間は同じ区間を渡し続けなければ keyset の連続性が保証されません。区間を 1 度だけ決めて持ち回る

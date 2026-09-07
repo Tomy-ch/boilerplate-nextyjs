@@ -4,9 +4,9 @@ import { z } from "zod";
  * `pnpm audit --json` の出力を読み、ゲートの判定に落とす。
  *
  * @remarks
- * 閾値は [0110](../../docs/adr/0110-security-operations.md) が **severity と修正可能性の 2 つ**で
- * 定めています。go の govulncheck が持つ到達可能性のフィルタは `pnpm audit` に無く、osv-scanner の
- * call analysis も JS/TS に対応していないため、この 2 つが現行ツールで引ける最も細い線です。
+ * 閾値は **severity と修正可能性の 2 つ**で定めています。go の govulncheck が持つ到達可能性の
+ * フィルタは `pnpm audit` に無く、osv-scanner の call analysis も JS/TS に対応していないため、
+ * この 2 つが現行ツールで引ける最も細い線です。
  *
  * 修正版の無いものを blocking から外すのは、その場で直せないものでゲートを組むと `--no-verify`
  * と同じ経路（無視する運用）を CI 側に作るためです。可視化は続けます —— 落とさないことと
@@ -42,7 +42,7 @@ const auditSchema = z.object({
  */
 const NO_PATCH = "<0.0.0";
 
-/** blocking へ上げる severity（[0110](../../docs/adr/0110-security-operations.md) 3）。 */
+/** blocking へ上げる severity。 */
 const BLOCKING_SEVERITIES: ReadonlySet<string> = new Set(["high", "critical"]);
 
 /** 検出 1 件。 */

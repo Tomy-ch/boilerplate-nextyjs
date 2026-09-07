@@ -9,8 +9,8 @@ import { type StripResult, stripMarkers } from "../lib/markers.js";
  * マーカーの名前。`portal:replace-begin` / `replace-with` / `replace-end` を作る。
  *
  * @remarks
- * 既存のマーカー族に相乗りさせず、独立した族にします。理由は
- * [0141](../../../docs/adr/0141-portal-operations.md) が持ちます。
+ * 既存のマーカー族に相乗りさせず、独立した族にします。理由は [README](../../README.md) から
+ * 辿ります。
  */
 const PORTAL_MARKER = "portal";
 
@@ -33,8 +33,7 @@ const PORTAL_URL_PLACEHOLDER = "__PORTAL_URL__";
  * 区別しないので owner は小文字へ寄せますが、path 段になる名前はそのまま使います。
  *
  * portal の実体は `/portal/` にありますが、指すのはサイトルートです。ルートは portal への
- * 転送だけを持つ層で（[0141](../../../docs/adr/0141-portal-operations.md)）、後から並ぶ生成物の
- * ために転送先が動いても、こちらの URL は追随します。
+ * 転送だけを持つ層なので、後から並ぶ生成物のために転送先が動いても、こちらの URL は追随します。
  *
  * @param repository - `<owner>/<repo>` 形式のリポジトリ参照
  */

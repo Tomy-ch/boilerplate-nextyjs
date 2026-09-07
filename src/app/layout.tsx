@@ -15,7 +15,7 @@ import "./globals.css";
 const site = getSiteConfig();
 
 /**
- * 全 route の metadata の土台（[0044](../../docs/adr/0044-seo-metadata-strategy.md)）。
+ * 全 route の metadata の土台。
  *
  * @remarks
  * `metadataBase` があるので、各 segment は canonical と OG 画像を経路だけで宣言できます。
@@ -39,9 +39,8 @@ export const metadata: Metadata = {
  * 計測の口。
  *
  * @remarks
- * 現在地と要求の文脈（`traceparent`）を読むため、殻の中では決まりません
- * （[0041](../../docs/adr/0041-cache-components-decision.md)）。**描くものを持たないので、待つ間に
- * 見えるものは何も変わりません。**
+ * 現在地と要求の文脈（`traceparent`）を読むため、殻の中では決まりません。**描くものを持たないので、
+ * 待つ間に見えるものは何も変わりません。**
  */
 function TelemetryHole() {
   return <Telemetry traceparent={findActiveTraceparent()} />;

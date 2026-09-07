@@ -18,9 +18,8 @@ export type ProductListErrorProps = {
  *
  * @remarks
  * 生のエラーもスタックも出しません。production では Server Component から投げられたエラーの
- * 本文が伏せられ、境界には汎用文言と `digest` だけが渡るためです
- * （[0080](../../../../../../docs/adr/0080-error-handling.md)）。原因の特定は `digest` とサーバ側のログの
- * 突合で行います。
+ * 本文が伏せられ、境界には汎用文言と `digest` だけが渡るためです。原因の特定は `digest` と
+ * サーバ側のログの突合で行います。
  */
 export function ProductListError({ message, digest, onRetry }: ProductListErrorProps) {
   return (

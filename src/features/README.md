@@ -64,9 +64,9 @@ export const XxxPageContent = withScreenSpan(
 ```
 
 **殻と穴に割れた画面は、最上位が 2 つ以上になる。** Cache Components 有効下では、待たずに配れる節を
-`Suspense` の外へ出すことがある（[0041](../../docs/adr/0041-cache-components-decision.md)）。出した側も
-取得を持つ画面の最上位なので `withScreenSpan` で包み、span 名はその module のパスに揃える —— 1 つの route に
-最上位の span が複数立つことになるが、それは殻と穴が別々に解決されるという事実そのものである。
+`Suspense` の外へ出すことがある。出した側も取得を持つ画面の最上位なので `withScreenSpan` で包み、
+span 名はその module のパスに揃える —— 1 つの route に最上位の span が複数立つことになるが、それは
+殻と穴が別々に解決されるという事実そのものである。
 
 仕組みと span の読み方は [observability/README.md](../observability/README.md) が持つ。
 
@@ -86,13 +86,14 @@ export const XxxPageContent = withScreenSpan(
 story を持てないのは**ブラウザで描けない部品だけ**である。`server-only` を辿る取得を中に持つ
 async な合成がそれにあたる。持てない理由と、中身がどこで見られるかを本体の doc に書く。
 
-- **`title` の体系は [`components/README.md`](../components/README.md) が持つ。** ADR 0054 が所有者をそこ 1 か所に定めているので、ここには写さない
+- **`title` の体系は [`components/README.md`](../components/README.md) が持つ。** 所有者はそこ 1 か所
+  なので、ここには写さない
 - **`@see Storybook` は自分の story を指す。** 画面の story を指していると、その部品を直す人が
   確かめる先を見つけられない
 - 送信中は解決しない送信先（[`~catalog/lib/pending-action`](../../.storybook/lib/pending-action.ts)）で
   留める。すぐ返る送信先では、撮る前に送信が終わっている
-- Server Action を直に読む部品は、`.storybook/preview.tsx` の差し替え宣言に載せる
-  （[0054](../../docs/adr/0054-ui-catalog-storybook.md)）。載せないと、押した先で `config` の読み込みに落ちる
+- Server Action を直に読む部品は、`.storybook/preview.tsx` の差し替え宣言に載せる。載せないと、
+  押した先で `config` の読み込みに落ちる
 - 入力の状態を外から受ける部品は、本物の hook を通した器で包む。差し替えると label と control の
   対応まで偽物になり、カタログで確かめられるものが無くなる
 
@@ -101,4 +102,21 @@ async な合成がそれにあたる。持てない理由と、中身がどこ�
 - 横断利用が必要になった要素は責務に応じて `model`、`components`、`adapters`、`capabilities`、`stores` へ昇格する
 - Server Action は編成だけを担い、業務ロジックを置かない
 - feature ごとにも同じ frontmatter を持つ README を置く
+- **コードのコメントから ADR を参照しない。** 参照は README に集め、コメントは「置き方は同 feature の
+  README」のように隣から辿れる形で書く（[`docs/rules.md`](../../docs/rules.md)「コメントと文書」）。
+  ADR は番号も節も決定の所在も動くが、README は層と一緒に動くので、動いたことが参照側へ波及しない ——
+  コメントが直接指していると、参照はコード側に散り、ADR からは誰が指しているか見えないまま腐る
 - **`test-requirement: feature` が掛かるのは画面の合成**（`view` / `page-content` と、その feature 専用の UI）である。値を返す対象——純関数、hook、Server Action の補助——は [0090](../../docs/adr/0090-testing-strategy.md) 層別責務表の `unit` 行（「feature 内純関数」）に従う。宣言が feature の下の全ファイルへ一律に掛かると、React のツリーを要さない対象にまで合成の観点を課すことになり、テストの側が正しいのに宣言と食い違う
+
+## 関連する ADR
+
+**この層が依存する ADR はここに集める。** 各 slice が自分の分を持つので、ここに挙げるのは層そのもの
+——受入基準・import 境界・共通の据え付け——が依存しているものだけである。slice 固有のものは
+`features/<name>/README.md` の同名の節が持つ（雛形は
+[feature README テンプレート](../../docs/templates/feature-readme.md)）。
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。feature 間の直接依存を禁じ、貸すものは `facade/` に出す
+- [0027](../../docs/adr/0027-directory-structure.md) — `src/` の物理配置と co-location。画面ユースケース・専用 UI・hook・Action を `features/<name>/` へ共置する
+- [0041](../../docs/adr/0041-cache-components-decision.md) — Cache Components（PPR）の可否。1 つの route に最上位の span が複数立つ根拠
+- [0054](../../docs/adr/0054-ui-catalog-storybook.md) — カタログの方針。story を持つ範囲と、Server Action の差し替え宣言
+- [0090](../../docs/adr/0090-testing-strategy.md) — 層別のテスト責務。`test-requirement: feature` が指す先

@@ -6,9 +6,7 @@ import type { MetricKey, MetricValues } from "./budget";
  * Lighthouse の結果（LHR）から指標を取り出し、試行をまとめる。
  *
  * @remarks
- * 取り出すのは LCP / CLS / TBT だけで、performance スコアは読みません。3 つを名指しで持つ理由と、
- * TBT が INP の代わりに立っている理由は [0101](../../docs/adr/0101-performance-budget.md) §2 が
- * 持ちます。
+ * 取り出すのは LCP / CLS / TBT だけで、performance スコアは読みません。
  */
 
 /** LHR の audit id と、判定に使う名前の対応。 */

@@ -16,8 +16,7 @@ coverage-exclusions:
 # scripts
 
 リポジトリを検査・生成・操作する道具を置く。アプリの振る舞いではないので、suite も CI のジョブも
-アプリ本体と分けてある（[0090](../docs/adr/0090-testing-strategy.md)）。設定は
-[`vitest.scripts.config.ts`](../vitest.scripts.config.ts)。
+アプリ本体と分けてある。設定は [`vitest.scripts.config.ts`](../vitest.scripts.config.ts)。
 
 ## 負う観点
 
@@ -43,8 +42,8 @@ coverage-exclusions:
 PR のコメントへ載る文字列は、このリポジトリが書いていない散文（抑止の理由、道具の出力）を含む。
 生の連結で組むと、mention や偽のリンクが CI の名義で公開の面に載る。該当するモジュールは
 [`lib/issue-body.ts`](lib/issue-body.ts) のような共有の窓口を通し、**このリポジトリが書いていない
-散文を注入しても記法として解釈されない**ケースを 1 つ持つ（[0153](../docs/adr/0153-ci-configuration.md) §5）。
-判定の基準は「その文字列の読み手が GitHub 上の公開の面か」であって、モジュールの置き場ではない。
+散文を注入しても記法として解釈されない**ケースを 1 つ持つ。判定の基準は「その文字列の読み手が
+GitHub 上の公開の面か」であって、モジュールの置き場ではない。
 
 ## 検査から外すもの
 
@@ -79,3 +78,31 @@ PR のコメントへ載る文字列は、このリポジトリが書いてい�
 | --- | --- |
 | `make scripts-test-cached` | pre-commit |
 | `make scripts-test` | pre-push / CI（`scripts-check`）。カバレッジ 100% を課す |
+
+## 関連する ADR
+
+ここに居る道具が自分の運用で従う決定と、ゲートが `src/` に代わって強制している決定。
+
+- [0010](../docs/adr/0010-standards-and-non-lockin.md) — 送り先を特定の SaaS へ縛らない書き出し
+- [0011](../docs/adr/0011-no-docker.md) — container image の参照を持つ面の責務線
+- [0021](../docs/adr/0021-frontend-responsibility.md) — 層 README の frontmatter と依存の突合
+- [0024](../docs/adr/0024-adapters-server-client-split.md) — server 専用を綴りではなく置き場で表す
+- [0027](../docs/adr/0027-directory-structure.md) — 生成物の配置と、規約上の配置を指す表記
+- [0028](../docs/adr/0028-naming-convention.md) — 生成対象の名前
+- [0029](../docs/adr/0029-type-design-discipline.md) — client へ届くスキーマの入口
+- [0030](../docs/adr/0030-environment-variable-management.md) — `process` の直読と server 番人の位置
+- [0043](../docs/adr/0043-middleware-policy.md) — 起動 / 境界エントリの分類
+- [0054](../docs/adr/0054-ui-catalog-storybook.md) — カタログ専用の差し替え
+- [0071](../docs/adr/0071-bff-api-integration.md) — build が要る取得先と、生成 client を使わない判断
+- [0072](../docs/adr/0072-api-type-generation.md) — 生成物へ検査を課さない判断
+- [0090](../docs/adr/0090-testing-strategy.md) — 層別責務表 / 1:1 対応 / 除外の規律
+- [0091](../docs/adr/0091-test-verification-methods.md) — 実ブラウザが負う観点と、単体で回せない範囲
+- [0101](../docs/adr/0101-performance-budget.md) — 予算の割り方と、測る指標
+- [0102](../docs/adr/0102-browser-support.md) — 数える対象を決める browserslist
+- [0110](../docs/adr/0110-security-operations.md) — 監査の閾値 / 抑止の撤回条件 / SAST のルール集合
+- [0112](../docs/adr/0112-data-classification-cache-boundary.md) — 取得の口が綴る分類
+- [0141](../docs/adr/0141-portal-operations.md) — portal の URL と差し替えマーカーの族
+- [0150](../docs/adr/0150-git-workflow.md) — ブランチ命名 / 昇格の連なり / 版の出所
+- [0151](../docs/adr/0151-git-hooks.md) — ローカルゲートの帯と bypass の可否
+- [0152](../docs/adr/0152-agents-md-policy.md) — boilerplate-only マーカーを独立させる理由
+- [0153](../docs/adr/0153-ci-configuration.md) — job の分割 / SHA ピン / 公開の面へ出す文字集合

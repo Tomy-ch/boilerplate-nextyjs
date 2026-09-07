@@ -7,15 +7,13 @@ import { UI_KERNELS } from "../architecture";
 /**
  * UI を置いてよい層の外で DOM マークアップを書かせないルール。
  *
- * 置いてよい層は [`architecture.ts`](../architecture.ts) の `UI_KERNELS` が持ち、根拠は
- * [0021](../docs/adr/0021-frontend-responsibility.md) の層別責務表にある。`eslint-plugin-boundaries`
- * は import の向きしか見ないため、層の中で完結するマークアップは境界検査を素通りする。Biome にも
- * 同等の検査は無い([0002](../docs/adr/0002-formatter-linter.md))。
+ * 置いてよい層は [`architecture.ts`](../architecture.ts) の `UI_KERNELS` が持ち、規約は
+ * `docs/rules.md`「層境界と依存」にある。`eslint-plugin-boundaries` は import の向きしか見ない
+ * ため、層の中で完結するマークアップは境界検査を素通りする。Biome にも同等の検査は無い。
  *
  * **見るのは host 要素だけである。** 禁じられているのは「UI マークアップ」であって JSX ではない。
- * `capabilities` が Provider を export することは [0022](../docs/adr/0022-capabilities-kernel.md) が、
- * その mount は [0026](../docs/adr/0026-layout-shell-mount.md) が明示的に許しており、React 19 では
- * Provider も JSX である。
+ * `capabilities` が Provider を export することも、それを shell が mount することも許されており、
+ * React 19 では Provider も JSX である。
  *
  * テストは対象外にする。hook を回すのに wrapper を描くことがあり、それは層の担う UI ではない。
  *

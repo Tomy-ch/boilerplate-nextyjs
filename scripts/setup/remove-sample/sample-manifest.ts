@@ -67,6 +67,10 @@ export const SAMPLE_PATHS: readonly string[] = [
   // とは別に置いてある。
   "mocks/references.ts",
   "mocks/references.test.ts",
+  // 題材の画面の一覧。全 24 画面と API の対応表で、中身は題材そのものである。
+  // 画面ごとの約束は `docs/spec/route/**` が持ち、契約は `openapi/api.gen.yaml` が持つので、
+  // ここは索引であって正ではない。題材と一緒に消える。
+  "docs/spec/screens.md",
   // 題材の画面の仕様書。実装と 1 対 1 で対応するため、画面が消えれば仕様書も消える。
   // 残るのは `docs/spec/README.md` と、コア残留の画面（`auth` の器 / `/login` / `/dev/session`）の分。
   "docs/spec/route/shop",

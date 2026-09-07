@@ -63,7 +63,7 @@ App Router の `error.tsx` / `not-found.tsx` / `global-error.tsx` の責務・Er
   畳むと呼び出し側は「再試行できる失敗」としか扱えず、資格情報が切れているのに読み直す操作しか
   出せない画面になる(再試行は 401 / 403 / 404 では誤り。`components/app-starter/auth-state-feedback`)
 - **補助的な値の degrade は、画面ごとに決めさせず境界で 1 度畳む。** 表示のためだけにあり、
-  読めなくても画面が成り立つ値(参考換算額のような添え物)は、`adapters` に「読めなければ `null`」を
+  読めなくても画面が成り立つ値(別の口から引く補足表示のような添え物)は、`adapters` に「読めなければ `null`」を
   返す口を置き、投げる口も残す。画面ごとに try / catch を書かせると、同じ判断が画面の数だけ増え、
   片方だけが落ちる画面が生まれる。**逆に、落として良いかどうかが画面で割れる値は畳まない** ——
   畳めるのは「どの画面も同じ扱いをする」ことが言い切れるときだけである
@@ -88,7 +88,7 @@ App Router の `error.tsx` / `not-found.tsx` / `global-error.tsx` の責務・Er
 - `loading.tsx` も `app/` 配下の App Router 特殊ファイル([0027](0027-directory-structure.md) / [0028](0028-naming-convention.md))である
 - **一次資源が見つからないことは 200 で配信される。** [0041](0041-cache-components-decision.md) により
   `Cache Components` が有効な間、動的な route は必ず殻から流れる。本文より先にヘッダが出るため、その後で
-  `notFound()` に達しても status はもう 200 で、見つからない購入・記事・ユーザが 200 として配信される。
+  `notFound()` に達しても status はもう 200 で、存在しない 1 件を指す URL が 200 として配信される。
   **これは route 側の書き方では解けない** —— `loading.tsx` を置かなくても、`<Suspense>` を使わなくても、
   `export const instant = false` を名乗っても変わらない。Next 自身が案内する回避は `proxy` での事前確認だが、
   [0043](0043-middleware-policy.md) は `proxy` を cookie を読むだけの前捌きに限っており、採らない

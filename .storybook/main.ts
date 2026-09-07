@@ -26,7 +26,7 @@ const config: StorybookConfig = {
   // token の目録は `.storybook/` に置く（配置の根拠は `src/components/README.md`）
   stories: ["../src/**/*.stories.@(ts|tsx)", "./*.stories.@(ts|tsx)"],
   addons: ["@storybook/addon-a11y", "@storybook/addon-docs"],
-  // 配信もアプリの `public/` と分ける（ADR 0054）
+  // 配信もアプリの `public/` と分ける
   staticDirs: ["../public", "./public"],
   framework: {
     name: "@storybook/nextjs-vite",

@@ -8,7 +8,7 @@ export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
 /**
- * タブに載るアイコン（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §5）。
+ * タブに載るアイコン。
  *
  * @remarks
  * 生成するのは印を 1 文字描くだけの絵で、テンプレートから作った側が自分の印へ差し替える枠です。

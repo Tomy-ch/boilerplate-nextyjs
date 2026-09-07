@@ -119,3 +119,48 @@ canonical を root に置かないのは、`alternates` が segment 単位で丸
 - root layout は横断通知の Provider を mount する。通知を出す側は `useToast()` を呼ぶだけでよく、queue の state も dismiss の配線も持たない。ただし 1 画面で完結する表示状態を、ここを経由してグローバルへ持ち上げない
 - metadata は Metadata API で宣言する。`<head>` の手書きと `next/head` は使わない。root は雛形の枠だけを持ち、各 segment はそこからの差分を宣言する
 - **route segment は描画の span を持たない。** Next.js が `render route (app)` を張るので、同じ範囲を二重に持たない。画面の中の帰属は feature 層の最上位が持つ（[observability/README.md](../observability/README.md)）
+
+## 関連する ADR
+
+この層のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります** ——
+ADR は番号も節も動くので、動いたことに気づける場所を 1 つに寄せています（[docs/rules.md](../../docs/rules.md)
+「コメントと文書」）。要素ごとに依存先が違うので、要素で分けます。
+
+### 層全体
+
+- [0025](../../docs/adr/0025-app-layer-elements.md) — この層の element（route segment / route handler / server action / metadata）と、それぞれが持てるもの
+- [0090](../../docs/adr/0090-testing-strategy.md) — 層別の検証責務（`route` / `integration` / `unit` の割り当て）
+
+### route segment（`page.tsx` / `layout.tsx` / `error.tsx` / `not-found.tsx`）
+
+- [0040](../../docs/adr/0040-routing-rendering-strategy.md) — App Router の採用と、描画の時点（CSR / SSR / SSG / ISR）を画面ごとに選ぶこと
+- [0041](../../docs/adr/0041-cache-components-decision.md) — Cache Components（PPR）の採否。殻と穴の分け方
+- [0026](../../docs/adr/0026-layout-shell-mount.md) — 横断 UI と Provider を mount してよいのは layout だけ
+- [0079](../../docs/adr/0079-auth-frontend-seam.md) — 入口の前捌きと、画面で通す確定認可の置き場
+- [0112](../../docs/adr/0112-data-classification-cache-boundary.md) — 主体に紐づく値をキャッシュ境界のどちら側へ置くか
+- [0080](../../docs/adr/0080-error-handling.md) — 失敗と不在の面（`error.tsx` / `not-found.tsx`）の責務
+
+### route handler（`dev/**/route.dev.ts`）
+
+`api/` の下は [api/README.md](api/README.md) が持ちます。
+
+- [0029](../../docs/adr/0029-type-design-discipline.md) — 境界での parse と、返す値の型の規律
+- [0075](../../docs/adr/0075-file-upload-seam.md) — 受け口が本体を受け取るときの seam
+- [0080](../../docs/adr/0080-error-handling.md) — 分類から status への対応
+
+### server action（`actions.ts`）
+
+- [0025](../../docs/adr/0025-app-layer-elements.md) — 主体の断言が要る action をこの層へ置く判断（`app/server-action`）
+- [0075](../../docs/adr/0075-file-upload-seam.md) — アップロードの seam。受け口が最後の関所になること
+
+### metadata（`sitemap.ts` / `robots.ts` / `icon.tsx` / `apple-icon.tsx` / `opengraph-image.tsx` と各 segment の宣言）
+
+- [0044](../../docs/adr/0044-seo-metadata-strategy.md) — Metadata API の使い方、索引の可否と canonical
+- [0045](../../docs/adr/0045-fonts-and-images.md) — 書体と画像の方針（OG 画像を含む）
+
+### root layout が mount する島（`telemetry.tsx` / `consent.tsx` / `analytics.tsx`）
+
+- [0031](../../docs/adr/0031-policy-state-supply.md) — 同意 / feature flag の状態をどこが供給するか
+- [0082](../../docs/adr/0082-client-observability.md) — Web Vitals と client 例外の収集、送信面の置き場
+- [0131](../../docs/adr/0131-cookie-consent.md) — 同意管理を採らない決定
+- [0077](../../docs/adr/0077-bff-abuse-protection-boundary.md) — 認証を要求しない受け口の防御をどこが持つか

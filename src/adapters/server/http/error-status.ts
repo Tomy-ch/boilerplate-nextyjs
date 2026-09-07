@@ -4,9 +4,9 @@ import { ErrorKind, type ErrorKind as ErrorKindType } from "@/errors/error-kind"
  * 分類ごとの HTTP status。
  *
  * @remarks
- * 対応は [0080](../../../../docs/adr/0080-error-handling.md) §1 の表が正です。`errors` は
- * transport を知らない層なので、分類から status への変換はこの層が持ちます。逆向きの
- * `toErrorKind()` が隣（`retry-policy.ts`）にあり、同じ表の両向きを別の層へ散らしません。
+ * `errors` は transport を知らない層なので、分類から status への変換はこの層が持ちます。逆向きの
+ * `toErrorKind()` が隣（`retry-policy.ts`）にあり、同じ表の両向きを別の層へ散らしません。対応表の
+ * 出所は[同区画の README](README.md)。
  */
 const STATUS_BY_KIND: Readonly<Record<ErrorKindType, number>> = {
   [ErrorKind.INVALID_ARGUMENT]: 400,

@@ -17,8 +17,7 @@ const ROWS = Array.from({ length: PLACEHOLDER_ROWS }, (_, index) => index);
  *
  * **高さは 1 画面ぶん確保します。** 枠だけの明細は実物より短く、その差ぶん footer が画面の中から
  * 下へ押し出されて layout shift になります。footer を最初から画面の外に置いておけば、中身が
- * 届いて伸びても動いたことにはなりません（[0101](../../../../../docs/adr/0101-performance-budget.md)
- * の CLS）。
+ * 届いて伸びても動いたことにはなりません。
  */
 export const CartSkeleton = withPartSpan("features/cart/ui/skeleton/skeleton", () => {
   return (

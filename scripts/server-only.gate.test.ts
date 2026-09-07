@@ -15,10 +15,9 @@ import {
  * 判定の中身は `lib/server-only.ts` が持ち、ここはツリーの走査だけを担う
  * （`client-schema-weight.gate.test.ts` と同形）。
  *
- * **境界検査は層の間しか見ておらず、server と client の区別を持たない。** 番人が
- * ([0030](../docs/adr/0030-environment-variable-management.md)) 抜けても、その module を client
- * から引く経路が今たまたま無ければ何も起きない。次に誰かが引いたときに初めて壊れ、そのときの
- * 失敗は引いた側の変更として現れる。
+ * **境界検査は層の間しか見ておらず、server と client の区別を持たない。** 番人が抜けても、
+ * その module を client から引く経路が今たまたま無ければ何も起きない。次に誰かが引いたときに
+ * 初めて壊れ、そのときの失敗は引いた側の変更として現れる。
  */
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, "..");

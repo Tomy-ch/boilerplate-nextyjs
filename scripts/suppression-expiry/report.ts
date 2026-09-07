@@ -8,7 +8,7 @@ import type { ExpiredSuppression, Suppression } from "./rules.js";
  *
  * @remarks
  * **期限を過ぎたものだけでなく、全件を出します。** 落ちた件だけを出すと、機械が判定できない条件が
- * 誰にも読まれないまま残るためです（ADR 0110 §3.4）。
+ * 誰にも読まれないまま残るためです。
  *
  * @param suppressions - 読み取った宣言の全件
  */
@@ -34,8 +34,8 @@ export function renderExpired(expired: readonly ExpiredSuppression[]): string {
  *
  * @remarks
  * **本文は `composeIssueBody` に組ませ、生の markdown 連結はしません。** 撤回条件の散文を書くのは
- * 抑止を足す PR の提出者だからです（無害化を観点に含める理由は [README](../README.md)、根拠は
- * [0153](../../docs/adr/0153-ci-configuration.md) §5）。`tool-output` は字下げで記法を殺します。
+ * 抑止を足す PR の提出者だからです（無害化を観点に含める理由は [README](../README.md)）。
+ * `tool-output` は字下げで記法を殺します。
  *
  * @param input.expired - 撤回条件を満たした宣言
  * @param input.suppressions - 読み取った宣言の全件

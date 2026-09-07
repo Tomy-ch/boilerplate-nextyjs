@@ -26,8 +26,7 @@ export type PurchaseHistoryViewProps = {
  *
  * **入力欄を 2 つ置き、CSS の段で出し分けます。** 広い幅では帯として常設し、脇に領域を持てない
  * 幅では下端に固定した操作から overlay を開きます。位置が動く出し分けを JS の幅判定で行うと、
- * サーバでは判定できないため hydration の前後で配置が動きます
- * （[0051](../../../../docs/adr/0051-styling-system.md) §2）。組み立て中の期間は供給で 1 つに
+ * サーバでは判定できないため hydration の前後で配置が動きます。組み立て中の期間は供給で 1 つに
  * 保つので、どちらから確定しても同じ条件が飛びます。
  *
  * 下端に余白を空けるのは、固定した操作が一覧の最後の行に重なるためです。
@@ -35,8 +34,7 @@ export type PurchaseHistoryViewProps = {
  * overlay を開く操作は本文の段組みの外へ出します。viewport の下端に固定されていて本文の高さを
  * 持たないため、段の中に置くと**中身の無い段の分だけ余白が空きます**。
  *
- * パンくずは置きません。global nav がこの画面を直接指しており、階層が 1 段だからです
- * （[0026](../../../../docs/adr/0026-layout-shell-mount.md)）。
+ * パンくずは置きません。global nav がこの画面を直接指しており、階層が 1 段だからです。
  */
 export const PurchaseHistoryView = withScreenSpan(
   "features/purchases/history/view",

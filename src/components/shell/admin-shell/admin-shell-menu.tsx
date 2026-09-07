@@ -29,7 +29,7 @@ export type AdminShellMenuProps = {
  * 場所ができます。
  *
  * **選んだら閉じますが、閉じるのは移った後です。** 押した時点で閉じると、overlay が積んだ履歴
- * 1 件を戻す動きが遷移そのものと競合します（[0053](../../../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 1 件を戻す動きが遷移そのものと競合します。
  *
  * @see Storybook `Layout/AdminShell`
  */

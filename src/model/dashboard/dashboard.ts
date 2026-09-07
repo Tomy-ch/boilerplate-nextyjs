@@ -14,8 +14,8 @@ export type PurchaseStatusCount = {
  * 管理側が読む横断集計。
  *
  * @remarks
- * **合成はバックエンドが済ませています**（[0070](../../../docs/adr/0070-backend-role-separation.md)）。
- * 画面はここにある値をそのまま出すだけで、足したり割ったりしません。
+ * **合成はバックエンドが済ませています。** 画面はここにある値をそのまま出すだけで、足したり
+ * 割ったりしません。
  *
  * **3 つの値は母集団が違います。** 売上（{@link DashboardSummary.salesAmount} /
  * {@link DashboardSummary.salesCount}）はキャンセルを除いた購入、

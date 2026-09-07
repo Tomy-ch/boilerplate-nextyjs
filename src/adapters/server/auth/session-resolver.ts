@@ -33,8 +33,7 @@ export type AuthorizationRequest = {
  *
  * @remarks
  * `session` は内側の層へ渡してよい身元、`accessToken` は `adapters/server` から出してはいけない
- * 値です。2 つを別の名前で持つことで、内側へ渡す際に「`session` だけを渡す」が既定になります
- * （[0079](../../../../docs/adr/0079-auth-frontend-seam.md)）。
+ * 値です。2 つを別の名前で持つことで、内側へ渡す際に「`session` だけを渡す」が既定になります。
  */
 export type SessionRecord = {
   /** 内側の層へ渡してよい身元。 */
@@ -56,10 +55,9 @@ export type SessionRecord = {
  * 認証方式の差異を閉じ込める差し替え点。
  *
  * @remarks
- * boilerplate が持つのは既定実装 1 つであり、唯一の実装ではありません
- * （[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §6）。OIDC クライアントの実装、
- * session の暗号化方式、トークンの保管形式はこの面の内側にあり、テンプレートから作った側は自社方式へ
- * 移るときにこの面だけを差し替えます。
+ * boilerplate が持つのは既定実装 1 つであり、唯一の実装ではありません。OIDC クライアントの実装、
+ * session の暗号化方式、トークンの保管形式はこの面の内側にあり、テンプレートから作った側は
+ * 自社方式へ移るときにこの面だけを差し替えます。
  *
  * 逆に、保護ルートの判定・`returnUrl` の検証・ログアウト時の状態破棄・役割による認可は
  * この面の**外側**にあります。それらは方式が変わっても変わらないため、Resolver の内側へ入れると

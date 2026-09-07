@@ -51,8 +51,7 @@ export type AdminShellNavStateProviderProps = {
  * @remarks
  * **開閉だけがブラウザ側の関心で、器の骨格は server のままです。** 切り替える操作は header に、
  * 開閉に応じて姿を変えるのは脇の一覧にあり、両者は兄弟の位置にあります。共通の親でしか状態を
- * 分け合えないため、器そのものを client にする代わりにこの供給だけを client へ置きます
- * （[0040](../../../../docs/adr/0040-routing-rendering-strategy.md)）。
+ * 分け合えないため、器そのものを client にする代わりにこの供給だけを client へ置きます。
  *
  * 状態を **`data-nav-open` として外枠に出します。** 脇の一覧はこの属性を CSS の条件として読むため、
  * 状態を props で受け取る必要がなく、Server Component のまま居られます。

@@ -10,9 +10,8 @@ import { createStaticServer } from "./lib/static-server";
 import { excludeDeclared, parseStoryIndex, selectStories, storyURL } from "./lib/story-index";
 import { openAtDeclaredViewport } from "./lib/viewport";
 
-// Storybook の全 story に axe を掛ける。ADR [0054](../docs/adr/0054-ui-catalog-storybook.md) の
-// 「a11y の自動検査を story に効かせる」を、追加のランナーを入れずに満たす経路
-// （[0091](../docs/adr/0091-test-verification-methods.md) §3）。
+// Storybook の全 story に axe を掛ける。「a11y の自動検査を story に効かせる」を、追加のランナーを
+// 入れずに満たす経路（[README](README.md)）。
 //
 // **実ブラウザであることが本質。** component テストの `vitest-axe` は jsdom で走るため色コント
 // ラストを検査できず、実際に無効化されている。ここは light / dark の両方を実描画するので、

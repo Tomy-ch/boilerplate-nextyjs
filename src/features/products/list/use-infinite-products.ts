@@ -34,8 +34,7 @@ export type InfiniteProducts = {
  * 一覧を読み進める。
  *
  * @remarks
- * 使うのがこの一覧だけなので `features` の中へ置いています
- * （[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md) の昇格ルール）。
+ * 使うのがこの一覧だけなので `features` の中へ置いています。
  *
  * 初回ページは受け取るだけで取得しません。取得するのは Server Component であり、この hook が
  * 担うのは 2 ページ目以降だけです。

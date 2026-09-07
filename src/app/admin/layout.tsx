@@ -44,7 +44,7 @@ const NAV_GROUPS: readonly AdminShellNavGroup[] = [
  * @remarks
  * この器は描画の前に役割を確かめ、持たない主体を送り返します。判定を穴の内側へ落とすと、
  * **確かめる前に管理の殻（コンソール名・管理の導線）が誰にでも配られます**。管理の面がある事実
- * だけが外へ出るのは、[0079](../../../docs/adr/0079-auth-frontend-seam.md) が禁じている形です。
+ * だけでも、確かめる前に外へ出しません。
  *
  * **これは「まだ手を付けていない」印ではありません。** 殻を配れないことがこの区画の要件であり、
  * 認可の位置が変わらない限り外れません。
@@ -55,8 +55,8 @@ export const instant = false;
  * 管理画面の外枠。
  *
  * @remarks
- * **ここが確定認可です**（[0079](../../../docs/adr/0079-auth-frontend-seam.md)）。判定に使う役割の
- * 宣言は `model/authz` にあり、前捌き（`proxy.ts`）と同じものを引きます。
+ * **ここが確定認可です**。判定に使う役割の宣言は `model/authz` にあり、前捌き（`proxy.ts`）
+ * と同じものを引きます。
  *
  * 送り返す先は前捌き（`proxy.ts`）と同じにします。行き先とその理由、403 の面を出さない理由は
  * `docs/spec/route/admin/layout.function.md`「入れない主体をどこへ送るか」。
@@ -70,8 +70,7 @@ export const instant = false;
  * ここはその申告を読むだけです。
  *
  * 導線の顔ぶれをこの層が持つのは、admin にどの画面があるかが route の構成そのものだからです。
- * 器（`AdminShell`）は並べ方だけを知り、何を並べるかは知りません
- * （[0026](../../../docs/adr/0026-layout-shell-mount.md)）。
+ * 器（`AdminShell`）は並べ方だけを知り、何を並べるかは知りません。
  *
  * 利用者向けの `(shop)` とは別の器を敷きます。root layout が持つのは `html` / `body` と Provider の
  * mount だけで、器の選択はこの段が行います。

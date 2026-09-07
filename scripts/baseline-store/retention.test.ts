@@ -9,7 +9,7 @@ import {
 
 describe("LIVE_BRANCH_PATTERNS", () => {
   // ----- 正常系 -----
-  it("ADR 0150 の常設ブランチを漏れなく持つ", () => {
+  it("常設ブランチを漏れなく持つ", () => {
     expect(LIVE_BRANCH_PATTERNS).toEqual(
       expect.arrayContaining(["production", "staging", "develop"]),
     );

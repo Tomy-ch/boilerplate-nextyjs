@@ -70,7 +70,7 @@ export default defineConfig({
     coverage: {
       provider: "istanbul",
       // テストを持つ範囲は実行対象と計測対象を揃える。片方だけ広げると、テストは走るのに
-      // ゲートに載らない範囲ができ、未テストの分岐を足しても緑のまま通る（ADR 0090）。
+      // ゲートに載らない範囲ができ、未テストの分岐を足しても緑のまま通る。
       include: [
         "src/**/*.{ts,tsx}",
         "docs-viewer/src/**/*.{ts,tsx}",
@@ -82,7 +82,7 @@ export default defineConfig({
         ".storybook/**/*.{ts,tsx}",
       ],
       // 検査対象から外すモジュールは scripts/lib/untested-modules.ts の宣言 1 箇所が持ち、
-      // カバレッジ母数と 1:1 ゲートの双方がそれを読む（ADR 0090）。ここへ直接足すと、
+      // カバレッジ母数と 1:1 ゲートの双方がそれを読む。ここへ直接足すと、
       // ゲート側だけが要求し続ける／カバレッジ側だけが要求し続けるずれが黙って生まれる。
       exclude: [
         "src/**/*.test.{ts,tsx}",

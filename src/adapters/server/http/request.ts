@@ -52,9 +52,8 @@ type RequestPayload =
        * 送信する本文。`multipart/form-data` として送る。
        *
        * @remarks
-       * ファイルを受け取る口が multipart しか持たない場合に使います（
-       * [0075](../../../../docs/adr/0075-file-upload-seam.md)）。JSON と違い、値がバイト列の
-       * ままで運べます。
+       * ファイルを受け取る口が multipart しか持たない場合に使います。JSON と違い、
+       * 値がバイト列のままで運べます。
        */
       multipart?: FormData;
     };
@@ -133,8 +132,8 @@ type RequestSpec<T> = PublicRequestSpec<T> | UserScopedRequestSpec<T>;
  * 主体を名乗らずに取れるものを運ぶ client。
  *
  * @remarks
- * 要求を 1 件送り、契約の形へ通した応答を返します。失敗はすべて分類済みのエラーになり、生の
- * status は表に出ません（[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * 要求を 1 件送り、契約の形へ通した応答を返します。失敗はすべて分類済みのエラーになり、
+ * 生の status は表に出ません。
  */
 export type PublicHttpClient = {
   request<T>(spec: PublicRequestSpec<T>): Promise<T>;
@@ -192,9 +191,9 @@ type UserScopedCredential =
        * 認証済みの呼び出しに付ける Bearer の取得口。渡さなければ認証なしで送る。
        *
        * @remarks
-       * ヘッダの組み立てをこの境界が持つのは、呼び出し側が個別に `Authorization` を作らないよう
-       * にするためです（[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §6）。接続先ごとに
-       * 認証が要るかどうかが決まるので、指定はクライアントの生成時に 1 度だけ行います。
+       * ヘッダの組み立てをこの境界が持つのは、呼び出し側が個別に `Authorization` を
+       * 作らないようにするためです。接続先ごとに認証が要るかどうかが決まるので、
+       * 指定はクライアントの生成時に 1 度だけ行います。
        *
        * **要求のたびに `cookies()` から解決する口を渡します**（0112 決定 5）。解決済みの値を掴む
        * と、cached scope の中で `cookies()` が読まれなくなり、framework 側の防御
@@ -279,8 +278,7 @@ const UNPROCESSABLE_ENTITY_STATUS = 422;
  * 失敗した応答のうち、詳細識別子だけを読む形。
  *
  * @remarks
- * `message` も `code` も読みません。理由は
- * [0080](../../../../docs/adr/0080-error-handling.md) §2 にあります。
+ * `message` も `code` も読みません。詳細は[同区画の README](README.md)。
  */
 const errorDetailsSchema = z.object({ details: z.array(z.string()).optional() });
 
@@ -288,8 +286,7 @@ const errorDetailsSchema = z.object({ details: z.array(z.string()).optional() })
  * 失敗した応答から、接続先が名指しした項目名を読む。
  *
  * @remarks
- * 読めない本文は「詳細が無い」に畳み、元の失敗をすり替えません
- * （[0080](../../../../docs/adr/0080-error-handling.md) §2）。
+ * 読めない本文は「詳細が無い」に畳み、元の失敗をすり替えません。
  *
  * @returns 名指しされた項目名。読めなければ空
  */

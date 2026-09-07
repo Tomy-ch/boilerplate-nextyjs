@@ -15,7 +15,7 @@ import { usePullGesture } from "./use-pull-gesture";
  * @remarks
  * 何を取り直すかを知りません。`router.refresh()` はサーバに現在の route を描き直させるだけで、
  * どの画面に置いても同じ意味になります。画面ごとの再取得の中身はそれぞれの画面が持ち、この器は
- * 合図を送るところまでを担います（[0026](../../../../docs/adr/0026-layout-shell-mount.md)）。
+ * 合図を送るところまでを担います。
  *
  * **ブラウザの再読み込みとは別物です。** client state が保たれるため、開いている入力や一時的な
  * 選択が消えません（[rendering.md](../../../../docs/design/rendering.md)）。

@@ -5,7 +5,7 @@ import { z } from "zod";
  *
  * @remarks
  * 外へは出しません。確定させる口は {@link toUserId} だけで、二重に入口を設けると境界の外でも
- * 通せてしまいます（[0029](../../../docs/adr/0029-type-design-discipline.md) §3）。
+ * 通せてしまいます。
  */
 const userIdSchema = z.string().brand<"user">();
 
@@ -14,8 +14,7 @@ const userIdSchema = z.string().brand<"user">();
  *
  * @remarks
  * 素の `string` を代入できない形にしてあります。商品・利用者・購入の識別子はいずれも UUID の
- * 文字列で、取り違えても型では止まらないためです
- * （[0029](../../../docs/adr/0029-type-design-discipline.md) §3）。
+ * 文字列で、取り違えても型では止まらないためです。
  */
 export type UserId = z.infer<typeof userIdSchema>;
 
@@ -35,7 +34,7 @@ export function toUserId(value: string): UserId {
  *
  * @remarks
  * 契約の wire 型ではなく、表示のための型です。両者を分けるのは、契約の制約が表示の都合とは
- * 別の理由で動くためです（[0070](../../../docs/adr/0070-backend-role-separation.md)）。
+ * 別の理由で動くためです。
  *
  * 削除日時は持ちません。自分の情報を引けている時点で退会していないため、画面が分岐する余地が
  * ありません。
@@ -71,7 +70,7 @@ export type Prefecture = {
  *
  * @remarks
  * 都道府県の識別子は落とします。プロフィールが持つのは名前の文字列で、識別子を送り返す口が
- * ありません（[0070](../../../docs/adr/0070-backend-role-separation.md)）。
+ * ありません。
  */
 export type AddressCandidate = {
   readonly prefecture: string;

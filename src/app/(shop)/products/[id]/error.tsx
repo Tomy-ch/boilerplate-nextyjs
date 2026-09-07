@@ -10,8 +10,7 @@ import { ProductListError } from "@/features/products/list/ui/error-state/error-
  *
  * @remarks
  * 文言はここで組み立てません。production では Server Component から投げられたエラーの本文が
- * 伏せられ、境界には `digest` しか渡らないためです。分類ごとの文言は `errors` が持ちます
- * （[0080](../../../../../docs/adr/0080-error-handling.md)）。
+ * 伏せられ、境界には `digest` しか渡らないためです。分類ごとの文言は `errors` が持ちます。
  */
 export default function ProductDetailError({
   error,

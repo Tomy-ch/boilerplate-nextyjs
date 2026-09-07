@@ -9,7 +9,7 @@ import { SectionFailure } from "./ui/section-failure/section-failure";
  *
  * @remarks
  * 失敗を例外ではなく値で持ちます。トップは系統ごとに成否が分かれる画面なので、投げてしまうと
- * 最初に落ちた 1 つが残りを道連れにします（[0080](../../../docs/adr/0080-error-handling.md)）。
+ * 最初に落ちた 1 つが残りを道連れにします。
  */
 export type SectionState<T> =
   | { readonly status: "ready"; readonly value: T }

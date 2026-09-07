@@ -20,12 +20,11 @@ const HISTORY_PAGE_SIZE = 50;
  * 3 系統を並行で取ります。互いに依存しないので、順に待つと遅いものの後ろに速いものが並ぶだけです。
  *
  * 履歴を開く前に取るのは、dialog を開いた時点で待たせないためです。増分取得へ倒すには
- * same-origin の Route Handler が要り（[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）、
- * それは購入履歴の画面が持ちます。ここで先に取っておけば、その口が生えるまで待たずに済みます。
+ * same-origin の Route Handler が要り、それは購入履歴の画面が持ちます。
+ * ここで先に取っておけば、その口が生えるまで待たずに済みます。
  *
  * 部分的な失敗を許しません。どれも自分自身の情報で、片方だけが出ている画面は「何かが壊れている」
- * 以上のことを伝えないためです。失敗は route の `error` 境界が受けます
- * （[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * 以上のことを伝えないためです。失敗は route の `error` 境界が受けます。
  */
 export const MypagePageContent = withScreenSpan(
   "features/account/mypage/page-content",

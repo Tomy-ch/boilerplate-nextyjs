@@ -75,8 +75,13 @@ route group は URL に現れないため、括弧を外した名前で置きま
 | `/dev/session` | [`screen`](route/dev/session/page.screen.md) / [`function`](route/dev/session/page.function.md) |
 | `/maintenance` | [`screen`](route/maintenance/page.screen.md) / [`function`](route/maintenance/page.function.md) |
 
-**この目録は「書いた画面の一覧」であって、画面の一覧ではありません。**実装済みの画面は
-[`screens.md`](../screens.md) が持ちます。
+**この目録が画面の一覧です。** 画面の約束はここが持ち、ほかの文書が代わりに持つことはありません
+（[0143](../adr/0143-spec-driven-development.md)）。
+
+**仕様書を先に固めることは求めません。** 書ける時点は見た目が確定した後なので、画面実装の順序
+（[`playbook.md`](../playbook.md)）では story のレビューを通ったあとに置きます。ただし
+**仕様書を持たない route が残るのは埋めるべき穴であって、正常な状態ではありません。**
+`src/app` の route とこの目録を機械で突き合わせる検査は v1.0.0 到達前に入れます（同 ADR）。
 
 ## 何を書かないか
 

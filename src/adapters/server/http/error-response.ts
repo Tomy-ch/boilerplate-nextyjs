@@ -12,7 +12,7 @@ import { toHttpStatus } from "./error-status";
  * 分かれ、増えるたびに揃っているかを読んで確かめることになります。
  *
  * 載せるのは分類が持つ既定の文言だけです。外から来た文言をそのまま返すと、こちらが選んでいない
- * 文字列が利用者へ出ます（[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * 文字列が利用者へ出ます。
  */
 export function toErrorResponse(kind: ErrorKindType): Response {
   return Response.json(

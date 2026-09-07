@@ -13,8 +13,7 @@ test("トップから一覧へ入り、1 件の詳細まで辿り着く", async 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("ようこそ");
 
   await page.getByRole("navigation").getByRole("link", { name: "商品", exact: true }).click();
-  // 読み進めた件数は URL へ書き戻される（[0073](../../docs/adr/0073-pagination-fetch-boundary.md)）
-  // ため、着いた直後の URL に条件が付く。
+  // 読み進めた件数は URL へ書き戻されるため、着いた直後の URL に条件が付く。
   await expect(page).toHaveURL(/\/products(\?|$)/);
 
   const link = page.getByRole("list", { name: "商品の一覧" }).getByRole("link").first();

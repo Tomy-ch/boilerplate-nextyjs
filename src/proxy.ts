@@ -65,13 +65,13 @@ const OPEN_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD"]);
  */
 const STOPPED_STATUS = 503;
 
-/** 別 origin への CORS を開く経路の接頭辞。開くのは BFF だけ（[0111](../docs/adr/0111-csp-security-headers.md) §5）。 */
+/** 別 origin への CORS を開く経路の接頭辞。開くのは BFF だけ。 */
 const BFF_PREFIX = "/api/";
 
 /**
  * 資格情報を載せた要求への応答に付ける `Cache-Control`。画面や handler ごとには書かない
- * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に書かない」
- * / [0112](../docs/adr/0112-data-classification-cache-boundary.md) 段 5）。
+ * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に
+ * 書かない」）。
  */
 const PRIVATE_CACHE_CONTROL = "private, no-store";
 
@@ -98,8 +98,7 @@ const FALLBACK_PATH = "/";
  * （CDN / ロードバランサ）が前に立ちます。
  *
  * 認可について、**ここは防御線ではありません。** cookie を読むだけの前捌きであり、確定認可はデータ源に最も
- * 近い所（`adapters/server` の `verifySession()`）が持ちます
- * （[0043](../docs/adr/0043-middleware-policy.md) / [0079](../docs/adr/0079-auth-frontend-seam.md)）。
+ * 近い所（`adapters/server` の `verifySession()`）が持ちます（`docs/rules.md`「認可と入口」）。
  * ここを唯一の検査にすると、Proxy を通らない経路がそのまま穴になります。
  *
  * prefetch を含む全リクエストで走るため、データ源を参照しません。cookie の復号だけに留めるのは
@@ -169,8 +168,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
  * **cookie を書き換えた応答は共有キャッシュへ載せません。** 資格情報を載せた要求への応答だけを
  * 外すと、**匿名で同意済みの訪問者へ計測 id を配る応答**が漏れます。固めて配れる画面は
  * `s-maxage` を伴うため、その応答を保存した CDN は以後の訪問者全員へ同じ id を配ります
- * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に書かない」
- * / [0112](../docs/adr/0112-data-classification-cache-boundary.md) 段 5）。
+ * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に
+ * 書かない」）。
  */
 function finalize(request: NextRequest, response: NextResponse, url: URL): NextResponse {
   syncMeasurementId(request, response, url);
@@ -278,10 +277,9 @@ async function authorize(request: NextRequest): Promise<NextResponse> {
  * ここへ処理を挟むと配信そのものが遅くなります。**外した経路には {@link PRIVATE_CACHE_CONTROL} も
  * 届きません** —— 画像最適化に載るのが公開画像だけであることが、その前提です。
  *
- * metadata ファイル（`robots.txt` / `sitemap.xml` / アイコン / OG 画像）も外します
- * （[0044](../docs/adr/0044-seo-metadata-strategy.md) §6）。いずれも誰でも開ける配信物で、前捌きが
- * 横取りする理由がありません。**綴りは末尾まで固定します** —— `icon` を接頭辞で外すと、その綴りで
- * 始まる画面を後から足したとき、その画面だけが前捌きを素通りします。
+ * metadata ファイル（`robots.txt` / `sitemap.xml` / アイコン / OG 画像）も外します。いずれも誰でも
+ * 開ける配信物で、前捌きが横取りする理由がありません。**綴りは末尾まで固定します** —— `icon` を
+ * 接頭辞で外すと、その綴りで始まる画面を後から足したとき、その画面だけが前捌きを素通りします。
  *
  * `/api` は外しません。Route Handler も保護の対象になり得るためです。
  */

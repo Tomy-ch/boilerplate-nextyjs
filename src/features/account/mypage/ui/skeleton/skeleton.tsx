@@ -48,8 +48,7 @@ const ACTIONS = Array.from({ length: PLACEHOLDER_ACTIONS }, (_, index) => index)
  *
  * 1 枚ずつ現れる形にすると、読み始めた位置が後から来たカードに押し下げられます。
  *
- * **下端の操作は、枠だけを置いて中身を置きません**
- * （[0101](../../../../../../docs/adr/0101-performance-budget.md) §4）。退会は戻せない操作なので、
+ * **下端の操作は、枠だけを置いて中身を置きません**。退会は戻せない操作なので、
  * 読み込み中に押せる位置へ現れてはいけません。
  */
 export const MypageSkeleton = withPartSpan("features/account/mypage/ui/skeleton/skeleton", () => {

@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 相方の facade/ と、画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 相方の facade/ と、画面まるごとの story は例外
 test-requirement: feature
 coverage-exclusions:
   - "src/features/purchases/__mocks__/**"
@@ -20,7 +20,7 @@ coverage-exclusions:
 
 - 他 feature の内部への依存（商品一覧の URL は `products` の `facade/` から取る）
 - 購入を作ること（`checkout` の領分）
-- 金額の計算（小計・税・送料・合計はバックエンドが決めた値。[0070](../../../docs/adr/0070-backend-role-separation.md)）
+- 金額の計算（小計・税・送料・合計はバックエンドが決めた値）
 
 ## Route と契約
 
@@ -63,7 +63,7 @@ coverage-exclusions:
 
 ## 構成
 
-画面（`history` / `detail`）ごとに掘り、その中を性質で分けます（[0027](../../../docs/adr/0027-directory-structure.md)）。
+画面（`history` / `detail`）ごとに掘り、その中を性質で分けます。
 どちらの画面にも属さないものは画面を挟まず直下へ置きます。
 
 | ファイル | 役割 |
@@ -76,7 +76,7 @@ coverage-exclusions:
 | `purchases.fixture.ts` | story とテストが使う固定の購入 |
 | `facade/purchase.fixture.ts` | `facade/` の 3 つと、それを借りる `checkout` が読む固定値 |
 | `actions.ts` | 状態を進める送信。契約の遷移を呼び、競合だけ言い分ける |
-| `__mocks__/actions.ts` | カタログでの Server Action の差し替え（[0054](../../../docs/adr/0054-ui-catalog-storybook.md)） |
+| `__mocks__/actions.ts` | カタログでの Server Action の差し替え |
 | `form-names.ts` | 送信が持つ項目の名前 |
 | `form-state.ts` | 送信の結果の器と、状況で拒まれたときの文言 |
 | `history/query.ts` | 画面が受け取る素の条件と、ページ送りの寸法（件数・カーソルのキー） |
@@ -139,7 +139,7 @@ coverage-exclusions:
 - **絞り込みは必ずクエリでサーバへ渡します。** 取得済みのページに日付の条件を掛けると、条件に合う
   古い購入が落ちた一覧になります。読み込んであるのは新しいほうから数ページぶんでしかないためです
 - **区分ごとの必須が欠けた条件は作れません。** 効いている条件は判別可能 union で持ち、入力欄が経由する
-  途中の姿は別の型（`period-draft.ts`）に分けています（[0029](../../../docs/adr/0029-type-design-discipline.md)）
+  途中の姿は別の型（`period-draft.ts`）に分けています
 - **読めない条件は全期間へ倒します。** URL は利用者が直接編集できるので、必須の欠けた URL も届きます。
   そのまま契約へ渡すと一覧そのものが 400 になり、画面に何も出せません
 - **ステータスの色は 3 つに束ねます。** 進行中 / 望ましい終端 / 取り消しで、これはバックエンドの
@@ -161,18 +161,33 @@ coverage-exclusions:
 - **購入の表示は `facade` が持ちます。** 控え・明細・内訳は購入完了（`checkout`）も同じものを出します。
   同じ購入が画面によって違う見え方になると、控えとして突き合わせられません。`components` へ上げられない
   のは、いずれも題材の語彙（注文・購入）を持ち、コア残留の検査に弾かれるためです
-  （[0021](../../../docs/adr/0021-frontend-responsibility.md)）
 - **できない操作は出しません。** 押せないボタンは「いつか押せる」と読めてしまいます。何ができるかは
   業務キーから引き、その表はこの画面が持ちます。バックエンドが持つ状態遷移の規則を写したものなので、
-  カーネルへは上げません（[0021](../../../docs/adr/0021-frontend-responsibility.md)）。管理側の操作が
-  同じ判定を必要としたときに、そこで初めて共有先を決めます。並べる順もこの表が持ち、進む操作が先に来ます
+  カーネルへは上げません。管理側の操作が同じ判定を必要としたときに、そこで初めて共有先を決めます。
+  並べる順もこの表が持ち、進む操作が先に来ます
 - **通らなかったことは確認の中で伝えます。** 送信しても確認は開いたままなので、外へ出すと利用者が
   見ていない場所に文言が出ます。逆に成立の知らせは操作が並ぶ段が持ちます。進んだ購入では操作ごと
   確認が消えるためです
 - **詳細は待機の状態を持ちません。** 購入は見つからないことがあり、その route に `loading.tsx` は
-  置けません（[0080](../../../docs/adr/0080-error-handling.md)）。取得の待ちは route が丸ごと引き受けるので、
+  置けません。取得の待ちは route が丸ごと引き受けるので、
   この画面に skeleton はありません。一覧のほうは Suspense の境界を持つので `history/ui/skeleton/` があります
 - **増分取得の部品は商品一覧と共有です。** 続きの読み込みの状態は
   [`LoadMore`](../../components/app-starter/load-more/README.md)、目印が見えたことを知るのは
   [`use-on-visible`](../../capabilities/use-on-visible.ts) が持ちます。積み上げの状態機械だけが
   feature に残るのは、読み進めた位置を URL へ書き戻すかどうかも、積み直す契機も画面ごとに違うためです
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。貸すものを `facade/` に出し、他 feature の内部は見ない
+- [0026](../../../docs/adr/0026-layout-shell-mount.md) — 殻と Provider の据え付け。画面ごとには置かない横断 UI の位置
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面ごとに掘り、その中を性質で分ける
+- [0029](../../../docs/adr/0029-type-design-discipline.md) — 判別可能 union と境界での parse。効いている条件と入力途中の姿を分ける
+- [0051](../../../docs/adr/0051-styling-system.md) — デザイントークンと帯ごとの出し分け
+- [0053](../../../docs/adr/0053-ui-component-interaction-seam.md) — 操作の a11y 継ぎ目。確認・シート・紙面の継ぎ目
+- [0054](../../../docs/adr/0054-ui-catalog-storybook.md) — カタログの方針。Server Action の差し替え
+- [0070](../../../docs/adr/0070-backend-role-separation.md) — バックエンドとの責務線。金額と状態遷移の規則を画面で決めない
+- [0073](../../../docs/adr/0073-pagination-fetch-boundary.md) — ページ送り / 増分取得の境界。続きをどこから読むか
+- [0079](../../../docs/adr/0079-auth-frontend-seam.md) — 認証の前面の継ぎ目。他人の購入へ届く経路を画面が持たない
+- [0080](../../../docs/adr/0080-error-handling.md) — エラーの扱い。`error` / `not-found` の受け持ちと待機の置き場
+- [0100](../../../docs/adr/0100-accessibility-target.md) — アクセシビリティの目標水準。色だけで区別させない
+- [0120](../../../docs/adr/0120-locale-aware-formatting.md) — 日付・数値の書式

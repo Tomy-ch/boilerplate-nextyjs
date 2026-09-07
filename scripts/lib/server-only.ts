@@ -52,14 +52,11 @@ function isSideEffectImport(statement: ts.Statement): boolean {
  *
  * @remarks
  * 綴りの側（`*.server.ts`）だけを見ます。逆向き —— 番人を持つ module がその綴りを名乗っているか
- * —— は検査しません。`adapters/server` は層まるごとが server 専用で
- * （[0024](../../docs/adr/0024-adapters-server-client-split.md)）、綴りではなく置き場が
+ * —— は検査しません。`adapters/server` は層まるごとが server 専用で、綴りではなく置き場が
  * それを表しているためです。
  *
- * 番人を **import の先頭**に要求するのは
- * [0030](../../docs/adr/0030-environment-variable-management.md) の「先頭に置く」です。位置が
- * ずれても build は同じく落ちますが、読む側が「この module は server 専用か」を確かめる場所が
- * module ごとに変わります。
+ * 番人を **import の先頭**に要求します。位置がずれても build は同じく落ちますが、読む側が
+ * 「この module は server 専用か」を確かめる場所が module ごとに変わります。
  *
  * @param modules - 走査対象。テストと story は呼び出し側で外しておく。
  */

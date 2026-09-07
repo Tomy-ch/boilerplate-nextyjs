@@ -8,9 +8,8 @@ import { findBoundaryDrift, parseBoundaryFrontmatter } from "./readme-boundaries
  * 境界を宣言している README を、`src/` を辿って集める。
  *
  * @remarks
- * **カーネル直下だけを見ません。** 宣言はカーネルの下の階層にも置かれます
- * （[0021](../../docs/adr/0021-frontend-responsibility.md) は feature ごとにも同じ
- * frontmatter を持つ README を求めます）。カーネル直下だけを突き合わせると、その下の宣言は
+ * **カーネル直下だけを見ません。** 宣言はカーネルの下の階層にも置かれます（feature ごとにも
+ * 同じ frontmatter を持つ README が要ります）。カーネル直下だけを突き合わせると、その下の宣言は
  * 誰も読まないまま `architecture.ts` から離れていきます。実際に離れました —— feature の
  * 宣言は 10 本すべてが `observability` を落としたまま残っていました。
  *

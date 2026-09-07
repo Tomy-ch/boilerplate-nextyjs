@@ -10,10 +10,10 @@ import { portOf, servesMockApi } from "./build";
  *
  * 使い方: `pnpm build`
  *
- * **`use cache` を持つ取得は組み立て時に評価される**ので、build には取得先が要る
- * （[0071](../../docs/adr/0071-bff-api-integration.md)）。`APP_API_MODE=mock` のときは、
- * `src/instrumentation.ts` の interception がプリレンダーの worker プロセスへ届かないため、
- * ここで HTTP の口として立てる（[mocks/serve.ts](../../mocks/serve.ts)）。
+ * **`use cache` を持つ取得は組み立て時に評価される**ので、build には取得先が要る。
+ * `APP_API_MODE=mock` のときは、`src/instrumentation.ts` の interception がプリレンダーの
+ * worker プロセスへ届かないため、ここで HTTP の口として立てる
+ * （[mocks/serve.ts](../../mocks/serve.ts)）。
  */
 
 loadEnvironment();

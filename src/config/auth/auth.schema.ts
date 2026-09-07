@@ -24,8 +24,8 @@ export function authIssuerValidator() {
  * `usesDevelopmentAuthorization()` が環境と併せて行い、その理由もそちらが持ちます。
  *
  * 省略できます。既定の `idp` は環境によらず正しい値で、`dev` を置くのは開発専用の口を開けて
- * いる環境だけです（[0030](../../../docs/adr/0030-environment-variable-management.md) §4 の
- * code default）。全環境へ必須にすると、実環境の設定に「開発用ではない」と書くだけの行が増えます。
+ * いる環境だけです。全環境へ必須にすると、実環境の設定に「開発用ではない」と書くだけの行が
+ * 増えます。
  */
 export function authModeValidator() {
   return z.enum(["idp", "dev"]).default("idp");

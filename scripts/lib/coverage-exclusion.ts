@@ -2,9 +2,9 @@
  * カバレッジ除外の、所有側への記録の解決。
  *
  * @remarks
- * 除外の正は `untested-modules.ts` の宣言 1 箇所で、README が持つのは対象の並びだけである
- * ([0090](../../docs/adr/0090-testing-strategy.md))。ここが持つのはその解決規則だけで、
- * ツリーの走査は `scripts/coverage-exclusion.gate.test.ts` が担う。
+ * 除外の正は `untested-modules.ts` の宣言 1 箇所で、README が持つのは対象の並びだけである。
+ * ここが持つのはその解決規則だけで、ツリーの走査は
+ * `scripts/coverage-exclusion.gate.test.ts` が担う。
  */
 
 import { parseFrontmatter } from "./frontmatter";

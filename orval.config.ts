@@ -198,8 +198,7 @@ const NUMBER_RANGE_MOCK_PROPERTIES = {
   "/^stockWarningThreshold$/": () => faker.number.int({ min: 1, max: 20 }),
   // sample:end
   "/^version$/": () => faker.number.int({ min: 1, max: 20 }),
-  // 頁繰りの件数（[0073](docs/adr/0073-pagination-fetch-boundary.md)）。一覧の表示件数と桁が
-  // 揃っていないと、頁送りの見た目を確かめられない。
+  // 頁繰りの件数。一覧の表示件数と桁が揃っていないと、頁送りの見た目を確かめられない。
   // sample:replace-begin
   "/^(count|itemCount|total|totalCount|salesCount|totalProductCount|publishedProductCount)$/": () =>
     faker.number.int({ min: 0, max: 9999 }),
@@ -230,7 +229,7 @@ const apiInput = {
 export default defineConfig({
   // wire 型は src/adapters/gen/ に、HTTP client は mocks/ に置く。orval は client の出力先
   // (target) を必須とする一方、outbound の resilience は adapters の手書き wrapper が所有する
-  // ([0071](docs/adr/0071-bff-api-integration.md))ため、生成された client は使わない。
+  // ため、生成された client は使わない。
   // 本番が参照する場所へ置くと「どちらで呼ぶのか」が生成物の側から曖昧になる。
   // 孤児の始末は orval の clean ではなく `make gen-api` が持つ。あちらは生成の直前に置き場を
   // まるごと消すので、mode や target の置き方に依らず「契約に無いものは残らない」が成り立つ。

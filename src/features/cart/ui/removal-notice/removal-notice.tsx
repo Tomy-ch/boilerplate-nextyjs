@@ -32,8 +32,7 @@ export type CartRemovalNoticeProps = {
  * 戻すのは数量の設定です。取り除いた時点の数量をそのまま入れ直すため、専用の口を持ちません。
  *
  * 操作の名前に商品名を含めます。案内は同時に複数並ぶため、文言だけではどれを戻す操作かを
- * 区別できません（[0053](../../../../../docs/adr/0053-ui-component-interaction-seam.md) の
- * 「1 つの操作に 1 つの role」）。
+ * 区別できません。
  */
 export function CartRemovalNotice({ removed }: CartRemovalNoticeProps) {
   const [, formAction] = useActionState<CartActionState, FormData>(

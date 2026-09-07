@@ -9,9 +9,8 @@ import { ErrorKind } from "@/errors/error-kind";
  * 購入確認の error 境界。
  *
  * @remarks
- * 置かないと、取得の失敗が `global-error.tsx` まで抜けます。あちらは root layout ごと壊れた
- * ときの最後の境界なので、header も nav も消えた画面になります
- * （[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * 置かないと、取得の失敗が `global-error.tsx` まで抜けます。あちらは root layout ごと壊れたときの
+ * 最後の境界なので、header も nav も消えた画面になります。
  *
  * この境界は**確定の前後どちらの失敗も受けません**。確定の失敗は Server Action が結果として
  * 返し、操作の隣に出ます。ここへ来るのは、確かめる内容そのものを読めなかったときです。

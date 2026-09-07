@@ -4,7 +4,7 @@
 詳細な型・エラーコードは `go-boilerplate/openapi/openapi.gen.yaml` を正とする。本書は画面と API の対応関係・実装上の注意点の把握用である。認証だけは `go-boilerplate/docker/mock-auth-server/openapi/openapi.gen.yaml` の mock OIDC 契約を正とする。
 
 - 本書は**サンプルの仕様**であり、[v1 実装計画](plan/v1-implementation-plan.md) Phase 5 の PR 分解はここを入力とする
-- 本書に列挙された画面・feature は**原則としてサンプル破棄(爆破)の対象**である。**例外**(U9 ログイン画面等のコア残留分)と正確な境界は [v1 実装計画](plan/v1-implementation-plan.md) §3.5 が正
+- 本書に列挙された画面・feature は**原則としてサンプル破棄(爆破)の対象**であり、**本書自身も消える**。**例外**(ログイン画面等のコア残留分)と正確な境界は [`scripts/setup/remove-sample/sample-manifest.ts`](../../scripts/setup/remove-sample/sample-manifest.ts) の `SAMPLE_PATHS` が正
 - backend API の実装計画は [go-boilerplate #596](https://redirect.github.com/Tomy-ch/go-boilerplate/issues/596) を参照する。**未チェックの項目は未実装であり、OpenAPI に追加されるまでフロントから呼び出さない**。本書では現行 OpenAPI に存在する API だけを使用 API として記載する
 
 ---

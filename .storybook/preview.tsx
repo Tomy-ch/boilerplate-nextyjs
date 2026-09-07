@@ -14,8 +14,7 @@ import "../src/app/globals.css";
 import "./preview.css";
 
 // sample:begin
-// Server Action を持つモジュールを、隣の `__mocks__` へ差し替える
-// （[0054](../docs/adr/0054-ui-catalog-storybook.md)）。
+// Server Action を持つモジュールを、隣の `__mocks__` へ差し替える。
 //
 // パスは拡張子まで書く。省くと解決に失敗し、宣言はしているのに 1 件も登録されないまま進む。
 sb.mock(import("../src/features/account/actions.ts"));
@@ -28,15 +27,14 @@ sb.mock(import("../src/features/purchases/actions.ts"));
 // 書体の変数は `next/font` が class に載せる。実アプリの `<html>` と同じ位置へ置かないと、
 // カタログだけが素の書体で表示され、基準画像が実物と一致しない。
 // カタログは実アプリと違い、系統をまたいで並べる。管理の書体は実アプリでは管理の面だけが
-// 読むが（0051 §5）、ここでは両方の系統の story を同じ文書で描くので、まとめて配る。
+// 読むが、ここでは両方の系統の story を同じ文書で描くので、まとめて配る。
 document.documentElement.classList.add(...FONT_VARIABLES.split(" "));
 
 const SYSTEM_THEME = "system";
 const DEFAULT_SURFACE = "user";
 
 const preview: Preview = {
-  // 同一オリジンの `/api/*` は [msw](msw/handlers.ts) が答える
-  // （[0054](../docs/adr/0054-ui-catalog-storybook.md)）。story 側で `fetch` は差し替えない。
+  // 同一オリジンの `/api/*` は [msw](msw/handlers.ts) が答える。story 側で `fetch` は差し替えない。
   loaders: [
     async () => {
       await startMockWorker();
@@ -102,9 +100,8 @@ const preview: Preview = {
 
       return Story(context);
     },
-    // 実アプリが横断 Provider を layout shell へ mount するのと同じ位置に置く
-    // （[0026](../docs/adr/0026-layout-shell-mount.md)）。story ごとに包むと、包み忘れた story は
-    // 部品ではなく Storybook のエラー画面を描き、それが基準画像として承認されうる。
+    // 実アプリが横断 Provider を layout shell へ mount するのと同じ位置に置く。story ごとに包むと、
+    // 包み忘れた story は部品ではなく Storybook のエラー画面を描き、それが基準画像として承認されうる。
     (Story) => <ToastProvider>{Story()}</ToastProvider>,
     // 例外は `StoryErrorBoundary` が受け止める（理由は同 component の doc コメント）。
     // story ごとに作り直すため key を与える。
@@ -121,8 +118,8 @@ const preview: Preview = {
       },
     },
     nextjs: {
-      // このリポジトリは App Router のみを使う (ADR 0040)。useRouter などの
-      // navigation hook は App Router の context が無いと throw するため、既定で有効にする。
+      // このリポジトリは App Router のみを使う。useRouter などの navigation hook は
+      // App Router の context が無いと throw するため、既定で有効にする。
       appDirectory: true,
     },
     options: {

@@ -1,8 +1,8 @@
 import { expect, test } from "../lib/test";
 
 /**
- * 別 origin からの要求の前捌き（[0111](../../docs/adr/0111-csp-security-headers.md) §5 /
- * `docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」）。
+ * 別 origin からの要求の前捌き（`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を
+ * 検証する」）。
  *
  * @remarks
  * 開く側は、宣言した origin の文書から fetch して確かめます。宣言（`HTTP_ALLOWED_ORIGINS`）と文書を

@@ -3,9 +3,8 @@
 // composite action（`.github/actions/**/action.yaml`）の `run:` シェルを shellcheck で検査する。
 //
 // actionlint は `.github/workflows` しか走査せず、action 定義を直接渡すと workflow として
-// 解釈して構文エラーで落ちるため、composite action の中のシェルはどのゲートにも掛からない
-// （ADR 0153 / 撤回条件 W10）。この穴を埋めるのが本ツールの責務で、workflow 側の `run:` は
-// 引き続き actionlint が受け持つ。
+// 解釈して構文エラーで落ちるため、composite action の中のシェルはどのゲートにも掛からない。
+// この穴を埋めるのが本ツールの責務で、workflow 側の `run:` は引き続き actionlint が受け持つ。
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { parseActionFile, targetFiles } from "./composite-step.js";

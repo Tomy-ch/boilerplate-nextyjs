@@ -36,8 +36,7 @@ import { PurchasePeriodFields } from "../period-fields/period-fields";
  *
  * 名前を持たせて landmark にします。支援技術から絞り込みへ直接移動できます。
  *
- * 出す幅の判断は持ちません。この帯を出す下限は
- * [0051](../../../../../../docs/adr/0051-styling-system.md) §2 が決めており、置く側が担います。
+ * 出す幅の判断は持ちません。この帯を出す下限は置く側が担います。
  */
 export function PurchasePeriodBar() {
   const { draft, applied, pending, change, apply } = usePurchaseFilterDraft();

@@ -26,9 +26,8 @@ import type { AuthorizationTransaction, SessionRecord } from "./session-resolver
  * 復号を 1 リクエストにつき 1 度へ畳むために memo 化します。認可の検査はデータ源の近くで
  * 何度も行われる想定であり、その都度復号すると回数がそのまま費用になります。
  *
- * **復元した記録を汚します。** 出しては困るのは Access Token と ID Token で、それを含む記録を
- * そのまま Client Component へ渡すと、渡した時点で描画が落ちます
- * （[0030](../../../../docs/adr/0030-environment-variable-management.md) §8）。ここで汚すのは、
+ * **復元した記録を汚します。** 出しては困るのは Access Token と ID Token で、それを含む
+ * 記録をそのまま Client Component へ渡すと、渡した時点で描画が落ちます。ここで汚すのは、
  * 記録が生まれる場所がここだけだからです。**参照でしか追えない**ので、項目を抜き出した値には
  * 及びません —— 内側の層へ渡してよいのは {@link verifySession} が返す身元だけ、という約束が主で、
  * これはそこを抜けたときに実行時で捕まえる補助です。
@@ -56,8 +55,7 @@ const readSessionRecord = cache(async (): Promise<SessionRecord | null> => {
  * 確定認可の入口。session を検証して身元を返す。
  *
  * @remarks
- * データ取得・Server Action・Route Handler は、進む前に必ずここを通します
- * （[0079](../../../../docs/adr/0079-auth-frontend-seam.md)）。`proxy.ts` の楽観判定は
+ * データ取得・Server Action・Route Handler は、進む前に必ずここを通します。`proxy.ts` の楽観判定は
  * 入口の前捌きに過ぎず、防御線はこちら側です。
  *
  * 返すのは身元だけで、トークンは含めません。
@@ -72,8 +70,7 @@ export const verifySession = cache(async (): Promise<Session | null> => {
  * 認証済みの API 呼び出しに付ける Bearer を返す。
  *
  * @remarks
- * 呼び出し側が個別に Authorization ヘッダを組み立てないよう、取り出し口をここに 1 つだけ
- * 置きます（[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §6）。
+ * 呼び出し側が個別に Authorization ヘッダを組み立てないよう、取り出し口をここに 1 つだけ置きます。
  *
  * @returns 未認証なら null
  */

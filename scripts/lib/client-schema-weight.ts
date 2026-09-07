@@ -56,8 +56,7 @@ const SPECIFIER = /(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g;
  * client へ載せてはいけない入口。
  *
  * @remarks
- * - `zod` の既定の入口を禁じる理由は
- *   [0029](../../docs/adr/0029-type-design-discipline.md) §2。client へ届くスキーマは `zod/mini`
+ * - `zod` の既定の入口を禁じる。client へ届くスキーマは `zod/mini` に寄せる
  * - 生成した zod スキーマを禁じる理由は `../openapi/extract-limits.ts`。定数は `limits.ts` が持つ
  */
 const FORBIDDEN: readonly {

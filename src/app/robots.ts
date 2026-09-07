@@ -7,7 +7,7 @@ import { PROTECTED_PREFIXES } from "@/model/authz";
 const SITEMAP_PATH = "/sitemap.xml";
 
 /**
- * クローラ制御（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §2）。
+ * クローラ制御。
  *
  * @remarks
  * **索引させない環境では全経路を断ります**（`docs/rules.md`「設定と環境」の「索引させてよい環境だけが

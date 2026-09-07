@@ -18,8 +18,8 @@ export const PRODUCT_PAGE_LIMIT: number = getProductsQueryFirstMax;
  *
  * `products.ts` ではなくこちらが要るのは、あちらの client が要求のたびに cookie を読むため、
  * `use cache` の中から呼べず、その口を持つモジュールごと `use cache` の下から引けないためです
- * （[0112](../../../../docs/adr/0112-data-classification-cache-boundary.md) 決定 3。ESLint の
- * `no-user-scoped-in-cached-module`）。資格情報を持たないので、返るのは公開中のものだけです。
+ * （ESLint の `no-user-scoped-in-cached-module`）。資格情報を持たないので、返るのは公開中の
+ * ものだけです。
  *
  * @param after - 前のページが返した cursor。先頭なら省略
  */

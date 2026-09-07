@@ -2,9 +2,9 @@
  * テストが負う層別責務の解決。
  *
  * @remarks
- * どの層の責務を負うかは、テストから遡って最も近い `README.md` の frontmatter が宣言する
- * ([0090](../../docs/adr/0090-testing-strategy.md))。ここが持つのはその解決規則だけで、
- * ツリーの走査は `scripts/test-requirement.gate.test.ts` が担う。
+ * どの層の責務を負うかは、テストから遡って最も近い `README.md` の frontmatter が宣言する。
+ * ここが持つのはその解決規則だけで、ツリーの走査は
+ * `scripts/test-requirement.gate.test.ts` が担う。
  */
 
 import { APP_ELEMENTS, ENTRY_POINTS } from "../../architecture";
@@ -16,8 +16,8 @@ import { toPathPattern } from "./path-pattern";
  * 宣言できる層。
  *
  * @remarks
- * [0090](../../docs/adr/0090-testing-strategy.md) の層別責務表と揃える。`visual` を含めないのは、
- * 対象が実装モジュールではなく story であり、宣言を持たないと同 ADR が定めているため。
+ * 層別責務表と揃える。`visual` を含めないのは、対象が実装モジュールではなく story であり、
+ * 宣言を持たないため。
  */
 const TEST_LAYERS = ["unit", "component", "feature", "route", "integration", "e2e"] as const;
 
@@ -28,9 +28,8 @@ type TestLayer = (typeof TEST_LAYERS)[number];
  * README を持たないまま宣言を負う入口（`architecture.ts` の `ENTRY_POINTS`）。
  *
  * @remarks
- * 入口はカーネルの外に居るため層 README を持たず、宣言できるのは依存マトリクスだけです
- * （[0090](../../docs/adr/0090-testing-strategy.md) の起動 / 境界エントリ）。**ここで写しを
- * 持たないのは、宣言が 2 か所になると片方だけ動いた状態を誰も検出できないため**です。
+ * 入口はカーネルの外に居るため層 README を持たず、宣言できるのは依存マトリクスだけです。
+ * **ここで写しを持たないのは、宣言が 2 か所になると片方だけ動いた状態を誰も検出できないため**です。
  *
  * 入口の `pattern` は拡張子を持たない（`src/proxy*`）ので実装とテストの両方に当たりますが、
  * ここへ来るのはテストファイルだけなのでそのまま照合します。
@@ -49,8 +48,7 @@ const ENTRY_DECLARATIONS: readonly { readonly matches: RegExp; readonly layer: T
 const ENTRY_DECLARATION_SOURCE = "architecture.ts";
 
 /**
- * ファイル名が役割を決める element の宣言（[0090](../../docs/adr/0090-testing-strategy.md) の
- * 「置き場ではなく element」）。
+ * ファイル名が役割を決める element の宣言。
  *
  * @remarks
  * 対象のテストは、element のパターンの拡張子の手前へ `.test` を挿した位置に居ます。glob の
@@ -79,7 +77,7 @@ function isTestLayer(value: unknown): value is TestLayer {
  *
  * @remarks
  * 1 つのディレクトリが複数の層を抱えるときは並びで宣言する。負う責務が割れているのに 1 つしか
- * 書けないと、書かなかった側の観点を誰も負わなくなる([0090](../../docs/adr/0090-testing-strategy.md))。
+ * 書けないと、書かなかった側の観点を誰も負わなくなる。
  *
  * @returns 宣言が無ければ null。宣言があっても層として読めなければ空の並び
  */

@@ -26,8 +26,7 @@ const MALFORMED_MESSAGE = "操作を受け付けられませんでした。画�
  * 場合、後から届いた側の数量になります。** カートは購入の控えであり、最終的な数量は利用者が
  * カートの画面で確かめられます。
  *
- * 在庫を超えても拒みません。買えるかどうかはバックエンドが明細の事情として返します
- * （[0070](../../../../../docs/adr/0070-backend-role-separation.md)）。
+ * 在庫を超えても拒みません。買えるかどうかはバックエンドが明細の事情として返します。
  */
 export async function addToCartAction(
   _previous: ActionState<void>,

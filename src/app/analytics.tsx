@@ -41,8 +41,8 @@ function readMeasurementId(): string | undefined {
  *
  * @remarks
  * **動的に読みます。** 静的に import すると、容器 ID を空にした配備 —— Google への依存を外した、
- * テンプレートから作った側 —— の初期 JS にもライブラリのコードが載ります。**拒否した相手にバイト数を運ばせない**のが
- * 同梱の条件です（[0131](../../docs/adr/0131-cookie-consent.md) §2）。
+ * テンプレートから作った側 —— の初期 JS にもライブラリのコードが載ります。**拒否した相手に
+ * バイト数を運ばせない**のが同梱の条件です。
  *
  * 同意を得るまで取りに行かない、という性質も同時に付きます。
  */
@@ -90,25 +90,23 @@ function MeasurementId(): null {
  * 同意ゲートの裏で読み込むタグマネージャ。
  *
  * @remarks
- * **`Consent` の children として置きます。** 同意が得られていない間はこの要素そのものが描かれない
- * ので、DOM にも script が現れません（[0131](../../docs/adr/0131-cookie-consent.md) §2）。
+ * **`Consent` の children として置きます。** 同意が得られていない間はこの要素そのものが
+ * 描かれないので、DOM にも script が現れません。
  *
  * **容器 ID が空なら何も描きません。** 空の意味は `config/analytics/analytics.schema.ts` が持ちます。
  * 配信ヘッダが連動することは `config/security-headers` の契約です。
  *
- * **`<noscript>` の iframe は置きません。** JS が無効な訪問者には同意を与える手段が無く、置けば
- * その相手にだけ無条件で発火するためです（[0131](../../docs/adr/0131-cookie-consent.md) §2）。
+ * **`<noscript>` の iframe は置きません。** JS が無効な訪問者には同意を与える手段が無く、
+ * 置けばその相手にだけ無条件で発火するためです。
  *
  * **この先は中継を通りません。** Google と直接通信する仕組みで、`/api/telemetry` の伏せ字の外に
- * あります（[0082](../../docs/adr/0082-client-observability.md) 禁止事項の唯一の例外。理由は
- * [0131](../../docs/adr/0131-cookie-consent.md) §2）。
+ * あります。
  *
  * **読み込みの strategy は選べません。** `GoogleTagManager` は prop を公開しておらず、`next/script`
  * の既定（`afterInteractive`）が効きます。`docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの
  * 裏に置く」が求める strategy の「明示」を宣言では満たせないため、いま効いている値をテストで固定し、ライブラリが既定を変えた時点で落ちるようにしています。
  *
- * 計測 id はこの経路以外へ渡しません。運用テレメトリ（`telemetry.tsx`）とは主体を分けます
- * （[0082](../../docs/adr/0082-client-observability.md) §4 / 禁止事項）。
+ * 計測 id はこの経路以外へ渡しません。運用テレメトリ（`telemetry.tsx`）とは主体を分けます。
  */
 export function Analytics() {
   const pathname = usePathname();

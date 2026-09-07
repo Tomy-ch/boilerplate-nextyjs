@@ -5,9 +5,8 @@ import type { Rule } from "eslint";
 
 /**
  * サーバに保存されるキャッシュを持つモジュールから、user-scoped な取得の口を import させないルール
- * （[0112](../docs/adr/0112-data-classification-cache-boundary.md) 決定 4 の段 2 /
- * `docs/rules.md`「データ分類と機微情報」の「サーバへ保存されるキャッシュから user-scoped な取得の口を
- * 引かない」）。
+ * （`docs/rules.md`「データ分類と機微情報」の「サーバへ保存されるキャッシュから user-scoped な
+ * 取得の口を引かない」）。
  *
  * `use cache` は**口の外側からモジュールごと**キャッシュへ入れるため、口の型では止まらない。
  * `use cache: private` はサーバへ保存されないので対象外。

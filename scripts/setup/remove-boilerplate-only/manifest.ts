@@ -4,8 +4,7 @@
  * マーカーの名前。`boilerplate-only:begin` / `:end` / `:line` / `:replace-*` を作る。
  *
  * @remarks
- * `sample` 族と同じ名前にはできません。族を分ける理由は
- * [0152](../../../docs/adr/0152-agents-md-policy.md) が持ちます。
+ * `sample` 族と同じ名前にはできません。族を分ける理由は [README](../../README.md) から辿ります。
  */
 export const BOILERPLATE_ONLY_MARKER = "boilerplate-only";
 
@@ -14,7 +13,6 @@ export const BOILERPLATE_ONLY_MARKER = "boilerplate-only";
  *
  * @remarks
  * サンプル破棄（`scripts/setup/remove-sample/`）へ相乗りさせず、**独立に**消える必要があります。
- * 独立させる理由は [0152](../../../docs/adr/0152-agents-md-policy.md) が持ちます。
  *
  * 剥がしを検証する CI（`.github/workflows/strip-verify.yaml`）も対象です。検証する相手が消えた
  * あとに残すと、テンプレートから作った側のすべての PR で「道具が無い」失敗を出し続けます。

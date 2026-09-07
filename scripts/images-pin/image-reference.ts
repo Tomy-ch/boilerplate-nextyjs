@@ -3,8 +3,7 @@
 //
 // 対象は compose の `image:`、Dockerfile の `FROM`、workflow / composite action の
 // `uses: docker://`。いずれも「接頭辞・参照・接尾辞」の 3 つに割れるため、書き換えは同じ
-// 関数で扱える。`uses: docker://` をこちらが持つ責務線は
-// [0011](../../docs/adr/0011-no-docker.md) が持つ。
+// 関数で扱える。
 import fs from "node:fs";
 import path from "node:path";
 import { blockScalarLines } from "../lib/block-scalar.js";

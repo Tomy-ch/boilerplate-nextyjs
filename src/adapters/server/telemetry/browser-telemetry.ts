@@ -78,9 +78,9 @@ export function parseTelemetryReport(value: unknown): TelemetryReport | undefine
  * 検証済みの報告を signal へ載せる。
  *
  * @remarks
- * Web Vitals は metric へ、例外は構造化ログへ載せます —— 前者は分布を読むためのもので、後者は
- * 1 件ずつ辿るためのものだからです（[0082](../../../../docs/adr/0082-client-observability.md)）。
- * 例外は `withRemoteTraceContext` を介して、画面を組んだ要求の trace へ紐づけます。
+ * Web Vitals は metric へ、例外は構造化ログへ載せます —— 前者は分布を読むためのもので、
+ * 後者は 1 件ずつ辿るためのものだからです。例外は `withRemoteTraceContext` を介して、
+ * 画面を組んだ要求の trace へ紐づけます。
  *
  * 記録の失敗はここで止めます。ブラウザは応答を読まないので、投げても伝わる相手が居ません。
  */

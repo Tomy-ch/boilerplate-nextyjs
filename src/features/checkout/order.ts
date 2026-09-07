@@ -15,8 +15,7 @@ function hasPriceChange(line: CartLine): boolean {
  * 買うつもりだったものが黙って落ちるためです。ただし値が変わったことは、確定の前に画面が
  * 確かめます。
  *
- * 買えるかどうかの判定はバックエンドが済ませています
- * （[0070](../../../docs/adr/0070-backend-role-separation.md)）。ここが決めるのは、その結果を
+ * 買えるかどうかの判定はバックエンドが済ませています。ここが決めるのは、その結果を
  * 「今回の購入に載せる / 載せない」へ写す一段だけです。
  */
 export function orderLinesOf(cart: Cart): readonly PurchaseOrderLine[] {

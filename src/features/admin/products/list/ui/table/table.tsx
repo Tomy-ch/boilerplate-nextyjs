@@ -144,7 +144,7 @@ function rowKey(item: AdminProductRow): string {
  *
  * **状態の色は行が持ち込みます。** どの状態がどの区分かはこの feature の意味づけで、表は渡された
  * 見た目をそのまま出すだけです（`../../status-tone.ts`）。色は状態名に重ねているだけで、色だけで
- * 区別させません（[0100](../../../../../../../docs/adr/0100-accessibility-target.md)）。
+ * 区別させません。
  *
  * **行を押す・在庫を押すのどちらも、明示的に選ぶ道を menu が残します**（理由は `docs/spec/route/admin/products/page.function.md`
  * 「行から進める先」）。

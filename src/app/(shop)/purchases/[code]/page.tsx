@@ -16,14 +16,13 @@ export const metadata: Metadata = {
  * 控えの中身。
  *
  * @remarks
- * **取得と判定を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません
- * （[0041](../../../../../docs/adr/0041-cache-components-decision.md)）。器は promise のまま渡し、穴の内側で解きます。
+ * **取得と判定を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません。
+ * 器は promise のまま渡し、穴の内側で解きます。
  *
- * 確定認可もここで通します。`proxy.ts` の判定は前捌きです（[0079](../../../../../docs/adr/0079-auth-frontend-seam.md)）。
+ * 確定認可もここで通します。`proxy.ts` の判定は前捌きです。
  *
  * **存在しない購入でも 200 が返ります。** 殻を先に流すため、`notFound()` に達した時点で応答の
- * ヘッダは出ています。書き方では解けないので、見つからないことは画面と `noindex` が伝えます
- * （[0080](../../../../../docs/adr/0080-error-handling.md) §4）。
+ * ヘッダは出ています。書き方では解けないので、見つからないことは画面と `noindex` が伝えます。
  */
 async function PurchaseDetailContent({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;

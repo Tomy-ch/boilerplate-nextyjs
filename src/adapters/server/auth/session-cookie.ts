@@ -32,8 +32,8 @@ export const TRANSACTION_MAX_AGE_SECONDS = 600;
  * cookie に共通で付ける属性。
  *
  * @remarks
- * 属性の既定は `docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を
- * 用途ごとに明示する」と [0079](../../../../docs/adr/0079-auth-frontend-seam.md) §1 が持ちます。ここに書くのは、この口に固有の判断だけです。
+ * 属性の既定は `docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、
+ * 属性を用途ごとに明示する」が持ちます。ここに書くのは、この口に固有の判断だけです。
  *
  * `sameSite: "lax"` は他サイトからの POST に cookie を載せない一方、IdP からのリダイレクト
  * （トップレベルの GET ナビゲーション）では送出されます。`strict` にすると callback で

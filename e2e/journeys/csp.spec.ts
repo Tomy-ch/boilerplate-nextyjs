@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * CSP が配信され、ブラウザが enforce していること（[0111](../../docs/adr/0111-csp-security-headers.md) §6）。
+ * CSP が配信され、ブラウザが enforce していること。
  * 見張りの外で書く理由は `e2e/README.md`「何を異常と数えるか」。
  */
 

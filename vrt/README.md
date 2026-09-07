@@ -7,9 +7,8 @@ coverage-exclusions:
 
 # vrt
 
-Storybook の全 story を基準画像と比べ、**意図しない見た目の変化**を検知する
-（[0091](../docs/adr/0091-test-verification-methods.md) §3）。ここは使い方が正で、
-部品どうしがどう組み上がっているかは [docs/design/vrt.md](../docs/design/vrt.md) にある。
+Storybook の全 story を基準画像と比べ、**意図しない見た目の変化**を検知する。ここは使い方が
+正で、部品どうしがどう組み上がっているかは [docs/design/vrt.md](../docs/design/vrt.md) にある。
 
 DOM のアサートでは「class 名が変わっていない」ことしか言えず、見た目が変わっていない保証には
 ならない。退行の主因は画面ごとの個別変更ではなく、design token や layout shell を触って全画面が
@@ -17,10 +16,9 @@ DOM のアサートでは「class 名が変わっていない」ことしか言�
 
 ## テストの責務
 
-frontmatter の `test-requirement: unit` が掛かるのは、**Vitest から回る `lib/` の判定**である
-（[0090](../docs/adr/0090-testing-strategy.md)）。`*.spec.ts` は Playwright が実行する本体で
-Vitest からは呼べず、層別責務表の `visual` は宣言を持たない。撮影そのものを単体で検査できない
-ぶん、判定を `lib/` へ切り出して 1:1 の対象にしてある。
+frontmatter の `test-requirement: unit` が掛かるのは、**Vitest から回る `lib/` の判定**である。
+`*.spec.ts` は Playwright が実行する本体で Vitest からは呼べず、層別責務表の `visual` は宣言を
+持たない。撮影そのものを単体で検査できないぶん、判定を `lib/` へ切り出して 1:1 の対象にしてある。
 
 ## 使い方
 
@@ -499,3 +497,11 @@ GitHub App の作成と鍵の生成だけは自動化できない（REST に作�
 | [`../.github/actions/diff-scope`](../.github/actions/diff-scope/action.yaml) | CI の入口で、差分が絵に届きうるかを判定する |
 
 `tmp/vrt/` に出る実行結果（actual / diff / HTML レポート）は追跡しない。
+
+## 関連する ADR
+
+- [0051](../docs/adr/0051-styling-system.md) — 動きを止めて初期状態で撮る根拠
+- [0054](../docs/adr/0054-ui-catalog-storybook.md) — a11y の自動検査を story に効かせる
+- [0090](../docs/adr/0090-testing-strategy.md) — 層別責務と、`visual` が宣言を持たない扱い
+- [0091](../docs/adr/0091-test-verification-methods.md) — story 単位の比較と、実行環境の固定
+- [0100](../docs/adr/0100-accessibility-target.md) — 適合目標（WCAG 2.x レベル AA）

@@ -3,9 +3,8 @@ import type { Rule } from "eslint";
 /**
  * 太さの utility を直に書かせないルール。
  *
- * 規約そのものは `src/components/README.md`「文字の太さ」と
- * [0051](../docs/adr/0051-styling-system.md) §5 が持つ。Biome は class 文字列の中身を見ないため
- * ESLint 側で持つ（[0002](../docs/adr/0002-formatter-linter.md) の能力ベース分担）。
+ * 規約そのものは `src/components/README.md`「文字の太さ」が持つ。Biome は class 文字列の中身を
+ * 見ないため ESLint 側で持つ。
  *
  * **文字列リテラルだけを見る。** class は文字列としてしか書けないので、これで書かれた分は必ず拾える。
  * 式で組んだ class は解決先が分からないため見送る（`no-internal-anchor` と同じ線引き）。

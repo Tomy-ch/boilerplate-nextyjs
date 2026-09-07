@@ -119,7 +119,7 @@ subcomponent が多い compound では、root に `@example` で組み合わせ�
 ### 文字の太さ
 
 - **強調は `font-emphasis` で書く。太さを直に指定しない。** 書体ごとに持っている太さが違い、持っていない段を指定しても丸められるだけで強調にならない（`tokens/README.md`「強調は 1 段だけ持つ」）。**`no-raw-font-weight` が機械で見る**（`eslint-rules/`）。`font-normal` は「強調しない」の打ち消しなので使ってよい
-- **段は 1 つしかない。** 見出しと本文の差は寸法（`text-lg` 等）と位置が作り、太さはその上乗せである。太さで階層をもう 1 段作ろうとしない —— OS 同梱の書体では出ない環境がある（[0051](../../docs/adr/0051-styling-system.md) §5）
+- **段は 1 つしかない。** 見出しと本文の差は寸法（`text-lg` 等）と位置が作り、太さはその上乗せである。太さで階層をもう 1 段作ろうとしない —— OS 同梱の書体では出ない環境がある
 
 ### 系統（`data-surface`）と Portal
 
@@ -135,7 +135,7 @@ subcomponent が多い compound では、root に `@example` で組み合わせ�
 ### 境界を示す線
 
 - **その線が要素の境界を示すなら `border-input`、区画の仕切りなら `border-border` を使う。** `Input` / `Textarea` のように枠が無いと入力できる範囲が判らなくなるもの、`Badge` の `outline` のように縁だけで成り立つ variant は、いずれも `input` を取る
-- 分けるのは**コントラストの要求が違う**ためである。入力できる範囲の境界は **WCAG 1.4.11 が隣接色との 3:1 を求める**対象で（[0100](../../docs/adr/0100-accessibility-target.md)）、`border` は仕切りとしてどの面でも 1.2〜1.6:1 しかなく満たさない。`input` は `background` / `card` / `popover` / `muted` / `accent` のすべての上で 3:1 を満たすよう定めてある。仕切りは同条の対象外なので `border` のままでよい
+- 分けるのは**コントラストの要求が違う**ためである。入力できる範囲の境界は **WCAG 1.4.11 が隣接色との 3:1 を求める**対象で、`border` は仕切りとしてどの面でも 1.2〜1.6:1 しかなく満たさない。`input` は `background` / `card` / `popover` / `muted` / `accent` のすべての上で 3:1 を満たすよう定めてある。仕切りは同条の対象外なので `border` のままでよい
 - **`primary` と `emphasis` を本文の色に使わない。** この 2 つは面と図形のための色で、WCAG 1.4.11 の **3:1** しか満たさない。文字に置くと AA の 4.5:1 を割る。リンクや状態の文言には `secondary` / `success` / `warning` / `destructive` / `info` を使う（いずれも 4.5:1 を満たす）。アイコンは非テキストなので 3:1 で足り、`primary` を置いてよい
 - 判断の根拠は token の値にあるため、配色を変えたときはこの節を先に確認し、**比を測り直す**。呼び出し側のコメントに理由を書くと、token を直しても気づかれない
 
@@ -281,7 +281,7 @@ components/
 - **feature の story は上の 13 見出しに入れない。** 目録はこのカーネルが持つ部品の一覧であり、feature の部品はここの持ち物ではないためである。feature 側は次の 2 つの先頭セグメントを使う
   - `Page/<feature>/<画面>` — 画面の合成（`features/<name>/<screen>/view.tsx`）。取得を伴わない状態で画面全体の見え方を確かめる場所
   - `Features/<feature>/…` — 画面固有の部品（`features/<name>/<screen>/ui/<part>/`）。以降のセグメントは実装のディレクトリと同じ形にする
-- **取得を行うもの（`page-content.tsx`）は story にしない。** story は取得の実体を持てないため、確かめられるのは合成した結果だけである。取得の検証は unit テストが持つ（[0091](../../docs/adr/0091-test-verification-methods.md)）
+- **取得を行うもの（`page-content.tsx`）は story にしない。** story は取得の実体を持てないため、確かめられるのは合成した結果だけである。取得の検証は unit テストが持つ
 - **`Icons/` も component の見出しではない。** [`icon.ts`](./icon.ts) が配るアイコンの目録（[`.storybook/icon.stories.tsx`](../../.storybook/icon.stories.tsx)）で、`Tokens/` と同じ理由で層にも目録にも載らない。名前を書き写さず公開面から実行時に読むので、`icon.ts` へ足せばこの画面に出る
 - **`Tokens/` は component の見出しではない。** design token の目録（[`.storybook/design-token.stories.tsx`](../../.storybook/design-token.stories.tsx)）で、アプリが描画する部品ではないため `components/` の層にも目録にも載らない。`components/` 直下は「誰が書き換えるか」で層を分ける規約なので、そこへ 5 つ目の層として足すと規約が嘘になる。Storybook 自身の資料として `.storybook/` に置き、`main.ts` の `stories` が拾う
 - sidebar の並び順は [`.storybook/preview.ts`](../../.storybook/preview.tsx) の `storySort` が持つ。**`Page` → `Features` → `Tokens` → `Icons` → 目録**の順に置き、その中は名前順である。組んでいる間に開くのは前の 2 つで、目録は参照物として後ろにある方が探す手数が少ない。目録自身の並びは sidebar に持ち込まない。目録は層と目的で読む順を作るが、sidebar は目当ての部品を名前で引く場所なので、二つの並びを揃える必要がない
@@ -289,6 +289,22 @@ components/
 - Controls が推論した props は任意の React 要素を生成できない。`asChild` のように単一の要素 child を必要とする props は Control を公開せず、必要な child を `render` で明示した専用 story を用意する
 - **どの story file にも component の説明と story ごとの説明を書く。** component の説明には、その部品が何のためにあるかと、**隣の似た部品との使い分け**を書く。`Accordion` と `Collapsible`、`Alert` と `Toaster` と `FeedbackState` のように、見た目が近く責務が違う部品は、並べて初めて選び分けられる。story の説明は、その story が何を示しているのかを書く
 - 説明の置き場は 2 つある。component 全体は `parameters.docs.description.component`、story ごとは export の直前の JSDoc（または `parameters.docs.description.story`）である。**どちらも Docs ページにしか描画されない。** [`.storybook/preview.ts`](../../.storybook/preview.tsx) が `tags: ["autodocs"]` を付けているのはこのためで、外すと書いた説明がどこにも出なくなる
+
+## 関連する ADR
+
+部品ごとの README はこの節を持たない。ADR への参照はこの層の README に集める。
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。ここが `model` と `errors` だけを引く根拠
+- [0026](../../docs/adr/0026-layout-shell-mount.md) — `shell/` の器と Provider をどこに mount するか
+- [0027](../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。実装・test・story・README を 1 ディレクトリに置く形
+- [0050](../../docs/adr/0050-styling-strategy.md) — Tailwind と design token、`cn()` による class の解決
+- [0051](../../docs/adr/0051-styling-system.md) — token の体系・段の切り方・motion・印刷
+- [0052](../../docs/adr/0052-ui-component-policy.md) — shadcn/ui を起点にする選択と、アイコンの供給元を `icon.ts` へ閉じる規約
+- [0053](../../docs/adr/0053-ui-component-interaction-seam.md) — 開閉・focus・履歴など操作まわりの a11y seam
+- [0054](../../docs/adr/0054-ui-catalog-storybook.md) — Storybook をカタログとして持つ運用
+- [0080](../../docs/adr/0080-error-handling.md) — `app-starter` が知っているバックエンドエラーの正規化と、画面側との責務分担
+- [0091](../../docs/adr/0091-test-verification-methods.md) — story と unit テストの分担、a11y 自動検査の組み込み
+- [0100](../../docs/adr/0100-accessibility-target.md) — 到達すべきアクセシビリティの水準
 
 ## component 目録
 

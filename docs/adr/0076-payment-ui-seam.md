@@ -1,6 +1,6 @@
 # 決済 UI seam(mount seam と PCI 境界)
 
-決済(Stripe Elements / PayPal / Adyen 等)を **本体非同梱(exclusion)** としたうえで、テンプレートから作った EC 系リポジトリが採用したときに乗る **フロント領域の mount seam**(SDK の DOM マウント点 + client_secret 受け渡し口)と、**別ドメイン(backend / PSP)の PCI 境界 seam**(生カード情報をフロントに持たせない = PCI SAQ-A 相当)を分けて明文化する。
+決済(Stripe Elements / PayPal / Adyen 等)を **本体非同梱(exclusion)** としたうえで、テンプレートから作った側が決済を採用したときに乗る **フロント領域の mount seam**(SDK の DOM マウント点 + client_secret 受け渡し口)と、**別ドメイン(backend / PSP)の PCI 境界 seam**(生カード情報をフロントに持たせない = PCI SAQ-A 相当)を分けて明文化する。
 
 ## Status
 
@@ -21,7 +21,7 @@ Accepted
 
 ### 1. フロント領域 = 決済 SDK の UI マウント seam
 
-決済 SDK(Stripe Elements / PayPal Buttons / Adyen Drop-in 等)は **本体非同梱(exclusion)** とし、EC 系の作った側が採用したときに乗る **mount seam**(SDK が iframe / redirect を差し込む DOM マウント点 + client_secret 等の受け渡し口)だけを名前付きで敷く。**既定は決済画面を PSP 側へ遷移させる(redirect)か、backend / BFF 経由で操作する構成**であり、本体の配信ヘッダはその前提で閉じている —— iframe を差す SDK を採る作った側は、[0111](0111-csp-security-headers.md) §2 の `Cross-Origin-Embedder-Policy` と `Permissions-Policy` の `payment` を開ける判断を伴う。
+決済 SDK(Stripe Elements / PayPal Buttons / Adyen Drop-in 等)は **本体非同梱(exclusion)** とし、作った側が採用したときに乗る **mount seam**(SDK が iframe / redirect を差し込む DOM マウント点 + client_secret 等の受け渡し口)だけを名前付きで敷く。**既定は決済画面を PSP 側へ遷移させる(redirect)か、backend / BFF 経由で操作する構成**であり、本体の配信ヘッダはその前提で閉じている —— iframe を差す SDK を採る作った側は、[0111](0111-csp-security-headers.md) §2 の `Cross-Origin-Embedder-Policy` と `Permissions-Policy` の `payment` を開ける判断を伴う。
 
 - 外部スクリプトの読込は [0131](0131-cookie-consent.md)(同意ゲート)と CSP([0111](0111-csp-security-headers.md))に連動させる。決済 SDK の `<script>` は同意 / CSP 許可の下でのみロードする(サードパーティスクリプト規約 = `docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの裏に置く」と一貫させる)。
 - **本体は mount seam をコードとして置かない。** 決済画面という設置面が本体に存在せず、使われない seam は腐るためである。本 ADR が記すのは採用時の拡張点の座標(SDK の DOM マウント点 + client_secret 受け渡し口)であり、SDK 採用と seam の実体化は作った側が行う。採用時も本体側の座標と PCI 境界(§2)は保ち、SDK は [0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + adapters / カーネル境界の裏で差替可能・vendor 直参照を feature / component に散らさない)と [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。

@@ -32,8 +32,7 @@ class HttpConfig {
    *
    * @remarks
    * 空なら同一 origin だけです。`src/proxy.ts` が CORS と origin 検証の両方でこの値を読みます
-   * （`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」/
-   * [0111](../../../docs/adr/0111-csp-security-headers.md) §5）。
+   * （`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」）。
    */
   get allowedOrigins(): readonly string[] {
     return this.#allowedOrigins;
@@ -55,7 +54,7 @@ class HttpConfig {
    *
    * @remarks
    * 中継の経路では配備先が先に要求を打ち切るため、その上限より内側に取ります。外側に置いた値は
-   * 表明されるだけで効きません（[0075](../../../docs/adr/0075-file-upload-seam.md)）。
+   * 表明されるだけで効きません。
    */
   get maxUploadBytes(): number {
     return this.#maxUploadBytes;

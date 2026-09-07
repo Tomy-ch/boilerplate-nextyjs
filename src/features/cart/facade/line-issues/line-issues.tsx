@@ -27,8 +27,7 @@ export type CartLineIssuesProps = {
  * **強さは 3 段階です。** 買えない事情は取り消しの配色と丸の絵柄（対処しないと買えない）、値が
  * 変わった事情は警告の配色と三角の絵柄（買えるが、金額を確かめる必要がある）、画面が足す一文は
  * 本文の補足として弱く出します。値の変動を補足と同じ強さで出すと、**金額が変わったことが読み
- * 飛ばされます**。絵柄も分けるのは、配色だけの区別が色を見分けにくい利用者へ届かないためです
- * （[0100](../../../../../docs/adr/0100-accessibility-target.md)）。
+ * 飛ばされます**。絵柄も分けるのは、配色だけの区別が色を見分けにくい利用者へ届かないためです。
  */
 export function CartLineIssues({ issues, availableQuantity, note }: CartLineIssuesProps) {
   if (issues.length === 0) {

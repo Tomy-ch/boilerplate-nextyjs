@@ -1,6 +1,5 @@
 /**
- * 取得の口が分類を綴りのまま宣言しているかの判定
- * （[0112](../../docs/adr/0112-data-classification-cache-boundary.md) 決定 4 の段 2）。
+ * 取得の口が分類を綴りのまま宣言しているかの判定。
  *
  * @remarks
  * 判定だけをここに置き、ツリーの走査は `scripts/scope-spelling.gate.test.ts` が担う。

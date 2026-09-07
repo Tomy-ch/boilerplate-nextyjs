@@ -14,8 +14,7 @@ import { usePendingRemovals } from "../../removal-memory";
  *
  * @remarks
  * 静的に import すると、明細の操作一式（数量・削除・全消しの確認）がどの画面の最初の読み込みにも
- * 乗ります。領域が閉じている画面や空のカートでは 1 度も描かれないため、開いたときに読みます
- * （[0101](../../../../../docs/adr/0101-performance-budget.md)）。
+ * 乗ります。領域が閉じている画面や空のカートでは 1 度も描かれないため、開いたときに読みます。
  */
 const CartContents = dynamic(() =>
   import("../contents/contents").then((module) => module.CartContents),

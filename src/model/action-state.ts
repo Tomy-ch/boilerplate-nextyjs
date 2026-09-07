@@ -18,10 +18,8 @@ export type FieldErrors<TField extends string = string> = Readonly<
  * Server Action が画面へ返す結果。
  *
  * @remarks
- * Server Action ごとに戻り値の形を発明しないための共通の器です
- * （[0061](../../docs/adr/0061-form-mutation-ux.md)）。入力検証が返す項目エラーも
- * （[0062](../../docs/adr/0062-form-input-validation.md)）、結果の通知手段の選択も
- * （[0063](../../docs/adr/0063-mutation-result-notification.md)）、この形を入力に取ります。
+ * Server Action ごとに戻り値の形を発明しないための共通の器です。入力検証が返す項目エラーも、
+ * 結果の通知手段の選択も、この形を入力に取ります。
  *
  * `useActionState` の境界を越えてシリアライズされるため、素の値だけで構成します。`Error` も
  * `Date` も往復しません。

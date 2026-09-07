@@ -8,8 +8,7 @@ import { PRODUCT_NAME_MAX_LENGTH, PRODUCT_PRICE_PATTERN } from "./field-limits";
  * 同じ規則を当てます。文言まで一箇所に置くのは、同じ誤りに対して 2 通りの言い方が現れるのを
  * 防ぐためです。
  *
- * ここで判定するのは形だけです。実在するか・業務として妥当かはバックエンドが決めます
- * （[0062](../../../../docs/adr/0062-form-input-validation.md)）。
+ * ここで判定するのは形だけです。実在するか・業務として妥当かはバックエンドが決めます。
  */
 export type ProductFieldRule = (value: string) => string | undefined;
 

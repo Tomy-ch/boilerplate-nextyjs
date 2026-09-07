@@ -4,9 +4,8 @@ import ts from "typescript";
  * 1:1 テスト対応原則を機械判定する。
  *
  * @remarks
- * 原則は「呼べる export はすべて、自分の名前の最上位 `describe` を 1 つだけ持つ」
- * ([0090](../../docs/adr/0090-testing-strategy.md))。`describe` が主語で `it` が述語という
- * JS/TS の一般的な構成に、export との 1 対 1 を機械判定として足したもの。
+ * 原則は「呼べる export はすべて、自分の名前の最上位 `describe` を 1 つだけ持つ」。`describe` が
+ * 主語で `it` が述語という JS/TS の一般的な構成に、export との 1 対 1 を機械判定として足したもの。
  *
  * `describe` の内側をどう束ねるかは判定しない。観点ごとに入れ子の `describe` で分ける規約は
  * あるが、束ね方はテストの中身しだいで妥当な形が変わり、名前を固定すると実態と合わない

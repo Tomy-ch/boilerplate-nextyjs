@@ -94,8 +94,7 @@ function toColumns(
  * 結果は一覧の外側に居ます（[`WithdrawableUserList`](../withdrawable-list/withdrawable-list.tsx)）。行が知って
  * いるのは「この人に対して退会が選ばれた」ことだけです。
  *
- * **退会済みかを色だけで伝えません。** 状態の列に文字のバッジを置き、行そのものは淡くしません
- * （[0100](../../../../../../docs/adr/0100-accessibility-target.md)）。
+ * **退会済みかを色だけで伝えません。** 状態の列に文字のバッジを置き、行そのものは淡くしません。
  *
  * @see Storybook `Features/Admin/Users/Table`
  */

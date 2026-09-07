@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// 抑止の撤回条件を週に一度見る入口。運用と、見る機構が要る理由は ADR 0110 §3.4 が持つ。
+// 抑止の撤回条件を週に一度見る入口。運用と、見る機構が要る理由は [README](../README.md) から辿る。
 //
 //   pnpm exec tsx scripts/suppression-expiry     期限を過ぎた宣言があれば 1 で落ちる
 //

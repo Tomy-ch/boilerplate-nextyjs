@@ -29,8 +29,8 @@ const PRICE_CHANGED_NOTE = "この金額で購入してよいかを、確定の�
  * 使い、この画面が足すのは「外れる / 確かめる」の一文だけです。
  *
  * **弱めるのは商品名だけで、行ごと薄くはしません。** 行に透過をかけると、載らない理由の文字まで
- * 一緒に薄くなり、地との比が [0100](../../../../../../docs/adr/0100-accessibility-target.md) の
- * 要求を割ります。読ませたいのはその理由なので、弱めるのは対象の名前に留めます。
+ * 一緒に薄くなり、地とのコントラスト比が足りなくなります。読ませたいのはその理由なので、
+ * 弱めるのは対象の名前に留めます。
  */
 export const OrderLineRow = withPartSpan(
   "features/checkout/confirm/ui/order-line-row/order-line-row",

@@ -30,7 +30,7 @@ export async function register(): Promise<void> {
     await bootstrapConfig();
 
     // API のモックは bootstrapConfig() の後に立てる。接続モードの決定を検証より前へ置くと、
-    // 未検証の値で本番の接続先を差し替えうる（検証の実行点は [0030](../docs/adr/0030-environment-variable-management.md)）。
+    // 未検証の値で本番の接続先を差し替えうる（検証の実行点は `docs/rules.md`「設定と環境」）。
     const { getApiConfig } = await import("./config/api/api.server");
 
     const apiConfig = getApiConfig();

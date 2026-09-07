@@ -25,8 +25,7 @@ type DevSessionCommon = {
  * @remarks
  * **経路で判別できる union にしてあります。** 取りに行くなら接続先が要り、貼るなら接続先は
  * 要りません。1 つの形へ両方を省略可能として入れると、どちらの組み合わせも型の上では作れて
- * しまい、送信先が中身を見て経路を推し量ることになります
- * （[0029](../../../docs/adr/0029-type-design-discipline.md)）。
+ * しまい、送信先が中身を見て経路を推し量ることになります。
  */
 type DevSessionInput =
   | (DevSessionCommon & {

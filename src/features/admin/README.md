@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 画面まるごとの story は例外
 test-requirement: feature
 coverage-exclusions:
   - "src/features/admin/analytics/analytics.fixture.ts"
@@ -100,7 +100,7 @@ app 層にあるためで、理由は「Action 戻り値契約」に書いてあ
 
 ## 構成
 
-画面ごとに掘り、その中を性質で分けます（[0027](../../../docs/adr/0027-directory-structure.md)）。
+画面ごとに掘り、その中を性質で分けます。
 
 **商品は 4 つの画面（一覧・作成・編集・在庫補充）を持つため、画面の軸で割ってあります。**複数の画面が
 共有するものは、どの画面のものでもないので 1 段上（`products/` 直下と `products/ui/`）が所有します。
@@ -196,10 +196,9 @@ app 層にあるためで、理由は「Action 戻り値契約」に書いてあ
 | `shipments/` | 発送の画面。**自分の README を持つ**（[README](shipments/README.md)） |
 
 **`feature` の宣言が掛かるのは、画面の単位で組み上げたものです**。`page-content.tsx` / `view.tsx` /
-`*-section.tsx` が対象で、部品が揃って初めて成立する振る舞いを負います
-（[0090](../../../docs/adr/0090-testing-strategy.md)）。**`ui/` の単一部品は `component` の形**——
-その部品 1 つの描画契約と、[0091](../../../docs/adr/0091-test-verification-methods.md) が要求する
-a11y の自動検査——で、**画面を跨ぐ純関数（`count.ts` / `summary-cards.ts` / `paths.ts` /
+`*-section.tsx` が対象で、部品が揃って初めて成立する振る舞いを負います。**`ui/` の単一部品は
+`component` の形**——その部品 1 つの描画契約と、必須の a11y 自動検査——で、
+**画面を跨ぐ純関数（`count.ts` / `summary-cards.ts` / `paths.ts` /
 `analytics/period.ts` など）は `unit` の形**——描画を持たず、戻り値と分岐を直接照合する——で
 確かめます。合成を持たないものへ合成のテストを課しても、確かめる相手が無いためです。
 
@@ -253,7 +252,7 @@ a11y の自動検査——で、**画面を跨ぐ純関数（`count.ts` / `summa
 
 どの経路に何の役割が要るかは [`src/model/authz.ts`](../../model/authz.ts) が持ちます。確定認可も、
 利用者向けの器が admin への入口を出すかどうかも、同じ `isAdmin()` を引きます。判定が別々に書かれて
-いると「入れないのに入口が出ている」状態を作れてしまいます（[0079](../../../docs/adr/0079-auth-frontend-seam.md)）。
+いると「入れないのに入口が出ている」状態を作れてしまいます。
 
 **役割を持たない人には導線を出しません。** 押せる場所を作らないことが出し分けであり、押した先で
 断る作りにすると、管理の面がある事実だけが誰にでも伝わります。
@@ -262,11 +261,11 @@ a11y の自動検査——で、**画面を跨ぐ純関数（`count.ts` / `summa
 
 URL から読んだ条件は、**取得の口が持つ検証**（`adapters/server/api/products` の `parseProductQuery`）を
 通してから渡します。画面側で数値化などの写しを作ると、契約を再生成しても写し方だけが古い範囲の
-まま残ります（[0029](../../../docs/adr/0029-type-design-discipline.md)）。写せなかった条件は捨てず、
+まま残ります。写せなかった条件は捨てず、
 一覧の代わりにそのことを出します。
 
 取得の失敗は `src/app/admin/error.tsx` が受けます。ここが無いと `global-error` まで抜け、脇の導線も
-header も失われた素の画面になります（[0080](../../../docs/adr/0080-error-handling.md)）。
+header も失われた素の画面になります。
 
 ## 契約との関係で気を付けること
 
@@ -284,3 +283,30 @@ header も失われた素の画面になります（[0080](../../../docs/adr/008
 
 **在庫僅少の一覧（`GetProductsLowStock`）は契約にありますが、この slice は使っていません。**入口の
 数値カードとは独立した後続の機能です。
+
+## 関連する ADR
+
+**`shipments/` は自分の [README](shipments/README.md) に自分の分を持ちます。** ここに挙げるのは
+この slice 全体（分析・商品・利用者と、それらが共有する部品）が依存しているものです。
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。カーネルへ上げてよいものの線
+- [0023](../../../docs/adr/0023-stores-kernel.md) — client 状態カーネルの受入基準。1 画面の状態を上げない線
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面ごとに掘り、その中を性質で分ける
+- [0028](../../../docs/adr/0028-naming-convention.md) — 命名規約。フォーム項目とファイルの綴り
+- [0029](../../../docs/adr/0029-type-design-discipline.md) — 判別可能 union と境界での parse。条件の写しを画面に作らない
+- [0040](../../../docs/adr/0040-routing-rendering-strategy.md) — 描画戦略。境界の粒度と client 島の切り方
+- [0051](../../../docs/adr/0051-styling-system.md) — デザイントークンと帯ごとの出し分け
+- [0052](../../../docs/adr/0052-ui-component-policy.md) — UI 部品の方針。器の選び方と icon の閉じ方
+- [0053](../../../docs/adr/0053-ui-component-interaction-seam.md) — 操作の a11y 継ぎ目。ダイアログ・シート・入力の継ぎ目
+- [0060](../../../docs/adr/0060-state-management.md) — 状態の置き場。入力途中を誰が持つか
+- [0062](../../../docs/adr/0062-form-input-validation.md) — 入力検証の UX。判定の正はバックエンドに置く
+- [0063](../../../docs/adr/0063-mutation-result-notification.md) — 送信結果の伝え方。一覧の外へ出す知らせ
+- [0070](../../../docs/adr/0070-backend-role-separation.md) — バックエンドとの責務線。集計と状態の意味を画面で決めない
+- [0073](../../../docs/adr/0073-pagination-fetch-boundary.md) — ページ送り / 増分取得の境界。条件を URL に載せる
+- [0079](../../../docs/adr/0079-auth-frontend-seam.md) — 認証の前面の継ぎ目。導線の出し分けと確定認可の関係
+- [0080](../../../docs/adr/0080-error-handling.md) — エラーの扱い。`error` 境界を管理面に置く理由
+- [0090](../../../docs/adr/0090-testing-strategy.md) — 層別のテスト責務。`feature` / `component` / `unit` の使い分け
+- [0091](../../../docs/adr/0091-test-verification-methods.md) — 検証の方法。a11y の自動検査
+- [0100](../../../docs/adr/0100-accessibility-target.md) — アクセシビリティの目標水準。色だけで区別させない
+- [0101](../../../docs/adr/0101-performance-budget.md) — 性能予算。client の束に何を載せるか
+- [0120](../../../docs/adr/0120-locale-aware-formatting.md) — 日付・数値の書式

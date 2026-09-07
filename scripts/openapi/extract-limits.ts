@@ -2,7 +2,7 @@
 // 生成した zod スキーマから、検証を伴わない定数だけの module を作る（make gen-api の一部）。
 //
 // 契約の上限値は client も要るが、それを取るために生成スキーマを import すると、**全エンドポイントの
-// スキーマと説明文がブラウザへ配られる**（[0101](../../docs/adr/0101-performance-budget.md) §4）。
+// スキーマと説明文がブラウザへ配られる**。
 // 定数だけを別 module へ写し、client はそちらだけを引く。
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 

@@ -13,9 +13,8 @@ export type JsonLdProps = {
  * バックエンドである以上、その中身を前提にできません。`\\u003c` は JSON として `<` と同じ値で、
  * 検索エンジンの読み取りは変わりません。
  *
- * 何を入れるか（schema.org の type と項目）は画面の判断で、この component は持ちません
- * （[0044](../../../../../docs/adr/0044-seo-metadata-strategy.md) §4）。Server Component として
- * 使えます。hydration は不要です。
+ * 何を入れるか（schema.org の type と項目）は画面の判断で、この component は持ちません。
+ * Server Component として使えます。hydration は不要です。
  *
  * @example
  * ```tsx

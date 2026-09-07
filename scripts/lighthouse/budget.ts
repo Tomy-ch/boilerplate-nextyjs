@@ -7,8 +7,7 @@ import { z } from "zod";
  * @remarks
  * 値そのものは [`performance-budget.yaml`](../../performance-budget.yaml) が持ちます。client
  * JavaScript の予算（[`../bundle-budget/budget.ts`](../bundle-budget/budget.ts)）と同じ置き場に
- * するのは、[0101](../../docs/adr/0101-performance-budget.md) が両方を 1 つの予算として扱って
- * いるためです。
+ * するのは、両方を 1 つの予算として扱っているためです。
  *
  * **上限は全画面へ一律に効きます。**画面ごとの宣言を必須にしないのは、既定値が Core Web Vitals
  * の "good" 境界そのもので、画面の用途によって動く値ではないためです。緩めたい画面だけが

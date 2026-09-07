@@ -3,7 +3,7 @@
 // SAST が読むルール集合を、固定した commit から取り出して置く。
 //
 // `make sast` はこれを先に呼び、`--config tmp/opengrep-rules` を読む。レジストリ（semgrep.dev）
-// は引かない —— 理由は manifest.ts と docs/adr/0110-security-operations.md が持つ。
+// は引かない —— 理由は manifest.ts が持つ。
 //
 // 2 つの mode を持つ。既定は取得と照合で、`--resolve` は commit を上げた人がロックファイルを
 // 書き直すためのもの。`actions-pin` の resolve / check と同じ形で、**digest を人が写す工程を

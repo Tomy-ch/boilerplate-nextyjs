@@ -28,8 +28,7 @@ export type AdminAnalyticsPageContentProps = {
  * @remarks
  * **この関数は取得を待ちません。** 待つと、選択肢まで含めた画面全体が待機表示に置き換わります。
  * 取得は 2 つの区画がそれぞれ持ち（`summary-section.tsx` / `ranking-section.tsx`）、`Suspense` の
- * 外側には選択肢と期間の表示だけが残ります
- * （[0040](../../../../docs/adr/0040-routing-rendering-strategy.md)「境界の粒度」）。
+ * 外側には選択肢と期間の表示だけが残ります。
  *
  * 集計の待機に鍵を与えるのは、期間が変われば数値が総入れ替えになるためです。鍵を与えないと、
  * 次の集計が届くまで前の期間の数が残ります。**鍵は値を一意に表す形で作ります。** 区切り文字で

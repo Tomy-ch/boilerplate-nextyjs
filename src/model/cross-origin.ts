@@ -93,8 +93,7 @@ export function isStateChanging(method: string): boolean {
  * @remarks
  * `Access-Control-Allow-Credentials: true` を返すため、`Access-Control-Allow-Origin` に `*` は
  * 使えません。origin をそのまま返し、キャッシュが別の origin へ同じ応答を配らないよう
- * `Vary: Origin` を添えます。credentials を許す理由は
- * [0111](../../docs/adr/0111-csp-security-headers.md) §5。
+ * `Vary: Origin` を添えます。
  *
  * @param origin - 許可した別 origin（{@link judgeOrigin} が返したもの）
  */

@@ -244,3 +244,27 @@ taintUniqueValue("署名鍵は server 専用です", config, config.sessionSecre
 
 - `server/` は server config を利用でき、`client/` は secret を利用しない
 - 外部型・生成型はここで変換し、内側へ漏らさない
+
+## 関連する ADR
+
+この層のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります** ——
+ADR は番号も節も動くので、動いたことに気づける場所を 1 つに寄せています（[docs/rules.md](../../docs/rules.md)
+「コメントと文書」）。子ディレクトリの README を持つ区画（[`server/auth`](server/auth) /
+[`server/http`](server/http) / [`server/telemetry`](server/telemetry) /
+[`client/telemetry`](client/telemetry) / [`gen`](gen)）は、そちらの節が持ちます。
+
+- [0024](../../docs/adr/0024-adapters-server-client-split.md) — `server/` と `client/` の分割と、client 側の外部接続境界
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界（server config を引けるのは `server/` だけ）
+- [0020](../../docs/adr/0020-adopted-architecture.md) — 内向きの依存と、外部型を内層へ漏らさないこと
+- [0070](../../docs/adr/0070-backend-role-separation.md) — バックエンドとの責務の線。業務ロジックを持たないこと
+- [0071](../../docs/adr/0071-bff-api-integration.md) — 外部 API クライアントと fetch wrapper、取得の口が寿命を持つこと
+- [0073](../../docs/adr/0073-pagination-fetch-boundary.md) — ページングと増分取得の取得境界
+- [0075](../../docs/adr/0075-file-upload-seam.md) — ファイルアップロードの seam（署名付き直接 PUT と多重部の例外）
+- [0079](../../docs/adr/0079-auth-frontend-seam.md) — 資格情報を組む境界と、主体を名乗る要求の扱い
+- [0080](../../docs/adr/0080-error-handling.md) — バックエンド由来の失敗を分類へ正規化すること
+- [0081](../../docs/adr/0081-observability-logging.md) — ブラウザから collector を直接叩かせず、BFF が中継すること
+- [0082](../../docs/adr/0082-client-observability.md) — Web Vitals と client 例外の収集、送信面の置き場
+- [0112](../../docs/adr/0112-data-classification-cache-boundary.md) — 取得の口が分類を宣言し、キャッシュと資格情報の口を型で塞ぐこと
+- [0030](../../docs/adr/0030-environment-variable-management.md) — secret の扱いと、client へ渡せないものを登録する口
+- [0040](../../docs/adr/0040-routing-rendering-strategy.md) — 再検証の契機（取り直しが起きるまで古い値が残ること）
+- [0090](../../docs/adr/0090-testing-strategy.md) — 層別の検証責務（`integration` が掛かる範囲）

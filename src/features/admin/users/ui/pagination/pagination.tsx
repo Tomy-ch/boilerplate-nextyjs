@@ -24,8 +24,7 @@ export type AdminUserPaginationProps = {
  *
  * @remarks
  * **任意のページへ跳べます。** 契約が位置と全件数を返す offset 方式のため、次と前しか指せない
- * cursor 方式の一覧（商品・購入）とは部品から違います
- * （[0073](../../../../../../docs/adr/0073-pagination-fetch-boundary.md)）。
+ * cursor 方式の一覧（商品・購入）とは部品から違います。
  *
  * 端では前後を link にせず、押せない control として残します。消すと残った側が左右へ動き、同じ
  * 場所を狙って押せません（`components/design-system/navigation/pagination`）。

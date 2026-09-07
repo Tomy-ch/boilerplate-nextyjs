@@ -3,9 +3,7 @@
  *
  * @remarks
  * **構造から名指しできなかったときの予備です**（[`recommend.ts`](recommend.ts)）。どの検査が要る
- * かを言えないまま「大きい」とだけ言うので、根拠のある線は引けません。分担の理由は
- * [0101](../../docs/adr/0101-performance-budget.md) §2 と
- * [0153](../../docs/adr/0153-ci-configuration.md) §2。
+ * かを言えないまま「大きい」とだけ言うので、根拠のある線は引けません。
  */
 import type { Change } from "../lib/numstat";
 import { movesResult } from "./subject";

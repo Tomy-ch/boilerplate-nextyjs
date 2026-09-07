@@ -1,6 +1,6 @@
 import { RuleConfigSeverity, type UserConfig } from "@commitlint/types";
 
-// コミット規約 (ADR 0150) の prefix 11 種を commit-msg hook で機械強制する。
+// コミット規約の prefix 11 種を commit-msg hook で機械強制する。
 // Feat / CI のように大文字構成が混在するため type-case は課さない。
 const config: UserConfig = {
   rules: {

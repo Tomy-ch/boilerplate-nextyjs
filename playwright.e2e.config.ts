@@ -6,7 +6,7 @@ import { getEnvironment } from "./src/config/environment";
 import { loadEnvironment } from "./src/config/load-environment";
 
 /**
- * 画面を通した検証の設定（[0090](docs/adr/0090-testing-strategy.md) / [0091](docs/adr/0091-test-verification-methods.md)）。
+ * 画面を通した検証の設定。使い方は [`e2e/README.md`](e2e/README.md)。
  *
  * @remarks
  * story 単位の撮影（`playwright.config.ts`）と分けてあります。開く相手が違い（build 済み
@@ -25,7 +25,7 @@ if (process.platform !== "linux") {
 }
 
 // 相手はモックでなければならない。実物のバックエンドへ当てると、応答が変わるたびに落ち、
-// 落ちた理由が退行なのか向こうのデータなのか区別できなくなる（[0090](docs/adr/0090-testing-strategy.md)）。
+// 落ちた理由が退行なのか向こうのデータなのか区別できなくなる。
 loadEnvironment();
 
 if (getEnvironment().APP_API_MODE !== "mock") {
@@ -83,8 +83,8 @@ export default defineConfig({
     locale: "ja-JP",
     trace: "retain-on-failure",
     contextOptions: {
-      // Framer Motion の動きは CSS animation ではないため撮影時の停止では止まらない
-      // （[0051](docs/adr/0051-styling-system.md)）。動きを求めない設定で初期状態に固定する。
+      // Framer Motion の動きは CSS animation ではないため撮影時の停止では止まらない。
+      // 動きを求めない設定で初期状態に固定する。
       reducedMotion: "reduce",
     },
   },

@@ -10,8 +10,7 @@ import { type AdminProductListLocation, CURSOR_KEY, FILTER_KEY, TRAIL_KEY } from
  * @remarks
  * 読むのは画面を組み立てる地点だけで、組むのは絞り込みの入力欄といった client の部品です。同じ
  * module に置くと、スキーマを組み立てる module 直下の式が tree-shaking を妨げ、**検証ライブラリごと
- * client の束に載ります**（[0101](../../../../../docs/adr/0101-performance-budget.md)）。境界を
- * 強制しているのは束であって、読みやすさではありません。
+ * client の束に載ります**。境界を強制しているのは束であって、読みやすさではありません。
  */
 
 /** 1 つしか受け取らない条件。読めなければ未指定（空文字）として扱う。 */

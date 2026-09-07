@@ -29,7 +29,7 @@ const PRICE_CHANGED_MESSAGE = "金額が変わりました。内容を確かめ�
  *
  * @remarks
  * **購入はこの時点で成立しています。** 後始末が通らなかったことを理由に完了を見せないと、
- * 利用者には購入できなかったように映ります（[0080](../../../docs/adr/0080-error-handling.md)）。
+ * 利用者には購入できなかったように映ります。
  *
  * 買った明細だけを取り除きます。カートを丸ごと空にすると、買えなくて今回の購入から外れた明細まで
  * 消え、利用者が選び直す手掛かりを失います。
@@ -69,11 +69,10 @@ async function acceptPriceChanges(lines: readonly PurchaseOrderLine[]): Promise<
  * 同じ鍵で届いた要求は初回の結果の再生として扱われ、購入は 1 件のままです。
  *
  * 成立したら完了画面へ送ります。同じ画面で完了を見せると、再読み込みで完了が消え、戻る操作が
- * 確定前の画面へ帰ります（[0063](../../../docs/adr/0063-mutation-result-notification.md)）。
+ * 確定前の画面へ帰ります。
  *
  * **送るのは積み増しではなく置き換えです。** 確定した後の確認画面はもう見せる内容を持たず、
- * 被せた overlay の中から確定したときは、その overlay が積んだ 1 件が戻り先として残ります
- * （[0053](../../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 被せた overlay の中から確定したときは、その overlay が積んだ 1 件が戻り先として残ります。
  */
 export async function placeOrderAction(
   _previous: PlaceOrderFormState,

@@ -25,8 +25,7 @@ export const metadata: Metadata = {
  * **待機表示は 1 つだけ置きます。** 見出しは殻に残し、中身だけを穴へ落とします。カートは外枠
  * （`(shop)/layout.tsx`）も読みますが、取得は 1 リクエストの中で memo 化されるため往復は増えません
  * （`adapters/server/api/cart.ts`）。境界をさらに割ると画面が二度継ぎ足され、読み始めた位置が
- * 動きます（[0040](../../../../docs/adr/0040-routing-rendering-strategy.md) の
- * 「境界は待つものの単位で置く」）。
+ * 動きます。
  */
 export default function CartPage() {
   return (

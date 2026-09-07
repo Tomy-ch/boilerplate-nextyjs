@@ -98,8 +98,7 @@ async function shipEach(purchaseCodes: readonly string[]): Promise<ShipmentProgr
  * 注文が未発送として並び続けます。
 
  *
- * 置き場の判断（主体の断言が要る action は app 層）は
- * [0025](../../../../docs/adr/0025-app-layer-elements.md) の `app/server-action`。
+ * 主体の断言が要る action なので、この層に置きます（[同層の README](../../README.md)）。
  */
 export async function shipPurchasesAction(
   _previous: ShipmentState,

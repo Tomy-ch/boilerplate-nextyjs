@@ -8,11 +8,10 @@ export const LOGIN_PATH = "/login";
  *
  * @remarks
  * 戻り先を必ず検証してから載せます。受け取った値をそのまま置くと、自サイトの導線で外部の
- * URL へ送れます（open redirect。[0079](../../../../docs/adr/0079-auth-frontend-seam.md)）。
- * 検証は `model` が持ち、ここはその結果を URL へ組むだけです。
+ * URL へ送れます（open redirect）。検証は `model` が持ち、ここはその結果を URL へ組むだけです。
  *
  * `proxy.ts` は同じ行き先を自前で組みます。前捌きは 11 カーネルの外にあり `features` を
- * 参照できないためで、これは重複ではなく層の境界です（[0043](../../../../docs/adr/0043-middleware-policy.md)）。
+ * 参照できないためで、これは重複ではなく層の境界です。
  *
  * @param returnTo - 認証後に戻す先。同一 origin の相対パスでなければ `/` へ倒れる
  */

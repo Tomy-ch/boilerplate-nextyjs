@@ -69,7 +69,7 @@ async function runTransition(
  *
  * @remarks
  * 主体を断言しません。契約が本人の購入だけを対象とし、他人の購入は存在ごと秘匿するため、この
- * 操作で他人の購入へ届く経路がありません（[0079](../../../docs/adr/0079-auth-frontend-seam.md)）。
+ * 操作で他人の購入へ届く経路がありません。
  */
 export async function cancelPurchaseAction(
   _previous: PurchaseTransitionState,

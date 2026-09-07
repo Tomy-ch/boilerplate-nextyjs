@@ -101,7 +101,7 @@ export const DOCUMENT_SANITIZE_SCHEMA: Readonly<Schema> = {
     src: [...DOCUMENT_LINK_PROTOCOLS],
   },
   // alt を持たない図が本文へ出ると読み上げから内容が落ちる。空文字で補い、装飾として
-  // 読み飛ばせる状態にする（AA 目標 = ADR 0100）。
+  // 読み飛ばせる状態にする。
   required: { img: { alt: "" } },
   strip: [...DOCUMENT_STRIPPED_TAG_NAMES],
   tagNames: [...DOCUMENT_TAG_NAMES],

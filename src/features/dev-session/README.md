@@ -173,9 +173,8 @@ Route Handler へ遷移できません —— client router が飲み込み、�
 認可 endpoint へ送信し、そこが応答を持って戻すので、形としてもそちらが実物に近くなります。
 
 **認可 endpoint の判定は受け口の隣が持ちます。** `route.ts` に許される import 先は
-`adapters/server` / `errors` / `logging` で、原則は thin proxy です
-（[0025](../../../docs/adr/0025-app-layer-elements.md)）。form の解析も失敗の分類も `features` の
-語彙なので、`src/app/dev/session/authorize-development-session.ts` が持ち、口は「閉じる・呼ぶ・
+`adapters/server` / `errors` / `logging` で、原則は thin proxy です。form の解析も失敗の分類も
+`features` の語彙なので、`src/app/dev/session/authorize-development-session.ts` が持ち、口は「閉じる・呼ぶ・
 HTTP の形へ直す」だけにしています。**送信の本体の上限もそちらが持ちます** —— `next.config.ts` の
 `bodySizeLimit` は Server Action にしか及ばず、Route Handler へ寄せた時点で外れるためです。
 
@@ -195,8 +194,16 @@ HTTP の形へ直す」だけにしています。**送信の本体の上限も�
 繋ぎ先を選んでいる人**なので、設定の値を初期値として出し、書き換えられるようにしています。
 
 **Access Token は画面に出しません。** ブラウザから観測できないことが session をこの形にしている理由
-そのもの（[0079](../../../docs/adr/0079-auth-frontend-seam.md)）で、確かめるために出すとその性質を
-自分で壊します。貼る欄はあっても、貼った値を読み返す欄はありません。
+そのもので、確かめるために出すとその性質を自分で壊します。貼る欄はあっても、貼った値を読み返す欄は
+ありません。
 
 **失効までの秒数を指定できます。** 失効したあとに保護された画面がどう見えるかを、待たずに踏める
 ようにするためです。
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。session の封緘へ触れてよいのが app 層だけである根拠
+- [0025](../../../docs/adr/0025-app-layer-elements.md) — app 層の構成要素。Route Handler は thin proxy に留め、判定は隣へ置く
+- [0029](../../../docs/adr/0029-type-design-discipline.md) — 判別可能 union と境界での parse。送信された `FormData` の解き方
+- [0053](../../../docs/adr/0053-ui-component-interaction-seam.md) — 操作の a11y 継ぎ目。入力の面が守る継ぎ目
+- [0079](../../../docs/adr/0079-auth-frontend-seam.md) — 認証の前面の継ぎ目。ブラウザから session を観測できないという性質

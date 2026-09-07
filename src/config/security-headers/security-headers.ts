@@ -56,12 +56,11 @@ const TAG_MANAGER_COLLECT_ORIGINS = [
  *
  * @remarks
  * 同一 origin へは URL 全体、別 origin へは origin だけを送り、降格（https → http）では何も
- * 送りません（[0111](../../../docs/adr/0111-csp-security-headers.md) §2 /
- * [0079](../../../docs/adr/0079-auth-frontend-seam.md)）。
+ * 送りません。
  */
 const REFERRER_POLICY = "strict-origin-when-cross-origin";
 
-/** 使わない強力な機能を明示して閉じる。使うならテンプレートから作った側が開ける。`payment` を閉じる理由は [0076](../../../docs/adr/0076-payment-ui-seam.md)。 */
+/** 使わない強力な機能を明示して閉じる。使うならテンプレートから作った側が開ける。 */
 const PERMISSIONS_POLICY = [
   "accelerometer=()",
   "camera=()",
@@ -78,7 +77,7 @@ const PERMISSIONS_POLICY = [
  *
  * @remarks
  * 1 年は preload list の下限と同じ値です。`includeSubDomains` と `preload` は配信構成の判断
- * なので付けません（[0111](../../../docs/adr/0111-csp-security-headers.md)）。
+ * なので付けません。
  */
 const STRICT_TRANSPORT_SECURITY = "max-age=31536000";
 
@@ -86,8 +85,8 @@ const STRICT_TRANSPORT_SECURITY = "max-age=31536000";
  * Content-Security-Policy を組み立てる。
  *
  * @remarks
- * 内容の根拠は [0111](../../../docs/adr/0111-csp-security-headers.md) §3 が持ちます。ここに書くのは、
- * 値が ENV から来る箇所と、条件で変わる箇所の理由だけです。
+ * 内容の根拠はここに持ちません（同層の [README](../README.md)「関連する ADR」から辿ります）。
+ * ここに書くのは、値が ENV から来る箇所と、条件で変わる箇所の理由だけです。
  *
  * - `img-src` の配信元は ENV から組み立てます。ここへ直接書くと、環境変数と設定の 2 か所が別々に
  *   動きます。`blob:` はアップロード前の preview（`URL.createObjectURL`）が使います
@@ -137,13 +136,12 @@ function buildContentSecurityPolicy({
  *
  * @remarks
  * どれも要求の内容に依存しません。`next.config.ts` の `headers()` に置くのはそのためで、
- * `src/proxy.ts` で足すと前捌きを通る経路にしか載らず、静的に配れる応答が漏れます
- * （[0111](../../../docs/adr/0111-csp-security-headers.md) §5）。要求に依るヘッダ（資格情報を
- * 載せた要求への `Cache-Control`）は `src/proxy.ts` が持ちます。
+ * `src/proxy.ts` で足すと前捌きを通る経路にしか載らず、静的に配れる応答が漏れます。要求に依る
+ * ヘッダ（資格情報を載せた要求への `Cache-Control`）は `src/proxy.ts` が持ちます。
  *
  * **`Cross-Origin-Embedder-Policy` は、タグマネージャを読み込む配備（`gtmContainerId` が空でない）
  * では出しません。読み込まない配備では出したままにします。** 理由と、それによって失うものは
- * [0111](../../../docs/adr/0111-csp-security-headers.md) §5 が持ちます。
+ * 同層の [README](../README.md)「関連する ADR」から辿ります。
  *
  * @param inputs - 検証済みの ENV と配信の条件
  * @returns `headers()` の `headers` にそのまま渡せる一覧

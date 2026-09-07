@@ -327,7 +327,7 @@ function configFileExists(name: string): boolean {
 //   - 末尾セグメントに `.` も末尾 `/` も無いもの — モジュール指定子（`next/image`）と区別できない
 //   - `...` を含むもの — 「以下同様」を表す省略記法
 //   - `<name>` プレースホルダを含むもの — `src/features/<name>/actions.ts` のような表記は
-//     [0027](../../docs/adr/0027-directory-structure.md) が定める規約上の配置であって、実在ファイルの参照ではない
+//     規約上の配置であって、実在ファイルの参照ではない
 //   - 未作成のカーネルを指すもの — isUncreatedKernelPath を参照
 function asRepoPath(span: string): string | null {
   let text = span.trim();
@@ -345,7 +345,7 @@ function asRepoPath(span: string): string | null {
 }
 
 // `src/` 直下のカーネル（`config` / `features` 等）と境界エントリ（`proxy.ts` / `instrumentation.ts`）は、
-// その決定が着地した時点で作られる（[0027](../../docs/adr/0027-directory-structure.md) / [0043](../../docs/adr/0043-middleware-policy.md)）。
+// その決定が着地した時点で作られる。
 // まだ無いものへの参照は「これから置く場所」であって実在ファイルの主張ではないため検査しない。
 // 実体化した時点で配下のパスは自動的に検査対象へ入り、以後は rename / 削除が検出される
 // （= 骨組みの現状を恒久ルールとして焼き込まない）。
@@ -376,8 +376,8 @@ function repoPathExists(candidate: string, fromDir: string): boolean {
 // 参照: ADR 採番
 // ---------------------------------------------------------------------------
 
-// 廃止済みの ADR 採番プレフィックス。採番はトピック別ブロック帯の数値 4 桁へ全面再付番済みで
-// （`docs/adr/0028-naming-convention.md`）、プレフィックス付きの採番は現行に 1 つも存在しない。
+// 廃止済みの ADR 採番プレフィックス。採番はトピック別ブロック帯の数値 4 桁へ全面再付番済みで、
+// プレフィックス付きの採番は現行に 1 つも存在しない。
 // 参照先が実在しないことが綴りだけで確定するため、判断を挟まずに違反と断定できる。
 // 廃止された 2 つに限定するのは、`[A-Z]\w+-\d{4}` のような一般形が規格番号や型番を巻き込むため。
 const RETIRED_ADR_NUMBER_RE = /\b(?:Toolchain|Dev)-\d{4}\b/g;

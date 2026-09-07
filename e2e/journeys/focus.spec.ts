@@ -4,7 +4,7 @@ import { expect, test } from "../lib/test";
 import { loadBreakpoints, VIEWPORT_HEIGHT } from "../lib/viewports";
 
 /**
- * 被せた面を開いたときの焦点の行き先（[0053](../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 被せた面を開いたときの焦点の行き先。
  *
  * @remarks
  * jsdom はフォーカスの実装を持ちません（[README](../README.md) の「フォーカス」）。component

@@ -54,7 +54,7 @@ createHttpClient({ scope: "user-scoped" })  // 資格情報を載せられる。
 | 分類 | 何か | 許される置き場 |
 | --- | --- | --- |
 | **public** | 主体を名乗らずに取れるもの(マスタ・公開カタログ) | 静的描画 / 共有キャッシュ / PPR の静的な殻 / client 送信 |
-| **user-scoped** | 主体に紐づくもの(プロフィール・カート・購入・ダッシュボード) | request scope / 動的 RSC。**共有キャッシュと静的生成は不可**。client へは詰め替えた後のみ |
+| **user-scoped** | 主体に紐づくもの(プロフィール・利用者ごとの一覧・利用履歴) | request scope / 動的 RSC。**共有キャッシュと静的生成は不可**。client へは詰め替えた後のみ |
 | **secret** | 署名鍵・トークン | server 内部のみ。キャッシュ・静的描画・client DTO・client 送信のいずれも不可 |
 
 **`secret` はこの取得経路を通らない。** `config/*.server.ts` に閉じ、`import "server-only"` と [0030](0030-environment-variable-management.md) §8 の taint が持つ。**値の数が少なく描画へ出ないため、こちらは branded / opaque な値型が費用に見合う**(包むのは secret だけ)。

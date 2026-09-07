@@ -4,7 +4,12 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import type { LayerContract } from "./layer-contract";
-import { type GenerationInput, isGenerationKind, planGeneration } from "./plan";
+import {
+  type GenerationInput,
+  featureLocation,
+  isGenerationKind,
+  planGeneration,
+} from "./plan";
 
 const contract: LayerContract = {
   forbidden: ["features", "business-logic"],
@@ -70,8 +75,13 @@ function featureInput({
     placement: { screen },
     importsAllowed: ["model", "components"],
     contract,
-    readmeTemplate,
+    readme: { kind: "create", template: readmeTemplate },
   };
+}
+
+/** README が既に在る feature へ 2 つ目の画面を足す入力。 */
+function secondScreenInput(screen = "detail"): GenerationInput {
+  return { ...featureInput({ screen }), readme: { kind: "keep" } };
 }
 
 const ADAPTER: GenerationInput = { kind: "adapter", name: "report-detail" };
@@ -96,6 +106,16 @@ function requiredSectionsOf(template: string): string[] {
         .filter((line) => line !== "")
         .map((line) => line.replace(/^ {2}- /, ""));
 }
+
+describe("featureLocation", () => {
+  // ----- 正常系 -----
+  it("README と画面ディレクトリを features/<name>/ の下で返す", () => {
+    expect(featureLocation("report-detail", "list")).toEqual({
+      readme: "src/features/report-detail/README.md",
+      screenDirectory: "src/features/report-detail/list",
+    });
+  });
+});
 
 describe("isGenerationKind", () => {
   // ----- 正常系 -----
@@ -122,6 +142,25 @@ describe("planGeneration", () => {
       "src/features/report-detail/list/page-content.tsx",
       "src/features/report-detail/list/page-content.test.tsx",
     ]);
+  });
+
+  it("README が既に在る feature へは、画面ディレクトリだけを計画する", () => {
+    expect(planGeneration(secondScreenInput()).map((file) => file.path)).toEqual([
+      "src/features/report-detail/detail/view.tsx",
+      "src/features/report-detail/detail/view.stories.tsx",
+      "src/features/report-detail/detail/view.test.tsx",
+      "src/features/report-detail/detail/page-content.tsx",
+      "src/features/report-detail/detail/page-content.test.tsx",
+    ]);
+  });
+
+  it("2 つ目の画面の識別子と span 名と story の title を、その画面名から組む", () => {
+    const [view, story, , pageContent] = planGeneration(secondScreenInput());
+
+    expect(view.content).toContain("export const DetailView = withScreenSpan(");
+    expect(view.content).toContain('"features/report-detail/detail/view"');
+    expect(story.content).toContain('title: "Page/ReportDetail/Detail"');
+    expect(pageContent.content).toContain('"features/report-detail/detail/page-content"');
   });
 
   it("component を README・実装・story・テストの 4 ファイルで計画する", () => {

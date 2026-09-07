@@ -23,6 +23,8 @@ test-requirement: feature
 **この層の役割論はここが持ち、各 slice の README はそれを再掲しません。** 子が書くのは、その
 slice に固有の線引きと、契約・仕様・デザインへの索引です。雛形は
 [feature README テンプレート](../../docs/templates/feature-readme.md) が持ちます。
+`pnpm gen feature <name> --screen=<画面>` は、feature が無ければ README ごと、既に在れば画面の
+ディレクトリだけを足し、止まるのは `<name>/<画面>/` が既に在るときだけです。
 
 | slice | 役割 | README |
 | --- | --- | --- |

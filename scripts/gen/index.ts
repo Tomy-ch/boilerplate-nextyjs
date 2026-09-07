@@ -1,12 +1,18 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DEPENDENCIES } from "../../architecture";
+import { collisionsOf } from "./collision";
 import { readComponentPlacement } from "./component-placement";
 import { readFeaturePlacement } from "./feature-placement";
 import { readLayerContract } from "./layer-contract";
 import { componentManifestEntry, isRecorded, recordComponent } from "./manifest";
 import { validateName } from "./naming";
-import { type GenerationInput, isGenerationKind, planGeneration } from "./plan";
+import {
+  type GenerationInput,
+  featureLocation,
+  isGenerationKind,
+  planGeneration,
+} from "./plan";
 
 /**
  * 雛形生成の入口。`pnpm gen <kind> <name> [--screen=<画面>] [--as=<見出し>] [--layer=<層>]` から呼ばれる。
@@ -32,7 +38,7 @@ const COMPONENT_README_TEMPLATE = "src/components/component-template.md";
 const COMPONENT_MANIFEST = "src/components/shadcn-manifest.yaml";
 
 const USAGE =
-  "使い方: pnpm gen <feature|component|adapter> <kebab-case-name> [feature の画面: --screen=<画面>] [component の配置: --as=<見出し> [--layer=<層>]]";
+  "使い方: pnpm gen <feature|component|adapter> <kebab-case-name> [feature の画面: --screen=<画面>（feature が既に在れば画面だけを足す）] [component の配置: --as=<見出し> [--layer=<層>]]";
 
 function fail(message: string): never {
   console.error(`❌ ${message}`);
@@ -69,16 +75,24 @@ function featureInput(featureName: string, placementOptions: readonly string[]):
     );
   }
 
+  const { readme } = featureLocation(featureName, result.placement.screen);
+
   return {
     kind: "feature",
     name: featureName,
     placement: result.placement,
     importsAllowed: DEPENDENCIES.features,
     contract,
-    readmeTemplate: readRepositoryFile(
-      FEATURE_README_TEMPLATE,
-      `テンプレート ${FEATURE_README_TEMPLATE} が見つかりません。feature の README の形を先に整えてください。`,
-    ),
+    // README が既に在る feature へは画面だけを足す。テンプレートは 1 画面目にしか要らない
+    readme: existsSync(resolve(REPOSITORY_ROOT, readme))
+      ? { kind: "keep" }
+      : {
+          kind: "create",
+          template: readRepositoryFile(
+            FEATURE_README_TEMPLATE,
+            `テンプレート ${FEATURE_README_TEMPLATE} が見つかりません。feature の README の形を先に整えてください。`,
+          ),
+        },
   };
 }
 
@@ -134,10 +148,10 @@ const input: GenerationInput =
 
 const files = planGeneration(input);
 
-const existing = files.filter((file) => existsSync(resolve(REPOSITORY_ROOT, file.path)));
+const collisions = collisionsOf(input, files, (path) => existsSync(resolve(REPOSITORY_ROOT, path)));
 
-if (existing.length > 0) {
-  fail(`次のパスが既に在ります。上書きしません: ${existing.map((file) => file.path).join(", ")}`);
+if (collisions.length > 0) {
+  fail(`次のパスが既に在ります。上書きしません: ${collisions.join(", ")}`);
 }
 
 /** 台帳へ行を足した全文。行が既に在るなら、1 ファイルも書かずに止まる。 */
@@ -178,7 +192,11 @@ if (recordedManifest !== null) {
   writeFileSync(resolve(REPOSITORY_ROOT, COMPONENT_MANIFEST), recordedManifest, "utf8");
 }
 
-console.log(`✅ ${kind} "${name}" の雛形を生成しました`);
+console.log(
+  input.kind === "feature" && input.readme.kind === "keep"
+    ? `✅ feature "${name}" に画面 "${input.placement.screen}" を足しました`
+    : `✅ ${kind} "${name}" の雛形を生成しました`,
+);
 
 for (const file of files) {
   console.log(`   ${file.path}`);
@@ -188,13 +206,22 @@ if (input.kind === "component") {
   console.log(`   ${COMPONENT_MANIFEST}（"${name}" の行を追加）`);
 }
 
-const NEXT_STEPS = {
-  feature:
-    "\n次に行うこと:\n  1. README の placeholder を実装に合わせて具体化する\n  2. story を route と同じ器で包み、画面が取る状態を足して説明を書く\n  3. pnpm fix && pnpm lint:ci\n  4. /scaffold-test でテストの観点を詰める",
-  component:
-    "\n次に行うこと:\n  1. README の placeholder を実装に合わせて具体化する\n  2. story に部品が表現する状態を足し、説明を書く\n  3. pnpm fix && pnpm lint:ci && pnpm check:ui --offline\n  4. /scaffold-test でテストの観点を詰める",
-  adapter:
-    "\n次に行うこと:\n  1. 呼び出す契約と正規化済みの型を書く\n  2. pnpm fix && pnpm lint:ci\n  3. /scaffold-test でテストの観点を詰める",
-} as const satisfies Record<GenerationInput["kind"], string>;
+/** 生成後に利用者が行うこと。README の 1 手目は、置いたばかりか既に在るかで変わる。 */
+function nextStepsOf(generated: GenerationInput): string {
+  if (generated.kind === "adapter") {
+    return "\n次に行うこと:\n  1. 呼び出す契約と正規化済みの型を書く\n  2. pnpm fix && pnpm lint:ci\n  3. /scaffold-test でテストの観点を詰める";
+  }
 
-console.log(NEXT_STEPS[input.kind]);
+  if (generated.kind === "component") {
+    return "\n次に行うこと:\n  1. README の placeholder を実装に合わせて具体化する\n  2. story に部品が表現する状態を足し、説明を書く\n  3. pnpm fix && pnpm lint:ci && pnpm check:ui --offline\n  4. /scaffold-test でテストの観点を詰める";
+  }
+
+  const readmeStep =
+    generated.readme.kind === "create"
+      ? "README の placeholder を実装に合わせて具体化する"
+      : "README に画面の route・状態・構成を書き足す";
+
+  return `\n次に行うこと:\n  1. ${readmeStep}\n  2. story を route と同じ器で包み、画面が取る状態を足して説明を書く\n  3. pnpm fix && pnpm lint:ci\n  4. /scaffold-test でテストの観点を詰める`;
+}
+
+console.log(nextStepsOf(input));

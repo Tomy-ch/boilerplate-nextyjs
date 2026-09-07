@@ -40,14 +40,26 @@ export type GenerationInput =
       readonly kind: "feature";
       /** kebab-case の名前。 */
       readonly name: string;
-      /** 最初の画面。`features/<name>/<screen>/` を掘る。 */
+      /** 足す画面。`features/<name>/<screen>/` を掘る。 */
       readonly placement: FeaturePlacement;
       /** 生成先の層が `architecture.ts` で import を許されている層。 */
       readonly importsAllowed: readonly string[];
       /** 生成先の層 README が宣言する契約。 */
       readonly contract: LayerContract;
-      /** `feature-readme.md` の全文。README はこの写しとして出す。 */
-      readonly readmeTemplate: string;
+      /**
+       * README の扱い。feature が無ければテンプレートの写しを置き、既に在れば触らない。
+       *
+       * @remarks
+       * 2 つ目の画面で README を書き直すと、人が育てた本文が消えます。`keep` のとき README は
+       * 生成物に入りません。
+       */
+      readonly readme:
+        | {
+            readonly kind: "create";
+            /** `feature-readme.md` の全文。README はこの写しとして出す。 */
+            readonly template: string;
+          }
+        | { readonly kind: "keep" };
     }
   | {
       readonly kind: "component";
@@ -91,13 +103,26 @@ const TEMPLATE_FRONTMATTER = /^---\n[\s\S]*?\n---\n*/;
  * `architecture.ts` と層 README から組みます —— 境界の宣言の正はそちらで、写しを持つと
  * 片方だけが動いたときに生成物が古い宣言を運びます。
  */
-function featureReadme(input: Extract<GenerationInput, { kind: "feature" }>): string {
-  const body = input.readmeTemplate.replace(TEMPLATE_FRONTMATTER, "");
+function featureReadme(
+  input: Extract<GenerationInput, { kind: "feature" }>,
+  template: string,
+): string {
+  const body = template.replace(TEMPLATE_FRONTMATTER, "");
 
   return `${frontmatter(input.importsAllowed, input.contract)}\n\n${body.replaceAll(
     FEATURE_NAME_PLACEHOLDER,
     input.name,
   )}`;
+}
+
+/** feature の置き場。README と画面ディレクトリの在り処は、計画と入口の存在判定がここを共有する。 */
+export function featureLocation(
+  name: string,
+  screen: string,
+): { readonly readme: string; readonly screenDirectory: string } {
+  const directory = `src/features/${name}`;
+
+  return { readme: `${directory}/README.md`, screenDirectory: `${directory}/${screen}` };
 }
 
 /** formatter が 1 行に許す幅。`biome.json` の `formatter.lineWidth` と同じ値。 */
@@ -381,7 +406,7 @@ describe("${symbol}", () => {
  *
  * @remarks
  * 返す順序は書き出す順序です。README を先頭に置くのは、途中で失敗しても「何を作ろうとしたか」が
- * 残るようにするためです。
+ * 残るようにするためです。feature の README が既に在るときは、画面のディレクトリだけを返します。
  */
 export function planGeneration(input: GenerationInput): readonly GeneratedFile[] {
   const symbol = toPascalCase(input.name);
@@ -418,12 +443,13 @@ export function planGeneration(input: GenerationInput): readonly GeneratedFile[]
   const screenSymbol = toPascalCase(screen);
   const viewSymbol = `${screenSymbol}View`;
   const pageContentSymbol = `${screenSymbol}PageContent`;
-  const directory = `src/features/${input.name}`;
-  const screenDirectory = `${directory}/${screen}`;
+  const { readme, screenDirectory } = featureLocation(input.name, screen);
   const spanPrefix = `features/${input.name}/${screen}`;
 
   return [
-    { path: `${directory}/README.md`, content: featureReadme(input) },
+    ...(input.readme.kind === "create"
+      ? [{ path: readme, content: featureReadme(input, input.readme.template) }]
+      : []),
     {
       path: `${screenDirectory}/view.tsx`,
       content: featureView(viewSymbol, `${spanPrefix}/view`, screen),

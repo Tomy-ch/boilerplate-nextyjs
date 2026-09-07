@@ -86,10 +86,11 @@ design calls for. Let the generator place, name, and bound the files — never h
 never pass it an input other than the one it takes (`architecture.ts` + the layer README are its
 single source; `docs/spec/**` is **not** a generation input).
 
-It emits three flat files — `README.md`, `<name>.tsx`, `<name>.test.tsx` — and does **not** split the
-slice into `list/` and `detail/`. That is deliberate: ADR 0027 keeps the screen axis collapsed until a
-second screen arrives, so the split belongs to Step 5, not here. Do not pre-create the directories the
-generator declined to make.
+It emits the slice `README.md` plus a screen directory — `<screen>/view.tsx`,
+`<screen>/page-content.tsx`, `<screen>/view.stories.tsx` and a test beside each — so the screen axis
+is there from the first screen. **A second screen is the same command run again**: the generator adds
+only the new screen directory and leaves the README alone. It refuses when `<name>/<screen>/` already
+exists. Do not hand-place what the generator would have written.
 
 Then write the stories for all four states the README's state table declares — loading / empty /
 error / success. Split the view so it holds no fetching, which is what lets every state come out of

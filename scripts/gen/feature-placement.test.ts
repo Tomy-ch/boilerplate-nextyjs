@@ -4,7 +4,7 @@ import { readFeaturePlacement } from "./feature-placement";
 
 describe("readFeaturePlacement", () => {
   // ----- 正常系 -----
-  it("--screen で最初の画面を受け取る", () => {
+  it("--screen で画面を受け取る", () => {
     expect(readFeaturePlacement(["--screen=list"])).toEqual({ placement: { screen: "list" } });
   });
 

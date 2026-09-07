@@ -2240,7 +2240,7 @@ git commit   # `/commit` skill があれば、それが prefix と分割を決�
 
 ## 次に進む先
 
-- **雛形に任せる。** `pnpm gen feature <name>` が feature の骨組みを、`pnpm gen adapter <name>` /
+- **雛形に任せる。** `pnpm gen feature <name> --screen=<画面>` が feature の骨組みを（2 画面目は同じコマンドをもう一度）、`pnpm gen adapter <name>` /
   `pnpm gen component <name>` がカーネル側の雛形を出す。この文書は雛形が何を出すべきかの
   根拠であり、出たものを判断する物差しになる。画面を一式作るなら `new-feature` skill が
   [`playbook.md`](../playbook.md) の作業順で進める

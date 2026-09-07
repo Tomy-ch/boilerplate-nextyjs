@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Editor } from "@tiptap/core";
 import type { Nodes } from "hast";
 import { fromHtml } from "hast-util-from-html";
@@ -140,6 +141,26 @@ describe("RichTextEditor", () => {
 
     expect(toolbarButton("元に戻す")).toBeDisabled();
     expect(toolbarButton("プレビュー")).toHaveFocus();
+  });
+
+  it("Tab は toolbar を 1 回で通り抜けて編集面へ移る", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+
+    toolbarButton("斜体").focus();
+    await user.tab();
+
+    expect(screen.getByRole("textbox", { name: "本文" })).toHaveFocus();
+  });
+
+  it("focus したボタンは Enter で押せる", async () => {
+    const user = userEvent.setup();
+    renderEditor({ defaultValue: "<p>本文</p>" });
+
+    toolbarButton("太字").focus();
+    await user.keyboard("{Enter}");
+
+    expect(toolbarButton("太字")).toHaveAttribute("aria-pressed", "true");
   });
 
   it("Tab の並びに残る toolbar のボタンは、最後に focus を持った 1 つだけ", () => {

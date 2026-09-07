@@ -85,22 +85,41 @@ function nextToolbarIndex(key: string, index: number, count: number): number | u
 }
 
 /**
+ * toolbar の中で場所を持つボタン（Tab の並びへ残すボタン）の添字を返します。
+ *
+ * focus を持つものが押せるボタンでなければ先頭にします。まだどれも focus を持っていない
+ * 初回と、focus を持ったまま押せなくなったときがこれにあたります。
+ *
+ * @param buttons - いま押せるボタン
+ * @param active - 最後に focus を持ったもの。まだ無ければ `undefined`
+ * @returns `buttons` の中の添字。`buttons` が空なら 0
+ */
+function toolbarStopIndex(
+  buttons: readonly HTMLButtonElement[],
+  active: EventTarget | undefined,
+): number {
+  return Math.max(
+    0,
+    buttons.findIndex((button) => button === active),
+  );
+}
+
+/**
  * toolbar の tab stop を 1 つだけにします。
  *
- * `role="toolbar"` は Tab で 1 回に通り抜けられることを約束するため、最後に focus を持った
- * ボタンだけを Tab の並びへ残し、ほかは矢印キーでだけ届くようにします。そのボタンが押せなく
- * なっていれば、先頭の押せるボタンへ移します。
+ * `role="toolbar"` は Tab で 1 回に通り抜けられることを約束するため、場所を持つボタン
+ * （{@link toolbarStopIndex}）だけを Tab の並びへ残し、ほかは矢印キーでだけ届くようにします。
  *
  * @param toolbar - `role="toolbar"` を持つ要素
- * @param active - 最後に focus を持ったボタン。まだ無ければ `null`
- * @returns Tab の並びへ残したボタン。押せるボタンが 1 つも無ければ `null`
+ * @param active - 最後に focus を持ったもの。まだ無ければ `undefined`
+ * @returns Tab の並びへ残したボタン。押せるボタンが 1 つも無ければ `undefined`
  */
 function syncToolbarTabStops(
   toolbar: HTMLElement,
-  active: HTMLButtonElement | null,
-): HTMLButtonElement | null {
+  active: EventTarget | undefined,
+): HTMLButtonElement | undefined {
   const buttons = toolbarButtons(toolbar);
-  const stop = active !== null && buttons.includes(active) ? active : (buttons[0] ?? null);
+  const stop = buttons[toolbarStopIndex(buttons, active)];
 
   for (const button of toolbar.querySelectorAll<HTMLButtonElement>("button")) {
     button.tabIndex = button === stop ? 0 : -1;
@@ -255,7 +274,7 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
   });
   const isEditable = useEditorState({ editor, selector: (state) => state.editor.isEditable });
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const activeToolbarButtonRef = useRef<HTMLButtonElement | null>(null);
+  const activeToolbarButtonRef = useRef<HTMLButtonElement | undefined>(undefined);
 
   // 描画のたびに揃える。プレビューの切り替えでボタンが作り直され、押せる操作も編集の内容で
   // 変わるため、依存の列挙では取り切れない。
@@ -271,24 +290,16 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
   });
 
   const handleToolbarFocus = useCallback((event: FocusEvent<HTMLDivElement>) => {
-    const target = event.target;
-
-    if (!(target instanceof HTMLButtonElement)) {
-      return;
-    }
-
-    activeToolbarButtonRef.current = syncToolbarTabStops(event.currentTarget, target);
+    activeToolbarButtonRef.current = syncToolbarTabStops(event.currentTarget, event.target);
   }, []);
 
   const handleToolbarKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
     const buttons = toolbarButtons(event.currentTarget);
-    const index = buttons.findIndex((button) => button === event.target);
-
-    if (index === -1) {
-      return;
-    }
-
-    const next = nextToolbarIndex(event.key, index, buttons.length);
+    const next = nextToolbarIndex(
+      event.key,
+      toolbarStopIndex(buttons, event.target),
+      buttons.length,
+    );
 
     if (next === undefined) {
       return;

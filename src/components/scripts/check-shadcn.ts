@@ -272,8 +272,7 @@ const RUNTIME_PACKAGES: ReadonlySet<string> = new Set(["react", "react-dom"]);
  * 「どの package を参照しているか」であって、その package のどの入口を使ったかではない。
  */
 export function packageOf(specifier: string): string {
-  const name = /^(?:@[^/]+\/)?[^/]+/.exec(specifier);
-  return name === null ? specifier : name[0];
+  return specifier.replace(/^((?:@[^/]+\/)?[^/]+).*/, "$1");
 }
 
 /**
@@ -287,8 +286,7 @@ export function packageOf(specifier: string): string {
 export function vendorImportsOf(sources: readonly string[]): string[] {
   const packages = new Set<string>();
   for (const source of sources) {
-    for (const [, specifier] of source.matchAll(/from "([^"]+)"/g)) {
-      if (specifier === undefined) continue;
+    for (const [specifier] of source.matchAll(/(?<=from ")[^"]+(?=")/g)) {
       if (specifier.startsWith(".") || specifier.startsWith("@/")) continue;
       const name = packageOf(specifier);
       if (RUNTIME_PACKAGES.has(name)) continue;

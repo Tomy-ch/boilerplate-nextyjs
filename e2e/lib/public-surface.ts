@@ -23,9 +23,7 @@ function unescapeXml(value: string): string {
  * @param xml - `sitemap.xml` の本文
  */
 export function listSitemapLocations(xml: string): string[] {
-  return [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].flatMap(([, location]) =>
-    location === undefined ? [] : [unescapeXml(location)],
-  );
+  return [...xml.matchAll(/(?<=<loc>)[^<]*(?=<\/loc>)/g)].map((match) => unescapeXml(match[0]));
 }
 
 /**
@@ -48,14 +46,8 @@ function attributesOf(tag: string): Map<string, string> {
       continue;
     }
 
-    const name = before
-      .slice(0, -1)
-      .split(/[\s<]+/)
-      .at(-1);
-
-    if (name === undefined) {
-      continue;
-    }
+    // `=` の手前で、区切り（空白か `<`）より後ろが名前。区切りが無ければ全体
+    const name = before.slice(0, -1).replace(/^.*[\s<]/s, "");
 
     attributes.set(name.toLowerCase(), value);
   }

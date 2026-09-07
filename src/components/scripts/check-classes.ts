@@ -138,9 +138,8 @@ export function collectClassCandidates(source: string): ReadonlySet<string> {
   // 書かれた順に読む。どの anchor から来たかで並びが変わると、差分が読みにくくなる
   const regions: { at: number; text: string }[] = [];
 
-  for (const [, classes] of source.matchAll(/className="([^"\n]*)"/g)) {
-    if (classes === undefined) continue;
-    addTokens(classes);
+  for (const match of source.matchAll(/(?<=className=")[^"\n]*(?=")/g)) {
+    addTokens(match[0]);
   }
 
   for (const { pattern, open, close } of CLASS_ANCHORS) {
@@ -170,9 +169,8 @@ export function collectClassCandidates(source: string): ReadonlySet<string> {
       // （`[&_svg:not([class*='size-'])]`）は literal の内側なので、この判定には掛からない
       if (/\[[^[\]"'\n]*$/.test(before) && /^\s*\]/.test(after)) continue;
 
-      const literal = match[1] ?? match[2];
-      if (literal === undefined) continue;
-      addTokens(literal);
+      // 両端の引用符を落とす
+      addTokens(match[0].slice(1, -1));
     }
   }
 

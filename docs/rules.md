@@ -153,7 +153,7 @@
 
 ## UI 部品と操作
 
-> Rationale: [ADR 0053](adr/0053-ui-component-interaction-seam.md) / [ADR 0052](adr/0052-ui-component-policy.md) / [ADR 0021](adr/0021-frontend-responsibility.md) / [ADR 0100](adr/0100-accessibility-target.md); enforced via Storybook と visual regression、component テストと interaction テスト、a11y lint、E2E（`e2e/journeys/browse.spec.ts`）。
+> Rationale: [ADR 0053](adr/0053-ui-component-interaction-seam.md) / [ADR 0052](adr/0052-ui-component-policy.md) / [ADR 0021](adr/0021-frontend-responsibility.md) / [ADR 0100](adr/0100-accessibility-target.md); enforced via Storybook と visual regression、component テストと interaction テスト、a11y lint、画面を通した E2E。
 
 - **状態によって出入りする表示のせいで、操作の位置を動かさない。** 出し入れされる要素は操作より後ろへ置くか、同じ構造（見出し + 操作など）で器の高さを揃える。**高さを数値で予約して揃えない** —— 中の部品の寸法が変われば予約値が古くなる。端では前後の操作を消さず押せない状態で残す。送信中は絵柄だけを差し替え、見えている文言を据え置く。
 - **面ごと押せる器を link で包まない。** 包むと中の操作が link の内側に入り（操作の中に操作が居る形）、補足まで遷移先の名前として読み上げられる。名前の link を疑似要素で面いっぱいに広げ、操作は link より後ろに置いて `relative` で重なりの上へ出す。支援技術には名前だけが遷移先として見える。
@@ -178,7 +178,7 @@
 - **スクロールの向きで出し入れする面は、向きだけに任せず、常時見える到達手段を残す。** もう動かせない位置に居ると、二度と出せなくなる。
 - **browser の既定操作と競合するジェスチャを持たない。** 画面端からの swipe は戻る操作と競合し、どちらが起きるかが端末ごとに変わる。引き出す操作は押下だけにする —— 支援技術からの操作も同じ 1 つの経路で済む。
 - **スクロール復元はルーティング既定を尊重する。** modal / drawer は body scroll を適切に lock し、アニメーションだけのために全体へ `scroll-behavior` を強制しない。interaction テストと手動確認が見る。
-- **背面を塞ぐ overlay の中から遷移するときは、閉じる操作を同時に撃たない。** overlay は戻る操作のために履歴を 1 つ積んでおり、閉じるときにそれを戻す。client 側の遷移は取得が終わるまで URL を動かさないため、同じ操作で閉じると、その戻しが遷移を消す。**遷移が届いたこと（効いている条件・データが変わったこと）で閉じる。** 積んだ 1 件は結果で差し替える（`router.replace`）—— そのうえで積むと戻る操作が 1 度空振りする。散文と E2E（`e2e/journeys/browse.spec.ts`）。
+- **背面を塞ぐ overlay の中から遷移するときは、閉じる操作を同時に撃たない。** overlay は戻る操作のために履歴を 1 つ積んでおり、閉じるときにそれを戻す。client 側の遷移は取得が終わるまで URL を動かさないため、同じ操作で閉じると、その戻しが遷移を消す。**遷移が届いたこと（効いている条件・データが変わったこと）で閉じる。** 積んだ 1 件は結果で差し替える（`router.replace`）—— そのうえで積むと戻る操作が 1 度空振りする。散文と E2E。
 - **clipboard 操作には成功・失敗のフィードバックを付け、権限拒否や非対応環境のフォールバックを表示する。**
 - **画面は viewport を明示し、safe area、十分なタッチターゲット、hover 非依存を満たす。** tooltip は pointer を合わせている間だけ現れるため touch と keyboard から到達できず、それだけに情報を持たせない。**根拠 ADR 無し** —— この内容を決めた ADR が存在しない（0044 は metadata / SEO 専用で、viewport にも safe area にも触れない）。0100 か 0102 のどちらが持つべきかは未決。
 - **アイコンは `src/components/icon.ts` から取る。** 供給元を直接 import しない。自作 SVG は `currentColor` を継承し、配置と用途を明示する。component review が見る。
@@ -196,7 +196,7 @@
 
 ## レイアウトと帯
 
-> Rationale: [ADR 0051](adr/0051-styling-system.md) / [ADR 0050](adr/0050-styling-strategy.md) / [ADR 0100](adr/0100-accessibility-target.md) / [ADR 0045](adr/0045-fonts-and-images.md); enforced via e2e の Responsive ジャーニー（`e2e/journeys/responsive.spec.ts`）、`components/patterns/action-bar` の component テスト、Storybook と visual regression、Biome formatter。
+> Rationale: [ADR 0051](adr/0051-styling-system.md) / [ADR 0050](adr/0050-styling-strategy.md) / [ADR 0100](adr/0100-accessibility-target.md) / [ADR 0045](adr/0045-fonts-and-images.md); enforced via 帯を跨いで見る E2E のジャーニー、`components/patterns/action-bar` の component テスト、Storybook と visual regression、Biome formatter。
 
 - **本文の脇に常設する領域（サイドバー・レール）は `lg` 以上でだけ出す。** `lg` 未満では本文へ被せて出す（overlay）。
 - **本文から幅を取る常設領域は、幅が足りていても閉じられる。** 閉じられないと、一度開いた利用者は本文を狭いまま読み続ける。閉じた後に開き直す入口は、その領域の外（header など）に持つ。

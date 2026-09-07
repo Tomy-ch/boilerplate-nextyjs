@@ -155,7 +155,7 @@ subcomponent が多い compound では、root に `@example` で組み合わせ�
 
 Tailwind は認識できない class に対して CSS を出力せず、そのことを何も報告しない。要素はその宣言が無いまま描画されるだけなので、**面が透明になる・focus ring が出ない・選択状態が見えない**といった欠陥が、browser で見るまで現れない。shadcn 生成物は上流の theme が持つトークンを前提にしているため、取り込みのたびにこれが混入しうる。
 
-検出は `pnpm check:classes` が行う。`globals.css` を実際に build し、`src/components` 配下の `.tsx` に書かれた class がすべて出力に現れるかを照合する。CI では component・`globals.css`・トークンのいずれかを触った PR で走る。
+検出は `pnpm check:classes` が行う。`globals.css` を実際に build し、`src/components` 配下の `.tsx` に書かれた class がすべて出力に現れるかを照合する。CI では**全 PR で走る** —— この検査は変更起因ではなく、上流の theme を前提にした class は他の変更でも出力から外れうるため。
 
 **「定義が無いから消す」は行わない。** 出力が無いことと、書いてはいけないことは別である。animation plugin を採らないために CSS が出ない `animate-in` / `fade-in-*` / `slide-in-from-*` や、子孫の variant から参照されるだけの `group` / `peer` は、意図して CSS を持たない。これらは [`scripts/check-classes.ts`](./scripts/check-classes.ts) の `KNOWN_WITHOUT_CSS` に理由とともに置いてあり、新たに見つけた場合も実装から消さずにそこへ足す。生成物から消すと、その生成物が持っていた情報が失われる。
 

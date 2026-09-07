@@ -144,7 +144,7 @@ SSOT は `tokens/primitives.json`（生の値）と `tokens/themes/<系統>/<配
 | `original` | 上流に相当する item が無い | 何もしない |
 | `not-adopted` | 検討したうえで作らない。実体を持たず `reason` / `revisitWhen` が必須 | 何もしない |
 
-`pnpm check:ui` は台帳の整合（`directory` と実体、記録の無いディレクトリ、実体を失った行、`kind` と `source` の噛み合い、`dependencies` と実際の import、`as` の妥当性）を通信なしで見て、問題が無ければ上流の最新と `source.commit` を突き合わせる。CI（`.github/workflows/shadcn-drift.yaml`）は前者を `src/components/**` を触った PR で、後者を週次でだけ回す —— 上流の drift はレビュー中の変更が原因ではないので、PR を落とす理由にしない。
+`pnpm check:ui` は台帳の整合（`directory` と実体、記録の無いディレクトリ、実体を失った行、`kind` と `source` の噛み合い、`dependencies` と実際の import、`as` の妥当性）を通信なしで見て、問題が無ければ上流の最新と `source.commit` を突き合わせる。CI（`.github/workflows/shadcn-drift.yaml`）は前者を**全 PR で**、後者を週次でだけ回す —— 上流の drift はレビュー中の変更が原因ではないので、PR を落とす理由にしない。
 
 上流の変更を取り込むときは、`source.commit` の原本を base にした `git merge-file` の 3-way merge を使う（手順は `src/components/scripts/README.md`）。`--overwrite` で取り込み直すと TSDoc・import・focus の修正が全部消える。
 

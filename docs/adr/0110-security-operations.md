@@ -1,30 +1,24 @@
 # セキュリティ運用
 
 <!-- boilerplate-only:replace-begin -->
-**依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・CodeQL・Opengrep)/ 依存監査ゲート / 依存差分ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。go-boilerplate のセキュリティ運用(ADR 0077 多層防御)を翻案し、no-Docker([0011](0011-no-docker.md))で対象外になる部分を exclusion として記録する(go ADR 0078 の SHA ピンは CI ハードニング側の主題であり、本リポでは [0153](0153-ci-configuration.md) が持つ)。
+**依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・CodeQL・Opengrep)/ 依存監査ゲート / 依存差分ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。コンテナ配送を前提とする機構は no-Docker([0011](0011-no-docker.md))のため対象外とし、exclusion として記録する。Actions の SHA ピンは CI ハードニング側の主題であり [0153](0153-ci-configuration.md) が持つ。
 <!-- boilerplate-only:replace-with -->
-<!-- = **依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・Opengrep)/ 依存監査ゲート / 依存差分ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。go-boilerplate のセキュリティ運用(ADR 0077 多層防御)を翻案し、no-Docker([0011](0011-no-docker.md))で対象外になる部分を exclusion として記録する(go ADR 0078 の SHA ピンは CI ハードニング側の主題であり、本リポでは [0153](0153-ci-configuration.md) が持つ)。 -->
+<!-- = **依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・Opengrep)/ 依存監査ゲート / 依存差分ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。コンテナ配送を前提とする機構は no-Docker([0011](0011-no-docker.md))のため対象外とし、exclusion として記録する。Actions の SHA ピンは CI ハードニング側の主題であり [0153](0153-ci-configuration.md) が持つ。 -->
 <!-- boilerplate-only:replace-end -->
 
 ## Status
 
 Accepted (一部 exclusion)
 
-（採番はブロック帯で確定(2026-07-14・0001〜0155。トピック順ブロック帯(10 番台=主題ブロック))([0140](0140-documentation-operations.md))。本 ADR の内容自体はユーザ決定済み(go 準拠の翻案。設計フェーズの「決定不要」表 B10)。日付 2026-07-13。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
-AGENTS.md の `[TODO] Security Operations`(BACKLOG B10)は、`pnpm audit` 閾値・Dependabot / Renovate・SECURITY.md・秘密スキャンを未決とし、暫定運用として「新規依存追加時に `pnpm audit`([0004](0004-library-management.md))/ セキュリティツールを勝手に CI・pre-commit へ組み込まない」を敷いていた。本 ADR がこれを確定させる。
-
-go-boilerplate は **多層防御**(**go 側**の ADR 0077: SAST + 秘密スキャン + 依存脆弱性 + 到達性フィルタ)/ Dependabot cooldown / gitleaks / Trivy 二段 / CodeQL を確立している。本 ADR はこれを翻案する。
-
-**注意**: 本 ADR の「no-Docker」は本リポの [0011](0011-no-docker.md) を指す(go 側 ADR 0004 は別内容)。go 側の Docker 前提のサプライチェーン機構(image-scan / cosign / SBOM / provenance)は本リポでは**対象外**として exclusion 記録する(後述)。
+守る対象は 4 つに分かれる —— 取り込む依存 / 履歴に載る秘密 / 自分が書いたコード / CI 定義とリポジトリ自身の設定。どれも他の層の道具では見えないため、**多層防御**(SAST + 秘密スキャン + 依存脆弱性 + 差分ゲート)として層ごとに持ち、層ごとに「落とす / 見せるだけ」を決める。依存追加時の `pnpm audit` は [0004](0004-library-management.md) が定め、本 ADR はその CI ゲート側を確定する。
 
 ## 決定
 
 ### 1. 依存更新 = Dependabot + cooldown(Renovate 不採用)
 
-- **Dependabot を採用**する(Renovate は不採用)。cooldown(更新 PR を出すまでの待機日数)を semver 別に設定する(go の翻案):
+- **Dependabot を採用**する(Renovate は不採用)。cooldown(更新 PR を出すまでの待機日数)を semver 別に設定する:
   - **patch = 5 日 / minor = 7 日 / major = 30 日**(default 5 日)。`github-actions` エコシステムは default 5 日
   - **セキュリティアップデートは cooldown をスキップ**して即時 PR
 - エコシステムは **`npm`**(+ `github-actions`)。1 エコシステム = 1 グループ PR、open PR 上限・週次。major 更新は別 PR([0004](0004-library-management.md) と一致)
@@ -36,6 +30,7 @@ go-boilerplate は **多層防御**(**go 側**の ADR 0077: SAST + 秘密スキ�
 - **PyPI(`pipx:` backend)= 7 日**。npm と同じ根拠で導く(公開レジストリで、悪性パッケージの検知・撤回が同程度の速さで回る)
 - **GitHub Releases(`aqua:` / `ubi:` backend)= 14 日**。Actions の pin(`ACTIONS_PIN_MIN_AGE_DAYS`・[0153](0153-ci-configuration.md))と配布経路が同じで、検知レイテンシも揃うため同じ窓を当てる
 - bump では「最新」ではなく**「窓を満たす最新」**を採る。窓のために意図的に 1 つ前を採った pin は、その旨を `mise.toml` のコメントに書く(でないと次の担当者が「古い pin」として無条件に上げる)
+- **検疫が買うのは時間であって、版の年齢の証明ではない。** 読めるのは release の公開日時と commit の日付だけで、どちらも解決した SHA そのものを語らず、両方揃えても意図した公開者には破れる。窓は自動化された侵害に対する遅延であり、保証ではない
 - 窓の実装は `tools-upgrade` スキルの `min_age_days`
 
 **エージェントスキルを配布するツールは審査項目が 1 つ増える**。ライブラリはビルド成果物に載るが、この種のツールは**開発者の権限で動き、何をマシン外へ送るかを自分で決める**。したがって pin の bump 時は版番号だけでなく、次の 2 つもレビュー対象とする。
@@ -50,13 +45,14 @@ go-boilerplate は **多層防御**(**go 側**の ADR 0077: SAST + 秘密スキ�
 - **走査対象は「これから送られるコミット範囲」**(`gitleaks git` + `--log-opts`)。作業ツリーのスナップショット(`gitleaks dir`)は採らない。理由は 2 つあり、いずれも**守りたい境界とずれる**ため:
   - **取りこぼす**: commit したあと作業ツリーから消した秘密は、blob として履歴に残り push される。スナップショットには映らない
   - **誤検知する**: push されない gitignore 済みファイル(`env/.env.local` 等 — [0030](0030-environment-variable-management.md))を秘密として検出する。ローカルの正当な秘密で毎回 push が止まれば `--no-verify` の常用を招き、fail-closed が形骸化する
+  - リモート追跡参照が 1 つも無い状態(fork 直後の初回 push 等)では履歴全体が対象になる。対象が広がる方向であり、取りこぼす方向ではない
 - **コミット履歴全体の走査は CI の定期実行が持つ**。マージ済み履歴に埋もれた秘密を拾う用途で、コミット数に比例して伸びるため hook には載せない
 - 検出値はログに出さない(`--redact`)。hook / CI のログ自体が二次的な漏洩経路になるため
 - **`useDefault` は gitleaks 本体の global allowlist を同伴する**。node_modules / 各種 lockfile / `.svg` 等が無条件に走査対象外となり、これは `.gitleaks.toml` からは打ち消せない。打ち消すには全ルールを自前で持つことになり既定ルールの更新追随を失うため、**追随を優先して除外範囲を把握したうえで受け入れる**。生成型([0072](0072-api-type-generation.md))など自前の除外は、誤検知が実際に出た時点で下記の抑止ポリシーに沿って追加する
 
-### 3. 脆弱性スキャン(多層防御・go ADR 0077 翻案)
+### 3. 脆弱性スキャン(多層防御)
 
-- **CodeQL SAST**: `languages: javascript-typescript`(go の `go` を差し替え)。trigger = PR + 保護ブランチ push + 週次 cron。`security-events: write` で SARIF アップロード。high-severity はマージブロック(ブロックの実体は branch protection / code scanning の required 設定側。go 同様、workflow 内の hard-fail には依存しない) <!-- boilerplate-only:line -->
+- **CodeQL SAST**: `languages: javascript-typescript`。trigger = PR + 保護ブランチ push + 週次 cron。`security-events: write` で SARIF アップロード。high-severity はマージブロック(ブロックの実体は branch protection / code scanning の required 設定側。workflow 内の hard-fail には依存しない) <!-- boilerplate-only:line -->
 - **portable SAST(Opengrep)**: CodeQL は **GitHub の外へ持ち出せない**。private かつ GHAS 無しの fork 先では SAST の層がまるごと消えるため、**同じ問いに答える持ち出せる実体**を別に持つ。実体は `mise.toml` にピンした 1 バイナリで、ローカルでも CI でも同じ `make sast` が回す。**Semgrep 本体ではなく OSS fork の Opengrep を採る** —— ルール記法は互換で `// nosemgrep:` の抑止もそのまま効くうえ、boilerplate が fork 先へライセンス判断を渡さずに済む。**0 件の baseline を保つことがこのゲートの前提**であり、0 件だからこそ新しい所見が読み飛ばす対象ではなく信号になる。許容する所見はソースへ `// nosemgrep: <rule-id>` を理由付きで置き、判断をコードの側に残す。**検査条件(対象・ルール・除外)は 1 箇所に持つ** —— ゲートと code scanning への取り込みが違う走査を指すと、落ちた内容と Security タブの一覧が食い違う。**ルールはレジストリ(semgrep.dev)から引かない** —— `p/javascript` の類が返す集合は Semgrep Rules License v1.0 で「自社内部の目的に限る」「再頒布不可」「サービスとして提供不可」を課し、**エンジンだけ OSS へ替えても、ルールをそこから引いている限りこの判断は成立しない**(判断の所在が層をずれるだけになる)。代わりにライセンス変更前から分岐している `opengrep/opengrep-rules` を **commit で固定**する(固定値は `.github/actions-pin.toml` / `docker/images-pin.toml` と同じ形のロックファイルが持ち、**digest をソースへ書かない** —— 人が写す工程は写し間違いの工程である)。取り出すのは`security` 分類の javascript / typescript だけを取り出して読む。取り出したもの(アーカイブではない)に対する digest を照合し、一致しなければ何も置かずに落ちる —— GitHub の自動生成アーカイブはバイト単位で不変ではないため、包み方ではなく中身を照合対象にする。**`audit` 分類は取らない**(レジストリの既定パックも含めていない。読んで判断するための所見であって、0 件 baseline を保てる分類ではない)。**検体は 1 つもディスクへ置かない** —— 置き場はルールと同数の意図的に脆弱なソースを抱えており、`java/` `php/` には本物の webshell が含まれる。言語で絞ったうえで YAML だけを名指しで取り出す
 <!-- boilerplate-only:replace-begin -->
 - **編集時 SAST(eslint-plugin-security)**: 上の 2 つと同じ問いに、**型を解決したうえで編集中に**答える層。走査が CI にしか無いと、指摘が届くのは push の後になる。ただし **[0002](0002-formatter-linter.md) の能力ベース分担に従い、推奨プリセットは当てない** —— 束を当てれば biome と重なる規則も、この層に対象の無い規則も同時に入る。**有効化するのは 0 件の baseline を保てる規則だけ**とし、落とした規則とその理由は `eslint.config.ts` に書く(ReDoS と path traversal は Opengrep / CodeQL が引き続き担うので、落としても検査面は消えない)
@@ -77,7 +73,7 @@ go-boilerplate は **多層防御**(**go 側**の ADR 0077: SAST + 秘密スキ�
 - **Trivy fs 二段運用**:
   - **dev ゲート**(全 PR・advisory): `scan-type: fs` / `severity: CRITICAL,HIGH,MEDIUM` / **`ignore-unfixed: true`**(修正不能は無視)/ hard-fail しない + PR コメント
   - **release ゲート**(保護ブランチへの PR 限定・厳格): **`ignore-unfixed: false`**(未修正も可視化)で厳格化。**止めるのはこの一点だけ**である
-- **依存監査ゲート**: **`pnpm audit` を既定**とする。go govulncheck 由来の「到達可能性(reachability)」フィルタは、`pnpm audit` に該当機能がなく、osv-scanner の call analysis も JS/TS 非対応のため、**現行ツールでは実装不能**である。したがって blocking 閾値は **severity(`high` / `critical`)と修正可能性(fixable)** で定める(未修正〈unfixable〉はノイズになりやすいため advisory 扱いとし、修正可能な high 以上を blocking)。運用 SLA(`high` 以上は 48 時間以内に対応着手)は [0004](0004-library-management.md) の既定を維持し、本項はその CI ゲート側の blocking 閾値を定める
+- **依存監査ゲート**: **`pnpm audit` を既定**とする。到達可能性(reachability)フィルタ —— 脆弱な関数へ実際に到達するコードパスがあるものだけを blocking にする絞り込み —— は、`pnpm audit` に該当機能がなく、osv-scanner の call analysis も JS/TS 非対応のため、**現行ツールでは実装不能**である。したがって blocking 閾値は **severity(`high` / `critical`)と修正可能性(fixable)** で定める(未修正〈unfixable〉はノイズになりやすいため advisory 扱いとし、修正可能な high 以上を blocking)。運用 SLA(`high` 以上は 48 時間以内に対応着手)は [0004](0004-library-management.md) の既定を維持し、本項はその CI ゲート側の blocking 閾値を定める
 - **スキャナ間で検出が食い違う場合は和集合を正とする**。Trivy fs と `pnpm audit` は集計単位(CVE 単位 / advisory 単位)も対象範囲も異なり、同一リポジトリに対して異なる件数を返す。片方だけを正とすると、そのツールが見ない領域(例: `pnpm audit` は npm advisory DB のみを見る)が恒久的な死角になる。**どちらか一方でも blocking 閾値に達したものは blocking として扱う**。両者の件数が一致しないこと自体は異常ではないため、突合して差分を潰そうとしない
 
 #### 3.1 脆弱性スキャンを push のゲートにしない
@@ -144,7 +140,7 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 - **ルールやスキャナの一括無効化は禁止**。抑止はファイル単位 or フィンガープリント単位に限定する。範囲を絞らない抑止は、同じ検知を踏む**新規のファイル・依存まで素通りさせる**
 - **ファイル単位に絞れないときは、抑止ではなく severity の引き下げに留める**。上の禁止が守ろうとしているのは「新規のものが黙って素通りする」ことを避ける点にあり、引き下げなら検査は走り続け、ゲートを抜けるだけである。**そのためには引き下げた所見が出力に残っていなければならない** —— 残らないなら、これは抑止と区別が付かない。ツールがファイル単位を持たないことがこれを選ぶ唯一の理由であり、**撤回条件（ツールが対応したら戻す）をその場に書く**
 - **各エントリに理由を必ず書く**(gitleaks は「なぜ秘密でないか」、Trivy は `statement`)。理由を書けないものは抑止せず、値そのものを消すか依存を上げる
-- **条件が変われば削除する**。恒久 allowlist にしない。**週に一度、宣言を条件へ突き合わせる**(`make suppression-expiry` / `.github/workflows/suppression-expiry.yaml`)。**見る機構が無いと、期限を過ぎた宣言が残り続け、次に同じ枠を使う人が期限そのものを軽く扱う。****限界が 2 つあり、報告はそれを明示する。** 機械が決められるのは日付だけなので全件の一覧を伴う —— 「上流が N 以上を要求したら」のように決められない条件を黙って落とすと、条件を書いた意味が消える。**理由をコメントに書く様式の面(上表の `.gitleaks.toml` / `.gitleaksignore` / `.github/zizmor.yml`、および `pnpm-workspace.yaml` の冷却期間と override)は宣言単位では読めない** —— パーサがコメントを落とすため、日付を含む行だけが出る
+- **条件が変われば削除する**。恒久 allowlist にしない。**週に一度、宣言を条件へ突き合わせる**(`make suppression-expiry` / `.github/workflows/suppression-expiry.yaml`)。条件の日付は日本時間の暦日で書き、突き合わせも同じ暦日で判定する(時刻は持ち込まない —— UTC で取ると日付をまたぐ時間帯の実行だけ判定が 1 日ずれる)。**見る機構が無いと、期限を過ぎた宣言が残り続け、次に同じ枠を使う人が期限そのものを軽く扱う。****限界が 2 つあり、報告はそれを明示する。** 機械が決められるのは日付だけなので全件の一覧を伴う —— 「上流が N 以上を要求したら」のように決められない条件を黙って落とすと、条件を書いた意味が消える。**理由をコメントに書く様式の面(上表の `.gitleaks.toml` / `.gitleaksignore` / `.github/zizmor.yml`、および `pnpm-workspace.yaml` の冷却期間と override)は宣言単位では読めない** —— パーサがコメントを落とすため、日付を含む行だけが出る
 - 抑止の妥当性そのものはレビュー時の人間判断に残る。機械が強制できるのは「抑止が上記の様式に載っていること」までである
 - **本ポリシーが及ぶのは自リポジトリが書いた抑止だけ**である。gitleaks の `useDefault` が同伴する global allowlist(上記 2 参照)や Trivy 本体の既定除外はツール側に埋め込まれており、ここには現れない。**「抑止ファイルが空 = 何も除外されていない」ではない**
 
@@ -164,18 +160,19 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 - **公式の `zaproxy/action-*` は使わない**。`docker_name` が受け取るのは tag であって digest であり、本リポは container image を digest で固定して `make images-pin-check` で突合する([0011](0011-no-docker.md))が、action の input はその走査対象に入らない。**固定したつもりで誰も検査していないピンを増やさない**
 - **ブラウザ側の違反検知は E2E の見張りが持つ**。ZAP が読むのはヘッダであり、そのヘッダをブラウザが enforce した結果(宣言に無い読み込みが拒まれたこと)は実ブラウザでしか出ない。`e2e/lib/test.ts` が `securitypolicyviolation` を全 spec で数え、enforce されていることは宣言に無い配信元を差して違反が報告されることで示す(`e2e/journeys/csp.spec.ts`)。ヘッダの検査と違反の検知は別の事実で、片方だけでは閉じない
 - **ゲートは実装より先に置き、既知の欠落は一覧で持つ**。恒常的に赤い必須チェックは全 PR を止め、その一覧を縮める PR 自身も止めるため、いま出ている所見だけを `.github/zap/rules.tsv` へ理由と撤回条件つきで並べ、**一覧に無い所見を赤にする**。ZAP は `IGNORE` にした規則も件数・規則名・URL を出力へ残すので、下記 3.4 の「引き下げた所見が出力に残っていること」を満たす。**測る側を後から入れると、測る側の導入が実装の完了に従属し、何が足りないかの一覧が最後まで手に入らない**
+- **CI の配備は、同梱するタグマネージャの容器 ID を空にして起動する(exclusion)**。配信元を `script-src` へ足し `Cross-Origin-Embedder-Policy` を降ろす分岐([0131](0131-cookie-consent.md) §2 / [0111](0111-csp-security-headers.md) §3)は、e2e でも DAST でも踏まれない。**CI から外部の配信元を叩かせないための選択である** —— 実在の容器を撃つ検査を置くと、外部の可用性と容器の中身の変更が CI の色に混ざる。ヘッダの組み立てと読み込みの strategy は単体テストが両方の配備で固定し、担保されていないのは組み立てたヘッダが実ブラウザで宣言どおり効くことだけである。撤回条件は、外部へ出ずに CSP の enforce を確かめる手段(配信元を差し替えられる形の検査など)が入ったとき
 
 ### 4. SECURITY.md
 
-- **`SECURITY.md` を置く**。脆弱性報告フロー(Private Vulnerability Reporting 誘導 / 連絡先 / Supported Versions)を定める(go の報告フロー節の翻案。連絡先は fork 先で差し替える placeholder)
-- go の後半「release artifact 検証(cosign / provenance / SBOM)」節は Docker 前提のため**含めない**(下記 exclusion)
+- **`SECURITY.md` を置く**。脆弱性報告フロー(Private Vulnerability Reporting 誘導 / 連絡先 / Supported Versions)を定める(連絡先は fork 先で差し替える placeholder)
+- release artifact の検証(cosign / provenance / SBOM)は、配送成果物がコンテナイメージでないため**含めない**(下記 exclusion)
 
 ### 5. release ゲート vs dev PR ゲート
 
 <!-- boilerplate-only:replace-begin -->
-- **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / CodeQL・gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy / CodeQL のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く(go 方式の翻案)
+- **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / CodeQL・gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy / CodeQL のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く
 <!-- boilerplate-only:replace-with -->
-<!-- = - **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く(go 方式の翻案) -->
+<!-- = - **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く -->
 <!-- boilerplate-only:replace-end -->
 
 ### 6. エージェントの文脈へ入るリポジトリ由来の文字列
@@ -188,11 +185,11 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 
 ## exclusion(no-Docker で対象外)
 
-go-boilerplate にはあるが、本リポは [0011](0011-no-docker.md)(no-Docker / PaaS・静的 CDN 配送)のため**採用しない**:
+コンテナ配送を前提とする次の機構は、本リポが [0011](0011-no-docker.md)(no-Docker / PaaS・静的 CDN 配送)のため**採用しない**:
 
 - ❌ **コンテナ image スキャン**(Trivy image / SBOM 生成)— アプリ本体の Docker イメージがない
-- ❌ **cosign によるイメージ署名 / SLSA provenance / SBOM attestation**(go 側の ADR 0088 相当)— 配送成果物がコンテナイメージでない
-- ❌ **Dependabot の `docker` エコシステム**(go は image ディレクトリ群を監査対象に持つ)— 監査対象の Dockerfile がない(上記 1 のとおり `npm` + `github-actions` のみ)
+- ❌ **cosign によるイメージ署名 / SLSA provenance / SBOM attestation** — 配送成果物がコンテナイメージでない
+- ❌ **Dependabot の `docker` エコシステム** — 監査対象の Dockerfile がない(上記 1 のとおり `npm` + `github-actions` のみ)
 - これらは「意図的にやらない」判断として記録する([0140](0140-documentation-operations.md) タクソノミー: exclusion = ADR)。fork 先が独自にコンテナ配送する場合は fork 先判断で追加する
 
 ## 禁止事項
@@ -220,7 +217,7 @@ go-boilerplate にはあるが、本リポは [0011](0011-no-docker.md)(no-Docke
 
 ## 関連 ADR
 
-- [0153-ci-configuration.md](0153-ci-configuration.md)(B9)— Security グループの CI 組込み(本 ADR の実行基盤)
+- [0153-ci-configuration.md](0153-ci-configuration.md) — Security グループの CI 組込み(本 ADR の実行基盤)。Actions の SHA ピンもこちら
 - [0004-library-management.md](0004-library-management.md) — `pnpm audit` / exact pin / major 別 PR(依存監査の土台)
 - [0151-git-hooks.md](0151-git-hooks.md) — pre-push の段階責務(本 ADR のスキャンを走らせる第一段)
 - [0003-version-manager.md](0003-version-manager.md) — gitleaks / Trivy のバージョン宣言(`mise.toml` が SSOT)

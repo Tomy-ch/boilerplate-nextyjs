@@ -6,22 +6,20 @@
 
 Accepted
 
-（**採番はブロック帯で確定(2026-07-14・0001〜0155(トピック順ブロック帯))**。独立起票。本 ADR の内容自体はこの設計討議でユーザ確定済み。日付 2026-07-14。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
-認証は out of scope でありながら、**seam なしでは保護ページが 1 枚も書けない**という点で、out-of-scope 領域の中で最も「seam の欠落」が濃い(triage #45)。関連する断片は既に複数 ADR に散っている:
+認証は out of scope でありながら、**seam なしでは保護ページが 1 枚も書けない**という点で、out-of-scope 領域の中で最も「seam の欠落」が濃い。関連する断片は複数 ADR に散っている:
 
-- [0070](0070-backend-role-separation.md)(A2)— 「認証・セッションの具体モデルは fork 先判断」「thin proxy / token 交換の seam は許す」「確定的な認可はデータ境界」
-- [0043](0043-middleware-policy.md)(C6)— 「`proxy.ts` は optimistic チェックのみ / 確定認可はデータ境界 / Node.js runtime / 唯一の防御線にしない」
+- [0070](0070-backend-role-separation.md) — 「認証・セッションの具体モデルは fork 先判断」「thin proxy / token 交換の seam は許す」「確定的な認可はデータ境界」
+- [0043](0043-middleware-policy.md) — 「`proxy.ts` は optimistic チェックのみ / 確定認可はデータ境界 / Node.js runtime / 唯一の防御線にしない」
 - [0021](0021-frontend-responsibility.md) — `adapters/server`(secret 可・`server-only`)/ `model`(表示用 VO)/ app の thin 原則
-- [0040](0040-routing-rendering-strategy.md)(A4)— Server Component 既定 / `"use client"` を葉へ / Server Action は編成のみ
+- [0040](0040-routing-rendering-strategy.md) — Server Component 既定 / `"use client"` を葉へ / Server Action は編成のみ
 
 これらは各 ADR の関心の副産物として断片化しており、「保護ページをどう書くか」を問う読み手は 4 本を横断せねばならず **局所推論が崩れている**。本 ADR はこの断片を **Next.js 文書化パターン**として 1 本に束ね、認証 seam の推論起点を一本化する。
 
 **裏取り元**: `node_modules/next/dist/docs/01-app/02-guides/authentication.md`(実装前確認。「This is NOT the Next.js you know」— Next.js 16)。同ガイドの Authorization 節は (1) httpOnly session cookie に最小 payload を格納、(2) 認可を 2 層(optimistic checks with Proxy〈optional〉+ Data Access Layer の `verifySession()` を React `cache()` で memo 化した確定認可)、(3) DTO で必要データのみ返す、を推奨形として文書化している。
 
-**0070 の中立との整合(triage #45 で確定した論点)**: 0070 が守る中立は **プロバイダ中立**であって **seam の形の中立ではない**。Next.js 自身が httpOnly cookie を標準推奨している以上、それに乗るのは特定方式の先取りではなく **プラットフォーム標準準拠**([0010](0010-standards-and-non-lockin.md) §1)であり、0070 の「特定の認証・セッションモデルを本体に前提として組み込まない」とは衝突しない。本 ADR が固定するのは seam の形(座標)のみで、プロバイダ・session 実装詳細(stateless vs DB / 暗号化方式)は fork 先に委ねる。
+**0070 の中立との整合**: 0070 が守る中立は **プロバイダ中立**であって **seam の形の中立ではない**。Next.js 自身が httpOnly cookie を標準推奨している以上、それに乗るのは特定方式の先取りではなく **プラットフォーム標準準拠**([0010](0010-standards-and-non-lockin.md) §1)であり、0070 の「特定の認証・セッションモデルを本体に前提として組み込まない」とは衝突しない。本 ADR が固定するのは seam の形(座標)のみで、プロバイダ・session 実装詳細(stateless vs DB / 暗号化方式)は fork 先に委ねる。
 
 ## 決定
 
@@ -56,6 +54,7 @@ Next.js 文書化パターンに乗り、認可を **2 層**に分ける:
 - **session に基づく保護の編成は app 層が行う。** `verifySession()` を呼び、結果で分岐し、リダイレクトするか feature を呼ぶ —— これは driving adapter の合成であって業務ロジックではない([0040](0040-routing-rendering-strategy.md) / [0021](0021-frontend-responsibility.md))。`features` がこれを持てないのは、DAL を含む `adapters/server/auth` へ触れてよいのが `app` と `adapters` だけだからで(`architecture.ts` の `adapters-auth`)、依存マトリクスの帰結であって例外規定ではない([0021](0021-frontend-responsibility.md))。
 - **feature が受け取ってよいのは `adapters` が分類した結果であって、session そのものではない。** 「未認証 / 未登録 / 登録済み」のような列挙は表示用の値であり、session の型も secret も内側の層へ渡らない([0020](0020-adopted-architecture.md) 型漏洩禁止)。この形なら入口ガードを feature に 1 つ置いて、同じ判定を画面ごとに書き写さずに済む。**分類を作るのは `adapters` の仕事**であり、feature のために session を素通しする関数を `adapters` へ足してはならない —— それは依存マトリクスを迂回して session の分岐を feature へ持ち込む経路になる。判定に使う規則そのものはバックエンドが持つ([0070](0070-backend-role-separation.md))。
 - **判定の述語は `model` が持つ。** 「この session が役割を満たすか」は session を入力に取る純粋な判定であり、app 層にも feature にも書かない。前捌き(`proxy.ts`)と確定認可が同じ述語を引くことで、2 層の判定がずれない。
+- **保護は保護される側を列挙して宣言する。** 公開側を列挙する書き方だと、新しく足した画面が既定で公開になり、書き忘れがそのまま漏洩になる。**経路の接頭辞は入れ子にしない** —— 入れ子を許すと、どちらの宣言が勝つかを決める規則が要り、宣言の並べ替えだけで認可が変わる状態を作れる。1 つの経路に 2 通りの役割を求めたくなったときは、規則を足す前にその設計を見直す。経路の一覧そのものはコード(`src/model/authz.ts`)が持つ
 - **静的ルートの注意**: build 時に取得され全ユーザで共有される静的 route は DAL(request 時検証)が効かないため、その保護は `proxy.ts`(optimistic)側で行う(Next.js ガイド注記)。
 
 ### 5. 未認証リダイレクト / `returnUrl` / ログアウト時の状態破棄
@@ -64,6 +63,7 @@ Next.js 文書化パターンに乗り、認可を **2 層**に分ける:
 - ログアウトは **session cookie の破棄(server)+ client 側の派生状態・キャッシュの teardown** を伴う。破棄の起点は `adapters/server`(cookie 削除)に置く。
 - **利用者のブラウザが IdP の session を持っている場合は、加えてブラウザを IdP の終了口へ遷移させる。** IdP 側の session を保持しているのは利用者のブラウザが持つ cookie であり、サーバから発した要求にそれは載らない —— 要求は成功を返しながら、IdP 側は何も終わらない。**この機構をここが持つ**ので、実装側は繰り返さずに本節を指す(呼び出しの連鎖に沿って同じ根拠が何度も書かれることになるため)。
 - **遷移が要るかどうかは、ログインが借り物の画面を経由したかで決まる。** 所有画面から資格情報を渡した経路(§6)では、ブラウザは IdP を一度も訪れておらず、破棄すべき IdP 側 cookie が存在しない。federation の経路(§6)だけがブラウザに IdP の session を残すため、終了口への遷移もその経路に限る。**どちらで確立したかは session 側が保持する** —— ログアウト時に推測すると、破棄漏れか無駄な往復のどちらかが必ず出る。
+- **client 側の取得が資格情報切れ(401)を受けたときは、その取得の失敗として扱わず、サーバへ描き直しを頼む。** 続きを読めなかった失敗として画面に出すと、利用者にできるのは読み直しだけで、サインインへ導く経路が無い。描き直せば各入口の判定(§4)が走り、未認証のリダイレクトへ倒れる([0080](0080-error-handling.md) §2 の「`Unauthenticated` を `Internal` へ畳まない」が前提)。
 - サインイン UI・session 更新(refresh)の具体は §6 の Resolver に閉じる。本 ADR は座標(どの層が何を所有するか)と拡張点の名前を敷く。
 
 ### 6. 動く最小 session 機構を本体へ同梱する(Resolver IF 方式)
@@ -78,8 +78,8 @@ Next.js 文書化パターンに乗り、認可を **2 層**に分ける:
 - **federation(ソーシャル / 企業 IdP 連携)だけは借り物の画面へ遷移する。** 連携先での認可は利用者のブラウザの遷移でしか成立せず、サーバ間 API では代替できない。この経路の意匠は §8 の供給が扱う
 - 認証が要る API 呼び出しは、**BFF 経由で Bearer が自動付与される前提**で実装する(個別に Authorization ヘッダを組み立てない)
 - **401 = 未ログイン / セッション切れ → サインインへ**、**403 = 権限不足 → 導線ごと出し分け**([0080](0080-error-handling.md) の分類に対応させる)
-- Resolver の IF 形状 / 既定実装のライブラリ選定 / refresh の扱いは実装で確定済み
-- **role の取得元はバックエンドとする。** IdP が持つのは身元（誰であるか）で、何をしてよいかは業務側のデータである([0070](0070-backend-role-separation.md))。ID Token の claim から読むと、IdP を差し替えるたびに役割の出所が変わり、IdP 側に業務の役割体系を持たせる圧力が生まれる。既定 Resolver は取得口を依存として受け取り、session を確立する途中で 1 度だけ引く。役割が 1 つも無い主体は権限を持たない側へ倒す
+- Resolver の IF 形状 / 既定実装のライブラリ選定 / refresh の扱いは本 ADR では定めず、既定 Resolver(`src/adapters/server/auth/session-resolver.ts`)が持つ
+- **role の取得元はバックエンドとする。** IdP が持つのは身元（誰であるか）で、何をしてよいかは業務側のデータである([0070](0070-backend-role-separation.md))。ID Token の claim から読むと、IdP を差し替えるたびに役割の出所が変わり、IdP 側に業務の役割体系を持たせる圧力が生まれる。既定 Resolver は取得口を依存として受け取り、session を確立する途中で 1 度だけ引く。役割が 1 つも無い主体は権限を持たない側へ倒す。**本体が敷く役割の集合は「特権を持つ側」と「持たない側」の 2 つだけ**とする —— 実際の役割体系はバックエンドが所有するため、本体が持つのは機構を動かして確かめられる最小の集合であり、fork 先はこれを自分の体系へ置き換える
 
 ### 7. 未認証時の状態を、ログイン成立の時点で引き継ぐ
 
@@ -126,6 +126,10 @@ federation の連携先と IdP の終了口だけであり、そこには意匠�
 
 - **資格情報の入力面は所有する。** ID / パスワード / MFA コードの入力欄を所有画面へ置く。利用者から
   見た認証は、遷移の途中で見知らぬドメインへ着地しない 1 本の導線になる
+- **入力面だけを持つ部品は、本 ADR の射程に入らない。** 桁を分割したコード入力欄のような部品は、名前に
+  「OTP」と付いていても値の種類を指しているだけで、発行・照合・有効期限・試行回数の制限といった検証の
+  責務を持たない。`Input` にパスワードを入れても `Input` が認証責務を持たないのと同じで、認証と無関係な
+  確認コード(メールアドレスの確認・機微操作の step-up)にも使う。名前から認証部品と読んで置き場を誤らない
 - **このリポジトリは資格情報を検証しない。** できるのは**バックエンドへの中継だけ**である。受け取った
   資格情報を保存しない / ログへ出さない / session payload へ載せない(§1)/ 中継以外の判断へ使わない。
   正しさの判定・試行回数の制限・ロックアウトはすべてバックエンドが持つ([0070](0070-backend-role-separation.md))
@@ -172,18 +176,19 @@ federation の連携先と IdP の終了口だけであり、そこには意匠�
 ## 補足
 
 - 本 ADR は **seam の座標(どの層が session verify / DTO / cookie を所有するか)** に加えて、**動く最小 session 機構の同梱**(§6 Resolver IF + 既定実装 1 本)を確定する。boilerplate 本体が持つのは既定実装であって「唯一の実装」ではない。
-- **#47 CSRF / origin 検証の同居は本 ADR では行わない**(triage で「要検討」)。CSRF(Server Actions `allowedOrigins` / SameSite cookie 前提)は triage 一次分類 **rule** であり、`docs/rules.md`(0140 方針・要新設)#47 が主 Rationale = 0070 で持つのが素直。本 ADR の httpOnly / SameSite cookie 前提が CSRF rule の土台を提供する関係のみを明記し、規約本体は同居させない([0140](0140-documentation-operations.md) 「decision と rule を分ける」タクソノミー)。
-- **CSP / セキュリティヘッダ(#46・別 ADR 予定)との境界**: 認証 seam(本 ADR)と CSP 実行時本体(別 ADR)は別関心。cookie 属性・認可分担は本 ADR、`Content-Security-Policy` / `X-Frame-Options` 等のヘッダ配置は CSP ADR が所有する。両者を同居させない(局所推論の維持)。
-- **既存 ADR 本体は編集しない**(0021 / 0040 / 0070 / 0043 は Accepted の Protected Documentation)。本 ADR は片方向参照で断片を集約するが、**旧 ADR からの back-link(相互参照)付与は AGENTS.md 整合 / v1 大規模整理フェーズでまとめて行う**。それまで局所推論の起点一本化は本 ADR → 旧 ADR の一方向に留まる(下記 flags)。
-- 本 ADR は [0140](0140-documentation-operations.md) タクソノミーにおいて **decision**(seam 定義)分類に属する。日常強制される rule(cookie 属性既定値 = #44 / CSRF = #47)は `docs/rules.md` 側が持つ。
+- **CSRF / origin 検証は本 ADR に同居させない。** それは日常強制される rule であり、`docs/rules.md` #47 が持つ。本 ADR の httpOnly / SameSite cookie 前提がその rule の土台を提供する関係のみを明記する([0140](0140-documentation-operations.md) 「decision と rule を分ける」タクソノミー)。
+- **CSP / セキュリティヘッダ([0111](0111-csp-security-headers.md))との境界**: 認証 seam(本 ADR)と CSP 実行時本体は別関心。cookie 属性・認可分担は本 ADR、`Content-Security-Policy` / `X-Frame-Options` 等のヘッダ配置は 0111 が所有する。両者を同居させない(局所推論の維持)。
+- 本 ADR は [0140](0140-documentation-operations.md) タクソノミーにおいて **decision**(seam 定義)分類に属する。日常強制される rule(cookie 属性既定値 = `docs/rules.md` #44 / CSRF = #47)は `docs/rules.md` 側が持つ。
 
 ## 関連 ADR
 
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — 標準準拠(§1 seam はデファクトに乗る)/ 非ロックイン判定(§2 vendor-independent 正当性材料の必須化)。本 ADR の 2 原則の土台
-- [0070-backend-role-separation.md](0070-backend-role-separation.md)(A2)— 認証は out of scope / thin proxy・token 交換の seam / 確定認可はデータ境界(プロバイダ中立の意味 = 本 ADR の前提)
-- [0043-middleware-policy.md](0043-middleware-policy.md)(C6)— `proxy.ts` = optimistic のみ / Node.js runtime / 唯一の防御線にしない(認可 optimistic 層の所有)
+- [0070-backend-role-separation.md](0070-backend-role-separation.md) — 認証は out of scope / thin proxy・token 交換の seam / 確定認可はデータ境界(プロバイダ中立の意味 = 本 ADR の前提)
+- [0043-middleware-policy.md](0043-middleware-policy.md) — `proxy.ts` = optimistic のみ / Node.js runtime / 唯一の防御線にしない(認可 optimistic 層の所有)
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — `adapters/server`(DAL / secret / `server-only`)/ `model`(DTO view 型)/ app の thin 原則(カーネル座標の SSOT)
 - [0024-adapters-server-client-split.md](0024-adapters-server-client-split.md) — `adapters/server`(secret 可)vs `adapters/client`(secret 不可)。DAL が server 面に属する根拠
-- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md)(A4)— Server Component 既定 / `page.tsx` thin / Server Action 編成のみ(各所チェックの配置根拠)
+- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — Server Component 既定 / `page.tsx` thin / Server Action 編成のみ(各所チェックの配置根拠)
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) — 型漏洩禁止(session・secret を内層へ漏らさない)
+- [0111-csp-security-headers.md](0111-csp-security-headers.md) — CSP / セキュリティヘッダ(本 ADR と同居させない別関心)
+- [0080-error-handling.md](0080-error-handling.md) — 401 / 403 の分類(§5 / §6 が対応させる先)
 - [0140-documentation-operations.md](0140-documentation-operations.md) — decision / rule タクソノミー(#44 cookie 属性・#47 CSRF は rules.md 側)

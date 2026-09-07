@@ -1,23 +1,21 @@
 # SEO / メタデータ戦略
 
-表示層 boilerplate における **メタデータの体系(App Router Metadata API)/ クローラ制御(`sitemap.ts` / `robots.ts`)/ canonical・alternates / 構造化データ(JSON-LD)/ アイコン体系** の規約を定める。Next.js 16 組込みの Metadata 機構を追認し、最小の運用ルールを敷く。具体値(タイトル文言・URL 一覧・schema.org type)は用途依存として fork 先 / 実装 PR に委ねる。
+表示層 boilerplate における **メタデータの体系(App Router Metadata API)/ クローラ制御(`sitemap.ts` / `robots.ts`)/ canonical・alternates / 構造化データ(JSON-LD)/ アイコン体系 / 公開面の検査** の規約を定める。Next.js 16 組込みの Metadata 機構を追認し、最小の運用ルールを敷く。具体値(タイトル文言・URL 一覧・schema.org type)は用途依存として fork 先に委ねる。
 
 ## Status
 
 Accepted
 
-（採番はブロック帯で確定(2026-07-14・0001〜0155。トピック順ブロック帯(10 番台=主題ブロック))([0140](0140-documentation-operations.md))。本 ADR の内容自体はユーザ決定済み(Tier 5 = C 枠の網羅性補完)。日付 2026-07-13。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
-C 系(Tier 5)の当初列挙(C1〜C6 = [0121](0121-i18n-strategy.md)〜[0043](0043-middleware-policy.md))は、i18n / a11y / パフォーマンス / ブラウザサポート / フォント・画像 / Middleware を拾っていたが、**表示層 boilerplate の中心的関心事である SEO / メタデータの体系が丸ごと欠落**していた(敵対的レビューで判明。2026-07-13)。[0045](0045-fonts-and-images.md)(フォント・画像)は動的 OG 画像(`ImageResponse` / `opengraph-image`)と `public/` の favicon を**画像アセットの生成手段として断片的に**扱うが、head 要素・クローラ制御・canonical・構造化データを含む**メタデータの体系は別軸**であり未成文だった。本 ADR がその穴を埋める。
+[0045](0045-fonts-and-images.md)(フォント・画像)は動的 OG 画像(`ImageResponse` / `opengraph-image`)と `public/` の favicon を**画像アセットの生成手段として**扱う。head 要素・クローラ制御・canonical・構造化データを含む**メタデータの体系は別軸**であり、本 ADR が持つ。
 
 実装前に `node_modules/next/dist/docs/` を確認した結果、以下は Next.js 16 の第一級のファイル規約 / API として実在する(AGENTS.md「This is NOT the Next.js you know」):
 
 - **Metadata API**: route セグメントで静的 `metadata` export または動的 `generateMetadata` を宣言すると、Next.js が `<head>` 要素を自動生成する
 - **ファイルベース metadata**: `app/` 直下の `sitemap.(xml|ts)` / `robots.(txt|ts)` / `icon.*` / `apple-icon.*` / `manifest.*` / `opengraph-image.*` 等。特殊 Route Handler として既定でキャッシュされる(request-time API / dynamic config 使用時を除く)
 - **大規模 sitemap**: `generateSitemaps` で分割生成
-- **Proxy 交点(重要)**: 公式ドキュメントは「`proxy.ts` と併用する場合、メタデータファイルを Proxy の対象外とせよ」と明示。`proxy.ts`([0043](0043-middleware-policy.md))を導入する場合の交点となる(0043 は proxy を薄い境界に限る方針までを定め、除外設定の具体は実装時)
+- **Proxy 交点(重要)**: 公式ドキュメントは「`proxy.ts` と併用する場合、メタデータファイルを Proxy の対象外とせよ」と明示。`proxy.ts`([0043](0043-middleware-policy.md))との交点となる
 
 ## 決定
 
@@ -26,12 +24,14 @@ C 系(Tier 5)の当初列挙(C1〜C6 = [0121](0121-i18n-strategy.md)〜[0043](00
 - head メタデータ(title / description / OpenGraph / Twitter / robots meta 等)は **App Router の Metadata API** で宣言する。**`<head>` の手書き・`next/head` は使わない**
   - 静的に決まるものは **静的 `metadata` export**、リクエスト / パラメータ依存のものは **`generateMetadata`** を使い分ける
 - ルート([`src/app/layout.tsx`](0027-directory-structure.md))に **`metadataBase` と `title.template`(サイト共通のタイトル雛形)の既定土台**を置く。各セグメントはそこからの差分だけを宣言する(重複定義を避ける)
-- 具体的なタイトル文言・description・OG 画像割当は**用途依存**のため、雛形の枠のみ boilerplate 本体で持ち、値は fork 先 / feature 実装 PR で確定する
+- **絶対 URL の出所は config(`SITE_PUBLIC_ORIGIN`)の 1 つに限り、要求の `Host` から採らない。** canonical / sitemap / OG 画像の絶対 URL はすべてこの origin に経路を足して組み立てる。配信面(CDN / ロードバランサ)を挟むと要求が名乗る host は公開名と一致しなくなり、`Host` から採ると他人を指す canonical を配ることになる
+- 具体的なタイトル文言・description・OG 画像割当は**用途依存**のため、雛形の枠のみ boilerplate 本体で持ち、値は fork 先 / feature 実装で確定する
 
 ### 2. クローラ制御 = `sitemap.ts` / `robots.ts`(Next.js 規約)
 
 - サイトマップは **`app/sitemap.(xml|ts)`**、クローラ制御は **`app/robots.(txt|ts)`** で Next.js 規約に従い生成する(独自の静的ファイル配置・手書き XML 生成を作らない)。URL 数が多い場合は **`generateSitemaps`** で分割する
-- 収録 URL・`Disallow` パス・`changefreq` 等の**具体内容は用途依存**(ルート構成に従属)のため fork 先 / 実装 PR で確定。boilerplate 本体は仕組み(このファイル規約を使う方針)を定める
+- 収録 URL・`Disallow` パス・`changefreq` 等の**具体内容は用途依存**(ルート構成に従属)のため fork 先で確定。boilerplate 本体は仕組み(このファイル規約を使う方針)を定める
+- **索引させてよいかは環境が宣言する**(`SITE_INDEXABLE`。[0030](0030-environment-variable-management.md))。宣言の無い環境は `robots.txt` が巡回を拒み、画面が `noindex` を出す。索引を許す側だけが明示する
 
 ### 3. canonical / alternates
 
@@ -39,7 +39,7 @@ C 系(Tier 5)の当初列挙(C1〜C6 = [0121](0121-i18n-strategy.md)〜[0043](00
 
 ### 4. 構造化データ(JSON-LD)
 
-- 構造化データ(schema.org / JSON-LD)は**採用可**とし、必要な feature の実装 PR で埋め込む(Next.js 推奨どおり、コンポーネント内で JSON-LD の `<script type="application/ld+json">` を描画)。**採否・schema.org type は用途依存**のため boilerplate 本体では型を固定せず、枠のみ示す
+- 構造化データ(schema.org / JSON-LD)は**採用可**とし、必要な feature の実装で埋め込む(Next.js 推奨どおり、コンポーネント内で JSON-LD の `<script type="application/ld+json">` を描画)。**採否・schema.org type は用途依存**のため boilerplate 本体では型を固定せず、枠のみ示す
 
 ### 5. アイコン体系(`icon.*` / `apple-icon.*` と `public/` favicon の役割分担)
 
@@ -47,7 +47,16 @@ C 系(Tier 5)の当初列挙(C1〜C6 = [0121](0121-i18n-strategy.md)〜[0043](00
 
 ### 6. Proxy との交点
 
-- `proxy.ts`([0043](0043-middleware-policy.md))を導入する場合、**メタデータファイル(`sitemap` / `robots` / `icon` / `opengraph-image` 等)を Proxy の対象外とする**必要がある(Next.js 公式の good-to-know。メタデータの配信を Proxy が横取りしないため)。除外設定の具体(`proxy.ts` 側の対象パス制御)は proxy を導入する実装 PR で行う(0043 は proxy を薄い境界に限る方針を定めるに留まる)
+- `proxy.ts`([0043](0043-middleware-policy.md))は、**メタデータファイル(`sitemap` / `robots` / `icon` / `opengraph-image` 等)を対象外とする**(Next.js 公式の good-to-know。メタデータの配信を Proxy が横取りしないため)。除外は `proxy.ts` の `matcher` で行い、選び足りなさは e2e が負う([0043](0043-middleware-policy.md) §4)
+
+### 7. 公開面の検査は「在るか」ではなく「成立しているか」を見る
+
+- metadata は**中身が壊れていても画面が壊れない**ため、通常のテストとレビューでは気づけない。存在検査だけを置くと、空の `sitemap.xml`・他人を指す canonical・実行時に落ちる OG 画像が、いずれも緑で通る
+- したがって索引を許す設定で build した公開面に対し、e2e(`make e2e-metadata`)が次を確かめる:
+  - `robots.txt` が巡回を許す
+  - `sitemap.xml` が挙げる URL が実在し(404 を挙げていない)、各ページの canonical が自分自身を指す
+  - `icon` / `opengraph-image` が絵として返る(`ImageResponse` は build を通っても実行時に落ちうる)
+- 索引させない側(`noindex` / 巡回拒否)は通常の e2e が見る。両側を見て初めて「環境で切り替わる」ことが確かめられる
 
 ## 責務境界(0045 との切り分け)
 
@@ -62,16 +71,20 @@ C 系(Tier 5)の当初列挙(C1〜C6 = [0121](0121-i18n-strategy.md)〜[0043](00
 
 - ❌ `<head>` の手書き / `next/head` の使用(Metadata API を使う)
 - ❌ 同一メタデータを複数箇所で重複定義すること(root の `title.template` / `metadataBase` を土台に差分宣言)
+- ❌ 絶対 URL を要求の `Host` から組み立てること(出所は config の公開 origin 1 つ)
 - ❌ `sitemap` / `robots` を独自の静的配置・手書き生成で実装すること(Next.js のファイル規約 `app/sitemap.ts` / `app/robots.ts` を使う)
 - ❌ 手書き `<link rel="canonical">` を置くこと(`alternates.canonical` を使う)
 - ❌ `proxy.ts` でメタデータファイルを巻き込むこと(Proxy の対象外とする)
+- ❌ 公開面の検査を存在確認だけで済ませること(§7)
 - ❌ 用途依存の具体値(タイトル文言・収録 URL・JSON-LD type)を boilerplate 本体で固定すること(枠のみ・値は fork 先)
 
 ## 関連 ADR
 
-- [0045-fonts-and-images.md](0045-fonts-and-images.md)(C5)— OG 画像生成 / `public/` favicon(本 ADR と責務境界を共有)
-- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md)(A4)— App Router / Metadata API / 特殊ファイルの土台
-- [0028-naming-convention.md](0028-naming-convention.md)(A6)— `sitemap` / `robots` / `opengraph-image` 等の特殊ファイル命名
-- [0043-middleware-policy.md](0043-middleware-policy.md)(C6)— `proxy.ts` 導入時にメタデータファイルを Proxy の対象外とする交点
-- [0121-i18n-strategy.md](0121-i18n-strategy.md)(C1)— 言語 alternates(i18n 採用時に本 ADR の canonical/alternates seam へ載る)
-- [0101-performance-budget.md](0101-performance-budget.md)(C3)— メタデータ / OG は SEO・共有体験に直結
+- [0045-fonts-and-images.md](0045-fonts-and-images.md) — OG 画像生成 / `public/` favicon(本 ADR と責務境界を共有)
+- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — App Router / Metadata API / 特殊ファイルの土台
+- [0028-naming-convention.md](0028-naming-convention.md) — `sitemap` / `robots` / `opengraph-image` 等の特殊ファイル命名
+- [0030-environment-variable-management.md](0030-environment-variable-management.md) — 公開 origin と索引可否の供給(`SITE_PUBLIC_ORIGIN` / `SITE_INDEXABLE`)
+- [0043-middleware-policy.md](0043-middleware-policy.md) — `proxy.ts` がメタデータファイルを対象外とする交点
+- [0091-test-verification-methods.md](0091-test-verification-methods.md) — 公開面の検査を e2e が負う根拠
+- [0121-i18n-strategy.md](0121-i18n-strategy.md) — 言語 alternates(i18n 採用時に本 ADR の canonical/alternates seam へ載る)
+- [0101-performance-budget.md](0101-performance-budget.md) — メタデータ / OG は SEO・共有体験に直結

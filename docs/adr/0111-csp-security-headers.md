@@ -6,8 +6,6 @@
 
 Accepted
 
-（採番はブロック帯([0140](0140-documentation-operations.md))に従い、セキュリティ帯 `011x` へ置く。pre-v1 の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
 後付けの CSP は既存の inline script / style との衝突で最も導入コストが高く、初期に方針を固めておく価値が高い。[0043](0043-middleware-policy.md) は「Proxy でヘッダ操作が可能」とのみ述べ、ポリシー本体・配置方針を持たない。
@@ -98,7 +96,7 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 - **要求に依らないヘッダを `proxy.ts` で足さない。** 前捌きを通る経路にしか載らず、静的に配れる応答が漏れる。
 - **資格情報を載せた要求への応答は `Cache-Control: private, no-store`。** [0112](0112-data-classification-cache-boundary.md) 段 5(配信)の実体で、主体に紐づく応答が CDN / プロキシの共有キャッシュへ載り別の主体へ配られる事故を、応答ヘッダで止める。**判定は要求の側で行う** —— session cookie を載せた要求は、その応答が何であれ主体に紐づく。画面や Route Handler ごとに書かせず、宣言を持たない handler にも届く。代償はログイン済み利用者への静的画面が CDN で共有されないことで、これは 0112 の優先順位(機密性 > キャッシュ効率)どおりである。framework が動的な応答に付ける `no-store` はアプリ内側の判断で、静的に固まった応答には付かない —— 主体に紐づく画面が誤って固まった回に効くのは、この段だけである。**届く範囲は `proxy.ts` の `matcher` が選ぶ経路に限る** —— 除外している `_next/static` / `_next/image` / `favicon.ico` は cookie を載せた要求でも framework 自身の `Cache-Control`（画像最適化は `public, max-age=...`）のまま配られる。同梱の画像最適化経路には公開画像しか載せていないため成立している前提であり、主体固有の画像を `next/image` に載せる fork は、この除外を見直すか配信元で `private` を返す。
 - **別 origin へ開く口は 1 つの宣言で持つ。** `HTTP_ALLOWED_ORIGINS`(`config/http`)に挙げた origin だけに、`src/proxy.ts` が BFF(`/api/*`)の応答へ `Access-Control-Allow-Origin` / `Access-Control-Allow-Credentials` / `Vary: Origin` を返し、preflight に 204 で答える。credentials を許すのは BFF の口が session cookie で主体を判定するためで、`*` は使えない。**既定は空 = 同一 origin だけ**であり、ブラウザから叩く先は BFF に限る(§3 `connect-src 'self'`)ので、この構成では宣言する相手が居ない。別 origin の SPA / 管理画面が BFF を叩く fork が、その origin を宣言する。
-- **同じ宣言が書き込みの送信元を決める。** `Origin` を持つ要求のうち、自分自身(host が `X-Forwarded-Host` / `Host` と一致)でも宣言した origin でもないものからの状態を変えるメソッド(`GET` / `HEAD` / `OPTIONS` 以外)は、handler へ届く前に 403 で止める。読むだけの要求は止めない —— CORS ヘッダを付けないので、ブラウザ側で応答を読めない。「読ませる相手」と「書かせる相手」を別々の宣言にすると、片方だけ開けた状態を作れる。Server Action は Next.js 自身が `Origin` と `Host` を突合しており、リバースプロキシで Host が書き換わる配備だけが `serverActions.allowedOrigins` を要する。判定は `src/model/cross-origin.ts` が持つ。
+- **同じ宣言が書き込みの送信元を決める。** `Origin` を持つ要求のうち、自分自身(host が `X-Forwarded-Host` / `Host` と一致)でも宣言した origin でもないものからの状態を変えるメソッド(`GET` / `HEAD` / `OPTIONS` 以外)は、handler へ届く前に 403 で止める。**自分自身の判定は host だけで行い、scheme を比べない** —— TLS を終端するリバースプロキシの後ろでは、自分が見る要求は http でも `Origin` は https で届く。host は `X-Forwarded-Host` を先に読み、無ければ `Host` を使う(Next.js が Server Action の送信元を確かめるのと同じ順)。一方、宣言した別 origin は **origin の完全一致**で、scheme・host・port のどれか 1 つでも違えば別物として扱う。読むだけの要求は止めない —— CORS ヘッダを付けないので、ブラウザ側で応答を読めない。「読ませる相手」と「書かせる相手」を別々の宣言にすると、片方だけ開けた状態を作れる。Server Action は Next.js 自身が `Origin` と `Host` を突合しており、リバースプロキシで Host が書き換わる配備だけが `serverActions.allowedOrigins` を要する。判定は `src/model/cross-origin.ts` が持つ。
 - **PaaS/CDN での付与は「境界 seam」**として認める(HSTS・一部の静的ヘッダは配送層で終端する構成が現実的)。boilerplate 本体は `next.config.ts` を SSOT とするが、**PaaS 側と重複・矛盾しない**ことを fork がデプロイ時に確認する(同一ヘッダの二重付与を避ける)。
 
 ### 6. CI 適合スライスは 0110 が持つ(本 ADR は実行時本体)
@@ -123,8 +121,8 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 
 ## 補足
 
-- **#47 CSRF / Server Actions の origin 検証**(`serverActions.allowedOrigins` / SameSite cookie 前提)は **rules.md(主 Rationale [0070](0070-backend-role-separation.md))** に置き、本 ADR には**同居させない**。[0079](0079-auth-frontend-seam.md) が確定済み。本 ADR は CSP・レスポンスヘッダの実行時本体に射程を限る。
-- 本 ADR は [0140](0140-documentation-operations.md) のタクソノミーで **decision** 分類に属する。日常強制される rule(サードパーティスクリプト #50・XSS/サニタイズ #48 等)は rules.md 側に置き、本 ADR を Rationale として逆参照する。
+- **CSRF / Server Actions の origin 検証**(`serverActions.allowedOrigins` / SameSite cookie 前提)は **`docs/rules.md` #47(主 Rationale [0070](0070-backend-role-separation.md))** に置き、本 ADR には**同居させない**。本 ADR は CSP・レスポンスヘッダの実行時本体に射程を限る。
+- 本 ADR は [0140](0140-documentation-operations.md) のタクソノミーで **decision** 分類に属する。日常強制される rule(サードパーティスクリプト #50・XSS/サニタイズ #48 等)は `docs/rules.md` 側に置き、本 ADR を Rationale として逆参照する。
 
 ## 関連 ADR
 

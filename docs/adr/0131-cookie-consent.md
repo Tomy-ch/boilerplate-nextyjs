@@ -6,8 +6,6 @@ Cookie 同意の**軽量機構**(同意状態の保持・バナー UI・サー�
 
 Accepted (一部 exclusion)
 
-（採番はブロック帯で確定(2026-07-14・0001〜0155。トピック順ブロック帯(10 番台=主題ブロック))([0140](0140-documentation-operations.md))。日付 2026-07-13。pre-v1 の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
 同意管理は**対象法域(GDPR / ePrivacy / CCPA 等)・使用するトラッキング / アナリティクスの有無・SaaS 選定に強く依存**するため、CMP レベルの実装を本体で一律に決めると fork 先の法令要件を狭める。
@@ -21,10 +19,12 @@ Accepted (一部 exclusion)
 同梱する範囲は次の 4 点に限る。
 
 - **同意状態の保持と読み出し** — cookie に保持し、ツリーへの供給は [0031](0031-policy-state-supply.md)(source adapter + no-op 既定 + stateless props 既定)に従う。cookie 操作は [0043](0043-middleware-policy.md) の `proxy.ts` 側
-- **同意バナー UI** — `components` に置く最小のバナー。カテゴリは「必須 / 任意」の 2 値を既定とし、細分カテゴリは fork 先の判断
+- **同意バナー UI** — `components` に置く最小のバナー。カテゴリは「画面を表示するために必要なもの / 無くても画面が成立するもの」の 2 値を既定とし、細分カテゴリは fork 先の判断(細分は繋ぐ製品と法域で決まるため、何も繋がっていない状態で先に決めない)。**同意と拒否の 2 つの操作は同じ大きさで並べる** —— 拒否だけを小さくしたり目立たなくしたりすると、得られた同意が自由に与えられたものでなくなる
 - **スクリプト読み込みゲート** — 同意が得られるまでサードパーティスクリプトを読み込まない。`next/script` の mount を gate 述語の裏に置く
 - **計測用 cookie_id の発行** — 同意後に発行する。未同意の間は発行しない
 - **同意の保持期間は 180 日(6 か月)とする** — EU の監督機関が同意の有効期間の目安として挙げる期間に合わせる。無期限にしないのは、繋ぐ製品も文面も変わったあとの画面が古い意思で動くことを避けるためであり、切れたらもう一度尋ねる
+- **尋ねた文面の版を意思と一緒に cookie へ載せ、いまの版と違えば選ばれていないものとして扱う。** 期限だけでは、文面を書き換えても古い文面に同意した意思が効き続ける —— 何に同意したかが変わったのに同意だけが残る。版を添えることで、書き換えた時点で全員へ尋ね直せる。**文面を書き換える側が版を上げる**のが条件で、上げ忘れると新しい文面を見ていない利用者の同意が効いたままになる
+- **同意状態の読み取りはブラウザ側で行う。** 同意は全画面に掛かるので読む場所はルート layout しかなく、そこでサーバ側から cookie を読むと、その読みが全画面に共通の動的な穴になり、丸ごと静的に配れている画面まで穴つきへ落ちる([0041](0041-cache-components-decision.md))。同意の面のためだけに、同意と関係の無い画面の配り方を変えない。帰結として**面はブラウザが読み終えてから現れる**。`proxy.ts` は同じ cookie をサーバ側で読むが、読む主体が 2 つあっても綴りと解釈は 1 か所(`model`)が持つ
 
 ### 2. ゲートの先に GTM を同梱する
 
@@ -63,10 +63,11 @@ Accepted (一部 exclusion)
 ## 関連 ADR
 
 - [0031-policy-state-supply.md](0031-policy-state-supply.md) — consent 供給 seam の定義(source adapter + gate 述語 + stateless props)
-- [0043-middleware-policy.md](0043-middleware-policy.md)(C6)— 同意状態の cookie 保持
+- [0043-middleware-policy.md](0043-middleware-policy.md) — 同意状態の cookie 保持
+- [0041-cache-components-decision.md](0041-cache-components-decision.md) — 同意状態をサーバ側で読まない根拠(ルート layout の動的な穴を作らない)
 - [0026-layout-shell-mount.md](0026-layout-shell-mount.md) — バナー / スクリプトの mount 位置
 - [0111-csp-security-headers.md](0111-csp-security-headers.md) — サードパーティスクリプトの `script-src` 許可(ゲートと同じ対象を扱う)
 - [0082-client-observability.md](0082-client-observability.md) — consent gate の主消費者(プロダクト分析は gate 必須・運用テレメトリの法域拡張点)
-- [0081-observability-logging.md](0081-observability-logging.md)(B7)— 運用テレメトリ(同意ゲート対象のユーザトラッキングとは区別)
+- [0081-observability-logging.md](0081-observability-logging.md) — 運用テレメトリ(同意ゲート対象のユーザトラッキングとは区別)
 - [0023-stores-kernel.md](0023-stores-kernel.md) — 横断 client 状態として保持する場合の置き場
-- [0121-i18n-strategy.md](0121-i18n-strategy.md)(C1)/ [0130-pwa-strategy.md](0130-pwa-strategy.md)(C8)— fork 先判断の exclusion 先例(本 ADR で exclusion なのは CMP / IAB TCF だけ)
+- [0121-i18n-strategy.md](0121-i18n-strategy.md) / [0130-pwa-strategy.md](0130-pwa-strategy.md) — fork 先判断の exclusion 先例(本 ADR で exclusion なのは CMP / IAB TCF だけ)

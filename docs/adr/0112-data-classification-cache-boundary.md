@@ -6,15 +6,13 @@
 
 Accepted
 
-（採番はブロック帯([0140](0140-documentation-operations.md))に従い、セキュリティ帯 `011x` へ置く。pre-v1 の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
 Cache Components(PPR)を有効化すると、**user-scoped な値が共有・静的な領域へ載る経路が新たに生まれる**。User A の個人データが共有キャッシュへ入り User B へ配られる事故は、表示層で起こしうる中で最も損害が大きい。
 
-規約は既にある —— [`docs/rules.md`](../rules.md) #79b が「Data Cache へ入れてよいのは、主体を名乗らずに取れるものだけ」と定め、`adapters/server/api/products.ts` は同じ理由を自身のコメントにも書いている。**足りないのは強制**であり、`adapters/server/http` の `RequestSpec` は `cache` / `tags` を**どの client でも受け取れる**。資格情報を載せる口に `cache: "force-cache"` を渡す書き方が型検査を通る。
+規約([`docs/rules.md`](../rules.md) #79b「Data Cache へ入れてよいのは、主体を名乗らずに取れるものだけ」)だけでは止まらない。`adapters/server/http` の `RequestSpec` が `cache` / `tags` を**どの client でも受け取れる**形なら、資格情報を載せる口に `cache: "force-cache"` を渡す書き方が型検査を通る。**要るのは強制**である。
 
-[0030](0030-environment-variable-management.md) §8 は Server → Client の誤送信に対する防御を持つが、**キャッシュ側の境界は誰も持っていない**。
+[0030](0030-environment-variable-management.md) §8 は Server → Client の誤送信に対する防御を持つ。**キャッシュ側の境界は本 ADR が持つ。**
 
 ## 不変条件
 

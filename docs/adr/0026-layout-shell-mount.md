@@ -1,18 +1,16 @@
 # layout の横断 UI / Provider mount(app シェル合成)
 
-`<Toaster/>`・グローバル nav / footer・各 Provider(テーマ / capabilities / ポリシー)を **root layout に mount する経路が無かった**(構造ブロッカー **S4**)。[0025](0025-app-layer-elements.md) の `app/route-segment` は import 先が `features` のみで、[0022](0022-capabilities-kernel.md) の Provider mount 例外は `capabilities` 限定に書かれていたため、横断 UI シェルと Provider を layout に置けなかった。
+`<Toaster/>`・グローバル nav / footer・各 Provider(テーマ / capabilities / ポリシー)を **root layout に mount する経路**を定める。[0025](0025-app-layer-elements.md) の `app/route-segment` は import 先が `features` のみで、[0022](0022-capabilities-kernel.md) の Provider mount 例外は `capabilities` 限定であるため、それだけでは横断 UI シェルと Provider を layout に置けない。
 
-本 ADR は **layout の mount 例外を一般化**し、`layout` と `page` を区別してこれを解消する(新カーネル不要)。
+本 ADR は **layout の mount 例外を一般化**し、`layout` と `page` を区別してこれを解く(新カーネルは要らない)。
 
 ## Status
 
 Accepted
 
-（**採番はブロック帯で確定(2026-07-14・0001〜0155(トピック順ブロック帯))**。S4 の解決を S ごとに 1 主題 = 1 ADR として独立起票したもの(ユーザ決定 2026-07-14)。内容自体はこの設計討議でユーザ確定済み。日付 2026-07-14。0.0.x の ADR は living document として本文を直接上書きする）
-
 ## 背景
 
-トーストの queue 状態と `<Toaster/>` UI は「UI 状態(業務状態でない)」なので `components` に置ける([0022](0022-capabilities-kernel.md) の「UI 密着は component」原則)。しかしその `<Toaster/>` やレイアウトシェル(nav / footer)・各 Provider を **root `layout.tsx` に mount する経路**が、`app → features のみ`のマトリクスと capabilities 限定の mount 例外の下では存在しなかった。
+トーストの queue 状態と `<Toaster/>` UI は「UI 状態(業務状態でない)」なので `components` に置ける([0022](0022-capabilities-kernel.md) の「UI 密着は component」原則)。しかしその `<Toaster/>` やレイアウトシェル(nav / footer)・各 Provider を **root `layout.tsx` に mount する経路**は、`app → features のみ`のマトリクスと capabilities 限定の mount 例外の下では存在しない。
 
 ## 決定: layout の mount 例外を一般化 + layout / page を区別
 
@@ -25,6 +23,7 @@ Accepted
 
 - **`page.tsx` は `features` のみ**(不変)
 - 根拠: root layout は「どの feature にも属さない **app シェル**(html / body・グローバル Provider・nav / footer / toaster)の合成点」であり、`page.tsx`(= 画面 = 1 feature)と性質が違う
+- **root layout は画面本体(`children`)を、自分が描く 1 要素で包む。** hydration は `<Suspense>` 境界ごとに分かれて進み、先に hydrate された島の effect が、まだ hydrate されていない側の DOM を React の外から書き換えると(focus の閉じ込めや背面の inert 化を行うライブラリはこれをする)、後から来た React が食い違いとして報告する。書き換えの相手を root layout が描く要素にしておけば、その要素は境界の外にあって最初の commit で hydrate されるため、島がいつ動いても相手は既に hydrate 済みである。「相手の側から hydrate されたと言わせる」形は採らない —— 書き換える主体がライブラリのとき、その合図を出す口が無い。時計(`setTimeout` / `requestAnimationFrame` 等)で待つ形も採らない(外れる理由の実測は [docs/design/rendering.md](../design/rendering.md))
 
 ### 横断 UI 状態の帰属(mount と対で確定)
 
@@ -35,13 +34,21 @@ Accepted
 
 route group を分けると器が分かれる。**その境界を跨ぐ遷移は、共有していない layout を unmount する**
 (client-side transition が保つのは shared layout だけである)。したがってその layout へ mount した
-Provider が持つ状態は、境界の向こうへ持ち越されない。`Cache Components` は採らないため
-([0041](0041-cache-components-decision.md))、React `<Activity>` による保存も効かない。
+Provider が持つ状態は、境界の向こうへ持ち越されない。Cache Components([0041](0041-cache-components-decision.md))
+が遷移後も前の route の木を保つことがあるのは router 側の最適化であって、状態が境界を跨いで残る保証
+ではない。設計はそれに依存しない。
 
 **これは欠陥ではなく、route group をジャーニーの単位として使うことの裏返しである。** あるジャーニー
 の内側でしか意味を持たない状態は、そのジャーニーを離れた時点で失われてよい。器を分ける理由は
 **見せたい姿の違いでも、描く時点の違いでもよい**([0040](0040-routing-rendering-strategy.md))——
 どちらで分けても、境界がジャーニーの境界になることは変わらない。
+
+- **見せたい姿が違う**とは、見せる相手と導線が違うことである。利用者向けと管理向けのように相手が
+  違えば shell そのものを分け(`AppShell` / `AdminShell`)、1 枚の shell に分岐で抱えない。抱えると、
+  どの画面でどの導線が出るかを shell を読まないと判断できなくなる
+- **描く時点が違う**とは、配下を組み立て時に固めたいことである。固めるには、器がバックエンドにも
+  cookie にも触れないところまで下がるしかない([0040](0040-routing-rendering-strategy.md))。器が
+  request 時の取得を要るなら、固めたい画面をその器の外へ出す
 
 したがって:
 
@@ -70,17 +77,16 @@ Provider が持つ状態は、境界の向こうへ持ち越されない。`Cach
 - ❌ `page.tsx` が横断 UI / Provider を直接 mount すること(mount 例外は `layout.tsx` 限定)
 - ❌ `layout.tsx` で hook 呼び + データ配線を行うこと(mount = 配置のみ。合成は feature)
 - ❌ 器(`AppShell`)がパンくずの口を持つこと、および階層が 1 段の画面へパンくずを置くこと
+- ❌ 見せる相手が違う面を 1 枚の shell に分岐で抱えること(shell を分ける)
 - ❌ 本来ローカルで足りる一時的な UI 状態(単発トーストの表示フラグ等)を、shell マウント層でグローバル状態として抱え込むこと。横断的に共有すべき UI 状態は [0060](0060-state-management.md) が採用した `stores`(Zustand)へ置く
-
-## 補足
-
-- **採番はブロック帯で確定(2026-07-14・0001〜0155(トピック順ブロック帯))**(独立起票・S ごと 1 ADR)。
-- **既存 ADR への内容反映は 2026-07-14 に適用済**(ユーザ承認のもと): [0021](0021-frontend-responsibility.md) 依存マトリクスの `app/route-segment` 行に layout mount 例外 / [0022](0022-capabilities-kernel.md) の mount 例外を本 ADR へ一般化する pointer。
 
 ## 関連 ADR
 
 - [0025-app-layer-elements.md](0025-app-layer-elements.md) — `app/route-segment`(layout / page。本 ADR が layout の mount を細分)
 - [0022-capabilities-kernel.md](0022-capabilities-kernel.md) — Provider mount 例外(本 ADR が capabilities 限定から一般化)
+- [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 依存マトリクス(`app/route-segment` 行の layout mount 例外)
 - [0031-policy-state-supply.md](0031-policy-state-supply.md) — ポリシー Provider(反応的供給時に layout mount)
+- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — 描画モードは route 全体で決まる(器を分ける判断の相方)
+- [0041-cache-components-decision.md](0041-cache-components-decision.md) — 遷移意味論の変更(状態の持ち越しを設計が当てにしない相手)
 - [0050-styling-strategy.md](0050-styling-strategy.md) — テーマ / ダークモード(Provider mount 対象)
-- [0080-error-handling.md](0080-error-handling.md) / [0052-ui-component-policy.md](0052-ui-component-policy.md) — トースト UI(#19)の帰属先
+- [0080-error-handling.md](0080-error-handling.md) / [0052-ui-component-policy.md](0052-ui-component-policy.md) — トースト UI の帰属先

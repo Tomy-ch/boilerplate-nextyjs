@@ -6,34 +6,30 @@ UI コンポーネント基盤として **shadcn/ui**(Radix primitives + Tailwin
 
 Accepted
 
-- バッテリー採用への転換(2026-07-14・v1)
-
-（採番はブロック帯で確定(2026-07-14・0001〜0155。トピック順ブロック帯(10 番台=主題ブロック))([0140](0140-documentation-operations.md))。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない。当初は exclusion(本体非同梱)として記録していたが、v1 =「一般的な Next.js アプリケーション基盤」方針([master-plan §1.2](../plan/master-plan.md))への転換に伴い、採用へ反転した。日付 2026-07-14）
-
 ## 背景
 
-当初 AGENTS.md の `[TODO]`(BACKLOG B2)は shadcn/ui の採否・アイコンライブラリ・form コンポーネント・Headless UI 系の扱いを未決とし、本 ADR はこれらを「用途依存ゆえ本体に同梱しない」exclusion として記録していた。
+本 boilerplate は「一般的な Next.js アプリケーション基盤」である。UI コンポーネント・アイコン・複雑入力部品は、一般的なアプリ基盤に **汎用・常用** で必要な要素であり、用途依存として fork 先へ委ねる対象ではない。したがって本体に採用し、shadcn/ui の採否・アイコンライブラリ・form コンポーネント・Headless UI 系の扱いをここで確定する。
 
-その後、boilerplate の性格を「用途未定の最小表示層」から **「一般的な Next.js アプリケーション基盤(v1)」** へ転換する方針が確定した([master-plan §1.2](../plan/master-plan.md))。UI コンポーネント・アイコン・複雑入力部品は、一般的なアプリ基盤に **汎用・常用** で必要な要素であり、v1 で採用対象とする(判定 = 汎用/常用 → v1)。
-
-## 決定: shadcn/ui + @tabler/icons-react + 複雑入力を採用(v1)
+## 決定: shadcn/ui + @tabler/icons-react + 複雑入力を採用
 
 - **UI コンポーネント = shadcn/ui**(Radix UI primitives + Tailwind、**copy-in** 方式)。生成コンポーネントは `components` カーネル([0021](0021-frontend-responsibility.md):横断 UI = デザインシステム的な純 UI)に配置する
 - **アイコン = @tabler/icons-react**。供給元を名指しできるのは [`src/components/icon.ts`](../../src/components/icon.ts) 1 ファイルだけで、feature も `components` の各部品もそこを参照する。締め出しは `eslint.config.ts` の `no-restricted-imports` が持つ。採る理由は語彙の広さで、outline だけで 5,000 種を超える。**アイコンが足りないことを理由に 2 つ目のセットを採らせない**ことがこの選択の目的である
 - **アイコンの公開面は名前付き再輸出に限る**。名前から component を引く表を置くと、その表がセット全体への静的な参照になり、使っていないアイコンまで束へ乗る。再輸出なら呼び出し側が import したものだけが残り、量は `pnpm bundle-budget` の予算([0101](0101-performance-budget.md))が受ける
 - **公開名は供給元の綴りではなく、この面の語彙**。供給元が別の名前で同じ字面を配っていても公開名は変えない。差し替えたときに呼び出し側が動かないことが、閉じ込めの目的そのものである
 - **複雑入力(日付ピッカー等)= shadcn 系部品**(`react-day-picker` などを Radix/Tailwind でラップした shadcn レシピ)。`components` に配置する。既定は控えめ(Medium)= 必要時に使う位置づけ
-- boilerplate 本体の UI は、これら採用部品に加えて **Tailwind ユーティリティ**([0050](0050-styling-strategy.md))と feature 内 UI([0021](0021-frontend-responsibility.md))で構成する
-- **variant 定義 = `class-variance-authority`(cva)**。shadcn/ui の公式コンポーネントが cva を使った状態で配布されるため採用する(採らなければ配布物を毎回書き換えることになる)。置き場・使い方の規約は [0050](0050-styling-strategy.md) が持つ
-- **リッチテキスト(TipTap)は v1 採用**。エディタ本体と表示側 sanitizer の a11y 契約・seam は [0053](0053-ui-component-interaction-seam.md) が所有し、本 ADR は `components` カーネルへの配置と exact-pin 要件のみを持つ
-- **v1 スコープの線引き**: v1 が抱えるのは上記の汎用 UI 基盤 + リッチテキストまで。これを超える局所的な UI 要件(DnD = dnd-kit 等は [0053](0053-ui-component-interaction-seam.md))は v2 で順次同梱、それを超える要件は **fork 先で追加**する
+- boilerplate 本体の UI は、これら採用部品に加えて **Tailwind ユーティリティ**([0050](0050-styling-strategy.md))と feature 内 UI([0021](0021-frontend-responsibility.md))で構成する。**utility で足りる配置(stack / inline / grid)は component で包まない。** `<Stack gap={4}>` と `<div className="flex flex-col gap-4">` の間に抽象の利得は無く、包んでも Tailwind の表現力は増えない。増えるのは「utility と component のどちらで書くか」を利用側が毎回迷う面だけである。骨格を utility だけで組む合成例はカタログ([0054](0054-ui-catalog-storybook.md))が示す
+- **variant 定義 = `class-variance-authority`(cva)**。shadcn/ui の公式コンポーネントが cva を使った状態で配布されるため採用する(採らなければ配布物を毎回書き換えることになる)。置き場・使い方の規約は [0050](0050-styling-strategy.md) が持つ。**`tailwind-variants` は採らない** —— variant / slots / responsive / merge を束ねて責務を 1 語で言えず([0004](0004-library-management.md) の一次判定)、cva と責務が重なる
+- **リッチテキスト(TipTap)を採用する**。エディタ本体と表示側 sanitizer の a11y 契約・seam は [0053](0053-ui-component-interaction-seam.md) が所有し、本 ADR は `components` カーネルへの配置と exact-pin 要件のみを持つ
+- **本体スコープの線引き**: 本体が抱えるのは上記の汎用 UI 基盤 + リッチテキストまで。これを超える局所的な UI 要件(並べ替え等のライブラリを要する DnD = dnd-kit 等)は本体に同梱せず、[0053](0053-ui-component-interaction-seam.md) が seam と a11y 契約を持つ。それらは **fork 先が必要時に追加**する
 
 ### 部品を得るために上流を増やさない
 
-registry は、本リポジトリが採るものとは別の headless 上流を前提とする item を配ることがある。**この場合その item は copy-in しない。**同一責務に 2 つ目の上流を抱える判断になり、1 部品のために同規模の下地を丸ごと引き受けることになるためである([0010](0010-standards-and-non-lockin.md) 非ロックイン)。registry に item が無い UI 概念も同じ扱いとする。取り得る道は 2 つで、いずれも `components` の公開 API を変えない。
+registry は、本リポジトリが採るものとは別の headless 上流を前提とする item を配ることがある。**この場合その item は copy-in しない。**同一責務に 2 つ目の上流を抱える判断になり、1 部品のために同規模の下地を丸ごと引き受けることになるためである([0010](0010-standards-and-non-lockin.md) 非ロックイン)。Base UI を前提とする item がこれに当たり、**`@base-ui/react` は採らない**。registry に item が無い UI 概念も同じ扱いとする。取り得る道は 2 つで、いずれも `components` の公開 API を変えない。
 
 - **既に持つ部品の合成で組む**
 - **合成で届かない場合は、必要な機構だけを抽出して自前で実装する**
+
+CLI が案内する代替 item が、既に持つ部品と責務を重ねることもある。その場合も copy-in せず、足りない機能だけを既存の部品へ取り込む(vendor は増やさない)。
 
 上流を増やす判断へ倒せるのは、**複数の部品が同じ上流を要求し始めたとき**か、**自前合成では満たせない要件が実使用面で確定したとき**である。この 2 つは別々に処理せず、**「今の上流をそちらへ置き換えるか」という 1 つの移行判断**としてまとめて評価する。**併存は選ばない** —— 依存表面が純増し、同じ責務の部品が 2 系統に割れる。
 
@@ -91,7 +87,7 @@ shadcn/ui から取り込んだ実装は**参照実装**として持つ。取り
 - ❌ @tabler/icons-react 以外のアイコンライブラリを追加同梱すること(差し替えは可だが並行同梱はしない)
 - ❌ 別の headless 上流を、registry item が要求するという理由だけで併存させること(合成か自前実装で組む。上流の追加は現行からの移行判断としてのみ扱う)
 - ❌ 採用ライブラリを exact-pin / `pnpm audit` を経ずに追加すること([0004](0004-library-management.md))
-- ❌ v1 スコープを超える局所的な UI 要件(高度な DnD 等)を本 ADR の範囲で本体へ持ち込むこと(v2 = [0053](0053-ui-component-interaction-seam.md) / それ以上は fork)
+- ❌ 本体スコープを超える局所的な UI 要件(ライブラリを要する DnD 等)を本 ADR の範囲で本体へ持ち込むこと(seam と契約は [0053](0053-ui-component-interaction-seam.md) / ライブラリは fork 先)
 - ❌ リッチテキストの表示を sanitizer を通さずに行うこと(生の `dangerouslySetInnerHTML` は禁止。sanitizer port は [0053](0053-ui-component-interaction-seam.md))
 
 ## 関連 ADR
@@ -102,6 +98,6 @@ shadcn/ui から取り込んだ実装は**参照実装**として持つ。取り
 - [0051-styling-system.md](0051-styling-system.md) — デザイントークン体系 / レスポンシブ / モーション / 印刷(採用 UI が参照する semantic token の供給元。モーションライブラリの採用帰属も 0051 側)
 - [0054-ui-catalog-storybook.md](0054-ui-catalog-storybook.md) — UI カタログ(採用部品の視覚的仕様の置き場)
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — `components` カーネル(採用 UI の配置先)・昇格規律(vendor 依存の閉じ込め)
-- [0011-no-docker.md](0011-no-docker.md) — 表示層ロール(v1 でアプリケーション基盤へ性格更新)
-- [0060-state-management.md](0060-state-management.md)(B5)— form state(react-hook-form + zod)採用。form 部品と対で機能する
-- [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) — リッチテキスト(TipTap。v1 採用)の a11y 契約 / sanitizer port、および DnD(dnd-kit)等 v2 採用の局所 UI
+- [0011-no-docker.md](0011-no-docker.md) — 表示層ロール
+- [0060-state-management.md](0060-state-management.md) — form state(react-hook-form + zod)採用。form 部品と対で機能する
+- [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) — リッチテキスト(TipTap)の a11y 契約 / sanitizer port、および DnD(dnd-kit)等、本体に同梱しない局所 UI の seam

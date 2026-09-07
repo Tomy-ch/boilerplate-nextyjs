@@ -8,46 +8,43 @@
 
 Accepted
 
-- バッテリー採用への転換(2026-07-14・v1)
+## boilerplate の性格
 
-## v1 バッテリー採用に伴う前提更新(性格転換)
+本 boilerplate は **一般的な Next.js アプリケーション基盤** である。これは「Next.js を表示層として用いる」というロール定義の **具体化** であって、ロールの拡張・変更ではない。表示層に必要な汎用ライブラリを boilerplate 側で決めておく、という粒度である（バックエンド業務ロジック / DB・ORM / アプリ本体の self-host Docker はロール外）。
 
-> 2026-07-14 追記(v1)。本 ADR の **ロール定義(Next.js を表示層として用いる / アプリ本体の no-Docker / PaaS・静的 CDN 配送)は不変**。変わるのは boilerplate の **性格(キャラクタ)** と **out-of-scope の意味** のみであり、禁止事項(exclusion)の中身は反転しない。**前提の更新であって除外の反転ではない**。
+目指すものは 3 つ（哲学 3 本柱）。
 
-### 性格の更新
+1. **考えないでもフロントが組める** — 置き場・書き方・接続点が決まっていて、判断を毎回やり直さない
+2. **デザインと README を見れば実装できる** — 画面の見た目はデザイン、部品の使い方と責務は層 README が答える
+3. **責務分離されていて綺麗に実装できる** — 層の境界が機械で守られ、正しい置き場が名前から読める
 
-従来、本 boilerplate は「**最小・用途未定** の表示層テンプレート」として位置づけ、多くのライブラリ選定を out-of-scope(未決・seam)に置いていた。v1 ではこれを次のように更新する。
+### 同梱するライブラリの範囲
 
-- **v1 = 一般的な Next.js アプリケーション基盤**。汎用・常用のライブラリ(UI コンポーネント / form state / グローバル状態 / 表示フォーマット / 観測性 等)を **必要なものとして同梱** する(採用の内訳は各 ADR 本体と [master-plan §1.2](../plan/master-plan.md))。
-- **v2 = 局所的に使うライブラリ**(i18n / リッチテキスト / DnD / 決済 / 分析 / PWA 等)を **順次同梱** していく。それまでは seam を存続させる。
+- **汎用・常用のライブラリ**（UI コンポーネント / form state / グローバル状態 / 表示フォーマット / 観測性 等）は **必要なものとして同梱** する。採用の内訳は各 ADR 本体が持つ
+- **局所的に使うライブラリ**（i18n / リッチテキスト / DnD / 決済 / 分析 / PWA 等）は後続のリリースで順次同梱する。それまでは seam を存続させる
 
-これは「Next.js を表示層として用いる」というロール定義の **具体化** であって、ロールの拡張・変更ではない。表示層に必要な汎用ライブラリを boilerplate 側で決めておく、という粒度の更新にとどまる(バックエンド業務ロジック / DB・ORM / アプリ本体の self-host Docker は引き続きロール外)。
+### out-of-scope の意味
 
-### out-of-scope の性格の変化
+out-of-scope は「**ロール境界の外**」（バックエンド業務ロジック / DB・ORM / アプリ本体の self-host Docker 等）を指す。「まだ決めていない / 最小に留める」という選定の留保ではない。汎用ライブラリの未決は out-of-scope ではなく、各 ADR で **決定済み** である。したがって本 ADR が定める Docker 非採用・表示層ロールの out-of-scope も、「用途未定だから含めない」ではなく「ロール定義上そもそも対象外」という線引きである。
 
-この更新で **out-of-scope の意味が変わる** 点に注意する。
+### 採用の規律（[0010](0010-standards-and-non-lockin.md) / [0004](0004-library-management.md)）
 
-- 従来: out-of-scope ≒「**まだ決めていない / 最小に留める**」(ライブラリ選定の留保)。
-- v1 以降: out-of-scope ≒「**ロール境界の外**」(バックエンド業務ロジック / DB・ORM / アプリ本体の self-host Docker 等)。汎用ライブラリの「未決」は out-of-scope ではなく **v1 で決定済み** に移る。
+同梱する各ライブラリの採用は、本 ADR ではなく個別 ADR が所有する。本 ADR はロール整合の観点からこれを参照するに留めるが、いずれの採用も次を必須とする。
 
-したがって本 ADR が定める Docker 非採用・表示層ロールの out-of-scope は、**「用途未定だから含めない」ではなく「ロール定義上そもそも対象外」** という、より明確な線引きへと性格が変わる。
-
-### 採用の規律([0010](0010-standards-and-non-lockin.md) / [0004](0004-library-management.md))
-
-v1 で同梱する各ライブラリの採用は、本 ADR ではなく個別 ADR が所有する。本 ADR はロール整合の観点からこれを参照するに留めるが、いずれの採用も次を必須とする。
-
-- [0010](0010-standards-and-non-lockin.md): デファクトに乗りつつ **vendor-independent な正当性材料を本体に明記**、かつ **adapters / カーネル境界の裏に置いて差し替え可能** に保つ(vendor 直参照を feature / component に散らさない)。
+- [0010](0010-standards-and-non-lockin.md): デファクトに乗りつつ **vendor-independent な正当性材料を本体に明記**、かつ **adapters / カーネル境界の裏に置いて差し替え可能** に保つ（vendor 直参照を feature / component に散らさない）。
 - [0004](0004-library-management.md): コア依存は **exact-pin**、追加時に **`pnpm audit`**。
 
-## 背景
+## 同梱サンプルと破棄境界
 
-旧構成では Dockerfile（dev / builder / prd の 3 ステージ）と docker-compose.yml を同梱していたが、以下のドリフトが恒常的に発生していた。
+本 boilerplate は題材を持つサンプル（画面・feature・ルート・E2E・モック・生成物からなるジャーニー）を同梱し、fork はセットアップ時にそれを破棄してコアだけを受け取る（`make setup-remove-sample`）。
 
-- `Dockerfile` の `npm ci` + `package-lock.json` 前提が pnpm 採用方針（ADR 0001）と乖離
-- `node:22.15.0-alpine` が `mise.toml` の `node = "24.14.1"`（ADR 0003）と乖離
-- `sharp` のために `vips-dev` 等を `apk add` する古い手順が残存（現代の sharp は prebuilt binary を同梱しており不要）
-
-これらの修正コストを払い続けるには、本リポジトリの **想定ロール** と **想定デプロイ先** を絞った方が合理的、という判断に至った。
+- **サンプルは、component を実データ・実操作へ配線した実装例として作る。** `components` に持っている部品を、画面要件に直接現れないことだけを理由に使わずに終えない。API から取得した実データ・form の実入力・Server Action の実送信へ繋ぐ
+- **残す / 破棄するの判定基準は「用途特化か汎用か」。** 破棄するのはジャーニーと、題材でしか使わない部品・装飾目的の部品。残すのはドメインを持たないもの — どのプロジェクトでも使う汎用 UI 部品・機構（`cn()` / `ActionState<T>` / 画像ローディングの仕組み等）・デザイントークン・認証・認可の機構
+- **破棄対象をディレクトリ名で隔離しない。** ファイルは自然な場所・自然な名前に置き、破棄対象は manifest の明示パス宣言と、共有ファイル内のマーカーで表現する
+- 破棄機構の設計は 3 点で成り立つ
+  1. **マーカー 3 種** — `sample:begin` / `sample:end`（ブロック・ネスト可）、`sample:line`（行末）、`sample:replace-begin` / `sample:replace-with` / `sample:replace-end`（サンプル在時のコードを除去し、退避してあった代替コードを有効化する）。3 つめは、既定値の切替のように「削除後にだけ有効化したい代替コード」のためにある
+  2. **マーカー除去を削除より先に実行する** — 不整合があれば中断し、「消したがマーカーが残った」半端な状態を作らない
+  3. **`verify` が過不足を両方見て、最後に自身を消す** — 不足（登録パスの残留）と過剰（登録外の削除）・make ターゲットの消失・残留参照を検証し、検証後に自身とスナップショットを削除してコアのみを残す
 
 ## 採用理由
 
@@ -78,15 +75,15 @@ Next.js を self-host する選択肢（ECS / Kubernetes / オンプレ / Fly.io
 
 `next/image` コンポーネントは内部で `sharp` を使うが、現代の `sharp`（≥ 0.32）は **prebuilt binary を同梱** しており、`vips-dev` / `libjpeg-turbo-dev` / `libpng-dev` / `libwebp-dev` 等を `apk add` する手順は不要。`pnpm install` だけで完結する。
 
-旧 Dockerfile の重厚な system lib インストール処理は、現代の sharp では vestigial（時代遅れの遺物）となっている。Docker を残す動機の一つだった「`sharp` の system 依存をコンテナに閉じ込める」は、もはや存在しない依存。
+Docker を残す動機になりうる「`sharp` の system 依存をコンテナに閉じ込める」は、現代の sharp では存在しない依存への手当てである。
 
 ### 4. メンテナンス負担の削減
 
 Docker を維持する場合、以下を毎リリースで同期する必要がある。
 
 - `Dockerfile` の `FROM` タグ ↔ `mise.toml` の `node` バージョン
-- `Dockerfile` 内の `npm ci` ↔ ADR 0001 の pnpm 方針
-- `package-lock.json` 維持 ↔ `pnpm-lock.yaml`（lockfile が二重化）
+- `Dockerfile` 内のインストールコマンド ↔ ADR 0001 の pnpm 方針（`npm ci` + `package-lock.json` を使わない）
+- lockfile の二重化（`package-lock.json` ↔ `pnpm-lock.yaml`）
 
 同梱しないことで、これら同期作業と「同期忘れによるドリフト」が構造的に消える。
 
@@ -158,24 +155,24 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 [0010](0010-standards-and-non-lockin.md) の非ロックインを config の形で否定することになる。
 **実装が本当に割れる点だけ、割れた分だけ独立した指定を置く。**
 
-## 何を削除するか
+## 同梱しないもの
 
-本 ADR の採用に伴い、以下（**アプリケーション本体の Docker 配送に関連するもの**）を削除する。
+以下（**アプリケーション本体の Docker 配送に関連するもの**）は同梱しない。
 
 - `Dockerfile`（Next.js アプリ本体用）
 - `docker-compose.yml`（本体配送用）
 - `.dockerignore`
-- README からの「Docker による起動」推奨記述（あれば）
+- README での「Docker による起動」推奨記述
 
-`mise.toml` / `package.json` / `pnpm-lock.yaml` 等の構成ファイルは引き続き SSOT として機能する。
+`mise.toml` / `package.json` / `pnpm-lock.yaml` 等の構成ファイルが SSOT として機能する。
 
 ## Dev インフラとしての docker-compose（例外）
 
 本 ADR は **アプリケーション本体（Next.js アプリそのもの）の配送に Docker を使わない** という方針であり、開発時に独立して立ち上げる **補助ツール群** を Docker / docker-compose で運用することは禁止対象外とする。
 
-### 本リポは自前の compose を持たず、go-boilerplate のスタックへ接続する
+### backend / IdP / ストレージの compose は持たず、backend 側のスタックへ接続する
 
-本リポジトリは `docker-compose.yaml` を **持たない**。開発時に必要な backend / 観測性 / ストレージ / IdP は、別リポジトリ **go-boilerplate の compose スタック**に接続して賄う（起動は go 側で `docker compose --profile development up`）。
+本リポジトリは backend / 観測性 / ストレージ / IdP を立てる compose を **持たない**。開発時に必要なそれらは、backend 側リポジトリの compose スタックへ接続して賄う（同梱サンプルの backend は go-boilerplate で、スタックの起動はそちらで行う）。表示層のリポジトリが backend の起動手順を抱えると、backend 側の変更に追随する二重管理が生じるためである。
 
 | 接続先 | 既定 | 用途 |
 | --- | --- | --- |
@@ -199,9 +196,14 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 
 **採用済みは visual regression のランナーだけ**（[`docker-compose.dev-tools.yml`](../../docker-compose.dev-tools.yml) の `browser_runner`）。基準画像はフォントのラスタライズに依存し、それは OS でも CPU アーキテクチャでも変わるため、比較の基準を実行者の環境から切り離す手段が要る（[0091](0091-test-verification-methods.md) §3）。ここで Docker を採るのは「Docker でないと解決できないか」への答えが是であるためで、PaaS / SaaS で代替できる用途（下記）とは性質が違う。
 
-補助ツールの image は tag ではなく digest で固定する。registry の tag は同じ名前のまま別の中身を指せるため、tag だけの参照では実行環境が黙って変わる。運用は [`docker/README.md`](../../docker/README.md)。
+### 補助ツールの image は digest で固定する
 
-**registry の image を指す参照は、書かれた場所によらずこの機構が固定する。**対象は compose の `image:` と Dockerfile の `FROM` に加え、workflow / composite action の `uses: docker://<image>:<tag>`（GitHub Actions が registry の image を直接実行するステップ記法）。`uses:` の行であっても参照先は GitHub のリポジトリではないため、tag を `git ls-remote` で commit SHA へ解決する actions-pin（[0153](0153-ci-configuration.md)）では扱えない。走査するファイルは両機構で重なるが、掴む行は重ならない。`docker://` 参照に tag を必須とし、省略（＝`:latest`）は fail-closed で落とす。
+registry の tag は同じ名前のまま別の中身を指せるため、tag だけの参照では実行環境が黙って変わる。そこで **版の SSOT は tag 側に残し、`image:tag` → digest の対応をロックファイル（`docker/images-pin.toml`）が持つ**。固定してあれば、指し先が変わった時点で pull が失敗する。手順は [`docker/README.md`](../../docker/README.md)。
+
+- **registry の image を指す参照は、書かれた場所によらずこの機構が固定する。** 対象は compose の `image:` と `docker/<用途>/Dockerfile` の `FROM` に加え、workflow / composite action の `uses: docker://<image>:<tag>`（GitHub Actions が registry の image を直接実行するステップ記法）。`uses:` の行であっても参照先は GitHub のリポジトリではないため、tag を `git ls-remote` で commit SHA へ解決する actions-pin（[0153](0153-ci-configuration.md)）では扱えない。走査するファイルは両機構で重なるが、掴む行は重ならない。`docker://` 参照に tag を必須とし、省略（＝`:latest`）は fail-closed で落とす
+- **検疫を通した digest だけを採る。** 解決は公開から 14 日未満の digest を採らない（`IMAGES_PIN_MIN_AGE_DAYS`。窓の長さは [0110](0110-security-operations.md) の供給網検疫と同じ理由で決まる）。上流が乗っ取りを検知して取り消すまでの時間を稼ぐためで、既存のピンがあればそれを維持する。退行先の無い出来立ての image は、tag のまま残さず失敗させる
+- **tag の付け替えは検知しない。** base image の tag は patch 版が出るたび前進するのが通例で、「解決先が変わったら止める」を入れると日常的な更新と区別が付かなくなる。Actions の SHA ピン（[0153](0153-ci-configuration.md)）とはここだけ運用が異なる。image に対して働く防壁は **検疫と固定の 2 つ** である
+- **image を tag でしか受け取れない公式 action は使わない。** 例えば DAST ツールの公式 action は image を tag で受け取り、その input はこの機構の走査対象に入らない。固定したつもりで誰も検査していないピンを 1 つ増やすより、他の補助ツールと同じ compose の service に揃える
 
 ### 採用する場合のルール
 
@@ -220,7 +222,7 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 本 boilerplate を fork したプロジェクトが、Docker / self-host が必要なロールに拡張する場合の指針:
 
 1. 本 ADR を fork プロジェクト側で superseded（廃止）扱いとし、別 ADR で「本プロジェクトでは Docker を採用する」と上書き宣言する
-2. `Dockerfile` を新規作成する。テンプレートとして git 履歴（本 ADR 適用前の commit）を参照できる
+2. `Dockerfile` を新規作成する
 3. 以下を SSOT と整合させる:
    - `FROM node:<X.Y.Z>-alpine` を `mise.toml` の `node` と一致
    - `RUN pnpm install --frozen-lockfile` を採用（`npm ci` は使わない）
@@ -243,19 +245,20 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 - ❌ `stand-alone` / `cloud` を値に持つ config の軸を置くこと(呼び名は 2 群の別名であって独立した軸ではない。組み合わせが表現できなくなる。§環境の定義)
 - ❌ 開発専用の口の開閉を、接続モード(`APP_API_MODE` 等)や環境の呼び名で判定すること(判定は `APP_ENV` と宛先が持つ。§環境の定義)
 - ❌ frontend だけを mock のまま cloud へ置くこと(IdP 無しで session を出す口を cloud で開くことになる。§環境の定義)
+- ❌ 補助ツールの image を tag だけで参照すること / tag でしか image を受け取れない action を経由して image を実行すること(digest 固定の走査対象から外れる。§補助ツールの image は digest で固定する)
 
 > Dev インフラとしての docker-compose（`docker-compose.dev-tools.yml` 等の名前付きファイル）は本禁止事項の対象外。
 
 ## 補足
 
 - 本 ADR が否定するのは **「アプリ本体の配送手段としての Docker」**（Type A）。**「補助ツール群を docker-compose で立ち上げる」**（Type B、例: モック API / OpenAPI viewer / docs viewer）は対象外であり、専用ファイル名で導入してよい
-- 「Docker を全否定する」のではなく、「本 boilerplate のロール定義（表示層）には Type A が不要」という整理。fork 先で必要になったら復活させればよい
-- 旧 Dockerfile / docker-compose.yml の内容は git 履歴から参照可能（必要に応じて cherry-pick 可）
+- 「Docker を全否定する」のではなく、「本 boilerplate のロール定義（表示層）には Type A が不要」という整理。fork 先で必要になったら導入すればよい
 - 本 ADR は **ロール定義の文書化** でもある。boilerplate を採用する開発者は、本 ADR を読むことで「このリポジトリで何を作る前提か」を理解できる
 
 ## 関連 ADR
 
-- [0001-package-manager.md](0001-package-manager.md) — pnpm 採用（旧 Dockerfile が `npm ci` を使っていた点の根拠）
+- [0001-package-manager.md](0001-package-manager.md) — pnpm 採用（Dockerfile を持つ場合も `npm ci` を使わない根拠）
 - [0003-version-manager.md](0003-version-manager.md) — Node / pnpm バージョンの SSOT（Dockerfile FROM タグとの同期問題を消す根拠）
-- [0004-library-management.md](0004-library-management.md) — `sharp` の prebuilt binary 等、現代ライブラリの system 依存に関する評価指針 / v1 同梱ライブラリの exact-pin・`pnpm audit`
-- [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — v1 バッテリー採用の規律(vendor-independent 正当化 + adapters/seam 越し差替可能)。本 ADR の表示層ロール定義は 0010 §2「フレームワーク選択は別既決」の根拠でもある
+- [0004-library-management.md](0004-library-management.md) — `sharp` の prebuilt binary 等、現代ライブラリの system 依存に関する評価指針 / 同梱ライブラリの exact-pin・`pnpm audit`
+- [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — 同梱ライブラリの採用の規律(vendor-independent 正当化 + adapters/seam 越し差替可能)。本 ADR の表示層ロール定義は 0010 §2「フレームワーク選択は別既決」の根拠でもある
+- [0110-security-operations.md](0110-security-operations.md) / [0153-ci-configuration.md](0153-ci-configuration.md) — 供給網検疫の窓 / Actions の SHA ピン（image の digest 固定と対になる機構）

@@ -132,7 +132,8 @@ Fix: route handler の query 取得を Next.js 16 API に合わせる
 
 ### スコープ分割の原則
 
-- **1 PR に複数の論理変更が混ざる場合はコミットを分割** する (例: Refactor + Feat、Docs + Fix)
+- **1 つの意味変更 = 1 コミット、プレフィックスは 1 つ。** 1 PR に複数の論理変更が混ざる場合はコミットを分割する (例: Refactor + Feat、Docs + Fix)。プレフィックスを 2 つ書きたくなったら、分割の単位が違う
+- テストは、それが検証する実装と同じコミットに置いてよい (実装と切り離した `Test:` に分けることを強制しない)
 - メジャー依存の更新 (`next` / `react` / `@biomejs/biome` 等のメジャーアップ) は他の機能変更と同じコミット・PR に混ぜない (0004 と整合)
 - フォーマッタ起因の大量変更は `Style:` で別コミットに切り出し、レビュアーがロジック差分に集中できるようにする
 - 生成物 (`pnpm-lock.yaml` 等) の変更は原因コミットと同じコミットに含める (lockfile だけ別コミットにしない)
@@ -216,13 +217,14 @@ PR タイトルも日本語で書き、関連 issue / ADR を本文末尾に記�
 ## 補足
 
 - 「最新の `release/*` から派生する」ルールがあるため、複数の `release/*` が並行する期間は **どの release に乗せるかを issue / PR 段階で決める**。曖昧な場合は最新の `release/*` を採る
-- **GitHub のデフォルトブランチは最新の `release/vX.Y.Z`** とする。リポジトリを開いた人が「現在作業中のリリース」を最初に見る形にするためで、go-boilerplate と同形式。デフォルトブランチはリリースを切るたびに新しい `release/*` へ張り替える
+- **GitHub のデフォルトブランチは最新の `release/vX.Y.Z`** とする。リポジトリを開いた人が「現在作業中のリリース」を最初に見る形にするためである。デフォルトブランチはリリースを切るたびに新しい `release/*` へ張り替える
 - **派生元と PR の base は、どちらもデフォルトブランチが指す `release/vX.Y.Z`。** 現行の `release/*` は `gh repo view --json defaultBranchRef` で引ける。デフォルトブランチが正しく張られていれば、`git switch -c <branch> origin/<release>` の宛先と、GitHub が PR で最初に提示する base が一致する
 - **`develop` を base に取ってよいのは `release/*` → `develop` の統合 PR だけ。** `feature/*` / `bugfix/*` の PR が `develop` を向いていたら、派生元を取り違えている。`develop` は統合先であり、開いている `release/*` より必ず後ろにいるため、そこを起点にすると既に載っている変更を差分として引き連れる
-- 本 ADR ではブランチ命名・保護対象・コミット粒度のみを宣言する。CI ジョブの具体構成 (どの job をどのブランチで走らせるか) や自動デプロイ連携の詳細は別 ADR で扱う
+- 本 ADR ではブランチ命名・保護対象・コミット粒度のみを宣言する。CI ジョブの具体構成 (どの job をどのブランチで走らせるか) や自動デプロイ連携の詳細は [0153](0153-ci-configuration.md) が扱う
 
 ## 関連 ADR
 
 - [0001-package-manager.md](0001-package-manager.md) — `pnpm-lock.yaml` を commit する方針 (lockfile の手動編集禁止)
 - [0004-library-management.md](0004-library-management.md) — 依存ライブラリ更新 PR の粒度 (メジャー更新は別 PR)
 - [0151-git-hooks.md](0151-git-hooks.md) — pre-commit / pre-push hook の運用方針
+- [0153-ci-configuration.md](0153-ci-configuration.md) — CI ジョブの構成と required check

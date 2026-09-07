@@ -5,7 +5,7 @@
 - **決定の正 = ADR**(`docs/adr/00NN-*.md`)。確定した設計判断は各 ADR 本体が唯一の正であり、本書は再掲しない(ADR 番号 + 相対リンクで参照する)
 - **進捗ボードの正 = [docs/adr/BACKLOG.md](../adr/BACKLOG.md)**。各 ADR / 枠 ID の「選定済み / 実装済み」ステータスは BACKLOG.md が正であり、本書は個別ステータスを再掲しない
 - **工程の正 = [v1-implementation-plan.md](v1-implementation-plan.md)**。Phase → PR の分解・完了条件・依存関係はすべてそちらが持ち、本書は工程を持たない
-- **サンプル仕様の正 = [screens.md](../screens.md)**(19 画面 + API 概要)
+- **サンプル仕様の正 = [screens.md](../spec/screens.md)**(19 画面 + API 概要)
 - **本書 = ADR に載らない確定事項**。滑走路原則・採用ロードマップ・実装レール・棄却を集約する
 
 - 生成日: 2026-07-18

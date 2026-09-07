@@ -61,15 +61,6 @@ describe("scanTree", () => {
     TIMEOUT_MS,
   );
 
-  it(
-    "実ツリーの Markdown に、表として成立していない行が無い",
-    () => {
-      // ベースラインと違い基準値を持たない。0 件が唯一の合格で、数えて固定する対象ではない。
-      expect(scanRowsOutsideTable(REPO_ROOT)).toEqual({});
-    },
-    TIMEOUT_MS,
-  );
-
   // ----- 異常系 -----
   it("除外ディレクトリ名の配下へ降りない", () => {
     for (const name of EXCLUDED_DIRECTORIES) {
@@ -98,6 +89,30 @@ describe("scanTree", () => {
     chmodSync(join(root, "locked.md"), 0o000);
 
     expect(() => scanTree(root)).toThrow();
+  });
+});
+
+describe("scanRowsOutsideTable", () => {
+  // ----- 正常系 -----
+  it(
+    "実ツリーの Markdown に、表として成立していない行が無い",
+    () => {
+      expect(scanRowsOutsideTable(REPO_ROOT)).toEqual({});
+    },
+    TIMEOUT_MS,
+  );
+
+  it("Markdown 以外は見ない", () => {
+    place("src/a.ts", "| a | b |", "| 1 | 2 |");
+
+    expect(scanRowsOutsideTable(root)).toEqual({});
+  });
+
+  // ----- 異常系 -----
+  it("区切り行を持たない `|` 始まりの行を挙げる", () => {
+    place("docs/a.md", "| a | b |", "| 1 | 2 |");
+
+    expect(scanRowsOutsideTable(root)).toEqual({ "docs/a.md": [1, 2] });
   });
 });
 

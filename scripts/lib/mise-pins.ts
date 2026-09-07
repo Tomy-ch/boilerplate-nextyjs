@@ -27,7 +27,7 @@ export const MISE_FILE = "mise.toml";
 export const IGNORE_DIRECTIVE = "tools-cooldown-ignore:";
 
 /** pin に添えられた冷却の免除。 */
-export type CooldownIgnore = {
+type CooldownIgnore = {
   /** 理由と撤回条件の散文。 */
   readonly condition: string;
   /** 免除の宣言が始まる行（1 始まり）。 */

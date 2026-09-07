@@ -77,4 +77,11 @@ describe("applyRepositoryReference", () => {
       occurrences: 0,
     });
   });
+
+  // ----- 異常系 -----
+  it('"/" を含まない参照は、空の答えを返さずに落ちる', () => {
+    expect(() => applyRepositoryReference("本文", CURRENT, "owner-only")).toThrow(
+      '所有者とリポジトリ名を "/" で繋いだ形ではありません',
+    );
+  });
 });

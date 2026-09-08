@@ -155,6 +155,10 @@
       "Bash(pnpm exec chrome-devtools take_heapsnapshot *)",
       "Bash(pnpm exec chrome-devtools evaluate_script *)",
       "Bash(make help)",
+      "Bash(make base-branch)",
+      "Bash(make -s base-branch)",
+      "Bash(make base-merge)",
+      "Bash(make base-merge *)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
       "Bash(make gh-login *)",
@@ -225,6 +229,7 @@
       "Bash(gh api *DELETE*)",
       "Bash(gh api *delete*)",
       "Bash(gh api *git/refs*)",
+      "Bash(git merge --abort*)",
       "Bash(pnpm exec playwright cli attach*)",
       "Bash(agent-browser -q chat*)"
     ],

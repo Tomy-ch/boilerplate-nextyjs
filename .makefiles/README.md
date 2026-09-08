@@ -181,6 +181,7 @@ pre-commit hook と CI の `actions-lint` job が実行します。actionlint �
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
 | `make base-branch` | 最新のリリースライン（`release/vX.Y.Z`）のブランチ名を 1 行で出力します。 | `git ls-remote` で `origin` の実状態を読むため、`git fetch` では更新されないローカルの `refs/remotes/origin/HEAD` が古くても、GitHub のデフォルトブランチが前のラインを指したままでも答えは変わりません。「最新」はコミット日時ではなく版の数値比較で、リリースブランチを切る側と同じ判定を使います。出力は装飾を持たないので `$(make -s base-branch)` でそのまま受けられます。リリースラインが 1 本も無ければ exit 1 で、空文字を返しません。PR が既にあるならその `baseRefName` が正で、これは PR が無いときの答えです。 |
+| `make base-merge [BASE=<ref>] [DRY_RUN=1]` | ベースブランチを現在のブランチへ取り込み、未解決のパスを 1 行 1 件で出力します。 | ベースは `--base` → PR の `baseRefName` → 最新のリリースライン の順で最初に決まったものを採ります。PR がある枝でそのベース以外を取り込むと、追いつかせるつもりが行き先の付け替えになります。**rebase はしません**（[0150](../docs/adr/0150-git-workflow.md)。加えて追記専用のファイルでは同じ内容が別のハッシュで再着地します）。保護ブランチの上と作業ツリーが汚れている状態は拒みます。衝突が残ると exit 1 で、**作業ツリーは MERGING のまま残します** —— 解決は `resolve-merge` が続けるので、ここで捨てるとその入力ごと失われます。分類と解決は持ちません（[`scripts/base-merge/README.md`](../scripts/base-merge/README.md)）。 |
 
 ### リリースブランチ関連
 

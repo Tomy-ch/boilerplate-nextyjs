@@ -295,6 +295,7 @@ make test-full             # Full run with coverage against the 100% threshold (
                            #   itself — leave it to the hook and CI rather than running it by hand
 make load-status           # Show the current gate band and why (ADR 0151)
 make base-branch           # Print the latest release line, read from origin (ADR 0150).
+make base-merge            # Merge that base into the current branch; prints the paths left unresolved
                            #   Branch from this, not from the default branch — a clone's
                            #   origin/HEAD is fixed at clone time and never refetched
 make hotfix-patch          # Create a hotfix/v<patch> branch from production
@@ -307,13 +308,25 @@ For release branches, follow 0150 (`git switch -c release/v<X.Y.Z> origin/produc
 
 See [`.makefiles/README.md`](.makefiles/README.md) for details.
 
+<!-- boilerplate-only:begin -->
 ### Do not pre-run the gates
 
-**The hooks and CI run these for you, and CI is the authority** ([0151](docs/adr/0151-git-hooks.md)).
-`pre-commit` already runs the full lint profile and the cached tests; `pre-push` adds the type check,
-the full test run, and the secret scan. Running the same commands by hand before committing does not
-make the result more true — it only spends the time twice, and on a busy host the duplicate run is
-itself a source of failures that have nothing to do with the change.
+**This section is this repository's own operating rule, and it is removed from a repository created
+from this template.** What a created repository keeps is *Code Style* below — run `pnpm fix` and
+`pnpm lint:ci` before committing. The two say opposite things on purpose: they are written for
+different situations, and only one of them is present at a time.
+
+The situation that produces this rule is this repository's alone. Several worktrees are open at once
+against the same host, every one of them carrying the full gate set, and the gates multiply rather
+than queue. A created repository has one working tree and a gate run that costs what it says it
+costs, so pre-running is cheap there and catches things before the hook does.
+
+**Here, the hooks and CI run these for you, and CI is the authority**
+([0151](docs/adr/0151-git-hooks.md)). `pre-commit` already runs the full lint profile and the cached
+tests; `pre-push` adds the type check, the full test run, and the secret scan. Running the same
+commands by hand before committing does not make the result more true — it only spends the time
+twice, and on a busy host the duplicate run is itself a source of failures that have nothing to do
+with the change.
 
 So: **commit, push, and read the verdict from the hook or CI.** Re-running a single file you just
 edited is fine; sweeping the whole suite, or the whole lint, is not.
@@ -322,6 +335,7 @@ edited is fine; sweeping the whole suite, or the whole lint, is not.
 and the heavy gates are delegated to CI automatically — that decision is measured, not guessed, so
 do not pre-empt it with `--no-verify`. Bypassing is governed by 0151's bypass policy, not by how
 slow the gate feels.
+<!-- boilerplate-only:end -->
 
 ## Git Rules
 

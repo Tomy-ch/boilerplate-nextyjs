@@ -235,11 +235,16 @@ If `git add` or `git commit` fails for any group (file-path typo, mid-operation 
 
 ## Step 6. Verification
 
+<!-- boilerplate-only:replace-begin -->
 **Do not run the gates here.** `AGENTS.md`'s *Do not pre-run the gates* is explicit that the hooks and
 CI run them and that **CI is the authority**; running `pnpm lint:ci` / `pnpm md-lint` over the whole
 repository after committing does not make the verdict more true, and on a loaded host the duplicate
 run is itself a source of failures that have nothing to do with the change. `make load-status` prints
 which gates run locally right now, and that band is measured rather than guessed.
+
+**That rule is this repository's own**, and it is stripped from a repository created from this
+template — which is why this section is too, and why the version below it restores the gate run. A
+created repository has one working tree and a gate run that costs what it says it costs.
 
 So this step does two things only:
 
@@ -258,13 +263,32 @@ So this step does two things only:
 
 If formatting changed a tracked file, surface the diff — the committed state was not formatted, and
 the user decides whether to stack a fix-up commit.
+<!-- boilerplate-only:replace-with -->
+<!-- = After all commits succeed, run the verification gate: each command defined under -->
+<!-- = `pre-commit:` in `.lefthook.yaml`, then `pnpm fix` as a final formatting pass. Do NOT run -->
+<!-- = `lefthook run pre-commit` itself — lefthook skips registered commands when nothing is -->
+<!-- = staged, which is exactly the state this skill leaves behind. -->
+<!-- = -->
+<!-- = ### Procedure -->
+<!-- = -->
+<!-- = 1. Re-read `.lefthook.yaml` and enumerate `pre-commit.commands.*.run`. Skip this step if -->
+<!-- =    the file is absent. -->
+<!-- = 2. Run each command sequentially, capturing its exit status and a short tail of its output. -->
+<!-- = 3. Run `pnpm fix` last. If it modifies a tracked file, surface the diff — the committed -->
+<!-- =    state was not formatted, and the user decides whether to stack a fix-up commit. -->
+<!-- = 4. Report each command as OK / FAIL. On any failure, report it and stop; do not roll back -->
+<!-- =    the commits — the failure is informational and the user decides how to answer it. -->
+<!-- boilerplate-only:replace-end -->
 
+<!-- boilerplate-only:begin -->
 ### Why this step no longer runs the gates
 
 `AGENTS.md` carries both this instruction and, under *Code Style*, a line telling you to run
 `pnpm fix` / `pnpm lint:ci` before committing. **Those two disagree, and this skill does not resolve
 the disagreement** — it follows the standing operating rule (the gates are CI's, pushes go
 `--no-verify`) and leaves the contradiction visible for a human to settle in `AGENTS.md`.
+
+<!-- boilerplate-only:end -->
 
 ## Step 7. Push Policy and Final Reminder
 

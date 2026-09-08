@@ -73,7 +73,8 @@ pnpm exec tsx scripts/bootstrap-plugins
 ```
 
 The bootstrap declares the `claude-plugins-official` marketplace and enables the official plugins
-this repo depends on (`skill-creator`) at **project scope**, so the declaration lands in this repo's
+this repo depends on (`skill-creator` and `feature-dev`; ADR 0155 says which of each plugin's assets
+are used and which are deliberately not) at **project scope**, so the declaration lands in this repo's
 `.claude/settings.json` and any trusted clone gets it without per-developer setup. It is idempotent;
 re-running is a no-op. Newly enabled plugins load on the *next* session, when `skill-creator` also
 becomes invocable as `/skill-creator` — but this wrapper does not depend on that, because it reads

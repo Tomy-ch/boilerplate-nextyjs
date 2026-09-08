@@ -17,7 +17,11 @@ const MARKETPLACE = "claude-plugins-official";
 const MARKETPLACE_SOURCE = "anthropics/claude-plugins-official";
 const SCOPE = "project";
 // 本リポジトリが依存する公式プラグイン。増やす場合はここに足す。
-const PLUGINS = ["skill-creator"];
+//
+// プラグインは資産の束であって、束ごと採る宣言ではない。どれを採りどれを意図して採らないかは
+// ADR 0155 が持つ。`feature-dev` は `code-explorer` のためだけに入れてあり、同梱の
+// `/feature-dev` コマンドと `code-architect` / `code-reviewer` は使わない。
+const PLUGINS = ["skill-creator", "feature-dev"];
 
 function repoRoot(): string {
   try {

@@ -100,6 +100,12 @@ verify-spec (integrator)
 scaffold-test (orchestrator)
  └─ test-perspective-enumerator (群単位で並列 fanout) ← .claude/agents/test-perspective-enumerator.md
      (書く前の観点の列挙。読むのは対象と最寄りの test-requirement README と 0090 / 0091)
+
+impl-issue (orchestrator)
+ ├─ code-explorer (観点ごとに並列 fanout)   ← feature-dev プラグイン同梱（下記の採否表）
+ │   (いまどう動いているか。呼び出しの鎖を辿り、読むべきファイルを返す)
+ └─ 3b 調査と起草 (定義を持たない汎用の subagent)
+     (何を変えるか。モデルは実行時に解決する —— 名簿はスキルへ焼かない)
 ```
 
 **エージェント定義は 1 つ、起動は複数**である。カーネルごとにエージェントのファイルを置くと、同じロジックを層の数だけ保守することになり、腐るのは写しのほうになる。並列に走らせる根拠は「独立した観点を並行させる」であって、定義を増やすことではない。
@@ -115,6 +121,39 @@ subagent 自身が read-only である規約は例外を持たない。書き込
 - subagent は **read-only on source** を既定とし、レビュー結果のみを返す (code edit は行わない)
 - subagent 間でモデル分散 (reviewer ≠ implementer) を意図する場合は、`SKILL.md` でその意図を明示する
 - 判定基準を持つ subagent は、基準をスキル配下の `prompts/` の 1 ファイルに置き、agent 定義と `SKILL.md` はそれを参照するだけで再掲しない。同じ検証が in-session と background の 2 経路で走るとき、両方が同じファイルを読むことで所見の質と形式が経路間でずれない。agent 定義が持つのは入力の受け取り方だけである
+
+### 公式プラグインから採る資産と、採らない資産
+
+公式プラグインは**資産の束**であり、有効化は束ごと採る宣言ではない。`scripts/bootstrap-plugins` が
+project スコープで宣言するものについて、**何を採り、何を意図して採らないか**をここで述べる。
+述べないと、束に入っているというだけで使われ、この repo が既に下した決定を黙って迂回する。
+
+| プラグイン | 採る | 採らない |
+| --- | --- | --- |
+| `skill-creator` | 方法論の全体（起草 → テスト → レビュー → 改善、description の最適化） | —— |
+| `feature-dev` | `code-explorer`（read-only / sonnet。呼び出しの鎖を辿り、読むべきファイルを返す） | `/feature-dev` コマンド・`code-architect`・`code-reviewer` |
+
+**`code-explorer` を採るのは、この repo が持っていない問いに答えるからである。**既存のレビュー系
+subagent はどれも「この変更は正しいか」を問うのに対し、これは**いまどう動いているか**を辿る。
+`impl-issue` の 3b（調査と起草）の前段として、観点を変えて並列に出す。read-only / sonnet 既定で、
+上の subagent 規約をそのまま満たす。
+
+**`code-architect` を採らないのは、このリポジトリの構造が決定済みだからである。**あれは
+「最小変更 / 綺麗な構造 / 折衷」の 3 案を並べて選ばせるが、層と依存の向きは
+[0020](0020-adopted-architecture.md) / [0021](0021-frontend-responsibility.md) が既に決めており、
+0020 は粒度で切る分類（Atomic Design / FSD）を名指しで棄却している。**既に決まっている所へ案を
+並べることは、選択肢の提示ではなく決定の再開である**（`AGENTS.md` の *What to Recommend*）。
+
+**`code-reviewer` を採らないのは、レビューの主題の分け方が違うからである。**このリポジトリは
+`AGENTS.md` の Review Phase Protocol で主題を 3 つ（変更 / テスト / コメント在庫）に割り、それぞれを
+1 つのスキルが所有し、見積もり付きで個別に問う。あれは軸を 3 つ（簡潔さ / 不具合 / 規約）に割るので、
+**同じ「3 本のレビュー」に見えて `test-review` と `comment-sweep` の主題を覆わない。**加えて
+finder → verifier の 2 段を持たないため、`impl-review` がまさにそのために置いている「もっともらしいが
+誤り」の濾過が働かない。
+
+**名前が衝突しなくても、混線は起きる。**プラグインのエージェントは型として並ぶので、統括する側が
+`adversarial-reviewer` の代わりにそちらを選びうる。**この表がその選択の根拠である** ——
+採らないと書いてあるものは、束に在っても使わない。
 
 ### subagent を使う判断
 

@@ -1,5 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "AGENT_BROWSER_PROFILE": "",
+    "AGENT_BROWSER_AUTO_CONNECT": "false",
+    "CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS": "1",
+    "CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(ls *)",
@@ -290,13 +296,17 @@
             "type": "command",
             "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" --hook || true"
           },
-        {
-          "type": "command",
-          "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" --hook || true"
-        }
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" --hook || true"
+          }
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -305,14 +315,5 @@
         "repo": "anthropics/claude-plugins-official"
       }
     }
-  },
-  "enabledPlugins": {
-    "skill-creator@claude-plugins-official": true
-  },
-  "env": {
-    "AGENT_BROWSER_PROFILE": "",
-    "AGENT_BROWSER_AUTO_CONNECT": "false",
-    "CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS": "1",
-    "CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS": "1"
   }
 }

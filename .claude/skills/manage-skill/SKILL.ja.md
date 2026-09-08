@@ -42,7 +42,7 @@
 pnpm exec tsx scripts/bootstrap-plugins
 ```
 
-この bootstrap は `claude-plugins-official` marketplace を宣言し、本リポジトリが依存する公式プラグイン（`skill-creator`）を **project スコープ**で有効化する。宣言が本リポジトリの `.claude/settings.json` に載るため、信頼済みの clone であれば開発者ごとのセットアップ無しに同じ資産が揃う。冪等であり、再実行は no-op。新たに有効化したプラグインが読み込まれるのは*次の*セッションからで、そのとき `skill-creator` は `/skill-creator` としても起動できるようになる。ただしこのラッパはそれに依存しない — パス指定でファイルを読むため、同一セッション内でも動く。
+この bootstrap は `claude-plugins-official` marketplace を宣言し、本リポジトリが依存する公式プラグイン（`skill-creator` と `feature-dev`。各プラグインのどの資産を使い、どれを意図して使わないかは ADR 0155 が持つ）を **project スコープ**で有効化する。宣言が本リポジトリの `.claude/settings.json` に載るため、信頼済みの clone であれば開発者ごとのセットアップ無しに同じ資産が揃う。冪等であり、再実行は no-op。新たに有効化したプラグインが読み込まれるのは*次の*セッションからで、そのとき `skill-creator` は `/skill-creator` としても起動できるようになる。ただしこのラッパはそれに依存しない — パス指定でファイルを読むため、同一セッション内でも動く。
 
 実際に宣言が行われる回では、`claude` CLI は `.claude/settings.json` へ追記するのではなく**ファイル全体を書き直す** — `permissions` 内のキー順序が動きうる。追加される 2 キー以上の差分ノイズが出ることを見込み、内容を確認したうえで変更の一部としてコミットする。
 

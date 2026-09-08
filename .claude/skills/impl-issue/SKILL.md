@@ -336,6 +336,13 @@ Run it as a subagent, so the research happens in a window that carries none of t
 accumulated framing. Give it the issue, your Step 1 corrections, the paths you have already read, and
 3a's questions. Tell it to verify your summary rather than trust it.
 
+**When the issue touches code whose current behaviour you have not traced, send `code-explorer`
+first** — the read-only agent from the official `feature-dev` plugin, which follows call chains from
+entry point to output and returns the files worth reading. Run two or three in one message on
+different aspects, read what they name, and hand that to 3b as input. It answers 「いまどう動いて
+いるか」, which is not what 3b is for: 3b decides what to change. **Nothing else from that plugin is
+used here** — see ADR [0155](../../../docs/adr/0155-claude-skills-development.md).
+
 **Point it at the documents that own the answers** rather than restating them: `docs/playbook.md`'s
 reverse index for placement, ADR [0021](../../../docs/adr/0021-frontend-responsibility.md)'s dependency
 matrix for what a layer may import, the layer `README.md` frontmatter for the per-layer instance of it,

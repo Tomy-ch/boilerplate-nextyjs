@@ -193,11 +193,11 @@ cases with no step-back available are:
 - **Any action held by the `with:` review** (step 3), if the user then asks whether the fresh
   version is safe in itself.
 
-The `supply-chain-triage` skill that scores such a candidate on direct evidence is **not yet present
-in this repository**. Until it is, do not improvise a verdict: report the case with the evidence you
-already have (publisher, the commit range between the lockfile SHA and the candidate, the diff of
-the action's own entry point, and the `with:` surface), state plainly that no vetted alternative
-exists, and let the user decide via `AskUserQuestion`.
+**Hand such a candidate to `supply-chain-triage`**, which scores it on direct evidence over four
+axes and reports what it could not answer rather than passing it. Do not improvise a verdict here:
+this skill knows the window and the step-back, and the evidence that discharges the window is a
+different job. Take its band back, state plainly that no vetted alternative exists, and let the user
+decide via `AskUserQuestion` — **a low score is evidence for that decision, not the decision**.
 
 ## Step 5. Display Plan and Confirm
 

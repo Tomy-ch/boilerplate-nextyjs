@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { diffLabels, type LabelSpec, parseLabelSpecs } from "./labels";
+import { FINDING_KINDS, KIND_LABEL_PREFIX } from "../closed-loop/summarize";
+import { CLOSED_LOOP_LABELS, diffLabels, parseLabelSpecs, type LabelSpec } from "./labels";
 
 const spec = (name: string): LabelSpec => ({ name, description: name, color: "d73a4a" });
 
@@ -94,3 +95,33 @@ describe("diffLabels", () => {
     expect(diff.alreadyPresent).toEqual(["bug", "release"]);
   });
 });
+
+// boilerplate-only:begin
+describe("CLOSED_LOOP_LABELS", () => {
+  // ----- 正常系 -----
+  it("所見の分類をすべて持つ", () => {
+    const declared = new Set(CLOSED_LOOP_LABELS.map((label) => label.name));
+
+    for (const kind of FINDING_KINDS) {
+      expect(declared).toContain(`${KIND_LABEL_PREFIX}${kind}`);
+    }
+  });
+
+  it("分類でないラベルを、分類の接頭辞で名乗らない", () => {
+    const kinds = new Set<string>(FINDING_KINDS);
+
+    for (const label of CLOSED_LOOP_LABELS) {
+      if (label.name.startsWith(KIND_LABEL_PREFIX)) {
+        expect(kinds).toContain(label.name.slice(KIND_LABEL_PREFIX.length));
+      }
+    }
+  });
+
+  // ----- 異常系 -----
+  it("名前が重複していない", () => {
+    const names = CLOSED_LOOP_LABELS.map((label) => label.name);
+
+    expect(new Set(names).size).toBe(names.length);
+  });
+});
+// boilerplate-only:end

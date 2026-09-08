@@ -162,6 +162,8 @@
       "Bash(make closed-loop-report)",
       "Bash(make closed-loop-send)",
       "Bash(make closed-loop-send-dry)",
+      "Bash(make closed-loop-weekly)",
+      "Bash(make closed-loop-weekly *)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
       "Bash(make gh-login *)",

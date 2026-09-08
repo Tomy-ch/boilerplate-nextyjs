@@ -111,6 +111,15 @@ function balancedSlice(source: string, start: number, open: string, close: strin
 }
 
 /**
+ * 先頭は utility の頭文字か、任意 variant の `[`、子孫を指す `*`。加えて `2xl:` のように
+ * 数字で始まる breakpoint も通す。数字始まりを一律に落とすと、その class は候補に上がらない
+ * まま検査を素通りし、ガードが黙って効かなくなる。ただし通すのは `:` を伴う variant 形だけで、
+ * `2xl` 単体は utility ではないため落とす（コード中の数値リテラルも同じ判定で落ちる）。
+ */
+const UTILITY_TOKEN = /^[a-z[*][\w:./[\]()&>*+~=%!#'-]*$/;
+const DIGIT_LED_VARIANT_TOKEN = /^\d+[a-z]+:[\w:./[\]()&>*+~=%!#'-]*$/;
+
+/**
  * ソース中の class 候補を取り出す。
  *
  * @remarks
@@ -121,26 +130,33 @@ function balancedSlice(source: string, start: number, open: string, close: strin
  */
 export function collectClassCandidates(source: string): ReadonlySet<string> {
   const candidates = new Set<string>();
-  const addTokens = (value: string): void => {
-    for (const token of value.split(/\s+/)) {
-      // 先頭は utility の頭文字か、任意 variant の `[`、子孫を指す `*`。加えて `2xl:` のように
-      // 数字で始まる breakpoint も通す。数字始まりを一律に落とすと、その class は候補に上がらない
-      // まま検査を素通りし、ガードが黙って効かなくなる。ただし通すのは `:` を伴う variant 形だけで、
-      // `2xl` 単体は utility ではないため落とす（コード中の数値リテラルも同じ判定で落ちる）。
-      const utility = /^[a-z[*][\w:./[\]()&>*+~=%!#'-]*$/;
-      const digitLedVariant = /^\d+[a-z]+:[\w:./[\]()&>*+~=%!#'-]*$/;
+  const literals = [
+    ...[...source.matchAll(/(?<=className=")[^"\n]*(?=")/g)].map((match) => match[0]),
+    ...classRegionsIn(source).flatMap(classLiteralsIn),
+  ];
 
-      if (!utility.test(token) && !digitLedVariant.test(token)) continue;
-      candidates.add(token);
-    }
-  };
-
-  // 書かれた順に読む。どの anchor から来たかで並びが変わると、差分が読みにくくなる
-  const regions: { at: number; text: string }[] = [];
-
-  for (const match of source.matchAll(/(?<=className=")[^"\n]*(?=")/g)) {
-    addTokens(match[0]);
+  for (const literal of literals) {
+    for (const token of classTokensIn(literal)) candidates.add(token);
   }
+
+  return candidates;
+}
+
+/** 文字列リテラルの中で class としてありうる語。 */
+function classTokensIn(value: string): string[] {
+  return value
+    .split(/\s+/)
+    .filter((token) => UTILITY_TOKEN.test(token) || DIGIT_LED_VARIANT_TOKEN.test(token));
+}
+
+/**
+ * class が書かれうる範囲（`className={…}` と `cn(…)` / `cva(…)` の引数）。
+ *
+ * @remarks
+ * 書かれた順に返す。どの anchor から来たかで並びが変わると、差分が読みにくくなる。
+ */
+function classRegionsIn(source: string): string[] {
+  const regions: { at: number; text: string }[] = [];
 
   for (const { pattern, open, close } of CLASS_ANCHORS) {
     for (const match of source.matchAll(pattern)) {
@@ -149,32 +165,41 @@ export function collectClassCandidates(source: string): ReadonlySet<string> {
     }
   }
 
-  for (const { text: region } of regions.sort((a, b) => a.at - b.at)) {
-    // cva の `defaultVariants` が指すのは variant の名前であって class ではない
-    const variantNameSpans = [...region.matchAll(/defaultVariants:\s*\{[^}]*\}/g)].map(
-      (match) => [match.index, match.index + match[0].length] as const,
-    );
+  return regions.sort((a, b) => a.at - b.at).map(({ text }) => text);
+}
 
-    // 逃がした引用符を含む literal を途中で切らない
-    for (const match of region.matchAll(/"((?:[^"\\\n]|\\.)*)"|'((?:[^'\\\n]|\\.)*)'/g)) {
-      const start = match.index;
-      const end = start + match[0].length;
-      const before = region.slice(0, start);
-      const after = region.slice(end);
+/**
+ * 範囲の中の文字列リテラルのうち、class として読むものの中身（引用符を除く）。
+ *
+ * @remarks
+ * 比較の対象・index の key・cva の variant 名は、文字列でも class ではないので落とす。
+ */
+function classLiteralsIn(region: string): string[] {
+  // cva の `defaultVariants` が指すのは variant の名前であって class ではない
+  const variantNameSpans = [...region.matchAll(/defaultVariants:\s*\{[^}]*\}/g)].map(
+    (match) => [match.index, match.index + match[0].length] as const,
+  );
+  const literals: string[] = [];
 
-      if (variantNameSpans.some(([from, to]) => start >= from && end <= to)) continue;
-      // `orientation === "horizontal" ? …` の比較対象
-      if (/[=!]==?\s*$/.test(before)) continue;
-      // `ALIGNMENT_CLASS[column.align ?? "start"]` のような index の key。class 側の任意値
-      // （`[&_svg:not([class*='size-'])]`）は literal の内側なので、この判定には掛からない
-      if (/\[[^[\]"'\n]*$/.test(before) && /^\s*\]/.test(after)) continue;
+  // 逃がした引用符を含む literal を途中で切らない
+  for (const match of region.matchAll(/"((?:[^"\\\n]|\\.)*)"|'((?:[^'\\\n]|\\.)*)'/g)) {
+    const start = match.index;
+    const end = start + match[0].length;
+    const before = region.slice(0, start);
+    const after = region.slice(end);
 
-      // 両端の引用符を落とす
-      addTokens(match[0].slice(1, -1));
-    }
+    if (variantNameSpans.some(([from, to]) => start >= from && end <= to)) continue;
+    // `orientation === "horizontal" ? …` の比較対象
+    if (/[=!]==?\s*$/.test(before)) continue;
+    // `ALIGNMENT_CLASS[column.align ?? "start"]` のような index の key。class 側の任意値
+    // （`[&_svg:not([class*='size-'])]`）は literal の内側なので、この判定には掛からない
+    if (/\[[^[\]"'\n]*$/.test(before) && /^\s*\]/.test(after)) continue;
+
+    // 両端の引用符を落とす
+    literals.push(match[0].slice(1, -1));
   }
 
-  return candidates;
+  return literals;
 }
 
 /** `src/components` 配下の `.tsx` を集める。story と test は実装ではないため対象にしない。 */

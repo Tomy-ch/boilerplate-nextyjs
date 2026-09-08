@@ -37,26 +37,37 @@ export const LISTING_HEADER = [
   "-------------------------------------------",
 ];
 
+/**
+ * `.mk` の 1 行が一覧へ出す行。
+ *
+ * @remarks
+ * カテゴリ見出しは空行と見出しの 2 行、説明コメント付きの `.PHONY` はターゲットごとの 1 行。
+ * どちらでもなければ空。
+ */
+function listingLinesIn(line: string): string[] {
+  const category = CATEGORY_PATTERN.exec(line);
+
+  if (category) return ["", `📂 ${category[1]}`];
+
+  const [, targets, comment] = PHONY_PATTERN.exec(line) ?? [];
+
+  if (targets === undefined || comment === undefined) return [];
+
+  return targets
+    .split(/\s+/)
+    .map((target) => `🛠  ${target.padEnd(TARGET_COLUMN_WIDTH)} ${comment}`);
+}
+
 export function buildTargetListing(sources: readonly MakefileSource[]): TargetListing {
   const lines = [...LISTING_HEADER];
   const undocumented: string[] = [];
 
   for (const source of sources) {
     for (const line of source.content.split("\n")) {
-      const category = CATEGORY_PATTERN.exec(line);
+      const listed = listingLinesIn(line);
 
-      if (category) {
-        lines.push("", `📂 ${category[1]}`);
-        continue;
-      }
-
-      const [, targets, comment] = PHONY_PATTERN.exec(line) ?? [];
-
-      if (targets !== undefined && comment !== undefined) {
-        for (const target of targets.split(/\s+/)) {
-          lines.push(`🛠  ${target.padEnd(TARGET_COLUMN_WIDTH)} ${comment}`);
-        }
-
+      if (listed.length > 0) {
+        lines.push(...listed);
         continue;
       }
 

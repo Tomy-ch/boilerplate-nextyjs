@@ -210,65 +210,74 @@ function checkTranslationPair(canonicalRel: string, translationRel: string): voi
 // 参照: make ターゲット
 // ---------------------------------------------------------------------------
 
-// Makefile / .makefiles/**/*.mk からターゲット名を集める。
-// `%` を含むパターンルールは正規表現として保持する。
-function collectMakeTargets(): MakeTargets {
+// ルートの makefile として通る綴り。処理系依存（`makefile` / `Makefile`）で、macOS は大文字小文字を
+// 区別しないため、Linux の CI で初めて読み落とすことがないよう実エントリ名で拾う。
+const ROOT_MAKEFILE_NAMES = new Set(["makefile", "Makefile", "GNUmakefile"]);
+
+// ディレクトリ配下（再帰）にある `.mk` ファイルの絶対パス。
+function mkFilesUnder(dir: string): string[] {
   const files: string[] = [];
-  const walk = (dir: string) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const abs = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        walk(abs);
-        continue;
-      }
-      if (entry.name.endsWith(".mk")) files.push(abs);
-    }
-  };
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const abs = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...mkFilesUnder(abs));
+    else if (entry.name.endsWith(".mk")) files.push(abs);
+  }
+  return files;
+}
+
+// make のターゲットを定義しうるファイル（`.makefiles/**/*.mk` とルートの makefile）。
+function listMakefiles(): string[] {
   const makefilesDir = path.join(REPO_ROOT, ".makefiles");
-  if (fs.existsSync(makefilesDir)) walk(makefilesDir);
-  // ルートの makefile は綴りが処理系依存（`makefile` / `Makefile`）。macOS は大文字小文字を
-  // 区別しないため、Linux の CI で初めて読み落とすことがないよう実エントリ名で拾う。
+  const files = fs.existsSync(makefilesDir) ? mkFilesUnder(makefilesDir) : [];
   for (const name of fs.readdirSync(REPO_ROOT)) {
-    if (name === "makefile" || name === "Makefile" || name === "GNUmakefile") {
-      files.push(path.join(REPO_ROOT, name));
-    }
+    if (ROOT_MAKEFILE_NAMES.has(name)) files.push(path.join(REPO_ROOT, name));
   }
+  return files;
+}
 
-  const exact = new Set<string>();
-  const patterns: RegExp[] = [];
-  const addTarget = (name: string) => {
-    if (name === "" || name.startsWith(".")) return;
-    if (name.includes("%")) {
-      patterns.push(
-        new RegExp(
-          `^${name
-            .split("%")
-            .map((p) => p.replace(/[.*+^${}()|[\]\\?]/g, "\\$&"))
-            .join(".+")}$`,
-        ),
-      );
-      return;
-    }
-    exact.add(name);
-  };
+// Makefile の 1 行が定義するターゲット名。レシピ行（タブ始まり）と定義でない行は空。
+// `.PHONY:` は `##` 以降の説明コメントを落とし、ルール行は `:` の左辺を取る（`:=` の代入は除く）。
+function targetNamesIn(line: string): string[] {
+  if (line.startsWith("\t")) return [];
+  const phony = /^\.PHONY:\s*(.+)$/.exec(line)?.[1];
+  if (phony !== undefined) {
+    const commentAt = phony.indexOf("##");
+    const names = commentAt < 0 ? phony : phony.slice(0, commentAt);
+    return names.trim().split(/\s+/);
+  }
+  const rule = /^([A-Za-z0-9_%.+/ -]+):(?!=)/.exec(line)?.[1];
+  return rule === undefined ? [] : rule.trim().split(/\s+/);
+}
 
-  for (const file of files) {
+// `%` を含むパターンルールに当てはまるターゲット名の正規表現。
+function patternRuleToRegExp(name: string): RegExp {
+  return new RegExp(
+    `^${name
+      .split("%")
+      .map((p) => p.replace(/[.*+^${}()|[\]\\?]/g, "\\$&"))
+      .join(".+")}$`,
+  );
+}
+
+// ターゲット名を完全一致で持つか、パターンとして持つか。空名と `.` 始まりの特殊ターゲットは持たない。
+function addMakeTarget(targets: MakeTargets, name: string): void {
+  if (name === "" || name.startsWith(".")) return;
+  if (name.includes("%")) {
+    targets.patterns.push(patternRuleToRegExp(name));
+    return;
+  }
+  targets.exact.add(name);
+}
+
+// Makefile / .makefiles/**/*.mk からターゲット名を集める。
+function collectMakeTargets(): MakeTargets {
+  const targets: MakeTargets = { exact: new Set(), patterns: [] };
+  for (const file of listMakefiles()) {
     for (const line of fs.readFileSync(file, "utf8").split("\n")) {
-      if (line.startsWith("\t")) continue;
-      const phony = /^\.PHONY:\s*(.+)$/.exec(line)?.[1];
-      if (phony !== undefined) {
-        const commentAt = phony.indexOf("##");
-        const names = commentAt < 0 ? phony : phony.slice(0, commentAt);
-        for (const name of names.trim().split(/\s+/)) addTarget(name);
-        continue;
-      }
-      const rule = /^([A-Za-z0-9_%.+/ -]+):(?!=)/.exec(line)?.[1];
-      if (rule !== undefined) {
-        for (const name of rule.trim().split(/\s+/)) addTarget(name);
-      }
+      for (const name of targetNamesIn(line)) addMakeTarget(targets, name);
     }
   }
-  return { exact, patterns };
+  return targets;
 }
 
 const makeTargets = collectMakeTargets();
@@ -428,6 +437,112 @@ function linkPathExists(target: string, fromDir: string): boolean {
 // 実行
 // ---------------------------------------------------------------------------
 
+// 検査している行の位置。報告に使うファイルと行番号、相対参照を解決する基準ディレクトリ。
+type Site = { file: string; lineNo: number; fromDir: string };
+
+// 廃止済み ADR 採番を参照していないか。行全体を見る —— 廃止採番はコードスパンに書かれていても
+// 実在しない ADR を指しており、リンクと違って「記法の例示」という正当な用途が無い。
+function checkRetiredAdrNumbers(site: Site, line: string): void {
+  for (const match of line.matchAll(RETIRED_ADR_NUMBER_RE)) {
+    report(
+      site.file,
+      site.lineNo,
+      "adr-ref",
+      `廃止された ADR 採番を参照しています: \`${match[0]}\`（現行の採番は数値 4 桁のみ）`,
+    );
+  }
+}
+
+// Markdown リンクの宛先は実在するか。コードスパンを除いた本文を見る —— コードスパンの中のリンクは
+// リンク記法そのものの例示であり、実在するファイルを指す主張ではない。
+function checkLinkReferences(site: Site, withoutCode: string): void {
+  for (const [, href] of withoutCode.matchAll(MD_LINK_RE)) {
+    if (href === undefined) continue;
+    const target = asLinkPath(href);
+    if (target !== null && !linkPathExists(target, site.fromDir)) {
+      report(site.file, site.lineNo, "link-ref", `存在しないパスへリンクしています: \`${href}\``);
+    }
+  }
+}
+
+// インラインコードの `make ...` が指すターゲットは実在するか。
+function checkMakeReferences(site: Site, span: string): void {
+  for (const target of extractMakeTargets(span)) {
+    if (isTooComplex(target)) {
+      report(
+        site.file,
+        site.lineNo,
+        "make-ref",
+        `ワイルドカードが多すぎて検査できません: \`make ${target}\``,
+      );
+      continue;
+    }
+    if (!makeTargetExists(target)) {
+      report(
+        site.file,
+        site.lineNo,
+        "make-ref",
+        `存在しない make ターゲットを参照しています: \`make ${target}\``,
+      );
+    }
+  }
+}
+
+// ディレクトリを伴わない設定ファイル名（`mise.toml` など）は実在するか。
+function checkConfigFileReference(site: Site, span: string): void {
+  if (CONFIG_FILE_RE.test(span) && !isTooComplex(span) && !configFileExists(span)) {
+    report(
+      site.file,
+      site.lineNo,
+      "path-ref",
+      `リポジトリに存在しない設定ファイルを参照しています: \`${span}\``,
+    );
+  }
+}
+
+// インラインコードのパス参照は実在するか。パスとして読めないものは設定ファイル名として見る。
+function checkPathReference(site: Site, span: string): void {
+  const repoPath = asRepoPath(span);
+  if (repoPath === null) {
+    checkConfigFileReference(site, span);
+    return;
+  }
+  if (isTooComplex(repoPath)) {
+    report(
+      site.file,
+      site.lineNo,
+      "path-ref",
+      `ワイルドカードが多すぎて検査できません: \`${span}\``,
+    );
+    return;
+  }
+  if (!repoPathExists(repoPath, site.fromDir)) {
+    report(site.file, site.lineNo, "path-ref", `存在しないパスを参照しています: \`${span}\``);
+  }
+}
+
+// 1 行が持つ参照をすべて検査する。抑止ディレクティブ付きの行は見ず、上限を超えた行は
+// 検査できないこと自体を違反として報告する。
+function checkLineReferences(site: Site, line: string): void {
+  if (line.includes(IGNORE_DIRECTIVE)) return;
+  if (line.length > MAX_LINE_LENGTH) {
+    report(
+      site.file,
+      site.lineNo,
+      "line-length",
+      `1 行が長すぎて検査できません（${line.length} 文字 / 上限 ${MAX_LINE_LENGTH} 文字）`,
+    );
+    return;
+  }
+  checkRetiredAdrNumbers(site, line);
+  const { spans, withoutCode } = scanInlineCode(line);
+  checkLinkReferences(site, withoutCode);
+  for (const span of spans) {
+    checkMakeReferences(site, span);
+    checkPathReference(site, span);
+  }
+}
+
 // `.claude/**` の Markdown 本文が参照する make ターゲット / ファイルパス / リンク先の実在性と、
 // 廃止済み ADR 採番の不使用を検査する。
 // frontmatter も対象にする。`description` はスキル選択時にモデルへ渡る要約であり、本文と同じだけ腐る。
@@ -437,78 +552,7 @@ function checkReferences(rel: string): void {
   const content = readFile(rel);
   const fromDir = path.dirname(rel);
   for (const { line, lineNo } of eachLineOutsideFence(content)) {
-    if (line.includes(IGNORE_DIRECTIVE)) continue;
-    if (line.length > MAX_LINE_LENGTH) {
-      report(
-        rel,
-        lineNo,
-        "line-length",
-        `1 行が長すぎて検査できません（${line.length} 文字 / 上限 ${MAX_LINE_LENGTH} 文字）`,
-      );
-      continue;
-    }
-    // 採番だけは行全体を見る。廃止採番はコードスパンに書かれていても実在しない ADR を指しており、
-    // リンクと違って「記法の例示」という正当な用途が無い。
-    for (const match of line.matchAll(RETIRED_ADR_NUMBER_RE)) {
-      report(
-        rel,
-        lineNo,
-        "adr-ref",
-        `廃止された ADR 採番を参照しています: \`${match[0]}\`（現行の採番は数値 4 桁のみ）`,
-      );
-    }
-    const { spans, withoutCode } = scanInlineCode(line);
-    // コードスパンの中のリンクはリンク記法そのものの例示であり、実在するファイルを指す主張ではない。
-    for (const [, href] of withoutCode.matchAll(MD_LINK_RE)) {
-      if (href === undefined) continue;
-      const target = asLinkPath(href);
-      if (target !== null && !linkPathExists(target, fromDir)) {
-        report(rel, lineNo, "link-ref", `存在しないパスへリンクしています: \`${href}\``);
-      }
-    }
-    for (const span of spans) {
-      for (const target of extractMakeTargets(span)) {
-        if (isTooComplex(target)) {
-          report(
-            rel,
-            lineNo,
-            "make-ref",
-            `ワイルドカードが多すぎて検査できません: \`make ${target}\``,
-          );
-          continue;
-        }
-        if (!makeTargetExists(target)) {
-          report(
-            rel,
-            lineNo,
-            "make-ref",
-            `存在しない make ターゲットを参照しています: \`make ${target}\``,
-          );
-        }
-      }
-      const repoPath = asRepoPath(span);
-      if (repoPath !== null && isTooComplex(repoPath)) {
-        report(rel, lineNo, "path-ref", `ワイルドカードが多すぎて検査できません: \`${span}\``);
-        continue;
-      }
-      if (repoPath !== null && !repoPathExists(repoPath, fromDir)) {
-        report(rel, lineNo, "path-ref", `存在しないパスを参照しています: \`${span}\``);
-        continue;
-      }
-      if (
-        repoPath === null &&
-        CONFIG_FILE_RE.test(span) &&
-        !isTooComplex(span) &&
-        !configFileExists(span)
-      ) {
-        report(
-          rel,
-          lineNo,
-          "path-ref",
-          `リポジトリに存在しない設定ファイルを参照しています: \`${span}\``,
-        );
-      }
-    }
+    checkLineReferences({ file: rel, lineNo, fromDir }, line);
   }
 }
 

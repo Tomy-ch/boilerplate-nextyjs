@@ -68,8 +68,25 @@ type CommentLine = { readonly text: string; readonly line: number };
  * られないとき、生の行から見つけた pin の件数がパーサの件数と食い違うとき
  */
 export function readPins(text: string): readonly MisePin[] {
-  const document = parseToml(text);
-  const tools = document["tools"];
+  const versions = versionsByParser(text);
+  const pins = pinsByLine(text, versions);
+
+  if (pins.length !== versions.size) {
+    throw new Error(
+      `pin の件数が食い違います（パーサ ${versions.size} 件 / 生の行 ${pins.length} 件）`,
+    );
+  }
+
+  return pins;
+}
+
+/**
+ * パーサが `[tools]` に読んだ、キーごとの版。
+ *
+ * @throws `[tools]` が無いとき、版が文字列でないとき
+ */
+function versionsByParser(text: string): ReadonlyMap<string, string> {
+  const tools = parseToml(text)["tools"];
 
   if (typeof tools !== "object" || tools === null || Array.isArray(tools)) {
     throw new Error("[tools] テーブルがありません");
@@ -85,6 +102,15 @@ export function readPins(text: string): readonly MisePin[] {
     versions.set(key, value);
   }
 
+  return versions;
+}
+
+/**
+ * 生の行から読んだ `[tools]` の pin。位置と直上のコメント塊はここで取り、版はパーサの結果から引く。
+ *
+ * @throws 生の行の代入をパーサの結果と突き合わせられないとき
+ */
+function pinsByLine(text: string, versions: ReadonlyMap<string, string>): MisePin[] {
   const pins: MisePin[] = [];
   // 直前から続いているコメント塊。コメントでない行で切れる。
   let comments: CommentLine[] = [];
@@ -111,8 +137,7 @@ export function readPins(text: string): readonly MisePin[] {
 
     if (!inTools) continue;
 
-    const assignment = ASSIGNMENT.exec(raw);
-    const key = assignment?.[1] ?? assignment?.[2];
+    const key = assignedKeyIn(raw);
 
     if (key === undefined) continue;
 
@@ -125,13 +150,14 @@ export function readPins(text: string): readonly MisePin[] {
     pins.push({ key, version, line, ignore: ignoreIn(block) });
   }
 
-  if (pins.length !== versions.size) {
-    throw new Error(
-      `pin の件数が食い違います（パーサ ${versions.size} 件 / 生の行 ${pins.length} 件）`,
-    );
-  }
-
   return pins;
+}
+
+/** その行が代入しているキー。代入の行でなければ undefined。 */
+function assignedKeyIn(raw: string): string | undefined {
+  const assignment = ASSIGNMENT.exec(raw);
+
+  return assignment?.[1] ?? assignment?.[2];
 }
 
 /** pin の直上のコメント塊から免除を読む。宣言が無ければ null。 */

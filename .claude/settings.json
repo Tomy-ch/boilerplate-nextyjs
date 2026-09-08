@@ -289,7 +289,11 @@
           {
             "type": "command",
             "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" --hook || true"
-          }
+          },
+        {
+          "type": "command",
+          "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" --hook || true"
+        }
         ]
       }
     ]

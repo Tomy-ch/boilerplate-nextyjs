@@ -41,9 +41,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret the config layer refuses outside
-# development — the build then fails on a value only meant for a workstation.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 

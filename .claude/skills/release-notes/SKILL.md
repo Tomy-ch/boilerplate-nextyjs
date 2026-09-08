@@ -182,30 +182,13 @@ Before calling `Write`, present the proposed content to the user (either inline 
 
 Only proceed with `Write` after the user confirms.
 
-## Step 6. Verify with Markdown Lint
+## Step 6. Format the written file
 
-After writing, run:
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` runs `markdownlint-cli2 --fix` on the entire repository to auto-fix common issues (blank-line placement around headings / lists / code blocks, trailing whitespace, file-final newline, etc.). `pnpm md-lint` then verifies the result in three stages — markdownlint against `.markdownlint.yaml`, mermaid diagram syntax, and `skill-lint` over `.claude/**` (frontmatter / translation-pair structure / reference existence).
-
-If `pnpm md-lint` reports remaining errors:
-
-1. Read the lint output.
-2. Fix the violations manually (rules that auto-fix cannot resolve, e.g., heading hierarchy, duplicate headings, bare URLs).
-3. Re-run `pnpm md-fix` then `pnpm md-lint` until clean.
-
-Do NOT report the skill as complete until `pnpm md-lint` exits cleanly.
-
-`pnpm md-fix` operates on the entire repository, so it may modify Markdown files unrelated to this release note. List any such files when reporting completion so the user can review the broader change set.
+After writing, run `pnpm exec markdownlint-cli2 --no-globs --fix <path>` on the release note. Leave `pnpm md-lint` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 ## Step 7. Final Verification
 
-After writing and lint:
+After writing and formatting:
 
 - Confirm the file exists at `.github/release/<NEW_VERSION>.md`.
 - Do NOT stage, commit, or push the file. Inform the user that the file has been created and let them handle git operations per AGENTS.md rules.
@@ -222,7 +205,7 @@ Confirm the following before reporting completion:
 - [ ] Release note drafted in Japanese, matching the canonical format
 - [ ] Preview confirmed by the user
 - [ ] `.github/release/<NEW_VERSION>.md` written
-- [ ] `pnpm md-lint` exits cleanly
+- [ ] `markdownlint-cli2 --fix` was run on the release note only
 - [ ] User informed that no git operations were performed
 
 ## Notes

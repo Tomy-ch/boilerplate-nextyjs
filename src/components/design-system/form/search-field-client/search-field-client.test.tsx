@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
 
@@ -163,6 +164,26 @@ describe("SearchFieldClient", () => {
     type("本");
     advance(SEARCH_FIELD_DEBOUNCE_MS * 2);
 
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("送信でだけ確定する形では、消去しても通知しない", async () => {
+    vi.useRealTimers();
+
+    const user = userEvent.setup();
+    const onSearch = vi.fn();
+    render(
+      <SearchFieldClient
+        commit={SEARCH_FIELD_COMMIT.SUBMIT}
+        defaultValue="本"
+        label="項目を検索"
+        onSearch={onSearch}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "検索語を消去" }));
+
+    expect(screen.getByRole("searchbox", { name: "項目を検索" })).toHaveValue("");
     expect(onSearch).not.toHaveBeenCalled();
   });
 

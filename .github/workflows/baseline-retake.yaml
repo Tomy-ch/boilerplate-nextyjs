@@ -35,10 +35,7 @@ on:
     workflows: [VisualRegressionTest, E2E]
     types: [completed]
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development. Storybook loads `next.config.ts` to build the preview, so the refusal lands
-# there — and `storybook build` reports success anyway, leaving a tree with no preview.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 

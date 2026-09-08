@@ -106,6 +106,11 @@ function MeasurementId(): null {
  * の既定（`afterInteractive`）が効きます。`docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの
  * 裏に置く」が求める strategy の「明示」を宣言では満たせないため、いま効いている値をテストで固定し、ライブラリが既定を変えた時点で落ちるようにしています。
  *
+ * **読み込んだ容器は unmount では降りません。** `afterInteractive` は effect で `document.body` へ
+ * script を足し、unmount で外しません。React も `async` の付いた `<script src>` を資源として扱い、
+ * 木から消えても `<head>` から外しません。同意の取り消しが効くのは次の読み込みからです
+ * （`docs/spec/route/layout.function.md`「同意が無いものは読み込まない」）。
+ *
  * 計測 id はこの経路以外へ渡しません。運用テレメトリ（`telemetry.tsx`）とは主体を分けます。
  */
 export function Analytics() {

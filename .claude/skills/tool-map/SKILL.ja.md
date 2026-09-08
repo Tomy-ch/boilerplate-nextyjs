@@ -143,26 +143,9 @@ graph LR
 - `inline`: レポート全文を応答に含めて終了する。
 - `file`: `--output-path` へレポートを書き出し、短い確認（1 行サマリ + ファイルパス）を返す。応答にレポート全文を重ねて出さないこと。
 
-## Step 7. Markdown Lint による検証（`--output=file` のときのみ）
+## Step 7. 書いたファイルの整形（`--output=file` のときのみ）
 
-`--output=file` の場合、レポート書き出し後に以下を実行する:
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` はリポジトリ全体に `markdownlint-cli2 --fix` を掛け、よくある問題（見出し / リスト / コードブロック周りの空行、行末空白、ファイル末尾改行など）を自動修正する。続く `pnpm md-lint` が 3 段で検証する — `.markdownlint.yaml` に対する体裁、mermaid 図の構文、`.claude/**` に対する `skill-lint`（frontmatter / 対訳ペアの構造 / 参照の実在性）。
-
-`pnpm md-lint` にエラーが残る場合:
-
-1. lint 出力を読む。
-2. 自動修正で解決できない違反（見出し階層・見出し重複・裸 URL 等）を手で直す。
-3. クリーンになるまで `pnpm md-fix` → `pnpm md-lint` を繰り返す。
-
-`pnpm md-lint` がクリーンに終了するまで、完了として報告しない。
-
-`pnpm md-fix` はリポジトリ全体を対象とするため、レポートと無関係な Markdown ファイルを変更しうる。完了報告時にはそうしたファイルを列挙し、ユーザが変更範囲全体をレビューできるようにする。
+`--output=file` の場合、レポート書き出し後にそのファイルへ `pnpm exec markdownlint-cli2 --no-globs --fix <パス>` を掛ける。`pnpm md-lint` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 `--output=inline` のときは本ステップをスキップする（ファイルを書いていないため）。
 
@@ -185,5 +168,5 @@ pnpm md-lint
 - [ ] 文書化された規則どおりに依存を検出した（自己参照は除外、broken edge は記録）
 - [ ] レポートに Summary / インベントリ表 / 依存グラフ（Mermaid）/ Notes が含まれる
 - [ ] 単独の項目がグラフ上に孤立ノードとして現れる
-- [ ] `--output=file` の場合、ファイルが書かれ `pnpm md-lint` がクリーンに終了した
-- [ ] `--output=file` の場合、確認済みの出力先（および `pnpm md-fix` の副作用）以外のパスを変更していない
+- [ ] `--output=file` の場合、ファイルが書かれ、そのファイルに `markdownlint-cli2 --fix` を掛けた
+- [ ] `--output=file` の場合、確認済みの出力先以外のパスを変更していない

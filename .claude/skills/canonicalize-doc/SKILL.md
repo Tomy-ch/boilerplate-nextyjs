@@ -132,26 +132,9 @@ Read the confirmed source file in full. If the direction is `sync-both`, read bo
 - Confirm code blocks are byte-identical (except where prose was translated inside them).
 - Report any sections that could not be cleanly mapped and ask the user how to resolve them.
 
-## Step 7. Verify with Markdown Lint
+## Step 7. Format the written files
 
-After writing the produced file (and the synced side in `sync-both` mode), run:
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` runs `markdownlint-cli2 --fix` on the entire repository to auto-fix common issues (blank-line placement around headings / lists / code blocks, trailing whitespace, file-final newline, etc.). `pnpm md-lint` then verifies the result in three stages — markdownlint against `.markdownlint.yaml`, mermaid diagram syntax, and `skill-lint` over `.claude/**` (frontmatter / translation-pair structure / reference existence).
-
-If `pnpm md-lint` reports remaining errors:
-
-1. Read the lint output.
-2. Fix the violations manually (rules that auto-fix cannot resolve, e.g., heading hierarchy, duplicate headings, bare URLs).
-3. Re-run `pnpm md-fix` then `pnpm md-lint` until clean.
-
-Do NOT report the skill as complete until `pnpm md-lint` exits cleanly.
-
-`pnpm md-fix` operates on the entire repository, so it may modify Markdown files unrelated to the confirmed pair. List any such files when reporting completion so the user can review the broader change set.
+After writing the produced file (and the synced side in `sync-both` mode), run `pnpm exec markdownlint-cli2 --no-globs --fix <paths you wrote>` on the files this skill produced. Leave `pnpm md-lint` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 ## Checklist
 
@@ -164,7 +147,7 @@ Confirm the following before reporting completion:
 - [ ] Frontmatter rules applied correctly (canonical SKILL has it; translation SKILL does not)
 - [ ] Translation sync-note header present in `*.ja.md` SKILL files
 - [ ] Section structure and code blocks match 1:1
-- [ ] `pnpm md-lint` exits cleanly
+- [ ] `markdownlint-cli2 --fix` was run on the written files only
 - [ ] No unintended files modified outside the confirmed pair
 
 ## Notes

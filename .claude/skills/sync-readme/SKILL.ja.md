@@ -135,26 +135,9 @@ canonical README の書き込み完了後:
 
 チェーンで呼び出された `canonicalize-doc` 自身が改めて `AskUserQuestion` で確認を行うのは期待される動作（冗長ではない）。ユーザーが翻訳同期を veto できる余地を残すため。
 
-## Step 7. Markdown Lint による検証
+## Step 7. 書いたファイルの整形
 
-canonical README の書き込み（および `canonicalize-doc` による翻訳同期）が完了した後、以下を実行する。
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` はリポジトリ全体に対して `markdownlint-cli2 --fix` を実行し、よくある違反（見出し / リスト / コードブロック周辺の空行、行末空白、ファイル末尾の改行など）を自動修正する。続けて `pnpm md-lint` が 3 段で検証する — `.markdownlint.yaml` に対する体裁、mermaid 図の構文、`.claude/**` に対する `skill-lint`（frontmatter / 対訳ペアの構造 / 参照の実在性）。
-
-`pnpm md-lint` がエラーを報告する場合:
-
-1. lint 出力を確認する。
-2. 自動修正で解消できないルール（見出し階層、重複見出し、bare URL など）を手で修正する。
-3. clean になるまで `pnpm md-fix` → `pnpm md-lint` を繰り返す。
-
-`pnpm md-lint` がクリーン終了するまでスキルを完了報告しない。
-
-`pnpm md-fix` はリポジトリ全体を対象にするため、本 README ペアとは無関係な Markdown も自動修正される可能性がある。その場合、変更された他ファイルの一覧を完了報告時にユーザーへ提示し、レビューできるようにする。
+canonical README の書き込み（および `canonicalize-doc` による翻訳同期）が完了した後、このスキルが書いたファイルだけに `pnpm exec markdownlint-cli2 --no-globs --fix <書いたパス>` を掛ける。`pnpm md-lint` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 ## Step 8. 最終検証
 
@@ -171,7 +154,7 @@ pnpm md-lint
 - [ ] canonical README を正しいエントリで書き換え、構造を保持済み
 - [ ] 独自 README を持つ子ディレクトリは 1 行ダイジェスト + 参照リンクで表現（展開していない）
 - [ ] 兄弟の翻訳ファイルが存在する場合は `canonicalize-doc` を起動して再同期済み
-- [ ] `pnpm md-lint` がクリーン終了する
+- [ ] `markdownlint-cli2 --fix` を書いたファイルだけに掛けた
 - [ ] canonical README（およびチェーンされた `canonicalize-doc` のスコープ）以外のファイルを変更していない
 
 ## 注意事項

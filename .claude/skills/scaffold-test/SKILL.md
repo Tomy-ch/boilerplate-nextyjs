@@ -11,9 +11,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 Write the test files for the symbols that do not have one, in the shape this repository's gates
 already enforce.
 
-**The unit of work is a set.** A screen lands with twenty-odd untested modules at once, and the
-procedure that produced it asks for the tests to be placed together. Resolving one symbol is the same
-path with a set of size one.
+**The unit of work is a set**, resolved in Step 0; one symbol is just a set of size one.
 
 A Japanese reference translation of this skill is available at `SKILL.ja.md` in the same directory
 (not loaded as a skill; for human reference only).

@@ -168,10 +168,8 @@ jobs:
 
           exit 0
 
-      # A job that stood down still owes the pull request a verdict. Without this, the ❌
-      # comment an earlier push produced stays beside a green check once the diff stops
-      # reaching the bundle — README.md's "update the comment on success too" invariant,
-      # applied to standing down. The body file is the one the comment step reads, so it has
+      # A job that stood down still owes the pull request a verdict (README § PR コメント,
+      # the `diff-scope` bullet). The body file is the one the comment step reads, so it has
       # to be written here too.
       - name: Note that the diff cannot reach the bundle
         id: standdown

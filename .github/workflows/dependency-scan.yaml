@@ -209,10 +209,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # A dependency scanner reads the lockfile; no source change can alter what it finds.
-      # This is the one place an allow-list is admissible (see the note in the action), and it
-      # is admissible only because the weekly schedule above still scans the whole tree — a
-      # mistake in this list defers a scan by at most a week rather than removing it.
+      # The allow-list is admissible here for the reason the `dependency-scan` job's scope
+      # step gives, and it is the same list.
       - name: Decide whether the diff can reach the dependency graph
         id: scope
         uses: ./.github/actions/diff-scope
@@ -375,8 +373,7 @@ jobs:
 
       # Named for what the exit code actually says. A non-zero status means the gate did
       # not pass, which covers a finding and equally a scan that could not run at all —
-      # the sibling report-only job spells its own step the same way. Asserting a finding
-      # here made a blocked database download read as a vulnerability.
+      # the sibling report-only job spells its own step the same way.
       - name: Fail if the release gate did not pass
         if: always() && steps.trivy.outputs.status != 'success'
         run: exit 1

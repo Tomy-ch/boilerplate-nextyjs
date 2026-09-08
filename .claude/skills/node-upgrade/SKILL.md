@@ -93,9 +93,8 @@ node = "<TARGET_VERSION>"
 pnpm = "…"   # unchanged
 ```
 
-`mise.toml` is the single source of truth; there is no `sync-versions` step in this repo (that was
-a Go-boilerplate mechanism for `go.mod` / Dockerfiles, neither of which exists here —
-[0011](../../../docs/adr/0011-no-docker.md)).
+`mise.toml` is the single source of truth; no other file in this repository carries the Node version
+(no Dockerfile — [0011](../../../docs/adr/0011-no-docker.md)), so there is no propagation step.
 
 ## Step 3. Update the Local Node Environment (user task)
 
@@ -108,7 +107,7 @@ node --version        # must print v<TARGET_VERSION>
 ```
 
 The AI agent must NOT run `mise install` itself (it mutates the machine's toolchain) — this is a user
-step, mirroring the go-upgrade convention.
+step.
 
 ## Step 4. Rebuild the Lockfile / Dependencies
 
@@ -137,12 +136,12 @@ the app.
 
 ## Step 6. Flag Follow-ups (do NOT bundle here)
 
-- **`@types/node`**: currently `^20` in `devDependencies` while the runtime is Node 24+. Aligning its
-  major to the runtime is reasonable, but per **[0004](../../../docs/adr/0004-library-management.md)** a dependency **major** update belongs
+- **`@types/node`**: compare its major in `devDependencies` with the target runtime's major. Aligning
+  the two is reasonable, but per **[0004](../../../docs/adr/0004-library-management.md)** a dependency **major** update belongs
   in its **own PR**, not bundled with a runtime bump. Report it as a recommended follow-up; do not edit
   `package.json` in this skill.
-- **CI**: there is no `.github/workflows/` yet (BACKLOG **B9** pending). When CI is added, a
-  `node-version-file` / matrix sync step belongs here — note it as a future addition to this skill.
+- **CI**: the workflows install the toolchain through `.github/actions/setup-mise`, which reads the
+  versions from `mise.toml`, so there is no `node-version-file` / matrix to sync.
 
 ## Checklist
 
@@ -156,8 +155,8 @@ the app.
 
 ## Notes
 
-- Do NOT run `mise install` yourself — ask the user (it mutates their toolchain).
-- Do NOT edit `package.json` here — dependency majors are separate PRs ([0004](../../../docs/adr/0004-library-management.md)).
+- Do NOT run `mise install` yourself — a user step (Step 3).
+- Do NOT edit `package.json` here (Step 6).
 - Commit on the working branch. Direct commits to protected branches are prohibited (AGENTS.md).
 - Push to a PR only when the user explicitly instructs it.
 - After updating `SKILL.md`, also update `SKILL.ja.md` to keep the Japanese translation in sync.

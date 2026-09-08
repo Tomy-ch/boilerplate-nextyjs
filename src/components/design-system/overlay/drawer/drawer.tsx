@@ -82,8 +82,8 @@ function DrawerPortal({ ...props }: ComponentProps<typeof DrawerPrimitive.Portal
  * footer の「キャンセル」や「閉じる」など、内容側に置く閉じる操作へ使う。`Button` を使う場合は
  * `asChild` で合成する。drag と overlay の操作でも閉じるため必須ではない。
  *
- * `Drawer` に `dismissible={false}` を指定した場合、この操作でも閉じない。閉じる経路が内部に
- * 残らないため、そのときは `open` / `onOpenChange` で呼び出し元が制御する。
+ * `Drawer` に `dismissible={false}` を指定した場合、この操作でも閉じない（{@link Drawer} の
+ * `dismissible` を参照）。
  *
  * @param props - vaul `Drawer.Close` の props。
  *

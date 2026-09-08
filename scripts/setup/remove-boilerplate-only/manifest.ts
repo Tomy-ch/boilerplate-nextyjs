@@ -12,7 +12,9 @@ export const BOILERPLATE_ONLY_MARKER = "boilerplate-only";
  * 剥がし終えたあとに自分を消す対象（リポジトリルート相対）。
  *
  * @remarks
- * サンプル破棄（`scripts/setup/remove-sample/`）へ相乗りさせず、**独立に**消える必要があります。
+ * ファイルやディレクトリごと消すものはマーカーを持てない（消える側に印を書くことになる）ので、
+ * ここで宣言します。サンプル破棄（`scripts/setup/remove-sample/`）へ相乗りさせず、**独立に**
+ * 消える必要があります。
  *
  * 剥がしを検証する CI（`.github/workflows/strip-verify.yaml`）も対象です。検証する相手が消えた
  * あとに残すと、テンプレートから作った側のすべての PR で「道具が無い」失敗を出し続けます。
@@ -26,7 +28,6 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   // このリポジトリの運用にだけ置く検査。呼ぶ API が無料なのは public のときだけで、private では
   // Code Security のライセンスを要求する。既定として配ると、テンプレートから作ったリポジトリは
   // 「金が掛かる」か「コードでは直せない赤」かのどちらかを受け取る。
-  // ファイルまるごと消すものはマーカーを持てない（消える側に印を書くことになる）ため、ここで宣言する。
   ".github/workflows/dependency-review.yaml",
   // 上と同じ理由。設定は読む相手が消えるので一緒に落とす。**`github/codeql-action` の pin は
   // 残す** —— `upload-sarif` を他の 4 つが使い続ける。
@@ -46,9 +47,9 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   // 存在の確認で囲んである。
   "scripts/marker-baseline",
   // 純化パスの台帳と照会フック。答えている問い（どのファイルが純化を通ったか）は、配る側にしか
-  // 開いていない —— テンプレートから作った側が受け取るのは通り終えたツリーである。ディレクトリまるごと消すため
-  // マーカーは持てず、ここで宣言する。`.claude/settings.json` のフック定義は JSON なので同じ手が
-  // 使えないが、スクリプトの不在を確かめてから呼ぶ形にしてあり、残っても何もしない。
+  // 開いていない —— テンプレートから作った側が受け取るのは通り終えたツリーである。
+  // `.claude/settings.json` のフック定義は JSON なので同じ手が使えないが、スクリプトの不在を
+  // 確かめてから呼ぶ形にしてあり、残っても何もしない。
   ".agents/purity-sweep",
 ];
 

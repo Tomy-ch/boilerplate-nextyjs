@@ -116,8 +116,7 @@ jobs:
       # TEST FILES ARE EXCLUDED, and that is a considered exclusion rather than a
       # convenience. A regex secret-detector reads a fixture SHA, a fake bearer token
       # and a `http://localhost` target as findings, and in a test file every one of
-      # those is the normal case — measured here: three `DS173237` errors, all of them
-      # hex fixtures in one unit test. The layer that watches test files for a REAL
+      # those is the normal case. The layer that watches test files for a REAL
       # secret is gitleaks, which scans them and is fail-closed; leaving DevSkim on
       # them would only bury the surfaces where its verdict means something.
       #

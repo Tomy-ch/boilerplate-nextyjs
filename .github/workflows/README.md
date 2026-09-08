@@ -154,7 +154,7 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 | code scanning へ送る | `bearer` / `devskim` | **差分が新しく持ち込んだ alert** に対する GitHub 側のチェック |
 | code scanning へ送る | `codeql` / `sonarcloud` | 同上 <!-- boilerplate-only:line --> |
 
-**「落とさない」のは所見に対してだけで、機構が壊れたら落ちる。** `bearer` / `devskim` / `scorecard` は報告が出力のすべてなので、走らなかった走査・書かれなかった SARIF・届かなかったアップロードは、いずれも綺麗な結果と同じ緑になってしまう。**検査しない gate は「違反なし」と見分けが付かない。**
+**「落とさない」のは所見に対してだけで、機構が壊れたら落ちる。** `bearer` / `devskim` / `scorecard` は報告が出力のすべてなので、走らなかった走査・書かれなかった SARIF・届かなかったアップロードは、いずれも綺麗な結果と同じ緑になってしまう。**検査しない gate は「違反なし」と見分けが付かない**（下記「`paths:` フィルタを使わない」）。
 
 3 つ目は「落とさない」と「見せない」を分けるための配線で、job は緑を返すが差分が持ち込んだ alert は PR を赤にする。
 
@@ -203,7 +203,7 @@ PR ごとには走らず、ラベルや保護ブランチへの push で起動�
 | --- | --- | --- | --- |
 | Baseline Retake | `baseline-retake.yaml` | `retake` / `report` | VRT または E2E の**完了**で発火し、`baseline-retake` ラベルが付いていれば、**story と画面の基準画像をまとめて**撮り直し、置き場へ push してサブモジュールのポインタを進める。story も画面も**報告された差分だけ**が対象で、報告はそれぞれの実行の artifact（`vrt-report` / `e2e-report`）から引く。画面の報告が無いときは撮らない —— 全数へ落とすと、コメントが誰にも見せていない画素を正にしてしまう。両方が赤いときは E2E 側の実行が VRT 側へ譲る —— 片方だけでラベルを使い切らないためで、これが「1 ラベル 1 撮り直し」を保つ。ラベルはトリガではなく条件なので、PR 作成時に付けておける（VRT の完了を待つ必要がない）。**絵を動かしうるチェック**（`baseline-retake.yaml` の `DECIDES_PIXELS` が名指しする）が落ちている間は撮らずに見送り、ラベルを残す（次の実行で自動的に再開する）。見るのは各チェックの最新の試行だけで、名指しは allowlist である — 落ちているもの全部を数えると、撮るまで存在しない画像を待つ `baseline-approval` と互いに待ち合う。`revert-` で始まるブランチではラベル無しで全数を撮り直す（掃除で復帰先の一式が消えているため）。ポインタの push は `GITHUB_TOKEN` ではなく App のトークンで行う（`GITHUB_TOKEN` の push は実行を起こさないため、確認用の VRT が走らない）。**承認ではない** — 画素の判断は、コメントが並べる動いた画像の前後を見て PR レビューで行う |
 | VRT Guard | `vrt-guard.yaml` | `guard` | 保護ブランチへの push 後に story の比較をやり直す。通常は鳴らない（PR はマージ結果に対して判定され、ブランチは最新であることを要求されるため）。鳴ったら前提が崩れた合図として issue を立てる。**基準画像は撮り直さない** |
-| Lighthouse | `lighthouse.yaml` | `lighthouse` | 保護ブランチへの push と毎日 1 回、`e2e/lib/screens.ts` が宣言する画面を 1 枚ずつ Lighthouse で開き、LCP / CLS / TBT を `performance-budget.yaml` の上限と照らす（[0101](../../docs/adr/0101-performance-budget.md)）。落ちたら issue を立てる（ブランチごとに 1 本、2 度目は同じ issue へコメント）。**performance スコアは見ない** —— 5 指標の加重平均は、下がったときにどれが下がったかを答えられない。INP は実ユーザの操作を要して lab では測れないため TBT が代わる。撮影（`vrt` / `a11y` / `e2e`）と違ってブラウザをコンテナへ閉じ込めないのは、比べるのが画素ではなく数値だから —— 固定すべきはフォントのラスタライズではなくブラウザの版で、それは lockfile が担う。**PR でも起動はするが、測るのは差分が要求したときだけ** —— 画面の宣言か器が動いていれば待たずに測る。**この job が見るのは、自分で測ると決められる構造だけ**で、ラベルで回すべき差分の名指しは `Deferred Checks` が 3 本ぶんまとめて行う。ラベル（`run-lighthouse`）でも回る。**全量を PR で回さない理由は実測にある** —— 計測は直列でしか成立せず（同時に測ると並列度そのものが数値へ混ざる）、23 画面 × 3 試行 × 約 14 秒 ≒ 16 分に対し build は約 1 分。費用は `画面数 × 試行回数` に張り付いており、試行を削れば runner のぶれを吸う中央値を失い、画面を削れば宣言から全数を引く意味を失う。**削るなら網羅ではなく頻度**という判断で、検知が 1 マージぶん遅れる代わりに PR は 1 秒も待たない |
+| Lighthouse | `lighthouse.yaml` | `lighthouse` | 保護ブランチへの push と毎日 1 回、`e2e/lib/screens.ts` が宣言する画面を 1 枚ずつ Lighthouse で開き、LCP / CLS / TBT を `performance-budget.yaml` の上限と照らす（[0101](../../docs/adr/0101-performance-budget.md)）。落ちたら issue を立てる（ブランチごとに 1 本、2 度目は同じ issue へコメント）。**performance スコアは見ない** —— 5 指標の加重平均は、下がったときにどれが下がったかを答えられない。INP は実ユーザの操作を要して lab では測れないため TBT が代わる。撮影（`vrt` / `a11y` / `e2e`）と違ってブラウザをコンテナへ閉じ込めないのは、比べるのが画素ではなく数値だから —— 固定すべきはフォントのラスタライズではなくブラウザの版で、それは lockfile が担う。**PR でも起動はするが、測るのは差分が要求したときだけ** —— 画面の宣言か器が動いていれば待たずに測る。**この job が見るのは、自分で測ると決められる構造だけ**で、ラベルで回すべき差分の名指しは `Deferred Checks` が 3 本ぶんまとめて行う。ラベル（`run-lighthouse`）でも回る。**全量を PR で回さない理由は実測にある** —— 計測は直列でしか成立せず（同時に測ると並列度そのものが数値へ混ざる）、23 画面 × 3 試行 × 約 14 秒 ≒ 16 分に対し build は約 1 分。費用は `画面数 × 試行回数` に張り付いており、試行を削れば runner のぶれを吸う中央値を失い、画面を削れば宣言から全数を引く意味を失う。**削るなら網羅ではなく頻度**という判断で、払う代償は上記「先送りにする検査」と同じ、買うのは PR が 1 秒も待たないことである |
 | Baseline Prune | `baseline-prune.yaml` | `report` | 月次で基準画像の置き場を測り、閾値を超えたときだけ掃除を促す issue を立てる。**消さない** — 履歴の書き換えは取り消せないので、実行は人が `make baseline-prune` で起こす |
 
 ## ワークフロー一覧（Documentation）
@@ -233,7 +233,7 @@ PR ごとには走らず、ラベルや保護ブランチへの push で起動�
 
 [`../settings/branch-protection.json`](../settings/branch-protection.json) が **CI Checks 群を必須**にし、`strict` でブランチが最新であることを要求する。これは VRT が成立する条件でもある — 判定しているのは base へマージした結果の木（`refs/pull/N/merge`）なので、base が動いた後の緑をそのまま通すと、基準画像が「実際にマージされる木」とずれる。
 
-**登録してよいのは、すべての PR でその名前を報告し続ける job だけ。**報告されない context を登録すると、GitHub はその PR を「必須チェック待ち」のまま永久にブロックする。`deploy-docs` の `docs-build` は `paths:` で自分自身の変更に絞ってあるため登録しない。
+**登録してよいのは、すべての PR でその名前を報告し続ける job だけ。**報告されない context を登録すると PR は永久に止まる（下記「`paths:` フィルタを使わない」）。`deploy-docs` の `docs-build` は `paths:` で自分自身の変更に絞ってあるため登録しない。
 
 この条件は `make actions-required-check-lint` が機械検査する（`actions-lint` job と pre-commit が回す）。落ちる条件は `.makefiles/README.md` が持つ（[`.makefiles/README.md`](../../.makefiles/README.md)）。
 
@@ -292,7 +292,7 @@ Node / pnpm などの供給は composite action [`../actions/setup-mise`](../act
 | `lockfile-drift` | CI のみ | install が追跡ファイルを書き換えたことは、手元では「自分が触った変更」と区別が付かない。第三者の目で見る CI が持つ |
 | commitlint | hook のみ | コミット件名の検査。作り直しがコミット単位でしか効かず、PR 到達後に落としても直す手段が rebase になる |
 | secret-scan | hook + CI | 同じ `make secret-scan` を呼ぶが、**走査範囲の決まり方が違う**。hook の既定は「どのリモートにも無いコミット」で、PR のブランチは既に push 済みなので CI では 0 件になる。CI は `SECRET_SCAN_LOG_OPTS` で base からの範囲を渡す。履歴全体は週次だけ（`make secret-scan-history`） |
-| 依存の脆弱性 | CI のみ | 変更の作者がその場で解消できず、変更と独立に状態が変わる。hook に載せると `--no-verify` の常用を教える（[0110](../../docs/adr/0110-security-operations.md) 3.1） |
+| 依存の脆弱性 | CI のみ | 上記「依存の脆弱性は、3 つの判定が同じ対象を見る」と同じ理由で、hook に載せると `--no-verify` の常用を教える |
 | `sast` | CI のみ | 走査に 1 分前後かかり hook の速度目標に収まらない。手元で確かめるなら `make sast` がそのまま同じ検査を回す |
 | `sonarcloud` | CI のみ | 解析を実行するのは SonarCloud 側で、手元には結果を読む口しか無い。そもそも `SONAR_TOKEN` を開発者の環境へ配らない <!-- boilerplate-only:line --> |
 | `dast` | CI のみ | build と起動を伴うので hook には収まらない。手元で確かめるなら `pnpm start` したものへ `DAST_TARGET=http://host.docker.internal:3000 make dast` を当てる |
@@ -389,14 +389,14 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 | | 取得元 | ライセンス |
 | --- | --- | --- |
 | エンジン | mise が固定する opengrep | LGPL-2.1-or-later |
-| ルール（変更前） | 走査のたびに semgrep.dev | **Semgrep Rules License v1.0** |
-| ルール（現在） | 固定した commit の `opengrep/opengrep-rules` | LGPL-2.1 + Commons Clause |
+| ルール（レジストリ `p/*`、採らない） | 走査のたびに semgrep.dev | **Semgrep Rules License v1.0** |
+| ルール（採用） | 固定した commit の `opengrep/opengrep-rules` | LGPL-2.1 + Commons Clause |
 
 ### 取り出し方は 3 つの制約で決まっている
 
 **1. 検体を 1 つもディスクへ置かない。** 置き場はルールとほぼ同数の**検体**（意図的に脆弱なソース）を抱えており、`java/` `php/` には本物の webshell が含まれる。そのまま展開すると開発者のマシンとランナーへ置かれ、ウイルス対策が反応する。よって**言語で絞ったうえで、アーカイブから YAML だけを名指しで取り出す** —— 「全部展開してから消す」では同じ集合になっても途中でディスクへ出る。
 
-**2. `audit` 分類を取らない。** 実測で、`security/` を丸ごと採ると 28 件（うち 23 件が `detect-non-literal-regexp` と `detect-redos`）出て 0 件 baseline が保てなかった。レジストリの `p/javascript` も既定では含めていない分類で、**読んで判断するための所見**であってゲートに載る前提ではない。同じ規則を [`eslint.config.ts`](../../eslint.config.ts) の security でも落としており、理由も同じ。
+**2. `audit` 分類を取らない。** `security/` を丸ごと採ると `audit` の所見で 0 件 baseline が保てない。レジストリの `p/javascript` も既定では含めていない分類で、**読んで判断するための所見**であってゲートに載る前提ではない。同じ規則を [`eslint.config.ts`](../../eslint.config.ts) の security でも落としており、理由も同じ。
 
 **3. 照合はアーカイブではなく取り出したものに掛ける。** GitHub が自動生成する tarball はバイト単位で不変ではない（gzip の設定が変われば同じ commit でも digest が動く）。照合したいのは「走らせるルールが固定したものと同じか」であって包み方ではないので、**取り出した YAML の集合に対して digest を取る**。一致しなければ**何も置かずに**落ちる —— 置いてから照合すると、落ちた後のツリーに照合できなかったルールが残り、次の実行がそれを「固定済み」と読む。
 
@@ -404,7 +404,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 
 ### 引き換えに失うもの
 
-**ルール数が減る。** レジストリの 3 パックで 563 ルールだったところ、いまは 77 ルールである。`p/owasp-top-ten` は複数言語を跨ぐパックで、その大半はこのリポジトリに対象が無いが、**それを差し引いても減っている**。
+**ルール数が減る。** 固定した commit から取り出す集合は、レジストリの 3 パックより小さい。`p/owasp-top-ten` は複数言語を跨ぐパックで、その大半はこのリポジトリに対象が無いが、**それを差し引いても減っている**。
 
 <!-- boilerplate-only:replace-begin -->
 **ルールが更新されない。** `opengrep/opengrep-rules` はライセンス変更直前（2024-12-13）の fork で、上流の動きは鈍い。新しい規則は入ってこない。**この層の鮮度は CodeQL が補っている**（GitHub 側が更新し続ける）ため、SAST 全体が固まるわけではない。

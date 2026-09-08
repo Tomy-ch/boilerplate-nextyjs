@@ -44,8 +44,8 @@ manifest が大きく変わったらこの数値を取り直します。ADR
 
 どちらも件数が多く、候補と取り違えるとリポジトリ全体のレポートが読めなくなります。
 
-- **部品リファレンス** —— `src/components/**` の README は固定の節の形を共有します
-  （用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト）。1 つの component の表面を
+- **部品リファレンス** —— `src/components/**` の README は Step 2 の N1 が名指しする固定の節の形を
+  共有します。1 つの component の表面を
   書いたもので、このリポジトリの答えは Storybook（manifest の `meta.reference_links` の常設項目）と
   component 自身の TSDoc です。これが本リポジトリでの N1 の読み方です
 - **feature slice** —— `src/features/` 配下の README は代わりに Step 2b の必須節検査で採点します。

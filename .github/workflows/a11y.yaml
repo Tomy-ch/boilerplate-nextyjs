@@ -22,11 +22,9 @@ name: Accessibility
 #
 # ## Why this does not run on every pull request
 #
-# Measured on this repository's own sample: 941 stories at about 2.2 s each over four
-# workers, which is roughly ten minutes, and four fifths of it is the per-story work — so
-# the cost is `stories x seconds` and grows with the catalogue. Against that, 5% of the runs
-# that actually ran found a violation. Paying ten minutes on every push to change the merge
-# decision one time in twenty is the wrong trade.
+# The cost is `stories x seconds`: the per-story work dominates, so it grows with the
+# catalogue, and only a small share of the runs finds a violation. Paying the whole
+# catalogue on every push to change the merge decision that rarely is the wrong trade.
 #
 # So the cadence moves instead of the coverage, exactly as `lighthouse.yaml` does. Every
 # story is still checked, in both themes, against the same rules — on every merge into a
@@ -204,10 +202,8 @@ jobs:
           path: tmp/a11y/verified-inputs.sha256
           key: a11y-verified-${{ github.run_id }}
 
-      # A job that stood down still owes the pull request a verdict. Without this, the ❌
-      # comment an earlier push produced stays beside a green check once the diff stops
-      # reaching a story — README.md's "update the comment on success too" invariant,
-      # applied to standing down. The body file is the one the comment job reads, so it has
+      # A job that stood down still owes the pull request a verdict (README § PR コメント,
+      # the `diff-scope` bullet). The body file is the one the comment job reads, so it has
       # to be written here too.
       - name: Note that axe did not run
         id: standdown

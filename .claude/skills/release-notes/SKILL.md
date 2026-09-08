@@ -67,7 +67,7 @@ The following remain protected even during skill execution:
 
 - `AGENTS.md` / `CLAUDE.md`
 - Existing release notes under `.github/release/` (this skill never modifies or overwrites an existing file — if `.github/release/<NEW_VERSION>.md` already exists, stop and ask the user)
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, generated content under `docs/`)
+- Generated files (the paths `.gitattributes` marks `linguist-generated`, and the generated content under `docs/portal/`)
 - Everything outside `.github/release/`
 
 ## Step 1. Guard: Output File Does Not Exist

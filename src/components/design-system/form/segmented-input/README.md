@@ -28,9 +28,9 @@
 
 SSR first の選定では `○` に当たります。桁間の focus 移動と入力位置の追跡に hydration が必要な client island で、Server Component からは直接 render できません。
 
-**桁区切りの表示が要らない場合は使いません。** `Input` に `inputMode="numeric"` と `autoComplete="one-time-code"` を与えれば足り、client runtime も要りません。この component が要るのは、**どこまで入力したかを桁の形で見せたい**場合です。
+**桁区切りの表示が要らない場合は使いません。** `Input` に `inputMode` と適切な `autoComplete` を与えれば足り、client runtime も要りません。この component が要るのは、**どこまで入力したかを桁の形で見せたい**場合です。
 
-**名前に「OTP」とありますが、OTP としての検証は一切しません。** この component が引き受けるのは、桁を分割した入力面だけです。コードの発行・照合・有効期限・再送・試行回数の制限といった、「ワンタイムパスワード」という言葉を成り立たせている処理はひとつもここにありません。`Input` にパスワードを入れても `Input` が認証責務を持たないのと同じで、名前は入力する値の種類を指しているだけです。
+**OTP としての検証は一切しません。** この component が引き受けるのは、桁を分割した入力面だけです。コードの発行・照合・有効期限・再送・試行回数の制限といった、「ワンタイムパスワード」という言葉を成り立たせている処理はひとつもここにありません。`Input` にパスワードを入れても `Input` が認証責務を持たないのと同じです。
 
 この取り違えは実際に起きます。名前から「認証部品」と読むと、認証本体を out of scope とする ADR [0079](../../../../../docs/adr/0079-auth-frontend-seam.md) に触れる部品に見え、置いてはいけないという結論になります。実際には認証と無関係な確認コード（メールアドレスや電話番号の確認、機微操作の step-up 確認）でも使うただの入力欄です。
 
@@ -55,7 +55,7 @@ SSR first の選定では `○` に当たります。桁間の focus 移動と�
 
 `SegmentedInputSeparator` は支援技術から隠します。入力の値は実体の `input` が伝えるため、この記号に意味はありません。`separator` role は focus と値を持つ widget を表すので当てません。
 
-実装は `input-otp` です。vendor 名は公開 API に現れません。文字種の正規表現も `SEGMENTED_INPUT_PATTERN` として包み直しているため、feature が vendor を直接 import する必要はありません。
+実装は `input-otp` です。
 
 ## Storybook とテスト
 

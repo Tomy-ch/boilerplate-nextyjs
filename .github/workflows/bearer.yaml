@@ -18,13 +18,11 @@ name: Bearer Scan
 # one `dependency-scan` draws.
 #
 # It never fails because THE BASELINE IS NOT ZERO, and it cannot honestly be made
-# zero. Measured on this tree: six findings, none of them real. Four were
-# `hardcoded_secret` on a test fixture and on the mock-OIDC development helper — both
-# excluded by path in `.makefiles/security/bearer.mk`, because a placeholder that
-# exists to be a placeholder is not a secret. The remaining two are
-# `observable_timing` on `href === current` and on `accessToken === ""`, neither of
-# which compares a secret. Silencing that rule would be a rule-wide disable, which
-# ADR 0110 §3.4 forbids, so the two stay visible instead.
+# zero. Paths whose placeholder secrets exist to be placeholders (fixtures, development
+# helpers) are excluded in `.makefiles/security/bearer.mk`; what remains are findings on
+# rules that also match harmless code, such as `observable_timing` on a comparison that
+# involves no secret. Silencing such a rule would be a rule-wide disable, which
+# ADR 0110 §3.4 forbids, so those stay visible instead.
 #
 # Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
 # in README.md.

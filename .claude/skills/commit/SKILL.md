@@ -103,8 +103,6 @@ Treat the following as **rider files** — they never form their own commit, but
 - Generated API artifacts: `src/adapters/gen/**` and the imported `openapi.gen.yaml` ([0072](../../../docs/adr/0072-api-type-generation.md) — do-not-edit, regenerated from the backend spec) <!-- skill-lint-ignore -->
 - Next.js-managed types: `next-env.d.ts`
 
-Example: a `package.json` dependency change brings the regenerated `pnpm-lock.yaml` with it in the same commit. Re-importing the backend `openapi.gen.yaml` brings its `src/adapters/gen/**` outputs in the same commit. <!-- skill-lint-ignore -->
-
 Some of these paths do not exist yet (the generation pipeline lands with [0072](../../../docs/adr/0072-api-type-generation.md)'s implementation PR). Treat an absent path as "no rider", not as an error.
 
 ## Step 3. Prefix Reference
@@ -159,7 +157,7 @@ Build a list of proposed commits with appropriate granularity. Each item:
 
 - **One semantic change = one commit.** Do not mix feature + refactor + fix into a single commit.
 - **Tests may co-locate with the implementation they cover** (a new handler and its tests belong together). If you are only adding tests for existing code, that goes into a standalone `Test:` commit.
-- **Generated artifacts co-locate with their source change.** When a dependency in `package.json` changes, the regenerated `pnpm-lock.yaml` belongs in the same commit. When the imported `openapi.gen.yaml` changes, the regenerated `src/adapters/gen/**` belongs in the same commit ([0072](../../../docs/adr/0072-api-type-generation.md)). <!-- skill-lint-ignore -->
+- **Generated artifacts co-locate with their source change.** The rider files of Step 2 ride in the same commit as the change that produced them.
 - **Formatting-only changes are standalone `Style:` commits.** Output produced by Step 0's `pnpm fix` may be folded into the appropriate existing group when it is clearly part of the same change; if it is unrelated, surface it as a separate `Style:` commit.
 - **`Docs:` is standalone by default.** Exception: when documentation is part of a new feature (e.g., a README added alongside a new package), they may co-locate.
 - **One prefix per commit.** If you feel the urge to write two, the grouping is wrong.
@@ -216,7 +214,7 @@ EOF
 - **`Co-Authored-By` footer**: Required, in the form `Co-Authored-By: <running model name> <noreply@anthropic.com>` — e.g. `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`. Use the identifier of the model actually producing the commit, as given by the environment / `CLAUDE.md`. Do not copy a model name hardcoded in this document: it goes stale at every model release, and a wrong name misattributes the commit.
 - **`Refs:` footer (review-applied commits only)**: when a commit applies a finding from `full-apply` / `impl-review` / `code-review`, add a `Refs: tmp/reviews/mod_*.md (<severity>)` line in the footer so the commit links to the finding. Omit it for ordinary commits.
 - **HEREDOC**: Required (keeps the title + blank line + body + footer layout intact).
-- **`--no-verify`**: Required for every commit produced by this command. This is an explicit, command-scoped carve-out from the project-wide rule; the rationale is documented in Step 4 (lefthook is run once manually before push, not N times during the split).
+- **`--no-verify`**: Required for every commit produced by this command — the command-scoped carve-out the introduction states, with Step 6 as the single verification pass.
 - **Never use `-a`, `git add -A`, or `git add .`.** Always stage files by name (avoids sweeping in `.env` or credentials).
 - **`--no-gpg-sign` and `--amend` remain prohibited.**
 
@@ -238,7 +236,7 @@ If `git add` or `git commit` fails for any group (file-path typo, mid-operation 
 
 ## Step 6. Verification
 
-After all commits succeed, run a verification gate composed of (a) each command defined under `pre-commit:` `commands:` in `.lefthook.yaml` and (b) `pnpm fix` as a final formatting pass. Do NOT run `lefthook run pre-commit` itself — lefthook skips registered commands when nothing is staged (which is the post-commit state), so it would report "no matching staged files" and exit without checking anything. Instead, execute each command directly.
+After all commits succeed, run a verification gate composed of (a) each command defined under `pre-commit:` `commands:` in `.lefthook.yaml` and (b) `pnpm fix` as a final formatting pass. Do NOT run `lefthook run pre-commit` itself — for the reason the introduction states it would report "no matching staged files" and exit without checking anything. Instead, execute each command directly.
 
 ### Procedure
 
@@ -314,7 +312,7 @@ If the user passes `--no-verify` to `/commit` itself (a future-compatible flag),
 - ✅ At Step 1, detect a current branch whose PR is already merged (`gh pr view`) and recommend cutting a fresh branch from the base before committing (degrade gracefully when `gh` is unavailable)
 - ✅ On failure, propose `git reset --mixed <ORIGINAL_HEAD>` via `AskUserQuestion`
 - ✅ Step 6 runs each lefthook-defined command + `pnpm fix` directly (never `lefthook run pre-commit`)
-- ❌ Do NOT invoke `lefthook run pre-commit` — it skips commands when nothing is staged, which is the post-commit state
+- ❌ Do NOT invoke `lefthook run pre-commit` (see the introduction)
 
 ## Checklist
 

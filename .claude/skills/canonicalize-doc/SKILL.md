@@ -13,7 +13,7 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 
 Use this skill when:
 
-- A Japanese-only Markdown doc exists and you need to produce the English canonical version (the typical case in this repo, where English is canonical).
+- A Japanese-only Markdown doc exists and you need to produce the English canonical version (the typical case here — see Repo Conventions › Language).
 - An English-only Markdown doc exists and you need to produce its Japanese translation.
 - Both versions exist but have drifted apart and need to be synchronized.
 
@@ -90,7 +90,7 @@ Paths that may be modified:
 The following remain protected even during skill execution:
 
 - `AGENTS.md` / `CLAUDE.md`
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, generated content under `docs/`)
+- Generated files — the paths `.gitattributes` declares `linguist-generated` (`git check-attr linguist-generated -- <path>`), and generated content under `docs/`
 - Any path listed under `permissions.deny` in `.claude/settings.json`
 
 ## Step 1. Read the source

@@ -81,7 +81,6 @@ export type TextHighlightProps = Omit<ComponentProps<"span">, "children"> & {
  * この部品は state や browser API を持たないため、Server Component と Client Component の
  * どちらからも利用できる。
  *
- * @remarks
  * `text` は文字列としてのみ扱い、HTML として解釈しない。sanitize 済みの本文を組版する用途には
  * `Typeset` を使う。
  *

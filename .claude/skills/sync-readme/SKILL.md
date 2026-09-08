@@ -59,7 +59,7 @@ Compare the README's documented entries against the actual entries:
 
 - Hidden files/dirs (`.git`, `.DS_Store`, `.gitkeep`, etc.) unless the README clearly documents them.
 - Build artifacts and ignored files (anything matched by `.gitignore` at or above the scope root).
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, `vendor/`).
+- Generated files (the paths `.gitattributes` marks `linguist-generated`).
 - Nested directory internals when that directory has its own README.
 
 ## Repo Conventions
@@ -67,7 +67,7 @@ Compare the README's documented entries against the actual entries:
 - The canonical README is `README.md` (English). The Japanese translation, if present, is `README.ja.md` co-located in the same directory.
 - When updating both, keep heading structure, list order, and table columns 1:1 between the two files.
 - Preserve existing section ordering and styling (tables vs lists vs prose) unless the user explicitly asks to restructure.
-- Preserve existing prose that is still accurate. Do not rewrite for stylistic reasons.
+- Preserve existing prose that is still accurate. Do not rewrite for stylistic reasons — minimize churn.
 
 ## AI Modification Scope
 
@@ -79,7 +79,7 @@ Per the "Exception: Skill Execution" clause in AGENTS.md, the normal AI Modifica
 The following remain protected even during skill execution:
 
 - `AGENTS.md` / `CLAUDE.md`
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, generated content under `docs/`)
+- Generated files (the paths `.gitattributes` marks `linguist-generated`, and the generated content under `docs/portal/`)
 - Any path listed under `permissions.deny` in `.claude/settings.json`
 - All other files and directories under the scope root (the skill reads them but never modifies them).
 
@@ -181,6 +181,5 @@ Confirm the following before reporting completion:
 
 - Do NOT recursively rewrite nested READMEs. Each invocation handles exactly one README's scope.
 - Do NOT delete documented entries blindly. When an entry is removed from disk, confirm it isn't referenced from elsewhere before pruning the line.
-- Do NOT restructure or restyle sections that are still accurate. Minimize churn.
 - If the directory has no obvious convention to follow (e.g., a fresh README with no structure), ask the user whether to use a table, a bulleted list, or prose.
 - If the README intentionally documents items outside its directory (e.g., a top-level README listing project-wide entries), confirm the scope with the user before treating those external references as drift.

@@ -53,10 +53,10 @@ manual-worthy means, so the criteria follow the manifest rather than the other w
 
 Both are large enough that mistaking them for candidates makes any repo-wide report unreadable.
 
-- **Per-component reference** — the READMEs under `src/components/**` share a fixed section shape
-  (用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト). They document one component's
-  surface, and this repository answers that with Storybook (a standing `meta.reference_links` entry
-  in the manifest) plus the component's own TSDoc. That is this repo's reading of N1.
+- **Per-component reference** — the READMEs under `src/components/**` share the fixed section shape
+  that N1 in Step 2 names. They document one component's surface, and this repository answers that
+  with Storybook (a standing `meta.reference_links` entry in the manifest) plus the component's own
+  TSDoc. That is this repo's reading of N1.
 - **Feature slice** — a README under `src/features/` is graded by the required-section check in
   Step 2b instead, against the sections `docs/templates/feature-readme.md` declares.
 

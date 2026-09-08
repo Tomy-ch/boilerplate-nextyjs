@@ -44,7 +44,7 @@ function main(): void {
   const { findings, postingJobs } = collectFindings(sources, commentActions.dirs, postingWorkflows);
 
   // 定義があるのに投稿ジョブが 1 つも見つからないのは、参照の同定が壊れていることを意味する。
-  // 検査対象が消えたまま緑になるのを塞ぐ。
+  // `files` の 0 件と同じで、緑で返さない。
   if (commentActions.defined && postingJobs === 0) {
     abort(
       `${UPSERT_ACTION_DIR} の定義があるのに、それを使うジョブが 1 つも見つかりません（参照の同定が壊れています）`,

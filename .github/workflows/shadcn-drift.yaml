@@ -11,8 +11,7 @@ name: shadcn Drift
 # For the same reason `upstream` must never become a required status check.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on every PR is in
-# README.md. A filtered workflow reports no context on the pull requests it skips, and a required
-# context that is never reported blocks the merge forever.
+# README.md.
 
 on:
   pull_request:

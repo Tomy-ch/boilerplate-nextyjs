@@ -92,7 +92,7 @@ function breakdownOf(verdict: Verdict): string {
  * @param verdicts - 判定。初期 JS の大きい route から並べ替えて出す。
  * @param survey - 表に添える計測全体の性質。
  * @param survey.sharedJs - 2 つ以上の route が読む chunk の総量。route ごとに繰り返さず 1 度だけ
- *   出す。共有が 8 KB 増えれば route の行はすべて +8 KB として並ぶが、原因は 1 つである。
+ *   出す。
  * @param survey.deferredChunkCount - 遅延として引けた chunk の総数。0 は「遅延が無い」とも
  *   「成果物から引けなくなった」とも読めるため、抽出が生きていることを表に添える
  *   （`manifest.ts` の `CHUNK_REFERENCE`）。

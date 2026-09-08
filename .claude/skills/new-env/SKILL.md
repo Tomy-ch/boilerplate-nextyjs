@@ -15,13 +15,13 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 
 ## Precondition: the config kernel must exist
 
-This skill assumes `src/config/` is already in place (it lands with the `env / 型付き Config` PR — plan ID **P3-3**). Before anything else:
+This skill assumes `src/config/` is already in place. Before anything else:
 
 ```sh
 ls src/config/ 2>/dev/null
 ```
 
-If `src/config/` does not exist, **stop immediately** and tell the user that the config kernel has not landed yet, so there is nothing to add a variable to. Do **not** scaffold the kernel, the schema, the validation call sites, or `env/` from a variable-addition request — building the kernel is P3-3's scope and requires the library selection that [0030](../../../docs/adr/0030-environment-variable-management.md) defers to that PR.
+If `src/config/` does not exist, **stop immediately** and tell the user that the config kernel has not landed yet, so there is nothing to add a variable to. Do **not** scaffold the kernel, the schema, the validation call sites, or `env/` from a variable-addition request — building the kernel is its own change and requires the library selection that [0030](../../../docs/adr/0030-environment-variable-management.md) leaves to it.
 
 ## When to Use
 
@@ -56,7 +56,7 @@ Do NOT use this skill for:
 **Never touches**:
 
 - `next.config.ts` / `instrumentation.ts` — the build-time and server-start validation points ([0030](../../../docs/adr/0030-environment-variable-management.md) §1) import the schema module wholesale, so adding a field to an existing purpose schema is already covered. If a change there looks necessary, that means the purpose module is not wired in — stop and report it instead of editing.
-- `biome.json` — the `noProcessEnv` override belongs to P3-3.
+- `biome.json` — the `noProcessEnv` override belongs to the config kernel, not to a variable addition.
 - Anything outside `env/` and `src/config/`.
 
 ## Step 0. Gather the Spec
@@ -80,7 +80,7 @@ This skill **MUST call `AskUserQuestion` immediately after invocation** — addi
   - 「はい(config 経由で読む)」 — the normal path: schema entry + getter in a purpose module, and a `src/config/README` entry
   - 「いいえ(外部ツール / SDK が `process.env` から直接読む)」 — e.g. a standard-named variable such as `OTEL_EXPORTER_OTLP_ENDPOINT`, or a value consumed by the platform rather than the app
 
-The answer decides how far the change reaches. `env/` and `env/README` are updated either way, because they own the fact that the variable exists. `src/config/` and its README are touched **only** on the "はい" path — the config side owns the meaning and handling of values that are validated at build time and injected at construction, which is a subset of what exists in env.
+The answer decides how far the change reaches. `env/` and `env/README` are updated either way; `src/config/` and its README are touched **only** on the "はい" path (the ownership split between the two documentation sides is stated in this skill's opening paragraph).
 
 On the "いいえ" path, skip Question 3 (which module side) and Question 4 (type / required vs code default) — both are schema concerns and there is no schema entry to write. The `NEXT_PUBLIC_` exposure rule and the secret label still apply. State plainly in the Step 2 plan that no config module is touched, so the reader is not left wondering why the getter is missing.
 
@@ -177,7 +177,7 @@ Include the secret label in the Notes column when one was chosen. This row is wr
 
 ### `src/config/README.md` — the config value (config-backed variables only)
 
-Only on the Question-2 "はい" path. Describe the value the way the surrounding entries do: which purpose it belongs to, server or client side, required or code default, and how a consumer receives it. Do **not** restate the env row here — env owns the fact that the variable exists, config owns what the value means and how it is handled. If the config README documents purposes rather than individual values, add nothing and say so in the plan rather than inventing a per-variable section that the file's structure does not have.
+Only on the Question-2 "はい" path. Describe the value the way the surrounding entries do: which purpose it belongs to, server or client side, required or code default, and how a consumer receives it. Do **not** restate the env row here (the ownership split is in this skill's opening paragraph). If the config README documents purposes rather than individual values, add nothing and say so in the plan rather than inventing a per-variable section that the file's structure does not have.
 
 ### `src/config/environment.fixture.ts` — the whole-set stub (config-backed variables only)
 
@@ -192,7 +192,7 @@ Discover the fixture rather than assuming it: it is the file the purpose tests i
 
 ### Tests
 
-The testing approach for config is **env stub + factory regeneration** (`vi.stubEnv`) — [0030](../../../docs/adr/0030-environment-variable-management.md) 周辺ルール / [0090](../../../docs/adr/0090-testing-strategy.md). If config tests exist in the purpose directory, extend them in lockstep with the production change: a case asserting the new getter, and — for a required variable — a case asserting that its absence fails validation. If no config test file exists yet (the test foundation lands in P3-6), skip this and state so explicitly in the Step 2 plan.
+The testing approach for config is **env stub + factory regeneration** (`vi.stubEnv`) — [0030](../../../docs/adr/0030-environment-variable-management.md) 周辺ルール / [0090](../../../docs/adr/0090-testing-strategy.md). If config tests exist in the purpose directory, extend them in lockstep with the production change: a case asserting the new getter, and — for a required variable — a case asserting that its absence fails validation. If no config test file exists yet, skip this and state so explicitly in the Step 2 plan.
 
 ## Step 2. Show the Plan and Confirm
 
@@ -250,7 +250,7 @@ Remains protected:
 
 ## Constraints
 
-- ❌ Run at all when `src/config/` does not exist (report instead — the kernel is P3-3's scope)
+- ❌ Run at all when `src/config/` does not exist (report instead — building the kernel is a separate change)
 - ❌ Hardcode the purpose list, the schema library, or the env-file set — always derive them from the live tree
 - ❌ Put a secret behind `NEXT_PUBLIC_`
 - ❌ Write a real secret value into a committed env file

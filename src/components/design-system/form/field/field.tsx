@@ -225,8 +225,8 @@ export function FieldSeparator({
  * `role="alert"` を持つため、描画された時点で支援技術が読み上げる。常に render して文言だけを
  * 空にすると読み上げが起きないため、エラーが無いときは要素ごと render しない。
  *
- * control と結び付けるには `id` を与え、control 側の `aria-describedby` から参照したうえで
- * `aria-invalid` を立てる。文言の整形と検証は持たないため、利用者向けの文字列を呼び出し元が渡す。
+ * control との結び付け方は {@link FieldDescription} と同じで、併せて `aria-invalid` を立てる。
+ * 文言の整形と検証は持たないため、利用者向けの文字列を呼び出し元が渡す。
  *
  * @param props - native `div` 属性。
  * @see Storybook `Form/Field`

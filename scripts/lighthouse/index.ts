@@ -270,8 +270,7 @@ function trigger(baseRef: string): void {
  * 測り終えた結果を、予算と照らして報告する。
  *
  * @remarks
- * **全画面を測った側でしか呼べません。** 在るべき画面が居るかどうかの検査は、測った集合が
- * 全体であることを前提にしています。分割した 1 台がこれを呼ぶと、他の台が持つ画面がすべて
+ * **全画面を測った側でしか呼べません。** 分割した 1 台がこれを呼ぶと、他の台が持つ画面がすべて
  * 「宣言されているのに居ない」として上がります。
  */
 function judgeAll(measurements: readonly Measurement[], budget: Budget): void {
@@ -379,8 +378,7 @@ async function measureAll(): Promise<void> {
   // 呼ばれ方で決める。台数では決めない —— 1 台に割った実行も束ねる側を持っており、そちらが
   // 判定するのに、ここで台数を見て書き出しを飛ばすと束ねる側は何も見つけられない。
   //
-  // 判定するのは束ねる側 1 箇所。台は全画面を見ているとは限らず、在るべき画面の検査に
-  // 答えられない。
+  // 判定するのは束ねる側（`merge`）1 箇所で、台は判定しない。
   if (spec !== undefined) {
     writeFileSync(join(OUTPUT_DIR, shardFileName(shard)), JSON.stringify(measurements));
     console.error(

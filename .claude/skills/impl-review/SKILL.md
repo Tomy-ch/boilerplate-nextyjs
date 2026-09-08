@@ -71,10 +71,9 @@ Idea) that it weakens the different-model guarantee and confirm before continuin
 model is passed to every `adversarial-reviewer` / `review-verifier`
 `Agent` call via the `model` parameter in Step 2 and Step 3.
 
-**Two questions, and no more.** There is no test question and no comment question here. Those
-subjects belong to `/test-review` and `/comment-sweep`, which the user asks for separately; folding
-them in would put a decision about one subject inside a run started for another, and would make this
-skill the single point through which the other two are remembered.
+**Two questions, and no more.** There is no test question and no comment question here — those
+subjects belong to `/test-review` and `/comment-sweep`, asked for separately (Core Idea, "This skill
+audits the change and nothing else").
 
 ### Flags
 
@@ -99,11 +98,9 @@ Spawn all finders concurrently (issue every `Agent` call in a single message). P
 | `cohesion` | adversarial-reviewer | always |
 | `runtime-gap` | adversarial-reviewer | when a Route Handler / Server Action / `src/proxy.ts` / Provider mount / generated API artifact is touched — the seams a mocked component test does not exercise |
 
-**No lens here audits the tests or the comments.** A finding that the change is untested belongs to
-`/test-review`, and one about a comment's content belongs to `/comment-sweep`. When a lens surfaces
-either in passing, say so in the 補足 section as an observation and name the skill that owns it —
-never grow a lens to cover it. A lens grown here takes the subject away from the skill that owns it
-without taking the depth with it.
+**No lens here audits the tests or the comments** (Core Idea, "This skill audits the change and
+nothing else"). When a lens surfaces an untested change or a comment's content in passing, say so in
+the 補足 section as an observation and name the skill that owns it — never grow a lens to cover it.
 
 Each `adversarial-reviewer` prompt MUST include: the lens name + its definition, the base ref + changed-file list + the diff, and pointers to `AGENTS.md` / the relevant `README.md` / the governing ADRs.
 
@@ -137,7 +134,7 @@ A build failure **is** a CONFIRMED finding: report it with the output. Do not fi
 
 ### 4-2 Request verification — only when a request-time seam is touched
 
-Gate: Step 1 found a touched Route Handler (`src/app/**/route.ts`), Server Action (`src/features/<name>/actions.ts`), `src/proxy.ts`, response header configuration (`next.config.ts` `headers()`), or layout shell / Provider composition (`src/app/**/layout.tsx`). <!-- skill-lint-ignore -->
+Gate: Step 1 found a touched **request-time seam** (the list is in Step 1).
 
 1. Start the app built in 4-1: `pnpm start --port <3000+N>`, on a port distinct from other worktrees so a parallel session's server is not the one under test. Run it in the background and stop it when done.
 2. `curl -i` the touched path(s) and assert:
@@ -197,7 +194,7 @@ skipped — silent omission reads as "covered everything" when it was not.
 
 By default, post the surviving **CONFIRMED + PLAUSIBLE** findings to the branch's PR as **inline review comments** — one per finding, anchored to its `path:line`, instead of a single wall-of-text comment. **Never post REFUTED.** The Step 5 local report is still produced regardless; this step is additive.
 
-Only this skill's own findings are posted. `/test-review` and `/comment-sweep` produce their own output for the user to act on, and nothing here reaches into them — posting another skill's findings under this skill's review would make one subject's audit look like it happened inside another's.
+Only this skill's own findings are posted — `/test-review` and `/comment-sweep` produce their own output for the user to act on (Core Idea, "This skill audits the change and nothing else").
 
 Skip this step entirely when:
 

@@ -65,7 +65,7 @@
 
 - `AGENTS.md` / `CLAUDE.md`
 - `.github/release/` 配下の既存ファイル（このスキルは既存ファイルの上書きを一切行わない。`.github/release/<NEW_VERSION>.md` が既に存在する場合は処理を中止してユーザーに確認する）
-- 生成物（`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, `docs/` 配下の生成物）
+- 生成物（`.gitattributes` が `linguist-generated` を付けるパスと、`docs/portal/` 配下の生成物）
 - `.github/release/` 以外のすべて
 
 ## Step 1. ガード: 出力先ファイルが存在しないこと

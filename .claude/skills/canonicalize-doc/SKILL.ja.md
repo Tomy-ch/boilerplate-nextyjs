@@ -10,7 +10,7 @@
 
 以下のいずれかに該当する場合に使用する。
 
-- 日本語版のみ存在する Markdown について、英語 canonical を作成したい（このリポジトリでは英語が canonical のため、典型的なケース）。
+- 日本語版のみ存在する Markdown について、英語 canonical を作成したい（典型的なケース — 「リポジトリ規約 › 言語」参照）。
 - 英語版のみ存在する Markdown について、日本語翻訳を作成したい。
 - 両方存在するが内容が乖離しており、再同期したい。
 
@@ -87,7 +87,7 @@ AGENTS.md の "Exception: Skill Execution" 節に基づき、このスキル実�
 スキル実行中でも保護対象として維持されるもの:
 
 - `AGENTS.md` / `CLAUDE.md`
-- 生成ファイル（`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, `docs/` 配下の生成物）
+- 生成ファイル — `.gitattributes` が `linguist-generated` を宣言するパス（`git check-attr linguist-generated -- <path>` で引ける）と、`docs/` 配下の生成物
 - `.claude/settings.json` の `permissions.deny` に列挙された任意のパス
 
 ## Step 1. 元ファイルの読み込み

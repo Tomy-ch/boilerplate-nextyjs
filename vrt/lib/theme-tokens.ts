@@ -66,8 +66,7 @@ export type TokenProbe = { readonly name: string; readonly property: string };
  * 生成した CSS から、色以外の意味トークンの名前を、読み取りに使うプロパティとともに取り出す。
  *
  * @remarks
- * 1 つも見つからなければ例外を投げます。0 件へ縮退させると、検査する対象が無い状態が
- * 「すべて届いている」として緑で通ります。
+ * 1 つも見つからなければ例外を投げます（{@link semanticColorTokens} と同じ規律）。
  */
 export function semanticNonColorTokens(css: string): TokenProbe[] {
   const probes = SEMANTIC_ALIAS_BY_PROPERTY.flatMap(([pattern, property]) =>

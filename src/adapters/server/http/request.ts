@@ -182,8 +182,7 @@ type BaseClientDeps = {
  * 資格情報の解決方法。どちらか一方だけを指定できる。
  *
  * @remarks
- * 型で排他にしているのは、両方を渡した実装が「どちらの資格情報で出ていくか」を読む側に推測
- * させるためです。
+ * 型で排他にしているのは {@link RequestPayload} と同じ理由です。
  */
 type UserScopedCredential =
   | {
@@ -266,11 +265,10 @@ async function readBody(response: Response): Promise<unknown> {
 }
 
 /**
- * 契約が詳細識別子を宣言している唯一の status。
+ * 契約が詳細識別子（`ErrorResponseWithDetails`）を宣言している status。
  *
  * @remarks
- * `ErrorResponseWithDetails` を宣言した口だけが `details` を返せ、いまその宣言を持つのは `422` だけです。
- * 契約が増えたらここも増えます。
+ * その宣言を持つ口だけが `details` を返せます。宣言が増えたらここも増えます。
  */
 const UNPROCESSABLE_ENTITY_STATUS = 422;
 
@@ -519,7 +517,7 @@ export function createHttpClient({
         } catch (cause) {
           lastError = cause instanceof Error ? cause : new Error(String(cause));
           lastKind = overall.aborted ? ErrorKind.CANCELED : ErrorKind.UNAVAILABLE;
-          // 分類と詳細が別々の試行のものにならないよう捨てる（0080 §2）。
+          // 分類と詳細が別々の試行のものにならないよう捨てる。
           lastDetails = [];
         }
 

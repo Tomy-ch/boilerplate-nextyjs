@@ -75,7 +75,7 @@ export type ComboboxClientProps = {
  * `aria-controls` の関連付けも競合する。trigger は popover を開く button であり、開閉は Radix が
  * `aria-expanded` に反映する。
  *
- * trigger は文言を持たない場合があるため、`aria-label` か `aria-labelledby` で**アクセシブルな
+ * trigger は選択状態によって文言が変わるため、`aria-label` か `aria-labelledby` で**アクセシブルな
  * 名前を必ず与える**。絞り込み入力の名前は `Command` の `label` として渡している。
  *
  * 絞り込みは label に対して行う。`CommandItem` の `value` は form へ送る値であり表示文言と異なる

@@ -55,7 +55,7 @@ SSR first の選定では、入力に応じた絞り込みとキーボード操�
 
 ### 生成物から直した点
 
-`CommandDialog` は、生成物では `DialogHeader` を `DialogContent` の**外**に置いていました。title が dialog の中に無いと `aria-labelledby` が成立せず、dialog がアクセシブルな名前を失います。`DialogContent` の中へ移しています。
+`CommandDialog` は `DialogHeader` を `DialogContent` の**中**に置きます。title が dialog の中に無いと `aria-labelledby` が成立せず、dialog がアクセシブルな名前を失います。
 
 `CommandSeparator` は `role="separator"` を固定で持ちますが、`listbox` が子に許すのは `option` と `group` だけです。区切りが読み上げの対象として残ると ARIA として不正な入れ子になり、a11y 自動検査が critical として検出します。要素は残したまま `aria-hidden` で支援技術から隠しています。group の見出しが読み上げ順での区切りをすでに伝えるため、伝わる情報は減りません。
 

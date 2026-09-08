@@ -8,11 +8,9 @@ allowed-tools: Read, Edit, Bash, Glob, Grep, AskUserQuestion
 # GitHub Actions Pin Upgrade
 
 This skill audits and upgrades the SHA-pinned GitHub Actions in `.github/workflows/**` and
-`.github/actions/**`, with a **supply-chain quarantine gate** plus an **automatic step-back**:
-releases newer than the exclusion window (`ACTIONS_PIN_MIN_AGE_DAYS`, default 14) are never
-adopted; instead the skill pins the newest version that is already older than the window. A
-freshly-published (possibly compromised) version is thus never pulled in before upstream has time
-to detect and revoke it.
+`.github/actions/**`, with a **supply-chain quarantine gate** plus an **automatic step-back**, so
+that a freshly-published (possibly compromised) version is never pulled in before upstream has time
+to detect and revoke it. The rule that picks each pin is §The Target-Selection Rule.
 
 It is the sibling of `tools-upgrade` — that skill covers `mise.toml` `[tools]`; this one covers
 GitHub Actions pins. They share the same quarantine philosophy but operate on different SSOTs.
@@ -231,12 +229,13 @@ inside the window — expected, not a failure.
 A legitimate advance of a moving major tag is printed as `ℹ️ tag の解決先が前進しました` with the
 old and new SHA.
 
-**If `resolve` exits 1 with `不変を宣言した tag の解決先が変わりました`, stop.** The lockfile was not
-written, so nothing has been adopted yet. Report both SHAs for every listed key — those two values
-are what make an upstream report actionable — and let the user decide. Do **not** reach for
-`ACTIONS_PIN_ALLOW_MOVED` on your own: the only case it is for is a comment tag this repo declared
-immutable that upstream in fact moves (a moving minor like `# v6.1`), and confirming that is a human
-judgment. If it is confirmed, re-run with the key approved and note in the commit why that tag moves.
+**If `resolve` exits 1 with `不変を宣言した tag の解決先が変わりました`, stop.** This is the fail-closed
+case of §Re-pointed tags, so nothing has been adopted yet. Report both SHAs for every listed key —
+those two values are what make an upstream report actionable — and let the user decide. Do **not**
+reach for `ACTIONS_PIN_ALLOW_MOVED` on your own: the only case it is for is a comment tag this repo
+declared immutable that upstream in fact moves (a moving minor like `# v6.1`), and confirming that is
+a human judgment. If it is confirmed, re-run with the key approved and note in the commit why that
+tag moves.
 
 If `resolve` aborts with `ref "vN" が見つかりません`, the moving-major tag does not exist — that
 action should have been a step-2 exact pin; fix and re-run.

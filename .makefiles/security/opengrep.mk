@@ -46,8 +46,8 @@ sast: opengrep-rules
 # 取り込み用。ここでは落とさない（落とす判断は上の sast が持つ）。
 #
 # **抑止済みの所見は取り込む前に落とす**（scripts/sarif）。opengrep は `// nosemgrep:` で消した
-# 所見を SARIF には残し、GitHub はそれを閉じた alert として扱わない。渡すと上の「ゲートと取り込みは
-# 同じ走査を指す」が崩れる。
+# 所見を SARIF には残し、GitHub はそれを閉じた alert として扱わない。渡すと冒頭の「検査条件は
+# 1 箇所に持つ」が崩れる。
 sast-sarif: opengrep-rules
 	@command -v opengrep >/dev/null 2>&1 || { echo "❌ opengrep が PATH にありません。make install-tools を実行し、shell の mise activate を済ませてください。"; exit 1; }
 	@opengrep scan $(OPENGREP_FLAGS) --sarif --output $(SAST_SARIF_FILE) $(OPENGREP_TARGETS)

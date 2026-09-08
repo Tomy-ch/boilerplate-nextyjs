@@ -11,10 +11,8 @@ name: VisualRegressionTest
 #
 # CI never writes baselines on its own. Producing new ones is a deliberate human act
 # — either `make vrt-update` locally, or the `baseline-retake` label handled by
-# `baseline-retake.yaml`. Neither is the approval: the images live in the store, so this
-# repository only ever shows a moved submodule pointer, and the pixels are judged in
-# the store's compare view and accepted with the `baseline-approve` label that
-# `baseline-approval.yaml` requires.
+# `baseline-retake.yaml`. Neither is the approval; that is the `baseline-approve` label
+# `baseline-approval.yaml` requires (`vrt/README.md`, 「撮り直しと承認は別の操作」).
 #
 # ## Why the comparison is split across machines
 #
@@ -293,8 +291,8 @@ jobs:
 
   # **The required status check.** Runs on every pull request except a cancelled one,
   # including the ones where every shard stood down — a required context that never reports
-  # blocks its pull request forever (README.md). Holds no App secret: it builds the comment
-  # body, and a job that holds a secret must not (ADR 0153).
+  # blocks its pull request forever (README.md). Holds no App secret, because it builds the
+  # comment body (header: the comparison and the comment are separate jobs).
   vrt:
     needs: [vrt-scope, vrt-shard]
     # Not `always()`: reading a cancelled run as a failure is the condition's responsibility to

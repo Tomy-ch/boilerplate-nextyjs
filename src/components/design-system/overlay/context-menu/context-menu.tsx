@@ -135,11 +135,8 @@ function ContextMenuRadioGroup({
  * 右端に開く向きを示す装飾のアイコンを伴う。項目自体は操作を実行せず、`ContextMenuSubContent`
  * を開くだけである。
  *
- * `inset` は、同じ menu 内に checkbox / radio 項目があるときに左端の余白を揃えるための表示
- * 指定であり、意味論は変えない。
- *
  * @param props - Radix `ContextMenu.SubTrigger` の props と、以下の表示用 props。
- * @param props.inset - 左端の余白を indicator 付き項目に揃えるか。
+ * @param props.inset - 左端の余白を indicator 付き項目に揃えるか。{@link ContextMenuItem} と同じ。
  *
  * @see Storybook `Overlay/ContextMenu`
  */
@@ -171,8 +168,8 @@ function ContextMenuSubTrigger({
  * 入れ子の menu の内容。
  *
  * @remarks
- * `ContextMenuSubTrigger` の隣へ開き、収まらない場合は自動で向きを変える。面はページ内容の上へ
- * 重なるため不透明である必要がある。
+ * `ContextMenuSubTrigger` の隣へ開き、収まらない場合は自動で向きを変える。面の不透明さは
+ * {@link ContextMenuContent} と同じ。
  *
  * @param props - Radix `ContextMenu.SubContent` の props。
  *
@@ -275,8 +272,8 @@ function ContextMenuItem({
  *
  * @remarks
  * `role="menuitemcheckbox"` として選択状態が読み上げられる。左端の check は表示用であり、
- * 状態そのものは `checked` が表す。切り替えは即座に反映されるため、確定操作を挟みたい場合は
- * menu ではなく form を使う。
+ * 状態そのものは `checked` が表す。切り替えは即座に反映され、確定操作の扱いは
+ * {@link ContextMenuRadioGroup} と同じ。
  *
  * @param props - Radix `ContextMenu.CheckboxItem` の props。`checked` と `onCheckedChange` で
  *   状態を扱う。
@@ -351,11 +348,8 @@ function ContextMenuRadioItem({
  * それ自体は選択できない。操作対象が何であるかを示す場合に、menu の先頭または
  * `ContextMenuGroup` の先頭へ置く。
  *
- * `inset` は、同じ menu 内に checkbox / radio 項目があるときに左端の余白を揃えるための表示
- * 指定であり、意味論は変えない。
- *
  * @param props - Radix `ContextMenu.Label` の props と、以下の表示用 props。
- * @param props.inset - 左端の余白を indicator 付き項目に揃えるか。
+ * @param props.inset - 左端の余白を indicator 付き項目に揃えるか。{@link ContextMenuItem} と同じ。
  *
  * @see Storybook `Overlay/ContextMenu`
  */

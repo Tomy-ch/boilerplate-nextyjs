@@ -100,8 +100,7 @@ workflows:
     - check.trivy.dev:443
     - mirror.gcr.io:443
     # Trivy は脆弱性 DB を mirror から取り、応えなければ ghcr へ落ちる。2 段目を塞ぐと
-    # 二段構えが成立せず、mirror が詰まるたびに必須チェックが赤くなる。しかも落ちるのは
-    # 検出のステップなので、取得できなかったことが脆弱性の検出として報告される。
+    # 二段構えが成立せず、mirror が詰まるたびに必須チェックが赤くなる。
     # ghcr の pull は blob を pkg-containers から取るため、2 ホストで 1 組。
     - ghcr.io:443
     - pkg-containers.githubusercontent.com:443

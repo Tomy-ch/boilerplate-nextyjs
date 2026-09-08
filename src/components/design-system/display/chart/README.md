@@ -31,17 +31,13 @@ recharts が描画に DOM の実寸を必要とするため hydration が必要�
 
 `config` の各 key は data の系列名と一致させます。色は `--color-<key>` の CSS 変数として配下へ配られるので、recharts 側では `var(--color-<key>)` で参照します。
 
+`ChartStyle` は `dangerouslySetInnerHTML` で stylesheet を書き出します。系列色を CSS 変数として配下へ配る手段が他に無いためで、`config` の色は開発者が書く定数であることを前提にしています。**利用者入力や API 応答を色として渡しません。**
+
 ### chart を唯一の伝達手段にしない
 
 chart は形と色で情報を伝えるため、それだけでは読み取れない利用者がいます。同じ内容へ到達できる数値表や要約を必ず併置します。`WithDataTable` の story がその構成です。
 
 `ChartTooltipContent` は pointer を合わせている間だけ現れるため、touch 環境と keyboard 利用者には到達できません。tooltip でしか読めない情報を置きません。
-
-### 生成物から直した点
-
-生成物は型 assertion を 9 箇所使っていました。`as React.CSSProperties` / `as keyof typeof ...` / `as string` はいずれもリポジトリの規約に反するため、型ガード（`isRecord` / `readStringField`）と、CSS custom property を含む `StyleWithCustomProperties` 型の宣言へ置き換えています。配色モードの一覧は `chart.definition.ts` の `CHART_THEME_SELECTORS` から型を導出し、キャストなしで走査します。
-
-`ChartStyle` は `dangerouslySetInnerHTML` で stylesheet を書き出します。系列色を CSS 変数として配下へ配る手段が他に無いためで、`config` の色は開発者が書く定数であることを前提にしています。**利用者入力や API 応答を色として渡しません。**
 
 ## 使わない場合
 

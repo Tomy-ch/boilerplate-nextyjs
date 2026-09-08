@@ -63,8 +63,7 @@ export const RULES_LANGUAGES = ["javascript", "typescript"] as const;
  * @remarks
  * `security/` だけを採り、その下の `audit/` は捨てます。**`audit` は「読んで判断するための
  * 所見」であって、ゲートに載る前提の分類ではありません** —— レジストリの `p/javascript` も
- * 既定では含めていません。実測でも、含めると 28 件（うち 23 件が `detect-non-literal-regexp`
- * と `detect-redos`）出て 0 件 baseline が保てませんでした。同じ規則を
+ * 既定では含めていません。同じ規則を
  * [eslint.config.ts](../../eslint.config.ts) の security でも落としており、理由も同じです。
  */
 export const RULES_CATEGORY = "security";

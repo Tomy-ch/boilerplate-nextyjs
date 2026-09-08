@@ -24,7 +24,7 @@
 
 `gap-*` のうち、token が名前を与えているのは `0` / `1` / `2` / `4` / `6` / `8` です。この段は `var(--spacing-N)` を経由するため、[`tokens/primitives.json`](../../../../../tokens/primitives.json) の一箇所で値を変えられます。
 
-それ以外の段（`1.5` / `3` / `10` など）も Tailwind の基底 `--spacing` の倍数として書けますが、`calc(var(--spacing) * N)` に展開されるため token の段とは別経路になります。**どちらを使うかの規約はまだありません。** 現状のコードには両方が混在しています。
+それ以外の段（`1.5` / `3` / `10` など）も Tailwind の基底 `--spacing` の倍数として書けますが、`calc(var(--spacing) * N)` に展開されるため token の段とは別経路になります。
 
 ## viewport breakpoint と container query の使い分け
 

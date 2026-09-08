@@ -39,8 +39,7 @@ export type FileUploadProps = Omit<ComponentProps<"input">, "onSelect" | "type" 
    * 呼び出し元が 1 件外しても受け口の表示は変わらず、同じファイルが 2 か所に食い違って
    * 並びます。空へ戻せば持ち主は 1 つになります。
    *
-   * 同じファイルを選び直せるようにもなります。`input` は値が変わらないと `change` を出さない
-   * ため、控えを残したままだと一度外したファイルを選び直せません。
+   * 同じファイルを選び直せるようにもなります。
    */
   resetOnSelect?: boolean;
   /** 受け付けなかったファイルと、その理由を伝える。 */
@@ -114,7 +113,7 @@ function rejectionOf(
  * **preview・選択済みの削除は持たない。** ここで表示するのは受け付けたファイルの名前だけで、
  * それ以上の組み立ては上位の composition が担う。
  *
- * 落としたファイルは `input` の `files` へ書き戻すため、native form の送信にもそのまま載る。
+ * 落としたファイルも native form の送信にそのまま載る。
  * `multiple` を指定しない場合、複数を落としても先頭の 1 件だけを受け付ける。
  *
  * native の下地は `Field` と `Input type="file"` の組み合わせで、Server Action による検証だけで

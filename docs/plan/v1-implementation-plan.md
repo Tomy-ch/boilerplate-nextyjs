@@ -853,13 +853,11 @@ test-requirement: unit
 - **同時に実施**: **`MediaImage`**(本書 §3.3)。CSS のみの Skeleton + `aspect-ratio` を既定にし、`placeholder` / `blurDataURL` は明示指定をそのまま通す。error fallback などの client 版は opt-in
 - **注意**: vendor 直参照を feature / component に散らさない([0010](../adr/0010-standards-and-non-lockin.md))。interaction a11y seam は [0053](../adr/0053-ui-component-interaction-seam.md) に従う
 - **Story の中立性**: `components` / `Foundations` の Story は boilerplate 自体のカタログであり、EC などサンプル固有の業務語彙・API・route を props / 文言 / link に埋め込まない。汎用的な表示値で component 自身の状態・利用方法を示し、業務文脈を伴う実例は feature の Story または画面実装へ置く。テンプレートから作った後の portal URL のような repository 固有値は P7 の setup 置換対象とする
-- **Story と README の構成**: component は実装・test・Story・README を同じディレクトリへ置く。README は用途・役割・公開 component・利用ケース・責務境界・Storybook / test の確認範囲を見出しで示し、公開 component がある場合は名称と個別の役割を表にする。自身が状態を所有する UI だけが loading / empty / error / success を Story で示し、`Button` のように状態を所有しない UI は disabled / pending など当該部品の操作状態だけを示す。`native` / `client` の対は同じ選択肢・ラベル・配置で Story を作り、runtime の違いと見た目を比較できるようにする
+- **Story と README の構成**: component は実装・test・Story・README を同じディレクトリへ置く。README の必須節と状態 story の要否は [`src/components/README.md`](../../src/components/README.md) の「運用」が持つ。`native` / `client` の対は同じ選択肢・ラベル・配置で Story を作り、runtime の違いと見た目を比較できるようにする
 - **`rich-text` はここで完成させる**: port と両 component はいずれも業務型を持たず、実 API も生成型も参照しない。したがって **Phase 4 / 5 の到達を待たずに着手できる**。実装順は port の nominal type → sanitizer + allowlist → `RichTextContent` → allowlist から導出した extension 集合で `RichTextEditor`。feature 側の配線(description を渡す / Server Action で保存)だけが P5-1 / P5-12 に残る。§3.9 の CSP 検証もここで済ませる
 - **Typeset**: Markdown / sanitizer 済み HTML の組版は `typeset/` の CSS 基盤として持ち、Storybook は `Foundations/Typeset` に置く。renderer・sanitizer・layout の最大幅は持たず、`typeset` / preset・`not-typeset`・`typeset-scroll` を通じて適用範囲だけを定義する
-- **SSR first の部品選定**: 初期表示に置く基礎部品は native HTML と Server Component を既定にし、初期配置を理由に CSR へ寄せない。Radix・Portal・browser API を使う部品は native 要素で満たせない操作要件が確定した client island に限定する。静的な少数選択は `select-native` を優先し、カスタム popup や高度な keyboard interaction が必要になった時点で `select-client` を再評価する
-- **native / client の命名と文書化**: 同じ UI 概念に両実装が成立する場合は、`<concept>-native` / `<concept>-client` と `ConceptNative` / `ConceptClient` を使う。`client` は利用上の境界を表し、Radix など vendor 名は README の実装詳細に閉じる。README には hydration の要否と、native を選ぶ条件・client island を選ぶ条件を記す
-- **native / client の視覚設計**: 取り込み監査の時点でも、対になる native / client 部品のサイズ・semantic token・focus・disabled・invalid の基本設計を可能な限り揃え、SSR・form・a11y と公開 API を固める。layout・motion・visual regression を含む完全整合は、P3-8 のデザインシステム構築で Storybook を見ながら仕上げる。OS 固有の popup などは pixel-perfect な一致を求めない
-- **外部ツールへの反映は Phase 5 の直前に行う**: 書き出しの機構(`pnpm design:bundle` と `design-export` スキル)は本 PR で完成させるが、**実際に反映する作業はここでは行わない**。理由は 2 つある。第一に、高忠実度のインポートは全 component のプレビューを 1 つずつ描画して検証するため、実行に数時間とそれに見合う量のトークンを要し、**同じセッションで進む他の作業の速度を落とす**。第二に、反映の目的はデザインセンスを補って**画面を設計すること**であり、画面を作らない間は反映しても使い道が無い。したがって**画面実装に入る直前(Phase 5 の着手時)に一度反映する**。デザインシステム自体がその時点まで動き続けるため、遅らせるほど反映内容が実態に近づくという利点もある
+- **SSR first の部品選定と native / client の対**: 部品選定の既定・`<concept>-native` / `<concept>-client` の命名と文書化・対の視覚設計の揃え方は同 README の「運用」「配置・命名」が持つ。本 PR の着地条件は、取り込んだ component がその規約に従っていること。layout・motion・visual regression を含む完全整合は P3-8 で仕上げる
+- **外部ツールへの反映は Phase 5 の着手時に行う**: 書き出しの機構(`pnpm design:bundle` と `design-export` スキル)は本 PR で完成させるが、**実際に反映する作業はここでは行わない**。時期と理由は Phase 5 の前置き(「この Phase の着手時に、デザインシステムを外部ツールへ反映する」)が持つ。デザインシステム自体がその時点まで動き続けるため、遅らせるほど反映内容が実態に近づく
 - **完了条件**: Storybook が起動する。基礎コンポーネントが 4 状態(loading / empty / error / success)の story を持つ。biome の a11y ルールが緑。**デザインシステムを外部ツールへ書き出す機構が動作する**(反映そのものは Phase 5 着手時)
 - **依存**: P3-7
 
@@ -1744,12 +1742,6 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 ここで見るのは 1 つだけ —— **`docs/spec/route/**` が実装と食い違っていないか**である。仕様書は
 確定した約束を書くものなので、v1 を切る時点の実装と読み合わせる。食い違いがあれば仕様書を直す
 (実装ではなく)。
-
-**ここまでの材料**: 仕様書は 25 画面 + 4 つの器ぶん 57 本あり、(1) 実装を再現できるだけの情報を
-持てること、(2) `architecture.ts` と重複しない情報だけで構成できることは確認済み。書き起こしで
-分かったのは、**画面の約束が文書の外(実装の doc コメント)に居やすい**ことで、spec 駆動を採る
-値打ちは生成の速さではなく約束の置き場が決まることにある。**生成 scaffold を持たないと決めたのは
-この材料の裏返しである** —— 生成器はその値打ちを 1 つも運ばない。
 
 **反映先**: BACKLOG GB-3 と [go-boilerplate-import-plan.md](go-boilerplate-import-plan.md) の
 IM-26 —— どちらも反映済み。**P4-6 の改修 PR は起票しない**(生成入力を `architecture.ts` の 1 本に

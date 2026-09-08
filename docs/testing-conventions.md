@@ -92,7 +92,7 @@
 
 jsdom は仕様の一部を実装しない。**個別のテストで発火方法を変えて回避しない** —— それは検証したかった経路を通らないテストを生む。
 
-- **共有の `vitest.setup.ts` で補う。**現在補っているのは Pointer Events の capture API（`setPointerCapture` / `releasePointerCapture` / `hasPointerCapture`）と、`getComputedStyle()` が返す `transform` の計算値である。どちらもドラッグを扱う部品が読む。
+- **共有の `vitest.setup.ts` で補う。**現在補っているのは Pointer Events の capture API（`setPointerCapture` / `releasePointerCapture` / `hasPointerCapture`）、`getComputedStyle()` が返す `transform` の計算値、`ResizeObserver`、`scrollIntoView` の 4 つである。前の 2 つはドラッグを扱う部品が、`ResizeObserver` は自分の大きさを測ってから描く部品が、`scrollIntoView` は選択中の項目を見える位置へ動かす部品が要求する。**この一覧が補いの全部である** —— 部品側の README がここに無いものを「補っている」と書いていたら、どちらかが古い。
 - 補いには**なぜ必要か**を書く。次に同じ問題へ当たった人が、個別の回避に逃げる前にここを見る。
 - 補えないもの（レイアウト計算を要するもの等）は、**その旨を明記して別の検証手段へ回す**。「動いているはず」で通さない。
 

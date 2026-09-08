@@ -77,7 +77,7 @@ function main(): void {
     readFileSync(`${dir}/prerender-manifest.json`, "utf8"),
   ) as PrerenderManifest;
 
-  // 1 つの route を複数の内部 page が組む（並行 slot）。宣言はそのどれに置かれていても効く。
+  // 並行 slot は 1 つの route を複数の内部 page で組むので、route ごとに畳む。
   const pagePathsByRoute = new Map<string, string[]>();
 
   for (const [pagePath, route] of Object.entries(routes)) {

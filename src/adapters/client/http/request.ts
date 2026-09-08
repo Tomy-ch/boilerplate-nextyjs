@@ -37,7 +37,6 @@ const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
  *
  * 生の status を投げ直さず分類へ写します。呼び出し側は「入力が悪いのか、取得できなかったのか」
  * だけを見て表示を決めます。
-
  *
  * @param path - 同一オリジンの絶対パス。クエリを含み、percent-encode 済みであること
  * @param schema - 応答の検証スキーマ。**流儀は問わない** —— `zod` と `zod/mini` は同じ core の型を

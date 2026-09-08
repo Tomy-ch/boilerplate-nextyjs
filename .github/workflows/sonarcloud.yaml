@@ -9,9 +9,9 @@ name: SonarQube Cloud Scan
 #
 #   1. NO TOKEN, NO RED. `preflight` reads `SONAR_TOKEN` and, when it is unset, every job
 #      below is skipped and the run stays green. A missing account is a setup gap, not a
-#      scan result. `unconfigured-notice` then says so on the pull request under the same
-#      marker the verdict would use — silence would be indistinguishable from a clean scan.
-#      This also covers a pull request from a fork, which never receives repository secrets.
+#      scan result. `unconfigured-notice` then says so on the pull request, for the reason
+#      that job gives. This also covers a pull request from a fork, which never receives
+#      repository secrets.
 #   2. REMOVABLE. This file and `sonar-project.properties` are listed in
 #      `scripts/setup/remove-boilerplate-only/manifest.ts` (`SELF_DESTRUCT_PATHS`), so the
 #      strip takes them both. The project key here names THIS repository's SonarCloud
@@ -27,13 +27,11 @@ name: SonarQube Cloud Scan
 # the same ref stops reporting it — without an analysis on the trunk, an exclusion added
 # here would silence the gate while the alert it was written for stayed open forever.
 #
-# That rationale reaches `production` and stops there. Naming the other protected branches
-# asked the free plan for a second branch, so their push analysis was refused server-side,
-# and on a `release/**` branch with an open pull request the refused branch analysis ran
-# beside the pull-request one for the same commit and took it down with it — the release
-# pull request went red on a scan that is green on every feature branch. A protected branch
-# other than the trunk is always on its way into one through a pull request, and that pull
-# request is analysed, so nothing here goes unscanned.
+# That rationale reaches `production` and stops there. A push analysis for any second branch
+# is refused server-side on the free plan, and a refused branch analysis running beside the
+# pull-request one for the same commit takes it down with it. A protected branch other than
+# the trunk is always on its way into one through a pull request, and that pull request is
+# analysed, so nothing here goes unscanned.
 
 on:
   pull_request:
@@ -254,8 +252,8 @@ jobs:
 
   # The only job that writes outside this run, and the only one with no SonarCloud token —
   # the scan log must never share a runner with the thing that posts it (ADR 0153 §5). It
-  # runs even when the scan failed: a scan that was cut off still has to say so, because a
-  # missing comment is indistinguishable from a clean scan.
+  # runs even when the scan failed: a scan that was cut off still has to say so, for the
+  # reason `unconfigured-notice` gives.
   #
   # The SARIF upload is not restricted to pull requests, and that is what keeps code scanning
   # honest — see the note at the top of this file.

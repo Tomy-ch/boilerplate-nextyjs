@@ -245,7 +245,7 @@ export default [
     },
   },
   {
-    // アイコンの公開面そのもの。ここだけが供給元を名指しするので、締め出しの側から外す。
+    // アイコンの公開面そのもの。`iconVendorImports` の締め出しから外す。
     files: ["src/components/icon.ts"],
     rules: {
       "no-restricted-imports": ["error", { patterns: commonImportRestrictions }],
@@ -253,8 +253,7 @@ export default [
   },
   {
     // ビューアーは `@` alias でアプリ本体のソースを直接参照する（`docs-viewer/README.md`）ので、
-    // アイコンも同じ公開面から取る。ここを締め出さないと、供給元を名指しできる場所が
-    // ワークスペースに 2 つできる。
+    // アイコンも同じ公開面から取る（`iconVendorImports`）。
     files: ["docs-viewer/src/**/*.{js,jsx,ts,tsx}"],
     languageOptions: { parser: tseslint.parser },
     rules: {

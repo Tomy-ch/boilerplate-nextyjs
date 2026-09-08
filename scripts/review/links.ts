@@ -85,8 +85,8 @@ export function screenLinks(
  * 端末へ出す案内文。件数・URL の一覧・見る面についての但し書きを 1 つに組む。
  *
  * @remarks
- * story と画面で但し書きが違います。story 側で撮られているのは sidebar を含まない面なので、
- * 並べた URL と撮影された面が同じでないことを断ります。
+ * story と画面で但し書きが違います。story 側は、並べた URL と撮影された面が同じでないこと
+ * （{@link storyLinks}）を断ります。
  *
  * @param kind - 見る対象（`vrt` / `e2e`）
  * @param links - 開ける先

@@ -11,8 +11,6 @@ import type { Rule } from "eslint";
  * 許すのは 2 形のみ — 名前付きの関数 / クラス宣言(`export default function Foo() {}`)と、
  * 識別子への参照(`const Foo = () => {}; export default Foo;`)。arrow function を default
  * export できるのは後者だけなので、両方を許して初めて書ける形が揃う。
- *
- * Biome には同等の検査が無いため ESLint 側で持つ。
  */
 const noAnonymousDefaultExport: Rule.RuleModule = {
   meta: {

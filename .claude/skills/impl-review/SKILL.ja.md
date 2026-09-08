@@ -59,7 +59,7 @@
 
 *auto* は、実装者が `sonnet` でなければエージェント定義の既定（`sonnet`）へ、`sonnet` なら別ティアへ解決する。ユーザーが実装者自身のモデルを選んだ場合は中核アイデアに従って警告し、続行前に確認する。選ばれたモデルは Step 2 / Step 3 の全 `adversarial-reviewer` / `review-verifier` の `Agent` 呼び出しへ `model` 引数で渡す。
 
-**問いは 2 つで、それ以上は置かない。** テストの問いもコメントの問いもここには無い。それらは `/test-review` と `/comment-sweep` の主題で、ユーザーが別に問われる。ここへ畳み込むと、ある主題についての判断が別の主題のために始めた実行の中に埋もれ、このスキルが残り 2 つを思い出す唯一の経路になってしまう。
+**問いは 2 つで、それ以上は置かない。** テストの問いもコメントの問いもここには無い —— それらは `/test-review` と `/comment-sweep` の主題で、ユーザーが別に問う（中核アイデア「このスキルは変更そのものだけを監査する」）。
 
 ### フラグ
 
@@ -84,7 +84,7 @@
 | `cohesion` | adversarial-reviewer | 常時 |
 | `runtime-gap` | adversarial-reviewer | Route Handler / Server Action / `src/proxy.ts` / Provider マウント / 生成 API 成果物が触られた時 — モックのコンポーネントテストが通らない継ぎ目 |
 
-**ここにテストやコメントを監査するレンズは無い。** 変更が未テストであるという finding は `/test-review` の、コメントの内容についての finding は `/comment-sweep` の主題である。レンズがついでに気づいたなら、補足の節に観察として書き、所管するスキル名を添える —— レンズを生やしてはならない。ここで生やしたレンズは、主題を所管スキルから取り上げるだけで、深さは連れてこない。
+**ここにテストやコメントを監査するレンズは無い**（中核アイデア「このスキルは変更そのものだけを監査する」）。未テストの変更やコメントの内容にレンズがついでに気づいたなら、補足の節に観察として書き、所管するスキル名を添える —— レンズを生やしてはならない。
 
 各 `adversarial-reviewer` プロンプトに必ず含める: レンズ名 + その定義、ベース ref + 変更ファイル一覧 + diff、`AGENTS.md` / 該当 `README.md` / 根拠となる ADR へのポインタ。
 
@@ -118,7 +118,7 @@ build 失敗は **それ自体が CONFIRMED な finding**。出力付きで報�
 
 ### 4-2 リクエスト検証 — リクエスト時 seam が触られた時のみ
 
-ゲート: Step 1 が Route Handler（`src/app/**/route.ts`）/ Server Action（`src/features/<name>/actions.ts`）/ `src/proxy.ts` / レスポンスヘッダ設定（`next.config.ts` の `headers()`）/ layout shell・Provider 合成（`src/app/**/layout.tsx`）の変更を検出している。 <!-- skill-lint-ignore -->
+ゲート: Step 1 が**リクエスト時の seam**の変更を検出している（一覧は Step 1 が持つ）。
 
 1. 4-1 でビルドしたアプリを起動: `pnpm start --port <3000+N>`。並行 worktree のサーバーを叩いてしまわないよう、他と異なるポートを使う。バックグラウンドで走らせ、終わったら止める。
 2. 対象パスへ `curl -i` し検証する:
@@ -172,7 +172,7 @@ build 失敗は **それ自体が CONFIRMED な finding**。出力付きで報�
 
 既定では、残った **CONFIRMED + PLAUSIBLE** の finding を、現ブランチの PR へ **インラインレビューコメント**として投稿する — 1 つの巨大コメントではなく、finding ごとに 1 件、その `path:line` へアンカーする。**REFUTED は決して投稿しない。** Step 5 のローカルレポートはいずれにせよ出力する。本ステップは追加分。
 
-投稿するのはこのスキル自身の finding だけである。`/test-review` と `/comment-sweep` はそれぞれ自分の出力を持ち、ここからそこへ手を伸ばさない —— 他スキルの finding をこのスキルのレビューとして投稿すると、ある主題の監査が別の主題の中で起きたように見える。
+投稿するのはこのスキル自身の finding だけである —— `/test-review` と `/comment-sweep` はそれぞれ自分の出力を持つ（中核アイデア「このスキルは変更そのものだけを監査する」）。
 
 以下の場合は本ステップを丸ごとスキップ:
 

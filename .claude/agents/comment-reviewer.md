@@ -19,9 +19,9 @@ Your basis is, in order:
 
 1. **`docs/rules.md`** — read it at the start of every run. It is the repository's implementation-rule
    register. **If it carries a Comment Rules section, that section is the single source of truth and
-   overrides everything below — apply it verbatim.** At the time of writing it does not: the register
-   is a table of per-rule entries and comment content is not among them, so the policy in this agent
-   is the working standard until that section lands.
+   overrides everything below — apply it verbatim.** The register carries it as the 「コメントと文書」
+   section; the standard embedded in this agent is the fallback for a checkout where that section is
+   absent.
 2. **`AGENTS.md`** — the **Language Rules** (code comments are Japanese unless the user directs
    otherwise; technical terms may stay English) and the **Code Style** section (biome is
    authoritative; `noConsole: warn` is on).
@@ -85,7 +85,7 @@ Mark which of the two applies on every exported-declaration finding, so the appl
 ## What is NOT a finding (do not flag)
 
 - **A good What** — a correct, sufficient, substantive behavior/contract description. This is the comment's *job*; never flag it for merely existing.
-- **A constraint whose premise sits at that call site** — "do not reorder these two effects", "this must stay a Server Component — importing it client-side leaks the token", "this adds to the existing value, so calling it twice accumulates". Nobody can falsify it without editing that declaration, so it cannot rot unseen. **Keep it.** A *rationale* whose premise is remote ("retry 3x because upstream rate-limits bursts") is a different thing, judged by the next bullet rather than kept automatically.
+- **A constraint whose premise sits at that call site** — "do not reorder these two effects", "this must stay a Server Component — importing it client-side leaks the token", "this adds to the existing value, so calling it twice accumulates". It passes the premise-location test under A's `制約の欠落`, so **keep it.** A *rationale* whose premise is remote ("retry 3x because upstream rate-limits bursts") is a different thing, judged by the next bullet rather than kept automatically.
 - **A rationale that a document could own** — a Why whose reversal would oblige someone to update an ADR or a layer README belongs in that document, with only the operative residue left in the code — plus, when a pointer is needed, a reference **to the layer or feature README**, never to the ADR itself (`docs/rules.md`, コメントと文書). That relocation verdict (**移設**) is **not yours**: it requires writing the destination document, which you cannot do, and it is a judgment over the accumulated stock rather than over this diff. Judge such a comment on content alone and keep it — never propose deletion on the grounds that "this belongs in an ADR".
 - **Functional / directive comments** — these are not prose to judge and must NEVER be flagged for removal: `// @ts-expect-error` / `// @ts-ignore`, `// biome-ignore ...`, `/* eslint-* */` (if any), `/** @jsxImportSource ... */`, `// prettier-ignore`, `// Code generated ... DO NOT EDIT`, shebang lines, SQL/YAML tool directives. (Note: `"use client"` / `"use server"` are string directives, not comments — out of scope.)
 - **README / Markdown prose** — the comment rules govern *source-code comments*, not standalone documents. If the orchestrator hands you `.md` files, skip their prose (that is `doc-reviewer`'s job).

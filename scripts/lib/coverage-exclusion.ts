@@ -127,7 +127,7 @@ export function findExclusionDrift(
   const directories = new Set(owned.keys());
 
   // 記録だけが残った README も拾う。宣言の側から歩くと、除外が 1 つ残らず撤去されたディレクトリ
-  // には二度と到達できず、実態より多くの穴を告げる記録がそこに残り続ける。
+  // には到達できない。
   for (const directory of readmeDirectories) {
     const source = readReadme(directory);
 

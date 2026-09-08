@@ -171,8 +171,8 @@ subagent を持ち出すのは、ADR が認める理由があるときだけ —
 ## Definition of Done
 
 - 公式 `skill-creator` の方法論を解決して読み込んだ（Step 0）。
-- `.claude/skills/<slug>/SKILL.md` が存在し、`name` がディレクトリ名と一致した kebab-case、`description` が密度のある英語の "pushy" 記述、本文が ADR 0154 の構造。
-- `SKILL.ja.md` を `canonicalize-doc` 経由で canonical 側から生成 / 同期済み。frontmatter 無し、sync ノートあり、`SKILL.md` と 1:1。
+- `.claude/skills/<slug>/SKILL.md` が存在し、frontmatter と本文が Step 2 の *frontmatter* 表と*本文構造*の箇条書きに合致している。
+- `SKILL.ja.md` が Step 4 のとおり同期済み（`canonicalize-doc` 経由、`SKILL.md` と 1:1）。
 - スキルが ADR 0154 または 0155 のカバー範囲テーブルへ登録済み。
 - 同梱スクリプトが `tsx` 実行の TypeScript である（インストール前単体実行の例外に当たる場合を除く）。
 - eval 生成物をコミットしていない。保護対象パスに触れていない。

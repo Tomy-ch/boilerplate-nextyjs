@@ -25,8 +25,8 @@ export type ExportedSymbol = {
    *
    * @remarks
    * 呼べる値(関数・クラス・React コンポーネント・`cva()` の戻り値など)だけが true になります。
-   * 定数や zod スキーマは false で、describe を要求されません。ただし describe を書くこと自体は
-   * 許されます(production シンボルに対応しない契約テストは 1:1 違反ではない、という規約に従う)。
+   * 定数や zod スキーマは false で、describe を要求されません(describe を許すかは
+   * `unknownDescribes` が判定します)。
    */
   readonly testable: boolean;
 };
@@ -103,8 +103,7 @@ function isDescribeCall(node: ts.CallExpression): boolean {
  *
  * @remarks
  * 型は見ない。`describe` は import 名で判別できる呼び出しであり、構文だけで拾える。
- * 入れ子へは降りない。内側の束ね方は判定対象ではなく、降りると内側の観点名を
- * 「export に対応しない describe」として誤って咎める。
+ * 入れ子へは降りない。降りると内側の観点名を「export に対応しない describe」として誤って咎める。
  */
 export function collectTopLevelDescribes(sourceText: string, fileName: string): DescribeNode[] {
   const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
@@ -263,8 +262,8 @@ export function resolveTestFile(
  * テストファイルに対応するソースの位置を決める。見つからなければ `null` を返す。
  *
  * @remarks
- * {@link resolveTestFile} の逆向きです。`.test.tsx` は `.ts` のモジュールにも対応しうるため
- * (hook は本体に JSX を持たないまま、検証には React のツリーが要る)、候補が 1 つに定まりません。
+ * {@link resolveTestFile} の逆向きです。`.test.tsx` は `.ts` のモジュールにも対応しうるため、
+ * 候補が 1 つに定まりません。
  */
 export function resolveSourceFile(
   testPath: string,

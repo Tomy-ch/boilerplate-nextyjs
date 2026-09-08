@@ -95,9 +95,9 @@ jobs:
       # The REST calls below run on an app installation token rather than `GITHUB_TOKEN`.
       # `GITHUB_TOKEN` is capped at 1,000 requests per hour per repository, shared across
       # every workflow and every open pull request; an installation token carries 5,000.
-      # This job is the one that ran out first — it fires on every VRT and E2E completion
-      # and makes about ten calls each time, so a busy day took it down while nothing was
-      # wrong with the change under test.
+      # This job fires on every VRT and E2E completion and makes about ten calls each time,
+      # so it is the first consumer to exhaust the shared cap on a busy day — a failure
+      # unrelated to the change under test.
       #
       # The permissions are the union of what the steps below need and nothing else:
       # reading the pull request and its check runs, and taking the label off once the

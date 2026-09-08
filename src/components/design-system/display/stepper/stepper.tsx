@@ -85,7 +85,8 @@ export function Stepper({
  *
  * @param props.state - 今どの位置にあるか。値の一覧は {@link STEPPER_STATE}。
  * @param props.passed - 現在地であっても、既に済ませた段階か。印だけを `complete` と同じにし、
- *   状態そのものは `current` のまま残す（現在地は 1 つに定まっている必要がある）。
+ *   状態そのものは `current` のまま残す（現在地は 1 つに定まっている必要がある）。戻ったときに
+ *   印まで消えると、済ませた入力が無かったように見える。
  * @param props.marker - 印に出す番号。省略すると `complete` 以外の印は空になる。
  * @param props.stateLabel - 状態を読み上げへ伝える語。省略すると {@link STEPPER_STATE_LABEL}
  *   の既定を使う。「承認済み」「差し戻し」のように段階の呼び名が決まっている場合へ寄せられる。
@@ -108,8 +109,6 @@ export function StepperItem({
   passed?: boolean;
 }) {
   const complete = state === STEPPER_STATE.COMPLETE;
-  // 済ませたことと今どこに居るかは別の事実。現在地へ戻ったときに印が消えると、済ませた入力まで
-  // 無かったことになったように見える。
   const showsCheck = complete || passed;
   const defaultStateLabel =
     passed && state === STEPPER_STATE.CURRENT

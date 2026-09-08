@@ -10,13 +10,13 @@
 
 ## 前提: config カーネルが存在すること
 
-本スキルは `src/config/` が既にあることを前提とする（`env / 型付き Config` PR = 計画 ID **P3-3** で入る）。最初に確認する:
+本スキルは `src/config/` が既にあることを前提とする。最初に確認する:
 
 ```sh
 ls src/config/ 2>/dev/null
 ```
 
-`src/config/` が無い場合は**即座に停止**し、config カーネル未着手のため変数を追加する先が無い旨をユーザへ伝える。変数追加の依頼を根拠に、カーネル・スキーマ・検証呼び出し・`env/` を**新規作成してはならない**。カーネル構築は P3-3 の担当であり、[0030](../../../docs/adr/0030-environment-variable-management.md) が同 PR へ委ねたスキーマライブラリ選定を要するため。
+`src/config/` が無い場合は**即座に停止**し、config カーネル未着手のため変数を追加する先が無い旨をユーザへ伝える。変数追加の依頼を根拠に、カーネル・スキーマ・検証呼び出し・`env/` を**新規作成してはならない**。カーネル構築はそれ自体が独立した変更であり、[0030](../../../docs/adr/0030-environment-variable-management.md) がそこへ委ねたスキーマライブラリ選定を要するため。
 
 ## 使うとき
 
@@ -51,7 +51,7 @@ ls src/config/ 2>/dev/null
 **触らない**:
 
 - `next.config.ts` / `instrumentation.ts` — ビルド時・サーバ起動時の検証点（[0030](../../../docs/adr/0030-environment-variable-management.md) §1）はスキーマモジュールを丸ごと import するため、既存 purpose のスキーマへフィールドを足せば自動的に検証対象になる。ここへの変更が要るように見える場合は、その purpose モジュールが未接続ということなので、編集せず報告して止まる
-- `biome.json` — `noProcessEnv` の override は P3-3 の担当
+- `biome.json` — `noProcessEnv` の override は config カーネルの持ち物で、変数追加の範囲ではない
 - `env/` と `src/config/` の外のすべて
 
 ## Step 0. 仕様の収集
@@ -75,7 +75,7 @@ ls src/config/ 2>/dev/null
   - 「はい（config 経由で読む）」 — 通常経路。purpose モジュールへスキーマ項目 + getter を足し、`src/config/README` にも項目を書く
   - 「いいえ（外部ツール / SDK が `process.env` から直接読む）」 — 例: `OTEL_EXPORTER_OTLP_ENDPOINT` のような標準名の変数、またはアプリではなくプラットフォームが消費する値
 
-この回答が変更の到達範囲を決める。`env/` と `env/README` はどちらでも更新する — 変数が**存在する**という事実はそこが持つから。`src/config/` とその README を触るのは「はい」のときだけ — config 側が持つのは、ビルド時に検証され構築時に流し込まれる値の**意味と扱い**であり、これは env に存在するものの部分集合である。
+この回答が変更の到達範囲を決める。`env/` と `env/README` はどちらでも更新し、`src/config/` とその README を触るのは「はい」のときだけ（2 つの文書の所有の分担は本スキル冒頭の段落が述べる）。
 
 「いいえ」の場合は質問 3（どちらのモジュールか）と質問 4（型 / required・code default）を飛ばす。どちらもスキーマの話であり、書くスキーマ項目が無いため。`NEXT_PUBLIC_` の露出則と Secret ラベルは引き続き適用する。Step 2 の計画では「config モジュールには触れない」と明示し、getter が無い理由を読み手に疑わせない。
 
@@ -172,7 +172,7 @@ secret ラベルを選んだ場合は Notes 列に含める。この行は**す�
 
 ### `src/config/README.md` — 設定値（config 経由の変数のみ）
 
-質問 2 が「はい」のときだけ。周囲の記述に倣って値を解説する: どの purpose に属するか、server / client のどちら側か、required か code default か、受け手がどう受け取るか。env 行の内容をここへ**再掲しない** — 変数が存在する事実は env、値の意味と扱いは config が持つ。config README が個別の値ではなく purpose 単位の解説になっている場合は、何も足さずその旨を計画で述べる（ファイルの構造に無い変数別セクションを勝手に作らない）。
+質問 2 が「はい」のときだけ。周囲の記述に倣って値を解説する: どの purpose に属するか、server / client のどちら側か、required か code default か、受け手がどう受け取るか。env 行の内容をここへ**再掲しない**（所有の分担は本スキル冒頭の段落が述べる）。config README が個別の値ではなく purpose 単位の解説になっている場合は、何も足さずその旨を計画で述べる（ファイルの構造に無い変数別セクションを勝手に作らない）。
 
 ### `src/config/environment.fixture.ts` — 全量のスタブ（config 経由の変数のみ）
 
@@ -187,7 +187,7 @@ secret ラベルを選んだ場合は Notes 列に含める。この行は**す�
 
 ### テスト
 
-config のテスト方針は **env スタブ + factory 再生成**（`vi.stubEnv`） — [0030](../../../docs/adr/0030-environment-variable-management.md) 周辺ルール / [0090](../../../docs/adr/0090-testing-strategy.md)。purpose ディレクトリに config テストが在れば、本体変更と歩調を合わせて拡張する: 新 getter を検証するケースと、required 変数なら欠落時に検証が失敗することを確認するケース。config テストがまだ無い場合（テスト基盤は P3-6 で入る）はスキップし、その旨を Step 2 の計画で明示する。
+config のテスト方針は **env スタブ + factory 再生成**（`vi.stubEnv`） — [0030](../../../docs/adr/0030-environment-variable-management.md) 周辺ルール / [0090](../../../docs/adr/0090-testing-strategy.md)。purpose ディレクトリに config テストが在れば、本体変更と歩調を合わせて拡張する: 新 getter を検証するケースと、required 変数なら欠落時に検証が失敗することを確認するケース。config テストがまだ無い場合はスキップし、その旨を Step 2 の計画で明示する。
 
 ## Step 2. 計画の提示と確認
 
@@ -245,7 +245,7 @@ pnpm build      # スキーマ全量のビルド時検証（required の欠落�
 
 ## 制約
 
-- ❌ `src/config/` が無い状態で実行すること（報告して止まる。カーネルは P3-3 の担当）
+- ❌ `src/config/` が無い状態で実行すること（報告して止まる。カーネル構築は別の変更）
 - ❌ purpose 一覧 / スキーマライブラリ / env ファイル集合を固定値で持つこと（常に実ツリーから検出する）
 - ❌ secret を `NEXT_PUBLIC_` に置くこと
 - ❌ コミットされる env ファイルへ実 secret 値を書くこと

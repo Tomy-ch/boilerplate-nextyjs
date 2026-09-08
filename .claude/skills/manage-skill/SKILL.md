@@ -259,10 +259,9 @@ Update the row when an existing skill's coverage materially changes.
 ## Definition of Done
 
 - The official `skill-creator` methodology was resolved and loaded (Step 0).
-- `.claude/skills/<slug>/SKILL.md` exists with a kebab `name` equal to the directory, a dense
-  English "pushy" `description`, and the ADR 0154 body structure.
-- `SKILL.ja.md` generated or synced from the canonical side via `canonicalize-doc`, frontmatter-free,
-  with the sync-note header, and 1:1 with `SKILL.md`.
+- `.claude/skills/<slug>/SKILL.md` exists, its frontmatter and body matching Step 2's *Frontmatter*
+  table and *Body structure* list.
+- `SKILL.ja.md` synced per Step 4 (via `canonicalize-doc`, 1:1 with `SKILL.md`).
 - The skill is registered in the coverage table of ADR 0154 or 0155.
 - Bundled scripts are TypeScript run through `tsx`, unless the standalone-before-install exception
   applies.

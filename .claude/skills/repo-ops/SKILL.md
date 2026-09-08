@@ -9,12 +9,10 @@ Concrete recovery + procedure steps for the operational gotchas that recur in th
 **lookup table, not a workflow**: find the symptom, run the fix. When a step is destructive or touches a
 root file, say so to the user first per `CLAUDE.md`.
 
-> **Scope note.** This runbook is intentionally sparse. The go-boilerplate `repo-ops` it was adapted
-> from centred on Docker tool-runners, `sqlc` / `schema.gen.sql`, root-owned generated dirs, and a
-> live DB — **none of which exist here** ([0011](../../../docs/adr/0011-no-docker.md); no DB;
-> presentation layer only). Only the
-> genuinely-present traps are listed below. Add an item when a new one bites — do not port the
-> Go-specific ones back in.
+> **Scope note.** This runbook is intentionally sparse: only the traps that genuinely exist here are
+> listed. This repository is a presentation layer with no Docker tool-runner and no DB
+> ([0011](../../../docs/adr/0011-no-docker.md)), so items about either do not belong. Add an item
+> when a new trap bites.
 
 ## 1. `make install-tools` fails with `mise not found`
 
@@ -203,7 +201,7 @@ make secret-scan
 ```
 
 Every command in `.lefthook.yaml` is written bare — `mise exec --` is forbidden there like everywhere
-else (ADR 0003 / 0151). A hook dying with `❌ <tool> が PATH にありません` while `mise ls` shows the tool
+else (§2; ADR 0003 / 0151). A hook dying with `❌ <tool> が PATH にありません` while `mise ls` shows the tool
 installed is therefore an environment report, not a hook bug: the shell that launched `git` does not have
 the activated `PATH`. Fix it at the source — `make install-tools`, then activate mise in that shell. For
 a launcher that never sources a profile (a GUI git client, an agent shell, CI), put mise's **shims**
@@ -295,5 +293,4 @@ does not touch mise itself.
 - ✅ Confirm with the user before editing root files (`biome.json` in §5, `package.json` in §4) —
   they are outside the default AI Modification Scope. §2's `git restore pnpm-workspace.yaml` is the
   exception: it discards an unrequested machine edit rather than making one.
-- ❌ Do not port the go-boilerplate Docker / sqlc / DB items here — they do not apply
-  ([0011](../../../docs/adr/0011-no-docker.md)).
+- ❌ Do not add Docker / DB items here (Scope note).

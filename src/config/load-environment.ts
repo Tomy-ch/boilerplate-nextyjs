@@ -58,8 +58,8 @@ const developmentOnlyEnvironments: ReadonlySet<ApplicationEnvironment> = new Set
  * 開発専用の口を開けてよい環境か。
  *
  * @remarks
- * **`APP_ENV` が指定されていることも要求します。** 未指定を既定値へ落とすと、設定を忘れた実環境が
- * `local` として扱われ、この種の口が開きます。
+ * **`APP_ENV` が指定されていることも要求します。** 未指定を既定値へ落とさない理由は
+ * {@link findApplicationEnvironment} と同じです。
  *
  * 判定をここに置くのは、口が増えるたびに同じ条件が写るのを避けるためです。開ける環境の一覧が
  * 2 か所にあると、片方だけを広げた変更が黙って通ります。

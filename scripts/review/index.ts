@@ -90,8 +90,7 @@ async function main(): Promise<void> {
   const root = repositoryRoot();
   const tree = path.resolve(root, worktreePath(options.kind, options.branch));
 
-  // 空いていることを、木を用意する手前で確かめる。塞がっているポートで起動待ちに入ると、
-  // 待ち受けている他人のサーバへの疎通で待機が満たされ、その相手の絵を見ることになる。
+  // 空いていることを、木を用意する手前で確かめる（塞がっていたときの失敗の形は `assertPortFree`）。
   await assertPortFree(options.port, PORT_KNOB[options.kind]);
   if (options.run !== null) await assertPortFree(options.port + 1, PORT_KNOB[options.kind]);
 
@@ -236,8 +235,7 @@ function download(tree: string, kind: Kind, run: string): string | null {
  * 落とした一式を配る。HTML レポートは `file://` では開けないため、配る側が要る。
  *
  * @remarks
- * 待ち受けを loopback へ絞ります。宛先を省くと全インターフェースで待ち受けるので、配っている
- * 画面が同じ LAN の他のホストから読める状態になります。
+ * 待ち受けを {@link LOOPBACK_HOST} へ絞ります。宛先を省くと全インターフェースで待ち受けるためです。
  */
 function serve(root: string, port: number): Server {
   return createStaticServer(root).listen(port, LOOPBACK_HOST);
@@ -270,8 +268,8 @@ function start(tree: string, options: Options): ReturnType<typeof spawn> {
     fail("アプリを build できませんでした。");
   }
 
-  // 待ち受けを loopback へ絞る。この起動は APP_ENV=ci で、誰でも任意の役割の session を取れる
-  // 発行口が開いている（`.makefiles/testing/e2e.mk`）。
+  // 待ち受けを `LOOPBACK_HOST` へ絞る。この起動は APP_ENV=ci で、誰でも任意の役割の session を
+  // 取れる発行口が開いている（`.makefiles/testing/e2e.mk`）。
   return spawn(
     "pnpm",
     ["exec", "next", "start", "--hostname", LOOPBACK_HOST, "--port", String(options.port)],

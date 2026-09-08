@@ -30,7 +30,7 @@ React context を配るため hydration が必要な client island です。Serv
 
 表示文言の出し分けはこの component の責務ではありません。向きと言語は別の関心であり、文言は feature 側が扱います。
 
-vendor は現在 Radix ですが、公開 API に vendor 名は含めません。
+vendor は現在 Radix です。
 
 ## Storybook とテスト
 

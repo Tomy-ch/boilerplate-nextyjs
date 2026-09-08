@@ -80,9 +80,8 @@ function ToggleGroupClient({
  * 集合の中の 1 項目。
  *
  * @remarks
- * `value` は必須で、集合の中で一意にする。選択中は必ず `data-state="on"` が付く。`aria-pressed` は
- * `type="multiple"` のときだけで、`single` では `aria-checked` になる。選択中の見た目を
- * `toggleVariants` が両モードで示せるのは、共通する `data-state` も見ているためである。
+ * `value` は必須で、集合の中で一意にする。選択中は `type` に関わらず `data-state="on"` が付き、
+ * `toggleVariants` はそれを見て両モードの見た目を示す。
  *
  * `variant` と `size` は集合から引き継がれるため、個別に指定するのは例外的な場合に限る。
  *

@@ -12,7 +12,7 @@ name: DAST
 # ZAP reports today sits in `.github/zap/rules.tsv` with a reason and a removal
 # condition; anything NOT on that list turns this red. The list is what makes the
 # wall passable — a permanently red required check would block the very pull requests
-# that shrink it, including P6-2's.
+# that shrink it.
 #
 # The entries are IGNORE rather than removed, and ZAP still prints every ignored rule
 # with its URLs in the summary. That is severity lowered, not a finding hidden

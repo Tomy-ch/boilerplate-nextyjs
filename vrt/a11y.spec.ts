@@ -71,8 +71,7 @@ for (const story of stories) {
       .disableRules(disabledRuleIds(story.id))
       .analyze();
 
-    // 件数ではなく違反そのものを並べる。どのルールがどの要素で落ちたかが出ないと、
-    // 落ちた人は Storybook を開いて探し直すことになる。
+    // 件数ではなく違反そのものを並べ、どのルールがどの要素で落ちたかを残す（時間切れと同じ理由）。
     expect(
       violations.map((violation) => ({
         rule: violation.id,

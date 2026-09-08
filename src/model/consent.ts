@@ -93,8 +93,7 @@ export const CONSENT_MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
  * 増やした版が残した綴りは、どれも意思として読めません。読めない値を同意として扱わないことが、
  * このカーネルが負う唯一の安全側です。
  *
- * **尋ねた文面の版が今と違えば、意思として読みません。** 何に同意したかが変わっている以上、前の
- * 意思はその文面に対するものでしかありません（{@link CONSENT_COPY_VERSION}）。
+ * **尋ねた文面の版が今と違えば、意思として読みません**（{@link CONSENT_COPY_VERSION}）。
  *
  * @param raw - cookie の値。cookie そのものが無ければ `undefined`
  * @returns 読み取れた同意状態。`"unread"` は返さない —— 呼んだ時点で読んでいる

@@ -495,7 +495,7 @@ export type RichTextEditorProps = {
   /**
    * 内容が変わるたびに、現在の内容を HTML 文字列として受け取る。
    *
-   * 保存・送信・検証は呼び出し元が行う。表示するときは `SanitizedRichText.from` を通す。
+   * 保存・送信・検証は呼び出し元が行う。表示前の扱いは {@link RichTextEditor} が持つ。
    */
   onChange: (html: string) => void;
   /**
@@ -541,7 +541,7 @@ export type RichTextEditorProps = {
  * リンクは toolbar の「リンク」から入力するほか、URL を入力または貼り付けると自動でリンクになる。
  * `http` / `https` / `mailto` とアプリ内のパスだけを受け付ける。
  *
- * 編集面は `textbox` として公開されるため、`label` でアクセシブルな名前を必ず与える。
+ * `label` は必ず与える（{@link RichTextEditorProps.label}）。
  *
  * @example
  * ```tsx

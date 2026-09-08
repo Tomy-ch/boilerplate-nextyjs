@@ -239,9 +239,7 @@ jobs:
         run: exit 1
 
   # Report-only by design, so a finding leaves the job green and the failure notification
-  # below can never fire for one. On a pull request the finding is already in a comment
-  # addressed to the author; on the weekly run nobody is watching, and a finding there means
-  # a newly published advisory now applies to code that has not changed.
+  # below can never fire for one. Why only the weekly run notifies is in README.md § 通知.
   notify-detection:
     needs: osv-scan
     if: ${{ github.event_name == 'schedule' && needs.osv-scan.outputs.status == 'findings' }}

@@ -70,8 +70,7 @@ const BFF_PREFIX = "/api/";
 
 /**
  * 資格情報を載せた要求への応答に付ける `Cache-Control`。画面や handler ごとには書かない
- * （`docs/rules.md`「データ分類と機微情報」の「主体に紐づく応答の `Cache-Control` を個別に
- * 書かない」）。
+ * （{@link finalize}）。
  */
 const PRIVATE_CACHE_CONTROL = "private, no-store";
 
@@ -79,8 +78,8 @@ const PRIVATE_CACHE_CONTROL = "private, no-store";
  * 役割が足りないときに送る先。
  *
  * @remarks
- * ログインへは送りません。認証はすでに済んでおり、やり直しても同じ結果になります。403 の面を
- * 出さない理由は `docs/spec/route/admin/layout.function.md`「入れない主体をどこへ送るか」。
+ * ログインへは送りません（{@link proxy}）。403 の面を出さない理由は
+ * `docs/spec/route/admin/layout.function.md`「入れない主体をどこへ送るか」。
  */
 const FALLBACK_PATH = "/";
 

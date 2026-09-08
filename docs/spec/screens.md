@@ -128,7 +128,7 @@
 
 ### ログイン / ログアウト(mock OIDC)
 
-Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock OIDC 契約を使う。フロントは BFF の URL(例: `/api/auth/login` / `/api/auth/logout`)だけを使い、IdP endpoint や token を直接扱わない。
+Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock OIDC 契約を使う。フロントが使うのは BFF の URL(例: `/api/auth/login` / `/api/auth/logout`)だけである(仲介の理由は §0)。
 
 | Method / Path | BFF の用途 | ブラウザが直接呼ばない理由 |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock 
 | 4 | ~~**在庫僅少一覧**~~ — **契約は決着済み**。`GET /v1/products/low-stock` が OpenAPI に入った。A1 の数値カードとは独立した後続機能なので、画面はまだ持たない | 契約は決着済み / 画面は後続 |
 | 5 | ~~**配達完了の対象を admin が指せない**~~ — **決着済み**。`GET /v1/purchases` に `statusCodes` と `includeOtherUsers` が入り、admin は発送済みの注文を列挙できる。A8 がその一覧と `deliver` を持つ | 決着済み |
 
-> **PostHog / Cookie 同意**: 本資料は「採否未決」としていたが、**v1 実装計画で「軽量 consent 機構 + ゲートは採用 / GTM・PostHog 本体は不採用」に確定**した([0131](../adr/0131-cookie-consent.md) を exclusion から反転)。
+> **PostHog / Cookie 同意**: 軽量 consent 機構 + ゲートは採用、GTM・PostHog 本体は不採用([0131](../adr/0131-cookie-consent.md))。
 
 ---
 

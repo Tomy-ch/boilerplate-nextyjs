@@ -129,12 +129,7 @@ Placing it after Step 2 is deliberate — reviewing the pre-merge state would ju
 
 Why a clean cancel rather than a pause-and-resume: a local review commonly produces fixes, which must be committed *before* submit-pr can run at all (the clean-tree precondition in Step 0, and the push in Step 7). Since the working tree will change anyway, there is nothing to "resume" — the next `/submit-pr` is a fresh, cheap run that flows straight through once the fixes are committed.
 
-**Depth by change type** — scale the recommendation to what the diff touches (this same scaling also drives the post-PR review at the final step):
-
-- **Behavior-affecting code** (`src/**` の `.ts` / `.tsx`、Server Action、Route Handler、`adapters`) → recommend the review by default.
-- **Docs / tooling-dominant changes** (`docs/**`、`*.md`、`.claude/**`、`AGENTS.md`、CI 設定 — 本番の振る舞いを変えない) → note the lower ROI so the user can decline quickly; still ask.
-
-Judge the dominant nature of the diff (changed paths / commit prefixes) for the default recommendation, but the user's choice always wins.
+**Depth by change type** — scale the recommendation to what the diff touches, on the scale *Depth by change type* under Step 10 defines; the same scale drives both asks.
 
 ## Step 4. Gather Context and Read Template
 

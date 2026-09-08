@@ -98,8 +98,7 @@ make setup-remove-sample   # DRY_RUN=1 でプレビュー
 [`src/model/authz.ts`](../../src/model/authz.ts) の `ROUTE_POLICIES` は、破棄すると `/account`
 （認証だけを求める）と `/admin`（役割まで求める）の 2 件が残る。これは**保護するパスをどこに
 何と宣言するか**を示すための置き場であり、その画面は同梱していない。自分の保護対象へ書き換える
-こと。列挙するのは保護する側で、公開側ではない — 公開側を列挙すると、新しく足した画面が既定で
-公開になり、書き忘れがそのまま漏洩になる。
+こと。列挙するのは保護する側で、公開側ではない（理由は `ROUTE_POLICIES` の doc コメントが持つ）。
 
 **求める役割が違う 2 件を残してある。** 認証だけを求める宣言しか無いと、役割が足りない主体を
 弾く経路がどこにも無くなり、その分岐を通す入力を作れなくなる。
@@ -248,11 +247,7 @@ make gen-api
 
 トークンの取り方は
 [`src/adapters/server/auth/development-token.ts`](../../src/adapters/server/auth/development-token.ts)
-が 1 か所で持つ。相手は製品ではなく性質で決まり、**OIDC Discovery を公開し、Resource Owner Password
-Credentials で主体を名指しできる開発用 IdP** なら何でも通る（本物の IdP で使ってはならない付与方式を、
-照合する相手が居ないから使っている）。**別の IdP へ移るなら、書き換えるのはこのファイルだけ**でよい。
-画面も Server Action も「主体と接続先を渡すとトークンが返る」ことしか知らない。
-
+が 1 か所で持つ。**別の IdP へ移るなら、書き換えるのはこのファイルだけ**でよい。通る IdP の性質と
 詳しい使い方は [`src/features/dev-session/README.md`](../../src/features/dev-session/README.md)。
 
 ## 確認

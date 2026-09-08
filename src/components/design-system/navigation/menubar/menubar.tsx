@@ -231,8 +231,7 @@ function MenubarItem({
  *
  * @remarks
  * `role="menuitemcheckbox"` として選択状態が読み上げられる。左端の check は表示用であり、状態
- * そのものは `checked` が表す。切り替えは即座に反映されるため、確定操作を挟みたい場合は menu
- * ではなく form を使う。
+ * そのものは `checked` が表す。確定操作を挟みたい場合の判断は {@link MenubarRadioGroup} と同じ。
  *
  * @param props - Radix `Menubar.CheckboxItem` の props。`checked` と `onCheckedChange` で
  *   状態を扱う。
@@ -306,9 +305,6 @@ function MenubarRadioItem({
  * @remarks
  * それ自体は選択できない。項目の並びが何の集まりかを示す場合に、menu の先頭または
  * `MenubarGroup` の先頭へ置く。
- *
- * `inset` は、同じ menu 内に checkbox / radio 項目があるときに左端の余白を揃えるための表示
- * 指定であり、意味論は変えない。
  *
  * @param props - Radix `Menubar.Label` の props と、以下の表示用 props。
  * @param props.inset - 左端の余白を indicator 付き項目に揃えるか。
@@ -410,9 +406,6 @@ function MenubarSub({ ...props }: ComponentProps<typeof MenubarPrimitive.Sub>) {
  * 右端に開く向きを示す装飾のアイコンを伴う。項目自体は操作を実行せず、`MenubarSubContent` を
  * 開くだけである。
  *
- * `inset` は、同じ menu 内に checkbox / radio 項目があるときに左端の余白を揃えるための表示
- * 指定であり、意味論は変えない。
- *
  * @param props - Radix `Menubar.SubTrigger` の props と、以下の表示用 props。
  * @param props.inset - 左端の余白を indicator 付き項目に揃えるか。
  *
@@ -446,8 +439,8 @@ function MenubarSubTrigger({
  * 入れ子の menu の内容。
  *
  * @remarks
- * `MenubarSubTrigger` の隣へ開き、収まらない場合は自動で向きを変える。面はページ内容の上へ
- * 重なるため不透明である必要がある。
+ * `MenubarSubTrigger` の隣へ開き、収まらない場合は自動で向きを変える。面が不透明である理由は
+ * {@link MenubarContent} と同じ。
  *
  * @param props - Radix `Menubar.SubContent` の props。
  *

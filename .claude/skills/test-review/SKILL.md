@@ -16,10 +16,9 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 ## When to Use
 
 - Before commit / PR, on the test files in the current change.
-- **When coverage sits at 100 % but regressions still ship.** This repository enforces a 100 %
-  coverage gate (`make test-full`), which means coverage carries no information about whether the
-  assertions mean anything — every line is executed by construction. That is exactly the blind spot
-  Lens 4 Axis B exists for.
+- **When coverage sits at 100 % but regressions still ship.** Under this repository's 100 % coverage
+  gate (`make test-full`) coverage carries no information about the assertions — the blind spot Lens
+  4 Axis B exists for.
 - As a standalone audit of a kernel or a component directory.
 
 ## Do NOT use this skill for
@@ -131,7 +130,7 @@ Compares what the layer owes to what the test actually exercises.
   loading / empty / error / success must exercise them; one that does not own them must not have
   meaningless state cases invented for it. Read it for component targets.
 
-**The kernel READMEs carry no Test Strategy prose section** — only the frontmatter. When a target's
+**The viewpoints come from the kernel README's `test-requirement` frontmatter.** When a target's
 viewpoints cannot be derived from the ADRs plus the frontmatter, report that as a documentation gap
 in 補遺 rather than silently returning nothing, which would read as a pass.
 

@@ -74,8 +74,8 @@ node = "<TARGET_VERSION>"
 pnpm = "…"   # 変更なし
 ```
 
-`mise.toml` が単一の正。本リポジトリに `sync-versions` は無い(あれは Go-boilerplate の `go.mod` /
-Dockerfile 用機構で、どちらも本リポジトリには存在しない ── [0011](../../../docs/adr/0011-no-docker.md))。
+`mise.toml` が単一の正。本リポジトリで Node の版を持つファイルは他に無く(Dockerfile も無い ──
+[0011](../../../docs/adr/0011-no-docker.md))、伝播ステップは存在しない。
 
 ## Step 3. ローカル Node 環境の更新(ユーザ作業)
 
@@ -86,8 +86,7 @@ make install-tools
 node --version        # v<TARGET_VERSION> であること
 ```
 
-AI エージェントは `mise install` を自分で実行しない(マシンのツールチェーンを変更するため)── go-upgrade 規約と同様
-ユーザ作業。
+AI エージェントは `mise install` を自分で実行しない(マシンのツールチェーンを変更するため)── ユーザ作業。
 
 ## Step 4. ロックファイル/依存の再構築
 
@@ -114,11 +113,11 @@ pnpm build            # next build ── 新ランタイムで成功必須
 
 ## Step 6. フォローアップの明示(ここでは束ねない)
 
-- **`@types/node`**: 現状 `devDependencies` で `^20` だがランタイムは Node 24+。メジャーをランタイムに合わせるのは
+- **`@types/node`**: `devDependencies` のメジャーを対象ランタイムのメジャーと突き合わせる。揃えるのは
   妥当だが、**[0004](../../../docs/adr/0004-library-management.md)** により依存**メジャー**更新は**別 PR**。推奨フォローアップとして報告し、本スキルでは
   `package.json` を編集しない。
-- **CI**: まだ `.github/workflows/` が無い(BACKLOG **B9** 保留)。CI 追加時に `node-version-file` / matrix 同期
-  ステップがここに入る ── 本スキルへの将来追加として記録。
+- **CI**: workflow は `.github/actions/setup-mise` でツールチェーンを入れ、版は `mise.toml` から読むので、
+  `node-version-file` / matrix の同期対象は無い。
 
 ## チェックリスト
 
@@ -132,8 +131,8 @@ pnpm build            # next build ── 新ランタイムで成功必須
 
 ## 注意
 
-- `mise install` を自分で実行しない ── ユーザに依頼(ツールチェーンを変更するため)。
-- ここで `package.json` を編集しない ── 依存メジャーは別 PR([0004](../../../docs/adr/0004-library-management.md))。
+- `mise install` を自分で実行しない ── ユーザ作業(Step 3)。
+- ここで `package.json` を編集しない(Step 6)。
 - 作業ブランチでコミット。保護ブランチへの直接コミット禁止(AGENTS.md)。
 - push は明示指示があるときのみ。
 - `SKILL.md` 更新後は `SKILL.ja.md` も同期。

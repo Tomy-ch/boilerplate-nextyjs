@@ -31,9 +31,8 @@ a skill; for human reference only).
 - **Changing components.** Edits happen under `src/components/`, governed by
   [`components/README.md`](../../../src/components/README.md). This skill only reads.
 - **Writing stories or component docs.** That is ordinary component work.
-- **Pulling anything back into the repository.** The dependency direction is fixed at repo → design.
-  What the design tool produces is a proposal that a human reads and implements; there is no
-  automatic path back, and adding one would make the design tool an upstream of the code.
+- **Pulling anything back into the repository.** The dependency direction is fixed at repo → design —
+  see §The one-way rule.
 
 ## The one-way rule
 

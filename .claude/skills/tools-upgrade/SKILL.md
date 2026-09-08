@@ -5,7 +5,7 @@ description: Audit `mise.toml` `[tools]` entries against upstream latest version
 
 # Tool Version Upgrade
 
-This skill audits `mise.toml` against upstream latest versions for every tool in the `[tools]` table, with a **supply-chain quarantine gate**: releases newer than their backend's window are surfaced as informational only and are never applied automatically. The gate exists because malicious uploads to npm / PyPI / Go module proxies are typically detected and revoked within hours to days; waiting reduces exposure.
+This skill audits `mise.toml` against upstream latest versions for every tool in the `[tools]` table, with a **supply-chain quarantine gate**: releases newer than their backend's window are surfaced as informational only and are never applied automatically (Step 0 resolves the window and states why it exists).
 
 A Japanese reference translation is available at `SKILL.ja.md` in the same directory (not loaded as a skill; for human reference only).
 
@@ -34,7 +34,8 @@ Do NOT use this skill for:
 [0110](../../../docs/adr/0110-security-operations.md) 1.1 sets one per backend, because the window
 tracks how fast a malicious release gets detected and revoked on that distribution channel — not how
 much damage the tool could do. A single value applied to every backend silently under-quarantines
-whichever channel has the longer window.
+whichever channel has the longer window. Waiting buys most of the protection: typical malicious
+releases (npm `ua-parser-js` 2021, PyPI `ctx` 2022) were detected and yanked within 24-72 hours.
 
 Procedure:
 
@@ -60,9 +61,7 @@ Per the "Exception: Skill Execution" clause in `CLAUDE.md`, the following paths 
 
 - `mise.toml` (the `[tools]` table — write only entries the user explicitly approved)
 
-`mise.toml` is the only tracked file this skill writes. Nothing propagates from it into the delivery
-layers — there is no Dockerfile or runtime manifest carrying a duplicated version
-([0003](../../../docs/adr/0003-version-manager.md) / [0011](../../../docs/adr/0011-no-docker.md)).
+`mise.toml` is the only tracked file this skill writes (Step 6: nothing propagates from it).
 
 The following remain protected even during skill execution:
 
@@ -104,7 +103,7 @@ For each tool:
 | **pending** | `pinned != latest` AND `now - release_date < MIN_AGE_DAYS(backend)` |
 | **resolution_failed** | Backend lookup failed (network error, 404, parsing failure) |
 
-The window is the one Step 0 resolved **for that tool's backend** (Step 1 already determined it). Comparing every tool against one number is the defect this step exists to avoid.
+The window is the one Step 0 resolved **for that tool's backend** (Step 1 already determined it), never one number for every tool.
 
 Sanity rule: refuse to "upgrade" to a strictly lower version per semver — if the parsed latest is `<` the pinned version, classify as `resolution_failed` with reason "potential downgrade".
 
@@ -155,7 +154,8 @@ Run `make install-tools` so the freshly pinned versions are the ones actually on
 runs, `mise.toml` and the installed toolchain disagree and every later step verifies the old versions.
 
 There is no downstream propagation step: `mise.toml` is the single source of truth and no delivery-layer
-file carries a duplicated version ([0003](../../../docs/adr/0003-version-manager.md)).
+file — no Dockerfile, no runtime manifest — carries a duplicated version
+([0003](../../../docs/adr/0003-version-manager.md) / [0011](../../../docs/adr/0011-no-docker.md)).
 
 ## Step 7. Verify
 
@@ -180,12 +180,12 @@ Do NOT commit, stage, or push. The user reviews the resulting working tree and r
 
 ## Notes
 
-- **Supply-chain quarantine rationale**: typical "dependency confusion" / "malicious release" attacks (e.g. npm `ua-parser-js` 2021, PyPI `ctx` 2022) were detected and yanked within 24-72 hours, so waiting buys most of the protection. **How long to wait per backend is ADR [0110](../../../docs/adr/0110-security-operations.md) 1.1's decision, not this skill's** — it balances that detection latency against staying current, and it moves.
+- **Supply-chain quarantine rationale**: Step 0 — the window per backend is ADR [0110](../../../docs/adr/0110-security-operations.md) 1.1's decision, not this skill's, and it moves.
 - **Pre-release exclusion**: this skill always selects the latest **stable** release. Pre-release tags are visible in upstream but never chosen as `latest`.
 - **Calendar versioning**: for tools using calendar versioning (e.g., `2024.12.30`), comparison is lexicographic with semver fallback. The "potential downgrade" guard remains active.
 - **Rate limits**: GitHub API anonymous limit is 60 req/h per IP. The skill SHOULD use `gh api` which authenticates via `GITHUB_TOKEN` (1000 req/h authenticated).
 - **Idempotency**: multiple invocations are safe. A second run after a successful apply will show those tools as up-to-date.
-- The skill never auto-pushes. The user reviews the working tree, then commits and pushes manually.
+- No commit / stage / push (Step 8).
 
 ## Checklist
 

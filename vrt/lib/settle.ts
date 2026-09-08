@@ -15,7 +15,7 @@ const RENDER_TIMEOUT_MS = 15_000;
  *
  * @remarks
  * `playing` を含めるのが要点です。`play` を持つ story は、描画が終わってから操作が走って初めて
- * 見せたい状態になります。ここを待たずに撮ると、操作前の絵で「安定した」と判定されます。
+ * 見せたい状態になります（待たない場合の壊れ方は {@link settle}）。
  */
 const PENDING_PHASES = ["preparing", "loading", "beforeEach", "rendering", "playing"];
 
@@ -23,9 +23,9 @@ const PENDING_PHASES = ["preparing", "loading", "beforeEach", "rendering", "play
  * DOM の変化が止まったと見なすまでの静止時間。
  *
  * @remarks
- * Storybook が「描画が終わった」と言うのは**最初の commit まで**で、そこから遅れて届くものが
- * ある。`next/dynamic` の別チャンクが実測 23ms 後に中身を差し込む例があり、待たずに撮ると
- * 枠だけの絵になる。1 フレームでは足りず、長く取ると story 数の分だけ実行時間へ効くので、
+ * Storybook が「描画が終わった」と言うのは**最初の commit まで**で、遅れて走る effect や
+ * `next/dynamic` の別チャンクはそのあとに届く。別チャンクが実測 23ms 後に中身を差し込む例が
+ * あり、待たずに撮ると枠だけの絵になる。1 フレームでは足りず、長く取ると story 数の分だけ実行時間へ効くので、
  * 遅れて届くものを跨げる最小の幅を置く。
  */
 const QUIET_MS = 150;
@@ -52,9 +52,8 @@ const QUIET_MS = 150;
  * focus が動き、ブラウザはその要素を見せるためにページを送ります。送る量は操作した時点の
  * 文書の高さで決まるので、story の宣言のどこにも現れません。
  *
- * **最後に DOM が静止し、画像が出そろうのを待ちます。** Storybook の言う描画完了は最初の
- * commit までで、`next/dynamic` の別チャンクや遅れて走る effect はそのあとに届きます。画像は
- * DOM を変えないまま絵を変えるので、静止の判定とは別に見ます。
+ * **最後に DOM が静止し、画像が出そろうのを待ちます。** 静止を待つ理由と幅は {@link QUIET_MS} が
+ * 持ちます。画像は DOM を変えないまま絵を変えるので、静止の判定とは別に見ます。
  */
 export async function settle(page: Page, theme: string): Promise<void> {
   try {

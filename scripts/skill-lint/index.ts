@@ -427,7 +427,7 @@ function linkPathExists(target: string, fromDir: string): boolean {
   const rel = path.relative(REPO_ROOT, abs);
   if (rel.startsWith("..")) return false;
   if (isExcludedPrefix(rel)) return false;
-  // tmp/ 配下はスキル実行中に生成されるため、静的検査では存在しないのが正常。
+  // 実行時の生成先（`PATH_ROOT_DENY`）は実在を問わない。
   const separatorAt = rel.indexOf(path.sep);
   if (PATH_ROOT_DENY.has(separatorAt < 0 ? rel : rel.slice(0, separatorAt))) return true;
   return fs.existsSync(abs);

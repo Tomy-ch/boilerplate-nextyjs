@@ -91,7 +91,7 @@ OTel SDK と logger へ値を注入します。Config 自身は logger / observa
 - `adapters/server` と `proxy.ts` は必要な目的の `get*Config()` だけを import し、feature / model / component は Config を import しない。
 - 内側のロジックへ設定値が必要な場合は、adapter が getter から取り出した値を引数で渡す。
 - Config class と ENV parser は module 外へ export しない。通常コードが任意の ENV から Config を再生成する経路を持たせない。
-- P3-6 以降の unit test は `vi.stubEnv()` と `vi.resetModules()` で module cache を再評価し、公開 singleton を検証する。
+- unit test は `vi.stubEnv()` と `vi.resetModules()` で module cache を再評価し、公開 singleton を検証する。
 
 ## 運用
 

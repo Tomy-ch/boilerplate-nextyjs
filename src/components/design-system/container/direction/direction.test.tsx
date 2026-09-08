@@ -8,7 +8,7 @@ import { DirectionProvider, useDirection } from "./direction";
 import { DIRECTION, type DirectionValue } from "./direction.definition";
 
 beforeAll(() => {
-  // Radix の menu は位置計算に使う API を jsdom が持たないため、実装を変えずにここで補う。
+  // Radix が位置計算に使う API を jsdom が持たないため、実装を変えずにここで補う。
   Element.prototype.scrollIntoView = vi.fn();
   globalThis.ResizeObserver ??= class {
     observe() {}

@@ -173,8 +173,7 @@ export function Button({
 
   return (
     <Component
-      // 文言を視覚から外すと、その文言から組み立てていた名前も消える。待っていることは操作自身の
-      // 名前で伝える。
+      // 文言が見えないあいだの名前。
       aria-label={pendingLabel}
       aria-busy={true}
       className={cn(buttonVariants({ variant, size, className }), "relative")}

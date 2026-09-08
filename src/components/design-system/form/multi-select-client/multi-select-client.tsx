@@ -140,8 +140,6 @@ export function MultiSelectClient({
   const triggerId = useId();
   const ownLabelId = useId();
   const optionIdPrefix = useId();
-  // 名前は常に「項目名 + 要約」の 2 要素を指す形で組む。属性の値として渡すと要素の間に
-  // 区切りが入らず、実装によって語が繋がって読まれる。
   const nameSourceId = ariaLabelledBy ?? (ariaLabel === undefined ? undefined : ownLabelId);
   const [internalValues, setInternalValues] = useState<readonly string[]>(defaultValue ?? []);
   const currentValues = value ?? internalValues;

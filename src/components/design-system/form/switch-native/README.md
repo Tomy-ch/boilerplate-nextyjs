@@ -8,7 +8,7 @@
 
 | Component / 型 | 役割 |
 | --- | --- |
-| `SwitchNative` | `input type="checkbox"` に `role="switch"` を与えた、SSR first の switch です。 |
+| `SwitchNative` | `input type="checkbox"` を switch の見た目で描く、SSR first の部品です。読み上げは checkbox のままです。 |
 | `SWITCH_SIZE` | 表示サイズの定数です。このディレクトリが owner で、`SwitchClient` も同じ値を参照します。 |
 
 ## 利用ケース

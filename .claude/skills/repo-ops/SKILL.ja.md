@@ -6,11 +6,9 @@
 **ワークフローではなくルックアップ表**: 症状を見つけて対処を打つ。破壊的またはルートファイルに触れるステップは
 `CLAUDE.md` に従い先にユーザへ伝える。
 
-> **スコープ注記。** この runbook は意図的に薄い。元にした go-boilerplate の `repo-ops` は Docker ツールランナー・
-> `sqlc` / `schema.gen.sql`・root 所有の生成ディレクトリ・稼働 DB が中心だったが、**それらはここには存在しない**
-> ([0011](../../../docs/adr/0011-no-docker.md)、DB なし、表示層のみ)。以下には実在する落とし穴だけを載せる。
-> 新たに踏んだら項目を足す
-> こと ── Go 固有のものを戻さない。
+> **スコープ注記。** この runbook は意図的に薄く、実在する落とし穴だけを載せる。本リポジトリは Docker
+> ツールランナーも DB も持たない表示層なので([0011](../../../docs/adr/0011-no-docker.md))、その種の項目は
+> ここに属さない。新たに踏んだら項目を足すこと。
 
 ## 1. `make install-tools` が `mise not found` で落ちる
 
@@ -191,7 +189,7 @@ worktree にも継承されるが、**`node_modules` は継承されない** ─
 make secret-scan
 ```
 
-`.lefthook.yaml` の全コマンドは素で書いてある ── `mise exec --` は他と同様ここでも禁止 (ADR 0003 / 0151)。
+`.lefthook.yaml` の全コマンドは素で書いてある ── `mise exec --` は他と同様ここでも禁止 (§2; ADR 0003 / 0151)。
 `mise ls` にツールが入っているのに `❌ <tool> が PATH にありません` で落ちる場合、それは hook の不備ではなく
 環境の報告で、`git` を起動したシェルに activate 済みの `PATH` が無い。元から直す ── `make install-tools` の後、
 そのシェルで mise を activate する。プロファイルを読まない起動元 (GUI の git クライアント / エージェントの
@@ -268,5 +266,4 @@ make actions-mise-pin-lint
 - ✅ ルートファイル編集(§5 `biome.json`、§4 `package.json`)は事前にユーザ確認 ── 既定の
   AI 変更スコープ外。§2 の `git restore pnpm-workspace.yaml` は例外 ── 頼んでいない機械的な変更を
   作るのではなく捨てる操作だから。
-- ❌ go-boilerplate の Docker / sqlc / DB 項目をここに移植しない ──
-  適用外([0011](../../../docs/adr/0011-no-docker.md))。
+- ❌ Docker / DB の項目をここに足さない(スコープ注記)。

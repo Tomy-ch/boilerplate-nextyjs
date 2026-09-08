@@ -100,8 +100,6 @@ git diff --name-only
 - 生成された API 生成物: `src/adapters/gen/**` と取り込んだ `openapi.gen.yaml`（[0072](../../../docs/adr/0072-api-type-generation.md) — 編集禁止。バックエンドの spec から再生成される） <!-- skill-lint-ignore -->
 - Next.js が管理する型: `next-env.d.ts`
 
-例: `package.json` の依存変更は、再生成された `pnpm-lock.yaml` を同じコミットへ連れてくる。バックエンドの `openapi.gen.yaml` を再取り込みした場合は、その `src/adapters/gen/**` 出力を同じコミットへ連れてくる。 <!-- skill-lint-ignore -->
-
 これらのパスの一部はまだ存在しない（生成パイプラインは [0072](../../../docs/adr/0072-api-type-generation.md) の実装 PR で着地する）。存在しないパスは「rider 無し」として扱い、エラーにしない。
 
 ## Step 3. prefix リファレンス
@@ -156,7 +154,7 @@ git diff --name-only
 
 - **1 つの意味的変更 = 1 コミット。** feature + refactor + fix を 1 コミットへ混ぜない。
 - **テストは対象の実装と同居してよい**（新規ハンドラとそのテストは一緒でよい）。既存コードへテストだけを追加する場合は、単独の `Test:` コミットにする。
-- **生成物はソース変更と同居する。** `package.json` の依存が変わったら、再生成された `pnpm-lock.yaml` は同じコミットに属する。取り込んだ `openapi.gen.yaml` が変わったら、再生成された `src/adapters/gen/**` は同じコミットに属する（[0072](../../../docs/adr/0072-api-type-generation.md)）。 <!-- skill-lint-ignore -->
+- **生成物はソース変更と同居する。** Step 2 の rider ファイルは、それを生んだ変更と同じコミットに相乗りする。
 - **フォーマットのみの変更は単独の `Style:` コミット。** Step 0 の `pnpm fix` が生んだ出力は、明らかに同じ変更の一部なら該当グループへ畳み込んでよい。無関係なら別の `Style:` コミットとして出す。
 - **`Docs:` は既定で単独。** 例外として、ドキュメントが新機能の一部である場合（新規パッケージに添える README 等）は同居してよい。
 - **1 コミット 1 prefix。** 2 つ書きたくなったら、その分割が間違っている。
@@ -213,7 +211,7 @@ EOF
 - **`Co-Authored-By` フッタ**: 必須。形式は `Co-Authored-By: <実行中のモデル名> <noreply@anthropic.com>` — 例: `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`。実際にコミットを生成しているモデルの識別子を、環境 / `CLAUDE.md` の記載どおりに使う。本ドキュメントにハードコードされたモデル名を写さないこと — モデルのリリースごとに古くなり、誤った名前はコミットの帰属を誤らせる。
 - **`Refs:` footer（レビュー適用コミットのみ）**: `full-apply` / `impl-review` / `code-review` の指摘を適用したコミットには、`Refs: tmp/reviews/mod_*.md (<severity>)` の行を footer へ足し、コミットからfinding へ辿れるようにする。通常のコミットには付けない。
 - **HEREDOC**: 必須（タイトル + 空行 + 本文 + フッタの体裁を保つ）。
-- **`--no-verify`**: このコマンドが作る全コミットで必須。プロジェクト全体の規則に対するコマンド限定の明示的な例外であり、根拠は Step 4 に記載（lefthook は分割中に N 回ではなく、push 前に 1 回手動で回す）。
+- **`--no-verify`**: このコマンドが作る全コミットで必須 — 冒頭で述べたコマンド限定の例外であり、検証は Step 6 の 1 回のパスで行う。
 - **`-a` / `git add -A` / `git add .` は決して使わない。** 常にファイル名を指定して staging する（`.env` や資格情報の巻き込みを避ける）。
 - **`--no-gpg-sign` と `--amend` は引き続き禁止。**
 
@@ -235,7 +233,7 @@ EOF
 
 ## Step 6. 検証
 
-全コミット成功後、(a) `.lefthook.yaml` の `pre-commit:` `commands:` 配下で定義された各コマンドと、(b) 最終フォーマットパスとしての `pnpm fix` からなる検証ゲートを回す。`lefthook run pre-commit` 自体は実行しないこと — staged が空のとき（コミット後はまさにその状態）lefthook は登録コマンドをスキップし、「一致する staged ファイルなし」として何も検査せず終了してしまう。代わりに各コマンドを直接実行する。
+全コミット成功後、(a) `.lefthook.yaml` の `pre-commit:` `commands:` 配下で定義された各コマンドと、(b) 最終フォーマットパスとしての `pnpm fix` からなる検証ゲートを回す。`lefthook run pre-commit` 自体は実行しないこと — 冒頭で述べた理由により「一致する staged ファイルなし」として何も検査せず終了してしまう。代わりに各コマンドを直接実行する。
 
 ### 手順
 
@@ -311,7 +309,7 @@ EOF
 - ✅ Step 1 で現ブランチの PR がマージ済みかを検出し（`gh pr view`）、コミット前に base から新ブランチを切ることを推奨する（`gh` が使えない場合は穏当に縮退する）
 - ✅ 失敗時は `AskUserQuestion` で `git reset --mixed <ORIGINAL_HEAD>` を提案する
 - ✅ Step 6 は lefthook 定義の各コマンド + `pnpm fix` を直接実行する（`lefthook run pre-commit` は使わない）
-- ❌ `lefthook run pre-commit` を呼ばない — staged が空のときコマンドをスキップしてしまい、それがコミット後の状態にあたる
+- ❌ `lefthook run pre-commit` を呼ばない（冒頭参照）
 
 ## チェックリスト
 

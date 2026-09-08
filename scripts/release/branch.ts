@@ -99,7 +99,7 @@ const BASELINE_STORE_PATH = "baseline/images";
  * @remarks
  * **ここを分けないと、案内が嘘になります。** ずれは撮り直しでポインタが進んだ後に実体が
  * 追いつかないと起き、`git status` には他の変更と同じ顔で出ます。案内どおり commit すると
- * **間違った基準画像の指し先を保護ブランチへ載せる**ことになり、押した後では取り消せません。
+ * **間違った基準画像の指し先を保護ブランチへ載せる**ことになります。
  */
 function isOnlyBaselinePointer(workTreeStatus: string): boolean {
   const paths = workTreeStatus

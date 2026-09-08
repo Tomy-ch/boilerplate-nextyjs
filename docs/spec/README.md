@@ -34,6 +34,14 @@
 route group は URL に現れないため、括弧を外した名前で置きます（`(group)` → `<group>/`）。動的
 セグメントは URL に現れるため、角括弧を含む名前のまま置きます。
 
+**並行ルートのスロット（`@slot/`）は置き場を持ちません。**URL に現れず、独立した画面でもないため、
+その約束はスロットを差し込む画面の仕様書が持ちます（`admin/@breadcrumb/products/page.tsx` の約束は
+`route/admin/products/page.screen.md`）。
+
+**開発専用の route も仕様書を持ちます。**`page.dev.tsx` は build から外れますが
+（[0113](../adr/0113-development-access-surface.md)）、**build から外れることと、約束を持たないことは
+別**です。置き場の写し方は他と同じです。
+
 **layout の仕様はその配下すべてに効きます。** 画面をまたぐ約束（外枠が供給する状態、認証の扱い、
 描画の時点への影響）は上位の `layout.*.md` に 1 回だけ書き、各画面はそこからの差分を書きます。
 

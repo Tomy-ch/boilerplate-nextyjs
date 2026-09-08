@@ -85,9 +85,7 @@ function resolveBase(): string {
     return fromPullRequest.trim();
   }
 
-  return selectLatestReleaseLine(
-    git(["ls-remote", "--heads", REMOTE, RELEASE_REFS]),
-  );
+  return selectLatestReleaseLine(git(["ls-remote", "--heads", REMOTE, RELEASE_REFS]));
 }
 
 /** マージを試み、衝突が残ったかを返す。 */

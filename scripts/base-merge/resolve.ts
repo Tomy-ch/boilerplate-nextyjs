@@ -18,8 +18,7 @@ const DRY_RUN_FLAG = "--dry-run";
  * `--base` は hotfix ラインが絡むときに人が渡すためにあります。ブランチ名から推測すると、
  * 推測が最も高くつく瞬間に推測することになります。
  */
-export const USAGE_MESSAGE =
-  "使い方: base-merge [--base=<ref>] [--dry-run]";
+export const USAGE_MESSAGE = "使い方: base-merge [--base=<ref>] [--dry-run]";
 
 /**
  * 取り込み先にできないブランチに立っているときに出す行。
@@ -43,9 +42,7 @@ export const DIRTY_TREE_MESSAGE =
  * 黙って捨てると、指定したつもりのベースが無視されたまま別のラインを取り込みます。
  */
 export function invalidArguments(argv: readonly string[]): string | null {
-  const unknown = argv.filter(
-    (arg) => !arg.startsWith(BASE_FLAG) && arg !== DRY_RUN_FLAG,
-  );
+  const unknown = argv.filter((arg) => !arg.startsWith(BASE_FLAG) && arg !== DRY_RUN_FLAG);
 
   return unknown.length === 0 ? null : `${USAGE_MESSAGE}: ${unknown.join(" ")}`;
 }

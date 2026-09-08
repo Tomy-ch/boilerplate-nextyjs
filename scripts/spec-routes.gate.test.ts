@@ -41,7 +41,10 @@ function listFiles(relativeDir: string): string[] {
     .readdirSync(absolute, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile())
     .map((entry) =>
-      path.relative(REPOSITORY_ROOT, path.join(entry.parentPath, entry.name)).split(path.sep).join("/"),
+      path
+        .relative(REPOSITORY_ROOT, path.join(entry.parentPath, entry.name))
+        .split(path.sep)
+        .join("/"),
     );
 }
 

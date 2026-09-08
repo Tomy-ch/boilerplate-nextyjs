@@ -1,5 +1,6 @@
 ---
 name: tools-upgrade
+usage-class: lifecycle
 description: Audit `mise.toml` `[tools]` entries against upstream latest versions, with a configurable supply-chain quarantine. For each tool the latest release is fetched from its backend (GitHub Releases for `aqua:` / `go:` tagged modules, npm registry for `npm:`, PyPI for `pipx:`, language download manifests for `go` / `node` / `python`). Releases newer than `min_age_days` are reported as informational only — never applied automatically — to avoid pulling in newly-published malicious versions before upstream has time to detect and revoke them. Confirms `min_age_days` and the per-tool update set via `AskUserQuestion`, rewrites approved entries in `mise.toml` atomically, reinstalls the toolchain with `make install-tools`, and verifies with `pnpm install` + `pnpm lint:ci` + `pnpm build`. Use this skill on a routine cadence (monthly / quarterly) or after a security advisory.
 ---
 

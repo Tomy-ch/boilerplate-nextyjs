@@ -1,5 +1,6 @@
 ---
 name: release-notes
+usage-class: lifecycle
 description: Generate a Japanese release note Markdown file under `.github/release/` summarizing changes between a specified `origin` git tag and `HEAD`. Confirms both the FROM tag and the new release version with the user via `AskUserQuestion`, gathers commit history / diff statistics, categorizes changes, and writes the document in the project's canonical `v1.1.0`-style sectioned format. Triggers: "リリースノートを作成", "release notes", "v1.x.y のリリースノート".
 ---
 

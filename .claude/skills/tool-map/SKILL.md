@@ -1,5 +1,6 @@
 ---
 name: tool-map
+usage-class: lifecycle
 description: Inventory every command / skill / agent registered under this project's `.claude/` directory and produce an inventory table plus a dependency map (Mermaid). Reads frontmatter and bodies, extracts cross-references, and renders the report inline or to a file. Read-only by default; writes only when `--output=file` is chosen.
 argument-hint: [--lang=en|ja] [--output=inline|file] [--output-path=<path>] [--include=commands,skills,agents]
 allowed-tools: Bash(ls:*), Bash(find:*), Bash(test:*), Bash(pnpm exec markdownlint-cli2:*), Read, Write, AskUserQuestion

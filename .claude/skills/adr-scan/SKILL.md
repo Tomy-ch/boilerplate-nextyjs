@@ -1,5 +1,6 @@
 ---
 name: adr-scan
+usage-class: lifecycle
 description: PROVISIONAL / one-off. Read-only full-repository scan that discovers ADR-worthy architectural decisions across the whole repo and maps each to the BACKLOG frame-ID taxonomy (Tier 0–6 / G,T,R,A,B,C,D). Unlike the go-boilerplate original (which migrated a flat decisions.md into docs/adr/), this repo already has a formal docs/adr/ set + BACKLOG.md board — so the job here is DISCOVERY of decisions that exist de-facto (in AGENTS.md, config files, src/ structure, .github/, code comments) but are NOT yet tracked as a BACKLOG frame, classifying each as decision (frame-worthy) / exclusion (frame-worthy negative decision) / rule (stays in AGENTS.md) / inventory (living reference), and proposing which Tier / frame ID it belongs to (existing or new). Read-only: produces a candidate inventory only; writes no docs/adr files and does not edit BACKLOG.md. Delete or archive once the discovered gaps are folded into BACKLOG.md.
 ---
 

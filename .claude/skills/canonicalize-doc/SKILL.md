@@ -1,5 +1,6 @@
 ---
 name: canonicalize-doc
+usage-class: situational
 description: Create or sync a canonical English / Japanese translation pair for a specified README, SKILL, or similar Markdown document. Detects the existing file (canonical, translation, or both), confirms the source file and direction with the user via AskUserQuestion, and produces the missing side or syncs both sides while preserving repo conventions (frontmatter rules for SKILL files, sync-note headers for translations, cross-reference links).
 ---
 

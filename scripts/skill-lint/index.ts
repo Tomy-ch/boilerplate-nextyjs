@@ -124,8 +124,24 @@ function buildEntryIndex(): string[] {
 // frontmatter
 // ---------------------------------------------------------------------------
 
+/**
+ * スキルが宣言する利用の型。
+ *
+ * @remarks
+ * 判定は呼出回数ではなく型に対して行います（[0160](../../docs/adr/0160-agent-environment-loop.md)）。
+ * 型を持たないスキルは「呼ばれなかった」を根拠に退役させられる側へ落ちるため、宣言を必須にします。
+ * 宣言はスキル自身が持ちます —— 別ファイルの台帳に置くと、スキルが増えた日に台帳だけが古くなります。
+ */
+const USAGE_CLASSES = new Set(["frequent", "situational", "lifecycle", "automatic", "safety"]);
+
 // name / description の必須検査と配置名（ディレクトリ名 / ファイル名）との一致検査。
-function checkFrontmatter(rel: string, content: string, expectedName: string): void {
+// `requireUsageClass` はスキルにだけ立てる（エージェント定義は利用の型を持たない）。
+function checkFrontmatter(
+  rel: string,
+  content: string,
+  expectedName: string,
+  { requireUsageClass = false }: { requireUsageClass?: boolean } = {},
+): void {
   const fm = splitFrontmatter(content);
   if (!fm) {
     report(rel, 1, "frontmatter", "frontmatter (`---` で囲まれたブロック) がありません");
@@ -145,6 +161,24 @@ function checkFrontmatter(rel: string, content: string, expectedName: string): v
       "frontmatter",
       `frontmatter の \`name: ${name}\` が配置名 \`${expectedName}\` と一致しません`,
     );
+  }
+  if (requireUsageClass) {
+    const usageClass = keys.get("usage-class");
+    if (usageClass === undefined || usageClass === "") {
+      report(
+        rel,
+        1,
+        "frontmatter",
+        `frontmatter に \`usage-class\` がありません（${[...USAGE_CLASSES].join(" / ")} のいずれか）`,
+      );
+    } else if (!USAGE_CLASSES.has(usageClass)) {
+      report(
+        rel,
+        1,
+        "frontmatter",
+        `\`usage-class: ${usageClass}\` は宣言できる型ではありません（${[...USAGE_CLASSES].join(" / ")}）`,
+      );
+    }
   }
 }
 
@@ -589,7 +623,7 @@ for (const name of skillDirs) {
     report(path.join(SKILLS_DIR, name), 1, "structure", "`SKILL.md` がありません");
     continue;
   }
-  checkFrontmatter(canonicalRel, readFile(canonicalRel), name);
+  checkFrontmatter(canonicalRel, readFile(canonicalRel), name, { requireUsageClass: true });
   checkTranslationPair(canonicalRel, path.join(SKILLS_DIR, name, "SKILL.ja.md"));
 }
 

@@ -1,5 +1,6 @@
 ---
 name: context-map-audit
+usage-class: lifecycle
 description: >-
   Read-only audit of `docs/design/context-map.md` against the code, reporting three kinds of divergence and editing nothing — a contact point that exists in the tree with no edge on the map, an edge whose counterpart no longer exists in the tree, and an edge whose recorded translation no longer matches what the dependency matrix enforces. Use it before a release, after work that added or removed an outward-facing entry point, or as a periodic sweep — 「地図と実物が合ってる？」「この口は載ってる？」. It does not edit, because a divergence reads two ways and the audit cannot tell them apart: the map may be stale, or the code may have drifted from a decision, and choosing between those is the reader's. It also never writes an ownership label, since ownership is an organisational fact the code does not carry; when an edge is new, the audit reports it and hands the ownership question to `context-map`. Every run states how many edges it checked and how many it could not, because an audit that reports "no divergence" without saying what it swept is indistinguishable from one that swept nothing. Do NOT use it to update the map (`context-map`), to review a diff (`impl-review`), or to judge whether an edge should exist at all.
 argument-hint: '[--scope=changed|full]'

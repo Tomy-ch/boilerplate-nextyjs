@@ -1,5 +1,6 @@
 ---
 name: new-env
+usage-class: situational
 description: Add a new environment variable end-to-end, keeping the env files, purpose-scoped typed config modules, and documentation in sync. Targets ADR 0030's config kernel: `env/.env.{local,ci,dev,stg,prd}` and `env/README.md` always, plus `src/config/<purpose>/<purpose>.schema.ts`, the corresponding server or client module, `src/config/environment.ts`, and `src/config/README.md` when the app reads the value through config. The skill derives the purpose inventory, schema library, type mapping, and naming conventions from live `src/config/` contents. It confirms the variable specification before writing, refuses secrets behind `NEXT_PUBLIC_`, and verifies with `pnpm lint:ci`, `pnpm typecheck`, and `pnpm build`.
 ---
 

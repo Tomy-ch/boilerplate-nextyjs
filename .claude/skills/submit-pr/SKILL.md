@@ -1,5 +1,6 @@
 ---
 name: submit-pr
+usage-class: frequent
 description: Push the current feature branch to `origin` and create or update its GitHub pull request. Detects whether a PR already exists for the current branch via `gh pr view` and automatically chooses between "create" and "update", then merges the up-to-date base branch into the current branch before anything is reviewed or pushed, so the local review and CI both judge the state that will actually land. The PR body is filled from `.github/pull_request_template.md` (sections `概要` / `変更内容` / `動作確認方法`) using the commit history and diff. Title and body are written in Japanese per `CLAUDE.md`. The skill confirms with the user before any push, with the exact wording required by `CLAUDE.md` for the update path.
 ---
 

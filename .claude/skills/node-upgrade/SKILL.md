@@ -1,5 +1,6 @@
 ---
 name: node-upgrade
+usage-class: lifecycle
 description: Upgrade the Node.js version used by this project. `mise.toml` `[tools] node` is the single source of truth (ADR 0003); this skill confirms the target version with the user via AskUserQuestion, reviews the release notes / breaking changes for that Node line, edits `mise.toml`, has the user run `make install-tools` (mise install), then rebuilds the lockfile and verifies with `pnpm install` + `pnpm lint` + `pnpm build`. Unlike go-boilerplate's go-upgrade there is no `sync-versions` propagation / Dockerfile / go.mod to update (ADR 0011 no-docker), and no CI node-version to sync yet (BACKLOG B9 pending). A `@types/node` major realignment is intentionally NOT bundled here — it is a separate PR per ADR 0004 (major updates in isolation). Use this for a deliberate Node version move; for a routine bulk audit of all mise tools (node + pnpm + …) with supply-chain quarantine, use `tools-upgrade` instead.
 argument-hint: [<target-version>]
 allowed-tools: Read, Edit, Bash, AskUserQuestion

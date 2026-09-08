@@ -377,6 +377,17 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make tools-cooldown-audit` | `mise.toml` の全 pin を冷却期間に照らして棚卸しします。 | 週に一度 CI が回します。手元でも引けます。免除の無いまま窓の内側に居る pin で落ち、免除の期限切れは `make suppression-expiry` が見ます。 |
 | `make audit` | 依存監査ゲート（`pnpm audit`）。 | 修正版のある `high` / `critical` が 1 件でもあれば exit 1。判定と表の組み立ては `scripts/audit-gate` が持ちます。Trivy とは集計単位も参照する DB も違うため件数は一致せず、**突合して差分を潰そうとしません** —— どちらか一方でも閾値に達したものを blocking として扱います（[ADR 0110](../docs/adr/0110-security-operations.md) 3）。 |
 
+<!-- boilerplate-only:begin -->
+## `.makefiles/agents` 系
+
+### 開発の窓の観測関連
+
+| コマンド | 説明 | 補足 |
+| --- | --- | --- |
+| `make closed-loop-report` | 打刻された開発の窓の、段の区間と所見を報告します。 | 読むだけで何も刻みません。打刻は `.agents/closed-loop/marks.sh` が hook とスキルから行い、置き場は追跡外の `tmp/closed-loop/` です。**決定的な集計だけでモデルを使いません**（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 2）。窓が 0 件のときは「所見なし」ではなく 0 件であること自体を出します（[ADR 0157](../docs/adr/0157-inspection-declaration-discipline.md)）。**この機構はテンプレートから作った側へは配りません。** |
+
+<!-- boilerplate-only:end -->
+
 ## 補足
 
 - 既存グループファイルへのターゲット追加ならトップレベル編集は不要。ただし**新規** `.mk` ファイルを追加する場合は、

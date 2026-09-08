@@ -99,7 +99,8 @@ lock されている版、入っている版であって、単にレジストリ
 「妥当そうか」で流し読みした差分は何も捕まえない。**
 
 - **install / lifecycle の hook** が足された / 変えられた —— `preinstall` / `install` /
-  `postinstall`、`action.yml` に `run:` の段が付いた。**誰かがレビューする前に実行されるコード。**
+  `postinstall`、`action.yml` に `run:` の段が付いた。**誰かがレビューする前に実行されるコード。** <!-- skill-lint-ignore -->
+  （このファイルは上流の Action のもので、このリポジトリには在りようがない。）
 - **資格情報と秘密へのアクセス** —— `process.env`、npm の認証ファイル、クラウドの資格情報のパス、
   `GITHUB_TOKEN`、`ACTIONS_RUNTIME_TOKEN`、SSH 鍵、runner のメモリ。
 - **新しい外向きの通信**。とくに生の IP、短縮 URL、paste サービス、webhook の受け口、

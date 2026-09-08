@@ -67,6 +67,7 @@ Stamp the boundary this run crosses before anything else: `.agents/closed-loop/m
 - Options:
   - 「変更ファイル (HEAD-vs-working tree, 推奨)」 — `git diff --name-only` から `*.test.ts` / `*.test.tsx` を抽出。新規追加 (`--diff-filter=A`) も含める
   - 「ブランチ base 比較」 — base は `gh pr view --json baseRefName -q .baseRefName`、PR が無ければ `make -s base-branch` で解く（`gh repo view --json defaultBranchRef` は使わない）。その base との `git merge-base` 以降に touch されたテスト
+  - 「レビュー指摘への対応分」 — 前回レビューの最終コミット `...HEAD`。反映そのものが未レビューである（`AGENTS.md` の Review Phase Protocol）
   - 「特定パス / ディレクトリ (free-text)」
   - 「キャンセル」
 

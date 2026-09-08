@@ -526,6 +526,22 @@ So `/impl-review` audits the change and nothing else — it owns no test lens an
 it hands nothing off. `/test-review` and `/comment-sweep` are invoked in their own right, whether or
 not `/impl-review` runs.
 
+### The response to a review is itself unreviewed
+
+**A review that has been acted on is not a review of the acting.** The commits that answer a set of
+findings are new, unaudited work — written under time pressure, in code the reviewer just called out,
+by someone who now believes the area is understood. That is where defects concentrate, and the one
+review pass that would have caught them is the pass everybody considers already spent.
+
+So a fix-up round is a **new scope, declared as such**: `<the review's last commit>...HEAD`, not the
+original diff and not the whole branch. Say which findings it answers, and re-run the skills whose
+subject the response actually touched — a fix that only reworded a comment does not re-open
+`/impl-review`, and a fix that changed control flow does.
+
+The estimate rule above still governs: price each pass and ask. What changes here is only the default
+assumption, which is otherwise wrong in a way nobody notices — **"the review already happened" is a
+statement about the code that was reviewed, never about the code that replaced it.**
+
 <!-- boilerplate-only:begin -->
 ## Purity Sweep
 

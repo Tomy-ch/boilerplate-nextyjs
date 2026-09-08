@@ -48,8 +48,9 @@ gh api repos/<owner>/<repo>/compare/<baseline-sha>...<candidate-sha> --jq '.file
 **A `dist/` change with no corresponding `src/` change is the single strongest signal in this
 ecosystem.** Score it `3` and say so.
 
-Also read `action.yml` in the diff: a composite action gaining a `run:` step, or a change of `runs.main`,
-is code that executes with the job's credentials.
+Also read `action.yml` in the diff: a composite action gaining a `run:` step, or a change of `runs.main`, <!-- skill-lint-ignore -->
+is code that executes with the job's credentials. (That file belongs to the upstream Action, not to this
+repository, so it will never exist here; the suppression goes when this repo publishes an Action of its own.)
 
 ## Axis S — surface
 

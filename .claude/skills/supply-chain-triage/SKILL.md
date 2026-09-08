@@ -110,7 +110,8 @@ These are what a malicious publish has actually looked like. **Read for them spe
 skimmed for 「妥当そうか」 catches nothing.**
 
 - **Install / lifecycle hooks** added or altered — `preinstall` / `install` / `postinstall`, an
-  `action.yml` gaining a `run:` step. Code that executes before anyone reviews it.
+  `action.yml` gaining a `run:` step. Code that executes before anyone reviews it. <!-- skill-lint-ignore -->
+  (The file belongs to the upstream Action, never to this repository.)
 - **Credential and secret access** — `process.env`, the npm auth file, cloud credential paths,
   `GITHUB_TOKEN`, `ACTIONS_RUNTIME_TOKEN`, SSH keys, the runner's memory.
 - **New outbound network calls**, particularly to a raw IP, a URL shortener, a paste service, a

@@ -81,6 +81,7 @@
   - 「変更で触れたファイル」 —— 変更が触れたファイルを**丸ごと**掃く。base は `gh pr view --json baseRefName -q .baseRefName`、PR が無ければ `make -s base-branch` で解く（`gh repo view --json defaultBranchRef` は使わない）
   - 「1 カーネル / 1 feature」 —— 例: `src/adapters/`、`src/features/<name>/`
   - 「`scripts/` の 1 ツール」
+  - 「レビュー指摘への対応分」 — 前回レビューの最終コミット `...HEAD` が触れたファイルを、**丸ごと**。反映そのものが未レビューである（`AGENTS.md` の Review Phase Protocol）
   - 「パスを指定」
 - 「検出結果をどう適用しますか？」
   - 「判定の束ごとに確認して書き換える」 ← 既定

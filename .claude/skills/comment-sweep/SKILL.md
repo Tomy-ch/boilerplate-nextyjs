@@ -115,6 +115,7 @@ already answers; skip the call entirely when both are fixed.
   - 「変更で触れたファイル」 — sweep the files a change touched, **whole**. Resolve the base with `gh pr view --json baseRefName -q .baseRefName`, falling back to `make -s base-branch`; never `gh repo view --json defaultBranchRef`
   - 「1 カーネル / 1 feature」 — e.g. `src/adapters/`, `src/features/<name>/`
   - 「`scripts/` の 1 ツール」
+  - 「レビュー指摘への対応分」 — 前回レビューの最終コミット `...HEAD` が触れたファイルを、**丸ごと**。反映そのものが未レビューである（`AGENTS.md` の Review Phase Protocol）
   - 「パスを指定」
 - 「検出結果をどう適用しますか？」
   - 「判定の束ごとに確認して書き換える」 ← default

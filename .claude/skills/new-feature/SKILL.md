@@ -115,6 +115,8 @@ passes rather than until it is right.
 
 ## Step 5. Split (order step 4)
 
+The review has settled the look, so stamp both boundaries this step sits between: `.agents/closed-loop/marks.sh planApprovedAt` then `.agents/closed-loop/marks.sh implStartedAt`. <!-- boilerplate-only:line -->
+
 Move what the review settled into its layers. Decide placement from `docs/playbook.md`'s reverse
 index and the kernel READMEs; carry the criteria as a reference path to the ADR that owns it rather
 than restating it in code or in the README.

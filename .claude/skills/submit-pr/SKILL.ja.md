@@ -208,6 +208,8 @@ HTML コメントのプレースホルダは除去する。テンプレートが
 
 ## Step 7. push
 
+PR が出来たら、この段が越えた境界を打刻する: `.agents/closed-loop/marks.sh prOpenedAt`。 <!-- boilerplate-only:line -->
+
 ```sh
 # 初回 push（upstream 無し）
 git push -u origin <branch>

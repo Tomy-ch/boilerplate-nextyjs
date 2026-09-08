@@ -97,6 +97,8 @@ script 側が `APP_ENV` を `local` に既定しているので、前置きは�
 
 ## Step 5. 分離（工程 4）
 
+レビューが見た目を確定させたので、この段が挟む 2 つの境界を打刻する: `.agents/closed-loop/marks.sh planApprovedAt` のあと `.agents/closed-loop/marks.sh implStartedAt`。 <!-- boilerplate-only:line -->
+
 レビューが確定させたものを層へ移す。置き場は `docs/playbook.md` の逆引きと各カーネル README から
 決める。基準はコードにも README にも書き写さず、それを所有する ADR への参照パスとして持つ。
 

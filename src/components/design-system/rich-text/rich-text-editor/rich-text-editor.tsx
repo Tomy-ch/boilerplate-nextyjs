@@ -98,9 +98,10 @@ function toolbarStopIndex(
   buttons: readonly HTMLButtonElement[],
   active: EventTarget | undefined,
 ): number {
+  // `active` は `EventTarget` で `buttons` の要素型と異なるため、`indexOf` は型が合わない。
   return Math.max(
     0,
-    buttons.indexOf(active),
+    buttons.findIndex((button) => button === active),
   );
 }
 

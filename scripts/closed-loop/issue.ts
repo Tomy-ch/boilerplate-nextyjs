@@ -90,7 +90,7 @@ function anomalyLines(anomalies: readonly { kind: string; detail: string }[]): s
  * 落とした節は**落としたと書きます**。黙って省くと、書かれなかったことと落としたことが
  * 同じ見た目になり、関門が働いた形跡が残りません。
  */
-function readingLines(summary: Summary | undefined, gap: ReadingGap): string[] {
+function readingLines(summary: Summary | undefined, gap: ReadingGap): readonly string[] {
   if (summary === undefined) {
     return gapNote(gap);
   }

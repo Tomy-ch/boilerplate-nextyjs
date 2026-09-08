@@ -15,7 +15,7 @@
  * それが GitHub であることを意味しないためで、判断できないものを既定へ倒すと
  * 「送ったつもりで届いていない」か「知らない先へ送る」のどちらかになります。
  */
-export function toRepoSlug(url: string): RepoSlug | null {
+export function toRepoSlug(url: string): string | null {
   const trimmed = url.trim();
 
   if (trimmed === "") {

@@ -134,14 +134,13 @@ if (kind === "adapter" && options.length > 0) {
   fail(`${kind} は配置オプションを取りません。${USAGE}`);
 }
 
-function generationInput(): GenerationInput {
-  if (kind === "feature") return featureInput(name, options);
-  if (kind === "component") return componentInput(name, options);
+let input: GenerationInput = { kind, name };
 
-  return { kind, name };
+if (kind === "feature") {
+  input = featureInput(name, options);
+} else if (kind === "component") {
+  input = componentInput(name, options);
 }
-
-const input: GenerationInput = generationInput();
 
 const files = planGeneration(input);
 

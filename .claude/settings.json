@@ -160,6 +160,7 @@
       "Bash(make base-merge)",
       "Bash(make base-merge *)",
       "Bash(make closed-loop-report)",
+      "Bash(make closed-loop-send-dry)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
       "Bash(make gh-login *)",

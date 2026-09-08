@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  COUNTED_MARKS,
   countOf,
+  isSubstantive,
   MARK_ORDER,
+  markAt,
   NO_WINDOWS_MESSAGE,
   toAnomalies,
   toPhases,
@@ -122,5 +125,41 @@ describe("NO_WINDOWS_MESSAGE", () => {
   // ----- 正常系 -----
   it("0 件が「異常なし」ではないことを述べる", () => {
     expect(NO_WINDOWS_MESSAGE).toContain("1 件もありません");
+  });
+});
+
+describe("markAt", () => {
+  // ----- 正常系 -----
+  it("繰り返し刻まれた打刻は最初の 1 つを返す", () => {
+    expect(markAt(windowOf({ commitAt: [10, 20, 30] }), "commitAt")).toBe(10);
+  });
+
+  // ----- 異常系 -----
+  it("刻まれていなければ null を返す", () => {
+    expect(markAt(windowOf({}), "commitAt")).toBeNull();
+  });
+});
+
+describe("COUNTED_MARKS", () => {
+  // ----- 正常系 -----
+  it("窓の開閉を数えない", () => {
+    expect(COUNTED_MARKS).not.toContain("openedAt");
+    expect(COUNTED_MARKS).not.toContain("closedAt");
+  });
+});
+
+describe("isSubstantive", () => {
+  // ----- 正常系 -----
+  it("段の境界を越えた窓を通す", () => {
+    expect(isSubstantive(windowOf({ openedAt: [0], commitAt: [10] }))).toBe(true);
+  });
+
+  // ----- 異常系 -----
+  it("開いて閉じただけの窓を通さない", () => {
+    expect(isSubstantive(windowOf({ openedAt: [0], closedAt: [10] }))).toBe(false);
+  });
+
+  it("打刻が無い窓を通さない", () => {
+    expect(isSubstantive(windowOf({}))).toBe(false);
   });
 });

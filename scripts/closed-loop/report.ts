@@ -1,6 +1,14 @@
 // 集計の結果を人が読む形にする。判定は [phases.ts](phases.ts) が持ち、ここは並べ方だけを持つ。
 
-import { countOf, NO_WINDOWS_MESSAGE, toAnomalies, toPhases, type WindowMarks } from "./phases.js";
+import { humanize } from "./format.js";
+import {
+  COUNTED_MARKS,
+  countOf,
+  NO_WINDOWS_MESSAGE,
+  toAnomalies,
+  toPhases,
+  type WindowMarks,
+} from "./phases.js";
 import type { TranscriptCounts } from "./transcript.js";
 
 /**
@@ -12,24 +20,6 @@ import type { TranscriptCounts } from "./transcript.js";
  */
 export const NO_TRANSCRIPT_MESSAGE =
   "セッションの記録を 1 行も読めませんでした。置き場が無いか、この機械の記録ではありません";
-
-/** 回数として意味を持つ打刻。イベントの列であることをそのまま所見にする。 */
-const COUNTED_MARKS: readonly string[] = ["commitAt", "reviewStartedAt"];
-
-/** 秒を、桁を見て読みやすい単位へ落とす。 */
-function humanize(seconds: number): string {
-  if (seconds < 0) {
-    return `${seconds} 秒`;
-  }
-  if (seconds < 90) {
-    return `${seconds} 秒`;
-  }
-  if (seconds < 5400) {
-    return `${Math.round(seconds / 60)} 分`;
-  }
-
-  return `${(seconds / 3600).toFixed(1)} 時間`;
-}
 
 /**
  * 1 つの窓の報告。

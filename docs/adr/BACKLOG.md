@@ -376,6 +376,6 @@ Go 側の本丸は **spec 駆動 scaffold + 層別監査体系**。今移植す�
 | 運用 | `resolve-merge` / `new-issue` / `supply-chain-triage` |
 | 宣言と実物の突合 | `back-prop` + agent `drift-detector`（GB-2）/ `verify-spec` + agent `spec-validator`（GB-3） |
 | 語彙と接触点 | `glossary` / `context-map` / `context-map-audit`（IM-48 は「採る」で決着） |
-| エージェント環境のループ | `closed-loop`（[0160](0160-agent-environment-loop.md) / [0161](0161-development-window-as-feedback-unit.md)）。宣言・打刻・集計まで。**送出は未着手** |
+| エージェント環境のループ | `closed-loop`（[0160](0160-agent-environment-loop.md) / [0161](0161-development-window-as-feedback-unit.md)）。宣言・打刻・集計・送出。**記録の読解（決定 2 の後半）は未着手** |
 
 **推奨着手順序**(BACKLOG 依存順): A1 決定 → GB-4 翻案 / A3・A5 決定(層別 README 整備)→ GB-1・GB-2・GB-7 / B8 決定 → GB-5。各グループ着手時は該当枠が Accepted であることと Instruction Priority(ADR > BACKLOG > agent config)を再確認する。

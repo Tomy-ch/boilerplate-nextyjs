@@ -45,6 +45,16 @@ export const MARK_ORDER: readonly string[] = [
 ];
 
 /**
+ * 回数として意味を持つ打刻。
+ *
+ * @remarks
+ * 打刻はイベントの列なので、回数もそのまま所見になります —— `commitAt` の回数はその窓の
+ * コミット数、`reviewStartedAt` の回数はレビューを回した回数です。**窓の開閉は数えません**。
+ * 1 回であることが決まっており、数が所見にならないためです。
+ */
+export const COUNTED_MARKS: readonly string[] = ["commitAt", "reviewStartedAt"];
+
+/**
  * 窓が 1 つも挙がらなかったときに出す行。
  *
  * @remarks
@@ -55,8 +65,14 @@ export const MARK_ORDER: readonly string[] = [
 export const NO_WINDOWS_MESSAGE =
   "窓が 1 件もありません。まだ打刻されていないか、走査の対象が動いた可能性があります";
 
-/** その打刻が最初に刻まれた時刻。無ければ null。 */
-function firstAt(window: WindowMarks, name: string): number | null {
+/**
+ * その打刻が最初に刻まれた時刻。無ければ null。
+ *
+ * @remarks
+ * 繰り返し刻まれた打刻でも**最初の 1 つ**を返します。段の境界を越えた時刻はその 1 回目で、
+ * 2 回目以降は同じ段の中の出来事です。何回刻まれたかは `countOf` が持ちます。
+ */
+export function markAt(window: WindowMarks, name: string): number | null {
   return window.marks[name]?.[0] ?? null;
 }
 
@@ -69,7 +85,7 @@ function firstAt(window: WindowMarks, name: string): number | null {
  */
 export function toPhases(window: WindowMarks): readonly Phase[] {
   const present = MARK_ORDER.flatMap((name) => {
-    const at = firstAt(window, name);
+    const at = markAt(window, name);
 
     return at === null ? [] : [{ name, at }];
   });
@@ -101,7 +117,7 @@ export function toPhases(window: WindowMarks): readonly Phase[] {
  */
 export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   const found: Anomaly[] = [];
-  const stamped = MARK_ORDER.filter((name) => firstAt(window, name) !== null);
+  const stamped = MARK_ORDER.filter((name) => markAt(window, name) !== null);
 
   // 窓の開閉そのものは段の境界ではない。それしか無い窓は「飛ばした」のではなく、
   // 何も起きなかった窓である。両者を同じ所見にすると、後者が 6 段ぶんの雑音を出す。
@@ -111,14 +127,14 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
     found.push({ kind: "打刻が開始だけ", detail: "窓は開いたが、どの段の境界も越えていない" });
   }
 
-  if (firstAt(window, "closedAt") === null) {
+  if (markAt(window, "closedAt") === null) {
     found.push({ kind: "窓が開いたまま", detail: "closedAt がない。集計の対象は閉じた窓だけ" });
   }
 
   let previous: { name: string; at: number } | null = null;
 
   for (const name of MARK_ORDER) {
-    const at = firstAt(window, name);
+    const at = markAt(window, name);
 
     if (at === null) {
       continue;
@@ -141,9 +157,7 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   const skipped =
     crossed.length === 0
       ? []
-      : MARK_ORDER.slice(firstIndex + 1, lastIndex).filter(
-          (name) => firstAt(window, name) === null,
-        );
+      : MARK_ORDER.slice(firstIndex + 1, lastIndex).filter((name) => markAt(window, name) === null);
 
   if (skipped.length > 0) {
     found.push({ kind: "段が飛んでいる", detail: `刻まれていない: ${skipped.join(" / ")}` });
@@ -152,13 +166,24 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   return found;
 }
 
-/**
- * その名前が刻まれた回数。
- *
- * @remarks
- * 打刻はイベントの列なので、回数もそのまま所見になります —— `commitAt` の回数はその窓の
- * コミット数、`reviewStartedAt` の回数はレビューを回した回数です。
- */
+/** その名前が刻まれた回数。何を数えると所見になるかは `COUNTED_MARKS` が持つ。 */
 export function countOf(window: WindowMarks, name: string): number {
   return window.marks[name]?.length ?? 0;
+}
+
+/**
+ * 送出に値する窓か。
+ *
+ * @remarks
+ * **開いて閉じただけの窓を外へ出しません。**段の境界を 1 つも越えていない窓は、何も起きな
+ * かった窓であって所見ではありません。`/clear` はそれだけで窓を 1 つ作るので、これを通すと
+ * **中身の無い issue が起動回数ぶん立ちます**。
+ *
+ * 閉じているかどうかはここでは見ません —— 開いたままの窓を送らないのは送出側の判断で、
+ * 理由が違うためです（半分の窓は遅れた窓より悪い）。
+ */
+export function isSubstantive(window: WindowMarks): boolean {
+  return MARK_ORDER.some(
+    (name) => name !== "openedAt" && name !== "closedAt" && markAt(window, name) !== null,
+  );
 }

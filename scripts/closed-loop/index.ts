@@ -15,7 +15,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { errorMessage } from "../lib/error-message.js";
-import { MARK_ORDER, type WindowMarks } from "./phases.js";
+import { collectWindows, toWorktreePaths, type MarksReader } from "./marks-store.js";
 import { reportAll, reportTranscript } from "./report.js";
 import { countTranscript, countUnparsable, neverInvoked, toProjectSlug } from "./transcript.js";
 
@@ -27,37 +27,23 @@ const SKILLS_DIR = ".claude/skills";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..");
 
-/**
- * 1 つの窓のディレクトリを読む。
- *
- * @remarks
- * 読むのは `MARK_ORDER` に在る名前だけです。知らない名前を拾うと、打ち間違いが打刻として
- * 集計に混ざります —— 名前の集合が閉じているのは刻む側と同じ理由です。
- */
-function readWindow(root: string, id: string): WindowMarks {
-  const dir = path.join(root, MARKS_DIR, id);
-  const marks: Record<string, readonly number[]> = {};
+const reader: MarksReader = {
+  listWindowIds: (root) => {
+    const dir = path.join(root, MARKS_DIR);
 
-  for (const name of MARK_ORDER) {
-    const file = path.join(dir, name);
+    return fs.existsSync(dir)
+      ? fs
+          .readdirSync(dir, { withFileTypes: true })
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => entry.name)
+      : [];
+  },
+  readMark: (root, id, name) => {
+    const file = path.join(root, MARKS_DIR, id, name);
 
-    if (!fs.existsSync(file)) {
-      continue;
-    }
-
-    const epochs = fs
-      .readFileSync(file, "utf8")
-      .split("\n")
-      .map((line) => Number.parseInt(line.trim(), 10))
-      .filter((value) => Number.isFinite(value));
-
-    if (epochs.length > 0) {
-      marks[name] = epochs;
-    }
-  }
-
-  return { id, marks };
-}
+    return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
+  },
+};
 
 /**
  * このリポジトリの作業ツリー。
@@ -72,34 +58,15 @@ function readWindow(root: string, id: string): WindowMarks {
  */
 function workingTreeRoots(): readonly string[] {
   try {
-    return execFileSync("git", ["worktree", "list", "--porcelain"], {
-      cwd: REPO_ROOT,
-      encoding: "utf8",
-    })
-      .split("\n")
-      .filter((line) => line.startsWith("worktree "))
-      .map((line) => line.slice("worktree ".length));
+    return toWorktreePaths(
+      execFileSync("git", ["worktree", "list", "--porcelain"], {
+        cwd: REPO_ROOT,
+        encoding: "utf8",
+      }),
+    );
   } catch {
     return [REPO_ROOT];
   }
-}
-
-/** 窓を古い順に並べる。id は `w<epoch>-<suffix>` なので、その epoch で並ぶ。 */
-function listWindows(roots: readonly string[]): readonly WindowMarks[] {
-  return roots
-    .flatMap((root) => {
-      const dir = path.join(root, MARKS_DIR);
-
-      if (!fs.existsSync(dir)) {
-        return [];
-      }
-
-      return fs
-        .readdirSync(dir, { withFileTypes: true })
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => readWindow(root, entry.name));
-    })
-    .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 /**
@@ -146,7 +113,7 @@ function declaredSkills(): readonly string[] {
 function main(): void {
   const roots = workingTreeRoots();
 
-  for (const line of reportAll(listWindows(roots))) {
+  for (const line of reportAll(collectWindows(roots, reader))) {
     console.log(line);
   }
 

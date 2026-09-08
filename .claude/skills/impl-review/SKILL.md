@@ -37,9 +37,47 @@ run in its own right beside this one, per the Review Phase Protocol in `AGENTS.m
 that offers to run the next one makes the subjects stop being independently answerable, and lets a
 drift in one skill's question silently drop the other two from every flow that went through it.
 
+## Precedence — findings are ranked, not just collected
+
+Reviewers disagree, overlap, and report the same fact in two vocabularies. Without a ranking the
+report is a flat list in which a naming nit outranks a kernel placed on the wrong side of a boundary
+because its finder called it "high". The tiers in the Step 2 table are that ranking:
+
+| Tier | Lenses | What it decides |
+| --- | --- | --- |
+| 1 | `architecture` | what the code should *be* |
+| 2 | `security`, `correctness` | whether what it is, works |
+| 3 | `runtime-gap`, `cohesion` | whether it holds up in the real system, and whether the unit is one anybody can keep |
+
+**A change at a higher tier propagates downward; a lower tier does not, as a rule, act on a higher
+one.** Moving a responsibility into another kernel invalidates the behavior verified against it where
+it stood; a seam that would split one file never justifies moving that responsibility. Four
+consequences follow, and each of them is a rule, not a suggestion:
+
+1. **Order the report by tier, then by severity within a tier** — never by severity alone. A tier-3
+   `high` sits below an architecture `medium`, because the architecture finding may delete the code
+   the lower one is about.
+2. **Mark a lower-tier finding 保留 while a higher-tier finding it depends on is unresolved.** Report
+   it, say what it is waiting on, and do not present it as actionable. Re-check it after the
+   higher-tier decision lands; it often disappears.
+3. **When two tiers report the same fact, keep the higher tier's framing and fold the lower one in as
+   corroboration** — one finding, not two. Two entries for one fact reads as two problems and
+   double-counts the change's apparent risk.
+4. **Agreement among lenses at the same tier raises confidence; agreement from a lower tier does
+   not raise a higher finding's severity.** Two tier-2 lenses independently reaching the same defect
+   is strong evidence — say so. A tier-3 lens agreeing with a tier-1 finding adds nothing to its
+   severity, though it may be cited as support.
+
+**The exception is criticality, and it is yours to notice, not to resolve.** A lower-tier finding
+can be the more urgent one — an exploitable hole surfaced by the `runtime-gap` lens does not wait for
+a placement debate. When a lower-tier finding looks critical enough to outrank the tier above it,
+**do not silently reorder: present both and ask the user.** The ranking exists so that ordinary
+disagreements resolve without a human; a finding that breaks the ranking is exactly the case a human
+should see.
+
 ## Step 0 — Confirm Scope
 
-Call `AskUserQuestion` immediately. Default-detect scope by checking branch vs base — get the base with `gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'` (this repo's base is a `release/*` branch); if there are unmerged commits, default to "changed files", otherwise "whole working tree / specific paths".
+Call `AskUserQuestion` immediately. Default-detect scope by checking branch vs base. Resolve the base the way `commit` and `submit-pr` already do — `gh pr view --json baseRefName -q .baseRefName`, and `make -s base-branch` when no PR exists. Never `gh repo view --json defaultBranchRef`: `.makefiles/README.md` owns why, and a base resolved that way silently widens the diff by a release generation. If there are unmerged commits, default to "changed files", otherwise "whole working tree / specific paths".
 
 ```text
 質問: どの範囲をレビューしますか？
@@ -90,13 +128,13 @@ audits the change and nothing else").
 
 Spawn all finders concurrently (issue every `Agent` call in a single message). Pass the Step 0 user-selected reviewer model to every `Agent` call via the `model` parameter (omit only when *auto* already resolves to the agent-file default). Every finder runs `adversarial-reviewer` — one per lens, `agentType: "adversarial-reviewer"`, `label` like `find:security`.
 
-| Finder | Agent | Run when |
-| --- | --- | --- |
-| `correctness` | adversarial-reviewer | always |
-| `security` | adversarial-reviewer | always (especially when a Route Handler / Server Action / `src/proxy.ts` / auth / a generated API request-response type is touched) |
-| `architecture` | adversarial-reviewer | always |
-| `cohesion` | adversarial-reviewer | always |
-| `runtime-gap` | adversarial-reviewer | when a Route Handler / Server Action / `src/proxy.ts` / Provider mount / generated API artifact is touched — the seams a mocked component test does not exercise |
+| Finder | Tier | Agent | Run when |
+| --- | --- | --- | --- |
+| `correctness` | 2 | adversarial-reviewer | always |
+| `security` | 2 | adversarial-reviewer | always (especially when a Route Handler / Server Action / `src/proxy.ts` / auth / a generated API request-response type is touched) |
+| `architecture` | 1 | adversarial-reviewer | always |
+| `cohesion` | 3 | adversarial-reviewer | always |
+| `runtime-gap` | 3 | adversarial-reviewer | when a Route Handler / Server Action / `src/proxy.ts` / Provider mount / generated API artifact is touched — the seams a mocked component test does not exercise |
 
 **No lens here audits the tests or the comments** (Core Idea, "This skill audits the change and
 nothing else"). When a lens surfaces an untested change or a comment's content in passing, say so in
@@ -110,7 +148,7 @@ The discipline that keeps it from becoming taste: every finding must **name two 
 
 ## Step 3 — Adversarial Verify
 
-Collect all findings and **dedup** by (file, line, claim). For each surviving finding, spawn one `review-verifier` subagent (concurrently), handing it the single finding + the base ref. Use `agentType: "review-verifier"`, `label` like `verify:<file>`, and the Step 0 user-selected reviewer `model` (same reviewer ≠ implementer rule).
+Collect all findings and **dedup** by (file, line, claim). When two lenses report the same fact, do not keep both: fold the lower tier's entry into the higher tier's framing as corroboration, so one fact stays one finding. For each surviving finding, spawn one `review-verifier` subagent (concurrently), handing it the single finding + the base ref. Use `agentType: "review-verifier"`, `label` like `verify:<file>`, and the Step 0 user-selected reviewer `model` (same reviewer ≠ implementer rule).
 
 - Keep **CONFIRMED** and **PLAUSIBLE** findings. Drop **REFUTED** (but keep a count for the report).
 - For a critical/high finding where a single verdict feels shaky, spawn 2–3 verifiers and go by majority — diversity beats one opinion on the findings that matter.
@@ -187,7 +225,7 @@ so the omission is visible rather than inferred from a `lens:` list that never m
 soften it into a recommendation — whether to run the other two is the user's call under the Review
 Phase Protocol, and this line only records what this run did not cover.
 
-Order by severity, CONFIRMED before PLAUSIBLE. Always state what runtime checks ran and what was
+Order by tier, then by severity within a tier, CONFIRMED before PLAUSIBLE — never by severity alone. A finding held behind an unresolved higher-tier one is marked 保留 with what it is waiting on. Always state what runtime checks ran and what was
 skipped — silent omission reads as "covered everything" when it was not.
 
 ## Step 6 — Post Findings as Inline PR Comments (default; opt out with `--no-comment`)
@@ -266,6 +304,8 @@ The permission layer is not what makes this safe — a pattern rule cannot tell 
 - ✅ When a generated artifact changed, widen the *finders'* read scope (Step 1) to every consumer that imports it — Step 4 does not widen; it verifies the paths it can reach.
 - ✅ State a path as 到達不能 when the missing backend blocks it — never simulate it, never call it passing.
 - ✅ Confirm with the user before running a Server Action that would mutate shared backend state.
+- ✅ Rank findings by tier before severity, fold a duplicated fact into the higher tier's framing, and mark a blocked lower-tier finding 保留 rather than presenting it as actionable.
+- ❌ Silently reorder a lower-tier finding above the tier that outranks it — present both and ask the user.
 - ✅ State on the `未監査の観点:` line of every report that the tests and the comment stock were not audited here.
 - ✅ By default, post the CONFIRMED + PLAUSIBLE findings to the branch's PR as inline review comments (Step 6); suppress with `--no-comment` or when no open PR exists.
 - ✅ Confirm once before posting to the PR (outward action); anchor each comment to its `path:line`, fold off-diff findings into the review summary.
@@ -286,6 +326,7 @@ The permission layer is not what makes this safe — a pattern rule cannot tell 
 - [ ] Reviewer model selected in Step 0 and verified ≠ implementer model (warn + confirm if same).
 - [ ] Finders fanned out concurrently, one `adversarial-reviewer` per lens — no test lens, no comment lens.
 - [ ] No other skill invoked from this run.
+- [ ] Report ordered by tier then severity; a duplicated fact folded once into the higher tier; blocked lower-tier findings marked 保留.
 - [ ] Every finding independently verified; REFUTED dropped (count kept).
 - [ ] Step 4-1 `pnpm build` run when app code was touched; Step 4-2 curl run when a request-time seam was; 到達不能 paths named; a mutating Server Action confirmed before running.
 - [ ] Single Japanese report: CONFIRMED → PLAUSIBLE, runtime coverage stated, `未監査の観点:` line present.

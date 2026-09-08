@@ -63,7 +63,7 @@ semantic findings point at. The reviewer subagents stay read-only; the orchestra
 - Question: 「test-review の対象スコープを指定してください」
 - Options:
   - 「変更ファイル (HEAD-vs-working tree, 推奨)」 — `git diff --name-only` から `*.test.ts` / `*.test.tsx` を抽出。新規追加 (`--diff-filter=A`) も含める
-  - 「ブランチ base 比較」 — `git merge-base` で base を解決し、その間に touch されたテスト
+  - 「ブランチ base 比較」 — base は `gh pr view --json baseRefName -q .baseRefName`、PR が無ければ `make -s base-branch` で解く（`gh repo view --json defaultBranchRef` は使わない）。その base との `git merge-base` 以降に touch されたテスト
   - 「特定パス / ディレクトリ (free-text)」
   - 「キャンセル」
 

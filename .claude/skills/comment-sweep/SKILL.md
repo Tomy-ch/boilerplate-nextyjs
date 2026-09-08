@@ -109,7 +109,7 @@ One `AskUserQuestion` call carrying **two** questions. Skip whichever one the ar
 already answers; skip the call entirely when both are fixed.
 
 - 「comment-sweep の対象スコープを選んでください」
-  - 「変更で触れたファイル」 — sweep the files a change touched, **whole**
+  - 「変更で触れたファイル」 — sweep the files a change touched, **whole**. Resolve the base with `gh pr view --json baseRefName -q .baseRefName`, falling back to `make -s base-branch`; never `gh repo view --json defaultBranchRef`
   - 「1 カーネル / 1 feature」 — e.g. `src/adapters/`, `src/features/<name>/`
   - 「`scripts/` の 1 ツール」
   - 「パスを指定」
@@ -143,6 +143,42 @@ finishes, and a half-finished queue is worse than none — the reader cannot tel
 3. Read every file in scope, comments **and** the code under them. A jurisdiction call cannot be made
    from the comment alone: whether the premise sits at this call site is a fact about the code.
 
+## Step 1.5. Scan for repetition across files (mechanical)
+
+Pass 2 asks its question of one file's stock. The same Why written once in every `adapters` client,
+once in every feature's `actions.ts`, once in every `scripts/` tool is invisible to it — no per-file
+pass can see across files, and every copy already passed jurisdiction on its own, which is why nobody
+had noticed.
+
+Collect the comment lines of every file in scope, normalise away the leading marker and indentation,
+drop lines shorter than a clause, and report any text that appears at declarations in **more than one
+file**:
+
+```sh
+for f in <files in scope>; do
+  grep -hE '^[[:space:]]*(//|\*|#)' "$f" \
+    | sed -E 's@^[[:space:]]*(//+|\*|#)[[:space:]]?@@' \
+    | awk -v f="$f" 'length($0) > 30 { print f "\t" $0 }'
+done | sort -t$'\t' -k2 \
+  | awk -F'\t' '{ n[$2]++; src[$2] = src[$2] "\n    " $1 }
+                 END { for (k in n) if (n[k] > 1) print "[" n[k] "] " k src[k] }'
+```
+
+The `grep` is load-bearing: without it the pipeline clusters code and blank lines too and reports one
+enormous meaningless cluster. The `\*` arm catches JSDoc continuation lines, which is where this
+repository's rationale usually sits.
+
+The exact pipeline matters less than the property: it is **deterministic and cheap**, so it runs on
+every sweep rather than when someone suspects duplication. Tune the length floor to the scope — too
+low and boilerplate one-liners dominate, too high and a one-line Why slips through.
+
+**Scan only the files Step 0 resolved.** Widening it to the repository breaks the one-directory rule
+and produces clusters nobody in this run can act on.
+
+Each cluster is then resolved by the Step 2 verdicts: jurisdiction first — usually 移設 or 書換 at
+every site — and 集約 across files only when one declaration genuinely owns the concept. **A cluster
+is a finding even when every member is individually correct.** That is the whole point.
+
 ## Step 2. Classify every comment in scope
 
 Run **both passes** over the same files. They find different things and neither substitutes for the
@@ -159,7 +195,7 @@ Five verdicts. The first three already exist; the last two are what this skill a
 | **削除** | 1 | How-narration, restatement, 経緯, tautology, a marker the code already satisfies | Remove |
 | **書換** | 1 | Right content, wrong wording — drifted, ambiguous, or longer than the fact it delivers | Rewrite in place |
 | **移設** | 1 | Correct and worth keeping, but it fails the 前提の所在 test and the 管轄 test names a document | Move it to that document; leave the operative residue and a one-line reference **to the README** |
-| **集約** | 2 | The same content is carried at several sites in one file (重複 / 分散 / 総量過多). **Not raised for a general-purpose part's public doc vs. its own README** — see the exception above | One site keeps it; the rest shrink to a pointer |
+| **集約** | 2 / 1.5 | The same content is carried at several sites — in one file, or across the files in scope when Step 1.5 clustered it (重複 / 分散 / 総量過多). **Not raised for a general-purpose part's public doc vs. its own README** — see the exception above | One site keeps it; the rest shrink to a pointer |
 
 **The 移設 test**: could someone make this statement false without editing this declaration? If yes,
 nobody here can verify it and nothing will flag it when it turns false. Ask where it *would* be
@@ -186,7 +222,9 @@ decidable as one unit. A 集約 missing any of it is not reviewable:
    shrunk sites gave up; a consolidation that quietly drops one member's distinct fact is a deletion
    wearing another verdict's name.
 5. **Each pointer** — the exact residue left at every other site. A bare 「詳細は上記参照」 is not a
-   pointer; name the declaration, so a reader who jumped straight to that line can navigate.
+   pointer; name the declaration, so a reader who jumped straight to that line can navigate. When the
+   owning site is in another file, name the file and the declaration — the same shape `docs/rules.md`
+   already requires of a value whose concept one module owns.
 6. **確度: high / medium / low** — load-bearing, not decorative. 自動適用 applies a 集約 only at
    `high`, so rate honestly: `high` means you can point to the sentences that state the same fact and
    to the declaration that owns the concept. Uncertainty about which site should win is `medium` at
@@ -264,6 +302,9 @@ written. Three exclusions come off that set first:
   the residue at a document that never says it. When the check fails, report the finding instead of
   applying it. A 移設 that survives the check writes no document — it is really a shortening down to
   the residue plus a reference.
+- **A 集約 whose members span more than one file is reported, never applied.** A cross-file
+  consolidation edits files the reader of any one of them cannot see, and picking the owning
+  declaration across a kernel is the call most likely to be wrong. 確認して適用 is where it lands.
 - **A 集約 is applied only at `確度: high`.** A 書換 risks the wrong wording at one site; a
   consolidation additionally picks *which declaration owns the concept*, and it has already shrunk
   the other sites by the time a wrong pick becomes visible. That is markedly harder to undo, so
@@ -320,6 +361,10 @@ pnpm md-lint
 Then re-read the diff of the touched files and confirm only comments and documents changed. Behavior
 must be untouched; if `git diff` shows a statement changed, that is a defect in this run.
 
+**After a cross-file 集約, read every file it touched and follow each pointer from the shrunk side
+back to the owning declaration** — a pointer that names a declaration a reader cannot reach from
+where they are standing is the failure this verdict introduces.
+
 **After a 集約, read the whole file top to bottom** rather than each edited site in isolation — the
 finding was about the file, so the check has to be too. Two failures show up only this way: the
 surviving site does not actually carry what the shrunk ones gave up, and a pointer names a
@@ -327,7 +372,9 @@ declaration a reader cannot find from where they are standing.
 
 ## Step 6. Report
 
-State per file what was 維持 / 削除 / 書換 / 移設 / 集約, and where each relocation landed. **Count a
+State per file what was 維持 / 削除 / 書換 / 移設 / 集約, and where each relocation landed. Report the
+cross-file cluster count from Step 1.5 separately, including the clusters that were left alone — a
+cluster nobody acted on is the finding most likely to recur. **Count a
 集約 once, not once per member**, and report the member count beside it so the size of the edit is
 visible before anyone approves it. Say plainly what
 was **not** swept — a directory left for later, a finding deferred because it needed a design call.

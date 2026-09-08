@@ -185,7 +185,7 @@ i18n / a11y / パフォーマンス予算 / ブラウザサポート 等、boile
 
 ### 機械的強制が文書に追いついていない箇所
 
-- **`app` の element 分割のうち、`route-segment` だけが機械で強制されていない。** [0025](0025-app-layer-elements.md) は `app` を 4 element(`route-segment` / `route-handler` / `server-action` / `metadata`)に分け、それぞれ許可 import 先を定める。`architecture.ts` の `APP_ELEMENTS` はこのうち後ろの 3 つをファイル名で分類し、層の許可から UI 部品・横断状態・feature の内側を削る。残る `route-segment` は `app` の粒度で検査され、`page.dev.tsx` が `server config` を直読する形が実在する。境界検査の要素はディレクトリに対応するため名前で分けるには層の許可を後から削るしかなく、**削る側の集合が ADR の表と実装で食い違っている**(表が `components` / `errors` / client 側 `config` を挙げていない)。表を実態へ合わせるのが先で、それまでは意味的監査(GB-1)と人のレビューが拾う。**`server-action` の `config` も削れていない** —— [0025](0025-app-layer-elements.md) が禁じるのは `server config` の直読で、`actions.ts` が読んでいる `http.client` は `NEXT_PUBLIC` の公開定数であり、層の粒度ではその 2 つを分けられない。`route-segment` の `observability` と `config` も同型で、[0021](0021-frontend-responsibility.md) が許したのは計装の mount と Next.js の規約が要求する値だけだが、その限定は import 先の集合として表せない
+- **`app` の element 分割は、行ごとに強制の届き方が違う。** どの行がどこまで強制されるか、`import` 先の集合として書けないものが何かは [0025](0025-app-layer-elements.md) が表で持つ（`route-handler` は全部 / `server-action` は `config` が通る / `metadata` は `adapters` が 5 ファイルすべてで通る / `route-segment` は要素として宣言が無く層の粒度）。**残る 2 つは実装の不足ではなく表現できないもの**である —— `server config` と `NEXT_PUBLIC` の公開定数は同じ `config` に居り、`route-segment` の `observability` / `config` の限定は「何を import してよいか」ではなく「どう使ってよいか」である。**意味的監査（下記）が受け持つ範囲であり、それが在るまでは人のレビューが拾う。**
 
 ---
 

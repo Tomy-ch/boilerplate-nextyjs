@@ -30,13 +30,35 @@ Pages Router(`pages/` / `pages/api`)は採用しない。裏取り: 公式 doc `
 
 **`actions.ts` の置き場は、主体の断言が要るかで決まる。**要るものは `app/server-action`、要らないものは `features/<name>/<screen>/actions.ts` に留まる([0027](0027-directory-structure.md))。同じ file 名が 2 か所に現れるのは、element 判定が **path と filename の組**で成立するためで、`src/app/**/actions.ts` だけがこの element に当たる。置き場を分けるのは、`features` から `adapters/server/auth` へ届かないという依存マトリクスの帰結であり、Next.js 公式の例が `app/**/actions.ts` を採ることとも一致する。
 
-**この表のうち機械で強制されるのは `app/route-handler` の行だけである。** `architecture.ts` の
-`APP_ELEMENTS` がファイル名で `route.ts` / `route.dev.ts` を分類し、層の許可から UI 部品・横断状態・
-設定・feature の内側を削る。`route-segment` / `server-action` は `app` の粒度（層の許可の和集合）で
-検査される —— 境界検査の要素はディレクトリに対応するため、同じディレクトリに居るファイルを名前で
-分けるには層の許可を後から削るしかなく、その 2 つは削る側の集合が実装と合っていない（`components` /
-`errors` / client 側 `config` を表が挙げていない）。**表を実態へ合わせる作業が先に要る**ため、
-現時点では指針として読む。
+### この表のどこまでが機械で強制されるか
+
+境界検査の要素はディレクトリに対応するため、同じディレクトリに居るファイルを名前で分けるには
+**層の許可を後から削る**しかない。`architecture.ts` の `APP_ELEMENTS` がその削る側で、実効の許可は
+`app` の層の許可からそこを引いたものになる。行ごとに強制の届き方が違う。
+
+| element | 強制 | 上の表より広く通るもの | なぜ狭められないか |
+| --- | --- | --- | --- |
+| `app/route-handler` | **全部** | —— | |
+| `app/server-action` | 一部 | `config` | 禁じているのは `server config` の直読だが、`actions.ts` が読むのは `NEXT_PUBLIC` の公開定数である。**層の粒度でその 2 つを分けられない** |
+| `app/metadata` | 一部 | `adapters`（5 ファイルすべて） | 要素はファイル名の集合であり、その中の `sitemap.ts` だけを分ける粒度が無い |
+| `app/route-segment` | **無し** | 層の許可すべて | 要素として宣言していない。`page.dev.tsx` が `server config` を直読する形が実在する |
+
+**強制の届かない部分は、この表が指針として述べているだけである。**緑は「この表のとおりである」を
+意味しない（[0157](0157-inspection-declaration-discipline.md)）。
+
+### import 先の集合として書けないもの
+
+上の 2 つは実装の不足ではなく、**表現できないもの**である。書けるようになるまで散文で持つ
+（[0144](0144-decision-enforcement-pairing.md) の「寄せられない理由を書く」）。
+
+- **`server config` と `NEXT_PUBLIC` の公開定数**は同じ `config` に居る。分けるには「どのモジュール
+  を読んだか」ではなく「読んだ値が秘密を持つか」を見る必要があり、それは import の集合ではない
+- **`route-segment` の `observability` と `config`** は、許されているのが計装の mount と、Next.js の
+  規約が route segment に置くことを要求する値だけである。これは「何を import してよいか」ではなく
+  **「どう使ってよいか」**なので、許可を削る形では表せない
+
+`route-segment` を要素として宣言できないのはこの 2 つめが理由であり、宣言すれば済む話ではない ——
+削る集合を書けないまま要素だけ足すと、**強制しているように見えて何も狭めていない**行が増える。
 
 `app/route-segment` のうち `layout.tsx` の横断 UI / Provider mount 規約は [0026](0026-layout-shell-mount.md) が定める。
 

@@ -170,7 +170,9 @@ export const ENTRY_POINTS = [
  *
  * - `app-metadata`: クローラと共有先が読む配信物。`config`（外から見た origin・索引の可否）と
  *   `model`（保護している経路の宣言）を読み、要求時に一覧を辿る `sitemap.ts` だけが
- *   `adapters/server` と feature の `facade/` へ届きます。UI 部品と横断状態は持ちません ——
+ *   `adapters/server` と feature の `facade/` へ届きます。**「`sitemap.ts` だけ」は指針です** ——
+ *   要素はここに並ぶファイル名の集合なので、その中の 1 つだけを分ける粒度が無く、`adapters` は
+ *   5 つすべてで通ります（[0025](docs/adr/0025-app-layer-elements.md) の強制の表）。UI 部品と横断状態は持ちません ——
  *   描くのは絵 1 枚か文書 1 つで、画面ではないためです。判定を持つ `sitemap.ts` / `robots.ts` は
  *   `unit` で検証し、絵を返すだけの 3 つは判定を持たないので単体では回しません
  *   （`scripts/lib/untested-modules.ts`）

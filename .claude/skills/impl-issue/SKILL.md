@@ -141,7 +141,6 @@ Under `pr`, **name the harvest as outstanding in the PR body** — Step 8 places
 precisely because that is the last moment it can happen, and a scope that ends earlier moves the debt
 onto whoever merges rather than cancelling it.
 
-
 **Review mode** — what happens to a review finding.
 
 | Mode | Confirmed finding | Everything else |
@@ -192,7 +191,6 @@ on, so a reader can disagree without repeating the work.
 The mode exists because `docs/rules.md` already forbids the opposite failure: **導出で決まる判断を、
 保留として issue へ逃がさない.** `ask` is the safe default, and `derive` is what the user picks when
 they will not be present to answer.
-
 
 **Plan mode** — how much the planning phase spends. Step 3 has three stages; this decides which of
 them run. **Every mode satisfies Step 3's invariant** (the plan is seen by a model that is not the

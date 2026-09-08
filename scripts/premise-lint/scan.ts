@@ -21,8 +21,20 @@ export type Premise = {
   readonly text: string;
 };
 
-/** 剥がしのマーカーの族。両方を落としてから読む。 */
+// boilerplate-only:replace-begin
+/**
+ * 剥がしのマーカーの族。両方を落としてから読む。
+ *
+ * @remarks
+ * 作った側の木には boilerplate 限定節の族がもう無いので、この宣言は剥がしで 1 つへ縮む。
+ * 綴りごと縮めるのは、`strip-verify` が剥がし後の木にこの族の綴りが残っていないことを見るためで、
+ * 生き残った綴りは「剥がし切れていない節がある」と読める。
+ */
 const MARKERS: readonly string[] = ["sample", "boilerplate-only"];
+// boilerplate-only:replace-with
+// = /** 剥がしのマーカーの族。 */
+// = const MARKERS: readonly string[] = ["sample"];
+// boilerplate-only:replace-end
 
 /**
  * 作った側へ渡る本文だけを残す。

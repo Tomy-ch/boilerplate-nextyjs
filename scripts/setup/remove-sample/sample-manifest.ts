@@ -217,4 +217,6 @@ export const MARKER_LITERAL_FILES: readonly string[] = [
   "scripts/setup/remove-sample/sample-manifest.ts",
   // 破棄の手順を説明する散文。マーカーの書き方をそのまま載せている。
   "docs/plan/v1-implementation-plan.md",
+  // 前提の検査が剥がし後の本文を読むことのテスト。入力としてマーカーの形を持つ。
+  "scripts/premise-lint/scan.test.ts",
 ];

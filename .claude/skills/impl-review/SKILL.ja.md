@@ -134,11 +134,11 @@ gh pr checks --json name,state,link 2>/dev/null   # ブランチに PR が在れ
 
 | Finder | エージェント | 起動条件 |
 | --- | --- | --- |
-| `correctness` | 2 | adversarial-reviewer | 常時 |
-| `security` | 2 | adversarial-reviewer | 常時（Route Handler / Server Action / `src/proxy.ts` / auth / 生成 API のリクエスト・レスポンス型が触られた時は特に） |
-| `architecture` | 1 | adversarial-reviewer | 常時 |
-| `cohesion` | 3 | adversarial-reviewer | 常時 |
-| `runtime-gap` | 3 | adversarial-reviewer | Route Handler / Server Action / `src/proxy.ts` / Provider マウント / 生成 API 成果物が触られた時 — モックのコンポーネントテストが通らない継ぎ目 |
+| `correctness` | adversarial-reviewer | 常時 |
+| `security` | adversarial-reviewer | 常時（Route Handler / Server Action / `src/proxy.ts` / auth / 生成 API のリクエスト・レスポンス型が触られた時は特に） |
+| `architecture` | adversarial-reviewer | 常時 |
+| `cohesion` | adversarial-reviewer | 常時 |
+| `runtime-gap` | adversarial-reviewer | Route Handler / Server Action / `src/proxy.ts` / Provider マウント / 生成 API 成果物が触られた時 — モックのコンポーネントテストが通らない継ぎ目 |
 
 **ここにテストやコメントを監査するレンズは無い**（中核アイデア「このスキルは変更そのものだけを監査する」）。未テストの変更やコメントの内容にレンズがついでに気づいたなら、補足の節に観察として書き、所管するスキル名を添える —— レンズを生やしてはならない。
 

@@ -103,15 +103,15 @@ IM-29 では `readme-review` の基準が go の英語見出しを前提にし�
 | IM-46 | `@claude` メンション workflow | A | P2-1 | なし | 未着手 |
 | **W5: サプライチェーン**(v1 Phase 2 後) | | | | | |
 | IM-19 | actions-pin 機構 + スキル(GB-6) | B | P2-3 | IM-12 | 完了(issue #86) |
-| IM-20 | `supply-chain-triage` スキル | B | — | IM-19 | 未着手 |
-| IM-21 | `dep-vuln-upgrade` スキル | B | — | IM-20 | 未着手 |
+| IM-20 | `supply-chain-triage` スキル | B | — | IM-19 | **着地** |
+| IM-21 | `dep-vuln-upgrade` スキル | B | — | IM-20 着地により解除 | 未着手 |
 | IM-47 | `tool-cooldown`(mise pin のクールダウン gate) | B | — | IM-19 | 未着手 |
 | **W6: アーキ監査・ドリフト**(v1 Phase 3 後) | | | | | |
 | IM-22 | `arch-check` + 層別 auditor(GB-1) | C | — | A3 Accepted + P3-1 | 未着手 |
-| IM-23 | `back-prop` + drift-detector(GB-2) | C | — | IM-22 | 未着手 |
+| IM-23 | `back-prop` + drift-detector(GB-2) | C | — | IM-22 を待たず着地 | **着地**（agent は 1 定義でカーネルごとに並列起動） |
 | IM-24 | `type-design-reviewer`(GB-7) | C | — | A3 Accepted + P3-1 | 未着手 |
 | IM-25 | 2 段 lint 構成の思想を ESLint へ適用 | B | P3-2 | P3-2 | 未着手 |
-| IM-48 | DDD / 語彙 / コンテキストマップ系の採否判断 | C | — | A3 Accepted。IM-22 の前 | 未着手 |
+| IM-48 | DDD / 語彙 / コンテキストマップ系の採否判断 | C | — | A3 Accepted。IM-22 の前 | **決着**（DDD の監査は不採用のまま。語彙表と接触点の地図は採用し、軸を「境界の所有と翻案の有無」「契約に無い UI 上の概念だけ」に限る条件付き） |
 | **W7: spec / scaffold**(v1 Phase 4 前後) | | | | | |
 | IM-26 | GB-3(spec 駆動)の採否判断 | C | P5-18 | v1 直前に spec と実装の突合のみ | **決着**(採用 / 生成 scaffold は不採用 / spec 先行は強制しない) |
 | IM-27 | GB-4 の骨格のみ P4-6 へ吸収 | B | P4-6 | P4-5(着地済み) | 未着手 |
@@ -134,7 +134,7 @@ IM-29 では `readme-review` の基準が go の英語見出しを前提にし�
 | IM-55 | 除去マーカーのベースライン固定(`marker-baseline`) | B | P7-2 | IM-53, P7-1 | 完了(issue #521) |
 | IM-56 | `doc-ref-lint`(ADR ファイル名 / H1 / 参照 / 対訳の整合) | B | — | なし | 未着手 |
 | **W13: issue 運用** | | | | | |
-| IM-57 | `new-issue` | B | — | なし | 未着手 |
+| IM-57 | `new-issue` | B | — | なし | **着地** |
 | IM-58 | `impl-issue` | B | — | IM-57 | 未着手 |
 | **W14: リポジトリ運用ツール** | | | | | |
 | IM-59 | `base-branch`(最新 release ラインの解決) | B | — | なし | 未着手 |

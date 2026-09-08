@@ -131,6 +131,8 @@ Print a Japanese-language summary grouped by class. Example:
   - pipx:sqlfluff: PyPI への接続失敗
 ```
 
+A `pending` release is a candidate for `supply-chain-triage`: it scores the version on direct evidence over four axes so the window can be discharged by evidence rather than only by waiting. **Report the band; never adopt on the strength of a low score** — that decision is the user's ([0110](../../../docs/adr/0110-security-operations.md) §1.2).
+
 ## Step 4. Confirm Per-tool Update Set
 
 If **eligible** is empty, skip to step 6 with no writes.

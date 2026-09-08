@@ -125,6 +125,8 @@ GitHub Releases 系は `gh api` を優先する（`GITHUB_TOKEN` 経由で認証
   - pipx:sqlfluff: PyPI への接続失敗
 ```
 
+`pending` の版は `supply-chain-triage` の対象である —— 4 つの軸で直接証拠を採点し、**待つことでしか解除できなかった窓を証拠で解除できる**ようにする。**帯を報告するだけで、低いスコアを根拠に採用しない** —— その判断は user のものである（[0110](../../../docs/adr/0110-security-operations.md) §1.2）。
+
 ## Step 4. 適用候補の per-tool 確認
 
 **eligible** が空ならステップ 6 へスキップし、書き換えは行わない。

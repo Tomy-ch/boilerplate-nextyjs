@@ -333,7 +333,7 @@ D4 (AGENTS.md) ─ D5 (スキル運用系) / D6 (スキル開発系)
 
 - **移植済(既存)**(スキル 10 / エージェント 2): canonicalize-doc / commit / impl-review / new-env / readme-review / release-notes / submit-pr / sync-readme / tool-map / tools-upgrade、agent: adversarial-reviewer / review-verifier
 - **移植済(A: 技術非依存)**(スキル 3 / エージェント 4): full-verify(+prompts+run.sh)/ full-apply / manage-skill(上乗せ規約を [0140](0140-documentation-operations.md) の対訳ペアと [0154](0154-claude-skills-operations.md) / [0155](0155-claude-skills-development.md) の配置・命名規約へ差し替え)、agent: arch-verifier / impl-verifier / doc-reviewer / comment-reviewer(godoc→TSDoc/JSDoc、正を AGENTS.md+一般原則へ)
-- **移植済(B: 変換)**(スキル 7): node-upgrade(← go-upgrade。mise.toml SSOT のみ伝播)、repo-ops(器のみ。Docker/sqlc 項目は ADR 0011 で不適用)、actions-pin(GB-6。Go 実装を TypeScript へ書き換え。`supply-chain-triage` 未移植のため triage への連鎖は「証拠を添えてユーザへ委ねる」に置換)、test-review(GB-5。Go の規約読み取りを [0090](0090-testing-strategy.md) / [0091](0091-test-verification-methods.md) と層 README の `test-requirement` の実行時読込へ差し替え)、scaffold-test(GB-5。ケースを対象の分岐から導き、対象は read-only。検証不能な分岐は skip せず切り出しの提案として返す)、scaffold-integration-test(GB-5。Echo + httptest を契約生成 MSW ハンドラへ翻案し、HTTP 境界のみへ限定)、portal-manifest-sync(D2。pair_drift preflight を落とし、N1 の除外先を godoc から Storybook + TSDoc へ、drift の機械検出を `portal:guides` / `portal:docs` の読み取りへ差し替え。判定基準は `readme-review` が SSOT)
+- **移植済(B: 変換)**(スキル 7): node-upgrade(← go-upgrade。mise.toml SSOT のみ伝播)、repo-ops(器のみ。Docker/sqlc 項目は ADR 0011 で不適用)、actions-pin(GB-6。Go 実装を TypeScript へ書き換え。窓に捕まった候補は `supply-chain-triage` へ渡し、返ってきた帯を証拠としてユーザが判断する)、test-review(GB-5。Go の規約読み取りを [0090](0090-testing-strategy.md) / [0091](0091-test-verification-methods.md) と層 README の `test-requirement` の実行時読込へ差し替え)、scaffold-test(GB-5。ケースを対象の分岐から導き、対象は read-only。検証不能な分岐は skip せず切り出しの提案として返す)、scaffold-integration-test(GB-5。Echo + httptest を契約生成 MSW ハンドラへ翻案し、HTTP 境界のみへ限定)、portal-manifest-sync(D2。pair_drift preflight を落とし、N1 の除外先を godoc から Storybook + TSDoc へ、drift の機械検出を `portal:guides` / `portal:docs` の読み取りへ差し替え。判定基準は `readme-review` が SSOT)
 - **対象外(D)**(スキル 2): `images-pin`([0011](0011-no-docker.md) no-docker)/ `scaffold-infra-db`(表示層に DB を持たない — [0070](0070-backend-role-separation.md))
 - **本リポジトリ固有**: adr-scan(go 側に現存しない。走査を nextjs 化・枠 ID 体系へ分類 / PROVISIONAL)。上記の資産数には数えない
 - **実行可能条件つき**: `new-env` は A7([0030](0030-environment-variable-management.md))の `src/config/` 構造へ再設計済。`src/config/` が着地したため実行可能
@@ -342,13 +342,12 @@ D4 (AGENTS.md) ─ D5 (スキル運用系) / D6 (スキル開発系)
 
 ### 未着手(ADR 決定待ちなし)
 
-ブロック元の枠がすべて Accepted で、**ADR の決定待ちによる停止は無い**。GB-6 が着地したため、`supply-chain-triage` を塞いでいた依存も外れている。残る着手順序は `supply-chain-triage` → `dep-vuln-upgrade` の資産間依存だけ。
+ブロック元の枠がすべて Accepted で、**ADR の決定待ちによる停止は無い**。`supply-chain-triage` が着地したため、`dep-vuln-upgrade` を塞いでいた資産間依存も外れている。
 
 | 資産 | 種別 | 依存 | 内容要旨 |
 | --- | --- | --- | --- |
 | `sync-ai` | スキル | — | `.claude/` ↔ `.codex/` の双方向同期(handoff スクリプト同梱) |
-| `supply-chain-triage` | スキル | — | 検疫に掛かったアーティファクトを直接証拠でスコアリングする report-only スキル。移植までの間、`actions-pin` はステップバック先が無い事例を証拠付きでユーザへ提示して止まる |
-| `dep-vuln-upgrade` | スキル | `supply-chain-triage` | CVE / GHSA を名指しした単発の依存更新 |
+| `dep-vuln-upgrade` | スキル | — | CVE / GHSA を名指しした単発の依存更新。依存元だった `supply-chain-triage` は着地済み |
 
 `.codex/`(エージェント 19 / スキル 34)は Codex 向けの並行資産で、上記の資産数には数えない。`.claude/` の完全なミラーではなく、現時点で `supply-chain-triage` が欠落し `arch-auditor-infra` の名が `arch-auditor-infrastructure` に振れている。基盤(`config.toml` / README)整備と全数ミラーは `sync-ai` と同時期に行う。
 
@@ -359,12 +358,29 @@ Go 側の本丸は **spec 駆動 scaffold + 層別監査体系**。今移植す�
 | グループ | 資産 | ブロック元 | 着手トリガー | 翻案メモ(流用可能な骨格) |
 | --- | --- | --- | --- | --- |
 | GB-1 層別アーキ監査 | `arch-check` + `arch-auditor-{domain,usecase,controller,infra,pkg}` | A1 / A3 / A5 | A3 Accepted + 層別 README が `src/**` に整備 | 層マッピングを差し替えるのみ。並列 fan-out + 「自層 README を正として実行時読込」構造は流用可。full-verify Pass1 との分担を明記 |
-| GB-2 層別ドリフト検出 | `back-prop` + `drift-detector-{domain,usecase,controller,infra,pkg}` | A3 / A5 | GB-1 と同時期 | 検出カテゴリ A/B/C と read-only 原則は流用可。`sync-readme`(構造ドリフト)との分担を明記 |
-| GB-3 spec 生成・検証 | `new-spec` / `new-spec-{domain,usecase}`、`verify-spec` + `spec-validator-{domain,usecase}`、`.claude/scaffold-spec/*`(5) | A1 / A3 | **採用**(v1 計画 P5-18)。**How は決着済み** —— 生成 scaffold は持たず、spec 先行も強制しない(翻案メモ) | **spec の置き場と 2 層構造は P5-5 で確定済み**(`docs/spec/route/**`。機能要件 / 画面要件の 2 層で、go の domain / usecase とは分け方が異なる)。**生成 scaffold は持たない。** spec は判断の散文であり機械可読な構造を持たない —— 生成器の入力にするには構造化データへ寄せることになり、spec の中心にある「やらない理由」が落ちる。加えて spec が書くのは**観測可能な契約であって機構ではない**ため、骨格を spec から導けない。`pnpm gen`(P4-6)の生成入力は `architecture.ts` + 層 README の 1 本に据え置く —— spec を第 2 の入力に足すと SSOT が二重化する。**spec は生成入力ではなく `new-feature` スキル(P7-3)の読み込み入力として扱う**。**輸入資産**: `new-spec` / `new-spec-{domain,usecase}` / `.claude/scaffold-spec/*` は生成 scaffold の資産のため**破棄**。`verify-spec` + `spec-validator-{domain,usecase}`(spec と実装の突合)は生成と独立なので**別枠で保留**する。**spec 先行は強制しない** —— [`playbook`](../playbook.md) の画面実装の順序が仕様書を工程 5（レビューで見た目が確定した後）に置いており、先に固めると見た目が変わるたびに書き直すことになる。**未確定は無い** |
+| GB-2 層別ドリフト検出 | **着地済** — `back-prop` + agent `drift-detector` | — | 完了 | **エージェント定義は 1 つで、カーネルごとに並列起動する。**層ごとにファイルを置くと同じロジックを層の数だけ保守することになり、腐るのは写しのほうになる。検出は A/B/C/E の 4 種で、(D) は台帳が無いため不成立と本文に明記。判定基準は `skills/back-prop/prompts/detect-drift.md` が SSOT。`sync-readme`(構造の drift)との分担を両方の本文に書いた |
+| GB-3 spec 生成・検証 | `new-spec` / `new-spec-{domain,usecase}`、`verify-spec` + `spec-validator-{domain,usecase}`、`.claude/scaffold-spec/*`(5) | A1 / A3 | **採用**(v1 計画 P5-18)。**How は決着済み** —— 生成 scaffold は持たず、spec 先行も強制しない(翻案メモ) | **spec の置き場と 2 層構造は P5-5 で確定済み**(`docs/spec/route/**`。機能要件 / 画面要件の 2 層で、go の domain / usecase とは分け方が異なる)。**生成 scaffold は持たない。** spec は判断の散文であり機械可読な構造を持たない —— 生成器の入力にするには構造化データへ寄せることになり、spec の中心にある「やらない理由」が落ちる。加えて spec が書くのは**観測可能な契約であって機構ではない**ため、骨格を spec から導けない。`pnpm gen`(P4-6)の生成入力は `architecture.ts` + 層 README の 1 本に据え置く —— spec を第 2 の入力に足すと SSOT が二重化する。**spec は生成入力ではなく `new-feature` スキル(P7-3)の読み込み入力として扱う**。**輸入資産**: `new-spec` / `new-spec-{domain,usecase}` / `.claude/scaffold-spec/*` は生成 scaffold の資産のため**破棄**。`verify-spec`(spec と実装の突合)は生成と独立なので別枠とし、**着地済** —— ただし go の主題（YAML を持つ構造化 spec）はこちらに無いので、こちらの spec の形に対する検査へ改変した。[0143](0143-spec-driven-development.md) の 2 つの突合をそのまま実体に割り、**存在の突合は `scripts/spec-routes.gate.test.ts`（機械）**、**内容の突合は `verify-spec` + agent `spec-validator`（route ごとに並列）**。検査を書いたことで写像表の穴が 2 つ出た（並行ルートのスロット / 開発専用の route）ので `docs/spec/README.md` へ書き足した。**spec 先行は強制しない** —— [`playbook`](../playbook.md) の画面実装の順序が仕様書を工程 5（レビューで見た目が確定した後）に置いており、先に固めると見た目が変わるたびに書き直すことになる。**未確定は無い** |
 | GB-4 onion scaffold | `scaffold-endpoint` / `scaffold-domain` / `scaffold-usecase` / `scaffold-controller` | A1 / A2 / A3 / A5(+B3 / B4) | A1/A3/A5 + B3(BFF/API)+ B4(型生成)確定後 | Go の onion + sqlc/OpenAPI 前提はほぼ載らない(表示層に DB 無し)。流用は chain 構造と「gen 由来マッピングを name-match 導出 → 不能なら halt/hand-off」の骨格のみ。**翻案コスト最大** |
 | GB-5 テスト scaffold/review | **移植済(3 資産すべて)** — `scaffold-test` / `scaffold-integration-test` / `test-review` | B8 | 完了(P4-0) | 「テスト観点を README から実行時導出」+ 2 段レビュー構造は流用可。`test-review` は既移植ワーカーを再利用。full-apply/node-upgrade/repo-ops の `pnpm test` 条件分岐も併せて見直す |
 | GB-7 型設計レビュー | agent: `type-design-reviewer` | A3 | A3 Accepted + `src/model/` の型設計規約(層別 README + `docs/rules.md`)確定 | 4 軸ルーブリックは言語非依存。Go の非公開フィールド + getter / `New()` 不変条件検査を TypeScript の型表現へ読み替えるのみ。`arch-auditor` 系の二値判定では拾えない「規約は満たすが弱い型」を程度で拾う |
 
 **分類合計**: スキル = 移植済 17 + 対象外 2 + 未着手 4 + 保留(C) 12 = **35**。エージェント = 移植済 6 + 保留(C) 13 = **19**。
+
+**この合計はスナップショット時点(2026-07-28)のものであり、いまの go 側の資産数ではない。** その後に
+第 2 波として次の 12 スキルと 2 エージェントが着地しており、**どれもスナップショットの 35 本に
+入っていない**。合計を書き換えるにはスナップショットを取り直す必要があり、**取り直さずに数だけ
+足すと、母数と分類が食い違ったまま権威として残る**（[0157](0157-inspection-declaration-discipline.md)）。
+
+| 群 | 着地した資産 |
+| --- | --- |
+| 問いに答える扉 | `repo-truth` / `how-to` / `question` / `research` |
+| 運用 | `resolve-merge` / `new-issue` / `supply-chain-triage` |
+| 宣言と実物の突合 | `back-prop` + agent `drift-detector`（GB-2）/ `verify-spec` + agent `spec-validator`（GB-3） |
+| 語彙と接触点 | `glossary` / `context-map` / `context-map-audit`（IM-48 の採否は「採る」で決着） |
+
+あわせて **`closed-loop`（エージェント環境の稼ぎを測る機構）** を [0160](0160-agent-environment-loop.md) /
+[0161](0161-development-window-as-feedback-unit.md) を先に置いたうえで着地させている。宣言・打刻・集計まで
+入っており、**送出は未着手** —— 外向きの操作を人の確認なしに行わない決定と、go 側の「境界で自動送出」の
+形が両立しないため、設計の変更込みで別に決める。
 
 **推奨着手順序**(BACKLOG 依存順): A1 決定 → GB-4 翻案 / A3・A5 決定(層別 README 整備)→ GB-1・GB-2・GB-7 / B8 決定 → GB-5。各グループ着手時は該当枠が Accepted であることと Instruction Priority(ADR > BACKLOG > agent config)を再確認する。

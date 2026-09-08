@@ -2,8 +2,8 @@
 name: impl-issue
 usage-class: frequent
 description: >-
-  Drive a GitHub issue from environment setup to a merged PR as a semi-automatic pipeline whose stopping points are enumerated rather than judged. Use whenever the user hands over an issue URL or number to be worked end-to-end (「この issue やって」「wt 上で対応して」「着手して PR まで」「#123 お願い」), or asks to resume such a run. It owns three things — progress orchestration, reconciling the approved plan against what was actually built, and mechanically detecting the moments needing a human call — and no implementation judgment: the work is delegated to `commit` / `submit-pr` / `resolve-merge` and to the three peer review skills `impl-review` / `test-review` / `comment-sweep`, and a screen-shaped issue is handed to `new-feature` rather than reimplemented here. It sets up an isolated worktree, builds a written plan in three stages whose necessity derives from one invariant — the plan is seen by a model that is not the implementer's — and holds it for approval before coding, then watches five mechanical trip-wires so drift becomes visible instead of silent. The plan's approval covers the whole run, and the skill carries a closed list of the five places it may stop. Every call it records is appended to a run record file as it happens, so a long run outliving its own context still produces a complete closing comment and can be resumed. Before merging it harvests the general form of what was fixed into the documents that survive a sample purge, because the fix itself lives only in code that may be discarded. Do NOT use it for a change with no issue behind it (`commit` + `submit-pr`), for reviewing an existing diff (`impl-review` / `test-review` / `comment-sweep`), or for authoring skills (`manage-skill`).
-argument-hint: '<issue-url-or-number> [--review-mode=all|harmful|issues] [--issue-mode=fix-here|search|file] [--flow=record-on-tripwire|halt-on-tripwire] [--derive=ask|derive] [--plan=full|draft-review|single]'
+  Drive a GitHub issue from environment setup to a merged PR as a semi-automatic pipeline whose stopping points are enumerated rather than judged. Use whenever the user hands over an issue URL or number to be worked end-to-end (「この issue やって」「wt 上で対応して」「着手して PR まで」「#123 お願い」), or asks to resume such a run. It owns three things — progress orchestration, reconciling the approved plan against what was actually built, and mechanically detecting the moments needing a human call — and no implementation judgment: the work is delegated to `commit` / `submit-pr` / `resolve-merge` and to the three peer review skills `impl-review` / `test-review` / `comment-sweep`, and a screen-shaped issue is handed to `new-feature` rather than reimplemented here. It sets up an isolated worktree, builds a written plan in three stages whose necessity derives from one invariant — the plan is seen by a model that is not the implementer's — and holds it for approval before coding, then watches five mechanical trip-wires so drift becomes visible instead of silent. The plan's approval covers the whole run, and the skill carries a closed list of the five places it may stop. A scope mode settled up front decides whether the run ends at a merge, at the PR (the 「pr作って」 shape), or at a local commit, and whatever an earlier ending leaves undone is named rather than left silent. Every call it records is appended to a run record file as it happens, so a long run outliving its own context still produces a complete closing comment and can be resumed. Before merging it harvests the general form of what was fixed into the documents that survive a sample purge, because the fix itself lives only in code that may be discarded. Do NOT use it for a change with no issue behind it (`commit` + `submit-pr`), for reviewing an existing diff (`impl-review` / `test-review` / `comment-sweep`), or for authoring skills (`manage-skill`).
+argument-hint: '<issue-url-or-number> [--scope=merge|pr|commit] [--review-mode=all|harmful|issues] [--issue-mode=fix-here|search|file] [--flow=record-on-tripwire|halt-on-tripwire] [--derive=ask|derive] [--plan=full|draft-review|single]'
 ---
 
 # Impl Issue
@@ -49,7 +49,7 @@ Where this pipeline stops is a specification, not a judgment. It stops here and 
 
 | # | Where | What is decided |
 | --- | --- | --- |
-| 1 | Step 0 | The five modes, in two back-to-back calls, before anything else |
+| 1 | Step 0 | The six modes, in two back-to-back calls, before anything else |
 | 2 | Step 3 | Approval of the written plan |
 | 3 | Step 4 | A trip-wire whose row says halt |
 | 4 | Step 7 | Which of the three peer review skills to run, each with its estimated return |
@@ -110,16 +110,37 @@ Hard-protected even during this skill, whatever the issue asks:
   its generator is fine; hand-editing is not (`AGENTS.md`, trip wire 3)
 - `baseline/images` — the gitlink moves only through the retake path (`docs/design/vrt.md`)
 
-## Step 0 — Confirm the five modes (two consecutive `AskUserQuestion` calls)
+## Step 0 — Confirm the six modes (two consecutive `AskUserQuestion` calls)
 
-Ask before anything else, in two back-to-back calls: the four run-policy modes, then the plan mode.
-Two calls rather than one because they answer different questions — how the run behaves, and what the
-planning phase costs — and because a single call caps at four questions. **This is still one stopping
-point.** The user answers both without the run doing anything in between.
+Ask before anything else, in two back-to-back calls: **where the run ends and what it does with
+findings**, then **what it may decide on its own and what planning costs**. Two calls rather than one
+because a single call caps at four questions — when a seventh mode is added, split again rather than
+dropping one. **This is still one stopping point.** The user answers both without the run doing
+anything in between.
 
 Defaults are marked; the user's choice always wins.
 
-### First call — run policy
+### First call — where the run ends, and what it does with findings
+
+**Scope mode** — how far this run goes. Ask it first: it bounds every mode below it, and a run that
+ends at the PR never reaches the steps the others govern.
+
+| Mode | Ends at | What is never reached |
+| --- | --- | --- |
+| `merge` *(default)* | Step 9 — merged, handed over, issue closed | — |
+| `pr` | Step 8, at the PR. CI is left running | Harvest, runtime verification, merge, close |
+| `commit` | Step 5, with the work committed locally | Everything from the push onward |
+
+**A trigger phrase can set this, and 「pr作って」 sets it to `pr`.** When the user handed the work over
+in words that already name an endpoint, that **is** the answer and the option is confirmed rather than
+asked open.
+
+**Say what each ending leaves undone, in the closing report.** A run that stops at `pr` has not
+verified the request path and has not harvested anything, and neither absence is visible from the PR.
+Under `pr`, **name the harvest as outstanding in the PR body** — Step 8 places it after CI goes green
+precisely because that is the last moment it can happen, and a scope that ends earlier moves the debt
+onto whoever merges rather than cancelling it.
+
 
 **Review mode** — what happens to a review finding.
 
@@ -153,6 +174,8 @@ of any combination; before executing it, show the count and confirm.
 **Neither mode reaches the trip-wires marked halt in Step 4.** Those are the decisions `AGENTS.md`
 keeps behind a human gate unconditionally.
 
+### Second call — what the run may decide, and what planning costs
+
 **Derive mode** — what happens to a design question the plan did not settle.
 
 | Mode | Behavior |
@@ -170,7 +193,6 @@ The mode exists because `docs/rules.md` already forbids the opposite failure: **
 保留として issue へ逃がさない.** `ask` is the safe default, and `derive` is what the user picks when
 they will not be present to answer.
 
-### Second call — plan mode
 
 **Plan mode** — how much the planning phase spends. Step 3 has three stages; this decides which of
 them run. **Every mode satisfies Step 3's invariant** (the plan is seen by a model that is not the
@@ -202,7 +224,7 @@ nothing in it says an entry went missing. The file is also what makes the run re
 
 | Written at | Entry |
 | --- | --- |
-| Step 0 | the five settled modes |
+| Step 0 | the six settled modes |
 | Step 3 | the plan file's path, and whether 3a / 3c ran |
 | Step 4 | every trip-wire that fired — its number, what triggered it, and the call taken |
 | Step 4 | every derivation made under `derive`, with the clause it rested on |
@@ -463,6 +485,10 @@ re-run only the skills whose subject the response actually touched.
 
 ## Step 8 — PR, then harvest, then runtime verification, then merge
 
+**Scope mode decides how much of this step runs.** Under `commit` the step does not run at all — stop
+after Step 7, report, and say the work is committed and unpushed. Under `pr` it stops after the PR is
+opened. Only `merge` reaches the end of it.
+
 Open the PR first via `submit-pr`, so CI starts while the rest of this step runs.
 
 ### Harvest — before the merge, after CI is green
@@ -537,6 +563,10 @@ Stamp it — a merge performed here is observed by nobody else until the loop go
 
 ## Step 9 — Close out
 
+**Reached only under scope mode `merge`.** Under `pr` or `commit`, close the run with the report
+instead: what was built, where it stopped, and what the ending left undone — the harvest above and
+the runtime verification most of all.
+
 Close the issue **manually** — auto-closing keywords do not fire when the PR targets a release branch
 rather than the default branch:
 
@@ -578,6 +608,7 @@ that when its apply mode does not arrive.
 
 ## Do / Do NOT
 
+- ✅ Ask scope mode first, and honour it — report what an early ending left undone rather than implying it was covered.
 - ✅ Secure the worktree before touching code, and ask where it goes when the user has not said.
 - ✅ Verify the issue's claims against the actual base, and put the discrepancies in the kickoff comment.
 - ✅ Get the plan approved before implementing, and keep it as a file so Step 5 can diff against it.
@@ -601,7 +632,8 @@ that when its apply mode does not arrive.
 
 ## Checklist
 
-- [ ] Five modes confirmed in Step 0's two calls, with plan mode's cost stated when it was asked.
+- [ ] Six modes confirmed in Step 0's two calls, with plan mode's cost stated when it was asked,
+      and scope mode asked first.
 - [ ] Kickoff comment posted, including issue-vs-base discrepancies.
 - [ ] Environment secured on the right half of Step 2 — a new worktree from a freshly fetched base with
       `pnpm install --frozen-lockfile`, or an existing one observed and reported.

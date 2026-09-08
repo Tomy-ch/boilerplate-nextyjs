@@ -104,6 +104,7 @@ Accepted
 | `how-to` | 目標 → 正規手順 | 実行したい操作に対し、前提 / コマンド / 成功判定 / 復旧 / 破壊性を揃えて返す。まず所有スキルへ振って止まり、無ければ make ターゲットと `package.json` の scripts の両方を索引で読む。手順が無ければ **UNDEFINED** と前線を出し、**コマンドを発明しない**。`repo-ops` が症状駆動で「手順が無い」と結論できないのに対し、こちらは目標駆動でそれを結論できる。`--mode=run` でもゲートは回さない |
 | `question` | 問いの読みの解決とルーティング | 3 軸（世界 / 意図 / 対象）で問いの読みを解き、**本当に割れた軸だけ**を `AskUserQuestion` で確認して所有スキルへ渡す。自分では答えない。行き先は `.claude/skills/*/SKILL.md` の frontmatter を実行時に読んで解決し、表をハードコードしない。**世界の軸が「この窓の差分」に解けたときは `AGENTS.md` の Review Phase Protocol へ渡す** —— レビュー 1 本へ直接振ると、3 本を対等に問う規律を迂回する |
 | `research` | 未決の選択の比較 | 評価軸を**選択肢を挙げる前に**固定し、案 / 利点欠点 / リスク / 既存構造との整合 / コストで比較して、反転条件付きの推奨を出す。案数は合わせない。まず問いを溶かす —— 現行 ADR / BACKLOG の**撤回条件** / `docs/project/out-of-scope.md` / カーネルを列挙して探す同型の前例。コストは述べるが判定に重みとして入れない。採択・ADR 執筆・起票はしない |
+| `resolve-merge` | マージの着地 | 衝突パスをクラスへ分け、クラスごとの機械的解決を当てる —— 生成物は片側を選ばず出典から作り直し、pin lockfile は resolver を回し、追記専用のレジストリは和集合にする。**衝突が無くても走る**（派生物は無衝突マージでも古くなる）。ベースの取り込みは `make base-merge` が持つ。終わり方は 2 つだけで、機械的に解けないものが 1 つでも残ればマーカーを残して打ち切りコミットしない、全部解ければコミットと push の可否を聞く。ゲートは回さない |
 | `repo-ops` | 運用 gotcha のランブック | mise ツールチェーン / pnpm lockfile / make `DRY_RUN` / `tmp/reviews` 等の再発しやすい躓きへの対処手順集。read-only の知識スキルで、状態は変更しない |
 | `tool-map` | `.claude/` 配下の inventory | commands / skills / agents の表 + Mermaid 依存マップを生成 |
 | `design-export` | デザインシステムの外部書き出し | `pnpm design:bundle` が作る `tmp/design-bundle`（shadcn registry / 目録 / トークン）を、送り先ごとの手順で運ぶ。依存の向きは repo → design の一本で、書き出した先の成果物を取り込む経路は持たない。特定 SaaS の手順は [0010](0010-standards-and-non-lockin.md) の非ロックインによりこのスキルの中だけに閉じる |

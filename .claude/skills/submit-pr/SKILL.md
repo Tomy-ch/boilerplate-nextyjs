@@ -90,9 +90,12 @@ Handle the outcomes:
 
 - **Already up to date** → say so and continue. Do not create an empty commit.
 - **Merge succeeded** → report how many commits came in. The resulting merge commit is part of what gets pushed at Step 7, so re-read the unpushed commit count after this step rather than reusing Step 0's.
-- **Conflict** → **stop here and hand it to the user.** Never resolve conflicts automatically. Print the conflicting paths and:
+- **Conflict** → **stop here and hand it to the user.** This skill never resolves conflicts itself. Print the conflicting paths and:
 
-  > ベースの取り込みでコンフリクトしました。解消して `/commit` で確定してから、改めて `/submit-pr` を実行してください。（`git merge --abort` で取り込み前に戻せます。）
+  > ベースの取り込みでコンフリクトしました。`/resolve-merge` が機械的に解けるクラス（生成物・lockfile・pin・追記専用のレジストリ）を解決し、残りを返します。確定してから改めて `/submit-pr` を実行してください。
+
+  **Leave the working tree in its merging state** and do not offer `git merge --abort` — that tree is
+  `resolve-merge`'s input, and discarding it throws away the classification it is about to do.
 
 Now apply the early exits that depend on the post-merge commit count:
 
@@ -305,7 +308,7 @@ Judge the dominant nature of the diff (changed file paths / commit prefixes) to 
 
 - ❌ Push to protected branches (`production` / `develop` / `staging` / `release/*`)
 - ❌ Check out a protected branch to update it — merge `origin/<base>` into the current branch instead
-- ❌ Resolve a base-merge conflict automatically (hand it to the user and stop)
+- ❌ Resolve a base-merge conflict here, or discard the merging tree (hand it to the user and stop; `resolve-merge` owns the mechanical classes)
 - ❌ `git push --force` / `--force-with-lease` (only with explicit user instruction)
 - ❌ Auto-update an existing PR's title or body (only on explicit user request)
 - ❌ Push while the working tree has uncommitted changes

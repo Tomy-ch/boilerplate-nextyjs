@@ -256,4 +256,11 @@ describe("containsQuote", () => {
   it("短すぎる本文は判定の対象にしない", () => {
     expect(containsQuote("短い", [{ at: 1, reason: "是正", text: quote }])).toBe(false);
   });
+
+  it("十分に長い本文でも、候補と重ならなければ見つけない", () => {
+    const other =
+      "こちらは別の話題について同じくらいの長さで書かれた別の文章であり、重なりをまったく持たない";
+
+    expect(containsQuote(other, [{ at: 1, reason: "是正", text: quote }])).toBe(false);
+  });
 });

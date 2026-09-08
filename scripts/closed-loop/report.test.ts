@@ -134,4 +134,25 @@ describe("reportTranscript", () => {
       reportTranscript(counts, { files: 0, places: 0, unparsable: 0, declared: [], never: [] }),
     ).toEqual(["", `⚠ ${NO_TRANSCRIPT_MESSAGE}`]);
   });
+
+  it("起動を多い順に並べる", () => {
+    const busy: TranscriptCounts = {
+      commands: { commit: 1, "submit-pr": 5 },
+      tools: {},
+      toolErrors: 0,
+      interruptions: 0,
+      turns: 2,
+      firstAt: 0,
+      lastAt: 10,
+    };
+    const lines = reportTranscript(busy, {
+      files: 1,
+      places: 1,
+      unparsable: 0,
+      declared: ["commit", "submit-pr"],
+      never: [],
+    });
+
+    expect(lines.indexOf("  submit-pr: 5")).toBeLessThan(lines.indexOf("  commit: 1"));
+  });
 });

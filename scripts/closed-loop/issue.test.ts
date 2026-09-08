@@ -4,6 +4,7 @@ import { issueTitle, renderIssueBody } from "./issue";
 import { toObservation } from "./observation";
 import type { WindowMarks } from "./phases";
 import type { Summary } from "./summarize";
+import type { TranscriptCounts } from "./transcript";
 
 function windowOf(marks: Record<string, readonly number[]>): WindowMarks {
   return { id: "w1788885163-abc", marks };
@@ -110,5 +111,43 @@ describe("renderIssueBody", () => {
 
   it("区間を作れない窓はそう書く", () => {
     expect(bodyOf(windowOf({ openedAt: [0] }))).toContain("区間なし（打刻が 1 つ以下）");
+  });
+
+  // ----- 異常系 -----
+  it("記録が読めなかった窓は、道具の回数の節ごと出さない", () => {
+    const body = bodyOf(full);
+
+    expect(body).not.toContain("道具の呼び出し");
+    expect(body).not.toContain("- 中断:");
+  });
+
+  it("記録が読めた窓は、道具の回数も並べる", () => {
+    const counts: TranscriptCounts = {
+      commands: {},
+      tools: {},
+      toolErrors: 1,
+      interruptions: 2,
+      turns: 4,
+      firstAt: 0,
+      lastAt: 240,
+    };
+    const body = renderIssueBody(full, toObservation(full, counts), undefined, "材料が無かった");
+
+    expect(body).toContain("- 道具の呼び出し: 0 回（うち失敗 1）");
+    expect(body).toContain("- 中断: 2 回");
+  });
+
+  it("失敗と中断が観測できていなければ 0 として並べる", () => {
+    const observation = {
+      windowId: "w1-x",
+      openedAt: 0,
+      closedAt: 240,
+      phases: [],
+      toolCalls: 5,
+    } as const;
+    const body = renderIssueBody(full, observation, undefined, "材料が無かった");
+
+    expect(body).toContain("- 道具の呼び出し: 5 回（うち失敗 0）");
+    expect(body).toContain("- 中断: 0 回");
   });
 });

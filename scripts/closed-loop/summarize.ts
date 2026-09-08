@@ -76,7 +76,7 @@ const KINDS_LINE = /^kinds:(.*)$/;
  */
 function kindsOf(lastLine: string): readonly FindingKind[] | null {
   const matched = KINDS_LINE.exec(lastLine);
-  const body = matched === null ? lastLine : (matched[1] ?? "");
+  const body = matched === null ? lastLine : matched[0].slice("kinds:".length);
   const parts = body
     .split(",")
     .map((value) => value.trim())
@@ -232,8 +232,10 @@ export function parseSummary(
   candidates: readonly Candidate[] = [],
 ): Summary | undefined {
   const lines = output.split("\n");
-  const lastIndex = lines.map((line) => line.trim()).findLastIndex((line) => line !== "");
-  const lastLine = lastIndex < 0 ? "" : (lines[lastIndex] ?? "").trim();
+  // 添字と本文を別々に取る。要素を取り出してから既定値を当てると、空行しか無い出力でしか
+  // 通らない枝が残る —— その出力は実在するので、枝ごと残して塞ぐ。
+  const lastIndex = lines.findLastIndex((line) => line.trim() !== "");
+  const lastLine = lines.findLast((line) => line.trim() !== "")?.trim() ?? "";
   const found = kindsOf(lastLine);
   const kinds = found ?? [];
 

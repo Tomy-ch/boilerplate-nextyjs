@@ -120,4 +120,14 @@ describe("selectCandidates", () => {
   it("該当が無ければ空にする", () => {
     expect(selectCandidates([prompt(10, "ありがとう")])).toEqual([]);
   });
+
+  it("直前に発話が無い中断は候補を生まない", () => {
+    expect(selectCandidates([{ at: 10, kind: "interrupt" }, prompt(20, "その後の話")])).toEqual([]);
+  });
+
+  it("直後に発話が無い失敗は候補を生まない", () => {
+    expect(
+      selectCandidates([prompt(10, "先の話"), { at: 20, kind: "tool_result", ok: false }]),
+    ).toEqual([]);
+  });
 });

@@ -115,4 +115,39 @@ describe("reportWeekly", () => {
 
     expect(lines.some((line) => line.includes("失敗— 中断— 待ち—"))).toBe(true);
   });
+
+  it("反復と単発を書き分ける", () => {
+    const lines = reportOf([], {
+      issues: [issueOf(1)],
+      clusters: [
+        {
+          key: "skill/commit",
+          score: 10,
+          frequency: 1,
+          impact: 0,
+          humanIntervention: 0,
+          isRecurring: true,
+          issues: [1],
+        },
+        {
+          key: "tool/bash",
+          score: 5,
+          frequency: 1,
+          impact: 0,
+          humanIntervention: 0,
+          isRecurring: false,
+          issues: [2],
+        },
+      ],
+    });
+
+    expect(lines.some((line) => line.includes("反復"))).toBe(true);
+    expect(lines.some((line) => line.includes("単発"))).toBe(true);
+  });
+
+  it("所見が在っても束が無ければ、束の節を出さない", () => {
+    const lines = reportOf([], { issues: [issueOf(1)], clusters: [] });
+
+    expect(lines.some((line) => line.startsWith("  ["))).toBe(false);
+  });
 });

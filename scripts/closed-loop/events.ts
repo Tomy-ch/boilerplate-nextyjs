@@ -49,7 +49,9 @@ type Block = {
  * 起動は 2 つの形で現れます —— `Skill` 道具の呼び出しと、この綴りです。**両方を出す**。
  * 片方だけにすると、打ち方の違いが起動回数の違いに化けます。
  */
-const COMMAND_NAME_RE = /<command-name>\/?([a-z0-9-]+)<\/command-name>/g;
+const COMMAND_TAG_OPEN = "<command-name>";
+const COMMAND_TAG_CLOSE = "</command-name>";
+const COMMAND_NAME_RE = /<command-name>\/?[a-z0-9-]+<\/command-name>/g;
 
 /** 人が実行を中断したときに記録へ入る綴り。 */
 const INTERRUPTION_MARK = "[Request interrupted";
@@ -102,12 +104,10 @@ function fromText(text: string, at: number): readonly Event[] {
     found.push({ at, kind: "interrupt", text });
   }
 
-  for (const match of text.matchAll(COMMAND_NAME_RE)) {
-    const name = match[1];
+  for (const [tag] of text.matchAll(COMMAND_NAME_RE)) {
+    const name = tag.slice(COMMAND_TAG_OPEN.length, -COMMAND_TAG_CLOSE.length).replace(/^\//, "");
 
-    if (name !== undefined) {
-      found.push({ at, kind: "command", name });
-    }
+    found.push({ at, kind: "command", name });
   }
 
   return found;

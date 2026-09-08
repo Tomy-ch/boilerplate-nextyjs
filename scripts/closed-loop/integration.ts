@@ -139,7 +139,8 @@ export function parseConcerns(output: string, known: readonly number[]): readonl
     const matched = SOURCES_LINE.exec(line.trim());
 
     if (matched !== null && title !== undefined) {
-      sources = (matched[1] ?? "")
+      sources = matched[0]
+        .slice("sources:".length)
         .split(",")
         .map((value) => Number(value.trim().replace(/^#/, "")))
         .filter((value) => Number.isInteger(value));

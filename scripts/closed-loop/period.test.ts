@@ -43,6 +43,11 @@ describe("resolvePeriod", () => {
   it("期間が逆転していれば落とす", () => {
     expect(() => resolvePeriod("2026-09-10", "2026-09-01", 0)).toThrow("逆転");
   });
+
+  // ----- 異常系 -----
+  it("to を省いた逆転も、既定と分かる形で落とす", () => {
+    expect(() => resolvePeriod("2099-01-01", undefined, 0)).toThrow("to=(既定)");
+  });
 });
 
 describe("withinPeriod", () => {

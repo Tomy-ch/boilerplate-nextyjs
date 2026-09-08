@@ -171,7 +171,7 @@ function readBlock(block: readonly string[]): {
     const scalar = /^([A-Za-z]+):(.*)$/.exec(line);
 
     if (scalar?.[1] !== undefined) {
-      scalars.set(scalar[1], (scalar[2] ?? "").trim());
+      scalars.set(scalar[1], scalar[0].slice(scalar[1].length + 1).trim());
     }
   }
 

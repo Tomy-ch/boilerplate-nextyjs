@@ -74,6 +74,19 @@ describe("renderObservation", () => {
     expect(text).not.toContain("toolCalls");
     expect(text).not.toContain("interrupts");
   });
+
+  // ----- 異常系 -----
+  it("観測できなかった端は行ごと落とす", () => {
+    const block = renderObservation({
+      windowId: "w1-x",
+      openedAt: null,
+      closedAt: null,
+      phases: [],
+    });
+
+    expect(block).not.toContain("openedAt:");
+    expect(block).not.toContain("closedAt:");
+  });
 });
 
 describe("parseObservation", () => {
@@ -110,5 +123,11 @@ describe("parseObservation", () => {
     );
 
     expect(observation?.toolCalls).toBeUndefined();
+  });
+
+  it("鍵の形をしていない行は読み飛ばす", () => {
+    const block = ["```yaml closed-loop", "windowId: w1-x", "  ぶら下がりの行", "```"].join("\n");
+
+    expect(parseObservation(block)?.windowId).toBe("w1-x");
   });
 });

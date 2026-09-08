@@ -72,6 +72,7 @@ export const EXCLUDED_DIRECTORIES: Set<string> = new Set([
   "node_modules",
   ".next",
   "coverage",
+  "coverage-scripts",
   "dist",
   "storybook-static",
   "tmp",

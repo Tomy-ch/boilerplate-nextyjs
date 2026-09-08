@@ -119,6 +119,58 @@ describe("parseLine", () => {
       { at: EPOCH, kind: "prompt", text: "" },
     ]);
   });
+
+  it("Skill の起動を、道具の呼び出しと起動の両方として出す", () => {
+    expect(
+      parseLine(
+        line({
+          type: "assistant",
+          timestamp: AT,
+          message: { content: [{ type: "tool_use", name: "Skill", input: { skill: "commit" } }] },
+        }),
+      ),
+    ).toEqual([
+      { at: EPOCH, kind: "assistant" },
+      { at: EPOCH, kind: "tool_use", name: "Skill" },
+      { at: EPOCH, kind: "command", name: "commit" },
+    ]);
+  });
+
+  it("message が物でない行は、本文が無いものとして読む", () => {
+    expect(parseLine(line({ type: "user", timestamp: AT, message: "文字列" }))).toEqual([
+      { at: EPOCH, kind: "prompt", text: "" },
+    ]);
+  });
+
+  it("Skill の入力が読めなければ、起動としては数えない", () => {
+    expect(
+      parseLine(
+        line({
+          type: "assistant",
+          timestamp: AT,
+          message: { content: [{ type: "tool_use", name: "Skill", input: "文字列" }] },
+        }),
+      ),
+    ).toEqual([
+      { at: EPOCH, kind: "assistant" },
+      { at: EPOCH, kind: "tool_use", name: "Skill" },
+    ]);
+  });
+
+  it("Skill 以外の道具は、起動として数えない", () => {
+    expect(
+      parseLine(
+        line({
+          type: "assistant",
+          timestamp: AT,
+          message: { content: [{ type: "tool_use", name: "Read", input: { skill: "commit" } }] },
+        }),
+      ),
+    ).toEqual([
+      { at: EPOCH, kind: "assistant" },
+      { at: EPOCH, kind: "tool_use", name: "Read" },
+    ]);
+  });
 });
 
 describe("parseTranscript", () => {

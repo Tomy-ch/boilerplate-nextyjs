@@ -81,8 +81,6 @@ export function countEvents(events: readonly Event[]): TranscriptCounts {
       case "command":
         if (event.name !== undefined) bump(commands, event.name);
         break;
-      default:
-        break;
     }
   }
 

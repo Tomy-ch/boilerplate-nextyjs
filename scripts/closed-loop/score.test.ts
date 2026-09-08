@@ -142,6 +142,15 @@ describe("clusterIssues", () => {
     expect(clusters[0]?.impact).toBe(0);
     expect(clusters[0]?.humanIntervention).toBe(0);
   });
+
+  it("点が並んだら鍵の順で決める", () => {
+    const found = clusterIssues([
+      issueOf(1, { kinds: ["tooling"] }),
+      issueOf(2, { kinds: ["skill"] }),
+    ]);
+
+    expect(found.map((cluster) => cluster.key)).toEqual([...found.map((c) => c.key)].sort());
+  });
 });
 
 describe("waitDominated", () => {
@@ -175,6 +184,19 @@ describe("waitDominated", () => {
 
   it("待ちを観測できていなければ挙げない", () => {
     expect(waitDominated([issueOf(3)])).toEqual([]);
+  });
+
+  it("番号を昇順に並べて返す", () => {
+    const waiting = observationOf({
+      phases: [
+        { from: "prOpenedAt", to: "mergedAt", sec: 900 },
+        { from: "implStartedAt", to: "commitAt", sec: 10 },
+      ],
+    });
+
+    expect(
+      waitDominated([issueOf(9, { observation: waiting }), issueOf(2, { observation: waiting })]),
+    ).toEqual([2, 9]);
   });
 });
 
@@ -238,5 +260,33 @@ describe("reevaluations", () => {
     expect(
       reevaluations([landed, issueOf(2, { kinds, createdAt: 999 * DAY })], 1020 * DAY)[0]?.recurred,
     ).toEqual([]);
+  });
+
+  it("再発の番号を昇順に並べる", () => {
+    const found = reevaluations(
+      [
+        landed,
+        issueOf(9, { kinds, createdAt: 1002 * DAY }),
+        issueOf(3, { kinds, createdAt: 1001 * DAY }),
+      ],
+      1100 * DAY,
+    );
+
+    expect(found[0]?.recurred).toEqual([3, 9]);
+  });
+
+  it("再発の数が並んだら鍵の順で決める", () => {
+    const other = issueOf(2, { kinds: ["tooling"], resolvedAt: 1000 * DAY, completed: true });
+    const found = reevaluations(
+      [
+        landed,
+        other,
+        issueOf(5, { kinds, createdAt: 1001 * DAY }),
+        issueOf(6, { kinds: ["tooling"], createdAt: 1001 * DAY }),
+      ],
+      1100 * DAY,
+    );
+
+    expect(found.map((item) => item.key)).toEqual([...found.map((item) => item.key)].sort());
   });
 });

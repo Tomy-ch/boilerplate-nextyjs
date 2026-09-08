@@ -101,7 +101,9 @@ export function toPhases(window: WindowMarks): readonly Phase[] {
     return at === null ? [] : [{ name, at }];
   });
 
-  return present.slice(0, -1).flatMap((start, index) => {
+  // 末尾を先に落とさず全件を歩く。落としてから「次が無い」を見ると、その枝へは決して
+  // 到達せず、塞げない分岐が残る。
+  return present.flatMap((start, index) => {
     const end = present[index + 1];
 
     if (end === undefined) {
@@ -167,12 +169,16 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   // **範囲は「窓が開いてから、最後に越えた境界まで」である。**終端を closedAt に取ると、
   // 到達しなかった先の段まで「飛んだ」に数えてしまう —— PR を出す前に閉じた窓は、
   // merge を飛ばしたのではなく、そこまで進まなかっただけである。
-  const firstIndex = MARK_ORDER.indexOf(stamped[0] ?? "");
-  const lastIndex = MARK_ORDER.indexOf(crossed.at(-1) ?? "");
+  const firstStamped = MARK_ORDER.findIndex((name) => markAt(window, name) !== null);
+  const lastCrossed = MARK_ORDER.findLastIndex(
+    (name) => crossed.includes(name) && markAt(window, name) !== null,
+  );
   const missing =
     crossed.length === 0
       ? []
-      : MARK_ORDER.slice(firstIndex + 1, lastIndex).filter((name) => markAt(window, name) === null);
+      : MARK_ORDER.slice(firstStamped + 1, lastCrossed).filter(
+          (name) => markAt(window, name) === null,
+        );
 
   // 任意の段しか欠けていない窓は所見にしない。計画の承認は、計画を要さない小さな変更では
   // そもそも起きない —— それを「飛んだ」と呼ぶと、正常な窓のほとんどが所見を持つ。

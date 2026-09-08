@@ -137,14 +137,15 @@ export function selectCandidates(
   maxChars: number = DEFAULT_EXCERPT_CHARS,
 ): readonly Candidate[] {
   const ordered = [...events].sort((a, b) => a.at - b.at);
-  const prompts = ordered.filter(
-    (event) =>
-      event.kind === "prompt" &&
-      event.text !== undefined &&
-      event.text !== "" &&
-      !isInjected(event.text) &&
-      // 秘密らしき本文は、どの理由に当たっても候補にしない。
-      !looksSecret(event.text),
+  const prompts = ordered.flatMap((event) =>
+    event.kind === "prompt" &&
+    event.text !== undefined &&
+    event.text !== "" &&
+    !isInjected(event.text) &&
+    // 秘密らしき本文は、どの理由に当たっても候補にしない。
+    !looksSecret(event.text)
+      ? [{ at: event.at, text: event.text }]
+      : [],
   );
 
   const corrective: Candidate[] = [];
@@ -152,17 +153,21 @@ export function selectCandidates(
   const afterFailure: Candidate[] = [];
   const taken = new Set<number>();
 
-  const push = (into: Candidate[], event: Event, reason: CandidateReason): void => {
-    if (taken.has(event.at)) {
+  const push = (
+    into: Candidate[],
+    said: { readonly at: number; readonly text: string },
+    reason: CandidateReason,
+  ): void => {
+    if (taken.has(said.at)) {
       return;
     }
 
-    taken.add(event.at);
-    into.push({ at: event.at, reason, text: excerpt(event.text ?? "", maxChars) });
+    taken.add(said.at);
+    into.push({ at: said.at, reason, text: excerpt(said.text, maxChars) });
   };
 
   for (const prompt of prompts) {
-    if (isCorrective(prompt.text ?? "")) {
+    if (isCorrective(prompt.text)) {
       push(corrective, prompt, "是正");
     }
   }

@@ -7,10 +7,22 @@
 //
 // ここが出すのは**数**だけで、解釈はしない。「何が難しかったか」は数からは出ない。
 
+/**
+ * 作業ツリーのパスから、その記録の置き場の名前を導く。
+ *
+ * @remarks
+ * 綴り換えの規則を決めているのはツールです。区切りだけを置き換えると `.claude/` の下に置いた
+ * 作業ツリーを取り落とすので、**名前に使えない文字をすべて `-` にします** —— 規則が変わっても
+ * 取りこぼしではなく空振りとして現れる側に倒しています。
+ */
+export function toProjectSlug(root: string): string {
+  return root.replace(/[^A-Za-z0-9-]/g, "-");
+}
+
 /** 記録から数えた事実。どれも解釈を含まない。 */
 export type TranscriptCounts = {
-  /** スキルの起動回数。名前ごと */
-  readonly skills: Readonly<Record<string, number>>;
+  /** `/<名前>` の起動回数。名前ごと。ツールの組み込みも混ざる */
+  readonly commands: Readonly<Record<string, number>>;
   /** 道具の使用回数。名前ごと */
   readonly tools: Readonly<Record<string, number>>;
   /** 道具が失敗を返した回数 */
@@ -25,7 +37,7 @@ export type TranscriptCounts = {
 };
 
 /**
- * スキルの起動を表す綴り。
+ * 起動を表す綴り。
  *
  * @remarks
  * 起動は 2 つの形で現れます —— `Skill` 道具の呼び出しと、`/<name>` を打ったときに記録へ入る
@@ -33,21 +45,30 @@ export type TranscriptCounts = {
  */
 const COMMAND_NAME_RE = /<command-name>\/?([a-z0-9-]+)<\/command-name>/g;
 
-/**
- * スキルとして数えない綴り。
- *
- * @remarks
- * `/clear` `/compact` `/exit` はツール自身の組み込みで、このリポジトリのスキルではありません。
- * 混ぜると、**最も多く「起動された」のが自前のスキルではなくなり**、順位が意味を失います。
- */
-const BUILTIN_COMMANDS = new Set(["clear", "compact", "exit", "help", "resume", "login", "logout"]);
-
 /** 人が実行を中断したときに記録へ入る綴り。 */
 const INTERRUPTION_MARK = "[Request interrupted";
 
 function bump(counter: Record<string, number>, key: string): void {
   counter[key] = (counter[key] ?? 0) + 1;
 }
+
+/**
+ * 記録の形のうち、この判定が読む部分だけ。
+ *
+ * @remarks
+ * 全体を型にしません —— 形を決めているのはツールで、版が上がれば知らない鍵が増えます。
+ * **読む鍵だけを宣言する**ことで、増えた鍵はここを素通りします。
+ */
+type Line = { readonly type?: unknown; readonly timestamp?: unknown; readonly message?: unknown };
+type Message = { readonly content?: unknown };
+type SkillInput = { readonly skill?: unknown };
+type Block = {
+  readonly type?: unknown;
+  readonly name?: unknown;
+  readonly input?: unknown;
+  readonly is_error?: unknown;
+  readonly text?: unknown;
+};
 
 /**
  * 記録の 1 行（JSON）から数える。
@@ -61,25 +82,23 @@ function countLine(entry: unknown, counts: MutableCounts): void {
     return;
   }
 
-  const record = entry as Record<string, unknown>;
-  const type = record.type;
+  const record = entry as Line;
 
-  if (type === "user" || type === "assistant") {
+  if (record.type === "user" || record.type === "assistant") {
     counts.turns += 1;
   }
 
   const timestamp = typeof record.timestamp === "string" ? record.timestamp : null;
 
   if (timestamp !== null) {
-    counts.firstAt = counts.firstAt === null || timestamp < counts.firstAt ? timestamp : counts.firstAt;
+    counts.firstAt =
+      counts.firstAt === null || timestamp < counts.firstAt ? timestamp : counts.firstAt;
     counts.lastAt = counts.lastAt === null || timestamp > counts.lastAt ? timestamp : counts.lastAt;
   }
 
   const message = record.message;
   const content =
-    typeof message === "object" && message !== null
-      ? (message as Record<string, unknown>).content
-      : undefined;
+    typeof message === "object" && message !== null ? (message as Message).content : undefined;
 
   if (typeof content === "string") {
     countText(content, counts);
@@ -96,31 +115,32 @@ function countLine(entry: unknown, counts: MutableCounts): void {
       continue;
     }
 
-    const part = block as Record<string, unknown>;
+    countBlock(block as Block, counts);
+  }
+}
 
-    if (part.type === "tool_use" && typeof part.name === "string") {
-      bump(counts.tools, part.name);
+/** 発話の中身 1 つ分から数える。 */
+function countBlock(part: Block, counts: MutableCounts): void {
+  if (part.type === "tool_use" && typeof part.name === "string") {
+    bump(counts.tools, part.name);
 
-      if (part.name === "Skill") {
-        const input = part.input;
-        const skill =
-          typeof input === "object" && input !== null
-            ? (input as Record<string, unknown>).skill
-            : undefined;
+    if (part.name === "Skill") {
+      const input = part.input;
+      const skill =
+        typeof input === "object" && input !== null ? (input as SkillInput).skill : undefined;
 
-        if (typeof skill === "string") {
-          bump(counts.skills, skill);
-        }
+      if (typeof skill === "string") {
+        bump(counts.commands, skill);
       }
     }
+  }
 
-    if (part.type === "tool_result" && part.is_error === true) {
-      counts.toolErrors += 1;
-    }
+  if (part.type === "tool_result" && part.is_error === true) {
+    counts.toolErrors += 1;
+  }
 
-    if (typeof part.text === "string") {
-      countText(part.text, counts);
-    }
+  if (typeof part.text === "string") {
+    countText(part.text, counts);
   }
 }
 
@@ -132,14 +152,14 @@ function countText(text: string, counts: MutableCounts): void {
   for (const match of text.matchAll(COMMAND_NAME_RE)) {
     const name = match[1];
 
-    if (name !== undefined && !BUILTIN_COMMANDS.has(name)) {
-      bump(counts.skills, name);
+    if (name !== undefined) {
+      bump(counts.commands, name);
     }
   }
 }
 
 type MutableCounts = {
-  skills: Record<string, number>;
+  commands: Record<string, number>;
   tools: Record<string, number>;
   toolErrors: number;
   interruptions: number;
@@ -155,7 +175,7 @@ type MutableCounts = {
  */
 export function countTranscript(lines: readonly string[]): TranscriptCounts {
   const counts: MutableCounts = {
-    skills: {},
+    commands: {},
     tools: {},
     toolErrors: 0,
     interruptions: 0,
@@ -216,5 +236,5 @@ export function neverInvoked(
   declared: readonly string[],
   counts: TranscriptCounts,
 ): readonly string[] {
-  return declared.filter((name) => (counts.skills[name] ?? 0) === 0);
+  return declared.filter((name) => (counts.commands[name] ?? 0) === 0);
 }

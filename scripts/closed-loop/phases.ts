@@ -82,7 +82,12 @@ export function toPhases(window: WindowMarks): readonly Phase[] {
     }
 
     return [
-      { name: `${start.name} → ${end.name}`, from: start.name, to: end.name, seconds: end.at - start.at },
+      {
+        name: `${start.name} → ${end.name}`,
+        from: start.name,
+        to: end.name,
+        seconds: end.at - start.at,
+      },
     ];
   });
 }
@@ -136,7 +141,9 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   const skipped =
     crossed.length === 0
       ? []
-      : MARK_ORDER.slice(firstIndex + 1, lastIndex).filter((name) => firstAt(window, name) === null);
+      : MARK_ORDER.slice(firstIndex + 1, lastIndex).filter(
+          (name) => firstAt(window, name) === null,
+        );
 
   if (skipped.length > 0) {
     found.push({ kind: "段が飛んでいる", detail: `刻まれていない: ${skipped.join(" / ")}` });

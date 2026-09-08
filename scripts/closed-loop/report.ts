@@ -74,7 +74,7 @@ export function reportAll(windows: readonly WindowMarks[]): readonly string[] {
     return [`⚠ ${NO_WINDOWS_MESSAGE}`];
   }
 
-  const closed = windows.filter((window) => (window.marks.closedAt?.length ?? 0) > 0);
+  const closed = windows.filter((window) => countOf(window, "closedAt") > 0);
   const header = [
     `窓: ${windows.length} 件（閉じた窓 ${closed.length} 件 / 開いたまま ${windows.length - closed.length} 件）`,
     "",
@@ -87,18 +87,35 @@ export function reportAll(windows: readonly WindowMarks[]): readonly string[] {
 export type TranscriptContext = {
   /** 読んだ行数 */
   readonly files: number;
+  /** 読んだ置き場の数（作業ツリー 1 つにつき 1 つ） */
+  readonly places: number;
   /** 解釈できなかった行数 */
   readonly unparsable: number;
+  /** 宣言されているスキルの名前 */
+  readonly declared: readonly string[];
   /** 宣言されているが記録に現れなかったスキル */
   readonly never: readonly string[];
 };
 
-/** 上位いくつかを `名前 回数` の行にする。 */
-function topLines(counter: Readonly<Record<string, number>>, limit: number): readonly string[] {
-  return Object.entries(counter)
-    .sort(([, a], [, b]) => b - a)
+/**
+ * 宣言されたスキルの起動を、多い順に `名前 回数` の行にする。
+ *
+ * @remarks
+ * **宣言された名前だけを通します。**記録に現れる `/<名前>` にはツール自身の組み込みが混ざり、
+ * それを名前で除外しようとすると、ツールが組み込みを増やすたびに追いかけることになります。
+ * 数える対象はこのリポジトリが宣言したスキルなので、**宣言の側を通行証にします**。
+ */
+function invocationLines(
+  counts: TranscriptCounts,
+  declared: readonly string[],
+  limit: number,
+): readonly string[] {
+  return declared
+    .map((name) => ({ name, count: counts.commands[name] ?? 0 }))
+    .filter(({ count }) => count > 0)
+    .sort((a, b) => b.count - a.count)
     .slice(0, limit)
-    .map(([name, count]) => `  ${name}: ${count}`);
+    .map(({ name, count }) => `  ${name}: ${count}`);
 }
 
 /**
@@ -121,14 +138,14 @@ export function reportTranscript(
     return ["", `⚠ ${NO_TRANSCRIPT_MESSAGE}`];
   }
 
-  const skills = topLines(counts.skills, 12);
+  const invocations = invocationLines(counts, context.declared, 12);
   const lines = [
     "",
-    `記録: ${context.files} 行（解釈できなかった行 ${context.unparsable}）`,
+    `記録: ${context.files} 行 / 置き場 ${context.places} 件（解釈できなかった行 ${context.unparsable}）`,
     `やり取り ${counts.turns} / 道具の失敗 ${counts.toolErrors} / 中断 ${counts.interruptions}`,
     "",
     "スキルの起動:",
-    ...(skills.length > 0 ? skills : ["  なし"]),
+    ...(invocations.length > 0 ? invocations : ["  なし"]),
     "",
     `一度も起動されなかったスキル: ${context.never.length} 本`,
     "  ※ 利用の型を見ずに退役の根拠にしない（ADR 0160 決定 3）",

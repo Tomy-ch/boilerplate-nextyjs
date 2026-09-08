@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Analyze the current working-tree changes (staged + unstaged), group them into appropriately-scoped commits with the project's prefix convention (Feat / Fix / Refactor / Perf / Docs / Test / Build / CI / Chore / Style / Revert), and execute each commit in Japanese after user approval. Pre-flight also checks whether the current branch's PR is already merged and, if so, recommends cutting a fresh branch from the base before committing. Commits are made with `git commit --no-verify` to skip lefthook during the split; after all commits succeed, the command runs the lefthook-defined commands directly plus `pnpm fix` as a final verification gate (lefthook itself is bypassed because it skips checks when nothing is staged). Respects CLAUDE.md's git rules (no direct commits to protected branches, no force-push, no auto-push after PR amend, Co-Authored-By footer, HEREDOC commit messages).
+description: Analyze the current working-tree changes (staged + unstaged), group them into appropriately-scoped commits with the project's prefix convention (Feat / Fix / Refactor / Perf / Docs / Test / Build / CI / Chore / Style / Revert), and execute each commit in Japanese after user approval. Pre-flight also checks whether the current branch's PR is already merged and, if so, recommends cutting a fresh branch from the base before committing. Commits are made with `git commit --no-verify` to skip lefthook during the split; after all commits succeed, the command formats only the Markdown it wrote and reports which gates were left to CI, which is the authority on them (AGENTS.md: do not pre-run the gates). Respects CLAUDE.md's git rules (no direct commits to protected branches, no force-push, no auto-push after PR amend, Co-Authored-By footer, HEREDOC commit messages).
 argument-hint: [--dry-run] [--scope=staged|all]
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(git reset:*), Bash(git fetch:*), Bash(git switch:*), Bash(gh pr view:*), Bash(pnpm fix:*), Bash(pnpm lint:*), Bash(pnpm md-lint:*), Bash(pnpm typecheck:*), Read, AskUserQuestion
 ---
@@ -11,7 +11,7 @@ You have been invoked via `/commit`. Argument string: `$ARGUMENTS`
 
 This command analyzes uncommitted changes in the working tree and produces one or more git commits with appropriate granularity and the project's prefix convention. All commit messages are in Japanese, per `CLAUDE.md`.
 
-This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` (currently `pnpm lint:ci` / `pnpm md-lint`) do not fire N times during multi-commit splits. Instead, after all commits succeed, Step 6 runs each lefthook-defined `pre-commit` command directly plus `pnpm fix` as a single verification pass. We do not call `lefthook run pre-commit` itself because lefthook skips registered commands when nothing is staged (which is exactly the case after this command stages and commits everything).
+This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` (currently `pnpm lint:ci` / `pnpm md-lint`) do not fire N times during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
 
 ## Step 0. Auto-format
 
@@ -164,15 +164,14 @@ Build a list of proposed commits with appropriate granularity. Each item:
 
 ### Lefthook notice
 
-Along with the grouping proposal, display the lefthook commands that will be **skipped** during the commit phase but **executed directly in Step 6** as a verification gate. Read them dynamically from `.lefthook.yaml` (the list is configuration, not hardcoded). Example output matching the config as it currently stands:
+Along with the grouping proposal, display the lefthook commands that will be **skipped** during the commit phase and **left to CI**. Read them dynamically from `.lefthook.yaml` (the list is configuration, not hardcoded). Example output matching the config as it currently stands:
 
 ```txt
 This command will run `git commit --no-verify` on every commit.
-The following lefthook pre-commit commands will be SKIPPED during commits but
-EXECUTED automatically in Step 6 (verification) after all commits succeed:
+The following lefthook pre-commit commands are SKIPPED here and left to CI,
+which is the authority on whether they pass:
   - lint     (pnpm lint:ci)
   - md-lint  (pnpm md-lint)   ※ glob: *.md
-Plus `pnpm fix` as a final formatting pass.
 ```
 
 `pre-push` commands (currently `pnpm typecheck`) are **not** part of this gate — they stay on the push path, which this command never triggers.
@@ -236,60 +235,50 @@ If `git add` or `git commit` fails for any group (file-path typo, mid-operation 
 
 ## Step 6. Verification
 
-After all commits succeed, run a verification gate composed of (a) each command defined under `pre-commit:` `commands:` in `.lefthook.yaml` and (b) `pnpm fix` as a final formatting pass. Do NOT run `lefthook run pre-commit` itself — for the reason the introduction states it would report "no matching staged files" and exit without checking anything. Instead, execute each command directly.
+**Do not run the gates here.** `AGENTS.md`'s *Do not pre-run the gates* is explicit that the hooks and
+CI run them and that **CI is the authority**; running `pnpm lint:ci` / `pnpm md-lint` over the whole
+repository after committing does not make the verdict more true, and on a loaded host the duplicate
+run is itself a source of failures that have nothing to do with the change. `make load-status` prints
+which gates run locally right now, and that band is measured rather than guessed.
+
+So this step does two things only:
 
 ### Procedure
 
-1. Re-read `.lefthook.yaml` and enumerate `pre-commit.commands.*.run` values. Skip this step if `.lefthook.yaml` is absent.
-2. Run each command **sequentially** (clearer output than parallel; the user sees which step failed if any). For each, capture the exit status and a short tail of the output.
-3. After all lefthook-defined commands finish, run `pnpm fix`. If `pnpm fix` modifies any tracked file, surface the diff to the user — it indicates the committed state was not fully formatted, and the user must decide whether to stage and commit those fixes.
-4. Summarize results to the user using a table format:
+1. **Format what this run touched, and nothing else.** Markdown written by this run:
+   `pnpm exec markdownlint-cli2 --no-globs --fix <paths>`. `--no-globs` is load-bearing — without it
+   the configured `globs` are *added* to your arguments and the whole tree is rewritten.
+2. **Report which gates were deferred**, reading them from `.lefthook.yaml` rather than a list here:
 
    ```txt
-   検証コマンドの実行結果:
-     - pnpm lint:ci   → OK / FAIL
-     - pnpm md-lint   → OK / FAIL
-     - pnpm fix       → no changes / changes detected
+   検証は CI が持ちます。手元では回していません。
+     - pre-commit で走るもの: <.lefthook.yaml の pre-commit.commands から列挙>
+     - pre-push で走るもの:   <同 pre-push から列挙>
    ```
 
-5. If any command **fails**, report the failure summary (exit code + last lines of output) and stop. Do NOT roll back commits — the failure is informational; the user decides whether to add fix-up commits or amend. Tell the user explicitly:
+If formatting changed a tracked file, surface the diff — the committed state was not formatted, and
+the user decides whether to stack a fix-up commit.
 
-   ```txt
-   検証で失敗があります。push 前に修正してください。
-   失敗したコマンド: <name> (<command>)
-   ```
+### Why this step no longer runs the gates
 
-6. If all commands **pass** and `pnpm fix` produced no changes, proceed to Step 7.
-
-### Skipping verification
-
-If the user passes `--no-verify` to `/commit` itself (a future-compatible flag), or if `.lefthook.yaml` is absent, skip this step entirely and note it in the Step 7 report. The default behavior is to run verification.
+`AGENTS.md` carries both this instruction and, under *Code Style*, a line telling you to run
+`pnpm fix` / `pnpm lint:ci` before committing. **Those two disagree, and this skill does not resolve
+the disagreement** — it follows the standing operating rule (the gates are CI's, pushes go
+`--no-verify`) and leaves the contradiction visible for a human to settle in `AGENTS.md`.
 
 ## Step 7. Push Policy and Final Reminder
 
 - **Do not auto-push** (per `CLAUDE.md` git rules).
-- After Step 6 finishes (whether all checks passed or not), report to the user. The template depends on the verification outcome:
-
-  When all checks passed:
+- After Step 6 finishes, report to the user:
 
   ```txt
-  N 件のコミットを作成し、検証コマンドも全て成功しました。
-  プッシュは手動で実行してください: `git push`
+  N 件のコミットを作成しました。
+  検証は CI が持ちます（手元では回していません）。
+  プッシュは手動で実行してください: `git push --no-verify`
   ```
 
-  When some checks failed:
-
-  ```txt
-  N 件のコミットを作成しましたが、Step 6 の検証で失敗があります。
-  失敗内容を修正してから push してください。
-  ```
-
-  When verification was skipped (no `.lefthook.yaml` or explicit skip):
-
-  ```txt
-  N 件のコミットを作成しました（検証はスキップしました）。
-  push 前に手動で動作確認してください。
-  ```
+  When Step 6's formatting changed a tracked file, say so and name the files — the committed state
+  was not formatted, and the user decides whether to stack a fix-up commit.
 
 - When working on an existing PR branch, follow `CLAUDE.md` and ask before pushing:
   「変更はローカルにコミット済みです。これらの変更をプルリクエストにプッシュしますか？」

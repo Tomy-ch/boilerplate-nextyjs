@@ -51,8 +51,18 @@ Apply these rules when producing each side of the pair.
 
 ### Language
 
-- **English is canonical.** The English file is the source of truth.
-- **Japanese is a translation.** It must be kept in sync with the canonical English version.
+**Below v1.0.0, a pair exists in exactly one place: `.claude/skills/<name>/`.** ADR
+[0140](../../../docs/adr/0140-documentation-operations.md) keeps Japanese canonical on the
+suffix-less path and forbids creating a `*.ja.md` beside it; `SKILL.md` is English only because
+Claude Code parses the frontmatter (ADR 0154). So a README or a `docs/**` document has **no
+translation to sync** — running this skill on one would create the very file 0140 forbids. Verify
+before assuming otherwise: `find src docs -name '*.ja.md'` returns nothing today.
+
+- **For a `SKILL` pair — English is canonical.** The English file is the source of truth, and
+  `SKILL.ja.md` is the translation kept in sync with it.
+- **Everywhere else, below v1.0.0 — Japanese on the suffix-less path is canonical, and there is no
+  translation.** The EN-canonical + `docs/ja/**` mirror described under *Targets* is the shape 0140
+  switches to **at the v1.0.0 boundary**, not the shape in force now.
 
 ### SKILL files (`.claude/skills/<name>/`)
 

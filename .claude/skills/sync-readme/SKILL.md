@@ -28,12 +28,15 @@ This skill **MUST call `AskUserQuestion` immediately after invocation** to confi
 
 Do NOT read the file tree or write any file until these are confirmed.
 
-This skill always operates on the **canonical** (English) README. Translation files (`README.ja.md` etc.) are re-synced automatically by chaining into the `canonicalize-doc` skill after the canonical update completes — do NOT modify translation files inline within this skill.
+This skill always operates on the **canonical** README — and below v1.0.0 that is the **Japanese**
+file on the suffix-less path. ADR [0140](../../../docs/adr/0140-documentation-operations.md) keeps
+Japanese canonical there and forbids creating a `*.ja.md` beside it until the v1.0.0 boundary, so a
+README in this repository has **no translation sibling**: `find src docs -name '*.ja.md'` returns
+nothing. Do not create one, and do not chain into `canonicalize-doc` to "re-sync" a file that must
+not exist.
 
-If the target the user supplied is itself a translation file (e.g., `README.ja.md` without a sibling `README.md`), ask whether to:
-
-- Treat it as the canonical (rare; only when no English version exists).
-- Generate the canonical first via the `canonicalize-doc` skill, then re-run this skill against the canonical.
+If a `README.ja.md` ever does turn up next to a `README.md`, that is a finding to report, not a pair
+to sync — 0140 decides which side survives, and this skill does not.
 
 ## How the Sync Works
 
@@ -64,8 +67,7 @@ Compare the README's documented entries against the actual entries:
 
 ## Repo Conventions
 
-- The canonical README is `README.md` (English). The Japanese translation, if present, is `README.ja.md` co-located in the same directory.
-- When updating both, keep heading structure, list order, and table columns 1:1 between the two files.
+- The canonical README is `README.md`, written in **Japanese** below v1.0.0 (ADR 0140). There is no co-located translation, and this skill does not create one.
 - Preserve existing section ordering and styling (tables vs lists vs prose) unless the user explicitly asks to restructure.
 - Preserve existing prose that is still accurate. Do not rewrite for stylistic reasons — minimize churn.
 
@@ -126,17 +128,15 @@ Rewrite the README so it reflects reality:
 - Confirm no real entry (other than ignored ones) is missing.
 - Confirm no nested README was inadvertently expanded.
 
-## Step 6. Chain into `canonicalize-doc` to sync the translation
+## Step 6. Confirm there is no translation to sync
 
-After the canonical README is written:
+Below v1.0.0 there is nothing to chain into: the README just written **is** the canonical, and 0140
+forbids a `*.ja.md` beside it. Check that the update did not produce one, and report the canonical as
+updated standalone.
 
-1. Check whether a sibling translation file exists (e.g., `README.ja.md` next to the updated `README.md`).
-2. If it does, invoke the `canonicalize-doc` skill via the Skill tool with:
-    - source path: the canonical README that was just updated
-    - direction: `translation-from-canonical` (or `sync-both` with the canonical as source of truth, if the translation already exists)
-3. If no translation file exists, skip this step and report that the canonical was updated standalone.
-
-The chained `canonicalize-doc` call will perform its own `AskUserQuestion` confirmation; that is expected and not redundant — it lets the user veto the translation sync if needed.
+The one place this repository does keep a pair is `.claude/skills/<name>/SKILL.md` + `SKILL.ja.md`,
+which exists because Claude Code parses the frontmatter in English (ADR 0154). That pair belongs to
+`manage-skill`, not here.
 
 ## Step 7. Format the written files
 

@@ -8,7 +8,7 @@
 
 このコマンドは作業ツリーの未コミット変更を分析し、適切な粒度とプロジェクトの prefix 規約に沿った 1 つ以上の git コミットを作る。コミットメッセージはすべて日本語（`CLAUDE.md` に従う）。
 
-このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm md-lint`）が N 回発火しないようにするため。代わりに全コミット成功後、Step 6 で lefthook 定義の各 `pre-commit` コマンドと `pnpm fix` を 1 回の検証パスとして直接実行する。`lefthook run pre-commit` 自体を呼ばないのは、staged が空のとき lefthook が登録コマンドをスキップしてしまうため（このコマンドが staging とコミットを終えた後は、まさにその状態になる）。
+このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm md-lint`）が N 回発火しないようにするため。あとから回すこともしない。`AGENTS.md` の *Do not pre-run the gates* がゲートを hook と CI に置き、**判定は CI が正**としているためである。Step 6 はこの実行が書いたものだけを整形し、どのゲートを CI へ預けたかを報告する。
 
 ## Step 0. 自動フォーマット
 
@@ -161,15 +161,14 @@ git diff --name-only
 
 ### lefthook の通知
 
-分割提案とあわせて、コミット段階では**スキップ**され Step 6 で検証ゲートとして**直接実行**される lefthook コマンドを表示する。一覧は `.lefthook.yaml` から動的に読む（設定であり、ハードコードしない）。現在の設定に対応する出力例:
+分割提案とあわせて、コミット段階では**スキップ**され、そのまま **CI へ預けられる** lefthook コマンドを表示する。一覧は `.lefthook.yaml` から動的に読む（設定であり、ハードコードしない）。現在の設定に対応する出力例:
 
 ```txt
 This command will run `git commit --no-verify` on every commit.
-The following lefthook pre-commit commands will be SKIPPED during commits but
-EXECUTED automatically in Step 6 (verification) after all commits succeed:
+The following lefthook pre-commit commands are SKIPPED here and left to CI,
+which is the authority on whether they pass:
   - lint     (pnpm lint:ci)
   - md-lint  (pnpm md-lint)   ※ glob: *.md
-Plus `pnpm fix` as a final formatting pass.
 ```
 
 `pre-push` のコマンド（現状は `pnpm typecheck`）はこのゲートに**含まない**。それらは push 経路に留まり、このコマンドは push を起動しない。
@@ -233,60 +232,49 @@ EOF
 
 ## Step 6. 検証
 
-全コミット成功後、(a) `.lefthook.yaml` の `pre-commit:` `commands:` 配下で定義された各コマンドと、(b) 最終フォーマットパスとしての `pnpm fix` からなる検証ゲートを回す。`lefthook run pre-commit` 自体は実行しないこと — 冒頭で述べた理由により「一致する staged ファイルなし」として何も検査せず終了してしまう。代わりに各コマンドを直接実行する。
+**ここでゲートを回さない。** `AGENTS.md` の *Do not pre-run the gates* は「hook と CI が回す。
+**判定は CI が正**」と明言している。コミット後にリポジトリ全体へ `pnpm lint:ci` / `pnpm md-lint` を
+掛け直しても判定が真になるわけではなく、負荷の高いホストでは二重実行そのものが、変更と無関係な失敗の
+発生源になる。`make load-status` はいまローカルでどのゲートが走る帯かを表示し、その帯は推測ではなく実測で決まる。
+
+したがってこのステップがやることは 2 つだけである。
 
 ### 手順
 
-1. `.lefthook.yaml` を読み直し、`pre-commit.commands.*.run` の値を列挙する。`.lefthook.yaml` が無ければこのステップをスキップする。
-2. 各コマンドを**逐次**実行する（並列より出力が明快で、どこで失敗したかがユーザに見える）。それぞれ終了ステータスと出力の末尾を短く捕捉する。
-3. lefthook 定義のコマンドがすべて終わったら `pnpm fix` を実行する。`pnpm fix` が追跡対象ファイルを変更した場合は、その差分をユーザへ提示する — コミットした状態が完全にはフォーマットされていなかったことを示すため、それらの修正を staging してコミットするかはユーザが判断する。
-4. 結果を表形式でユーザへ要約する:
+1. **この実行が触ったものだけを整形する。**この実行が書いた Markdown に対して
+   `pnpm exec markdownlint-cli2 --no-globs --fix <パス>`。`--no-globs` は効力を持つ ——
+   付けないと設定の `globs` が引数へ**追加され**、木全体が書き換わる。
+2. **どのゲートを CI へ預けたかを報告する。**ここに一覧を焼き込まず `.lefthook.yaml` から読む。
 
    ```txt
-   検証コマンドの実行結果:
-     - pnpm lint:ci   → OK / FAIL
-     - pnpm md-lint   → OK / FAIL
-     - pnpm fix       → no changes / changes detected
+   検証は CI が持ちます。手元では回していません。
+     - pre-commit で走るもの: <.lefthook.yaml の pre-commit.commands から列挙>
+     - pre-push で走るもの:   <同 pre-push から列挙>
    ```
 
-5. いずれかのコマンドが**失敗**した場合は、失敗サマリ（終了コード + 出力末尾）を報告して停止する。コミットはロールバック**しない** — 失敗は情報提供であり、修正コミットを積むか amend するかはユーザが決める。ユーザへ明示的に伝える:
+整形が追跡下のファイルを変えたら差分を提示する。コミットした状態が整形されていなかったということで、
+追加のコミットを積むかは user が決める。
 
-   ```txt
-   検証で失敗があります。push 前に修正してください。
-   失敗したコマンド: <name> (<command>)
-   ```
+### このステップがゲートを回さなくなった理由
 
-6. すべて**成功**し `pnpm fix` が変更を生まなかった場合は Step 7 へ進む。
-
-### 検証のスキップ
-
-`/commit` 自体へ `--no-verify` が渡された場合（将来互換のフラグ）、または `.lefthook.yaml` が無い場合は、このステップを丸ごとスキップし、Step 7 の報告にその旨を記す。既定の挙動は検証を実行することである。
+`AGENTS.md` はこの指示と、*Code Style* 節の「コミット前に `pnpm fix` / `pnpm lint:ci` を回せ」を
+**両方**持っている。**この 2 つは食い違っており、このスキルはその食い違いを解かない** ——
+常設の運用規律（ゲートは CI のもの、push は `--no-verify`）に従い、矛盾は `AGENTS.md` の上で人が
+決着させるために見えるまま残す。
 
 ## Step 7. push 方針と最終リマインド
 
 - **自動 push しない**（`CLAUDE.md` の git 規約に従う）。
-- Step 6 が終わったら（全チェック成功か否かに関わらず）ユーザへ報告する。テンプレートは検証結果に応じて変える:
-
-  すべて成功した場合:
+- Step 6 が終わったらユーザへ報告する:
 
   ```txt
-  N 件のコミットを作成し、検証コマンドも全て成功しました。
-  プッシュは手動で実行してください: `git push`
+  N 件のコミットを作成しました。
+  検証は CI が持ちます（手元では回していません）。
+  プッシュは手動で実行してください: `git push --no-verify`
   ```
 
-  一部が失敗した場合:
-
-  ```txt
-  N 件のコミットを作成しましたが、Step 6 の検証で失敗があります。
-  失敗内容を修正してから push してください。
-  ```
-
-  検証をスキップした場合（`.lefthook.yaml` 無し、または明示的スキップ）:
-
-  ```txt
-  N 件のコミットを作成しました（検証はスキップしました）。
-  push 前に手動で動作確認してください。
-  ```
+  Step 6 の整形が追跡下のファイルを変えたなら、そう述べてファイル名を挙げる —— コミットした状態が
+  整形されていなかったということで、追加のコミットを積むかは user が決める。
 
 - 既存 PR ブランチで作業している場合は `CLAUDE.md` に従い、push 前に確認する:
   「変更はローカルにコミット済みです。これらの変更をプルリクエストにプッシュしますか？」

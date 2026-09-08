@@ -48,8 +48,18 @@
 
 ### 言語
 
-- **英語が canonical。** 英語ファイルが source of truth。
-- **日本語は翻訳。** canonical な英語版との同期を維持する。
+**v1.0.0 未満において、対が存在するのは `.claude/skills/<name>/` の 1 か所だけである。**
+ADR [0140](../../../docs/adr/0140-documentation-operations.md) は日本語をサフィックス無しのパスの
+canonical に置き、その隣に `*.ja.md` を作ることを禁じている。`SKILL.md` が英語なのは Claude Code が
+frontmatter を解釈するツール要件による例外（ADR 0154）。したがって README や `docs/**` の文書には
+**同期すべき翻訳が無い** —— このスキルをそれらに当てると、0140 が禁じているファイルをまさに作ることになる。
+前提を置く前に確かめること: `find src docs -name '*.ja.md'` は今日いま何も返さない。
+
+- **`SKILL` の対では、英語が canonical。** 英語ファイルが source of truth で、`SKILL.ja.md` が
+  それに追従する翻訳である。
+- **それ以外は、v1.0.0 未満ではサフィックス無しのパスの日本語が canonical で、翻訳は存在しない。**
+  *対象* に挙げた「英語 canonical + `docs/ja/**` mirror」は、0140 が **v1.0.0 の境界で切り替える**形であって、
+  いま効いている形ではない。
 
 ### SKILL ファイル（`.claude/skills/<name>/`）
 

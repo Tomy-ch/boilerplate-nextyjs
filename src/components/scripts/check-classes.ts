@@ -165,7 +165,7 @@ function classRegionsIn(source: string): string[] {
     }
   }
 
-  return regions.sort((a, b) => a.at - b.at).map(({ text }) => text);
+  return regions.toSorted((a, b) => a.at - b.at).map(({ text }) => text);
 }
 
 /**

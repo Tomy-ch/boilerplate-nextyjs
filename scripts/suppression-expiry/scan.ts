@@ -155,9 +155,11 @@ function zapSuppressions(root: string): readonly Suppression[] {
 
 /** YAML の並びの 1 項目の行。引用の有無を問わず、行末コメントがあればそれも取る。 */
 function listItemLine(entry: string): RegExp {
-  const literal = entry.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const literal = entry.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
-  return new RegExp(`^\\s*-\\s*(?:"${literal}"|'${literal}'|${literal})\\s*(?:#\\s*(.*))?$`);
+  return new RegExp(
+    String.raw`^\s*-\s*(?:"${literal}"|'${literal}'|${literal})\s*(?:#\s*(.*))?$`,
+  );
 }
 
 /** 直上に続くコメント塊。行番号（1 始まり）と、`#` を落として繋いだ本文。 */

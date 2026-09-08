@@ -67,7 +67,7 @@ export const INJECTED_MARKERS: readonly string[] = [
  */
 export const SECRET_PATTERNS: readonly RegExp[] = [
   /\bgh[pousr]_[A-Za-z0-9]{16,}/,
-  /\bgithub_pat_[A-Za-z0-9_]{20,}/,
+  /\bgithub_pat_\w{20,}/,
   /\b(?:sk|pk|rk)-[A-Za-z0-9_-]{16,}/,
   /\bAKIA[0-9A-Z]{16}\b/,
   /\bASIA[0-9A-Z]{16}\b/,
@@ -77,13 +77,13 @@ export const SECRET_PATTERNS: readonly RegExp[] = [
   /\b[A-Za-z][A-Za-z0-9+.-]*:\/\/[^\s:@/]+:[^\s:@/]+@/,
   // 単語境界を前に置かないのは、環境変数名の形をした鍵を取り逃さないため —— `\btoken\b` は
   // `SONAR_TOKEN=` に当たらない。
-  /(?:token|secret|credential|password|passwd|api[_-]?key)\s*[:=]\s*["']?[A-Za-z0-9_\-.+/]{12,}/i,
+  /(?:token|secret|credential|password|passwd|api[_-]?key)\s*[:=]\s*["']?[\w\-.+/]{12,}/i,
   // `pass` / `pwd` は語として短く、`passing` や `cwd` に当たる。前後を区切って
   // `DB_PASS=` や `pwd:` の形だけを拾う。
-  /(?:^|[\s_\-.])(?:pass|pwd)\s*[:=]\s*["']?[A-Za-z0-9_\-.+/]{8,}/i,
+  /(?:^|[\s_\-.])(?:pass|pwd)\s*[:=]\s*["']?[\w\-.+/]{8,}/i,
   // `curl -u user:secret` の形。URL の userinfo とは別の経路で、こちらは `://` を持たない。
   /\s-u\s+[^\s:@/]+:[^\s]{6,}/,
-  /\bBearer\s+[A-Za-z0-9_\-.=]{20,}/i,
+  /\bBearer\s+[\w\-.=]{20,}/i,
 ];
 
 /** 既定の上限。1 窓ぶんとして読ませても費用が見合う量。 */

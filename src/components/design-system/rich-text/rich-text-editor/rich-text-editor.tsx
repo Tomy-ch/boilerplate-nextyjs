@@ -100,7 +100,7 @@ function toolbarStopIndex(
 ): number {
   return Math.max(
     0,
-    buttons.findIndex((button) => button === active),
+    buttons.indexOf(active),
   );
 }
 

@@ -63,7 +63,7 @@ export type Summary = {
   readonly dropped: readonly string[];
 };
 
-const KINDS_LINE = /^kinds:\s*(.*)$/;
+const KINDS_LINE = /^kinds:(.*)$/;
 
 /**
  * 最終行から分類を取り出す。
@@ -198,11 +198,11 @@ export function parseSections(body: string): Readonly<Record<string, string>> {
   };
 
   for (const line of body.split("\n")) {
-    const heading = /^##\s+(.+?)\s*$/.exec(line);
+    const heading = /^##(?!#)(.*)$/.exec(line)?.[1]?.trim();
 
-    if (heading !== null) {
+    if (heading) {
       flush();
-      current = known.has(heading[1] ?? "") ? (heading[1] as string) : null;
+      current = known.has(heading) ? heading : null;
 
       continue;
     }

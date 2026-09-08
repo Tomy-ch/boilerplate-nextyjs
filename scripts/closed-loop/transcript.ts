@@ -64,24 +64,25 @@ export function countEvents(events: readonly Event[]): TranscriptCounts {
       lastAt = lastAt === null || event.at > lastAt ? event.at : lastAt;
     }
 
-    if (event.kind === "prompt" || event.kind === "assistant") {
-      turns += 1;
-    }
-
-    if (event.kind === "tool_use" && event.name !== undefined) {
-      bump(tools, event.name);
-    }
-
-    if (event.kind === "tool_result" && event.ok === false) {
-      toolErrors += 1;
-    }
-
-    if (event.kind === "interrupt") {
-      interruptions += 1;
-    }
-
-    if (event.kind === "command" && event.name !== undefined) {
-      bump(commands, event.name);
+    switch (event.kind) {
+      case "prompt":
+      case "assistant":
+        turns += 1;
+        break;
+      case "tool_use":
+        if (event.name !== undefined) bump(tools, event.name);
+        break;
+      case "tool_result":
+        if (event.ok === false) toolErrors += 1;
+        break;
+      case "interrupt":
+        interruptions += 1;
+        break;
+      case "command":
+        if (event.name !== undefined) bump(commands, event.name);
+        break;
+      default:
+        break;
     }
   }
 

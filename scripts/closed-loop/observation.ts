@@ -127,6 +127,58 @@ function numberOf(raw: string | undefined): number | undefined {
 }
 
 /**
+ * ブロックの各行を、スカラと段の区間へ振り分ける。
+ *
+ * @remarks
+ * 切り出しと読み取りを分けています。1 つの関数が「どこからどこまでか」と「各行が何か」を
+ * 同時に決めると、片方だけを直したい人が両方を読むことになります。
+ */
+function readBlock(block: readonly string[]): {
+  readonly scalars: Map<string, string>;
+  readonly phases: ObservedPhase[];
+} {
+  const scalars = new Map<string, string>();
+  const phases: ObservedPhase[] = [];
+  let phase: Partial<ObservedPhase> = {};
+
+  for (const line of block) {
+    const item = /^\s*-\s+from:(.*)$/.exec(line)?.[1]?.trim();
+
+    if (item) {
+      phase = { from: item };
+
+      continue;
+    }
+
+    const nested = /^\s+(to|sec):(.*)$/.exec(line);
+    const nestedValue = nested?.[2]?.trim();
+
+    if (nested !== null && nestedValue) {
+      if (nested[1] === "to") {
+        phase = { ...phase, to: nestedValue };
+      } else {
+        phase = { ...phase, sec: numberOf(nestedValue) };
+      }
+
+      if (phase.from !== undefined && phase.to !== undefined && phase.sec !== undefined) {
+        phases.push({ from: phase.from, to: phase.to, sec: phase.sec });
+        phase = {};
+      }
+
+      continue;
+    }
+
+    const scalar = /^([A-Za-z]+):(.*)$/.exec(line);
+
+    if (scalar?.[1] !== undefined) {
+      scalars.set(scalar[1], (scalar[2] ?? "").trim());
+    }
+  }
+
+  return { scalars, phases };
+}
+
+/**
  * issue 本文から観測を読み戻す。
  *
  * @remarks
@@ -145,43 +197,7 @@ export function parseObservation(body: string): Observation | undefined {
   }
 
   const end = lines.findIndex((line, index) => index > start && line.trim() === FENCE);
-  const block = lines.slice(start + 1, end < 0 ? lines.length : end);
-  const scalars = new Map<string, string>();
-  const phases: ObservedPhase[] = [];
-  let phase: Partial<ObservedPhase> = {};
-
-  for (const line of block) {
-    const item = /^\s*-\s+from:\s*(.+?)\s*$/.exec(line);
-
-    if (item !== null) {
-      phase = { from: item[1] };
-
-      continue;
-    }
-
-    const nested = /^\s+(to|sec):\s*(.+?)\s*$/.exec(line);
-
-    if (nested !== null) {
-      if (nested[1] === "to") {
-        phase = { ...phase, to: nested[2] };
-      } else {
-        phase = { ...phase, sec: numberOf(nested[2]) };
-      }
-
-      if (phase.from !== undefined && phase.to !== undefined && phase.sec !== undefined) {
-        phases.push({ from: phase.from, to: phase.to, sec: phase.sec });
-        phase = {};
-      }
-
-      continue;
-    }
-
-    const scalar = /^([A-Za-z]+):\s*(.*)$/.exec(line);
-
-    if (scalar !== null && scalar[1] !== undefined) {
-      scalars.set(scalar[1], scalar[2] ?? "");
-    }
-  }
+  const { scalars, phases } = readBlock(lines.slice(start + 1, end < 0 ? lines.length : end));
 
   const windowId = scalars.get("windowId")?.trim();
 

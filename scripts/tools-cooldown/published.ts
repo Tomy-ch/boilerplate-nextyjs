@@ -75,7 +75,10 @@ export function routeOf(key: string): Route {
 function nameOf(key: string): string {
   const [, ...rest] = key.split(":");
 
-  return rest.join(":").replace(/\[.*$/, "");
+  const name = rest.join(":");
+  const optionAt = name.indexOf("[");
+
+  return optionAt < 0 ? name : name.slice(0, optionAt);
 }
 
 /** 応答の値を日時として読む。読めなければ落とす —— ゼロ値は「公開から数十年」と読まれる。 */
@@ -83,7 +86,7 @@ function asDate(value: unknown, what: string): Date {
   const at = typeof value === "string" ? new Date(value) : new Date(Number.NaN);
 
   if (Number.isNaN(at.getTime())) {
-    throw new Error(`${what} を日時として読めません`);
+    throw new TypeError(`${what} を日時として読めません`);
   }
 
   return at;
@@ -107,9 +110,7 @@ async function githubReleaseAt(pin: PinRef, fetchJson: FetchJson): Promise<Date>
     }
   }
 
-  return Promise.reject(
-    new Error(`${repo} に release v${pin.version} / ${pin.version} がありません`),
-  );
+  throw new Error(`${repo} に release v${pin.version} / ${pin.version} がありません`);
 }
 
 /** npm registry。`time` に版ごとの公開日時が並ぶ。 */

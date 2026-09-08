@@ -16,6 +16,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { errorMessage } from "../../lib/error-message.js";
+import { issueRefs } from "../format.js";
 import {
   buildConcernPrompt,
   INTEGRATION_LABEL,
@@ -172,11 +173,11 @@ function applyRollup(slug: string, concerns: readonly Concern[]): void {
       const number = Number.parseInt(url.split("/").at(-1) ?? "", 10);
 
       if (!Number.isFinite(number)) {
-        throw new Error(`URL から番号を読めない: ${url}`);
+        throw new TypeError(`URL から番号を読めない: ${url}`);
       }
 
       console.log(
-        `  #${number} ${concern.title}  ← ${concern.sources.map((n) => `#${n}`).join(" ")}`,
+        `  #${number} ${concern.title}  ← ${issueRefs(concern.sources)}`,
       );
       created.push({ issue: number, sources: concern.sources });
     } catch (error) {

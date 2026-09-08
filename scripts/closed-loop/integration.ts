@@ -29,7 +29,7 @@ export type Concern = {
   readonly sources: readonly number[];
 };
 
-const SOURCES_LINE = /^sources:\s*(.*)$/;
+const SOURCES_LINE = /^sources:(.*)$/;
 
 /**
  * 畳む対象を選ぶ。
@@ -126,12 +126,12 @@ export function parseConcerns(output: string, known: readonly number[]): readonl
   };
 
   for (const raw of output.split("\n")) {
-    const line = raw.replace(/\s+$/, "");
-    const heading = /^##(?!#)\s*(.+?)\s*$/.exec(line);
+    const line = raw.trimEnd();
+    const heading = /^##(?!#)(.*)$/.exec(line)?.[1]?.trim();
 
-    if (heading !== null) {
+    if (heading) {
       flush();
-      title = heading[1];
+      title = heading;
 
       continue;
     }

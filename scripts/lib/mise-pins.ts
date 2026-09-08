@@ -96,7 +96,7 @@ function versionsByParser(text: string): ReadonlyMap<string, string> {
 
   for (const [key, value] of Object.entries(tools)) {
     if (typeof value !== "string") {
-      throw new Error(`${key} の版が文字列ではありません（テーブル形式の宣言は読めません）`);
+      throw new TypeError(`${key} の版が文字列ではありません（テーブル形式の宣言は読めません）`);
     }
 
     versions.set(key, value);

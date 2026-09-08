@@ -2,7 +2,7 @@
 // 入口([index.ts](index.ts))が持ち、ここは渡された文字列だけから答えを出す。
 
 /** 直接の取り込み先にしないブランチ。保護ブランチの一覧は [0150](../../docs/adr/0150-git-workflow.md) が持つ。 */
-const PROTECTED_BRANCHES = ["production", "staging", "develop"] as const;
+const PROTECTED_BRANCHES: readonly string[] = ["production", "staging", "develop"];
 
 /** 保護されたブランチ族の接頭辞。`release/v1.2.3` / `hotfix/1234-...` を族ごと弾く。 */
 const PROTECTED_PREFIXES = ["release/", "hotfix/"] as const;
@@ -78,7 +78,7 @@ export function isDryRun(argv: readonly string[]): boolean {
 export function refuseProtectedBranch(branch: string): string | null {
   const name = branch.trim();
   const isProtected =
-    PROTECTED_BRANCHES.some((protectedName) => protectedName === name) ||
+    PROTECTED_BRANCHES.includes(name) ||
     PROTECTED_PREFIXES.some((prefix) => name.startsWith(prefix));
 
   return isProtected ? `${PROTECTED_BRANCH_MESSAGE}（現在: ${name}）` : null;

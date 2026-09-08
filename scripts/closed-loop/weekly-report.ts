@@ -4,7 +4,7 @@
 // **順位は検討の入口であって結論ではない。**保持・簡素化・撤回を決めるのは人である
 // （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 1）。だから本文にその一行を残す。
 
-import { humanize } from "./format.js";
+import { humanize, issueRefs, percent } from "./format.js";
 import type { Period } from "./period.js";
 import {
   failureRate,
@@ -47,7 +47,7 @@ function clusterLines(
       `  [${String(cluster.score).padStart(4)}] ${cluster.key}` +
         `  件数${cluster.frequency} 影響${cluster.impact} 介入${cluster.humanIntervention}` +
         ` ${cluster.isRecurring ? "反復" : "単発"}`,
-      `         ${cluster.issues.map((number) => `#${number}`).join(" ")}`,
+      `         ${issueRefs(cluster.issues)}`,
     );
 
     // 順位だけでなく改善案そのものを並べる。GitHub を開かずに議題が読めるようにする。
@@ -75,7 +75,7 @@ function reevaluationLines(reevaluated: readonly Reevaluation[]): readonly strin
     const since =
       item.recurred.length === 0
         ? "再発なし"
-        : `再発 ${item.recurred.map((number) => `#${number}`).join(" ")}`;
+        : `再発 ${issueRefs(item.recurred)}`;
 
     lines.push(
       `  ${item.key}  #${item.landedIssue} を ${asDate(item.landedAt)} にクローズ → ${since}` +
@@ -99,7 +99,7 @@ function perWindowLines(issues: readonly FeedbackIssue[]): readonly string[] {
 
       return (
         `  #${issue.number} ${issue.observation.windowId}` +
-        `  失敗${rate === undefined ? "—" : `${(rate * 100).toFixed(1)}%`}` +
+        `  失敗${percent(rate)}` +
         ` 中断${issue.observation.interrupts ?? "—"}` +
         ` 待ち${wait === undefined ? "—" : humanize(wait)}`
       );
@@ -144,7 +144,7 @@ export function reportWeekly(input: WeeklyInput): readonly string[] {
     ...(input.waiting.length > 0
       ? [
           "",
-          `待ちが実装の時間を上回る窓: ${input.waiting.map((number) => `#${number}`).join(" ")}`,
+          `待ちが実装の時間を上回る窓: ${issueRefs(input.waiting)}`,
           "  実装を速くしても縮まない。レビューとマージの経路を見ること",
         ]
       : []),

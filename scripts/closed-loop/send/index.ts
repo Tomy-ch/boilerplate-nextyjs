@@ -132,7 +132,7 @@ function createIssue(slug: string, title: string, body: string, labels: readonly
   const number = Number.parseInt(url.split("/").at(-1) ?? "", 10);
 
   if (!Number.isFinite(number)) {
-    throw new Error(`issue の番号を読めませんでした: ${url}`);
+    throw new TypeError(`issue の番号を読めませんでした: ${url}`);
   }
 
   return number;

@@ -20,3 +20,24 @@ export function humanize(seconds: number): string {
 
   return `${(seconds / 3600).toFixed(1)} 時間`;
 }
+
+/**
+ * issue 番号の並びを `#12 #34` の形へ。
+ *
+ * @remarks
+ * 呼び出し側が本文の中で組むと、テンプレートの入れ子になって読む向きが 2 つに割れます。
+ * 番号の綴り方は 1 箇所で持ちます。
+ */
+export function issueRefs(numbers: readonly number[]): string {
+  return numbers.map((number) => `#${number}`).join(" ");
+}
+
+/**
+ * 割合を百分率の綴りへ。測っていないものは `—`。
+ *
+ * @remarks
+ * 未計測を `0%` へ倒しません。**測っていないことと、測って 0 だったことは別の所見**です。
+ */
+export function percent(rate: number | undefined): string {
+  return rate === undefined ? "—" : `${(rate * 100).toFixed(1)}%`;
+}

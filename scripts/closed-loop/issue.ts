@@ -61,6 +61,49 @@ function gapNote(gap: ReadingGap): readonly string[] {
   ];
 }
 
+/** 段の区間の節。打刻が 1 つ以下なら表を出さない —— 空の表は「測ったが 0 件」に読める。 */
+function phaseLines(phases: readonly { from: string; to: string; seconds: number }[]): string[] {
+  if (phases.length === 0) {
+    return ["区間なし（打刻が 1 つ以下）"];
+  }
+
+  return [
+    "| 区間 | 実測 |",
+    "| --- | --- |",
+    ...phases.map((phase) => `| ${phase.from} → ${phase.to} | ${humanize(phase.seconds)} |`),
+  ];
+}
+
+/** 打刻から出た所見の節。 */
+function anomalyLines(anomalies: readonly { kind: string; detail: string }[]): string[] {
+  if (anomalies.length === 0) {
+    return ["打刻の所見なし"];
+  }
+
+  return anomalies.map((anomaly) => `- **${anomaly.kind}** — ${anomaly.detail}`);
+}
+
+/**
+ * 読んだ結果の節。
+ *
+ * @remarks
+ * 落とした節は**落としたと書きます**。黙って省くと、書かれなかったことと落としたことが
+ * 同じ見た目になり、関門が働いた形跡が残りません。
+ */
+function readingLines(summary: Summary | undefined, gap: ReadingGap): string[] {
+  if (summary === undefined) {
+    return gapNote(gap);
+  }
+
+  return BODY_SECTIONS.flatMap((section) => {
+    const text = summary.dropped.includes(section)
+      ? "**この節は出口の関門で落とした**（秘密らしき形、または記録の逐語を含んでいた）。書かれなかったのではない。"
+      : (summary.sections[section] ?? "該当なし");
+
+    return [`## ${section}`, "", text, ""];
+  });
+}
+
 /**
  * issue の本文。
  *
@@ -93,15 +136,7 @@ export function renderIssueBody(
     "",
   ];
 
-  if (phases.length === 0) {
-    lines.push("区間なし（打刻が 1 つ以下）");
-  } else {
-    lines.push("| 区間 | 実測 |", "| --- | --- |");
-
-    for (const phase of phases) {
-      lines.push(`| ${phase.from} → ${phase.to} | ${humanize(phase.seconds)} |`);
-    }
-  }
+  lines.push(...phaseLines(phases));
 
   lines.push("", "## 回数", "");
 
@@ -118,28 +153,11 @@ export function renderIssueBody(
 
   lines.push("", "## 所見", "");
 
-  if (anomalies.length === 0) {
-    lines.push("打刻の所見なし");
-  } else {
-    for (const anomaly of anomalies) {
-      lines.push(`- **${anomaly.kind}** — ${anomaly.detail}`);
-    }
-  }
+  lines.push(...anomalyLines(anomalies));
 
   lines.push("", "---", "");
 
-  if (summary === undefined) {
-    lines.push(...gapNote(gap));
-  } else {
-    for (const section of BODY_SECTIONS) {
-      const dropped = summary.dropped.includes(section);
-      const text = dropped
-        ? "**この節は出口の関門で落とした**（秘密らしき形、または記録の逐語を含んでいた）。書かれなかったのではない。"
-        : (summary.sections[section] ?? "該当なし");
-
-      lines.push(`## ${section}`, "", text, "");
-    }
-  }
+  lines.push(...readingLines(summary, gap));
 
   lines.push(
     "---",

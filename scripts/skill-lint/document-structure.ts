@@ -29,12 +29,14 @@ export function* eachLineOutsideFence(
   const lines = content.split("\n");
   let fence: string | null = null;
   for (const [i, line] of lines.entries()) {
-    const [, marker, info] = /^\s*(`{3,}|~{3,})(.*)$/.exec(line) ?? [];
+    const opener = /^[ \t]*(`{3,}|~{3,})/.exec(line);
+    const marker = opener?.[1];
+    const info = opener === null ? undefined : line.slice(opener[0].length);
     if (fence) {
       const closes =
         marker !== undefined &&
         info !== undefined &&
-        marker.charAt(0) === fence.charAt(0) &&
+        marker.startsWith(fence.charAt(0)) &&
         marker.length >= fence.length &&
         info.trim() === "";
       if (closes) fence = null;
@@ -62,7 +64,7 @@ export function splitFrontmatter(content: string): Frontmatter | null {
 export function parseFrontmatterKeys(fmLines: string[]): Map<string, string> {
   const keys = new Map<string, string>();
   for (const [i, fmLine] of fmLines.entries()) {
-    const [, key, raw] = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(fmLine) ?? [];
+    const [, key, raw] = /^([\w-]+):(.*)$/.exec(fmLine) ?? [];
     if (key === undefined || raw === undefined) continue;
     let value = raw.trim();
     if (value === ">-" || value === ">" || value === "|" || value === "|-") {
@@ -81,8 +83,9 @@ export function parseFrontmatterKeys(fmLines: string[]): Map<string, string> {
 export function extractHeadings(content: string): Heading[] {
   const headings: Heading[] = [];
   for (const { line, lineNo } of eachLineOutsideFence(content)) {
-    const [, hashes, text] = /^(#{1,6})\s+(.*?)\s*$/.exec(line) ?? [];
-    if (hashes !== undefined && text !== undefined) {
+    const [, hashes, raw] = /^(#{1,6})[ \t]+(.*)$/.exec(line) ?? [];
+    const text = raw?.trim();
+    if (hashes !== undefined && text !== undefined && text !== "") {
       headings.push({ level: hashes.length, text, lineNo });
     }
   }

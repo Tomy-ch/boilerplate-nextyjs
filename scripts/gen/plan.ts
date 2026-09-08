@@ -191,6 +191,8 @@ ${screenSpanExport(symbol, spanName, `({ title }: ${symbol}Props)`, [
 
 /** 画面の取得と組み立て（`page-content.tsx`）の雛形。 */
 function featurePageContent(symbol: string, viewSymbol: string, spanName: string): string {
+  const viewCall = `return <${viewSymbol} title="見出し" />;`;
+
   return `import { withScreenSpan } from "@/observability/render-span";
 import { ${viewSymbol} } from "./view";
 
@@ -201,7 +203,7 @@ import { ${viewSymbol} } from "./view";
  * TODO: \`adapters\` から取得し、表示モデルへ写した値を \`${viewSymbol}\` へ渡してください。
  * 生成型（\`src/adapters/gen/\`）はここへ持ち込まないこと。
  */
-${screenSpanExport(symbol, spanName, "async ()", [`return <${viewSymbol} title="見出し" />;`])}`;
+${screenSpanExport(symbol, spanName, "async ()", [viewCall])}`;
 }
 
 /**

@@ -290,8 +290,8 @@ function listMakefiles(): string[] {
 // `.PHONY:` は `##` 以降の説明コメントを落とし、ルール行は `:` の左辺を取る（`:=` の代入は除く）。
 function targetNamesIn(line: string): string[] {
   if (line.startsWith("\t")) return [];
-  const phony = /^\.PHONY:\s*(.+)$/.exec(line)?.[1];
-  if (phony !== undefined) {
+  const phony = /^\.PHONY:(.*)$/.exec(line)?.[1]?.trim();
+  if (phony) {
     const commentAt = phony.indexOf("##");
     const names = commentAt < 0 ? phony : phony.slice(0, commentAt);
     return names.trim().split(/\s+/);

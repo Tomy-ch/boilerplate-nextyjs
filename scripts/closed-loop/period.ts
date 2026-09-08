@@ -32,7 +32,7 @@ function parseDay(day: string): number {
   const ms = Date.parse(`${day}T00:00:00Z`);
 
   if (Number.isNaN(ms)) {
-    throw new Error(`日付として解釈できない: ${day}`);
+    throw new TypeError(`日付として解釈できない: ${day}`);
   }
 
   return Math.floor(ms / 1000) - DAY_BOUNDARY_OFFSET_SEC;

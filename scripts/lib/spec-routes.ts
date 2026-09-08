@@ -15,7 +15,7 @@ export const SPEC_ROOT = "docs/spec/route";
  * `page.dev.tsx` は build から外れますが（[0113](../../docs/adr/0113-development-access-surface.md)）、
  * build から外れることと、約束を持たないことは別です。
  */
-const ROUTE_ENTRIES = ["page.tsx", "page.dev.tsx", "layout.tsx"] as const;
+const ROUTE_ENTRIES: readonly string[] = ["page.tsx", "page.dev.tsx", "layout.tsx"];
 
 /** `src/app` の接頭辞。 */
 const APP_PREFIX = "src/app/";
@@ -50,7 +50,7 @@ export function toSpecDir(appPath: string): string | null {
   const segments = appPath.slice(APP_PREFIX.length).split("/");
   const entry = segments.pop();
 
-  if (entry === undefined || !ROUTE_ENTRIES.some((name) => name === entry)) {
+  if (entry === undefined || !ROUTE_ENTRIES.includes(entry)) {
     return null;
   }
 

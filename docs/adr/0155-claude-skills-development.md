@@ -61,6 +61,7 @@ Accepted
 | `context-map` | 接触点の地図の保守 | `docs/design/context-map.md` を保守する。辺を `src/config/` / `src/adapters/` / `src/app/api/**` / metadata / `src/proxy.ts` から列挙し、辺ごとに 2 軸を記録する。**翻案の有無は `architecture.ts` が機械で決め、境界の所有はコードから出てこない**（相手と交渉できるかは組織的な事実）。所有は証拠つきの候補として提示して人に選ばせ、自分の権限でラベルを書かない。仕組みは主題ごとの design 文書が持ち、地図は指すだけ |
 | `context-map-audit` | 地図と実物の突合 | **完全 read-only。**3 種の乖離（接触点はあるが辺が無い / 辺の相手が消えた / 記録された翻案が依存表と食い違う）を報告し、編集しない —— 乖離は「地図が古い」とも「コードが決定から外れた」とも読め、監査にはその 2 つを区別できない。所有は監査しない（突き合わせる相手がコードに無い）。**検査した辺と検査できなかった辺の数を必ず述べる** —— 件数を言わない「乖離なし」は、何も走査しなかった実行と見分けが付かない |
 | `verify-spec` | 仕様書と実装の読み合わせ | [0143](0143-spec-driven-development.md) の**内容の突合**を所有する。route ごとに read-only の `spec-validator` を並列起動し、4 種（約束と実装の食い違い / 振り分けの誤り / 上位 layout の書き直し / 書かないものが書かれている）を挙げる。**存在の突合はやり直さない**（ゲートが決着させており、散文で再現すると写像の 2 つめの実装ができる）。**どちらが動くべきかは決めない** —— 向きは 0143 が決めているが、約束が変わったのか実装がずれたのかは読み合わせから見えない。確かめられなかった約束は、確かめられなかったものとして報告する。書き込みは一切しない |
+| `scaffold-test` | テストの雛形生成 | 観点の列挙を**書く前に**、read-only の `test-perspective-enumerator` へ群ごとに出す。テストを書くモデルは「何を検査するか」を「どう主張するか」と同時に決めるので、**並ぶのは主張を書きやすいケース**になる。分けても一覧が完全になるわけではないが、**ケースにならなかった観点を声に出して見送る**ことになり、落としたものが見える。最寄りの `test-requirement` README の `## テスト観点` は人が書いた観点であり、実装していないように見えても落とさず人へ渡す（README とコードのどちらが誤りかは、このスキルの判断ではない）|
 | `manage-skill` | スキルの作成・更新の単一入口 | 公式 `skill-creator` の方法論をラップし、本 ADR / [0154](0154-claude-skills-operations.md) の配置・命名・frontmatter・本文構造と [0140](0140-documentation-operations.md) の対訳ペアを上乗せする。`.claude/skills/**` への変更はこのスキルを入口とし、`SKILL.md` / `SKILL.ja.md` の直接手編集に先立って通す。公式プラグインの用意は `scripts/bootstrap-plugins` が担う |
 
 新規追加は本 ADR の趣旨 (開発系の定義) に合致する場合のみ。リスト追加は軽微編集とし ADR 改訂は不要。
@@ -93,6 +94,10 @@ back-prop (integrator)
 verify-spec (integrator)
  └─ spec-validator (route 単位で並列 fanout)     ← .claude/agents/spec-validator.md
      (約束と実装の読み合わせ。基準は skills/verify-spec/prompts/validate-spec.md が SSOT)
+
+scaffold-test (orchestrator)
+ └─ test-perspective-enumerator (群単位で並列 fanout) ← .claude/agents/test-perspective-enumerator.md
+     (書く前の観点の列挙。読むのは対象と最寄りの test-requirement README と 0090 / 0091)
 ```
 
 **エージェント定義は 1 つ、起動は複数**である。カーネルごとにエージェントのファイルを置くと、同じロジックを層の数だけ保守することになり、腐るのは写しのほうになる。並列に走らせる根拠は「独立した観点を並行させる」であって、定義を増やすことではない。

@@ -118,7 +118,10 @@ not one.
 ## Step 1. Read the layer context
 
 1. Walk up from the subject to the nearest ancestor `README.md` carrying `test-requirement` in its
-   frontmatter, and read both the frontmatter and the body.
+   frontmatter, and read both the frontmatter and the body — **including its `## テスト観点` section
+   when it has one.** Those lines are perspectives a human wrote for this slice, and they are the one
+   part of the input this skill did not derive. They are declarations with a reader: a slice README
+   that lists a perspective nothing ever asserts is a checklist that rots unwatched.
 2. Read ADR 0090 and ADR 0091.
 3. Read the subject source in full.
 4. Read the sibling tests in the same directory.
@@ -194,6 +197,33 @@ is on the ADR's ❌ list.
 Where the `正常系` / `異常系` axis does apply, assign by **whether the case sits inside or outside the
 happy path**, not by how the subject expresses the failure — the ADR is explicit that a thrown error,
 a returned error state and a silently dropped value all belong on the same side.
+
+### Enumerate before deriving, in a different head
+
+Before listing anything yourself, spawn one `test-perspective-enumerator` per subject group
+(`agentType: "test-perspective-enumerator"`, `label` like `perspectives:<group>`). It reads the
+subject, the nearest `test-requirement` README including its `## テスト観点`, and ADR 0090 / 0091,
+and returns one line per perspective with the assertion that would distinguish it.
+
+**The split is the point.** A model that writes a test decides what to test while deciding how to
+assert it, and those are not independent — the cases that get listed are the cases that are easy to
+assert. Holding a list you did not produce does not make the list complete; it makes the omissions
+**visible**, because a perspective that never becomes a case now has to be declined out loud.
+
+Reconcile its output against your own derivation:
+
+- Every returned perspective becomes a case, **or is declined in the Step 3 confirmation with the
+  reason.** "Covered by another test" is not a reason (ADR 0090).
+- A `宣言` perspective the subject does not appear to implement is **not** dropped. Put it to the
+  user: the README and the code disagree, and which one is wrong is not this skill's call.
+- Its 「区別できない」 block feeds Step 5 — those are subjects that cannot be verified as written.
+- Its 「読めなかった」 block goes into the report verbatim. An input that could not be read is not an
+  input that held nothing ([0157](../../../docs/adr/0157-inspection-declaration-discipline.md)).
+
+**When the README has no `## テスト観点` section, or it holds only the template placeholder, say so
+and do not invent one.** The absence is reportable: it means this slice's perspectives live only in
+whoever is reading the code right now. Proceed on the derived set, and name the gap in Step 3 so the
+user can decide whether the README should gain the section before the tests are written.
 
 ## Step 3. Plan and confirm, one group at a time
 

@@ -157,9 +157,7 @@ function zapSuppressions(root: string): readonly Suppression[] {
 function listItemLine(entry: string): RegExp {
   const literal = entry.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
-  return new RegExp(
-    String.raw`^\s*-\s*(?:"${literal}"|'${literal}'|${literal})\s*(?:#\s*(.*))?$`,
-  );
+  return new RegExp(String.raw`^\s*-\s*(?:"${literal}"|'${literal}'|${literal})\s*(?:#\s*(.*))?$`);
 }
 
 /** 直上に続くコメント塊。行番号（1 始まり）と、`#` を落として繋いだ本文。 */

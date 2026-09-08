@@ -15,9 +15,9 @@ import os from "node:os";
 import path from "node:path";
 
 import { errorMessage } from "../lib/error-message.js";
-import { collectWindows, toWorktreePaths, type MarksReader } from "./marks-store.js";
-import { reportAll, reportTranscript } from "./report.js";
 import { countUnparsable, parseTranscript } from "./events.js";
+import { collectWindows, type MarksReader, toWorktreePaths } from "./marks-store.js";
+import { reportAll, reportTranscript } from "./report.js";
 import { countEvents, neverInvoked, toProjectSlug } from "./transcript.js";
 
 /** 打刻の置き場（リポジトリルート相対）。 */

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-
+import { parseTranscript } from "./events";
 import { NO_WINDOWS_MESSAGE, type WindowMarks } from "./phases";
 import { NO_TRANSCRIPT_MESSAGE, reportAll, reportTranscript, reportWindow } from "./report";
-import { parseTranscript } from "./events";
 import { countEvents, type TranscriptCounts } from "./transcript";
 
 function windowOf(id: string, marks: Record<string, readonly number[]>): WindowMarks {

@@ -2,6 +2,10 @@
 test-requirement: unit
 coverage-exclusions:
   - "scripts/*/index.ts"
+  # boilerplate-only:begin
+  - "scripts/closed-loop/send/index.ts"
+  - "scripts/closed-loop/weekly/index.ts"
+  # boilerplate-only:end
   - "scripts/lighthouse/diagnose.ts"
   - "scripts/openapi/check-generated.ts"
   - "scripts/openapi/extract-limits.ts"

@@ -5,6 +5,7 @@ import {
   clusterIssues,
   clusterKey,
   DEFAULT_WEIGHTS,
+  type FeedbackIssue,
   failureRate,
   labelsToKinds,
   mergeWaitSec,
@@ -12,7 +13,6 @@ import {
   reevaluations,
   UNCLASSIFIED,
   waitDominated,
-  type FeedbackIssue,
 } from "./score";
 import type { FindingKind } from "./summarize";
 

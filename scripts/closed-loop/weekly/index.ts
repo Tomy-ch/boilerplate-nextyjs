@@ -19,25 +19,25 @@ import { errorMessage } from "../../lib/error-message.js";
 import { issueRefs } from "../format.js";
 import {
   buildConcernPrompt,
+  type Concern,
   INTEGRATION_LABEL,
   parseConcerns,
+  ROLLED_UP_REASON,
+  type RollupSource,
   renderIntegrationBody,
   renderRollupComment,
-  ROLLED_UP_REASON,
   rollupDestinations,
   rollupTargets,
-  type Concern,
-  type RollupSource,
 } from "../integration.js";
 import { parseObservation } from "../observation.js";
 import { resolvePeriod, withinPeriod } from "../period.js";
 import { toRepoSlug } from "../remote.js";
 import {
   clusterIssues,
+  type FeedbackIssue,
   labelsToKinds,
   reevaluations,
   waitDominated,
-  type FeedbackIssue,
 } from "../score.js";
 import { parseSections } from "../summarize.js";
 import { reportWeekly } from "../weekly-report.js";
@@ -176,9 +176,7 @@ function applyRollup(slug: string, concerns: readonly Concern[]): void {
         throw new TypeError(`URL から番号を読めない: ${url}`);
       }
 
-      console.log(
-        `  #${number} ${concern.title}  ← ${issueRefs(concern.sources)}`,
-      );
+      console.log(`  #${number} ${concern.title}  ← ${issueRefs(concern.sources)}`);
       created.push({ issue: number, sources: concern.sources });
     } catch (error) {
       console.error(`統合 issue を作れませんでした（この関心だけ飛ばす）: ${errorMessage(error)}`);

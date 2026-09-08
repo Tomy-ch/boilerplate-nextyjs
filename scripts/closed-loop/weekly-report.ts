@@ -5,13 +5,13 @@
 // （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 1）。だから本文にその一行を残す。
 
 import { humanize, issueRefs, percent } from "./format.js";
-import type { Period } from "./period.js";
+import { type Period, toDay } from "./period.js";
 import {
+  type Cluster,
+  type FeedbackIssue,
   failureRate,
   mergeWaitSec,
   REEVALUATION_DAYS,
-  type Cluster,
-  type FeedbackIssue,
   type Reevaluation,
 } from "./score.js";
 import { IMPROVEMENT_SECTION } from "./summarize.js";
@@ -31,7 +31,7 @@ export const REEVALUATION_NOTE =
   "効いたかを決めるのはここではない。保持 / 簡素化 / 撤回は人が決める";
 
 function asDate(epoch: number): string {
-  return new Date(epoch * 1000).toISOString().slice(0, 10);
+  return toDay(epoch);
 }
 
 /** 束ねた結果を、点の高い順に並べる。 */
@@ -72,10 +72,7 @@ function reevaluationLines(reevaluated: readonly Reevaluation[]): readonly strin
   const lines = ["", `測り直し（着地から ${REEVALUATION_DAYS} 日後に判定する）`];
 
   for (const item of reevaluated) {
-    const since =
-      item.recurred.length === 0
-        ? "再発なし"
-        : `再発 ${issueRefs(item.recurred)}`;
+    const since = item.recurred.length === 0 ? "再発なし" : `再発 ${issueRefs(item.recurred)}`;
 
     lines.push(
       `  ${item.key}  #${item.landedIssue} を ${asDate(item.landedAt)} にクローズ → ${since}` +

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { collectWindows, toWorktreePaths, type MarksReader } from "./marks-store";
+import { collectWindows, type MarksReader, toWorktreePaths } from "./marks-store";
 
 /** 作業ツリー → 窓 id → 打刻名 → 中身、を持つ作り物の読み手。 */
 function readerOf(tree: Record<string, Record<string, Record<string, string>>>): MarksReader {

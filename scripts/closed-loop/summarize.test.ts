@@ -137,7 +137,8 @@ describe("parseSummary", () => {
   });
 
   it("候補の逐語を含む節を落とす", () => {
-    const quote = "ここは 40 文字を超える十分に長い発話の逐語であり、引用されたら分かるものである";
+    const quote =
+      "ここは 40 文字を超える十分に長い発話の逐語であり、引用されたらすぐに分かるものである";
     const summary = parseSummary(`## 根拠\n${quote}\n\n## 摩擦\nx`, [
       { at: 1, reason: "是正", text: quote },
     ]);
@@ -165,7 +166,8 @@ describe("dropSecretSections", () => {
 
   // ----- 異常系 -----
   it("候補の逐語を含む節を落とす", () => {
-    const quote = "ここは 40 文字を超える十分に長い発話の逐語であり、引用されたら分かるものである";
+    const quote =
+      "ここは 40 文字を超える十分に長い発話の逐語であり、引用されたらすぐに分かるものである";
     const result = dropSecretSections({ 根拠: `前置き。${quote}` }, [
       { at: 1, reason: "是正", text: quote },
     ]);
@@ -226,7 +228,8 @@ describe("issueLabels", () => {
 });
 
 describe("containsQuote", () => {
-  const quote = "ここは 40 文字を超える十分に長い発話の逐語であり、引用されたら分かるものである";
+  const quote =
+    "ここは 40 文字を超える十分に長い発話の逐語であり、引用されたらすぐに分かるものである";
 
   // ----- 正常系 -----
   it("自分の言葉で言い直した文を逐語と見なさない", () => {

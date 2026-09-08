@@ -18,7 +18,7 @@ describe("issueTitle", () => {
   // ----- 正常系 -----
   it("窓 id と閉じた日を題にする", () => {
     expect(issueTitle(windowOf({ openedAt: [0], closedAt: [1788885163] }))).toBe(
-      "[feedback] 開発の窓 w1788885163-abc（2026-09-08）",
+      "[feedback] 開発の窓 w1788885163-abc（2026-09-09）",
     );
   });
 
@@ -44,12 +44,18 @@ describe("renderIssueBody", () => {
     expect(body).toContain("windowId: w1788885163-abc");
   });
 
-  it("区間・回数・打刻の所見を並べる", () => {
+  it("区間と回数を並べる", () => {
     const body = bodyOf(full);
 
     expect(body).toContain("| openedAt → implStartedAt | 60 秒 |");
     expect(body).toContain("- commitAt: 2 回");
     expect(body).toContain("- reviewStartedAt: 0 回");
+  });
+
+  it("打刻の所見を並べる", () => {
+    // 必須の段（commitAt / reviewStartedAt）を飛ばして PR まで進んだ窓。
+    const body = bodyOf(windowOf({ openedAt: [0], prOpenedAt: [120], closedAt: [240] }));
+
     expect(body).toContain("**段が飛んでいる**");
   });
 

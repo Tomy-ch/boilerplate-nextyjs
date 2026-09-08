@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DAY_BOUNDARY_OFFSET_SEC, resolvePeriod, withinPeriod } from "./period";
+import { DAY_BOUNDARY_OFFSET_SEC, resolvePeriod, toDay, withinPeriod } from "./period";
 
 /** 2026-09-09 00:00 JST。 */
 const JST_DAY_START = Date.parse("2026-09-08T15:00:00Z") / 1000;
@@ -21,10 +21,10 @@ describe("resolvePeriod", () => {
     expect(period.to).toBe(JST_DAY_START + 86_400 - 1);
   });
 
-  it("省略時は、基準時刻の日から 7 日前までを取る", () => {
+  it("省略時は、基準時刻の日を含めて 7 日ぶんを取る", () => {
     const period = resolvePeriod(undefined, undefined, JST_DAY_START + 3600);
 
-    expect(period.from).toBe(JST_DAY_START - 7 * 86_400);
+    expect(period.from).toBe(JST_DAY_START - 6 * 86_400);
     expect(period.to).toBe(JST_DAY_START + 86_400 - 1);
   });
 
@@ -58,5 +58,21 @@ describe("withinPeriod", () => {
   it("外側を含めない", () => {
     expect(withinPeriod(period.from - 1, period)).toBe(false);
     expect(withinPeriod(period.to + 1, period)).toBe(false);
+  });
+});
+
+describe("toDay", () => {
+  // ----- 正常系 -----
+  it("日の境界と同じ側で綴る", () => {
+    expect(toDay(JST_DAY_START)).toBe("2026-09-09");
+  });
+
+  it("その日の終わりも同じ日として綴る", () => {
+    expect(toDay(JST_DAY_START + 86_400 - 1)).toBe("2026-09-09");
+  });
+
+  // ----- 異常系 -----
+  it("境界の 1 秒前は前の日になる", () => {
+    expect(toDay(JST_DAY_START - 1)).toBe("2026-09-08");
   });
 });

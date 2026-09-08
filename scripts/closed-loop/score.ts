@@ -6,7 +6,7 @@
 // （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 1）。
 
 import type { Observation } from "./observation.js";
-import { FINDING_KINDS, KIND_LABEL_PREFIX, type FindingKind } from "./summarize.js";
+import { FINDING_KINDS, type FindingKind, KIND_LABEL_PREFIX } from "./summarize.js";
 
 /** 分類が付いていない issue をまとめる鍵。 */
 export const UNCLASSIFIED = "unclassified";

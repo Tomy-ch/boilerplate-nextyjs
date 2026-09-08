@@ -47,7 +47,7 @@ function startOfDay(epochSec: number): number {
 /**
  * 期間を決める。
  *
- * @param from - `YYYY-MM-DD`。省略時は `to` の 7 日前
+ * @param from - `YYYY-MM-DD`。省略時は `to` を含めて 7 日ぶん遡った日
  * @param to - `YYYY-MM-DD`。省略時は `now` の日
  * @param now - 基準時刻（epoch 秒）。呼び出し側が渡すので、同じ入力は常に同じ期間になる
  */
@@ -57,7 +57,10 @@ export function resolvePeriod(
   now: number,
 ): Period {
   const endDay = to === undefined ? startOfDay(now) : parseDay(to);
-  const startDay = from === undefined ? endDay - 7 * DAY_SEC : parseDay(from);
+  // 7 日は**終端を含めて 7 日**である。`endDay - 7` にすると 8 日ぶんになり、両端を含む
+  // `withinPeriod` と合わさって、毎週の実行が 1 日ぶん重なる —— 同じ窓が 2 週続けて数えられ、
+  // 再計測が「増えた」と読める。週ごとの実行が隙間なく敷き詰まる形はこちらだけである。
+  const startDay = from === undefined ? endDay - 6 * DAY_SEC : parseDay(from);
   const end = endDay + DAY_SEC - 1;
 
   // 逆転しうるのは `from` が明示された場合だけ。省略時は `to` の 7 日前を置くので、構造上
@@ -78,4 +81,16 @@ export function resolvePeriod(
  */
 export function withinPeriod(at: number, period: Period): boolean {
   return at >= period.from && at <= period.to;
+}
+
+/**
+ * epoch を `YYYY-MM-DD` にする。
+ *
+ * @remarks
+ * **境界と綴りは同じ側が持ちます。**日の境界を JST に取りながら綴りを UTC で出すと、
+ * JST の朝に閉じた窓が前日の日付で並び、期間の端が 1 日ずれた形で表示されます ——
+ * 期間そのものは正しいので、表示だけを見ても原因に辿り着けません。
+ */
+export function toDay(epoch: number): string {
+  return new Date((epoch + DAY_BOUNDARY_OFFSET_SEC) * 1000).toISOString().slice(0, 10);
 }

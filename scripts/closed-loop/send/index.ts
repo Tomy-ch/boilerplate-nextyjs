@@ -17,14 +17,14 @@ import os from "node:os";
 import path from "node:path";
 
 import { errorMessage } from "../../lib/error-message.js";
-import { selectCandidates, type Candidate } from "../candidates.js";
+import { type Candidate, selectCandidates } from "../candidates.js";
 import { parseTranscript, withinWindow } from "../events.js";
 import { issueTitle, renderIssueBody } from "../issue.js";
-import { collectWindows, toWorktreePaths, type MarksReader } from "../marks-store.js";
+import { collectWindows, type MarksReader, toWorktreePaths } from "../marks-store.js";
 import { toObservation } from "../observation.js";
 import { markAt } from "../phases.js";
 import { toRepoSlug } from "../remote.js";
-import { parseSent, unsent, withSent, type SentIndex } from "../sent-index.js";
+import { parseSent, type SentIndex, unsent, withSent } from "../sent-index.js";
 import { buildPrompt, issueLabels, parseSummary, readingGap, type Summary } from "../summarize.js";
 import { countEvents, toProjectSlug } from "../transcript.js";
 

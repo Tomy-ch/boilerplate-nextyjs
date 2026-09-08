@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 // boilerplate-only:begin
 import { FINDING_KINDS, KIND_LABEL_PREFIX } from "../closed-loop/summarize";
 // boilerplate-only:end
-import { diffLabels, LABELS_PATH, parseLabelSpecs, type LabelSpec } from "./labels";
+import { diffLabels, LABELS_PATH, type LabelSpec, parseLabelSpecs } from "./labels";
 
 const spec = (name: string): LabelSpec => ({ name, description: name, color: "d73a4a" });
 

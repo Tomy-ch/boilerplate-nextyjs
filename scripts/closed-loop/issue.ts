@@ -7,7 +7,8 @@
 // 前 2 つは出る —— 決定的な集計が先に立ち、モデルはその後に来る（同 決定 2）。
 
 import { humanize } from "./format.js";
-import { renderObservation, type Observation } from "./observation.js";
+import { type Observation, renderObservation } from "./observation.js";
+import { toDay } from "./period.js";
 import {
   COUNTED_MARKS,
   countOf,
@@ -18,9 +19,9 @@ import {
 } from "./phases.js";
 import { BODY_SECTIONS, type ReadingGap, type Summary } from "./summarize.js";
 
-/** epoch を `YYYY-MM-DD` にする。時刻までは題に要らない。 */
+/** epoch を `YYYY-MM-DD` にする。時刻までは題に要らない。綴りは日の境界を持つ側に従う。 */
 function toDate(epoch: number): string {
-  return new Date(epoch * 1000).toISOString().slice(0, 10);
+  return toDay(epoch);
 }
 
 /**

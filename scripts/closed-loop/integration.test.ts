@@ -4,12 +4,12 @@ import {
   buildConcernPrompt,
   INTEGRATION_LABEL,
   parseConcerns,
+  ROLLED_UP_REASON,
+  type RollupSource,
   renderIntegrationBody,
   renderRollupComment,
-  ROLLED_UP_REASON,
   rollupDestinations,
   rollupTargets,
-  type RollupSource,
 } from "./integration";
 import type { Observation } from "./observation";
 

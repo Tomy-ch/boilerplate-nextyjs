@@ -7,7 +7,7 @@
 // 「読むのは記録を作った機械の上だけ」「外へ出るのは読んだ結果であって記録そのものではない」と
 // 決めているためである。**逐語を public な場へ出す縮退経路は持たない。**
 
-import { looksSecret, type Candidate } from "./candidates.js";
+import { type Candidate, looksSecret } from "./candidates.js";
 import type { Observation } from "./observation.js";
 
 /**

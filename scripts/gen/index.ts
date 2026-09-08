@@ -134,12 +134,16 @@ if (kind === "adapter" && options.length > 0) {
   fail(`${kind} は配置オプションを取りません。${USAGE}`);
 }
 
-let input: GenerationInput = { kind, name };
+// 分岐は `else` まで書く。`{ kind, name }` が通るのは feature でも component でもないと
+// 絞り込めた枝だけで、初期値として外へ出すと絞り込みの前の型になる。
+let input: GenerationInput;
 
 if (kind === "feature") {
   input = featureInput(name, options);
 } else if (kind === "component") {
   input = componentInput(name, options);
+} else {
+  input = { kind, name };
 }
 
 const files = planGeneration(input);

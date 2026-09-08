@@ -45,6 +45,17 @@ export const MARK_ORDER: readonly string[] = [
 ];
 
 /**
+ * 刻まれなくても所見にしない段。
+ *
+ * @remarks
+ * この 2 つを刻むのは計画から実装へ渡る段だけで、**その段を持たない窓では起き得ません** ——
+ * コミットもレビューも PR も、それぞれ別の入口が刻みます。起き得ない段の不在を「飛んだ」と
+ * 呼ぶと、正常な窓のほとんどが所見を持ち、本当に飛んだ窓がその中に埋もれます。
+ * ここに並ぶのは「無いことが正常な段」であって、「測っていない段」ではありません。
+ */
+const OPTIONAL_MARKS: readonly string[] = ["planApprovedAt", "implStartedAt"];
+
+/**
  * 回数として意味を持つ打刻。
  *
  * @remarks
@@ -152,12 +163,21 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
 
   // 途中を飛ばした窓。越えていない段があるのか、刻み忘れなのかはここでは決まらないので、
   // 飛んだ事実だけを出す。境界を 1 つも越えていない窓は上で報告済みなので、ここでは見ない。
+  //
+  // **範囲は「窓が開いてから、最後に越えた境界まで」である。**終端を closedAt に取ると、
+  // 到達しなかった先の段まで「飛んだ」に数えてしまう —— PR を出す前に閉じた窓は、
+  // merge を飛ばしたのではなく、そこまで進まなかっただけである。
   const firstIndex = MARK_ORDER.indexOf(stamped[0] ?? "");
-  const lastIndex = MARK_ORDER.indexOf(stamped.at(-1) ?? "");
-  const skipped =
+  const lastIndex = MARK_ORDER.indexOf(crossed.at(-1) ?? "");
+  const missing =
     crossed.length === 0
       ? []
       : MARK_ORDER.slice(firstIndex + 1, lastIndex).filter((name) => markAt(window, name) === null);
+
+  // 任意の段しか欠けていない窓は所見にしない。計画の承認は、計画を要さない小さな変更では
+  // そもそも起きない —— それを「飛んだ」と呼ぶと、正常な窓のほとんどが所見を持つ。
+  // 欠けが必須の段へ及んだときだけ、任意の段も含めて何が刻まれなかったかを並べる。
+  const skipped = missing.some((name) => !OPTIONAL_MARKS.includes(name)) ? missing : [];
 
   if (skipped.length > 0) {
     found.push({ kind: "段が飛んでいる", detail: `刻まれていない: ${skipped.join(" / ")}` });

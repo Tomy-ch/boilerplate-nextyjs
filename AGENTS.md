@@ -161,6 +161,8 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0157](docs/adr/0157-inspection-declaration-discipline.md) | 検査の宣言規律 | 成立しない検査を「違反なし」へ倒さない / 抑止は理由と撤去条件を持つ |
 | [0158](docs/adr/0158-code-search-tooling.md) | コード検索ツール | 採用範囲 / 導入経路 / allow・deny 境界 |
 | [0159](docs/adr/0159-script-structure.md) | スクリプト構造 | TypeScript / 1 ツール 1 ディレクトリ / 入口と判定の分離 |
+| [0160](docs/adr/0160-agent-environment-loop.md) | エージェント環境のループ | 観測 → 改善 → 再計測を 1 周とする / 呼出回数を単独の根拠にしない / 所見の正はトラッカー |
+| [0161](docs/adr/0161-development-window-as-feedback-unit.md) | フィードバックの単位 | 開発の窓を単位とする / セッション・コミット・PR を母数にしない / 打刻が第一で記録は補完 |
 
 > **ADR numbering is finalized (2026-07-14): topical decade-bands.** Numbers are grouped by subject into decade bands (e.g. `002x` architecture, `004x` routing/rendering, `005x` styling/UI, `007x` data/BFF, `008x` error/observability, `015x` process/dev-ops); the former `Toolchain-` / `Dev-` prefixed ADRs were folded into the numeric sequence (`0150`+). Gaps between bands are reserved for future insertion. Each ADR body remains authoritative.
 

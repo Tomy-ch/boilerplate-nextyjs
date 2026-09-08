@@ -271,6 +271,10 @@
 
 > Rationale: [ADR 0072](adr/0072-api-type-generation.md) / [ADR 0110](adr/0110-security-operations.md) / [ADR 0153](adr/0153-ci-configuration.md) / [ADR 0054](adr/0054-ui-catalog-storybook.md) / [ADR 0091](adr/0091-test-verification-methods.md) / [ADR 0157](adr/0157-inspection-declaration-discipline.md); enforced via `scripts/catalog-assets.gate.test.ts`、`make actions-pin-check`、`make actionlint` / `make actions-shellcheck` / `make actions-required-check-lint`、`scripts/markdown-exclusions.gate.test.ts`、`make tools-cooldown-check`（手で入れた pin の検疫）、`make suppression-expiry`（抑止の期限）。
 
+- **ゲートを足す前に、それが並列でいくつ走るかを見る。** 費用は 1 回ぶんではない —— このリポジトリは並行する作業ツリーで進むうえ、fan-out するスキルは同じ検査を lens やカーネルの数だけ呼ぶ。**手元で n 倍、CI で PR の数だけ**になり、遅くなった機械の上では検査そのものが失敗の源になる。`make load-status` の帯は掛かった負荷に**反応する**機構であって、足す前の見積もりは肩代わりしない。散文 —— **寄せられない**。何倍になるかは呼び出し側の構造で決まり、検査の側からは見えない。
+- **同じ判定を複数の worker に計算させない。** 統合する側が 1 回だけ解いて配る。判定の権威が CI に在るものは、**解くのではなく取得する**（[0151](adr/0151-git-hooks.md)）。
+- **検査は、自分が見ていない腐り方を出力で述べる。** 緑は「対象が健全」ではなく「この検査が見る形に違反が無い」である。述べない検査は、読み手に見ていない範囲まで保証したと読ませる（[0157](adr/0157-inspection-declaration-discipline.md)）。
+
 - **required check へ登録するのは、全 PR でその context 名を報告し続ける job だけにする。** `paths:` で絞った job、第三者のアカウント（外部解析サービスのトークン）の有無で降りる job、作った側の初期化で消える job を登録すると、報告されない PR が必須チェック待ちのまま止まり、コードでは直せない。降ろすときは `on:` から外さず、job は起動させて `if:` でステップだけを降ろす。Security 群を差分で降ろせるのは、週次スケジュールが残りの走査を引き受け、かつ required に載っていないからで、どちらかを外すなら絞りも外す —— 片方だけ外すと書き漏らしが恒久の死角になる。
 
 - **何が生成物か・何が対象外かを判定するコードは、リポジトリが既に持つ宣言を引く。** 列挙を判定側へ写し取らない。生成物の宣言は [`.gitattributes`](../.gitattributes) の `linguist-generated`（`git check-attr` で引ける）、生成の出力先は生成器自身の設定（`orval.config.ts` / `scripts/openapi/gen-api-plan.ts` の `GEN_API_OUTPUTS`）が持つ。必須・任意のような判定もスキーマから導き、列挙しない。写しは書いた日には正しく、**生成器が 1 つ増えた日に、誰にも気づかれずに古くなる** —— 判定は静かに外れ、外れたことを言う者が居ない。散文 —— **寄せられない**。「その列挙に対応する宣言が既に在るか」は、宣言の側を知らないと決まらない。

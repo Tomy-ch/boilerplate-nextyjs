@@ -76,6 +76,23 @@ const IGNORE_DIRECTIVE = "<!-- skill-lint-ignore -->";
 // 報告する（黙って通すと「長く書けば検査を外せる」抜け道になる）。
 const MAX_LINE_LENGTH = 4096;
 
+/**
+ * この検査が見ていない腐り方。
+ *
+ * @remarks
+ * **緑は「同期済み」ではない。**ここが見ているのは形（frontmatter の鍵、対訳の見出し列の 1:1、
+ * 参照するパスと make ターゲットの実在）であって、中身ではありません。黙って通すと、**形が
+ * 揃っているだけの対訳と、通るはずの無い手順が「検査済み」として並びます**
+ * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ *
+ * 撤去条件は、その形を機械で見られるようになった時点。見られないなら、ここに残す。
+ */
+const UNCHECKED = [
+  "対訳が canonical と同じことを言っているか（見出しの列は 1:1 でも、中身は乖離しうる）",
+  "本文の手順が実際に通るか",
+  "消えた節や見出しを指したままの参照",
+];
+
 const findings: Finding[] = [];
 
 function report(file: string, line: number, rule: string, message: string): void {
@@ -655,9 +672,11 @@ if (findings.length > 0) {
   console.error(
     `\n検査 ${skillDirs.length} スキル / ${agentFiles.length} エージェント / ${markdownFiles.length} Markdown 中 ${findings.length} 件 NG`,
   );
+  console.error(`  未検査: ${UNCHECKED.join(" / ")}`);
   process.exit(1);
 }
 
 console.log(
   `✓ skill-lint: ${skillDirs.length} スキル / ${agentFiles.length} エージェント / ${markdownFiles.length} Markdown すべて OK`,
 );
+console.log(`  未検査: ${UNCHECKED.join(" / ")}`);

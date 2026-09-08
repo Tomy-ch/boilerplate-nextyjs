@@ -9,7 +9,7 @@
 // [0160](../../docs/adr/0160-agent-environment-loop.md) 決定 5 が持つ。
 
 /** 出来事の種類。 */
-export type EventKind =
+type EventKind =
   | "prompt"
   | "assistant"
   | "tool_use"

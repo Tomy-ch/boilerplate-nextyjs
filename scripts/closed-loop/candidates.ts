@@ -12,7 +12,7 @@
 import type { Event } from "./events.js";
 
 /** なぜこのターンが選ばれたか。モデルへ渡すときに添える。 */
-export type CandidateReason = "是正" | "中断の直前" | "失敗の直後";
+type CandidateReason = "是正" | "中断の直前" | "失敗の直後";
 
 /** モデルに読ませる 1 件。 */
 export type Candidate = {
@@ -28,7 +28,7 @@ export type Candidate = {
  * 丁寧な訂正、質問の形をした指摘、黙って直した場合は捕まりません。ここは網羅ではなく
  * **読む価値が高い順に絞る**ための足切りで、**語を増やすほど絞りが緩みます**。
  */
-export const CORRECTIVE_MARKERS: readonly string[] = [
+const CORRECTIVE_MARKERS: readonly string[] = [
   "違う",
   "ではなく",
   "じゃなく",
@@ -49,7 +49,7 @@ export const CORRECTIVE_MARKERS: readonly string[] = [
  * `user` の記録には、人が打ったものだけでなくハーネスが差し込んだものも混ざります。これらは
  * 人の発話ではないので、**是正の語を含んでいても摩擦の証拠になりません**。
  */
-export const INJECTED_MARKERS: readonly string[] = [
+const INJECTED_MARKERS: readonly string[] = [
   "<task-notification>",
   "<local-command-caveat>",
   "<command-name>",
@@ -65,7 +65,7 @@ export const INJECTED_MARKERS: readonly string[] = [
  * こと —— 落とした 1 件は他の候補で埋まりますが、**出てしまった 1 件は取り消せません**
  * （[0110](../../docs/adr/0110-security-operations.md)）。
  */
-export const SECRET_PATTERNS: readonly RegExp[] = [
+const SECRET_PATTERNS: readonly RegExp[] = [
   /\bgh[pousr]_[A-Za-z0-9]{16,}/,
   /\bgithub_pat_\w{20,}/,
   /\b(?:sk|pk|rk)-[A-Za-z0-9_-]{16,}/,
@@ -87,10 +87,10 @@ export const SECRET_PATTERNS: readonly RegExp[] = [
 ];
 
 /** 既定の上限。1 窓ぶんとして読ませても費用が見合う量。 */
-export const DEFAULT_LIMIT = 40;
+const DEFAULT_LIMIT = 40;
 
 /** 1 件あたりの本文の長さ。 */
-export const DEFAULT_EXCERPT_CHARS = 600;
+const DEFAULT_EXCERPT_CHARS = 600;
 
 /** ハーネスが差し込んだ本文か。 */
 export function isInjected(text: string): boolean {

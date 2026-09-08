@@ -11,7 +11,7 @@ import { markAt, toPhases, type WindowMarks } from "./phases.js";
 import type { TranscriptCounts } from "./transcript.js";
 
 /** 段の区間 1 つ。 */
-export type ObservedPhase = {
+type ObservedPhase = {
   readonly from: string;
   readonly to: string;
   readonly sec: number;

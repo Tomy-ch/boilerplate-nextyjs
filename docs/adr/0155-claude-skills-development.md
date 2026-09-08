@@ -56,13 +56,14 @@ Accepted
 | `full-apply` | full-verify 所見の適用 | `tmp/reviews/` の所見を severity 順 (Critical → Low) に修正適用。設計判断を要する所見は理由付きで defer し、コミット前に `pnpm fix` / lint / build で検証。`full-verify` と対をなす |
 | `adr-scan` | ADR 候補の全リポ発見 | de facto に存在するが BACKLOG 未追跡の設計判断を read-only で走査し、taxonomy (decision / exclusion / rule / inventory) と Tier / frame ID へ分類した候補 inventory を出力。暫定の one-off スキルで、BACKLOG へ反映した時点で削除する |
 | `new-feature` | 画面 1 枚の e2e 動線 | 画面を「ディレクション → story → レビュー → 分離 → 仕様書 → テスト」の順で通す。順序そのものを含め、規則は焼き込まず [`docs/playbook.md`](../playbook.md) / [`docs/templates/feature-readme.md`](../templates/feature-readme.md) / [`docs/spec/README.md`](../spec/README.md) / カーネル README を実行時に読む。配置・命名・境界は `pnpm gen` に委ね、`docs/spec/**` は**読み込み入力であって生成入力ではない**。story のレビューが返るまでテストを書かない。レビュー 3 本（`impl-review` / `test-review` / `comment-sweep`）は `AGENTS.md` の Review Phase Protocol に従い**呼ばずに user へ渡す**。commit / push はしない |
+| `back-prop` | 宣言と実物のずれの検出 | README / スキル / 語彙表が述べていることと、木が実際にやっていることのずれを 4 種（A README→コード / B コード→README の未文書化パターン（該当 3 件以上） / C スキル↔README の重複 / E 業務語彙の家出）で検出する。integrator + read-only の `drift-detector` をカーネルごとに 1 メッセージで並列起動し、承認と書き込みは integrator が単一スレッドで行う。検出基準は `skills/back-prop/prompts/detect-drift.md` が SSOT で、スキル本文も agent 定義も書き直さず読む。書き込みは層 README のみ。スキル本文の変更は `manage-skill` へ、E2（ADR / `docs/rules.md` への漏れ）は報告のみ。`sync-readme`（構造の drift）とは交わらない |
 | `manage-skill` | スキルの作成・更新の単一入口 | 公式 `skill-creator` の方法論をラップし、本 ADR / [0154](0154-claude-skills-operations.md) の配置・命名・frontmatter・本文構造と [0140](0140-documentation-operations.md) の対訳ペアを上乗せする。`.claude/skills/**` への変更はこのスキルを入口とし、`SKILL.md` / `SKILL.ja.md` の直接手編集に先立って通す。公式プラグインの用意は `scripts/bootstrap-plugins` が担う |
 
 新規追加は本 ADR の趣旨 (開発系の定義) に合致する場合のみ。リスト追加は軽微編集とし ADR 改訂は不要。
 
 ## subagent パターン
 
-`impl-review` と `full-verify` は **複数の subagent を組み合わせる構造** を持つ。
+`impl-review` / `full-verify` / `back-prop` は **複数の subagent を組み合わせる構造** を持つ。
 
 ```text
 impl-review (orchestrator)
@@ -80,7 +81,13 @@ full-verify (orchestrator / in-session fast-path)
  │   (構造の設計妥当性。基準は skills/full-verify/prompts/verify-arch.md が SSOT)
  └─ impl-verifier (Pass 2 / unit 単位で並列 fanout) ← .claude/agents/impl-verifier.md
      (unit ごとの実装品質。基準は skills/full-verify/prompts/verify-impl.md が SSOT)
+
+back-prop (integrator)
+ └─ drift-detector (カーネル単位で並列 fanout)   ← .claude/agents/drift-detector.md
+     (宣言と実物のずれ。基準は skills/back-prop/prompts/detect-drift.md が SSOT)
 ```
+
+**エージェント定義は 1 つ、起動は複数**である。カーネルごとにエージェントのファイルを置くと、同じロジックを層の数だけ保守することになり、腐るのは写しのほうになる。並列に走らせる根拠は「独立した観点を並行させる」であって、定義を増やすことではない。
 
 このほか、特定スキルへの固定 wiring を持たない **単独起動の read-only レビュー subagent** として `doc-reviewer` (ドキュメント散文の品質) と `comment-reviewer` (コメント内容の品質基準。`comment-sweep` が実行時に基準の出所として読む) が `.claude/agents/` に存在する。下記の subagent 規約 (read-only / sonnet 既定 / モデル分散) に従う。
 

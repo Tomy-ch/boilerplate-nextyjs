@@ -159,6 +159,7 @@
       "Bash(make -s base-branch)",
       "Bash(make base-merge)",
       "Bash(make base-merge *)",
+      "Bash(make closed-loop-report)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
       "Bash(make gh-login *)",

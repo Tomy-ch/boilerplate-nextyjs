@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { NO_WINDOWS_MESSAGE, type WindowMarks } from "./phases";
-import { reportAll, reportWindow } from "./report";
+import { NO_TRANSCRIPT_MESSAGE, reportAll, reportTranscript, reportWindow } from "./report";
+import { countTranscript, type TranscriptCounts } from "./transcript";
 
 function windowOf(id: string, marks: Record<string, readonly number[]>): WindowMarks {
   return { id, marks };
@@ -52,5 +53,40 @@ describe("reportAll", () => {
   // ----- 異常系 -----
   it("0 件を「異常なし」へ倒さない", () => {
     expect(reportAll([])).toEqual([`⚠ ${NO_WINDOWS_MESSAGE}`]);
+  });
+});
+
+describe("reportTranscript", () => {
+  const counts: TranscriptCounts = countTranscript([
+    JSON.stringify({ type: "user", message: { content: [{ type: "tool_use", name: "Skill", input: { skill: "commit" } }] } }),
+  ]);
+
+  // ----- 正常系 -----
+  it("読んだ量・数えられなかった量・起動を並べる", () => {
+    const lines = reportTranscript(counts, { files: 10, unparsable: 2, never: [] });
+
+    expect(lines).toContain("記録: 10 行（解釈できなかった行 2）");
+    expect(lines).toContain("  commit: 1");
+    expect(lines).toContain("一度も起動されなかったスキル: 0 本");
+  });
+
+  it("一度も起動されなかったスキルを名前で挙げる", () => {
+    const lines = reportTranscript(counts, { files: 1, unparsable: 0, never: ["glossary", "how-to"] });
+
+    expect(lines).toContain("  glossary / how-to");
+  });
+
+  it("起動が 1 件も無ければ、そう述べる", () => {
+    const lines = reportTranscript(countTranscript([]), { files: 1, unparsable: 0, never: [] });
+
+    expect(lines).toContain("  なし");
+  });
+
+  // ----- 異常系 -----
+  it("1 行も読めなかったことを「起動なし」へ倒さない", () => {
+    expect(reportTranscript(counts, { files: 0, unparsable: 0, never: [] })).toEqual([
+      "",
+      `⚠ ${NO_TRANSCRIPT_MESSAGE}`,
+    ]);
   });
 });

@@ -10,14 +10,19 @@
 // **決定的な集計だけを行い、モデルを使わない**（同 決定 2）。区間・回数・順序は数えるものであって
 // 解釈するものではなく、この層の数は監査できる。「何が難しかったか」は別の段の仕事である。
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 import { errorMessage } from "../lib/error-message.js";
 import { MARK_ORDER, type WindowMarks } from "./phases.js";
-import { reportAll } from "./report.js";
+import { reportAll, reportTranscript } from "./report.js";
+import { countTranscript, countUnparsable, neverInvoked } from "./transcript.js";
 
 /** 打刻の置き場（リポジトリルート相対）。 */
 const MARKS_DIR = "tmp/closed-loop/marks";
+
+/** 宣言されたスキルの置き場（リポジトリルート相対）。 */
+const SKILLS_DIR = ".claude/skills";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..");
 
@@ -69,8 +74,60 @@ function listWindows(): readonly WindowMarks[] {
     .map(readWindow);
 }
 
+/**
+ * セッションの記録の置き場。
+ *
+ * @remarks
+ * 置き場を決めているのはツールで、リポジトリの外にあります。**範囲はこのリポジトリのぶんだけ** ——
+ * ツールは 1 人の全プロジェクトぶんを同じ親の下に並べるので、リポジトリのパスから導いた 1
+ * ディレクトリより外へ出ません（[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 5）。
+ */
+function transcriptsDir(): string {
+  return path.join(os.homedir(), ".claude", "projects", REPO_ROOT.split(path.sep).join("-"));
+}
+
+/** 記録の全行。置き場が無ければ空。 */
+function readTranscripts(): readonly string[] {
+  const dir = transcriptsDir();
+
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith(".jsonl"))
+    .flatMap((name) => fs.readFileSync(path.join(dir, name), "utf8").split("\n"));
+}
+
+/** 宣言されているスキルの名前。 */
+function declaredSkills(): readonly string[] {
+  const dir = path.join(REPO_ROOT, SKILLS_DIR);
+
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+}
+
 function main(): void {
   for (const line of reportAll(listWindows())) {
+    console.log(line);
+  }
+
+  const lines = readTranscripts();
+  const counts = countTranscript(lines);
+
+  for (const line of reportTranscript(counts, {
+    files: lines.length,
+    unparsable: countUnparsable(lines),
+    never: neverInvoked(declaredSkills(), counts),
+  })) {
     console.log(line);
   }
 }

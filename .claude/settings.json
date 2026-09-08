@@ -160,6 +160,7 @@
       "Bash(make base-merge)",
       "Bash(make base-merge *)",
       "Bash(make closed-loop-report)",
+      "Bash(make closed-loop-send)",
       "Bash(make closed-loop-send-dry)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
@@ -251,6 +252,10 @@
           {
             "type": "command",
             "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook session-start || true"
+          },
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/send.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/send.sh\" --hook || true"
           }
         ]
       }

@@ -10,6 +10,38 @@
 > ツールランナーも DB も持たない表示層なので([0011](../../../docs/adr/0011-no-docker.md))、その種の項目は
 > ここに属さない。新たに踏んだら項目を足すこと。
 
+## Contract
+
+| | |
+| --- | --- |
+| **Owns** | 既知の症状 → 対処。索引に載っている落とし穴の、実際に効いた直し方 |
+| **Never** | 手順の発明 / **「手順が存在しない」という結論** / 索引に無い症状への推測 |
+| **Starts when** | 何かが予期しない振る舞いをし、それが下の索引に載っているとき |
+| **Stops when** | 症状が索引に無いとき —— `how-to`（目標）か `repo-truth`（現状）へ振って止まる |
+
+## 症状の索引
+
+| 症状 | 節 |
+| --- | --- |
+| `make install-tools` が `mise not found` で落ちる | 1 |
+| `pnpm` の script が落ちる / `pnpm-workspace.yaml` が勝手に変わる | 2 |
+| `DRY_RUN=1` を付けたのに `make setup-repo` が何も変わらない | 3 |
+| `pnpm install --frozen-lockfile` が落ちる | 4 |
+| `pnpm lint` は通るのに `pnpm lint:ci` が落ちる | 5 |
+| scratch の出力を `git status` に出したくない / どこへ置くか | 6 |
+| commit / push が hook に弾かれる | 7 |
+| mise 自身の版を上げたい / 上げたら CI が落ちた | 8 |
+
+**この索引が、このスキルに答えられることの全部である。**ここに無い症状は「たぶん大丈夫」でもなければ
+「手順が存在しない」でもない —— **この runbook は後者を結論できない。**結論できるようにすると、
+**その沈黙が答えと区別できなくなる。**代わりに振る。
+
+| 問いが実は何だったか | 扉 |
+| --- | --- |
+| 「これをやりたい。正規の手順は？」 | `how-to` —— 尽くしたレジストリの上で UNDEFINED を**結論できる** |
+| 「そもそもどうなっている / この規約の正本は？」 | `repo-truth` |
+| 「まだ誰も決めていない選択」 | `research` |
+
 ## 1. `make install-tools` が `mise not found` で落ちる
 
 `make install-tools` は `mise install` を実行し、`mise.toml` の `[tools]` を読む(ADR 0003)。まず `mise` 自体が

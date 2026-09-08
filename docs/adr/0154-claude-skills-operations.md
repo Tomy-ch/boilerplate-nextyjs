@@ -107,7 +107,7 @@ Accepted
 | `resolve-merge` | マージの着地 | 衝突パスをクラスへ分け、クラスごとの機械的解決を当てる —— 生成物は片側を選ばず出典から作り直し、pin lockfile は resolver を回し、追記専用のレジストリは和集合にする。**衝突が無くても走る**（派生物は無衝突マージでも古くなる）。ベースの取り込みは `make base-merge` が持つ。終わり方は 2 つだけで、機械的に解けないものが 1 つでも残ればマーカーを残して打ち切りコミットしない、全部解ければコミットと push の可否を聞く。ゲートは回さない |
 | `new-issue` | issue の起票 | 前提を実装で裏取りしてから起票する。**5 つの blocker**（観測していない振る舞いの断定 / 鮮度未確認の引用 / 測っていない比較 / 部分的な探索からの影響範囲 / 既存 issue の未検索）が下書きを止める。本文の欄は `.github/ISSUE_TEMPLATE/` を実行時に読んで埋め（`scripts/issue-field-lint` が `###` の完全一致で見る）、そこへ 前提 / 論点 / やらないこと を足す。最後に「そもそも issue か」の関門を通す |
 | `supply-chain-triage` | 検疫に掛かった版の証拠採点 | 窓に捕まった 1 つの版について、[0110](0110-security-operations.md) の 4 つの問いを 4 軸 0–12 で採点する。**report-only** —— lockfile も pin も窓も触らない。成果物を読むが決して実行しない。**取れなかった証拠は `?` として報告し `0` に数えない**（`?` が 2 つ以上なら帯を出さず INSUFFICIENT-EVIDENCE）。暴露面はスコアと別の行で報告する。`actions-pin` / `images-pin` / `tools-upgrade` / Dependabot の連鎖先 |
-| `repo-ops` | 運用 gotcha のランブック | mise ツールチェーン / pnpm lockfile / make `DRY_RUN` / `tmp/reviews` 等の再発しやすい躓きへの対処手順集。read-only の知識スキルで、状態は変更しない |
+| `repo-ops` | 運用 gotcha のランブック | mise ツールチェーン / pnpm lockfile / make `DRY_RUN` / `tmp/reviews` 等の再発しやすい躓きへの対処手順集。read-only の知識スキルで、状態は変更しない。**症状駆動**であり、答えるのは自分の索引に載っているものだけ —— 載っていない症状は `how-to`（目標。手順の不在を結論できる）か `repo-truth`（現状）へ振る。**このランブックは意図的に不在を結論できない**（できるようにすると沈黙が答えと区別できなくなる） |
 | `tool-map` | `.claude/` 配下の inventory | commands / skills / agents の表 + Mermaid 依存マップを生成 |
 | `design-export` | デザインシステムの外部書き出し | `pnpm design:bundle` が作る `tmp/design-bundle`（shadcn registry / 目録 / トークン）を、送り先ごとの手順で運ぶ。依存の向きは repo → design の一本で、書き出した先の成果物を取り込む経路は持たない。特定 SaaS の手順は [0010](0010-standards-and-non-lockin.md) の非ロックインによりこのスキルの中だけに閉じる |
 

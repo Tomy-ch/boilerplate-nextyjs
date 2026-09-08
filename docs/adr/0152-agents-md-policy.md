@@ -49,7 +49,7 @@ Accepted
 | # | 節 | 責務 |
 | --- | --- | --- |
 | 1 | Project Overview | リポジトリの役割 / ロール / バックエンド分離前提 |
-| 1.5 | Temporary Operating Rules until v1.0.0 | **v1.0.0 未満の期間限定節**。Protected Documentation / AI Modification Scope の一時解除を宣言する。v1.0.0 到達時に削除する([0140](0140-documentation-operations.md) の同名節と対) |
+| 1.5 | Temporary Operating Rules until v1.0.0 | **v1.0.0 未満の期間限定節**。Protected Documentation / AI Modification Scope の一時解除を宣言する。v1.0.0 到達時に節ごと削除し、戻す先の形と手順は下記「Protected Documentation の機械強制」が持つ([0140](0140-documentation-operations.md) の同名節と対。切替は 0140 決定 4 と同じ変更で行う) |
 | 2 | Instruction Priority | 指示の優先度 (後述) |
 | 2.5 | What to Recommend | **boilerplate 限定節**。推奨 (行為ではなく助言) を何に向けて最適化するかを定める。本文を `boilerplate-only:begin` / `end` で囲み、作った側の初期化で節ごと削除する <!-- boilerplate-only:line --> |
 | 3 | Accepted Rules (ADRs) | 確定済み ADR の表で要約。詳細は `docs/adr/` に委譲 |
@@ -93,9 +93,13 @@ AI エージェントは以下の優先度で指示に従う。矛盾時は上�
 4. **`.github/copilot-instructions.md`** 等のエージェント固有設定
 5. ユーザ指示
 
+**`docs/adr/BACKLOG.md` を破棄した時点で、3 の段を落として 4 段にする。** 未策定領域の追跡は破棄と同時に issue トラッカーへ移るが、issue は優先順位の段にならない —— 着地した瞬間に閉じるものを恒常の優先順位に載せても、その段は常に空か古いかのどちらかである。AGENTS.md の `Instruction Priority` 節も同じ変更で 4 段にする(下記「更新責務」の構成対応)。
+
+強制: 散文。破棄済みのパスへ向く相対リンクが AGENTS.md / ADR に残ることは静的に検出できるが、Markdown の相対リンクの宛先実在を見る検査は未実装(`md-lint` は相対リンクの宛先を解決しない)。
+
 ## 未策定領域の扱い
 
-ADR 化されていない決定領域は `docs/adr/BACKLOG.md` が追跡し、AGENTS.md はその一覧を持たない。AGENTS.md の `Pending Decisions` 節が持つのは、未策定領域に踏み込んだときの振る舞いだけである:
+ADR 化されていない決定領域の一覧を AGENTS.md は持たない。追跡先は `docs/adr/BACKLOG.md` が在る間はそれ、破棄後は issue トラッカー —— **閉じることのできる単位**である。AGENTS.md や ADR に一覧を写せば、1 つ着地した瞬間に陳腐化する二重管理になる([`docs/project/roadmap.md`](../project/roadmap.md) が作業項目を持たないのと同じ理由)。AGENTS.md の `Pending Decisions` 節が持つのは、未策定領域に踏み込んだときの振る舞いだけである:
 
 1. **新しい規約・パターン・ライブラリを独自に持ち込まない**。ADR の判断はユーザへ委ねる
 2. 暫定実装が避けられない場合は、着手前に「暫定実装」であることを明示する
@@ -116,9 +120,47 @@ ADR が策定されたら、確定済み ADR を `Accepted Rules` 表に追加�
 
 ## 更新責務
 
-- AGENTS.md は `Protected Documentation` に列挙され、AI エージェントは直接編集しない。変更案を提示してユーザ承認を得てから編集する(**v1.0.0 未満の間はこの都度承認を解除する** — AGENTS.md #1.5 の期間限定節 / [0140](0140-documentation-operations.md))
+- AGENTS.md は `Protected Documentation` に列挙され、AI エージェントは直接編集しない。変更案を提示してユーザ承認を得てから編集する(**v1.0.0 未満の間はこの都度承認を解除する** — 下記「Protected Documentation の機械強制」の「いまの形」/ [0140](0140-documentation-operations.md) 決定 4)
 - 本 ADR (0152) と AGENTS.md は **構成上の対応関係** を持つ。本 ADR を改訂する場合は AGENTS.md 側も同じ PR で揃える
 - `Accepted Rules` 表への ADR 追加は軽微編集として扱う
+
+## Protected Documentation の機械強制 —— 編集許可の最終形
+
+`Protected Documentation` の宣言は散文であり、宣言だけでは担保にならない([0144](0144-decision-enforcement-pairing.md))。機械強制は Claude Code の `.claude/settings.json` の `permissions` が担う。**`settings.json` は JSON で注釈を持てない**ため、そこに在る値が何を意図した形なのか、いまの形が最終形とどう違うのかは本 ADR が持つ。
+
+### 最終形(v1.0.0 から)
+
+`permissions.deny` が次の 8 エントリを持ち、`permissions.ask` はこれらを持たない。
+
+| エントリ | 守るもの |
+| --- | --- |
+| `Edit(AGENTS.md)` / `Write(AGENTS.md)` | 規約本体 |
+| `Edit(LICENSE)` / `Write(LICENSE)` | ライセンス([0142](0142-license.md)) |
+| `Edit(.claude/settings.json)` / `Write(.claude/settings.json)` | 権限境界そのもの。エージェントが自分の deny を外せる形にしない |
+| `Edit(docs/adr/*-*.md)` / `Write(docs/adr/*-*.md)` | Accepted ADR 本文(immutable — [0140](0140-documentation-operations.md) 決定 4)。`*-*` は番号付きの ADR にだけ掛かり、`docs/adr/README.md` には掛からない |
+
+**`ask` ではなく `deny` にする理由。** `ask` は編集のたびに承認を求める形で、承認する側が内容を読まずに通した 1 回で保護が破れる。Protected Documentation の保護の中身は「人が変更案を読んで判断する」ことなので、経路をエージェントの提案 → 人の編集に限り、エージェントの編集そのものを塞ぐ。`deny` には承認疲れで通る経路が無い。
+
+### いまの形(v1.0.0 未満)と、そうしている理由
+
+- `AGENTS.md` / `LICENSE` / `.claude/settings.json` の 6 エントリは `permissions.ask` に置く。承認は残し、hard block はしない
+- Accepted ADR 本文はエントリを持たない
+
+v1.0.0 未満の ADR は living document で、本文を直接上書きする([0140](0140-documentation-operations.md) 決定 4)。この期間の作業の大半は ADR 本文の書き換えそのものなので、ADR に `ask` を置くと承認が常時鳴り、承認する側が内容を読まずに通す習慣を作る —— `deny` を選ぶ理由と正反対の状態である。鳴らないほうが、鳴り続けて無視されるより保護として正しい。AGENTS.md / LICENSE / settings.json は編集の頻度が低く、`ask` が「読んで判断する」機会として機能するので残す。
+
+### v1.0.0 での復元手順
+
+1. `.claude/settings.json` で上の 6 エントリを `permissions.ask` から `permissions.deny` へ移し、`Edit(docs/adr/*-*.md)` / `Write(docs/adr/*-*.md)` を `permissions.deny` に足す
+2. `AGENTS.md` の `Temporary Operating Rules until v1.0.0` 節を削除し、`AI Modification Scope` / `Protected Documentation` に付いている「v1.0.0 未満は解除」の但し書きを消す
+3. 本 ADR の節構成表から #1.5 の行、「更新責務」の v1.0.0 未満の但し書き、上記「いまの形」の小節を消す
+
+[0140](0140-documentation-operations.md) 決定 4 の immutable 切替と同じ変更で行う。片方だけ切り替えると、上書きしてよい文書が `deny` で塞がれるか、immutable な文書がエージェントに開いたままになる。
+
+### 強制手段と、届かない範囲
+
+- **`permissions.deny` は Claude Code にしか効かない。** Codex / Copilot / Gemini には同等の宣言形式が無く、そこでは AGENTS.md の散文だけが保護である。寄せられない
+- **`Edit` / `Write` の `deny` は `Bash` 経由の書き換え(`sed` / heredoc)に届かない。** 塞ぐには Bash の引数の中にパスを見る `deny` が要るが、パスが引数のどこに現れるかは決まらず、前方一致の宣言では書けない。寄せられない
+- **`settings.json` が本 ADR の最終形と一致していること**は、上の表と JSON を突き合わせる検査として書ける。未実装
 
 ## 禁止事項
 
@@ -137,6 +179,9 @@ ADR が策定されたら、確定済み ADR を `Accepted Rules` 表に追加�
 
 - [0002-formatter-linter.md](0002-formatter-linter.md) — `Code Style` 節が参照する biome 規約
 - [0004-library-management.md](0004-library-management.md) — `Recommended Commands` 節が参照する pnpm exact pin ルール
+- [0140-documentation-operations.md](0140-documentation-operations.md) — ADR の living / immutable 切替(編集許可の復元と同じ変更で行う)
+- [0142-license.md](0142-license.md) — `LICENSE`(Protected Documentation の 1 つ)
+- [0144-decision-enforcement-pairing.md](0144-decision-enforcement-pairing.md) — 宣言だけでは担保にならない(編集許可を `deny` で持つ理由)
 - [0150-git-workflow.md](0150-git-workflow.md) — `Git Rules` 節が参照する Git 運用方針
 - [0151-git-hooks.md](0151-git-hooks.md) — `Code Style` / `Recommended Commands` 節が参照する hook 方針
 - [0154-claude-skills-operations.md](0154-claude-skills-operations.md) — Skill 実行時 Exception で参照する運用系スキル方針

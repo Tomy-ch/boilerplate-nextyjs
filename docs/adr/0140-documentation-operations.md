@@ -10,11 +10,11 @@ Accepted
 
 > **(このセクションは v1.0.0 時には消すこと)**
 
-v1 実装期間は、下記「決定 4」の living 運用を **v1.0.0 未満まで延長**する。工程上の根拠は [v1 実装計画](../plan/v1-implementation-plan.md)。
+v1.0.0 未満の間は、下記「決定 4」の living 運用が効いている。
 
-- **ADR 本文は直接上書きしてよい** — Protected Documentation の都度承認を一時的に解除する(AGENTS.md「Temporary Operating Rules until v1.0.0」節と対をなす)
+- **ADR 本文は直接上書きしてよい** — Protected Documentation の都度承認を解除する(AGENTS.md「Temporary Operating Rules until v1.0.0」節と対をなす。編集許可のいまの形と最終形は [0152](0152-agents-md-policy.md) が持つ)
 - **経緯・変遷を本文に残さない** — 「当初は X だったが Y に改訂」のような改定履歴・検討経緯を本文に書かない。決定の**現在形**だけを書く。経緯は git 履歴が持つ
-- v1.0.0 到達時に本節を削除し、ADR を immutable(決定 4)へ切り替え、全 ADR 本文から経緯記述を除去する
+- v1.0.0 到達時に本節を削除する。切替の条件と手順は決定 4 が持ち、本節に依存しない
 
 ## 背景
 
@@ -41,7 +41,7 @@ boilerplate のドキュメントは、日本語の読者と、英語の frontma
 | **decision** | `docs/adr/` |
 | **exclusion** | `docs/adr/`(Status に `Accepted (exclusion)`、decision と混在する場合は `Accepted (一部 exclusion)` と明記。例: `Accepted (exclusion)` = [0121](0121-i18n-strategy.md) / [0130](0130-pwa-strategy.md)、`Accepted (一部 exclusion)` = [0082](0082-client-observability.md) / [0110](0110-security-operations.md) / [0131](0131-cookie-consent.md)) |
 | **rule** | **`docs/rules.md`**(下記 3) |
-| **inventory** | ADR には入れない。生きた参照(`docs/adr/BACKLOG.md` の枠 ID 体系を含む) |
+| **inventory** | ADR には入れない。家は [`docs/reference/`](../reference/README.md) —— コードに追随して変わる目録で、正はコード側、書き換えは対象のコードと同じ変更の中で行う。目録は根拠を持たず、選定の理由は ADR へリンクするだけ |
 
 - **exclusion** はテンプレートから作った側のセットアップ時に直接編集して独自ベースラインを敷けるものとする(supersede-by-new-ADR モデルは setup 後の変更にのみ適用)
 - **ADR の decision から自然に決まるものを、別の ADR で二重に決定しない。** tooling や reference は ADR を要さず、規約に昇格するものだけを ADR 化する
@@ -56,6 +56,19 @@ boilerplate のドキュメントは、日本語の読者と、英語の frontma
 - **v1.0.0 未満(pre-v1)= living document**: ADR 本文を直接上書きし、改定履歴を残さない(pre-v1 なので過去記述の破棄を許容)。この運用は本 ADR が宣言し、各 ADR の Status は写しを持たない
 - **v1.0.0 から immutable**: accepted 後は Status 行のみ編集 / supersede = 本文編集ではなく新 ADR を追加し旧を superseded 化 / **番号は再利用しない**
 - **採番はトピック順ブロック帯**(10 番台 = 主題ブロック。`docs/adr/README.md`)。帯の間の空き番号は将来の挿入用に予約する
+
+**切替の条件は v1.0.0 のリリースそのもの**である。`release/v1.0.0` を切る変更で行い、ADR ごとに時期をずらさない —— 一部だけを immutable にすると、どの ADR が上書きしてよいのかを Status の外に持つことになる。
+
+切替時に行うこと:
+
+1. 全 ADR 本文から経緯・比較検討・反転の記述を除き、決定の現在形だけにする(禁止事項の「経緯を書かない」を、living 期間に混入した分まで遡って適用する)
+2. 本 ADR の「v1.0.0 までの暫定運用」節と、AGENTS.md の「Temporary Operating Rules until v1.0.0」節を削除する
+3. `.claude/settings.json` の `permissions.deny` に Accepted ADR 本文(`Edit(docs/adr/*-*.md)` / `Write(docs/adr/*-*.md)`)を足す。編集許可の最終形と復元手順は [0152](0152-agents-md-policy.md) が持ち、同じ変更で行う
+4. 決定 1 の canonical 言語の移行(EN canonical + `*.ja.md` mirror)を同じ境界で行う
+
+以後の変更は supersede だけになる —— 新 ADR を起票し、旧 ADR は Status 行を `Superseded by NNNN` へ書き換える。
+
+強制手段: 3 は Claude Code の `deny`(届かない範囲は [0152](0152-agents-md-policy.md))。immutable な本文が Status 行以外で動いていないことは、`docs/adr/*-*.md` の差分を Status 行に限定する CI 検査として書ける —— 寄せられるが未実装。1 の「経緯かどうか」は文の意味判断で、機械へは寄せられない(レビューが見る)
 
 ### 5. per-package README 運用
 
@@ -98,4 +111,4 @@ boilerplate のドキュメントは、日本語の読者と、英語の frontma
 - [0121-i18n-strategy.md](0121-i18n-strategy.md) / [0130-pwa-strategy.md](0130-pwa-strategy.md) — exclusion ADR の実例(`Accepted (exclusion)`)
 - [0082-client-observability.md](0082-client-observability.md) / [0110-security-operations.md](0110-security-operations.md) — 一部 exclusion ADR の実例(`Accepted (一部 exclusion)`)
 - [`docs/README.md`](../README.md) — 4 分類の判定と行き先
-- `docs/adr/BACKLOG.md` — 未決の枠 ID 体系(inventory の生きた参照)
+- [`docs/reference/README.md`](../reference/README.md) — inventory の家(コードに追随する目録の契約)

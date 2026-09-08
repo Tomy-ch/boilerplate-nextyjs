@@ -55,12 +55,26 @@ Accepted
 
 生成器は、仕様書を持つ値打ち（約束の置き場が決まること）を 1 つも運ばない。速さのために置くものは、置いた時点で仕様書の側を生成器の都合へ寄せ始める。
 
-## v1.0.0 到達前に構築を完了する
+## 仕様書と実装の突合 —— 2 つの検査
 
-本 ADR の決定のうち、次の 2 つは機構がまだ揃っていない。**v1.0.0 到達前に構築を完了する。** Status は `Accepted` のままとし、完了をもって本節を削除する。
+仕様書が実装と合っていることは、次の 2 つの検査で見る。**どちらも未実装**であり、本節がその唯一の記録である —— [`docs/traceability.md`](../traceability.md) は `rules.md` の行と issue しか数えず、ADR が宣言する未実装の機構を載せる口を持たない。検査していないものを「違反なし」の緑に数えない（[0157](0157-inspection-declaration-discipline.md)）ため、集計の外にあることをここに書く。
 
-- **存在の突合。** `src/app` の route と `docs/spec/route/**` の対応（機能要件を持たない画面は画面要件だけ）を機械で突き合わせる検査。いまは feature README が指す link の実在を `readme-review` が見るだけで、仕様書を持たない route を挙げる口が無い
-- **内容の突合。** 仕様書と実装を読み合わせ、食い違いを挙げる経路。生成とは独立に成立するため、生成 scaffold を持たない決定の影響を受けない。v1.0.0 を切る時点で全画面を一度読み合わせ、以後は約束を変える変更ごとに行う
+### 存在の突合（機械）—— 未実装
+
+`src/app` の route と `docs/spec/route/**` の対応を機械で突き合わせる検査。
+
+- **母数**: `src/app/**` の `page.tsx` と `layout.tsx` の全件。[`docs/spec/README.md`](../spec/README.md) の写像（route group の括弧を外す・動的セグメントは角括弧のまま）で仕様書のパスへ変換する
+- **判定**: 各 route に `*.screen.md` が在ること。`*.function.md` は無くてよい（機能要件を持たない画面には置かない）。逆向きに、route を持たない仕様書は失敗として挙げる —— 画面を消して約束だけが残った状態である
+- **倒し方**: route が 0 件に列挙されたら「違反なし」ではなく失敗にする（[0157](0157-inspection-declaration-discipline.md)）。サンプル画面の仕様書はサンプルと一緒に消えるので、剥がした後の木でも成立することを剥がしの検査（`.github/workflows/strip-verify.yaml`）の下で確かめる
+
+いま在るのは、feature README が指す仕様書リンクの実在を `readme-review` が見ることだけで、仕様書を持たない route を挙げる口は無い。検出の形は上のとおり書けるので、**寄せられるが未実装**（[0144](0144-decision-enforcement-pairing.md)）。v1.0.0 到達前に置く。
+
+### 内容の突合（読み合わせ）—— 未実施
+
+仕様書の約束と実装を読み合わせ、食い違いを挙げる。約束を変えたのなら仕様書を、変えていないのなら実装を直す（上記「実装は仕様書から導く」）。
+
+- **機械へは寄せられない。** 約束は観測可能な契約の散文で、機械可読な構造を持たせない（本 ADR の決定）。散文と描画結果の一致は読む側の判断である
+- **時期**: v1.0.0 を切る時点で全画面を一度読み合わせ、以後は約束を変える変更ごとにその画面だけを行う。生成 scaffold を持たない決定とは独立に成立する
 
 ## 不採用
 
@@ -90,5 +104,6 @@ Accepted
 - [0072-api-type-generation.md](0072-api-type-generation.md) — 契約の生成型
 - [0140-documentation-operations.md](0140-documentation-operations.md) — 文書運用（仕様書もこの運用に従う）
 - [0141-portal-operations.md](0141-portal-operations.md) — portal
-- [0144-decision-enforcement-pairing.md](0144-decision-enforcement-pairing.md) — 決定と強制手段の併記（「構築を完了する」節が挙げる 2 つの突合）
+- [0144-decision-enforcement-pairing.md](0144-decision-enforcement-pairing.md) — 決定と強制手段の併記（「仕様書と実装の突合」節の「寄せられるが未実装」/「寄せられない」の区別）
+- [0157-inspection-declaration-discipline.md](0157-inspection-declaration-discipline.md) — 検査の宣言規律（存在の突合の倒し方。集計の外にある未実装を緑に数えない）
 - [0155-claude-skills-development.md](0155-claude-skills-development.md) — `new-feature` スキル（仕様書を読み込み入力として使う）

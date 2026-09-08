@@ -281,16 +281,6 @@ the user decides whether to stack a fix-up commit.
 <!-- =    the commits — the failure is informational and the user decides how to answer it. -->
 <!-- boilerplate-only:replace-end -->
 
-<!-- boilerplate-only:begin -->
-### Why this step no longer runs the gates
-
-`AGENTS.md` carries both this instruction and, under *Code Style*, a line telling you to run
-`pnpm fix` / `pnpm lint:ci` before committing. **Those two disagree, and this skill does not resolve
-the disagreement** — it follows the standing operating rule (the gates are CI's, pushes go
-`--no-verify`) and leaves the contradiction visible for a human to settle in `AGENTS.md`.
-
-<!-- boilerplate-only:end -->
-
 ## Step 7. Push Policy and Final Reminder
 
 - **Do not auto-push** (per `CLAUDE.md` git rules).

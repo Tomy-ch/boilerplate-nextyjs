@@ -63,13 +63,11 @@ Accepted
 
 `src/app` の route と `docs/spec/route/**` の対応を機械で突き合わせる検査。
 
-- **母数**: `src/app/**` の `page.tsx` と `layout.tsx` の全件。[`docs/spec/README.md`](../spec/README.md) の写像（route group の括弧を外す・動的セグメントは角括弧のまま）で仕様書のパスへ変換する
+- **母数**: `src/app/**` の `page.tsx` / `page.dev.tsx` / `layout.tsx` の全件。**開発専用の route も約束を持つ** —— build から外れること（[0113](0113-development-access-surface.md)）と、約束を持たないことは別である。[`docs/spec/README.md`](../spec/README.md) の写像（route group の括弧を外す・動的セグメントは角括弧のまま）で仕様書のパスへ変換する
 - **判定**: 各 route に `*.screen.md` が在ること。`*.function.md` は無くてよい（機能要件を持たない画面には置かない）。逆向きに、route を持たない仕様書は失敗として挙げる —— 画面を消して約束だけが残った状態である
 - **倒し方**: route が 0 件に列挙されたら「違反なし」ではなく失敗にする（[0157](0157-inspection-declaration-discipline.md)）。サンプル画面の仕様書はサンプルと一緒に消えるので、剥がした後の木でも成立することを剥がしの検査（`.github/workflows/strip-verify.yaml`）の下で確かめる
 
 実体は [`scripts/spec-routes.gate.test.ts`](../../scripts/spec-routes.gate.test.ts) で、写像と判定は [`scripts/lib/spec-routes.ts`](../../scripts/lib/spec-routes.ts) が持つ。**写像の実装はここ 1 つだけ**にする —— 2 つあると、片方だけが規約に追随する。
-
-検査を書いたことで写像表の穴が 2 つ出た。どちらも [`docs/spec/README.md`](../spec/README.md) へ書き足してある —— **並行ルートのスロット（`@slot`）は独立した画面ではないので置き場を持たず、約束は差し込む画面の仕様書が持つ**。**開発専用の route（`page.dev.tsx`、[0113](0113-development-access-surface.md)）は build から外れるが約束は持つ** —— build から外れることと、約束を持たないことは別である。
 
 ### 内容の突合（読み合わせ）
 

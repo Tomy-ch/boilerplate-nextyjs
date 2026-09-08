@@ -275,16 +275,6 @@ EOF
 <!-- =    巻き戻さない —— 失敗は情報であり、どう答えるかは user が決める。 -->
 <!-- boilerplate-only:replace-end -->
 
-<!-- boilerplate-only:begin -->
-### このステップがゲートを回さなくなった理由
-
-`AGENTS.md` はこの指示と、*Code Style* 節の「コミット前に `pnpm fix` / `pnpm lint:ci` を回せ」を
-**両方**持っている。**この 2 つは食い違っており、このスキルはその食い違いを解かない** ——
-常設の運用規律（ゲートは CI のもの、push は `--no-verify`）に従い、矛盾は `AGENTS.md` の上で人が
-決着させるために見えるまま残す。
-
-<!-- boilerplate-only:end -->
-
 ## Step 7. push 方針と最終リマインド
 
 - **自動 push しない**（`CLAUDE.md` の git 規約に従う）。

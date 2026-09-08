@@ -11,9 +11,8 @@ export const SPEC_ROOT = "docs/spec/route";
  * 母数になる app の入口。
  *
  * @remarks
- * [0143](../../docs/adr/0143-spec-driven-development.md) は「`page.tsx` と `layout.tsx` の全件」と
- * 書いていますが、**開発専用の route は `page.dev.tsx` で置く**のが
- * [0113](../../docs/adr/0113-development-access-surface.md) の決定で、それも約束を持つ画面です。
+ * [0143](../../docs/adr/0143-spec-driven-development.md) の母数。**開発専用の route も約束を持ちます** ——
+ * `page.dev.tsx` は build から外れますが（[0113](../../docs/adr/0113-development-access-surface.md)）、
  * build から外れることと、約束を持たないことは別です。
  */
 const ROUTE_ENTRIES = ["page.tsx", "page.dev.tsx", "layout.tsx"] as const;

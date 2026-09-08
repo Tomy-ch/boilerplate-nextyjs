@@ -315,8 +315,9 @@ See [`.makefiles/README.md`](.makefiles/README.md) for details.
 
 **This section is this repository's own operating rule, and it is removed from a repository created
 from this template.** What a created repository keeps is *Code Style* below — run `pnpm fix` and
-`pnpm lint:ci` before committing. The two say opposite things on purpose: they are written for
-different situations, and only one of them is present at a time.
+`pnpm lint:ci` before committing. **While this section is present it governs**, and *Code Style*'s
+line is what the created repository is left with; the two are written for different situations
+rather than in disagreement.
 
 The situation that produces this rule is this repository's alone. Several worktrees are open at once
 against the same host, every one of them carrying the full gate set, and the gates multiply rather

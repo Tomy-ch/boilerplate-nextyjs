@@ -128,6 +128,29 @@ audits the change and nothing else").
 - Note whether a **request-time seam** is touched — a Route Handler (`src/app/**/route.ts`), a Server Action (`src/features/<name>/actions.ts`), `src/proxy.ts`, the response header configuration (`next.config.ts` `headers()`), or the **layout shell / Provider composition** (`src/app/**/layout.tsx` — ADR [0026](../../../docs/adr/0026-layout-shell-mount.md); a missing Provider only fails when the route actually renders). This decides whether Step 4-2 runs. <!-- skill-lint-ignore -->
 - Note whether a **generated API artifact** is touched (`**/gen/**` — the types / zod schemas of ADR [0072](../../../docs/adr/0072-api-type-generation.md)). A regenerated artifact ripples to every consumer, so widen the review to the `adapters` conversions and features that import it, not just the changed file.
 
+### Resolve the static verdict once, here
+
+The lenses must not run the gates — each one that did would recompute the same verdict, once per
+lens, and this repository's authority for a gate verdict is CI anyway (`AGENTS.md`, *Do not pre-run
+the gates*). So **the orchestrator resolves it a single time and hands the result to every finder**:
+
+```bash
+gh pr checks --json name,state,link 2>/dev/null   # the branch's PR, if one is open
+```
+
+Pass the outcome into every `adversarial-reviewer` prompt in one of three shapes, and **never
+collapse them**:
+
+| Shape | When | What the lens does with it |
+| --- | --- | --- |
+| **緑** | every required check passed on this head | Skip what the static gates already cover; spend the lens on what they cannot express |
+| **赤: `<check>`** | a required check failed | Read the failure as a confirmed finding's evidence, and do not re-derive it |
+| **未取得** | no PR, checks not started, `gh` unavailable | Treat the gates as **unknown, not clean** — an unrun check is not a passing one ([0157](../../../docs/adr/0157-inspection-declaration-discipline.md)) |
+
+**Do not run the gates here either to fill in 未取得.** The point of the third row is that the
+absence of a verdict is itself reportable; a local run would replace an honest gap with a number CI
+has not agreed to.
+
 ## Step 2 — Fan-out Finders (different model, concurrent)
 
 Spawn all finders concurrently (issue every `Agent` call in a single message). Pass the Step 0 user-selected reviewer model to every `Agent` call via the `model` parameter (omit only when *auto* already resolves to the agent-file default). Every finder runs `adversarial-reviewer` — one per lens, `agentType: "adversarial-reviewer"`, `label` like `find:security`.
@@ -204,6 +227,7 @@ Produce one Japanese report:
 
 スコープ: <base>...HEAD（<N> files） / lens: correctness, security, architecture, cohesion, runtime-gap
 未監査の観点: テスト（/test-review）・コメント（/comment-sweep）は本スキルの対象外
+静的ゲート: 緑 / 赤（<check>）/ 未取得（走っていない検査は通った検査ではない）
 ランタイム検証: 4-1 build 実施 / 4-2 リクエスト検証 実施（curl）・対象外（リクエスト時 seam の変更なし）・到達不能（バックエンド不在で未検証の経路: <経路>）
 
 ### CONFIRMED（要対応）

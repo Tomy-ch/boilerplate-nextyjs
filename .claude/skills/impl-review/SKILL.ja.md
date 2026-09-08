@@ -107,6 +107,27 @@
 - **リクエスト時の seam** が触られたか — Route Handler（`src/app/**/route.ts`）/ Server Action（`src/features/<name>/actions.ts`）/ `src/proxy.ts` / レスポンスヘッダ設定（`next.config.ts` の `headers()`）/ **layout shell・Provider 合成**（`src/app/**/layout.tsx` — ADR [0026](../../../docs/adr/0026-layout-shell-mount.md)。Provider の欠落は当該ルートが実際に描画されて初めて落ちる）。Step 4-2 を回すかの判定。 <!-- skill-lint-ignore -->
 - **生成 API 成果物**（`**/gen/**` — ADR [0072](../../../docs/adr/0072-api-type-generation.md) の型 / zod スキーマ）が触られたか。再生成は全 consumer に波及するので、変更ファイルだけでなくそれを import する `adapters` 変換と feature までレビュー範囲を広げる。
 
+### 静的な判定は、ここで 1 回だけ解く
+
+lens にゲートを回させない。**回せば同じ判定が lens の数だけ再計算され**、そもそもこのリポジトリで
+ゲートの判定を持つのは CI である（`AGENTS.md` の *Do not pre-run the gates*）。だから
+**統合側が 1 回だけ解いて、全 finder へ渡す**。
+
+```bash
+gh pr checks --json name,state,link 2>/dev/null   # ブランチに PR が在れば
+```
+
+結果は次の 3 つのどれかとして渡し、**畳まない**。
+
+| 形 | いつ | lens 側の扱い |
+| --- | --- | --- |
+| **緑** | この head で必須チェックが全部通った | 静的ゲートが既に見ている範囲を飛ばし、表現できないものへ lens を使う |
+| **赤: `<check>`** | 必須チェックが落ちている | その失敗を確定した所見の根拠として読み、導出し直さない |
+| **未取得** | PR が無い / チェック未開始 / `gh` が無い | ゲートを**不明として扱う。緑ではない** —— 走っていない検査は通った検査ではない（[0157](../../../docs/adr/0157-inspection-declaration-discipline.md)） |
+
+**未取得を埋めるためにここでゲートを回さない。**3 つめの行の要点は、判定が無いこと自体が報告に
+値するということで、手元で走らせると**正直な空白が、CI の同意していない数字に置き換わる**。
+
 ## Step 2 — Finder の fan-out（別モデル、並列）
 
 全 finder を並列起動（`Agent` 呼び出しを1メッセージにまとめる）。Step 0 でユーザーが選んだ reviewer モデルを全 `Agent` 呼び出しへ `model` 引数で渡す（*auto* がエージェント定義の既定へ解決する場合のみ省略可）。finder はすべて `adversarial-reviewer` — レンズごとに1体、`agentType: "adversarial-reviewer"`、`label` は `find:security` のように。
@@ -181,6 +202,7 @@ build 失敗は **それ自体が CONFIRMED な finding**。出力付きで報�
 
 スコープ: <base>...HEAD（<N> files） / lens: correctness, security, architecture, cohesion, runtime-gap
 未監査の観点: テスト（/test-review）・コメント（/comment-sweep）は本スキルの対象外
+静的ゲート: 緑 / 赤（<check>）/ 未取得（走っていない検査は通った検査ではない）
 ランタイム検証: 4-1 build 実施 / 4-2 リクエスト検証 実施（curl）・対象外（リクエスト時 seam の変更なし）・到達不能（バックエンド不在で未検証の経路: <経路>）
 
 ### CONFIRMED（要対応）

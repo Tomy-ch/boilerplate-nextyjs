@@ -39,6 +39,7 @@ Accepted
 | commit-msg | 「規約外のコミットメッセージを積ませない」 | commitlint ([0150](0150-git-workflow.md) の prefix 11 種を検証) | < 5 秒 |
 | pre-push | 「壊れた push・秘密を含む push を上げない」 | 型チェック (`pnpm typecheck` = `tsc --noEmit`) / キャッシュ無しの完全テスト (`make test-full`) / 秘密スキャン (`make secret-scan` = push 予定コミット範囲) | < 30 秒 |
 | post-checkout / post-merge | 「基準画像の実体を、指し先から取り残さない」 | サブモジュールの同期 (`make baseline-sync`)。移動と pull のたび | < 1 秒 |
+| post-commit | 「実装が形になった瞬間を、後から言えるようにする」 | 開発の窓への打刻 ([0161](0161-development-window-as-feedback-unit.md))。追跡外の `tmp/` へ 1 行書くだけ | < 0.1 秒 |
 | (CI) | 権威ある検査 | lint / 型 / test / build / e2e 等 | 制約なし |
 
 - pre-commit で走らせる biome は、エディタ保存時の簡易版ではなく **完全版** (`pnpm lint:ci`)。保存時は軽量・commit 時は厳格という二段構え（プロファイル分割の詳細は [0002](0002-formatter-linter.md)）
@@ -56,6 +57,7 @@ Accepted
 ### 設計原則
 
 - **post-checkout / post-merge は検査ではない。** 壊れを止めるのではなく、git が動かさない実体をブランチの記録へ合わせるだけである。落ちる余地を持たせない —— 取り込んでいない作業ツリーでは何もせず、撮影の前提検査が名指しで案内する側に任せる
+- **post-commit も検査ではない。** 記録するだけで、何も止めない。**段の境界はそれを越えた側にしか存在しない**ので、コミットという境界をここで刻む（[0161](0161-development-window-as-feedback-unit.md)）。スクリプトが無い checkout —— 剥がした後のテンプレート —— でも成立するよう存在確認を挟み、**常に成功で抜ける**。打刻が失敗して作業が止まる形にしない
 - **pre-commit は速さ優先**。重い処理 (テスト全件 / `pnpm build` / e2e) は入れない
 - **pre-push は中速まで許容**。push の機会は commit より少ないため
 - **CI が権威**。hook は「早く気づく」ための補助層であり、hook 通過 = 正しい状態ではない

@@ -243,6 +243,36 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook session-start || true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook pre-compact || true"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook session-end || true"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|MultiEdit|Write|NotebookEdit",

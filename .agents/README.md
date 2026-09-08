@@ -12,6 +12,8 @@
 | --- | --- |
 | `skills/` | `AGENTS.md` が OpenAI Codex CLI 用に予約しているパス（実体は未作成） |
 | `purity-sweep/` | 純化パスの台帳と照会フック。下記 <!-- boilerplate-only:line --> |
+| `closed-loop/` | 開発の窓の打刻。下記 <!-- boilerplate-only:line --> |
+| `private/` | 機械ローカルの索引（追跡外）。再生成できる cache で、失っても費用がゼロ <!-- boilerplate-only:line --> |
 
 <!-- boilerplate-only:begin -->
 ## `purity-sweep/`
@@ -64,6 +66,28 @@ submodule・スクラッチ）は `purity-swept.sh` が宣言する。個々の�
 台帳は**走査の結果**なので、手で書き足したエントリは「実際には行われていない走査」を主張する。
 次に読む者はその主張を黙って引き継ぎ、そのファイルは二度と見られない。手編集が妥当なのは、
 失敗した実行が壊れた行を残した場合の修復だけである。
+
+## `closed-loop/`
+
+**開発の窓の段の境界**を打刻する。窓が何かと、なぜセッションでもコミットでも PR でもないのかは
+[0161](../docs/adr/0161-development-window-as-feedback-unit.md) が持ち、何のために測るのかは
+[0160](../docs/adr/0160-agent-environment-loop.md) が持つ。
+
+| ファイル | 役割 |
+| --- | --- |
+| `marks.sh` | 打刻。窓の開閉と、段の境界の記録 |
+
+**段の境界は、それを越えたワークフロー以外のどこにも存在しない。**記録は全部のやり取りを残すが、
+そのやり取りが**どの段のものだったか**を知らない。だから越えた側が刻む —— セッションの hook、
+git の hook、そしてスキル自身が。
+
+打刻は `tmp/closed-loop/` に落ちる（追跡外）。**1 つの名前に 1 ファイル、1 行 1 epoch、常に追記** ——
+読む側が最初の行・最後の行・行数のうち問いが要るものを取れるので、**どの打刻が繰り返しうるかを
+前もって決めなくてよい**。
+
+**これはこのリポジトリの保守者のための機構であり、テンプレートから作った側へは配らない。**
+剥がしの対象として `scripts/setup/remove-boilerplate-only/manifest.ts` に登録してある。
+
 <!-- boilerplate-only:end -->
 
 ## 編集について

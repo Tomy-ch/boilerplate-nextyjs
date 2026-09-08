@@ -21,10 +21,15 @@
 | --- | --- |
 | **差異なし** | 原典がいま言っていることと、こちらの解釈が一致している |
 | **差異あり** | 食い違っており、**その食い違いを述べた決定がこちらに無い** |
-| **逸脱宣言あり** | 食い違っているが、**なぜ外れるかをこちらの決定が明示している** |
+| **逸脱宣言あり** | 食い違っているが、**なぜ外れるかを、決定か強制手段のどちらかが明示している** |
 
 「差異あり」と「逸脱宣言あり」を分けるのがこの目録の要点である。**外れていること自体は問題では
 ない** —— 問題なのは、外れていると誰も知らないまま外れていることである。
+
+**宣言の置き場は、読み手がその制約にぶつかる場所でよい。**必ずしも ADR ではない。標準と違う形を
+弾くのが lint なら、その設定のコメントに関係が書いてあれば、誤解する人はそこで読む —— 弾かれた
+人が開くのは設定であって ADR ではない。**決定が要るのは、外れ方そのものに別の案が在るときだけ**
+である（[`docs/README.md`](../README.md) の判定 1）。
 
 ## 判定に使った前提を必ず書く
 
@@ -39,7 +44,7 @@
 | Next.js の `"use client"` ディレクティブ（同梱文書 `node_modules/next/dist/docs/01-app/04-glossary.md`） | [`docs/design/rendering.md`](../design/rendering.md) の「`"use client"` は『CSR にする指示』ではない」 | **差異なし** | 同文書が `"use client"` を "marks the boundary between server and client code ... should be included in the client bundle" と定義し、Client Component を "can also be rendered on the server during initial page generation" と述べている。**バンドル境界であって描画の場所ではない**という読みは、原典の語をそのまま採ったものである | 2026-09-09 |
 | Core Web Vitals の "good" 境界（LCP 2.5 秒） | [0101](../adr/0101-performance-budget.md) の LCP 上限 | **逸脱宣言あり** | 2.5 秒は **field（実ユーザ計測）側の定義**である。0101 はこれを lab の推定値へそのまま置かず、「床 + 実行をまたぐ振れ + アプリへ割り当てる分」で導くと本文で述べている。field の LCP は [0082](../adr/0082-client-observability.md) の RUM が別に持つ | 2026-09-09 |
 | Lighthouse が INP の lab 代替として置く TBT | [0101](../adr/0101-performance-budget.md) の TBT 上限 | **逸脱宣言あり** | TBT の 200 ms が INP の "good" 境界と一致するのは **Lighthouse のスコアリング規約の側の都合**であり、標準がその値を定めたのではない。0101 はそう明示したうえで、計測手段を変えたらこの行を置き直す、という撤去条件まで本文に持っている | 2026-09-09 |
-| Conventional Commits 1.0.0 | [0150](../adr/0150-git-workflow.md) のコミット規約と [`commitlint.config.ts`](../../commitlint.config.ts) | **差異あり** | Conventional Commits は type を小文字で定め、`type(scope)!: description` の形と `feat` / `fix` の意味を規定する。こちらは大文字始まりの 11 種（`Feat` / `CI` など）と日本語の件名を採り、`commitlint.config.ts` は `type-case` を課さない。**この形が Conventional Commits から外れていることを述べた決定が、0150 にも設定にも無い。** 設定のコメントは「大文字構成が混在するため type-case を課さない」と手段だけを述べており、標準との関係には触れていない | 2026-09-09 |
+| Conventional Commits 1.0.0 | [0150](../adr/0150-git-workflow.md) のコミット規約と [`commitlint.config.ts`](../../commitlint.config.ts) | **逸脱宣言あり** | Conventional Commits は type を小文字で定め、`type(scope)!: description` の形を規定する。こちらは大文字始まりの 11 種（`Feat` / `CI` など）と日本語の件名を採る。**宣言は強制手段の側に在る** —— `commitlint.config.ts` のコメントが「型名は Conventional Commits と同じだが小文字へ揃えない」と関係を述べ、`type-case` を課さない理由をそこに置いている。弾かれた人が開くのは設定なので、置き場としてはそこが近い。**版の算出には使っていない** —— 0150 は版を人が選ぶと決めており、標準の機械可読性を要件にしていない | 2026-09-09 |
 
 ## 目録が動く条件
 

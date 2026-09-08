@@ -71,20 +71,25 @@ you tried, and leave the previous verdict with its date. An unread source is not
 | Verdict | When |
 | --- | --- |
 | **差異なし** | The source, as it reads now, says what our decision assumed |
-| **差異あり** | They disagree, **and no decision of ours says so** |
-| **逸脱宣言あり** | They disagree, **and one of our decisions states why we depart** |
+| **差異あり** | They disagree, **and nothing of ours says so** |
+| **逸脱宣言あり** | They disagree, **and either a decision or the enforcement point states why we depart** |
 
 **The split between the last two is the whole point of the ledger.** Departing from a standard is
 not a defect — ADR [0010](../../../docs/adr/0010-standards-and-non-lockin.md) exists precisely
 because conformance is a judgment, not an obligation. The defect is departing without anyone knowing.
 
 So when you land on 差異あり, check once more whether the declaration exists somewhere you did not
-look — the configuration file's comment, a neighbouring ADR, `docs/rules.md`. A declaration that
-exists but sits far from the decision is still a declaration; say where it is, and note the distance.
+look — the configuration file's comment, a neighbouring ADR, `docs/rules.md`.
 
-**A comment that states the mechanism is not a declaration of departure.** "We do not enforce
-type-case because our prefixes mix cases" says what the tool does; it does not say that the scheme
-departs from a standard, or why that is acceptable.
+**The declaration belongs where a reader meets the constraint, and that is often not an ADR.** When
+the thing that rejects the non-conforming form is a lint, its configuration is where the person who
+got rejected will look; a sentence there reaches them, and a paragraph in an ADR does not. Say where
+the declaration is. A decision is required only when the *manner* of departing had alternatives worth
+recording — `docs/README.md`'s first routing question.
+
+**A comment that states only the mechanism is not a declaration.** "We do not enforce type-case
+because our prefixes mix cases" says what the tool does; it does not say that the scheme departs from
+a standard. The repair is usually one clause in that same comment, not a new section elsewhere.
 
 ## Step 3. Write the premise before the verdict
 

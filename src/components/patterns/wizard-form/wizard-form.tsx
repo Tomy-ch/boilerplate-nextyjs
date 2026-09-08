@@ -73,6 +73,9 @@ function WizardStepLink({
   );
 }
 
+/** 先頭の段に居て、まだ先へは到達していない進捗。 */
+const START = { currentIndex: 0, furthestIndex: 0 };
+
 /** {@link WizardForm} の props。 */
 export type WizardFormProps = {
   /** この入力全体のアクセシブルな名前。 */
@@ -152,12 +155,21 @@ export function WizardForm({
   // 現在地と最も先まで進んだ位置を 1 つの状態で持つ。別々に持って片方の更新関数の中でもう片方を
   // 更新すると、更新関数が再実行されたときに副作用も繰り返され、進んでいない段まで到達済みに
   // なる。更新関数は状態から次の状態を返すだけにする。
-  const [progress, setProgress] = useState({ currentIndex: 0, furthestIndex: 0 });
-  const { currentIndex, furthestIndex } = progress;
+  const [progress, setProgress] = useState(START);
+  // 段が減って現在地が並びの外へ出たら、先頭から始め直す。到達済みも捨てる —— 到達は位置で
+  // 数えており、並びが変わった後の位置については、その段を通ったと言えない。
+  //
+  // state を戻すのは描画中に行う。effect にすると戻す前の描画が 1 度挟まる。React はこの描画の
+  // 結果を捨てて描き直すが、この描画自身も戻した値で組む —— 戻す前の位置には段が無い。
+  const located = steps[progress.currentIndex];
+  const restarted = located === undefined;
+  if (restarted) {
+    setProgress(START);
+  }
+  const { currentIndex, furthestIndex } = restarted ? START : progress;
+  const current = located ?? steps[0];
   const panelId = useId();
   const movedRef = useRef(false);
-  // 段が減って現在地が並びの外へ出たら、先頭の段を現在地とみなす。
-  const current = steps[currentIndex] ?? steps[0];
   const currentPanelId = `${panelId}-${current.id}`;
 
   // 段階が変わったときだけ focus を移す。最初の表示で移すと、開いた直後に読み上げが飛ぶ。

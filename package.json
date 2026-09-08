@@ -23,7 +23,7 @@
     "lint:ci": "biome check --config-path=./biome.ci.jsonc --error-on-warnings && pnpm lint:eslint && pnpm check:architecture",
     "lint:eslint": "eslint .",
     "md-fix": "markdownlint-cli2 --fix",
-    "md-lint": "markdownlint-cli2 && tsx scripts/mermaid-lint && tsx scripts/skill-lint",
+    "md-lint": "markdownlint-cli2 && tsx scripts/mermaid-lint && tsx scripts/skill-lint && tsx scripts/premise-lint",
     "portal:build": "pnpm portal:guides && pnpm portal:docs && pnpm --filter docs-viewer build",
     "portal:docs": "tsx scripts/portal/gen-docs-json.ts",
     "portal:guides": "tsx scripts/portal/gen-portal-docs.ts",

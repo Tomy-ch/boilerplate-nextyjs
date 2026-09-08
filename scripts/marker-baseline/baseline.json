@@ -52,6 +52,7 @@
   "scripts/e2e-routes.gate.test.ts": 2,
   "scripts/github-settings/labels.test.ts": 4,
   "scripts/lib/untested-modules.ts": 17,
+  "scripts/premise-lint/scan.test.ts": 10,
   "scripts/setup/lib/markers.test.ts": 11,
   "src/adapters/README.md": 2,
   "src/adapters/server/auth/resolver.test.ts": 3,

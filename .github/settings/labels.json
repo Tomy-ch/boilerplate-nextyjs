@@ -35,5 +35,14 @@
     "name": "run-lighthouse",
     "description": "この PR で全画面の Core Web Vitals を測る（既定は merge 後と日次）",
     "color": "1d76db"
-  }
+  },
+  { "name": "feedback", "description": "開発の窓の所見（機械が起票）", "color": "1d76db" },
+  { "name": "feedback-integration", "description": "週次で関心へ畳んだ所見", "color": "0052cc" },
+  { "name": "feedback/skill", "description": "所見の分類: スキル", "color": "c5def5" },
+  { "name": "feedback/architecture", "description": "所見の分類: アーキテクチャ", "color": "c5def5" },
+  { "name": "feedback/documentation", "description": "所見の分類: 文書", "color": "c5def5" },
+  { "name": "feedback/tooling", "description": "所見の分類: 道具", "color": "c5def5" },
+  { "name": "feedback/ai-misread", "description": "所見の分類: AI の読み違い", "color": "c5def5" },
+  { "name": "feedback/ci", "description": "所見の分類: CI", "color": "c5def5" },
+  { "name": "feedback/developer-experience", "description": "所見の分類: 開発体験", "color": "c5def5" }
 ]

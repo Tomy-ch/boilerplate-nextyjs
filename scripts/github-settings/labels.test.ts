@@ -1,7 +1,11 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
+// boilerplate-only:begin
 import { FINDING_KINDS, KIND_LABEL_PREFIX } from "../closed-loop/summarize";
-import { CLOSED_LOOP_LABELS, diffLabels, parseLabelSpecs, type LabelSpec } from "./labels";
+// boilerplate-only:end
+import { diffLabels, LABELS_PATH, parseLabelSpecs, type LabelSpec } from "./labels";
 
 const spec = (name: string): LabelSpec => ({ name, description: name, color: "d73a4a" });
 
@@ -97,31 +101,31 @@ describe("diffLabels", () => {
 });
 
 // boilerplate-only:begin
-describe("CLOSED_LOOP_LABELS", () => {
+describe("LABELS_PATH", () => {
   // ----- 正常系 -----
-  it("所見の分類をすべて持つ", () => {
-    const declared = new Set(CLOSED_LOOP_LABELS.map((label) => label.name));
+  it("所見の分類をすべてラベルとして宣言している", () => {
+    const declared = new Set(
+      parseLabelSpecs(readFileSync(LABELS_PATH, "utf8")).map((label) => label.name),
+    );
 
+    // 分類を足してラベルを足し忘れると、`gh issue create` がその窓だけ拒否し、送出が静かに
+    // 溜まり続ける。宣言と綴りを機械で結んでおく（ADR 0144）。
     for (const kind of FINDING_KINDS) {
       expect(declared).toContain(`${KIND_LABEL_PREFIX}${kind}`);
     }
+
+    expect(declared).toContain("feedback");
   });
 
-  it("分類でないラベルを、分類の接頭辞で名乗らない", () => {
+  // ----- 異常系 -----
+  it("分類でないものが、分類の接頭辞で名乗っていない", () => {
     const kinds = new Set<string>(FINDING_KINDS);
 
-    for (const label of CLOSED_LOOP_LABELS) {
+    for (const label of parseLabelSpecs(readFileSync(LABELS_PATH, "utf8"))) {
       if (label.name.startsWith(KIND_LABEL_PREFIX)) {
         expect(kinds).toContain(label.name.slice(KIND_LABEL_PREFIX.length));
       }
     }
-  });
-
-  // ----- 異常系 -----
-  it("名前が重複していない", () => {
-    const names = CLOSED_LOOP_LABELS.map((label) => label.name);
-
-    expect(new Set(names).size).toBe(names.length);
   });
 });
 // boilerplate-only:end

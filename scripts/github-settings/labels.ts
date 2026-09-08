@@ -18,36 +18,6 @@ const labelsSchema = z.array(labelSchema).min(1, { error: "ラベルの宣言が
 /** ラベル 1 件の宣言。 */
 export type LabelSpec = z.infer<typeof labelSchema>;
 
-// boilerplate-only:begin
-/**
- * 開発の窓のループが使うラベル。
- *
- * @remarks
- * 宣言ファイル（`.github/settings/labels.json`）ではなくここに置くのは、**この機構ごと剥がされる**
- * ためです（[0160](../../docs/adr/0160-agent-environment-loop.md)）。JSON はコメントを持てず、
- * 剥がしのマーカーを書けません。テンプレートから作った側に、意味を持たないラベルを 9 つ渡す
- * ことになります。
- *
- * 分類は所見の種別と 1:1 で、綴りは `summarize.ts` の `FINDING_KINDS` が持ちます。ここが
- * 増えたときにあちらを直し忘れると、**ラベルは付くが週次が知らない分類**が生まれます。
- */
-export const CLOSED_LOOP_LABELS: readonly LabelSpec[] = [
-  { name: "feedback", description: "開発の窓の所見", color: "1d76db" },
-  { name: "feedback-integration", description: "週次で関心へ畳んだもの", color: "0052cc" },
-  { name: "feedback/skill", description: "所見の分類: スキル", color: "c5def5" },
-  { name: "feedback/architecture", description: "所見の分類: アーキテクチャ", color: "c5def5" },
-  { name: "feedback/documentation", description: "所見の分類: 文書", color: "c5def5" },
-  { name: "feedback/tooling", description: "所見の分類: 道具", color: "c5def5" },
-  { name: "feedback/ai-misread", description: "所見の分類: AI の読み違い", color: "c5def5" },
-  { name: "feedback/ci", description: "所見の分類: CI", color: "c5def5" },
-  {
-    name: "feedback/developer-experience",
-    description: "所見の分類: 開発体験",
-    color: "c5def5",
-  },
-];
-// boilerplate-only:end
-
 /** 宣言と実在の差分。 */
 export type LabelDiff = {
   /** 実在しないので作るもの。宣言された順のまま。 */

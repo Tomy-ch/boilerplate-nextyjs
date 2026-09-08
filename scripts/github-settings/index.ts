@@ -9,12 +9,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
-import {
-  CLOSED_LOOP_LABELS, // boilerplate-only:line
-  diffLabels,
-  LABELS_PATH,
-  parseLabelSpecs,
-} from "./labels.js";
+import { diffLabels, LABELS_PATH, parseLabelSpecs } from "./labels.js";
 
 /** 一度に読むラベルの上限。gh の既定は 30 件で、宣言の全数に届かない。 */
 const LIST_LIMIT = 1000;
@@ -37,10 +32,7 @@ function main(argv: readonly string[]): void {
 function create(): void {
   console.log("🏷 ラベルを作成します...");
 
-  const desired = [
-    ...parseLabelSpecs(readFileSync(LABELS_PATH, "utf8")),
-    ...CLOSED_LOOP_LABELS, // boilerplate-only:line
-  ];
+  const desired = parseLabelSpecs(readFileSync(LABELS_PATH, "utf8"));
   const { toCreate, alreadyPresent } = diffLabels(listLabelNames(), desired);
 
   for (const name of alreadyPresent) {

@@ -273,20 +273,18 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
     selector: (state) => state.editor.isActive("link"),
   });
   const isEditable = useEditorState({ editor, selector: (state) => state.editor.isEditable });
-  const toolbarRef = useRef<HTMLDivElement>(null);
+  // toolbar は state で受ける。付く前の描画が 1 度あり、その回は揃える相手が無い。
+  const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null);
   const activeToolbarButtonRef = useRef<HTMLButtonElement | undefined>(undefined);
 
   // 描画のたびに揃える。プレビューの切り替えでボタンが作り直され、押せる操作も編集の内容で
   // 変わるため、依存の列挙では取り切れない。
   useEffect(() => {
-    if (toolbarRef.current === null) {
+    if (toolbar === null) {
       return;
     }
 
-    activeToolbarButtonRef.current = syncToolbarTabStops(
-      toolbarRef.current,
-      activeToolbarButtonRef.current,
-    );
+    activeToolbarButtonRef.current = syncToolbarTabStops(toolbar, activeToolbarButtonRef.current);
   });
 
   const handleToolbarFocus = useCallback((event: FocusEvent<HTMLDivElement>) => {
@@ -428,7 +426,7 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
           data-slot="rich-text-editor-toolbar"
           onFocus={handleToolbarFocus}
           onKeyDown={handleToolbarKeyDown}
-          ref={toolbarRef}
+          ref={setToolbar}
           role="toolbar"
         >
           {isPreviewing

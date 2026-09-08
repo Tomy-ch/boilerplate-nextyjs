@@ -291,6 +291,17 @@ describe("WizardForm", () => {
     expect(screen.getByLabelText("用途")).not.toBeVisible();
   });
 
+  it("段階が減って現在地が並びの外へ出たら、先頭の段階の操作を出す", async () => {
+    const { rerender } = render(<WizardFixture />);
+
+    await next();
+    await next();
+    rerender(<WizardFixture steps={[{ ...STEPS[0], nextLabel: "申請内容へ" }, STEPS[1]]} />);
+
+    expect(screen.getByRole("button", { name: "申請内容へ" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "申請する" })).not.toBeInTheDocument();
+  });
+
   it("隠れている段階の入力値も form に残る", async () => {
     render(
       <form data-testid="wizard-host">

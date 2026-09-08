@@ -29,6 +29,7 @@
 | [observability.md](observability.md) | 観測 | 2 つのカーネルの分担、1 本の trace の繋がり方、中継の口、描画の計装 |
 | [realtime-delivery.md](realtime-delivery.md) | 購読と配信 | **まだ実体の無い** 購読 seam を実体化するときの形。発券から整列・再接続まで、どの層が何を持つか |
 | [vrt.md](vrt.md) | 見た目の固定 | 基準画像が何を守り、何を守らないか。揺らぎの止め方 |
+| [context-map.md](context-map.md) | 接触点の地図 | 外と触れる場所の一覧と、辺ごとの境界の所有・翻案の有無。仕組みは各主題の文書が持ち、ここは指すだけ |
 
 ## 読み方
 

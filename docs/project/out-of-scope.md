@@ -47,10 +47,16 @@
   すると落ちる（[0143](../adr/0143-spec-driven-development.md)）
 - **観測ツールの MCP 登録と、実ブラウザのプロファイルへの接続** —— CLI から呼び、手元の開発サーバ
   だけを観測する（[0156](../adr/0156-browser-observation-tooling.md)）
-- **DDD の監査、コンテキストマップ、語彙表** —— domain 層を持たないので DDD への整合を謳わない。
-  接触点の地図を採るなら関係の語彙ではなく「境界の所有と翻案の有無」を軸にし、語彙表を採るなら契約に
-  無い UI 上の概念だけに限る。業務語彙の正は契約と生成型であり、別に持つと二重になる
-  （[0070](../adr/0070-backend-role-separation.md) / [0072](../adr/0072-api-type-generation.md)）
+- **DDD の監査** —— domain 層を持たないので DDD への整合を謳わない。集約・境界づけられたコンテキスト・
+  ユビキタス言語のどれもこのリポジトリに対象を持たず、外部の原典との差分を測っても、測った先が無い
+  （[0020](../adr/0020-adopted-architecture.md)）
+
+  **接触点の地図と語彙表は、上の条件を満たす形で採った。**地図の軸は関係の語彙（Customer-Supplier /
+  Conformist)ではなく「**境界の所有と翻案の有無**」で、翻案の有無は `architecture.ts` が機械で決める。
+  語彙表が持つのは**契約に無い UI 上の概念だけ**で、業務語彙は入れない —— その正は契約と生成型であり、
+  別に持つと二重になる（[0070](../adr/0070-backend-role-separation.md) /
+  [0072](../adr/0072-api-type-generation.md)）。どちらも、既存の ADR と `docs/design/` が持つ判定を
+  写さず**指す**（[`docs/README.md`](../README.md) の inventory の扱い）
 
 ## 用途に依存し、作った側が判断するもの
 

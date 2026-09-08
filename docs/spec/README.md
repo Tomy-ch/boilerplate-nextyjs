@@ -95,6 +95,7 @@ route group は URL に現れないため、括弧を外した名前で置きま
 | [`rules.md`](../rules.md) | 日常的に強制される規約 |
 | `components/**/README.md` + Storybook | 部品の語彙 |
 | [`adr/`](../adr/) | 機構の選択と、その理由 |
+| [`glossary.md`](glossary.md) | 仕様書の散文が使う、**契約に無い画面の側の語** |
 
 したがって、仕様書には次を書きません。
 

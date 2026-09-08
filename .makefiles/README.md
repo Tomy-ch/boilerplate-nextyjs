@@ -385,6 +385,8 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
 | `make closed-loop-report` | 打刻された開発の窓の、段の区間と所見を報告します。 | 読むだけで何も刻みません。打刻は `.agents/closed-loop/marks.sh` が hook とスキルから行い、置き場は追跡外の `tmp/closed-loop/` です。**決定的な集計だけでモデルを使いません**（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 2）。窓が 0 件のときは「所見なし」ではなく 0 件であること自体を出します（[ADR 0157](../docs/adr/0157-inspection-declaration-discipline.md)）。**この機構はテンプレートから作った側へは配りません。** |
+| `make closed-loop-send` | 閉じたまま届いていない窓の所見を issue へ送出します。 | 送出先は `.git` の remote から導き、設定項目で宛先を持ちません（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 4）。送るのは**閉じていて、段の境界を 1 つ以上越えた窓**だけです。通常はセッション開始時に `.agents/closed-loop/send.sh` が自動で回すので、これを叩くのは取りこぼしを手で流すときです。 |
+| `make closed-loop-send-dry` | 送出する内容だけを出します。 | 何も送らず、送出済みの索引にも触れません。送出が走っている最中でも見られます。 |
 
 <!-- boilerplate-only:end -->
 

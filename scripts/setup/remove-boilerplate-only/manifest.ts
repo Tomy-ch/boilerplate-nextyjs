@@ -30,6 +30,7 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   ".agents/closed-loop",
   "scripts/closed-loop",
   ".makefiles/agents",
+  ".github/workflows/closed-loop-weekly.yaml",
   ".github/workflows/strip-verify.yaml",
   // このリポジトリの運用にだけ置く検査。呼ぶ API が無料なのは public のときだけで、private では
   // Code Security のライセンスを要求する。既定として配ると、テンプレートから作ったリポジトリは

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { NO_WINDOWS_MESSAGE, type WindowMarks } from "./phases";
 import { NO_TRANSCRIPT_MESSAGE, reportAll, reportTranscript, reportWindow } from "./report";
-import { countTranscript, type TranscriptCounts } from "./transcript";
+import { parseTranscript } from "./events";
+import { countEvents, type TranscriptCounts } from "./transcript";
 
 function windowOf(id: string, marks: Record<string, readonly number[]>): WindowMarks {
   return { id, marks };
@@ -59,12 +60,14 @@ describe("reportAll", () => {
 });
 
 describe("reportTranscript", () => {
-  const counts: TranscriptCounts = countTranscript([
-    JSON.stringify({
-      type: "user",
-      message: { content: [{ type: "tool_use", name: "Skill", input: { skill: "commit" } }] },
-    }),
-  ]);
+  const counts: TranscriptCounts = countEvents(
+    parseTranscript([
+      JSON.stringify({
+        type: "user",
+        message: { content: [{ type: "tool_use", name: "Skill", input: { skill: "commit" } }] },
+      }),
+    ]),
+  );
 
   // ----- 正常系 -----
   it("読んだ量・数えられなかった量・起動を並べる", () => {
@@ -94,7 +97,7 @@ describe("reportTranscript", () => {
   });
 
   it("起動が 1 件も無ければ、そう述べる", () => {
-    const lines = reportTranscript(countTranscript([]), {
+    const lines = reportTranscript(countEvents([]), {
       files: 1,
       places: 1,
       unparsable: 0,
@@ -106,9 +109,14 @@ describe("reportTranscript", () => {
   });
 
   it("宣言されていない名前は、起動の一覧に載せない", () => {
-    const withBuiltin = countTranscript([
-      JSON.stringify({ type: "user", message: { content: "<command-name>/model</command-name>" } }),
-    ]);
+    const withBuiltin = countEvents(
+      parseTranscript([
+        JSON.stringify({
+          type: "user",
+          message: { content: "<command-name>/model</command-name>" },
+        }),
+      ]),
+    );
     const lines = reportTranscript(withBuiltin, {
       files: 1,
       places: 1,

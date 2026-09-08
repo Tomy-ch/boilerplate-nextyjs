@@ -17,7 +17,8 @@ import path from "node:path";
 import { errorMessage } from "../lib/error-message.js";
 import { collectWindows, toWorktreePaths, type MarksReader } from "./marks-store.js";
 import { reportAll, reportTranscript } from "./report.js";
-import { countTranscript, countUnparsable, neverInvoked, toProjectSlug } from "./transcript.js";
+import { countUnparsable, parseTranscript } from "./events.js";
+import { countEvents, neverInvoked, toProjectSlug } from "./transcript.js";
 
 /** 打刻の置き場（リポジトリルート相対）。 */
 const MARKS_DIR = "tmp/closed-loop/marks";
@@ -119,7 +120,7 @@ function main(): void {
 
   const dirs = transcriptDirs(roots);
   const lines = readTranscripts(dirs);
-  const counts = countTranscript(lines);
+  const counts = countEvents(parseTranscript(lines));
   const declared = declaredSkills();
 
   for (const line of reportTranscript(counts, {

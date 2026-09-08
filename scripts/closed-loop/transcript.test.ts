@@ -1,57 +1,48 @@
 import { describe, expect, it } from "vitest";
 
-import { countTranscript, countUnparsable, neverInvoked, toProjectSlug } from "./transcript";
+import type { Event } from "./events";
+import { countEvents, neverInvoked, toProjectSlug } from "./transcript";
 
-/** 記録の 1 行を組み立てる。 */
-function line(entry: unknown): string {
-  return JSON.stringify(entry);
+function at(seconds: number, event: Omit<Event, "at">): Event {
+  return { at: seconds, ...event };
 }
 
-/** 道具の呼び出しを 1 つ持つ行。 */
-function toolUse(name: string, input?: unknown): string {
-  return line({ type: "assistant", message: { content: [{ type: "tool_use", name, input }] } });
-}
-
-describe("countTranscript", () => {
+describe("countEvents", () => {
   // ----- 正常系 -----
   it("人とモデルの発話をやり取りとして数える", () => {
-    const counts = countTranscript([
-      line({ type: "user" }),
-      line({ type: "assistant" }),
-      line({ type: "summary" }),
+    const counts = countEvents([
+      at(1, { kind: "prompt" }),
+      at(2, { kind: "assistant" }),
+      at(3, { kind: "tool_use", name: "Read" }),
     ]);
 
     expect(counts.turns).toBe(2);
   });
 
   it("道具の呼び出しを名前ごとに数える", () => {
-    const counts = countTranscript([toolUse("Read"), toolUse("Read"), toolUse("Bash")]);
+    const counts = countEvents([
+      at(1, { kind: "tool_use", name: "Read" }),
+      at(2, { kind: "tool_use", name: "Read" }),
+      at(3, { kind: "tool_use", name: "Bash" }),
+    ]);
 
     expect(counts.tools).toEqual({ Read: 2, Bash: 1 });
   });
 
-  it("Skill 道具の起動を、スキル名で数える", () => {
-    expect(countTranscript([toolUse("Skill", { skill: "commit" })]).commands).toEqual({
-      commit: 1,
-    });
-  });
-
-  it("`/name` を打った記録も同じスキルの起動として数える", () => {
-    const counts = countTranscript([
-      line({ type: "user", message: { content: "<command-name>/commit</command-name>" } }),
-      toolUse("Skill", { skill: "commit" }),
+  it("起動を名前ごとに数える", () => {
+    const counts = countEvents([
+      at(1, { kind: "command", name: "commit" }),
+      at(2, { kind: "command", name: "commit" }),
     ]);
 
     expect(counts.commands).toEqual({ commit: 2 });
   });
 
-  it("道具が返した失敗と、人の中断を数える", () => {
-    const counts = countTranscript([
-      line({ type: "user", message: { content: [{ type: "tool_result", is_error: true }] } }),
-      line({
-        type: "user",
-        message: { content: [{ type: "text", text: "[Request interrupted by user]" }] },
-      }),
+  it("道具の失敗と中断を数える", () => {
+    const counts = countEvents([
+      at(1, { kind: "tool_result", ok: false }),
+      at(2, { kind: "tool_result", ok: true }),
+      at(3, { kind: "interrupt", text: "中断" }),
     ]);
 
     expect(counts.toolErrors).toBe(1);
@@ -59,70 +50,48 @@ describe("countTranscript", () => {
   });
 
   it("最初と最後の時刻を、並び順ではなく値で決める", () => {
-    const counts = countTranscript([
-      line({ type: "user", timestamp: "2026-09-09T10:00:00Z" }),
-      line({ type: "user", timestamp: "2026-09-09T09:00:00Z" }),
-      line({ type: "user", timestamp: "2026-09-09T11:00:00Z" }),
+    const counts = countEvents([
+      at(300, { kind: "prompt" }),
+      at(100, { kind: "prompt" }),
+      at(200, { kind: "prompt" }),
     ]);
 
-    expect(counts.firstAt).toBe("2026-09-09T09:00:00Z");
-    expect(counts.lastAt).toBe("2026-09-09T11:00:00Z");
+    expect(counts.firstAt).toBe(100);
+    expect(counts.lastAt).toBe(300);
   });
 
   // ----- 異常系 -----
-  it("空行を飛ばす", () => {
-    expect(countTranscript(["", "   "]).turns).toBe(0);
+  it("出来事が無ければ、時刻を null にする", () => {
+    const counts = countEvents([]);
+
+    expect(counts.firstAt).toBeNull();
+    expect(counts.lastAt).toBeNull();
+    expect(counts.turns).toBe(0);
   });
 
-  it("壊れた行で落ちない", () => {
-    expect(countTranscript(["{", line({ type: "user" })]).turns).toBe(1);
+  it("時刻を持たない出来事を、最初と最後に数えない", () => {
+    expect(countEvents([at(0, { kind: "prompt" })]).firstAt).toBeNull();
   });
 
-  it("解釈できない形の行を飛ばす", () => {
-    const counts = countTranscript([
-      line(null),
-      line("文字列"),
-      line({ type: "assistant", message: null }),
-      line({ type: "assistant", message: { content: 42 } }),
-      line({ type: "assistant", message: { content: [null, { type: "tool_use" }] } }),
-      line({
-        type: "assistant",
-        message: { content: [{ type: "tool_use", name: "Skill", input: null }] },
-      }),
-    ]);
+  it("名前を持たない道具と起動を数えない", () => {
+    const counts = countEvents([at(1, { kind: "tool_use" }), at(2, { kind: "command" })]);
 
+    expect(counts.tools).toEqual({});
     expect(counts.commands).toEqual({});
-    expect(counts.tools).toEqual({ Skill: 1 });
-  });
-
-  it("時刻でない timestamp を無視する", () => {
-    expect(countTranscript([line({ type: "user", timestamp: 1757400000 })]).firstAt).toBeNull();
-  });
-});
-
-describe("countUnparsable", () => {
-  // ----- 正常系 -----
-  it("解釈できた行は数えない", () => {
-    expect(countUnparsable([line({ type: "user" }), ""])).toBe(0);
-  });
-
-  // ----- 異常系 -----
-  it("解釈できなかった行を数える", () => {
-    expect(countUnparsable(["{", "not json", line({ type: "user" })])).toBe(2);
   });
 });
 
 describe("neverInvoked", () => {
   // ----- 正常系 -----
   it("記録に現れなかった宣言だけを返す", () => {
-    const counts = countTranscript([toolUse("Skill", { skill: "commit" })]);
+    const counts = countEvents([at(1, { kind: "command", name: "commit" })]);
 
     expect(neverInvoked(["commit", "submit-pr"], counts)).toEqual(["submit-pr"]);
   });
 
   // ----- 異常系 -----
   it("宣言が無ければ空を返す", () => {
-    expect(neverInvoked([], countTranscript([]))).toEqual([]);
+    expect(neverInvoked([], countEvents([]))).toEqual([]);
   });
 });
 

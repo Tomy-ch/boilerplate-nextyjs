@@ -53,3 +53,6 @@
 "docs/templates/feature-readme.md" = "2026-09-07"
 "docs/tutorial/README.md" = "2026-09-07"
 "docs/tutorial/build-a-screen.md" = "2026-09-07"
+"scripts/closed-loop/transcript.ts" = "2026-09-09"
+"scripts/closed-loop/transcript.test.ts" = "2026-09-09"
+"scripts/closed-loop/issue.ts" = "2026-09-09"

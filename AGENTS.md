@@ -175,6 +175,49 @@ When a change forces you into an area that BACKLOG still leaves blank (no accept
 1. **Do not introduce new conventions, patterns, or libraries on your own**. Defer the ADR decision to the user
 2. If a provisional implementation is unavoidable, explicitly tell the user it is a "provisional implementation" before starting work
 
+## Where You May Stop
+
+**The places you may hand a decision back are a list, not a judgment.** This section is that list, and
+it is closed: outside it, decide, act, and record what you decided in the pull request body.
+
+The reason for closing it is that "should I ask?" is answered by how the work is going, not by what
+the decision is. A run that is going badly asks about everything and stalls; a run that is going well
+asks about nothing and quietly settles questions that were never the agent's to settle. Neither
+failure is visible from inside the run. A list is checkable from outside it.
+
+### The stopping points
+
+Each is owned by the document named; this section indexes them and restates none.
+
+| Stop | Owner |
+| --- | --- |
+| Pushing to an existing PR branch after amending | *Git Rules* above — use its exact wording |
+| A plain cross-repository link instead of `redirect.github.com` | *Cross-Repository Links* above. **Per case, every time**, even under a standing delegation |
+| An area `BACKLOG.md` still leaves blank — a new convention, pattern, or library | *Pending Decisions* above |
+| An outward or commercial action a skill is about to take | ADR [0154](docs/adr/0154-claude-skills-operations.md) |
+| A change that removes an element the user can see | `docs/rules.md`, *作業とエージェント* |
+| Adding a dependency | ADR [0004](docs/adr/0004-library-management.md) — walk its 選定基準 and paste its 採用判断のテンプレ into the PR. Silently routing around the dependency is the same decision, taken without the record |
+
+### The trip wires
+
+These stop the work **whatever your judgment says**, because each is decidable without judgment. They
+are not extra approvals — they are the conditions under which continuing is itself the error.
+
+1. **The next step needs an operation under `permissions.deny`.** Re-routing it through another
+   interpreter is not a solution; neither is editing the deny list.
+2. **The next step rewrites history or touches a protected branch** — force push, rebase, amend-then-push.
+3. **The next step edits a generated artifact** (`**/gen/**` and anything carrying a generated banner).
+4. **Two sources that both claim authority disagree.** Noticing is the job; resolving is not
+   (`docs/rules.md`, *作業とエージェント*).
+5. **The change would make a document assert something it cannot check** — a rule with no owner, a
+   claim with no evaluator (ADR [0157](docs/adr/0157-inspection-declaration-discipline.md)).
+
+### Everywhere else
+
+Decide, and **write the decision into the PR body** — what you chose, and what you chose against. A
+decision recorded there can be reversed by a reader; a decision taken silently can only be discovered
+by someone re-deriving it. That record is the price of not asking, and it is cheaper than the ask.
+
 ## AI Modification Scope
 
 By default, AI agents may modify code only in the following scope. All other paths require an explicit user instruction.

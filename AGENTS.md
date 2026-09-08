@@ -74,6 +74,24 @@ so "it already shipped" carries little weight.
 Give the cost with the recommendation — files touched, what breaks for whom, what must be rebuilt —
 so a human can decline the scope while keeping the direction.
 
+**Two things carry authority here, and nothing else does**: a de-facto standard (an RFC, a
+specification, a platform's own definition) and the shape this repository's architecture derives.
+A personal preference is not one, and neither is a speculative accommodation of a future nobody has
+asked for. When a recommendation cannot be stated as "the standard says this" or "the dependency
+matrix leaves only this shape", it is a preference wearing a recommendation's clothes.
+
+**Do not bake a particular deployment's situation into what survives.** The concrete choices belong
+to whoever creates a repository from this template; this side supplies the seam. But that rule is
+subordinate to the one above, not parallel to it: a knob or an abstraction is justified only where
+the variation is genuinely situational **and** neither the standard nor the architecture has already
+settled it. Putting a knob where a standard already decided is not situation-independence — it is a
+departure from the standard, and it needs the declaration ADR
+[0010](docs/adr/0010-standards-and-non-lockin.md) requires, or it needs to go.
+
+The test is therefore never "more abstraction" or "less abstraction". It is **move toward the shape
+the standard or the architecture derives, and drop the situational label** — which is why the same
+principle pushes abstraction up in one place and collapses it in another.
+
 Recommending is not deciding. Where BACKLOG still leaves an area blank, `Pending Decisions` below
 still applies: propose, and leave the ADR call to the user.
 <!-- boilerplate-only:end -->

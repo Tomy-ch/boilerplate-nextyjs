@@ -119,7 +119,10 @@ The review has settled the look, so stamp both boundaries this step sits between
 
 Move what the review settled into its layers. Decide placement from `docs/playbook.md`'s reverse
 index and the kernel READMEs; carry the criteria as a reference path to the ADR that owns it rather
-than restating it in code or in the README.
+than restating it in code or in the README. **The reference paths themselves are a table in
+`docs/playbook.md`, 「工程 4（分離）で読むもの」** — open the rows that apply and read the ADR
+sections they name, including the rejected-alternative rows, which exist so the same idea is not
+re-argued from scratch each time.
 
 ## Step 6. Spec (order step 5)
 

@@ -127,6 +127,33 @@ function numberOf(raw: string | undefined): number | undefined {
 }
 
 /**
+ * 段の内側の行（`to:` / `sec:`）を読み、揃った段があればそれも返す。
+ *
+ * @remarks
+ * 段は 3 行で 1 つになるので、読んだ行だけでは「まだ途中」か「揃った」かが決まりません。
+ * 呼び出し側が組み立てを持つと、行の読み取りと段の完成判定が同じ入れ子に混ざります。
+ *
+ * @returns 段の行でなければ `null`。`done` は揃った段、揃っていなければ `null`
+ */
+function readPhaseLine(
+  phase: Partial<ObservedPhase>,
+  line: string,
+): { readonly phase: Partial<ObservedPhase>; readonly done: ObservedPhase | null } | null {
+  const nested = /^\s+(to|sec):(.*)$/.exec(line);
+  const value = nested?.[2]?.trim();
+
+  if (nested === null || !value) {
+    return null;
+  }
+
+  const next = nested[1] === "to" ? { ...phase, to: value } : { ...phase, sec: numberOf(value) };
+
+  return next.from !== undefined && next.to !== undefined && next.sec !== undefined
+    ? { phase: {}, done: { from: next.from, to: next.to, sec: next.sec } }
+    : { phase: next, done: null };
+}
+
+/**
  * ブロックの各行を、スカラと段の区間へ振り分ける。
  *
  * @remarks
@@ -150,19 +177,13 @@ function readBlock(block: readonly string[]): {
       continue;
     }
 
-    const nested = /^\s+(to|sec):(.*)$/.exec(line);
-    const nestedValue = nested?.[2]?.trim();
+    const read = readPhaseLine(phase, line);
 
-    if (nested !== null && nestedValue) {
-      if (nested[1] === "to") {
-        phase = { ...phase, to: nestedValue };
-      } else {
-        phase = { ...phase, sec: numberOf(nestedValue) };
-      }
+    if (read !== null) {
+      phase = read.phase;
 
-      if (phase.from !== undefined && phase.to !== undefined && phase.sec !== undefined) {
-        phases.push({ from: phase.from, to: phase.to, sec: phase.sec });
-        phase = {};
+      if (read.done !== null) {
+        phases.push(read.done);
       }
 
       continue;

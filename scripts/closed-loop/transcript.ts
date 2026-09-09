@@ -38,8 +38,38 @@ export type TranscriptCounts = {
   readonly lastAt: number | null;
 };
 
-function bump(counter: Record<string, number>, key: string): void {
-  counter[key] = (counter[key] ?? 0) + 1;
+/** その種別の出来事を、名前ごとに数える。名前を持たない出来事は数えない。 */
+function countNames(
+  events: readonly Event[],
+  kind: Event["kind"],
+): Readonly<Record<string, number>> {
+  const counter: Record<string, number> = {};
+
+  for (const event of events) {
+    if (event.kind === kind && event.name !== undefined) {
+      counter[event.name] = (counter[event.name] ?? 0) + 1;
+    }
+  }
+
+  return counter;
+}
+
+/**
+ * 記録が覆う時刻の幅。
+ *
+ * @remarks
+ * 時刻を持たない出来事（`at` が 0）は数えません。記録の側に時刻が無いだけで、その出来事が
+ * 1970 年に起きたわけではないためです。
+ */
+function spanOf(events: readonly Event[]): {
+  readonly firstAt: number | null;
+  readonly lastAt: number | null;
+} {
+  const stamps = events.map((event) => event.at).filter((at) => at > 0);
+
+  return stamps.length === 0
+    ? { firstAt: null, lastAt: null }
+    : { firstAt: Math.min(...stamps), lastAt: Math.max(...stamps) };
 }
 
 /**
@@ -48,43 +78,19 @@ function bump(counter: Record<string, number>, key: string): void {
  * @remarks
  * 数える対象を出来事に取るのは、**同じ列を読ませる候補の選定も読むから**です。数え方と
  * 選び方が別々に記録を解釈すると、報告の数と読解の材料が食い違っても誰も気づけません。
+ *
+ * 指標ごとに列を歩き直します。1 度の走査へ畳むと、どの指標がどの出来事を数えるかが
+ * 分岐の入れ子の中に沈み、指標を 1 つ足すたびにその入れ子を読む必要が出ます。
  */
 export function countEvents(events: readonly Event[]): TranscriptCounts {
-  const commands: Record<string, number> = {};
-  const tools: Record<string, number> = {};
-  let toolErrors = 0;
-  let interruptions = 0;
-  let turns = 0;
-  let firstAt: number | null = null;
-  let lastAt: number | null = null;
-
-  for (const event of events) {
-    if (event.at > 0) {
-      firstAt = firstAt === null || event.at < firstAt ? event.at : firstAt;
-      lastAt = lastAt === null || event.at > lastAt ? event.at : lastAt;
-    }
-
-    switch (event.kind) {
-      case "prompt":
-      case "assistant":
-        turns += 1;
-        break;
-      case "tool_use":
-        if (event.name !== undefined) bump(tools, event.name);
-        break;
-      case "tool_result":
-        if (event.ok === false) toolErrors += 1;
-        break;
-      case "interrupt":
-        interruptions += 1;
-        break;
-      case "command":
-        if (event.name !== undefined) bump(commands, event.name);
-        break;
-    }
-  }
-
-  return { commands, tools, toolErrors, interruptions, turns, firstAt, lastAt };
+  return {
+    commands: countNames(events, "command"),
+    tools: countNames(events, "tool_use"),
+    toolErrors: events.filter((event) => event.kind === "tool_result" && event.ok === false).length,
+    interruptions: events.filter((event) => event.kind === "interrupt").length,
+    turns: events.filter((event) => event.kind === "prompt" || event.kind === "assistant").length,
+    ...spanOf(events),
+  };
 }
 
 /**

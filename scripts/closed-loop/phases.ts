@@ -53,7 +53,7 @@ export const MARK_ORDER: readonly string[] = [
  * 呼ぶと、正常な窓のほとんどが所見を持ち、本当に飛んだ窓がその中に埋もれます。
  * ここに並ぶのは「無いことが正常な段」であって、「測っていない段」ではありません。
  */
-const OPTIONAL_MARKS: readonly string[] = ["planApprovedAt", "implStartedAt"];
+const OPTIONAL_MARKS: ReadonlySet<string> = new Set(["planApprovedAt", "implStartedAt"]);
 
 /**
  * 回数として意味を持つ打刻。
@@ -183,7 +183,7 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   // 任意の段しか欠けていない窓は所見にしない。計画の承認は、計画を要さない小さな変更では
   // そもそも起きない —— それを「飛んだ」と呼ぶと、正常な窓のほとんどが所見を持つ。
   // 欠けが必須の段へ及んだときだけ、任意の段も含めて何が刻まれなかったかを並べる。
-  const skipped = missing.some((name) => !OPTIONAL_MARKS.includes(name)) ? missing : [];
+  const skipped = missing.some((name) => !OPTIONAL_MARKS.has(name)) ? missing : [];
 
   if (skipped.length > 0) {
     found.push({ kind: "段が飛んでいる", detail: `刻まれていない: ${skipped.join(" / ")}` });

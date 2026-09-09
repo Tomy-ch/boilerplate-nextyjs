@@ -128,6 +128,15 @@ export function renderIssueBody(
   const phases = toPhases(window);
   const anomalies = toAnomalies(window);
 
+  const counts = COUNTED_MARKS.map((name) => `- ${name}: ${countOf(window, name)} 回`);
+  const toolCounts =
+    observation.toolCalls === undefined
+      ? []
+      : [
+          `- 道具の呼び出し: ${observation.toolCalls} 回（うち失敗 ${observation.toolFailures ?? 0}）`,
+          `- 中断: ${observation.interrupts ?? 0} 回`,
+        ];
+
   const lines = [
     `打刻された開発の窓 \`${window.id}\` が閉じた。`,
     "",
@@ -135,38 +144,26 @@ export function renderIssueBody(
     "",
     "## 段の区間",
     "",
-  ];
-
-  lines.push(...phaseLines(phases));
-
-  lines.push("", "## 回数", "");
-
-  for (const name of COUNTED_MARKS) {
-    lines.push(`- ${name}: ${countOf(window, name)} 回`);
-  }
-
-  if (observation.toolCalls !== undefined) {
-    lines.push(
-      `- 道具の呼び出し: ${observation.toolCalls} 回（うち失敗 ${observation.toolFailures ?? 0}）`,
-      `- 中断: ${observation.interrupts ?? 0} 回`,
-    );
-  }
-
-  lines.push("", "## 所見", "");
-
-  lines.push(...anomalyLines(anomalies));
-
-  lines.push("", "---", "");
-
-  lines.push(...readingLines(summary, gap));
-
-  lines.push(
+    ...phaseLines(phases),
+    "",
+    "## 回数",
+    "",
+    ...counts,
+    ...toolCounts,
+    "",
+    "## 所見",
+    "",
+    ...anomalyLines(anomalies),
+    "",
+    "---",
+    "",
+    ...readingLines(summary, gap),
     "---",
     "",
     "上半分は打刻と記録から機械が数えた事実、下半分は手元のモデルが読んだ結果である（ADR 0160 決定 2）。",
     "所見の正はこの issue が持ち、リポジトリの中には置かない（同 決定 4）。",
     "改善が着地したらこの issue を閉じる —— 着地の記録を別に持たない（同 決定 1）。",
-  );
+  ];
 
   return `${lines.join("\n")}\n`;
 }

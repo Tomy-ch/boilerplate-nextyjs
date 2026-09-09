@@ -83,7 +83,7 @@ export function parseFrontmatterKeys(fmLines: string[]): Map<string, string> {
 export function extractHeadings(content: string): Heading[] {
   const headings: Heading[] = [];
   for (const { line, lineNo } of eachLineOutsideFence(content)) {
-    const [, hashes, raw] = /^(#{1,6})[ \t]+(.*)$/.exec(line) ?? [];
+    const [, hashes, raw] = /^(#{1,6})[ \t](.*)$/.exec(line) ?? [];
     const text = raw?.trim();
     if (hashes !== undefined && text !== undefined && text !== "") {
       headings.push({ level: hashes.length, text, lineNo });

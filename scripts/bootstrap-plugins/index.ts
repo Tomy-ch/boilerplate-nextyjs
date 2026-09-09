@@ -19,7 +19,7 @@ const SCOPE = "project";
 // 本リポジトリが依存する公式プラグイン。増やす場合はここに足す。
 //
 // プラグインは資産の束であって、束ごと採る宣言ではない。どれを採りどれを意図して採らないかは
-// ADR 0155 が持つ。`feature-dev` は `code-explorer` のためだけに入れてあり、同梱の
+// [README](../README.md) が挙げる決定が持つ。`feature-dev` は `code-explorer` のためだけに入れてあり、同梱の
 // `/feature-dev` コマンドと `code-architect` / `code-reviewer` は使わない。
 const PLUGINS = ["skill-creator", "feature-dev"];
 

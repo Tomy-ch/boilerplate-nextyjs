@@ -78,7 +78,7 @@ export function resolvePeriod(
  * @remarks
  * 読めなかったものを 0 や現在時刻へ倒しません。**倒すと、読めなかった窓が期間の内側や
  * 外側として静かに数えられます** —— `undefined` を返せば、呼ぶ側は集計から外すか
- * 数え直すかを選べます（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 数え直すかを選べます。
  *
  * @param iso - GitHub が返す時刻。閉じていない issue では `null`
  * @returns epoch 秒。時刻が無いか読めなければ `undefined`

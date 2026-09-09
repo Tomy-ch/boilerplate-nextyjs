@@ -68,7 +68,6 @@ describe("composeIssueBody", () => {
 describe("drawModelProse", () => {
   // ----- 正常系 -----
   it("散文と markdown の記法はそのまま残す", () => {
-    // 字下げで殺さない。後段がこの本文を節として読み戻し、`#12` を辿るため。
     expect(
       drawModelProse("## 摩擦\n\n- ゲートを 2 回回した（#12）\n\n`code` も **強調** も残る"),
     ).toBe("## 摩擦\n\n- ゲートを 2 回回した（#12）\n\n`code` も **強調** も残る");
@@ -86,15 +85,12 @@ describe("drawModelProse", () => {
 
   // ----- 異常系 -----
   it("mention でないものを mention として囲まない", () => {
-    // メールアドレス、既に囲ってあるもの、パスの一部。いずれも直前が語の文字・
-    // バッククォート・`/` で、二重に囲むと本文が壊れる。
     expect(drawModelProse("a@example.test / `@octocat` / path/@scope")).toBe(
       "a@example.test / `@octocat` / path/@scope",
     );
   });
 
   it("スレッドを指さない GitHub の URL は寄せない", () => {
-    // commit / blob / release は逆参照を作らないので、素のまま辿れる方がよい。
     expect(drawModelProse("https://github.com/o/r/commit/abc1234")).toBe(
       "https://github.com/o/r/commit/abc1234",
     );

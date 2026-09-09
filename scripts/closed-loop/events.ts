@@ -6,7 +6,7 @@
 // 形が変わったときに直す場所を 1 つにする。
 //
 // なぜ記録を読むのか、どこまでを読んでよいのかは
-// [0160](../../docs/adr/0160-agent-environment-loop.md) 決定 5 が持つ。
+// [README](../README.md) が挙げる決定が持つ。
 
 /** 出来事の種類。 */
 type EventKind = "prompt" | "assistant" | "tool_use" | "tool_result" | "interrupt" | "command";
@@ -209,7 +209,7 @@ export function parseTranscript(lines: readonly string[]): readonly Event[] {
  * @remarks
  * **飛ばした行を黙って落とさない。**記録の形が変わったのか、書き込みの途中だったのかは
  * ここでは決まりませんが、**数えられなかった量は報告に出す**必要があります
- * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 。
  */
 export function countUnparsable(lines: readonly string[]): number {
   return lines.filter((line) => {

@@ -1,7 +1,6 @@
 // 閉じた窓を issue の題と本文にする判定。投稿は入口([send/index.ts](send/index.ts))が持つ。
 //
-// **所見の正はリポジトリの中に置かない**（[0160](../../docs/adr/0160-agent-environment-loop.md)
-// 決定 4）。ここが作るのは、その置き場へ渡す文面である。
+// **所見の正はリポジトリの中に置かない**。ここが作るのは、その置き場へ渡す文面である。
 //
 // 本文は 3 層で、順に**機械が読み戻す区画**・**数えた事実**・**読解**である。読解が無い窓でも
 // 前 2 つは出る —— 決定的な集計が先に立ち、モデルはその後に来る（同 決定 2）。
@@ -114,10 +113,10 @@ function readingLines(summary: Summary | undefined, gap: ReadingGap): readonly s
  *
  * @remarks
  * **読めなかったことを「所見なし」に倒しません**
- * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。読解の節が空なのか、
+ * 。読解の節が空なのか、
  * そもそも読んでいないのかは本文から分かる必要があります。
  *
- * **記録の抜粋は載せません**（[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 5）。
+ * **記録の抜粋は載せません**。
  * 外へ出るのは読んだ結果だけで、逐語は手元のモデルへ渡って終わります。
  */
 export function renderIssueBody(

@@ -84,7 +84,7 @@ export const SAMPLE_PATHS: readonly string[] = [
   "e2e/journeys/responsive.spec.ts",
   "e2e/journeys/overlay.spec.ts",
   "e2e/journeys/focus.spec.ts",
-  // 破棄の道具（使い終わったら不要）。ディレクトリごと挙げれば、判定モジュールを足しても漏れない。
+  // 破棄の道具（使い終わったら不要）。
   "scripts/setup/remove-sample",
 ];
 
@@ -123,7 +123,7 @@ export const SAMPLE_RESTORATIONS: readonly SampleRestoration[] = [
     to: "src/app/page.tsx",
   },
   // 置き直した入口の画面要件。route が戻る以上、突合の相手も戻らなければ
-  // `spec-routes.gate` が破棄後の木でだけ落ちる（[0143](../../../docs/adr/0143-spec-driven-development.md)）。
+  // `spec-routes.gate` が破棄後の木でだけ落ちる。
   {
     from: "scripts/setup/remove-sample/templates/page-screen.md.template",
     to: "docs/spec/route/page.screen.md",

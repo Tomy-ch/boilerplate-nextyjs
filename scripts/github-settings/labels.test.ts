@@ -115,7 +115,7 @@ describe("LABELS_PATH", () => {
     );
 
     // 分類を足してラベルを足し忘れると、`gh issue create` がその窓だけ拒否し、送出が静かに
-    // 溜まり続ける。宣言と綴りを機械で結んでおく（ADR 0144）。
+    // 溜まり続ける。宣言と綴りを機械で結んでおく。
     for (const kind of FINDING_KINDS) {
       expect(declared).toContain(`${KIND_LABEL_PREFIX}${kind}`);
     }

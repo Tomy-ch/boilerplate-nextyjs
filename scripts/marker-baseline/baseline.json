@@ -57,7 +57,7 @@
   "openapi/sources.yaml": 2,
   "orval.config.ts": 23,
   "performance-budget.yaml": 11,
-  "scripts/README.md": 5,
+  "scripts/README.md": 7,
   "scripts/e2e-routes.gate.test.ts": 2,
   "scripts/github-settings/labels.test.ts": 9,
   "scripts/lib/untested-modules.ts": 17,

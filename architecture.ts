@@ -155,7 +155,9 @@ export const ENTRY_POINTS = [
  * 列で、層の許可より後に評価されます。
  *
  * - `app-route-handler`: 唯一の HTTP 口。バックエンドへの中継とその応答の組み立てだけを持つため、
- *   UI 部品・横断状態・設定と、feature の内側を落とします。**feature を指すなら `facade/` から**
+ *   UI 部品・横断状態・設定と `observability`、そして feature の内側を落とします —— 計装の mount は
+ *   `app-server-action` の名指しの例外で、HTTP 口が自分で span を立てる場面ではありません。
+ *   **feature を指すなら `facade/` から**
  *   —— 送り先に要るのはルートの識別子だけで、それは所有する feature が `facade/` へ出しています。
  *   スライスの内側まで開けると、業務ロジックがここへ降りてくる経路になります。受け口の本体を隣の
  *   モジュールへ薄く出す形（`app` 内の相互参照）は残ります
@@ -172,7 +174,7 @@ export const ENTRY_POINTS = [
  *   `model`（保護している経路の宣言）を読み、要求時に一覧を辿る `sitemap.ts` だけが
  *   `adapters/server` と feature の `facade/` へ届きます。**「`sitemap.ts` だけ」は指針です** ——
  *   要素はここに並ぶファイル名の集合なので、その中の 1 つだけを分ける粒度が無く、`adapters` は
- *   5 つすべてで通ります（[0025](docs/adr/0025-app-layer-elements.md) の強制の表）。UI 部品と横断状態は持ちません ——
+ *   5 つすべてで通ります。UI 部品と横断状態は持ちません ——
  *   描くのは絵 1 枚か文書 1 つで、画面ではないためです。判定を持つ `sitemap.ts` / `robots.ts` は
  *   `unit` で検証し、絵を返すだけの 3 つは判定を持たないので単体では回しません
  *   （`scripts/lib/untested-modules.ts`）

@@ -4,10 +4,11 @@
 //
 //   closed-loop-send             送る
 //   closed-loop-send --dry-run   何を送るかだけ出す
+//   closed-loop-send --no-summary 読解を省いて送る
 //
 // 送出先は `.git` の remote から導く（[remote.ts](../remote.ts)）。**設定項目で宛先を持たない**
-// —— このリポジトリが押している先そのものが、[0160](../../../docs/adr/0160-agent-environment-loop.md)
-// 決定 4 の言う issue トラッカーである。
+// —— このリポジトリが押している先そのものが、決定の言う issue トラッカーである
+// （[README](../../README.md)）。
 //
 // 外へ出るのは数えた事実と**読解の結果**だけで、セッションの記録の抜粋は出さない（同 決定 5）。
 // 逐語は手元のモデルへ渡って終わる。

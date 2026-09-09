@@ -21,7 +21,6 @@ describe("PREMISE_SHAPES", () => {
   it("判断の要る言い回しを綴りにしない", () => {
     const all = PREMISE_SHAPES.flatMap((shape) => shape.phrases);
 
-    // 決定の理由として正しく使われる語。入れると赤が日常になり、検査が読まれなくなる。
     for (const loose of ["現時点", "まだ", "いまは", "暫定"]) {
       expect(all).not.toContain(loose);
     }

@@ -2,7 +2,7 @@
 // 持ち、ここは受け取ったパスの一覧だけから答えを出す。
 //
 // 写像の規約は [`docs/spec/README.md`](../../docs/spec/README.md) が持ち、検査の輪郭は
-// [0143](../../docs/adr/0143-spec-driven-development.md)「存在の突合」が持つ。
+// [README](../README.md) が挙げる決定の「存在の突合」が持つ。
 
 /** 仕様書の置き場（リポジトリ相対）。 */
 export const SPEC_ROOT = "docs/spec/route";
@@ -11,8 +11,8 @@ export const SPEC_ROOT = "docs/spec/route";
  * 母数になる app の入口。
  *
  * @remarks
- * [0143](../../docs/adr/0143-spec-driven-development.md) の母数。**開発専用の route も約束を持ちます** ——
- * `page.dev.tsx` は build から外れますが（[0113](../../docs/adr/0113-development-access-surface.md)）、
+ * 突合の母数。**開発専用の route も約束を持ちます** ——
+ * `page.dev.tsx` は build から外れますが、
  * build から外れることと、約束を持たないことは別です。
  */
 const ROUTE_ENTRIES: ReadonlySet<string> = new Set(["page.tsx", "page.dev.tsx", "layout.tsx"]);
@@ -26,7 +26,7 @@ const APP_PREFIX = "src/app/";
  * @remarks
  * 母数が 0 件になるのは、走査の対象が動いたか接頭辞が変わったときです。そのまま「違反なし」を
  * 返すと、**検査が成立していないこと**と**違反が無いこと**が同じ緑になります
- * ([0157](../../docs/adr/0157-inspection-declaration-discipline.md))。
+ * 。
  */
 export const NO_ROUTES_MESSAGE =
   "src/app に page / layout の入口が 1 件もありません。走査の対象が動いた可能性があります";

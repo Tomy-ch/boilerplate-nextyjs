@@ -4,16 +4,8 @@
 //
 //   base-merge [--base=<ref>] [--dry-run]
 //
-// ベースは PR の `baseRefName` が最も強く、無いときだけ origin の実状態から最新の
-// リリースラインを解く([base-branch](../base-branch/README.md) と同じ判定を共有する)。
-// `refs/remotes/origin/HEAD` と `gh repo view --json defaultBranchRef` は読まない —— どちらも
-// 前のリリースラインを黙って答える。
-//
-// **rebase はしない。**[0150](../../docs/adr/0150-git-workflow.md) の規約であることに加えて、
-// 追記専用のファイルでは同じ内容が別のハッシュで再着地し、2 つの独立した追加として読める。
-//
-// 衝突が残ったときは終了コード 1 で、未解決のパスを stdout へ並べる。作業ツリーは MERGING の
-// まま残す —— 解決は `resolve-merge` の仕事で、この道具は取り込みと報告までを持つ。
+// ベースの解き方・rebase しないこと・拒む状態・終わり方は [README](README.md) が持つ。
+// ベースの判定は [base-branch](../base-branch/README.md) と共有する。
 import { execFileSync } from "node:child_process";
 
 import { selectLatestReleaseLine } from "../base-branch/resolve.js";

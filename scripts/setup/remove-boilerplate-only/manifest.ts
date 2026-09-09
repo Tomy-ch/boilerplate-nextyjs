@@ -24,13 +24,14 @@ export const BOILERPLATE_ONLY_MARKER = "boilerplate-only";
  */
 export const SELF_DESTRUCT_PATHS: readonly string[] = [
   "scripts/setup/remove-boilerplate-only",
-  // エージェント環境の稼ぎを測る機構（[0160](../../../docs/adr/0160-agent-environment-loop.md)）。
+  // エージェント環境の稼ぎを測る機構。
   // 問いの主語がこのリポジトリの保守者で、テンプレートから作った側のスキル群は作った側が判断する。
   // 打刻そのものは追跡外の tmp/ に落ちるので、消すのは機構の側だけでよい。
   ".agents/closed-loop",
   "scripts/closed-loop",
   ".makefiles/agents",
   ".github/workflows/closed-loop-weekly.yaml",
+  // 剥がしそのものを検証する CI。理由は冒頭の @remarks が持つ。
   ".github/workflows/strip-verify.yaml",
   // このリポジトリの運用にだけ置く検査。呼ぶ API が無料なのは public のときだけで、private では
   // Code Security のライセンスを要求する。既定として配ると、テンプレートから作ったリポジトリは

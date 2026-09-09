@@ -67,7 +67,7 @@ function main(): void {
   );
 
   // 検査していない形を毎回述べる。黙って通すと、緑が「前提なし」に読める
-  // （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+  // 。
   const note = `検査 ${files.length} 文書 / 未検査の形: ${UNCHECKED_SHAPES.join(" / ")}`;
 
   if (premises.length === 0) {

@@ -3,7 +3,7 @@
 //
 // **これはモデルの 2 つめの用途で、入力が既にモデルの出力である**（改善案の節）。順位付けと
 // 測り直しは決定的な集計だけで済んでおり、畳み込みが落ちても週次は成立する
-// （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 2）。
+// 。
 
 import { drawModelProse } from "../lib/issue-body.js";
 import { issueRefs } from "./format.js";

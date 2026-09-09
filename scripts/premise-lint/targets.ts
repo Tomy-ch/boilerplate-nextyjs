@@ -21,17 +21,13 @@ export const SCANNED_PATHS: readonly string[] = [
  *
  * @remarks
  * **理由を値の一部にしてあります。**外した覚えの無い除外は、規則として置いたつもりの無い規則と
- * 見分けが付きません（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 見分けが付きません。
  */
 export const EXCLUDED_PATHS: Readonly<Record<string, string>> = {
-  // 進行中の状態を書くための文書であり、「途中である」ことがそのまま中身である。
   "docs/adr/BACKLOG.md": "未決の待ち行列そのもの。途中であることを書くのが役目",
-  // 同上。作った側へ渡らない。
   "docs/plan": "こちらの計画書。作った側は受け取らない",
-  // 前提と一緒に捨てられる側。
   "docs/get-started": "作った側が読み終えたら捨てる文書",
   "docs/tutorial": "作った側が読み終えたら捨てる文書",
-  // 生成物。手で書く場所ではない。
   "docs/portal": "生成物",
 };
 

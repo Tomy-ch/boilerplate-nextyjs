@@ -1,8 +1,8 @@
 // 打刻から段の区間と異常を導く判定。ファイルの読み取りは入口([index.ts](index.ts))が持ち、
 // ここは受け取った打刻だけから答えを出す。
 //
-// 何を測るのかは [0160](../../docs/adr/0160-agent-environment-loop.md)、単位が窓であることと
-// 打刻が第一であることは [0161](../../docs/adr/0161-development-window-as-feedback-unit.md) が持つ。
+// 何を測るのか、単位が窓であること、打刻が第一であることは
+// [README](../README.md) が挙げる決定が持つ。
 
 /** 1 つの窓の打刻。名前ごとに、追記された epoch(秒)の並び。 */
 export type WindowMarks = {
@@ -29,8 +29,7 @@ export type Anomaly = {
  *
  * @remarks
  * 区間はこの並びの**隣り合う打刻のうち、実際に在るもの同士**で作ります。存在しない打刻を
- * 埋めないのは、[0161](../../docs/adr/0161-development-window-as-feedback-unit.md) の
- * 「刻まれなければ存在しない」に従うためです。推測で埋めると、測っていない区間が
+ * 埋めないのは、「刻まれなければ存在しない」に従うためです（[README](../README.md)）。推測で埋めると、測っていない区間が
  * 測った区間と同じ見た目で並びます。
  */
 export const MARK_ORDER: readonly string[] = [
@@ -71,7 +70,7 @@ export const COUNTED_MARKS: readonly string[] = ["commitAt", "reviewStartedAt"];
  * @remarks
  * 打刻の置き場が空であることと、走査が壊れて 0 件になったことは見分けが付きません。
  * そのまま「異常なし」を返すと、**壊れた集計が永久に緑を返します**
- * ([0157](../../docs/adr/0157-inspection-declaration-discipline.md))。
+ * 。
  */
 export const NO_WINDOWS_MESSAGE =
   "窓が 1 件もありません。まだ打刻されていないか、走査の対象が動いた可能性があります";
@@ -126,7 +125,7 @@ export function toPhases(window: WindowMarks): readonly Phase[] {
  *
  * @remarks
  * 打刻だけで決まるものに限ります。「なぜ時間が掛かったか」は打刻からは出ないので、ここは
- * 触れません（[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 2 の分担）。
+ * 触れません。
  */
 export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
   const found: Anomaly[] = [];
@@ -180,9 +179,8 @@ export function toAnomalies(window: WindowMarks): readonly Anomaly[] {
           (name) => markAt(window, name) === null,
         );
 
-  // 任意の段しか欠けていない窓は所見にしない。計画の承認は、計画を要さない小さな変更では
-  // そもそも起きない —— それを「飛んだ」と呼ぶと、正常な窓のほとんどが所見を持つ。
-  // 欠けが必須の段へ及んだときだけ、任意の段も含めて何が刻まれなかったかを並べる。
+  // 任意の段（`OPTIONAL_MARKS`）しか欠けていない窓は所見にしない。欠けが必須の段へ及んだ
+  // ときだけ、任意の段も含めて何が刻まれなかったかを並べる。
   const skipped = missing.some((name) => !OPTIONAL_MARKS.has(name)) ? missing : [];
 
   if (skipped.length > 0) {

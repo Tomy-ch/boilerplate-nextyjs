@@ -2,7 +2,7 @@
 // 持ち、ここは並べ方だけを持つ。
 //
 // **順位は検討の入口であって結論ではない。**保持・簡素化・撤回を決めるのは人である
-// （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 1）。だから本文にその一行を残す。
+// 。だから本文にその一行を残す。
 
 import { humanize, issueRefs, percent } from "./format.js";
 import { type Period, toDay } from "./period.js";
@@ -21,7 +21,7 @@ import { IMPROVEMENT_SECTION } from "./summarize.js";
  *
  * @remarks
  * 0 件は「問題が無かった週」ではありません。**窓が開かなかった週も、送出が届かなかった週も、
- * 同じ 0 件**です（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 同じ 0 件**です。
  */
 export const NO_ISSUES_MESSAGE =
   "この期間の所見は 0 件です。窓が無かったのか、送出が届いていないのかは、ここでは分かりません";
@@ -121,7 +121,7 @@ export type WeeklyInput = {
  * @remarks
  * **読めなかった issue の数を必ず出します。**人が本文を書き換えた 1 件で週次全体を落とさない
  * 代わりに、落とした量は見えている必要があります
- * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 。
  */
 export function reportWeekly(input: WeeklyInput): readonly string[] {
   const header = [

@@ -2,7 +2,7 @@
 //
 // 置き場は `.agents/private/`（追跡外）である —— 失っても費用は「同じ窓をもう一度立てる」
 // だけで、コミットすると別のマシンでそれが正を主張する
-// （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 4）。
+// 。
 
 import { isSubstantive, markAt, type WindowMarks } from "./phases.js";
 

@@ -14,7 +14,7 @@ import {
  * route と仕様書の存在の突合ゲート。
  *
  * @remarks
- * 何を・なぜ見るかは [0143](../docs/adr/0143-spec-driven-development.md)「存在の突合」。写像と判定は
+ * 何を・なぜ見るかは [README](README.md) が挙げる「存在の突合」。写像と判定は
  * [`lib/spec-routes.ts`](lib/spec-routes.ts) が持ち、ここは木を歩くだけです。
  *
  * 剥がした木でも成立します —— サンプルの画面とその仕様書は同じ変更で消えるため、母数と対象が
@@ -26,7 +26,7 @@ const REPOSITORY_ROOT = path.resolve(import.meta.dirname, "..");
 /** 母数の走査対象。 */
 const APP_DIR = "src/app";
 
-/** 仕様書のファイル名の末尾。索引や README は対象外。 */
+/** 仕様書のファイル名の末尾。この綴りだけで拾うので、配下に置いた README も仕様書として数える。 */
 const SPEC_SUFFIX = ".md";
 
 /** ディレクトリ配下のファイルを、リポジトリ相対のパスで列挙する。 */

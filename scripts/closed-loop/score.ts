@@ -3,7 +3,7 @@
 //
 // **ここは何も決めない。**順位は検討の入口であって結論ではなく、測り直しは再発の件数と
 // 判定の時期が来たかを並べるだけである。保持・簡素化・撤回を決めるのは人である
-// （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 1）。
+// 。
 
 import type { Observation } from "./observation.js";
 import { FINDING_KINDS, type FindingKind, KIND_LABEL_PREFIX } from "./summarize.js";
@@ -116,7 +116,7 @@ export function mergeWaitSec(observation: Observation): number | undefined {
  * @remarks
  * 分類のラベルが付いていればそれを鍵にし、無ければ `UNCLASSIFIED` にまとめます。
  * **意味による分類はここでは行いません** —— 決定的な集計が先に立ち、モデルはその後です
- * （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 2）。
+ * 。
  */
 export function clusterKey(issue: FeedbackIssue): string {
   return issue.kinds.length === 0
@@ -195,8 +195,7 @@ export function waitDominated(issues: readonly FeedbackIssue[]): readonly number
  * 着地から測り直しまでの日数。
  *
  * @remarks
- * [0160](../../docs/adr/0160-agent-environment-loop.md) 決定 1 が「一定期間後に再計測する」と
- * 置いた待ち時間です。**短すぎれば母数が足りず、長すぎれば次の改善と混ざります。**14 日は
+ * 「一定期間後に再計測する」と置いた待ち時間です（[README](../README.md)）。**短すぎれば母数が足りず、長すぎれば次の改善と混ざります。**14 日は
  * 最初の設定値で、運用のデータで動かす前提です。
  */
 export const REEVALUATION_DAYS = 14;
@@ -218,8 +217,7 @@ export type Reevaluation = {
  * 着地した改善を、その後の再発と並べる。
  *
  * @remarks
- * **「着地」の合図は issue が閉じられたことです**（[0160](../../docs/adr/0160-agent-environment-loop.md)
- * 決定 1 の「着地の記録を二重に持たない」）。畳み込みで閉じたものは着地ではないので、
+ * **「着地」の合図は issue が閉じられたことです**。畳み込みで閉じたものは着地ではないので、
  * `completed` を見ます。
  *
  * `UNCLASSIFIED` は除きます。**何についての所見か分かっていない以上、「同じものが再発したか」に

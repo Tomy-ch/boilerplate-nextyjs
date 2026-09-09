@@ -597,6 +597,8 @@ export function RichTextEditor({
       },
     },
     extensions: EDITOR_EXTENSIONS,
+    // これを外すと戻り値が `Editor | null` から `Editor` へ変わり、下の番人が死枝になる。
+    // 初回の描画を遅らせるのは、server の描画と食い違わせないためである。
     immediatelyRender: false,
     onUpdate: ({ editor: updated }) => onChange(updated.getHTML()),
   });

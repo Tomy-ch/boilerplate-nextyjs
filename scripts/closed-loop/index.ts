@@ -5,7 +5,7 @@
 //   closed-loop            すべての窓を報告する
 //
 // 打刻は `.agents/closed-loop/marks.sh` が刻み、置き場は追跡外の `tmp/closed-loop/marks/` である
-// （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 4）。ここは読むだけで、何も刻まない。
+// 。ここは読むだけで、何も刻まない。
 //
 // **決定的な集計だけを行い、モデルを使わない**（同 決定 2）。区間・回数・順序は数えるものであって
 // 解釈するものではなく、この層の数は監査できる。「何が難しかったか」は別の段の仕事である。
@@ -52,8 +52,7 @@ const reader: MarksReader = {
  * @remarks
  * 打刻も記録も**作業ツリーごとに割れます** —— 打刻は追跡外の `tmp/` に置かれ、記録の置き場は
  * セッションを開いたディレクトリから導かれるためです。窓を数え落とさないために全部を読みますが、
- * **どれがこのリポジトリのものかを決めるのは git です**（[0160](../../docs/adr/0160-agent-environment-loop.md)
- * 決定 5）。名前の似たディレクトリを拾うと、範囲の境界が推測になります。
+ * **どれがこのリポジトリのものかを決めるのは git です**。名前の似たディレクトリを拾うと、範囲の境界が推測になります。
  *
  * git が答えられなければ、いま居る作業ツリーだけを見ます。
  */
@@ -76,7 +75,7 @@ function workingTreeRoots(): readonly string[] {
  * @remarks
  * 置き場を決めているのはツールで、リポジトリの外にあります。**範囲はこのリポジトリのぶんだけ** ——
  * ツールは 1 人の全プロジェクトぶんを同じ親の下に並べるので、`workingTreeRoots` が挙げた
- * ディレクトリより外へ出ません（[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 5）。
+ * ディレクトリより外へ出ません。
  */
 function transcriptDirs(roots: readonly string[]): readonly string[] {
   const parent = path.join(os.homedir(), ".claude", "projects");

@@ -1,7 +1,7 @@
 // ベースの取り込みを実行してよいかの判定と、引数・git 出力の読み取り。git の呼び出しは
 // 入口([index.ts](index.ts))が持ち、ここは渡された文字列だけから答えを出す。
 
-/** 直接の取り込み先にしないブランチ。保護ブランチの一覧は [0150](../../docs/adr/0150-git-workflow.md) が持つ。 */
+/** 直接の取り込み先にしないブランチ。一覧の出どころは [README](README.md)。 */
 const PROTECTED_BRANCHES: ReadonlySet<string> = new Set(["production", "staging", "develop"]);
 
 /** 保護されたブランチ族の接頭辞。`release/v1.2.3` / `hotfix/1234-...` を族ごと弾く。 */
@@ -24,9 +24,8 @@ export const USAGE_MESSAGE = "使い方: base-merge [--base=<ref>] [--dry-run]";
  * 取り込み先にできないブランチに立っているときに出す行。
  *
  * @remarks
- * 保護ブランチの上でマージすると、その後の push が [0150](../../docs/adr/0150-git-workflow.md) の
- * 「保護ブランチへ直接 push しない」に当たります。マージしてから気付くと、作業ツリーが
- * MERGING のまま行き場を失います。
+ * マージしてから気付くと、作業ツリーが MERGING のまま行き場を失います。理由は
+ * [README](README.md)「拒む 2 つの状態」。
  */
 export const PROTECTED_BRANCH_MESSAGE =
   "保護ブランチの上ではベースを取り込みません。フィーチャーブランチへ切り替えてください";
@@ -87,8 +86,8 @@ export function refuseProtectedBranch(branch: string): string | null {
  * `git status --porcelain` の出力が「マージしてよい状態」かを見る。汚れていれば理由の 1 行。
  *
  * @remarks
- * マージ前に確定させておかないと、衝突の解決と手元の未確定変更が同じ作業ツリーに混ざり、
- * どちらが衝突由来かを後から見分けられなくなります。
+ * 混ざると、どちらが衝突由来かを後から見分けられません。理由は
+ * [README](README.md)「拒む 2 つの状態」。
  */
 export function refuseDirtyTree(statusOutput: string): string | null {
   return statusOutput.trim() === "" ? null : DIRTY_TREE_MESSAGE;

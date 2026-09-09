@@ -27,7 +27,7 @@ const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..
 const OSV_PATH = "osv-scanner.toml";
 /** 依存の脆弱性の抑止（trivy）。 */
 const TRIVY_PATH = ".trivyignore.yaml";
-/** 検出 1 件ごとの抑止（bearer）。 */
+/** bearer の抑止の置き場。 */
 const BEARER_PATH = "bearer.ignore";
 /** 動的スキャンの所見の抑止。 */
 const ZAP_PATH = ".github/zap/rules.tsv";

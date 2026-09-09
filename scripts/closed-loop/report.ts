@@ -26,7 +26,7 @@ export const NO_TRANSCRIPT_MESSAGE =
  *
  * @remarks
  * **所見が無い窓も「所見なし」と書きます。**黙って落とすと、見て何も無かった窓と、そもそも
- * 見ていない窓が区別できなくなります（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 見ていない窓が区別できなくなります。
  */
 export function reportWindow(window: WindowMarks): readonly string[] {
   const phases = toPhases(window);
@@ -113,12 +113,12 @@ function invocationLines(
  *
  * @remarks
  * **一度も起動されなかったスキルは、退役の候補としてではなく事実として並べます**
- * （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 3）。機会を待つスキルは、機会が
+ * 。機会を待つスキルは、機会が
  * 来なかった期間について何も語りません。
  *
  * **数えられなかった行は必ず出します。**記録の形はツールが決めており版が上がれば変わるので、
  * 黙って飛ばすと「読めた範囲だけの数」が全量として読まれます
- * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 。
  */
 export function reportTranscript(
   counts: TranscriptCounts,

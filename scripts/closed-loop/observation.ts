@@ -2,7 +2,7 @@
 //
 // 週次([weekly](weekly/index.ts))は自分で記録を読み直さず、**issue に書かれた観測を読み戻す**。
 // 記録は手元にしか無く、週次が動く時点では別の窓の別の機械かもしれないためである
-// （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 5）。
+// 。
 //
 // だから本文には**人が読む表と、機械が読む区画の両方**が要る。同じ値から両方を作るので、
 // 食い違いようがない。
@@ -23,7 +23,7 @@ type ObservedPhase = {
  * @remarks
  * 記録から数えた項目は `undefined` を取ります。**「観測できなかった」を `0` と混ぜません** ——
  * 記録が読めなかった窓の失敗 0 件と、実際に失敗しなかった窓の 0 件は別の事実です
- * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * 。
  */
 export type Observation = {
   readonly windowId: string;

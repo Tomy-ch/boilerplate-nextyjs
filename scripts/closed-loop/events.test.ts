@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { countUnparsable, parseLine, parseTranscript, withinWindow } from "./events";
 
-/** 記録の 1 行を組み立てる。 */
 function line(entry: unknown): string {
   return JSON.stringify(entry);
 }

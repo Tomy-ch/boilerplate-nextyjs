@@ -100,6 +100,7 @@ GitHub 上の公開の面か」であって、モジュールの置き場では�
 - [0011](../docs/adr/0011-no-docker.md) — container image の参照を持つ面の責務線
 - [0021](../docs/adr/0021-frontend-responsibility.md) — 層 README の frontmatter と依存の突合
 - [0024](../docs/adr/0024-adapters-server-client-split.md) — server 専用を綴りではなく置き場で表す
+- [0025](../docs/adr/0025-app-layer-elements.md) — app 層の要素の別と、要素ごとに許す依存
 - [0027](../docs/adr/0027-directory-structure.md) — 生成物の配置と、規約上の配置を指す表記
 - [0028](../docs/adr/0028-naming-convention.md) — 生成対象の名前
 - [0029](../docs/adr/0029-type-design-discipline.md) — client へ届くスキーマの入口
@@ -114,8 +115,13 @@ GitHub 上の公開の面か」であって、モジュールの置き場では�
 - [0102](../docs/adr/0102-browser-support.md) — 数える対象を決める browserslist
 - [0110](../docs/adr/0110-security-operations.md) — 監査の閾値 / 抑止の撤回条件 / SAST のルール集合
 - [0112](../docs/adr/0112-data-classification-cache-boundary.md) — 取得の口が綴る分類
+- [0113](../docs/adr/0113-development-access-surface.md) — 開発用の口を build から外す線
 - [0141](../docs/adr/0141-portal-operations.md) — portal の URL と差し替えマーカーの族
+- [0143](../docs/adr/0143-spec-driven-development.md) — route と画面要件の存在の突合
 - [0150](../docs/adr/0150-git-workflow.md) — ブランチ命名 / 昇格の連なり / 版の出所
 - [0151](../docs/adr/0151-git-hooks.md) — ローカルゲートの帯と bypass の可否
 - [0152](../docs/adr/0152-agents-md-policy.md) — boilerplate-only マーカーを独立させる理由 <!-- boilerplate-only:line -->
 - [0153](../docs/adr/0153-ci-configuration.md) — job の分割 / SHA ピン / 公開の面へ出す文字集合
+- [0157](../docs/adr/0157-inspection-declaration-discipline.md) — 成立しない検査を「違反なし」へ倒さない
+- [0160](../docs/adr/0160-agent-environment-loop.md) — 打刻と記録から稼ぎを測る機構 <!-- boilerplate-only:line -->
+- [0161](../docs/adr/0161-development-window-as-feedback-unit.md) — 窓を単位に測るという取り方 <!-- boilerplate-only:line -->

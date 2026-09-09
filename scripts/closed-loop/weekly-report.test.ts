@@ -141,8 +141,10 @@ describe("reportWeekly", () => {
       ],
     });
 
-    expect(lines.some((line) => line.includes("反復"))).toBe(true);
-    expect(lines.some((line) => line.includes("単発"))).toBe(true);
+    // どちらの語が在るかではなく、どちらの束に付いているかを見る。別々に数えると、
+    // 三項を反転しても相手の行に両方の語が出るので落ちない。
+    expect(lines.find((line) => line.includes("skill/commit"))).toContain("反復");
+    expect(lines.find((line) => line.includes("tool/bash"))).toContain("単発");
   });
 
   it("所見が在っても束が無ければ、束の節を出さない", () => {

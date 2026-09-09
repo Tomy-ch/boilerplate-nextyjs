@@ -28,7 +28,6 @@ describe("issueRefs", () => {
     expect(issueRefs([12, 34])).toBe("#12 #34");
   });
 
-  // ----- 異常系 -----
   it("空の並びは空文字にする", () => {
     expect(issueRefs([])).toBe("");
   });

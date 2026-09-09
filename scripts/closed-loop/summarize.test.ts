@@ -206,7 +206,6 @@ describe("kindLabels", () => {
     expect(kindLabels(["skill", "ci"])).toEqual(["feedback/skill", "feedback/ci"]);
   });
 
-  // ----- 異常系 -----
   it("分類が無ければ空にする", () => {
     expect(kindLabels([])).toEqual([]);
   });

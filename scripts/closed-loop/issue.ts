@@ -6,6 +6,7 @@
 // 本文は 3 層で、順に**機械が読み戻す区画**・**数えた事実**・**読解**である。読解が無い窓でも
 // 前 2 つは出る —— 決定的な集計が先に立ち、モデルはその後に来る（同 決定 2）。
 
+import { drawModelProse } from "../lib/issue-body.js";
 import { humanize } from "./format.js";
 import { type Observation, renderObservation } from "./observation.js";
 import { toDay } from "./period.js";
@@ -99,7 +100,7 @@ function readingLines(summary: Summary | undefined, gap: ReadingGap): readonly s
   return BODY_SECTIONS.flatMap((section) => {
     const text = summary.dropped.includes(section)
       ? "**この節は出口の関門で落とした**（秘密らしき形、または記録の逐語を含んでいた）。書かれなかったのではない。"
-      : (summary.sections[section] ?? "該当なし");
+      : drawModelProse(summary.sections[section] ?? "該当なし");
 
     return [`## ${section}`, "", text, ""];
   });

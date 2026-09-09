@@ -84,6 +84,18 @@ describe("extractHeadings", () => {
     ]);
   });
 
+  it("文言が空の見出しも列から落とさない", () => {
+    // 落とすと、片側にだけ在るときに対訳の列がずれた分だけ詰まって揃い、構造ずれが
+    // 無報告になる。全角空白のように markdownlint が素通しする綴りで実際に起こる。
+    const content = ["# 題名", "## ", "## 　"].join("\n");
+
+    expect(extractHeadings(content)).toEqual([
+      { level: 1, text: "題名", lineNo: 1 },
+      { level: 2, text: "", lineNo: 2 },
+      { level: 2, text: "", lineNo: 3 },
+    ]);
+  });
+
   // ----- 異常系 -----
   it("フェンスの中の見出し記法を見出しとして扱わない", () => {
     const content = ["```md", "# 例示", "```"].join("\n");

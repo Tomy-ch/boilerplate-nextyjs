@@ -97,7 +97,6 @@ describe("clusterKey", () => {
     expect(clusterKey(issueOf(1, { kinds: ["skill", "ci"] }))).toBe("ci+skill");
   });
 
-  // ----- 異常系 -----
   it("分類が無ければ、まとめる鍵へ落とす", () => {
     expect(clusterKey(issueOf(1))).toBe(UNCLASSIFIED);
   });
@@ -144,12 +143,14 @@ describe("clusterIssues", () => {
   });
 
   it("点が並んだら鍵の順で決める", () => {
+    // 入力の順（tooling → skill）と鍵の順（skill → tooling）を食い違わせる。揃えると、
+    // 安定ソートが入力の順をそのまま返すので、鍵で決めているかどうかが出力に現れない。
     const found = clusterIssues([
       issueOf(1, { kinds: ["tooling"] }),
       issueOf(2, { kinds: ["skill"] }),
     ]);
 
-    expect(found.map((cluster) => cluster.key)).toEqual([...found.map((c) => c.key)].sort());
+    expect(found.map((cluster) => cluster.key)).toEqual(["skill", "tooling"]);
   });
 });
 
@@ -277,16 +278,17 @@ describe("reevaluations", () => {
 
   it("再発の数が並んだら鍵の順で決める", () => {
     const other = issueOf(2, { kinds: ["tooling"], resolvedAt: 1000 * DAY, completed: true });
+    // `clusterIssues` と同じ理由で、入力の順（tooling → skill）を鍵の順と食い違わせる。
     const found = reevaluations(
       [
-        landed,
         other,
-        issueOf(5, { kinds, createdAt: 1001 * DAY }),
+        landed,
         issueOf(6, { kinds: ["tooling"], createdAt: 1001 * DAY }),
+        issueOf(5, { kinds, createdAt: 1001 * DAY }),
       ],
       1100 * DAY,
     );
 
-    expect(found.map((item) => item.key)).toEqual([...found.map((item) => item.key)].sort());
+    expect(found.map((item) => item.key)).toEqual(["skill", "tooling"]);
   });
 });

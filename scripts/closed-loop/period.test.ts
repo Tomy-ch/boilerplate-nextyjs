@@ -37,14 +37,17 @@ describe("resolvePeriod", () => {
   // ----- 異常系 -----
   it("日付の形が違えば落とす", () => {
     expect(() => resolvePeriod("2026/09/09", undefined, 0)).toThrow("YYYY-MM-DD");
-    expect(() => resolvePeriod("2026-13-45", undefined, 0)).toThrow();
+  });
+
+  it("形は合っていても暦として読めなければ、形の違いとは別の理由で落とす", () => {
+    expect(() => resolvePeriod("2026-13-45", undefined, 0)).toThrow(TypeError);
+    expect(() => resolvePeriod("2026-13-45", undefined, 0)).toThrow("解釈できない");
   });
 
   it("期間が逆転していれば落とす", () => {
     expect(() => resolvePeriod("2026-09-10", "2026-09-01", 0)).toThrow("逆転");
   });
 
-  // ----- 異常系 -----
   it("to を省いた逆転も、既定と分かる形で落とす", () => {
     expect(() => resolvePeriod("2099-01-01", undefined, 0)).toThrow("to=(既定)");
   });

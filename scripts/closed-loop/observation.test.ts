@@ -75,7 +75,6 @@ describe("renderObservation", () => {
     expect(text).not.toContain("interrupts");
   });
 
-  // ----- 異常系 -----
   it("観測できなかった端は行ごと落とす", () => {
     const block = renderObservation({
       windowId: "w1-x",

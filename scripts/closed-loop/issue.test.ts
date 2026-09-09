@@ -90,37 +90,6 @@ describe("renderIssueBody", () => {
     expect(body).toContain("- 中断: 2 回");
   });
 
-  // ----- 異常系 -----
-  it("読めなかったことを「所見なし」へ倒さない", () => {
-    expect(bodyOf(full)).toContain("読解なし — 材料が無かった");
-    expect(
-      renderIssueBody(full, toObservation(full, undefined), undefined, "モデルを呼べなかった"),
-    ).toContain("読解なし — モデルを呼べなかった");
-    expect(
-      renderIssueBody(full, toObservation(full, undefined), undefined, "読解を省いた"),
-    ).toContain("読解なし — 読解を省いて送出した");
-  });
-
-  it("落とした節を、書かれなかった節と混ぜない", () => {
-    const summary: Summary = { sections: { 摩擦: "x" }, kinds: [], dropped: ["根拠"] };
-    const body = renderIssueBody(full, toObservation(full, undefined), summary, "読解済み");
-
-    expect(body).toContain("## 根拠\n\n**この節は出口の関門で落とした**");
-    expect(body).toContain("## 結果\n\n該当なし");
-  });
-
-  it("区間を作れない窓はそう書く", () => {
-    expect(bodyOf(windowOf({ openedAt: [0] }))).toContain("区間なし（打刻が 1 つ以下）");
-  });
-
-  // ----- 異常系 -----
-  it("記録が読めなかった窓は、道具の回数の節ごと出さない", () => {
-    const body = bodyOf(full);
-
-    expect(body).not.toContain("道具の呼び出し");
-    expect(body).not.toContain("- 中断:");
-  });
-
   it("記録が読めた窓は、道具の回数も並べる", () => {
     const counts: TranscriptCounts = {
       commands: {},
@@ -149,5 +118,44 @@ describe("renderIssueBody", () => {
 
     expect(body).toContain("- 道具の呼び出し: 5 回（うち失敗 0）");
     expect(body).toContain("- 中断: 0 回");
+  });
+
+  it("打刻の所見が無ければ、その旨を書く", () => {
+    // 段を飛ばさず順に閉じた窓。所見が 0 件のとき、節を空にせず「所見なし」と述べる。
+    const body = bodyOf(
+      windowOf({ openedAt: [0], commitAt: [60], reviewStartedAt: [120], closedAt: [180] }),
+    );
+
+    expect(body).toContain("打刻の所見なし");
+  });
+
+  // ----- 異常系 -----
+  it("読めなかったことを「所見なし」へ倒さない", () => {
+    expect(bodyOf(full)).toContain("読解なし — 材料が無かった");
+    expect(
+      renderIssueBody(full, toObservation(full, undefined), undefined, "モデルを呼べなかった"),
+    ).toContain("読解なし — モデルを呼べなかった");
+    expect(
+      renderIssueBody(full, toObservation(full, undefined), undefined, "読解を省いた"),
+    ).toContain("読解なし — 読解を省いて送出した");
+  });
+
+  it("落とした節を、書かれなかった節と混ぜない", () => {
+    const summary: Summary = { sections: { 摩擦: "x" }, kinds: [], dropped: ["根拠"] };
+    const body = renderIssueBody(full, toObservation(full, undefined), summary, "読解済み");
+
+    expect(body).toContain("## 根拠\n\n**この節は出口の関門で落とした**");
+    expect(body).toContain("## 結果\n\n該当なし");
+  });
+
+  it("区間を作れない窓はそう書く", () => {
+    expect(bodyOf(windowOf({ openedAt: [0] }))).toContain("区間なし（打刻が 1 つ以下）");
+  });
+
+  it("記録が読めなかった窓は、道具の回数の節ごと出さない", () => {
+    const body = bodyOf(full);
+
+    expect(body).not.toContain("道具の呼び出し");
+    expect(body).not.toContain("- 中断:");
   });
 });

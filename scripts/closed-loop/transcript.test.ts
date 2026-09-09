@@ -29,6 +29,19 @@ describe("countEvents", () => {
     expect(counts.tools).toEqual({ Read: 2, Bash: 1 });
   });
 
+  it("同じ名前が別の種別に付いていても混ぜない", () => {
+    // Skill の起動は道具の呼び出しと起動を必ず両方出す。種別で絞り損ねると、
+    // 起動の回数と道具の回数が互いに混ざって二重に数えられる。
+    const counts = countEvents([
+      at(1, { kind: "tool_use", name: "Skill" }),
+      at(1, { kind: "command", name: "commit" }),
+      at(2, { kind: "tool_use", name: "commit" }),
+    ]);
+
+    expect(counts.tools).toEqual({ Skill: 1, commit: 1 });
+    expect(counts.commands).toEqual({ commit: 1 });
+  });
+
   it("起動を名前ごとに数える", () => {
     const counts = countEvents([
       at(1, { kind: "command", name: "commit" }),

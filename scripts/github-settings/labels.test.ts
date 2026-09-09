@@ -91,7 +91,6 @@ describe("diffLabels", () => {
     expect(diff.alreadyPresent).toEqual([]);
   });
 
-  // ----- 異常系 -----
   it("ラベルが 1 つも実在しなければ宣言の全数を作る", () => {
     const diff = diffLabels([], [spec("bug"), spec("release")]);
 

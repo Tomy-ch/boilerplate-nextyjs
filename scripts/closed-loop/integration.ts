@@ -5,6 +5,8 @@
 // 測り直しは決定的な集計だけで済んでおり、畳み込みが落ちても週次は成立する
 // （[0160](../../docs/adr/0160-agent-environment-loop.md) 決定 2）。
 
+import { drawModelProse } from "../lib/issue-body.js";
+import { issueRefs } from "./format.js";
 import type { Observation } from "./observation.js";
 import { BODY_SECTIONS, IMPROVEMENT_SECTION } from "./summarize.js";
 
@@ -169,7 +171,7 @@ export function renderIntegrationBody(concern: Concern): string {
   return [
     "<!-- 週次の統合が作成した。根拠は下の所見である -->",
     "",
-    concern.body,
+    drawModelProse(concern.body),
     "",
     "## 根拠",
     "",
@@ -185,7 +187,7 @@ export function renderIntegrationBody(concern: Concern): string {
  * 複数の関心から根拠として参照されます。1 つだけ書くと、残りの関心へ辿れなくなります。
  */
 export function renderRollupComment(integrationIssues: readonly number[]): string {
-  const refs = integrationIssues.map((number) => `#${number}`).join(" ");
+  const refs = issueRefs(integrationIssues);
 
   return `週次の統合で ${refs} へ畳んだ。この所見はそちらで扱う。`;
 }

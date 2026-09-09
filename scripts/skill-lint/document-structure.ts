@@ -85,7 +85,9 @@ export function extractHeadings(content: string): Heading[] {
   for (const { line, lineNo } of eachLineOutsideFence(content)) {
     const [, hashes, raw] = /^(#{1,6})[ \t](.*)$/.exec(line) ?? [];
     const text = raw?.trim();
-    if (hashes !== undefined && text !== undefined && text !== "") {
+    // 文言が空でも列から落とさない。落とすと、片側にだけ在る見出しで**対訳の列がずれた分だけ
+    // 詰まって揃い**、本来報告すべき構造ずれが無報告になる。空であることは呼び出し側が見る。
+    if (hashes !== undefined && text !== undefined) {
       headings.push({ level: hashes.length, text, lineNo });
     }
   }

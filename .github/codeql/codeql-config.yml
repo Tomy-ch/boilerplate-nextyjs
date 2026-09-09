@@ -8,7 +8,7 @@ queries:
 paths-ignore:
   # Dependencies. Their own advisories are the dependency scan's subject, not SAST's.
   - '**/node_modules'
-  # Generated from the API contract (ADR 0072). Nobody edits them, so a finding here
+  # Generated from the API contract. Nobody edits them, so a finding here
   # is not actionable — it belongs upstream in the contract or the generator.
   - src/adapters/gen
   - mocks/api

@@ -1,6 +1,6 @@
 name: Deploy Docs
 
-# Publishes the generated-HTML documentation site to GitHub Pages (ADR 0141).
+# Publishes the generated-HTML documentation site to GitHub Pages.
 #
 # Storybook is the site's first tenant, not the site itself. The docs portal and
 # any further generated HTML (coverage, OpenAPI) join it under sibling paths
@@ -44,7 +44,7 @@ permissions:
 
 # Deliberately deviates from the repo-wide skeleton of
 # `${{ github.workflow }}-${{ github.ref }}` / `cancel-in-progress: true`
-# (ADR 0153 §3). A Pages deployment is one shared resource rather than a per-ref
+#. A Pages deployment is one shared resource rather than a per-ref
 # one, so the group names the resource; and a running deploy is never cancelled,
 # because interrupting one leaves the live site serving a half-uploaded artifact.
 concurrency:

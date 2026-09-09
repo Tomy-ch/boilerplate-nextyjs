@@ -12,7 +12,6 @@
 base-branch:
 	@pnpm exec tsx scripts/base-branch
 
-# make の $(if) は空文字列判定のため、そのまま使うと DRY_RUN=0 も真になる。
 BASE_MERGE_BASE_FLAG := $(if $(BASE),--base=$(BASE),)
 BASE_MERGE_DRY_RUN_FLAG := $(if $(filter 1,$(DRY_RUN)),--dry-run,)
 

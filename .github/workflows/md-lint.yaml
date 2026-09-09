@@ -1,7 +1,7 @@
 name: Markdown Lint
 
 # markdownlint-cli2, the mermaid syntax check, and skill-lint (the semantic check over
-# `.claude/**`) — the same command the pre-commit hook runs (ADR 0153: hooks mirror CI).
+# `.claude/**`) — the same command the pre-commit hook runs.
 # biome does not read Markdown, so nothing else in CI would catch a broken document, an
 # unrenderable diagram, or a skill instructing an agent to run a target that no longer exists.
 #

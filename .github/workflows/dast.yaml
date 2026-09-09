@@ -2,7 +2,7 @@ name: DAST
 
 # The only check here that reads a RESPONSE rather than a file. Every other scanner
 # reads the tree; this one builds the app, boots it inside the runner, and drives HTTP
-# at it with OWASP ZAP (ADR 0110 §3.5).
+# at it with OWASP ZAP.
 #
 # It exists because a delivered header cannot be verified by reading the source. What
 # `next.config.ts` declares and what a browser actually receives are two different
@@ -16,11 +16,11 @@ name: DAST
 #
 # The entries are IGNORE rather than removed, and ZAP still prints every ignored rule
 # with its URLs in the summary. That is severity lowered, not a finding hidden
-# (ADR 0110 §3.4).
+#.
 #
 # `zaproxy/action-baseline` is deliberately not used. Its `docker_name` input takes a
 # tag, not a digest, and this repository pins every container image by digest and
-# checks it with `make images-pin-check` (ADR 0011) — an action input is not in that
+# checks it with `make images-pin-check` — an action input is not in that
 # scan's reach. Running the image through the same compose file the VRT container uses
 # keeps the pin inside a mechanism that verifies it.
 #

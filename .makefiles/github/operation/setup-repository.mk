@@ -9,8 +9,7 @@
 .PHONY: setup-remove-sample ## 同梱サンプルを一括破棄し、検証まで実行
 # sample:end
 
-# make の $(if) は空文字列判定のため、そのまま使うと DRY_RUN=0 も真になる。
-# 文書化された唯一の有効値 1 に限定する
+# 有効値は 1 のみ（[README](../../README.md)）。$(if) は空文字列判定なので filter で絞る。
 SETUP_DRY_RUN_FLAG := $(if $(filter 1,$(DRY_RUN)),--dry-run,)
 
 # 利用者が渡す値はレシピ文字列へ直接展開せず、環境変数としてシェルに渡して

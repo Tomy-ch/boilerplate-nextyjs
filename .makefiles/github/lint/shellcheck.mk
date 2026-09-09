@@ -1,10 +1,10 @@
 ## 単体シェルスクリプトの Lint
 #
 # 走査対象は追跡下の `*.sh` 全数。composite action に埋め込まれた run: は
-# actions-shellcheck が、workflow 側の run: は actionlint が受け持つ (ADR 0153)。
+# actions-shellcheck が、workflow 側の run: は actionlint が受け持つ。
 #
 # ここに掛かるのは、依存の導入前に走る必要があってシェルで書くしかないもの
-# (ADR 0155 の例外) である。TypeScript ではないので 1:1 ゲートもカバレッジも掛からず、
+# である。TypeScript ではないので 1:1 ゲートもカバレッジも掛からず、
 # 静的検査だけが唯一の網になる。shellcheck が無ければ範囲が黙って縮むため落とす。
 .PHONY: shellcheck ## 追跡下の *.sh を shellcheck で検査
 

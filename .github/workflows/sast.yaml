@@ -2,7 +2,7 @@ name: SAST
 
 # Opengrep over this repository's own source. The dependency scanners ask "is a
 # library we pull in known-vulnerable"; this asks "does the code we wrote contain a
-# vulnerable pattern" (ADR 0110 §3).
+# vulnerable pattern".
 #
 # GitHub's own analysis cannot leave GitHub and is licensed for a private repository,
 # so a repository created from this template cannot count on it. This one is a pinned

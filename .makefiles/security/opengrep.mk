@@ -3,7 +3,7 @@
 .PHONY: sast-sarif ## 同じ検査を SARIF で書き出す（code scanning への取り込み用）
 
 # 依存スキャナが「引き込んだライブラリが既知の脆弱性を持つか」を問うのに対し、こちらは
-# 「自分が書いたコードが脆弱なパターンを含むか」を問う（docs/adr/0110-security-operations.md）。
+# 「自分が書いたコードが脆弱なパターンを含むか」を問う。
 #
 # Semgrep 本体ではなく OSS fork の opengrep を使う。ルール記法は互換で、抑止も
 # `// nosemgrep: <rule-id>` がそのまま効く。CodeQL は GitHub の外へ持ち出せないため、

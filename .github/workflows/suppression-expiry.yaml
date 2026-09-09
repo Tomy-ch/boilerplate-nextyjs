@@ -1,8 +1,8 @@
 name: Suppression Expiry
 
-# Weekly re-read of the suppressions this repository declares (ADR 0110 §3.4).
+# Weekly re-read of the suppressions this repository declares.
 #
-# Why the rule needs a job that looks is ADR 0110 §3.4; this file is that job.
+# Why the rule needs a job that looks is in the README; this file is that job.
 #
 # Two limits are deliberate, and the report states both rather than reading as complete.
 # Only dates are decided: "once upstream requires N or later" and "after the sample purge

@@ -1,7 +1,7 @@
 name: VisualRegressionTest
 
 # Compares every Storybook story against its committed baseline image
-# (ADR 0091: visual regression runs on Playwright's screenshot comparison).
+# (visual regression runs on Playwright's screenshot comparison).
 #
 # The run happens inside the digest-pinned Playwright container declared in
 # `docker-compose.dev-tools.yml`, invoked through the same `make vrt` a developer
@@ -27,7 +27,7 @@ name: VisualRegressionTest
 # The comparison and the pull-request comment are separate jobs. The baseline store
 # may be private, which means the comparison job needs a GitHub App secret; a job
 # holding a secret must not also produce a comment body, because secret masking does
-# not survive a `tee` to a file (ADR 0153).
+# not survive a `tee` to a file.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
 # every PR is in README.md. `vrt-scope` always starts and asks `diff-scope` whether the
@@ -483,7 +483,7 @@ jobs:
 
             # The command below is pasted into a shell, so a value outside the accepted set
             # drops the whole block rather than being quoted into it. Both the set and that
-            # decision live in `scripts/lib/review-command.ts` (ADR 0153 §5).
+            # decision live in `scripts/lib/review-command.ts`.
             echo
             pnpm exec tsx scripts/ci-report review-block \
               --kind story \

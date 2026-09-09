@@ -1,8 +1,8 @@
 name: Actions Pin
 
 # Verifies every `uses:` is pinned to the commit SHA recorded in
-# `.github/actions-pin.toml` — the same command the pre-commit hook runs (ADR 0153:
-# hooks mirror CI). A moving tag lets upstream change what CI executes without a
+# `.github/actions-pin.toml` — the same command the pre-commit hook runs
+# (hooks mirror CI). A moving tag lets upstream change what CI executes without a
 # commit here, so an unpinned or drifted reference fails the PR.
 #
 # The check never reaches the network: it compares the workflow files against the
@@ -10,7 +10,7 @@ name: Actions Pin
 # local action — `make actions-pin-resolve` — and is not run in CI.
 #
 # A separate workflow from `actions-lint` on purpose: actionlint validates workflow
-# syntax, this validates supply-chain provenance (ADR 0153 §1, one concern per
+# syntax, this validates supply-chain provenance (one concern per
 # workflow).
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on

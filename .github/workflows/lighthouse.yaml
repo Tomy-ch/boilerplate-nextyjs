@@ -1,7 +1,7 @@
 name: Lighthouse
 
 # Measures the Core Web Vitals of every screen and holds them against
-# `performance-budget.yaml` (ADR 0101).
+# `performance-budget.yaml`.
 #
 # The screens come from `e2e/lib/screens.ts` — the same declaration the E2E job walks. The
 # list is deliberately not restated here: a second list would let a screen be added to one
@@ -9,7 +9,7 @@ name: Lighthouse
 #
 # Only three metrics are judged, not the performance score. The score is a weighted mean of
 # five metrics, so a drop in it cannot say WHICH metric dropped. INP needs a real user
-# interaction and cannot be measured in a lab, so TBT stands in for it (ADR 0082 owns the
+# interaction and cannot be measured in a lab, so TBT stands in for it (RUM owns the
 # field side).
 #
 # The browsers here are NOT the digest-pinned Playwright container the VRT and E2E jobs use.
@@ -57,7 +57,7 @@ name: Lighthouse
 #
 # The job reports a context on every pull request either way, which is what would let it
 # become a required check later; it is deliberately not one today, because the budget is not
-# yet reachable on this sample (`docs/adr/0101-performance-budget.md`).
+# yet reachable on this sample.
 
 on:
   pull_request:
@@ -471,7 +471,7 @@ jobs:
         run: |
           # The table is what says which screen moved, and it is left to render as markdown:
           # its cells are screen names the declaration fixes and numbers this job computed
-          # (ADR 0153 §5 — the accepted character set cannot make markup). The measurement
+          #. The measurement
           # may never have produced a table at all — the browser can fail to install — so
           # every fallback ends in something printable.
           # `|| true` is what makes the fallbacks below reachable: under `-e`, a `sed` against

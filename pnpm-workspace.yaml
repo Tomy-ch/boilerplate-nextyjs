@@ -26,7 +26,7 @@ minimumReleaseAgeIgnoreMissingTime: false
 # 各行には理由と撤去条件をコメントで添える。
 #
 # **上流が宣言した範囲の内側でだけ使う。** 範囲の外へ動かすと、上流が検証していない組み合わせを
-# こちらで作ることになる ([ADR 0110](docs/adr/0110-security-operations.md))。
+# こちらで作ることになる。
 overrides:
   # ajv (commitlint / orval / shadcn / @hookform/resolvers が引く) の推移的依存。
   # GHSA-7p8r-x3mc-p8w7 (high): authority 部のバックスラッシュで host の解釈が他のパーサとずれる。

@@ -4,7 +4,7 @@ name: Bearer Scan
 # outbound request, a third-party client — and reports it against a classification of
 # what the value is. Nothing else here asks that: opengrep judges a pattern
 # or a taint path on its own terms, and neither knows that the string reaching a
-# logger happens to be an email address (ADR 0110 §3).
+# logger happens to be an email address.
 #
 # A FINDING never fails the job. Findings go to code scanning,
 # and what turns a pull request red is GitHub's own check over the alerts the diff
@@ -22,7 +22,7 @@ name: Bearer Scan
 # helpers) are excluded in `.makefiles/security/bearer.mk`; what remains are findings on
 # rules that also match harmless code, such as `observable_timing` on a comparison that
 # involves no secret. Silencing such a rule would be a rule-wide disable, which
-# ADR 0110 §3.4 forbids, so those stay visible instead.
+# the suppression rules forbid, so those stay visible instead.
 #
 # Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
 # in README.md.

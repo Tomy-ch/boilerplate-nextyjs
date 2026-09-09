@@ -3,14 +3,14 @@ name: Closed Loop Weekly
 # Re-measures the development windows that were reported as issues: clusters them, ranks
 # them, and checks whether improvements that landed earlier have shown up again.
 #
-# The schedule is the point. ADR 0160 makes the re-measurement a required step of the loop —
+# The schedule is the point. The re-measurement is a required step of the loop —
 # "skip it and the decision is void" — and a step somebody has to remember is a step that
 # gets skipped. Nothing else in the repository calls `closed-loop-weekly`, so without this
 # workflow the loop degrades into an accumulator: findings pile up as issues and nobody
 # ever asks whether the fixes worked.
 #
 # It reads issues, never transcripts. Session transcripts live on the developer's machine
-# and stay there (ADR 0160 decision 5); everything this job needs was written into the
+# and stay there; everything this job needs was written into the
 # issue bodies when they were opened.
 #
 # It reads and reports; it never writes. Rolling findings up into concerns creates issues
@@ -84,7 +84,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      # The report goes to the job summary rather than to an issue. ADR 0160 keeps the
+      # The report goes to the job summary rather than to an issue. The decision keeps the
       # findings themselves in the tracker, but this is a view over them — writing the view
       # back as another issue would put a second, staler copy beside the thing it summarises.
       - name: Re-measure the period

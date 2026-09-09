@@ -1,6 +1,6 @@
 name: Typecheck
 
-# tsc --noEmit — the same command the pre-push hook runs (ADR 0153: hooks mirror
+# tsc --noEmit — the same command the pre-push hook runs (hooks mirror
 # CI). biome does not type-check, so this is the only job that reads the type graph.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on

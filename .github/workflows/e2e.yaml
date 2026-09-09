@@ -1,7 +1,7 @@
 name: E2E
 
 # Drives the built application through its main journeys, and compares each screen
-# against its baseline image (ADR 0090 / 0091).
+# against its baseline image.
 #
 # What this job covers beyond the story-level checks (vrt.yaml / a11y.yaml):
 #
@@ -9,9 +9,9 @@ name: E2E
 #   * Browser errors — hydration mismatches, exceptions thrown while rendering, and
 #                      failed requests. A hydration mismatch compiles, type-checks and
 #                      only ever shows up in a real browser, so nothing else can see it.
-#   * Responsive     — the three bands ADR 0051 §2 fixes, read from the design tokens.
+#   * Responsive     — the three bands the styling system fixes, read from the design tokens.
 #   * Cross browser  — Chromium, Firefox and WebKit. Those are the three rendering
-#                      engines modern browsers reduce to (ADR 0102 defers the version
+#                      engines modern browsers reduce to (the support matrix defers the version
 #                      floor to the repository created from this template), and they are
 #                      ALL this job looks at: no browser brands, no versions. The versions
 #                      are whatever the pinned Playwright image ships.
@@ -491,7 +491,7 @@ jobs:
         run: exit 1
 
   # Holds no secret beyond `GITHUB_TOKEN`, so the body it publishes cannot carry one
-  # (ADR 0153: secret masking does not survive a `tee` to a file).
+  #.
   e2e-comment:
     if: always() && github.event_name == 'pull_request'
     needs: e2e

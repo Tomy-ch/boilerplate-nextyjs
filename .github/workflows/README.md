@@ -414,6 +414,30 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 
 この判断を見直すのは、レジストリのルールが OSI 承認ライセンスへ戻ったときか、固定先が更新を止めて**他の層でも補えない面**が実測で見つかったときである。**ルールが少ないこと・上流の更新が鈍いことだけでは条件にならない** —— 減ること自体は承知のうえで選んでおり、条件は「減った分がどこにも無い」と実測で言えることである。
 
+## Related ADRs
+
+The decisions the workflows here follow. **Comments in the workflow definitions do not cite an ADR
+directly — they come here instead.** An ADR's number, section and owning record all move, while this
+README moves with the workflows, so the movement never reaches the definitions
+（[docs/rules.md](../../docs/rules.md)「コメントと文書」）。
+
+- [0004](../../docs/adr/0004-library-management.md) — dependency update policy: majors go in their own PR
+- [0011](../../docs/adr/0011-no-docker.md) — what the delivery boundary does and does not promise
+- [0051](../../docs/adr/0051-styling-system.md) — the responsive bands the screen checks read
+- [0054](../../docs/adr/0054-ui-catalog-storybook.md) — the catalogue the visual and a11y checks ride on
+- [0072](../../docs/adr/0072-api-type-generation.md) — generated artefacts carry no findings of their own
+- [0082](../../docs/adr/0082-client-observability.md) — which metrics are collected from real users
+- [0090](../../docs/adr/0090-testing-strategy.md) / [0091](../../docs/adr/0091-test-verification-methods.md) — the framework split and what a real browser owns
+- [0101](../../docs/adr/0101-performance-budget.md) — the budget and the metrics it is written against
+- [0102](../../docs/adr/0102-browser-support.md) — the support matrix the checks are run against
+- [0110](../../docs/adr/0110-security-operations.md) — scan thresholds, suppression format, fail-closed gates
+- [0140](../../docs/adr/0140-documentation-operations.md) — what a document must carry
+- [0141](../../docs/adr/0141-portal-operations.md) — what the documentation site publishes
+- [0150](../../docs/adr/0150-git-workflow.md) — the branches an environment is deployed from
+- [0153](../../docs/adr/0153-ci-configuration.md) — job partitioning, SHA pinning, secrets, the character set the public surface may carry
+- [0155](../../docs/adr/0155-claude-skills-development.md) — shell as the exception to TypeScript
+- [0160](../../docs/adr/0160-agent-environment-loop.md) — the re-measurement step and what the loop may read <!-- boilerplate-only:line -->
+
 ## 通知
 
 **通知するのはスケジュール実行だけ。** PR ではどちらの出来事も既に作者へ届いている —— チェックが赤くなるか、PR コメントが所見を述べるかのどちらかである。そこで通知を足すのは、作者が今見ているものをチャットへ複製することにしかならない。週次の実行には作者が居ない。**誰も触っていないツリーに対して起きた出来事**こそ、リポジトリ側から押し出す価値がある。

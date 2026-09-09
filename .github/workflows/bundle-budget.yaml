@@ -1,7 +1,7 @@
 name: Bundle Budget
 
 # Measures what each route makes the browser download, and holds it against
-# `performance-budget.yaml` (ADR 0101).
+# `performance-budget.yaml`.
 #
 # Next 16 prints no size column, so the numbers come from the build output itself: the
 # route's own client chunks (`__RSC_MANIFEST`) unioned with the shared runtime chunks (the
@@ -13,7 +13,7 @@ name: Bundle Budget
 # without it, moving something heavy behind a dynamic import reads as a shrink even though
 # the person using the screen downloads exactly as much. **Total** is the sum, and it is
 # what keeps such a move honest. **CSS** is measured because it blocks rendering and lands
-# straight on LCP, which is the metric ADR 0101 budgets.
+# straight on LCP, which is the metric the budget is written against.
 #
 # The base branch is built too. A ceiling alone lets a change spend the headroom a few KB at
 # a time until some later pull request crosses the line — the red then lands on whoever went

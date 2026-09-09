@@ -2,10 +2,10 @@ name: OSV Scan
 
 # The dependency graph read against the OSV database. Trivy and `pnpm audit` already
 # read the same graph, and the three disagree — different aggregation units, different
-# databases. ADR 0110 §3 settles that: the UNION is the truth, so a third reader is
+# databases. The security rules settle that: the UNION is the truth, so a third reader is
 # not redundancy to be removed but a blind spot being closed.
 #
-# Two jobs, the same split the Trivy pair has (ADR 0110 §3.1):
+# Two jobs, the same split the Trivy pair has:
 #
 #   osv-scan  reports, never fails
 #   osv-gate  fails on a finding, only for a PR aimed at a protected branch
@@ -164,7 +164,7 @@ jobs:
 
   osv-gate:
     # Expressed as a job condition rather than a `branches:` filter, so the context is
-    # still reported on every PR (ADR 0153 §5).
+    # still reported on every PR.
     if: ${{ github.event_name != 'pull_request' || contains(fromJSON('["production", "staging", "develop"]'), github.base_ref) || startsWith(github.base_ref, 'release/') || startsWith(github.base_ref, 'hotfix/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

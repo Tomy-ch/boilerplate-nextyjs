@@ -1,14 +1,14 @@
 name: CodeQL Scan
 
-# SAST over the application's own source (ADR 0110 §3). It sees what the dependency
+# SAST over the application's own source. It sees what the dependency
 # scanners do not: a flaw this repository wrote, rather than one it pulled in.
 #
 # No matrix. This repository is one language, and a matrix would make the reported
 # context name depend on the leg — a required check cannot be registered against a
-# name that branches at run time (ADR 0153 §5).
+# name that branches at run time.
 #
 # High-severity findings block the merge through code scanning's own required
-# setting, not through this job's exit code (ADR 0110 §3). The job fails only when
+# setting, not through this job's exit code. The job fails only when
 # the analysis itself could not run.
 #
 # Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is

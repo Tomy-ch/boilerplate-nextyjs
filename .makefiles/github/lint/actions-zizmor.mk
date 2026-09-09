@@ -2,7 +2,7 @@
 .PHONY: actions-zizmor ## workflows / composite action の定義を zizmor で静的解析する（high で落とす）
 
 # actionlint / actions-shellcheck が原理的に見られない観点を担う
-# （何が見えないのか、なぜ別の検査が要るのかは docs/adr/0153-ci-configuration.md）。
+# （何が見えないのか、なぜ別の検査が要るのかは [README](../../README.md)）。
 
 # 走査対象は `.`。zizmor が workflows と composite action の両方を集める。
 ZIZMOR_TARGET := .
@@ -16,7 +16,7 @@ ZIZMOR_FLAGS := -q --no-progress --format plain --config $(ZIZMOR_CONFIG)
 
 # ゲートに使う severity。`--min-severity` は表示も絞るので、これを付けた実行だけでは medium 以下が
 # 出力からも消える —— 抑止を severity の引き下げで行っている以上（.github/zizmor.yml）、引き下げた
-# 所見まで見えなくなると ADR 0110 §3.4 が禁じる「黙って素通り」になる。そのため下のレシピは、
+# 所見まで見えなくなると「黙って素通り」になる（[README](../../README.md)）。そのため下のレシピは、
 # 全所見を出す実行と、high だけで落とす実行の 2 段に分ける。
 ZIZMOR_GATE_SEVERITY := high
 

@@ -1,7 +1,7 @@
 ## 画面ごとの Core Web Vitals
 #
 # `e2e/lib/screens.ts` が宣言する画面を 1 枚ずつ Lighthouse で開き、LCP / CLS / TBT を
-# performance-budget.yaml の上限と照らす (ADR 0101)。
+# performance-budget.yaml の上限と照らす。
 #
 # 起動は画面を通した検証 (e2e.mk) をそのまま使う —— 本番ビルドをホストで起動し、終わったら
 # 片付ける。同じものを 2 組持つと、起動待ちも後片付けもポートの衝突検査も二重になり、片方だけを

@@ -113,6 +113,14 @@ git の hook、そしてスキル自身が。
 返す文面は、対応表の値をデータとして名乗らせ、指示にあたる 1 文を自分の言葉で後ろへ置く
 （[`docs/rules.md`](../docs/rules.md)「作業とエージェント」）。
 
+## 関連する ADR
+
+ここに居る機構が従う決定。**シェルのコメントからは ADR を直接指さず、この節を辿る**
+（[docs/rules.md](../docs/rules.md)「コメントと文書」）。
+
+- [0160](../docs/adr/0160-agent-environment-loop.md) — 何のために測るのか / 打刻の置き場 / 記録をどこまで読んでよいか
+- [0161](../docs/adr/0161-development-window-as-feedback-unit.md) — 単位が窓であること、打刻が第一で記録は補完であること
+
 ## 編集について
 
 `AGENTS.md` の `AI Modification Scope` はエージェントが触ってよいパスを列挙しており、ここはその

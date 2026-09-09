@@ -4,7 +4,7 @@
 
 # --redact: 検出値そのものを出力しない（hook / CI のログ経由の二次漏洩を防ぐ）
 # --no-color: 非 TTY（lefthook / CI）で ANSI エスケープが化けないようにする
-# 検出時は exit 1 で落ちる。秘密混入は fail-closed（docs/adr/0110-security-operations.md）。
+# 検出時は exit 1 で落ちる。秘密混入は fail-closed。
 
 # 既定の走査対象は「HEAD から辿れて、どのリモートにも存在しないコミット」= これから push される範囲。
 # 作業ツリーを見る dir モードを使わないのは、それが守りたい境界とずれているため:

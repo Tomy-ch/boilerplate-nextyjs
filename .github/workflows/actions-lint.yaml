@@ -1,7 +1,7 @@
 name: Actions Lint
 
 # Lints the Actions definitions themselves — the same commands the pre-commit hook
-# runs (ADR 0153: hooks mirror CI). Seven checks, one concern:
+# runs. Seven checks, one concern:
 #
 #   actionlint          — workflow syntax, plus the shell of every `run:` in
 #                         `.github/workflows`. shellcheck is installed alongside it
@@ -11,12 +11,12 @@ name: Actions Lint
 #                         scans only `.github/workflows` and rejects an `action.yaml`
 #                         handed to it directly (it reads the file as a workflow), so
 #                         without this the shells under `.github/actions` reach no gate
-#                         at all (ADR 0153 §1, revert condition W10).
+#                         at all.
 #   actions-comment-…   — no secret reaches a job that posts a PR comment. Secret
 #     …secret-lint        masking only covers what the runner captures for the log, so
 #                         bytes written to a file with `tee` pass through unmasked and
 #                         land verbatim in a public comment. actionlint cannot express
-#                         that rule, so it is checked here (ADR 0153 §5).
+#                         that rule, so it is checked here.
 #   actions-mise-pin-…  — the mise version, its digest and the cache key agree. mise's
 #     …lint               own version cannot live in `mise.toml`, so it is declared in
 #                         `.github/actions/setup-mise` in three places at once.
@@ -26,11 +26,11 @@ name: Actions Lint
 #                         renamed, two jobs sharing a name, a `paths:` filter) span two
 #                         files at once, which actionlint never reads together.
 #   actions-zizmor      — static analysis of the definitions themselves. Neither of the two
-#                         above can see quoting inside `${{ … }}`; ADR 0153 §1 has why.
+#                         above can see quoting inside `${{ … }}`; the README has why.
 #                         zizmor reads the expressions and gates on high findings only.
 #   shellcheck          — every tracked standalone `*.sh`. What lives there is shell
 #                         only because it has to run before dependencies are installed
-#                         (the exception ADR 0155 allows). Nothing else covers it: it is
+#                         (the exception the README records). Nothing else covers it: it is
 #                         not TypeScript, so neither the 1:1 gate nor coverage applies,
 #                         and it sits outside `.github` so actionlint and
 #                         actions-shellcheck both miss it.

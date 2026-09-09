@@ -1,8 +1,8 @@
 name: Accessibility
 
 # Runs axe over every Storybook story in a real browser, inside the same
-# digest-pinned container the screenshots use (ADR 0054: the automated a11y check
-# rides on the stories; ADR 0091 §3: no additional runner is introduced for it).
+# digest-pinned container the screenshots use — the automated a11y check rides on the
+# stories, and no additional runner is introduced for it (see the README).
 #
 # Real browser is the point. The component suite's `vitest-axe` runs under jsdom,
 # which has no layout and no computed colour, so `color-contrast` is switched off

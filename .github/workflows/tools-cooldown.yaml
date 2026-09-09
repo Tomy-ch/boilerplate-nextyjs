@@ -1,6 +1,6 @@
 name: Tools Cooldown
 
-# The supply-chain quarantine for the CLI tools `mise.toml` pins (ADR 0110 §1.1). A pin can
+# The supply-chain quarantine for the CLI tools `mise.toml` pins. A pin can
 # be edited by hand, and nothing else reads the publish date of the version it names, so
 # this is the one place a freshly published — possibly compromised — release is caught
 # before it lands on every developer's PATH.
@@ -8,7 +8,7 @@ name: Tools Cooldown
 # Two modes of the same script (`scripts/tools-cooldown`):
 #
 #   check  on a pull request — only the pins the diff moved. A pin inherited from base is not
-#          the author's to fix here; the weekly audit owns it (ADR 0110 §3.3).
+#          the author's to fix here; the weekly audit owns it.
 #   audit  on the schedule and on dispatch — every pin. Catches a pin merged past a red check.
 #
 # The window is per distribution channel and is passed in by the make target; an exemption

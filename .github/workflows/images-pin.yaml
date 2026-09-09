@@ -11,7 +11,7 @@ name: Images Pin
 # run in CI.
 #
 # A separate workflow from `actions-pin` on purpose: same discipline, different
-# supply chain (ADR 0153 §1, one concern per workflow). The two scan some of the
+# supply chain. The two scan some of the
 # same files but never the same lines — a `docker://` step is a registry
 # reference, which `actions-pin` cannot resolve through `git ls-remote`.
 #

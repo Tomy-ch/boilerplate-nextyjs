@@ -1,7 +1,7 @@
 ## GitHub Actions 定義の Lint
 # 走査対象は .github/workflows のみ。composite action (.github/actions/**) の
 # action.yaml は actionlint へ直接渡すと workflow として解釈され必ず落ちるため
-# 対象に加えない (ADR 0153)。workflows 側の `uses: ./.github/actions/...` 解決を
+# 対象に加えない。workflows 側の `uses: ./.github/actions/...` 解決を
 # 通じて検査されるのは、既に参照されている action の入力 (with: と inputs) の整合
 # だけで、action 内の run: のシェルには及ばず、どの workflow からも参照されていない
 # action は検査されないまま通る。それでも呼び出し側を壊す変更は捕まるため、hook

@@ -1,8 +1,8 @@
 name: Lint
 
 # biome (full profile), the ESLint layer-boundary check, and the architecture
-# declaration cross-check — the same command the pre-commit hook runs (ADR 0153:
-# hooks mirror CI). The hook is the fast first stop; this job is the authority.
+# declaration cross-check — the same command the pre-commit hook runs
+# (hooks mirror CI). The hook is the fast first stop; this job is the authority.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
 # every PR is in README.md.

@@ -1,11 +1,11 @@
-# 依存更新（docs/adr/0110-security-operations.md 1）。
+# 依存更新。
 #
 # cooldown は、版が公開されてから更新 PR を出すまでの待機日数。悪意ある版が公開されてから上流が
 # 検知・撤回するまでの時間を待つための検疫で、窓の長さは blast radius ではなく上流の検知
 # レイテンシに比例させる。セキュリティ更新はこれを飛ばして即時 PR になる（Dependabot 自身の
 # 挙動であり、ここで設定するものではない）。
 #
-# docker エコシステムは持たない。監査対象の Dockerfile がそもそも無い（ADR 0011 no-Docker）。
+# docker エコシステムは持たない。監査対象の Dockerfile がそもそも無い。
 # mise.toml の pin も Dependabot の対象外で、同じ検疫を tools-upgrade スキルの min_age_days が
 # 手作業側に適用する（0110 1.1）。
 version: 2
@@ -22,7 +22,7 @@ updates:
       semver-minor-days: 7
       semver-major-days: 30
     groups:
-      # major を group から外すのは ADR 0004（major 更新は別 PR）による。まとめた PR の中に
+      # major を group から外すのは「major 更新は別 PR」の規約による。まとめた PR の中に
       # 破壊的変更が紛れると、通ったことが何の証拠にもならなくなる。
       npm:
         patterns:
@@ -34,7 +34,7 @@ updates:
   # ---- GitHub Actions ----
   #
   # 版の SSOT は uses: の末尾コメント tag で、SHA は .github/actions-pin.toml が持つ
-  # （ADR 0153 §3）。Dependabot が tag を上げた PR には make actions-pin-resolve /
+  #。Dependabot が tag を上げた PR には make actions-pin-resolve /
   # actions-pin-apply を掛けてから取り込む。actions-pin job が固定の不一致で落ちる。
   - package-ecosystem: "github-actions"
     directory: "/"

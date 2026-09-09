@@ -31,7 +31,7 @@ runs:
 
     # `--frozen-lockfile` refuses a lockfile that does not match `package.json`, so a drift shows
     # here rather than as a version nobody chose. `--ignore-scripts` keeps a dependency's install
-    # hook from running on the runner (ADR 0004).
+    # hook from running on the runner.
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile --ignore-scripts

@@ -20,7 +20,7 @@ description: Raise one issue per title, commenting on the open one rather than o
 # Nothing here escapes or fences anything. An issue body renders as Markdown, and these bodies
 # carry tool output — axe rule ids, Playwright assertion text, a Lighthouse table — which in a
 # public repository is text this repository does not author. Indent it four spaces so it renders
-# as a code block, or filter it to a character set that cannot make markup (ADR 0153 §5).
+# as a code block, or filter it to a character set that cannot make markup.
 
 inputs:
   github-token:

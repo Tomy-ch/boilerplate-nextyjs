@@ -495,7 +495,7 @@ jobs:
           # message and the pull-request comment. It originates in the story catalogue
           # committed to this repository, so it should never leave the accepted set — if it
           # does, the report's shape changed, and this refuses rather than pass it on
-          # (ADR 0153 §5).
+          #.
           if printf '%s' "$ids" | LC_ALL=C grep -q '[^A-Za-z0-9/._,-]'; then
             echo '❌ 報告の story id が許可した文字集合を外れています。'
             exit 1
@@ -670,7 +670,7 @@ jobs:
           body: ${{ steps.pointer-body.outputs.body }}
 
       # The body is built here but published by a job that holds no App secret, so a
-      # token cannot reach a public comment through the file (ADR 0153).
+      # token cannot reach a public comment through the file.
       - name: Build the outcome comment
         id: outcome
         if: always() && steps.mode.outputs.mode != 'none' && steps.mode.outputs.mode != ''

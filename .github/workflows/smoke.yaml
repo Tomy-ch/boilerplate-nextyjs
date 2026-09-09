@@ -3,7 +3,7 @@ name: Smoke
 # Boot check: build, start the production server, and require it to answer a real
 # request. A green `next build` only proves the bundle compiled — a provider that
 # throws on mount, a missing runtime env value, or a server component that fails to
-# render all surface at boot, not at build (ADR 0153).
+# render all surface at boot, not at build.
 #
 # It builds for itself rather than taking an artifact from the Build workflow: one
 # concern per workflow means neither job may sit behind the other's runner. Both

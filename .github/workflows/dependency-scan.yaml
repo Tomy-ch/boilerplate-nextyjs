@@ -1,6 +1,6 @@
 name: Dependency Scan
 
-# The dependency half of the defence in depth (ADR 0110 §3). Three jobs, three
+# The dependency half of the defence in depth. Three jobs, three
 # different verdicts over the same subject:
 #
 #   dependency-scan   Trivy fs, report only. Never fails.
@@ -10,12 +10,12 @@ name: Dependency Scan
 #
 # Trivy and pnpm audit disagree on purpose and their counts are not reconciled: they
 # aggregate differently (CVE vs advisory) and read different databases. The union is
-# the truth, so either one reaching its threshold is enough to block (ADR 0110 §3).
+# the truth, so either one reaching its threshold is enough to block.
 #
 # Why the report-only job exists at all: a vulnerability is not something the author
 # of a change can resolve on the spot, and its state moves without the code moving.
 # A gate built on that teaches people to bypass it. Promotion is where someone has
-# the standing to accept the risk, so that is where the strict job sits (ADR 0110 §3.1).
+# the standing to accept the risk, so that is where the strict job sits.
 #
 # Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
 # in README.md.
@@ -263,7 +263,7 @@ jobs:
           exit 0
 
       # Standing down is admissible for this gate and not for `dependency-gate` below: a
-      # verdict the author inherited from base is one they cannot act on (ADR 0110 §3.1),
+      # verdict the author inherited from base is one they cannot act on,
       # whereas promotion is precisely where someone accepts what the tree already carries.
       - name: Note that the diff cannot reach the dependency graph
         id: standdown
@@ -295,7 +295,7 @@ jobs:
     # all, and a required context that is never reported is not read as "not
     # applicable" — the merge waits for something that will never arrive. A job the
     # condition skips reports `skipped`, which a required check counts as success
-    # (ADR 0153 §5).
+    #.
     if: ${{ github.event_name != 'pull_request' || contains(fromJSON('["production", "staging", "develop"]'), github.base_ref) || startsWith(github.base_ref, 'release/') || startsWith(github.base_ref, 'hotfix/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

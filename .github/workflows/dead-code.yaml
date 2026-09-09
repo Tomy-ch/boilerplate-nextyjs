@@ -1,6 +1,6 @@
 name: Dead Code
 
-# Reports files, exports and dependencies that nothing reaches (ADR 0004 / 0091).
+# Reports files, exports and dependencies that nothing reaches.
 #
 # This closes a gap the other gates cannot see. The 1:1 correspondence gate in Scripts Check
 # asks whether an export has a matching `describe`, and the coverage thresholds ask whether

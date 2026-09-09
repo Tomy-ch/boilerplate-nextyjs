@@ -392,6 +392,20 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 
 <!-- boilerplate-only:end -->
 
+## 関連する ADR
+
+ここに居るターゲットが従う決定。**レシピのコメントからは ADR を直接指さず、この節を辿る** ——
+ADR は番号も節も決定の所在も動くが、README は区画と一緒に動くので、動きがレシピへ波及しない
+（[docs/rules.md](../docs/rules.md)「コメントと文書」）。
+
+- [0090](../docs/adr/0090-testing-strategy.md) — アプリと補助スクリプトで実行を分ける
+- [0101](../docs/adr/0101-performance-budget.md) — 上限の置き方と、照らす先が `performance-budget.yaml` であること
+- [0110](../docs/adr/0110-security-operations.md) — 監査の閾値 / 抑止の様式 / 所見を黙って素通りさせない
+- [0151](../docs/adr/0151-git-hooks.md) — ローカルゲートの帯と、hook から呼ぶ側の責務
+- [0153](../docs/adr/0153-ci-configuration.md) — workflow 定義の検査 / secret の渡し方 / 公開の面へ出す文字集合
+- [0155](../docs/adr/0155-claude-skills-development.md) — TypeScript で書けない例外としてのシェル
+- [0160](../docs/adr/0160-agent-environment-loop.md) — 決定的な集計だけを持ち、モデルを使わない <!-- boilerplate-only:line -->
+
 ## 補足
 
 - 既存グループファイルへのターゲット追加ならトップレベル編集は不要。ただし**新規** `.mk` ファイルを追加する場合は、

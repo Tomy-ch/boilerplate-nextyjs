@@ -251,7 +251,7 @@ jobs:
           esac
 
   # The only job that writes outside this run, and the only one with no SonarCloud token —
-  # the scan log must never share a runner with the thing that posts it (ADR 0153 §5). It
+  # the scan log must never share a runner with the thing that posts it. It
   # runs even when the scan failed: a scan that was cut off still has to say so, for the
   # reason `unconfigured-notice` gives.
   #
@@ -311,7 +311,7 @@ jobs:
       # **`body-sanitized` stays unset.** The body carries SonarCloud's own text — rule
       # messages and file paths this repository did not author — so it must be fenced rather
       # than rendered. Setting it to make the list read as Markdown would let that text
-      # become markup in a comment posted under `GITHUB_TOKEN` (ADR 0153 §5).
+      # become markup in a comment posted under `GITHUB_TOKEN`.
       - name: Comment the SonarCloud result on PR
         if: always() && github.event_name == 'pull_request'
         continue-on-error: true

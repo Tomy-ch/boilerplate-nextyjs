@@ -1,5 +1,6 @@
 ---
 name: manage-skill
+usage-class: situational
 description: >-
   Create, update, evaluate, and optimize skills under this repository's `.claude/skills/`, wrapping Anthropic's official `skill-creator` methodology and layering this repo's own conventions on top (ADR 0154 / 0155 placement, naming, frontmatter and body structure; English-canonical `SKILL.md` plus a mandatory `SKILL.ja.md` translation pair per ADR 0140; read-only sonnet subagents; eval artifacts kept under the gitignored `tmp/`). This is the single entry point for ANY change to a skill under `.claude/skills/`; ALWAYS use it before hand-editing a `SKILL.md` or `SKILL.ja.md`. Use this WHENEVER the user wants to create / update / modify / change / edit / fix / improve / refactor / rename / extend / adjust / tune a skill — its steps, `description`, frontmatter, or behavior — or to author a `/<name>` command, turn a repeated workflow into a skill, tune a skill's triggering description, or run evals on a skill, even if they never say "skill-creator". Japanese triggers apply too, e.g. 「スキルを作りたい」「スキルを更新して」「このスキルの手順 / description / 挙動を変えて」. Do NOT use it for canonical docs under `docs/**` or READMEs (`sync-readme` / `canonicalize-doc` / `readme-review` own those), for subagent definitions alone under `.claude/agents/`, or for other AI tools' configs (`.cursor/`, `.gemini/`, `.github/copilot-instructions.md`).
 argument-hint: '[skill-name] [--new|--update|--optimize]'
@@ -72,7 +73,8 @@ pnpm exec tsx scripts/bootstrap-plugins
 ```
 
 The bootstrap declares the `claude-plugins-official` marketplace and enables the official plugins
-this repo depends on (`skill-creator`) at **project scope**, so the declaration lands in this repo's
+this repo depends on (`skill-creator` and `feature-dev`; ADR 0155 says which of each plugin's assets
+are used and which are deliberately not) at **project scope**, so the declaration lands in this repo's
 `.claude/settings.json` and any trusted clone gets it without per-developer setup. It is idempotent;
 re-running is a no-op. Newly enabled plugins load on the *next* session, when `skill-creator` also
 becomes invocable as `/skill-creator` — but this wrapper does not depend on that, because it reads
@@ -113,10 +115,13 @@ option and let the user confirm it.
 
 ### Deciding where a new skill belongs
 
-| Family | ADR | Definition | Existing examples |
-| --- | --- | --- | --- |
-| Operational | [0154](../../../docs/adr/0154-claude-skills-operations.md) | Operations that advance the development process — Git / GitHub, release, dependency and tool audits, `.claude/` meta inventory. Not primarily generating or editing code | `commit`, `submit-pr`, `release-notes`, `tools-upgrade`, `node-upgrade`, `repo-ops`, `tool-map` |
-| Development | [0155](../../../docs/adr/0155-claude-skills-development.md) | Generating, editing, or reviewing code / docs / configuration | `canonicalize-doc`, `sync-readme`, `readme-review`, `new-env`, `impl-review`, `full-verify`, `full-apply`, `adr-scan` |
+| Family | ADR | Definition |
+| --- | --- | --- |
+| Operational | [0154](../../../docs/adr/0154-claude-skills-operations.md) | Operations that advance the development process — Git / GitHub, release, dependency and tool audits, `.claude/` meta inventory. Not primarily generating or editing code |
+| Development | [0155](../../../docs/adr/0155-claude-skills-development.md) | Generating, editing, or reviewing code / docs / configuration |
+
+The current members of each family are the coverage table of that ADR — read it this run rather
+than a list kept here.
 
 If the proposed skill would establish a new convention, pattern, or library in an area `BACKLOG.md`
 still leaves undecided, **stop and defer the ADR decision to the user** (`AGENTS.md`, "Pending
@@ -246,7 +251,7 @@ Update the row when an existing skill's coverage materially changes.
 
 - `pnpm lint:ci` and `pnpm typecheck` — required whenever a bundled or `scripts/` TypeScript
   file was added or changed. Run `pnpm fix` first for autofixable findings.
-- `pnpm md-lint` — required whenever any Markdown was touched, including `.claude/**`. It runs three
+- `pnpm lint:md` — required whenever any Markdown was touched, including `.claude/**`. It runs three
   stages: markdownlint (layout), mermaid-lint (diagram syntax), and `skill-lint`, which checks the
   frontmatter keys, the `SKILL.md` / `SKILL.ja.md` pair's heading structure, and the existence of
   every `make` target and path the body references. What `skill-lint` cannot judge stays this skill's
@@ -256,10 +261,9 @@ Update the row when an existing skill's coverage materially changes.
 ## Definition of Done
 
 - The official `skill-creator` methodology was resolved and loaded (Step 0).
-- `.claude/skills/<slug>/SKILL.md` exists with a kebab `name` equal to the directory, a dense
-  English "pushy" `description`, and the ADR 0154 body structure.
-- `SKILL.ja.md` generated or synced from the canonical side via `canonicalize-doc`, frontmatter-free,
-  with the sync-note header, and 1:1 with `SKILL.md`.
+- `.claude/skills/<slug>/SKILL.md` exists, its frontmatter and body matching Step 2's *Frontmatter*
+  table and *Body structure* list.
+- `SKILL.ja.md` synced per Step 4 (via `canonicalize-doc`, 1:1 with `SKILL.md`).
 - The skill is registered in the coverage table of ADR 0154 or 0155.
 - Bundled scripts are TypeScript run through `tsx`, unless the standalone-before-install exception
   applies.

@@ -642,24 +642,24 @@ describe("collectComponentLayout", () => {
     const { directories } = collectComponentLayout([
       "src/components/design-system/display/button/README.md",
       "src/components/design-system/display/button/button.tsx",
-      "src/components/feedback/toaster/README.md",
+      "src/components/shell/toaster/README.md",
     ]);
 
     expect(directories).toEqual([
       "src/components/design-system/display/button",
-      "src/components/feedback/toaster",
+      "src/components/shell/toaster",
     ]);
   });
 
   it("入れ子の component を、親と別のディレクトリとして拾う", () => {
     const { directories } = collectComponentLayout([
-      "src/components/sugar/table/README.md",
-      "src/components/sugar/table/static-data/README.md",
+      "src/components/patterns/table/README.md",
+      "src/components/patterns/table/static-data/README.md",
     ]);
 
     expect(directories).toEqual([
-      "src/components/sugar/table",
-      "src/components/sugar/table/static-data",
+      "src/components/patterns/table",
+      "src/components/patterns/table/static-data",
     ]);
   });
 

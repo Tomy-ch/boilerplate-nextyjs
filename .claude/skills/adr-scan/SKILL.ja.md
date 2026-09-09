@@ -28,7 +28,7 @@ go-boilerplate 版は、フラットな `docs/decisions.md` を正式な `docs/a
 Agent ツールで並列に fan out する（read-only）。各ワーカーは後述の出力形で候補を返す。その後 orchestrator が既存の BACKLOG 枠に対して重複排除する。
 
 1. **既存 ADR + ボード** — `docs/adr/*.md` + `docs/adr/BACKLOG.md`。*既に追跡されている*枠のベースライン集合を作る（発見結果を差分で見られるように）。Status や BACKLOG のステータス対が実態と食い違って見える ADR があれば記録する。
-2. **AGENTS.md** — `## [TODO]` 節（各々が未決領域。BACKLOG 枠へ対応しているか確認する）、「AI Modification Scope」/「Protected Documentation」/「Git Rules」/「Language Rules」の各節。真の意思決定とルールを切り分ける。
+2. **AGENTS.md** — 「Pending Decisions」節（指す先の未決領域は BACKLOG にある。各々が枠へ対応しているか確認する）、「AI Modification Scope」/「Protected Documentation」/「Git Rules」/「Language Rules」の各節。真の意思決定とルールを切り分ける。
 3. **設定・ツール（潜在的な意思決定）** — `package.json`（依存 / scripts / `packageManager`）、`tsconfig.json`、`next.config.ts`、`biome.json`、`postcss.config.mjs`、`mise.toml`、`.makefiles/**`、`.github/**`。ピン留めされたツール、有効化されたコンパイラフラグ、CI ジョブ、`browserslist` — いずれも設定の中で下されたまま ADR / 枠へ昇格していない意思決定でありうる。
 4. **`src/` の de-facto 構造** — 実際のディレクトリレイアウト、`"use client"` の配置、ルート規約、スタイリング方針（Tailwind の使われ方）、状態管理・データ取得のパターン。これらは A 系 / B 系の de-facto 状態にあたる。各々が BACKLOG に（⚠️ de-facto として）反映されており、記録されないまま規約として固まりつつある状態でないかを確認する。
 5. **散文・コメント中の潜在** — `README*`、コード中の `// TODO` / `// why` コメント、`.github/copilot-instructions.md`。ついでに述べられただけで追跡されていない意思決定・除外。

@@ -6,16 +6,13 @@ import { cn } from "@/components/cn";
  * ページ先頭で、そのページが何かと主要な操作を示すブロック。
  *
  * @remarks
- * `ContentContainer` の直下に置く。**左右余白を持たない。** 余白は `ContentContainer` が
- * 所有しており、ここで重ねると本文と先頭ブロックで縦線が揃わなくなる。
+ * `ContentContainer` の直下に置く。**左右余白を持たない。** 余白は `ContentContainer` が所有する。
  *
  * **`main` の内側に置くこと。** `header` 要素は `main` / `article` / `aside` / `nav` /
  * `section` の外にあると `banner` landmark になり、サイト全体の header を名乗ってしまう。
  *
- * 本文の構造とデータ取得は持たない。表示する文言は呼び出し元が決める。
- *
- * 配置は grid で、タイトルと説明を左の列へ積み、操作を右の列へ置く。子を包む要素を足さずに
- * 済ませるため、各 subcomponent が自分の位置を持つ。狭い画面では DOM の順に縦へ積む。
+ * 本文の構造とデータ取得は持たない。表示する文言は呼び出し元が決める。配置の責務は同層の
+ * README「責務境界」が持つ。
  *
  * Server Component として使える。hydration は不要で、`PageHeaderActions` に client island を
  * 置く場合もその部品だけが境界を持つ。

@@ -4,7 +4,7 @@
 
 # Trivy とも pnpm audit とも参照するデータベースが違う。件数は一致せず、突合して差分を潰そうと
 # しない —— 和集合を正とし、どれか 1 つでも閾値に達したものを blocking として扱う
-# （docs/adr/0110-security-operations.md 3）。
+#。
 #
 # 抑止は osv-scanner.toml が持つ。理由と撤回条件を各エントリへ書く様式は他のスキャナと同じ。
 OSV_FLAGS := --lockfile pnpm-lock.yaml --config osv-scanner.toml

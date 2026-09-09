@@ -23,7 +23,7 @@ function unescapeXml(value: string): string {
  * @param xml - `sitemap.xml` の本文
  */
 export function listSitemapLocations(xml: string): string[] {
-  return [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => unescapeXml(match[1]));
+  return [...xml.matchAll(/(?<=<loc>)[^<]*(?=<\/loc>)/g)].map((match) => unescapeXml(match[0]));
 }
 
 /**
@@ -39,16 +39,17 @@ function attributesOf(tag: string): Map<string, string> {
   const parts = tag.split('"');
 
   for (let index = 1; index < parts.length; index += 2) {
-    const before = parts[index - 1].trimEnd();
+    const before = parts[index - 1]?.trimEnd();
+    const value = parts[index];
 
-    if (!before.endsWith("=")) {
+    if (before === undefined || value === undefined || !before.endsWith("=")) {
       continue;
     }
 
-    const tokens = before.slice(0, -1).split(/[\s<]+/);
-    const [name] = tokens.slice(-1);
+    // `=` の手前で、区切り（空白か `<`）より後ろが名前。区切りが無ければ全体
+    const name = before.slice(0, -1).replace(/^.*[\s<]/s, "");
 
-    attributes.set(name.toLowerCase(), parts[index]);
+    attributes.set(name.toLowerCase(), value);
   }
 
   return attributes;
@@ -153,8 +154,7 @@ export function listRobotsDirectives(text: string, field: string): string[] {
 
   return text
     .split(/\r?\n/)
-    .map((line) => line.split("#")[0])
-    .map((line) => line.trim())
+    .map((line) => line.replace(/#.*/, "").trim())
     .filter((line) => line !== "")
     .flatMap((line) => {
       const separator = line.indexOf(":");

@@ -15,11 +15,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const ERRORS: readonly ImportRowError[] = [
+const ERRORS = [
   { line: 12, column: "月額", message: "数値として読めません（「¥1,200」）" },
   { line: 27, message: "列の数が合いません（8 列必要ですが 7 列でした）" },
   { line: 45, column: "状態", message: "使えない値です（「公開済」）" },
-];
+] satisfies readonly [ImportRowError, ...ImportRowError[]];
 
 /** すべて取り込めた場合。 */
 export const AllSucceeded: Story = {
@@ -35,7 +35,7 @@ const RETRY_DELAY_MS = 700;
 
 /** 再実行のたびに、落ちた行が 1 件ずつ通っていく取り込みを模した fixture。 */
 function PartiallyFailedFixture({ total }: { total: number }) {
-  const [errors, setErrors] = useState(ERRORS);
+  const [errors, setErrors] = useState<readonly ImportRowError[]>(ERRORS);
   const [pending, setPending] = useState(false);
 
   const retry = useCallback(() => {
@@ -91,13 +91,18 @@ export const RowLevelError: Story = {
   ),
 };
 
-/** 書き出しの 3 状態。生成前・生成中・受け取り可能。 */
+/**
+ * 書き出しの 3 状態。生成前・生成中・受け取り可能。
+ *
+ * 末尾は前の出力を持ったまま次を生成している組で、生成中が勝つ。
+ */
 export const ExportStates: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       <ExportButton />
       <ExportButton pending />
       <ExportButton fileName="plans.csv" href="/exports/plans.csv" />
+      <ExportButton fileName="plans.csv" href="/exports/plans.csv" pending />
     </div>
   ),
 };

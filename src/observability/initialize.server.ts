@@ -65,7 +65,7 @@ export function initializeObservability({
       new HttpInstrumentation(),
       new UndiciInstrumentation({
         requireParentforSpans: true,
-        // 許可 origin 以外へは伝播しない（伝播先の方針は [0081](../../docs/adr/0081-observability-logging.md)）。
+        // 許可 origin 以外へは伝播しない。
         ignoreRequestHook: ({ origin }) => !allowedOrigins.has(new URL(origin).origin),
       }),
     ],

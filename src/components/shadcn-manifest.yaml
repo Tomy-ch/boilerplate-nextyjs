@@ -17,8 +17,8 @@
 # 責務を引き取った component がある場合はその README が決定の実体を持つ。
 #
 # `as` と `directory` を 1 つに畳まないこと。`as` は目的、`directory` は層と置き場所で、軸が違う。
-# `ui/pagination` と `navigation/cursor-pagination` はどちらも `as: navigation` であり、
-# 基底か合成かは `directory` だけが持つ。
+# `design-system/navigation/pagination` と `app-starter/cursor-pagination` はどちらも
+# `as: navigation` であり、どの層かは `directory` だけが持つ。
 #
 # key と registryItem を 1 つに畳まないこと。同じ item から native / client の 2 実装を
 # 作った場合に表現できなくなる。

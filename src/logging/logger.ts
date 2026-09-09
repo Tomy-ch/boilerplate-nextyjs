@@ -6,8 +6,7 @@
  * 素通りし、見分けられたつもりのものが偽の安心になります。名前は自分たちが付けるものなので、
  * ここに挙げた名前で持ち回る限り確実に効きます。
  *
- * ログと span の双方がこの表を見ます（[0081](../../docs/adr/0081-observability-logging.md) §3 が
- * 両方へ同じ redaction を求めています）。増やすときは、名前を持ち回っている側も併せて直します。
+ * ログと span の双方がこの表を見ます。増やすときは、名前を持ち回っている側も併せて直します。
  */
 export const REDACTED_FIELD_NAMES: readonly string[] = [
   "authorization",

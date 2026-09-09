@@ -5,9 +5,9 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
 
-const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+const { push, replace } = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace }) }));
 
 import { PurchaseFilterDraftProvider } from "../../filter-draft";
 import type { PeriodSelection } from "../../period";
@@ -23,6 +23,7 @@ function renderSheet(period: PeriodSelection = { kind: "all" }) {
 
 beforeEach(() => {
   push.mockClear();
+  replace.mockClear();
 });
 
 describe("PurchasePeriodSheet", () => {
@@ -71,21 +72,68 @@ describe("PurchasePeriodSheet", () => {
     expect(screen.getByRole("button", { name: "全期間に戻す" })).toBeEnabled();
   });
 
-  it("確定で、組み立てた期間の URL へ送る", async () => {
+  it("確定で、組み立てた期間の URL へ、履歴を積まずに送る", async () => {
     renderSheet();
     await userEvent.click(screen.getByRole("button", { name: /期間で絞り込む/ }));
     await userEvent.click(await screen.findByRole("radio", { name: "直近" }));
     await userEvent.click(screen.getByRole("button", { name: "この期間で見る" }));
 
-    expect(push).toHaveBeenCalledWith("/purchases?period=recent&days=30");
+    expect(replace).toHaveBeenCalledWith("/purchases?period=recent&days=30");
+    expect(push).not.toHaveBeenCalled();
   });
 
-  it("全期間へ戻すと、条件の無い URL へ送る", async () => {
+  it("確定しても、結果が届くまでは閉じない", async () => {
+    renderSheet();
+    await userEvent.click(screen.getByRole("button", { name: /期間で絞り込む/ }));
+    await userEvent.click(await screen.findByRole("radio", { name: "直近" }));
+    await userEvent.click(screen.getByRole("button", { name: "この期間で見る" }));
+
+    expect(screen.getByRole("button", { name: "この期間で見る" })).toBeVisible();
+  });
+
+  it("結果が届いたら閉じる", async () => {
+    const { rerender } = renderSheet();
+    await userEvent.click(screen.getByRole("button", { name: /期間で絞り込む/ }));
+    await userEvent.click(await screen.findByRole("radio", { name: "直近" }));
+    await userEvent.click(screen.getByRole("button", { name: "この期間で見る" }));
+
+    const applied: PeriodSelection = { kind: "recent", days: 30 };
+
+    rerender(
+      <PurchaseFilterDraftProvider period={applied}>
+        <PurchasePeriodSheet period={applied} />
+      </PurchaseFilterDraftProvider>,
+    );
+
+    expect(screen.queryByRole("button", { name: "この期間で見る" })).not.toBeInTheDocument();
+  });
+
+  it("期間を変えずに確定したら、移らずにその場で閉じる", async () => {
+    renderSheet({ kind: "recent", days: 30 });
+    await userEvent.click(screen.getByRole("button", { name: /期間: 直近 30 日/ }));
+    await userEvent.click(await screen.findByRole("button", { name: "この期間で見る" }));
+
+    expect(replace).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "この期間で見る" })).not.toBeInTheDocument();
+  });
+
+  it("全期間へ戻すと、条件の無い URL へ、履歴を積まずに送る", async () => {
     renderSheet({ kind: "recent", days: 30 });
     await userEvent.click(screen.getByRole("button", { name: /期間: 直近 30 日/ }));
     await userEvent.click(await screen.findByRole("button", { name: "全期間に戻す" }));
 
-    expect(push).toHaveBeenCalledWith("/purchases");
+    expect(replace).toHaveBeenCalledWith("/purchases");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("既に全期間なら、戻す操作はその場で閉じる", async () => {
+    renderSheet();
+    await userEvent.click(screen.getByRole("button", { name: /期間で絞り込む/ }));
+    await userEvent.click(await screen.findByRole("radio", { name: "月で指定" }));
+    await userEvent.click(screen.getByRole("button", { name: "全期間に戻す" }));
+
+    expect(screen.queryByRole("button", { name: "全期間に戻す" })).not.toBeInTheDocument();
   });
 
   it("a11y 自動検査に違反しない", async () => {

@@ -5,8 +5,8 @@ import { type RawSearchParams, singleValue } from "@/model/search-params";
 import { type AdminUserListLocation, FIRST_PAGE, USER_LIST_KEY, USER_SCOPE } from "./query";
 
 /**
- * URL を読む側。**組む側（[`query.ts`](query.ts)）と分けてある**（`docs/rules.md` #76）。
- * 組むのは選択欄やページ送りといった client の部品です。
+ * URL を読む側。**組む側（[`query.ts`](query.ts)）と分けてある**（`docs/rules.md`「URL と条件」の
+ * 「`searchParams` を読むスキーマは URL へ組む側と別の module へ置く」）。組むのは選択欄やページ送りといった client の部品です。
  */
 
 /** 範囲を読むスキーマ。宣言に無い名前は既定へ倒す。 */
@@ -31,8 +31,8 @@ function pageSchema(pageMax: number) {
  * **URL は利用者が直接編集できます。** 読めない範囲・読めないページ番号は既定へ倒します。契約が
  * 拒む値をそのまま送っても得られるのは `400` だけで、押した人にできることがありません。
  *
- * 判定はスキーマが持ちます（`docs/rules.md` #42）。手で条件を並べると、契約が宣言している制約の
- * どれを見ていないのかが読み取れません。
+ * 判定はスキーマが持ちます（`docs/rules.md`「URL と条件」の「`searchParams` は zod で検証する」）。
+ * 手で条件を並べると、契約が宣言している制約のどれを見ていないのかが読み取れません。
  *
  * @param pageMax - 契約が許すページ番号の上限
  */

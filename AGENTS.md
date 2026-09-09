@@ -60,7 +60,7 @@ This section governs what you **recommend**, never what you may change. Authorit
 untouched: `Instruction Priority` above, the ADRs under `docs/adr/`, and `AI Modification Scope` /
 `Protected Documentation` below still decide that.
 
-This repository's product is **the state a fork receives when it is created from this template** —
+This repository's product is **the state a repository receives when it is created from this template** —
 not the history that produced it. So when you weigh options and state a preference, weigh them for
 that snapshot: what reads as coherent to someone who has never seen this repository and will never
 read its git log.
@@ -73,6 +73,24 @@ so "it already shipped" carries little weight.
 
 Give the cost with the recommendation — files touched, what breaks for whom, what must be rebuilt —
 so a human can decline the scope while keeping the direction.
+
+**Two things carry authority here, and nothing else does**: a de-facto standard (an RFC, a
+specification, a platform's own definition) and the shape this repository's architecture derives.
+A personal preference is not one, and neither is a speculative accommodation of a future nobody has
+asked for. When a recommendation cannot be stated as "the standard says this" or "the dependency
+matrix leaves only this shape", it is a preference wearing a recommendation's clothes.
+
+**Do not bake a particular deployment's situation into what survives.** The concrete choices belong
+to whoever creates a repository from this template; this side supplies the seam. But that rule is
+subordinate to the one above, not parallel to it: a knob or an abstraction is justified only where
+the variation is genuinely situational **and** neither the standard nor the architecture has already
+settled it. Putting a knob where a standard already decided is not situation-independence — it is a
+departure from the standard, and it needs the declaration ADR
+[0010](docs/adr/0010-standards-and-non-lockin.md) requires, or it needs to go.
+
+The test is therefore never "more abstraction" or "less abstraction". It is **move toward the shape
+the standard or the architecture derives, and drop the situational label** — which is why the same
+principle pushes abstraction up in one place and collapses it in another.
 
 Recommending is not deciding. Where BACKLOG still leaves an area blank, `Pending Decisions` below
 still applies: propose, and leave the ADR call to the user.
@@ -109,10 +127,12 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0044](docs/adr/0044-seo-metadata-strategy.md) | SEO / metadata | metadata API strategy |
 | [0045](docs/adr/0045-fonts-and-images.md) | Fonts / images | `next/font` / `next/image` policy |
 | [0050](docs/adr/0050-styling-strategy.md) | Styling strategy | Tailwind v4 + design tokens / `cn()` helper / CSS Modules limited allowance |
-| [0051](docs/adr/0051-styling-system.md) | Styling system | design tokens / responsive / motion (Framer Motion) / print |
+| [0051](docs/adr/0051-styling-system.md) | Styling system | design tokens / responsive / motion (Framer Motion) / print / z-index bands |
 | [0052](docs/adr/0052-ui-component-policy.md) | UI component policy | shadcn/ui + @tabler/icons-react adopted / icon vendor closed into `src/components/icon.ts` |
 | [0053](docs/adr/0053-ui-component-interaction-seam.md) | UI interaction seam | UI component policy + interaction a11y seam |
 | [0054](docs/adr/0054-ui-catalog-storybook.md) | UI catalog | Storybook policy |
+| [0055](docs/adr/0055-design-system-export.md) | デザイン書き出し | 成果物は tool 非依存 / 配送だけが vendor を知る / 取り込みは一方向 |
+| [0056](docs/adr/0056-mock-app-exclusion.md) | mock app（除外） | 公開面として持たない（negative decision） |
 | [0060](docs/adr/0060-state-management.md) | State management | react-hook-form / Zustand adopted / server-state policy |
 | [0061](docs/adr/0061-form-mutation-ux.md) | Form submission UX | `<form action>` + `useActionState` + `useFormStatus` canonical mechanism |
 | [0062](docs/adr/0062-form-input-validation.md) | Form validation UX | client validation / generated-zod reuse boundary |
@@ -122,7 +142,7 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0072](docs/adr/0072-api-type-generation.md) | API type generation | Generated from OpenAPI/GraphQL / generated-artifact "do not edit" rules |
 | [0073](docs/adr/0073-pagination-fetch-boundary.md) | Pagination fetch | pagination / infinite-scroll data-fetch boundary |
 | [0074](docs/adr/0074-runtime-communication-seam.md) | Realtime comm seam | WebSocket / SSE seam |
-| [0075](docs/adr/0075-file-upload-seam.md) | File upload seam | presigned direct PUT default / multipart proxy exception |
+| [0075](docs/adr/0075-file-upload-seam.md) | File receive / deliver | Server Action is the entry point / delivery from a public origin / no presigned direct PUT |
 | [0076](docs/adr/0076-payment-ui-seam.md) | Payment UI seam | mount seam & PCI boundary |
 | [0077](docs/adr/0077-bff-abuse-protection-boundary.md) | BFF abuse protection | infra / edge seam boundary |
 | [0078](docs/adr/0078-dynamic-feature-flag-seam.md) | Feature-flag seam | dynamic feature flag / staged rollout (A-B) seam |
@@ -138,31 +158,83 @@ ADRs under `docs/adr/` are the authoritative source. This file only summarizes t
 | [0110](docs/adr/0110-security-operations.md) | Security ops | Dependabot + cooldown / gitleaks secret scan (fail-closed) / vulnerability scan is report-only / suppression-policy format |
 | [0111](docs/adr/0111-csp-security-headers.md) | CSP / security headers | runtime CSP & security headers |
 | [0112](docs/adr/0112-data-classification-cache-boundary.md) | データ分類 / キャッシュ境界 | PII・user-scoped・secret の置き場 / 分類は取得の口が持つ / 段ごとの関所 |
+| [0113](docs/adr/0113-development-access-surface.md) | 開発用の口 | 制御面は到達したい状態で決める / build 除外と実行時判定は別の保証 |
 | [0120](docs/adr/0120-locale-aware-formatting.md) | Locale formatting | date/number formatting + date-fns date arithmetic |
 | [0121](docs/adr/0121-i18n-strategy.md) | i18n (exclusion) | i18n not adopted (negative decision) |
 | [0130](docs/adr/0130-pwa-strategy.md) | PWA (exclusion) | PWA not adopted (negative decision) |
-| [0131](docs/adr/0131-cookie-consent.md) | Cookie consent (exclusion) | Consent management not adopted (negative decision) |
+| [0131](docs/adr/0131-cookie-consent.md) | Cookie consent | Lightweight consent mechanism + script gate bundled / full CMP (IAB TCF) not adopted |
 | [0140](docs/adr/0140-documentation-operations.md) | Documentation ops | Japanese canonical on suffix-less paths below v1.0.0 / EN canonical + `.ja.md` mirror from v1.0.0 |
 | [0141](docs/adr/0141-portal-operations.md) | Portal ops | `docs/portal/manifest.yaml` curation |
 | [0142](docs/adr/0142-license.md) | License | MIT / OSS contribution policy / `private` flag alignment |
+| [0143](docs/adr/0143-spec-driven-development.md) | 仕様書駆動 | 画面要件を仕様書として持つ / 生成 scaffold を持たない |
+| [0144](docs/adr/0144-decision-enforcement-pairing.md) | 決定と強制手段 | 散文へ逃がす前に機械強制を検討する / 寄せられない理由を書く |
+| [0145](docs/adr/0145-docs-viewer-package-boundary.md) | docs-viewer 境界 | 依存分離をパッケージ境界で担保する |
 | [0150](docs/adr/0150-git-workflow.md) | Git workflow | Branch strategy / commit convention / PR operations / release process |
 | [0151](docs/adr/0151-git-hooks.md) | Git hooks | pre-commit / pre-push via lefthook |
-| [0152](docs/adr/0152-agents-md-policy.md) | AGENTS.md policy | File placement / language / 13-section structure / Instruction Priority / `## [TODO]` convention |
+| [0152](docs/adr/0152-agents-md-policy.md) | AGENTS.md policy | File placement / language / 13-section structure / Instruction Priority / how undecided areas are tracked |
 | [0153](docs/adr/0153-ci-configuration.md) | CI configuration | GitHub Actions job partitioning / workflow-definition lint (actionlint / zizmor) / hooks mirror CI / required checks / caching |
 | [0154](docs/adr/0154-claude-skills-operations.md) | Claude skills (operations) | Operational skill placement / naming / frontmatter / commercial-action confirmation |
 | [0155](docs/adr/0155-claude-skills-development.md) | Claude skills (development) | Development skill placement / subagent pattern / `new-env` target structure |
 | [0156](docs/adr/0156-browser-observation-tooling.md) | Browser observation tooling | Three lanes (see / measure / dig) / CLI only, no MCP registration / no real-profile access / gates untouched |
+| [0157](docs/adr/0157-inspection-declaration-discipline.md) | 検査の宣言規律 | 成立しない検査を「違反なし」へ倒さない / 抑止は理由と撤去条件を持つ |
+| [0158](docs/adr/0158-code-search-tooling.md) | コード検索ツール | 採用範囲 / 導入経路 / allow・deny 境界 |
+| [0159](docs/adr/0159-script-structure.md) | スクリプト構造 | TypeScript / 1 ツール 1 ディレクトリ / 入口と判定の分離 |
+| [0160](docs/adr/0160-agent-environment-loop.md) | エージェント環境のループ | 観測 → 改善 → 再計測を 1 周とする / 呼出回数を単独の根拠にしない / 所見の正はトラッカー |
+| [0161](docs/adr/0161-development-window-as-feedback-unit.md) | フィードバックの単位 | 開発の窓を単位とする / セッション・コミット・PR を母数にしない / 打刻が第一で記録は補完 |
 
 > **ADR numbering is finalized (2026-07-14): topical decade-bands.** Numbers are grouped by subject into decade bands (e.g. `002x` architecture, `004x` routing/rendering, `005x` styling/UI, `007x` data/BFF, `008x` error/observability, `015x` process/dev-ops); the former `Toolchain-` / `Dev-` prefixed ADRs were folded into the numeric sequence (`0150`+). Gaps between bands are reserved for future insertion. Each ADR body remains authoritative.
 
 ## Pending Decisions
 
-The major design decisions are now settled as ADRs (`0001`–`0156` across topical bands; the A / B / C / D groups are all authored, including the negative "exclusion" decisions). The `## [TODO]` placeholder sections that this file used to carry — one per undecided area, each with its own "provisional behavior" — have been removed because the corresponding ADRs are now authoritative. The remaining blank slots and not-yet-written design seams are tracked in [`docs/adr/BACKLOG.md`](docs/adr/BACKLOG.md); the ADR bodies are the source of truth and this file only summarizes them.
+The major design decisions are now settled as ADRs (`0001`–`0159` across topical bands; the A / B / C / D groups are all authored, including the negative "exclusion" decisions). The `## [TODO]` placeholder sections that this file used to carry — one per undecided area, each with its own "provisional behavior" — have been removed because the corresponding ADRs are now authoritative. The remaining blank slots and not-yet-written design seams are tracked in [`docs/adr/BACKLOG.md`](docs/adr/BACKLOG.md); the ADR bodies are the source of truth and this file only summarizes them.
 
 When a change forces you into an area that BACKLOG still leaves blank (no accepted ADR yet):
 
 1. **Do not introduce new conventions, patterns, or libraries on your own**. Defer the ADR decision to the user
 2. If a provisional implementation is unavoidable, explicitly tell the user it is a "provisional implementation" before starting work
+
+## Where You May Stop
+
+**The places you may hand a decision back are a list, not a judgment.** This section is that list, and
+it is closed: outside it, decide, act, and record what you decided in the pull request body.
+
+The reason for closing it is that "should I ask?" is answered by how the work is going, not by what
+the decision is. A run that is going badly asks about everything and stalls; a run that is going well
+asks about nothing and quietly settles questions that were never the agent's to settle. Neither
+failure is visible from inside the run. A list is checkable from outside it.
+
+### The stopping points
+
+Each is owned by the document named; this section indexes them and restates none.
+
+| Stop | Owner |
+| --- | --- |
+| Pushing to an existing PR branch after amending | *Git Rules* above — use its exact wording |
+| A plain cross-repository link instead of `redirect.github.com` | *Cross-Repository Links* above. **Per case, every time**, even under a standing delegation |
+| An area `BACKLOG.md` still leaves blank — a new convention, pattern, or library | *Pending Decisions* above |
+| An outward or commercial action a skill is about to take | ADR [0154](docs/adr/0154-claude-skills-operations.md) |
+| A change that removes an element the user can see | `docs/rules.md`, *作業とエージェント* |
+| Adding a dependency | ADR [0004](docs/adr/0004-library-management.md) — walk its 選定基準 and paste its 採用判断のテンプレ into the PR. Silently routing around the dependency is the same decision, taken without the record |
+
+### The trip wires
+
+These stop the work **whatever your judgment says**, because each is decidable without judgment. They
+are not extra approvals — they are the conditions under which continuing is itself the error.
+
+1. **The next step needs an operation under `permissions.deny`.** Re-routing it through another
+   interpreter is not a solution; neither is editing the deny list.
+2. **The next step rewrites history or touches a protected branch** — force push, rebase, amend-then-push.
+3. **The next step edits a generated artifact** (`**/gen/**` and anything carrying a generated banner).
+4. **Two sources that both claim authority disagree.** Noticing is the job; resolving is not
+   (`docs/rules.md`, *作業とエージェント*).
+5. **The change would make a document assert something it cannot check** — a rule with no owner, a
+   claim with no evaluator (ADR [0157](docs/adr/0157-inspection-declaration-discipline.md)).
+
+### Everywhere else
+
+Decide, and **write the decision into the PR body** — what you chose, and what you chose against. A
+decision recorded there can be reversed by a reader; a decision taken silently can only be discovered
+by someone re-deriving it. That record is the price of not asking, and it is cheaper than the ask.
 
 ## AI Modification Scope
 
@@ -285,6 +357,10 @@ make test-cached           # Default. Same tests through Vitest's cache — the 
 make test-full             # Full run with coverage against the 100% threshold (ADR 0090). The gate
                            #   itself — leave it to the hook and CI rather than running it by hand
 make load-status           # Show the current gate band and why (ADR 0151)
+make base-branch           # Print the latest release line, read from origin (ADR 0150).
+make base-merge            # Merge that base into the current branch; prints the paths left unresolved
+                           #   Branch from this, not from the default branch — a clone's
+                           #   origin/HEAD is fixed at clone time and never refetched
 make hotfix-patch          # Create a hotfix/v<patch> branch from production
 make tag-patch             # Tag production HEAD and create a GitHub Release
 make tag-minor             # Same (minor)
@@ -295,13 +371,26 @@ For release branches, follow 0150 (`git switch -c release/v<X.Y.Z> origin/produc
 
 See [`.makefiles/README.md`](.makefiles/README.md) for details.
 
+<!-- boilerplate-only:begin -->
 ### Do not pre-run the gates
 
-**The hooks and CI run these for you, and CI is the authority** ([0151](docs/adr/0151-git-hooks.md)).
-`pre-commit` already runs the full lint profile and the cached tests; `pre-push` adds the type check,
-the full test run, and the secret scan. Running the same commands by hand before committing does not
-make the result more true — it only spends the time twice, and on a busy host the duplicate run is
-itself a source of failures that have nothing to do with the change.
+**This section is this repository's own operating rule, and it is removed from a repository created
+from this template.** What a created repository keeps is *Code Style* below — run `pnpm fix` and
+`pnpm lint:ci` before committing. **While this section is present it governs**, and *Code Style*'s
+line is what the created repository is left with; the two are written for different situations
+rather than in disagreement.
+
+The situation that produces this rule is this repository's alone. Several worktrees are open at once
+against the same host, every one of them carrying the full gate set, and the gates multiply rather
+than queue. A created repository has one working tree and a gate run that costs what it says it
+costs, so pre-running is cheap there and catches things before the hook does.
+
+**Here, the hooks and CI run these for you, and CI is the authority**
+([0151](docs/adr/0151-git-hooks.md)). `pre-commit` already runs the full lint profile and the cached
+tests; `pre-push` adds the type check, the full test run, and the secret scan. Running the same
+commands by hand before committing does not make the result more true — it only spends the time
+twice, and on a busy host the duplicate run is itself a source of failures that have nothing to do
+with the change.
 
 So: **commit, push, and read the verdict from the hook or CI.** Re-running a single file you just
 edited is fine; sweeping the whole suite, or the whole lint, is not.
@@ -310,6 +399,7 @@ edited is fine; sweeping the whole suite, or the whole lint, is not.
 and the heavy gates are delegated to CI automatically — that decision is measured, not guessed, so
 do not pre-empt it with `--no-verify`. Bypassing is governed by 0151's bypass policy, not by how
 slow the gate feels.
+<!-- boilerplate-only:end -->
 
 ## Git Rules
 
@@ -323,6 +413,9 @@ slow the gate feels.
 4. History rewrites (`git commit --amend` + force push / `git rebase`) are forbidden. Stack fixes as **new commits**.
 
 ### Branch Naming
+
+**Branch from `$(make -s base-branch)`**, never from `origin/HEAD` or the default branch —
+both drift silently behind the newest release line (ADR [0150](docs/adr/0150-git-workflow.md)).
 
 ```text
 feature/<issue-no>-<kebab-description>     e.g., feature/1234-add-login-form
@@ -416,7 +509,7 @@ Technical terms (HTTP status code names / API names / command names, etc.) may s
 
 **Exception — comments in GitHub Actions workflow definitions (`.github/workflows/**`) are written in English.**
 Workflows are the part of a public boilerplate that is most often read from outside it: they get pasted
-into upstream bug reports, they are the first thing a fork adapts, and they carry the security-hardening
+into upstream bug reports, they are the first thing a repository created from this template adapts, and they carry the security-hardening
 rationale (SHA pinning / minimal permissions / fail-closed gates — ADR [0153](docs/adr/0153-ci-configuration.md))
 that an outside reader needs in order to judge it. They also sit directly against English-only tool output
 (`actionlint` / `shellcheck`). Everything else under `.github/` — issue and PR templates, `settings/` —
@@ -494,6 +587,22 @@ So `/impl-review` audits the change and nothing else — it owns no test lens an
 it hands nothing off. `/test-review` and `/comment-sweep` are invoked in their own right, whether or
 not `/impl-review` runs.
 
+### The response to a review is itself unreviewed
+
+**A review that has been acted on is not a review of the acting.** The commits that answer a set of
+findings are new, unaudited work — written under time pressure, in code the reviewer just called out,
+by someone who now believes the area is understood. That is where defects concentrate, and the one
+review pass that would have caught them is the pass everybody considers already spent.
+
+So a fix-up round is a **new scope, declared as such**: `<the review's last commit>...HEAD`, not the
+original diff and not the whole branch. Say which findings it answers, and re-run the skills whose
+subject the response actually touched — a fix that only reworded a comment does not re-open
+`/impl-review`, and a fix that changed control flow does.
+
+The estimate rule above still governs: price each pass and ask. What changes here is only the default
+assumption, which is otherwise wrong in a way nobody notices — **"the review already happened" is a
+statement about the code that was reviewed, never about the code that replaced it.**
+
 <!-- boilerplate-only:begin -->
 ## Purity Sweep
 
@@ -506,7 +615,7 @@ that gets bypassed.
 
 The pass asks three questions of the **whole file**, not of your diff:
 
-1. **Purity** — can a fork resolve every reference here, and is every statement still true once this
+1. **Purity** — can a repository created from this template resolve every reference here, and is every statement still true once this
    repository is a template rather than the repository that produced it?
 2. **Distillation** — what design judgment does this file embody?
 3. **Routing** — which document owns that judgment: an ADR, a layer `README.md`, a feature

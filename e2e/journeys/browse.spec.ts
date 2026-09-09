@@ -13,8 +13,7 @@ test("トップから一覧へ入り、1 件の詳細まで辿り着く", async 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("ようこそ");
 
   await page.getByRole("navigation").getByRole("link", { name: "商品", exact: true }).click();
-  // 読み進めた件数は URL へ書き戻される（[0073](../../docs/adr/0073-pagination-fetch-boundary.md)）
-  // ため、着いた直後の URL に条件が付く。
+  // 読み進めた件数は URL へ書き戻されるため、着いた直後の URL に条件が付く。
   await expect(page).toHaveURL(/\/products(\?|$)/);
 
   const link = page.getByRole("list", { name: "商品の一覧" }).getByRole("link").first();
@@ -45,13 +44,15 @@ test("脇に絞り込みを常設できる幅では、選んだ時点で一覧�
 
   await sidebar.getByRole("checkbox").first().check();
 
-  // 確定の操作を持たない。選ぶことがそのまま確定になる（`docs/rules.md` #71）。
+  // 確定の操作を持たない。選ぶことがそのまま確定になる
+  // （`docs/rules.md`「レイアウトと帯」の「脇に常設する領域は `lg` 以上でだけ出す」）。
   await expect(page).toHaveURL(/categoryCodes=/);
   await expect(sidebar.getByRole("checkbox").first()).toBeChecked();
 });
 
 test("脇に領域を持てない幅では、overlay で組んだ条件が確定で一覧へ載る", async ({ page }) => {
-  // 脇に絞り込みを常設できない幅でだけ overlay が出る（`docs/rules.md` #71）。
+  // 脇に絞り込みを常設できない幅でだけ overlay が出る
+  // （`docs/rules.md`「レイアウトと帯」の「脇に常設する領域は `lg` 以上でだけ出す」）。
   await page.setViewportSize({ width: 720, height: 900 });
   await page.goto("/products");
 
@@ -68,8 +69,9 @@ test("脇に領域を持てない幅では、overlay で組んだ条件が確定
   await expect(page).toHaveURL(/categoryCodes=/);
   await expect(sheet).toBeHidden();
 
-  // overlay が積んだ 1 件は結果で差し替わる（`docs/rules.md` #89）。積み増すと、この戻る操作が
-  // 1 度空振りしてから条件が外れる。
+  // overlay が積んだ 1 件は結果で差し替わる（`docs/rules.md`「UI 部品と操作」の「overlay の中から
+  // 遷移するときは閉じる操作を同時に撃たない」）。積み増すと、この戻る操作が 1 度空振りしてから
+  // 条件が外れる。
   await page.goBack();
 
   await expect(page).not.toHaveURL(/categoryCodes=/);

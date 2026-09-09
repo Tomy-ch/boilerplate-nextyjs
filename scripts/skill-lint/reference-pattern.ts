@@ -28,8 +28,9 @@ export function isTooComplex(text: string): boolean {
 // 当たれば良い）と意味が異なるため、判定側で all / any を使い分ける。
 export function expandBraces(text: string): string[] {
   const m = /\{([^{}]*)\}/.exec(text);
-  if (!m) return [text];
-  return m[1]
+  const alternatives = m?.[1];
+  if (m === null || alternatives === undefined) return [text];
+  return alternatives
     .split(",")
     .flatMap((alt) =>
       expandBraces(text.slice(0, m.index) + alt + text.slice(m.index + m[0].length)),
@@ -48,7 +49,7 @@ export function placeholderToRegExp(
   const placeholderChars = segmentSeparator ? "[^/]+" : ".+";
   let out = "";
   for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+    const ch = text.charAt(i);
     if (ch === "<") {
       const close = text.indexOf(">", i);
       if (close === -1) {

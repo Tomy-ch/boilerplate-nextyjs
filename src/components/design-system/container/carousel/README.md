@@ -31,11 +31,17 @@ SSR first の選定では `○` に当たります。送りは CSS Scroll Snap �
 
 ### 送り操作だけを client island にする
 
-`CarouselPrevious` / `CarouselNext` / `CarouselLink` の 3 つだけが client island です。markup は `href` を持つ link のままなので hydration 前でも押せば送れますが、fragment 遷移は carousel を画面内へ引き寄せるためにページごとスクロールさせ、履歴も 1 件積みます。hydration 後は既定動作を止めて `CarouselContent` だけを横へ送るため、ページも履歴も URL も動きません。
+client island は `CarouselPrevious` / `CarouselNext` / `CarouselLink` と、`CarouselLink` を束ねて現在地に追従させる `CarouselThumbnails` の 4 つです。markup は `href` を持つ link のままなので hydration 前でも押せば送れますが、fragment 遷移は carousel を画面内へ引き寄せるためにページごとスクロールさせ、履歴も 1 件積みます。hydration 後は既定動作を止めて `CarouselContent` だけを横へ送るため、ページも履歴も URL も動きません。
 
 修飾キーを伴う押下と、行き先の slide が存在しない場合は browser の既定動作に任せます。
 
-touch のスワイプと trackpad の横スクロールは、browser のスクロールとして最初から効きます。pointer だけで送る手段が要る場合は、slide の左右端へ `CarouselPrevious` / `CarouselNext` を重ねます。この二つは置いた slide の中でだけ押せるため、現在位置を追わずに行き先が決まります。行き先のない端では要素ごと置きません。押しミスを防ぐため、当たり判定は見た目の円より一回り広く、円の半径ぶんだけ外周へ透明な領域を足しています。この領域は slide の内容に重なるので、slide の中に link や button を置く場合は円の周囲を空けてください。重なった操作は押せなくなります。内容を隠しすぎないよう面と枠は半透明で置き、hover と focus で不透明にします。薄めるのは面と枠だけで記号は透かしません。背後に来る画像は選べないため、記号まで薄めると絵柄しだいで contrast が落ちるためです。touch には hover がなく半透明のまま操作するので、面はこれ以上薄くしません。slide ごとに繰り返されるので、枚数が多く `CarouselNav` で keyboard からの送り先を用意している場合は `tabIndex={-1}` を渡して tab 順から外します。
+touch のスワイプと trackpad の横スクロールは、browser のスクロールとして最初から効きます。pointer だけで送る手段が要る場合は、slide の左右端へ `CarouselPrevious` / `CarouselNext` を重ねます。この二つは置いた slide の中でだけ押せるため、現在位置を追わずに行き先が決まります。行き先のない端では要素ごと置きません。
+
+押しミスを防ぐため、当たり判定は見た目の円より一回り広く、円の半径ぶんだけ外周へ透明な領域を足しています。この領域は slide の内容に重なるので、slide の中に link や button を置く場合は円の周囲を空けてください。重なった操作は押せなくなります。
+
+内容を隠しすぎないよう面と枠は半透明で置き、hover と focus で不透明にします。薄めるのは面と枠だけで記号は透かしません。背後に来る画像は選べないため、記号まで薄めると絵柄しだいで contrast が落ちるためです。touch には hover がなく半透明のまま操作するので、面はこれ以上薄くしません。
+
+slide ごとに繰り返されるので、枚数が多く `CarouselNav` で keyboard からの送り先を用意している場合は `tabIndex={-1}` を渡して tab 順から外します。
 
 **自動送り・JS による drag・無限ループは持ちません。** 再生 timer や pointer の追跡を要し、送りの機構を client へ出すという切り分けを超えます。catalog が client island の条件として挙げる四つのうち、現時点で必要なのは現在位置の同期表示だけです。
 

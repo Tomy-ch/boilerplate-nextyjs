@@ -49,7 +49,7 @@ const FIX_CART_LABEL = "カートを修正する";
  * 閉じるだけの操作が無いと、確かめから元の画面へ戻る手段がありません。
  *
  * カートへ移る導線は置き換えで移ります。被せている間の履歴 1 件は現在地の複製で、戻り先として
- * 残すと戻る操作が 1 回空回りします（[0053](../../../../../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 残すと戻る操作が 1 回空回りします。
  */
 export function PriceChangeConfirm({ orderable, changedNames }: PriceChangeConfirmProps) {
   const { formAction, idempotencyKey } = usePlaceOrderState();

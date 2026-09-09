@@ -5,7 +5,7 @@
 ## レンダリング
 
 **build 時に固める。** 取得を持たず、内容が変わるのはコードを書き換えたときだけである
-（[0040](../../../../adr/0040-routing-rendering-strategy.md)）。器も何も読まない
+（[0041](../../../../adr/0041-cache-components-decision.md)）。器も何も読まない
 （[`../layout.function.md`](../layout.function.md)）。
 
 ## 認可

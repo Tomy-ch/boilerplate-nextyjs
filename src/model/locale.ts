@@ -3,8 +3,7 @@
  *
  * @remarks
  * フォーマッタは locale を引数で受け取り、省略時にこの値を使います。既定値をこの 1 か所に
- * 集めるのは、i18n を採用する際の差し替え点をここだけに保つためです
- * （[0120](../../docs/adr/0120-locale-aware-formatting.md)）。
+ * 集めるのは、i18n を採用する際の差し替え点をここだけに保つためです。
  */
 export const DEFAULT_LOCALE = "ja-JP";
 

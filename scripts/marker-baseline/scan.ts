@@ -7,6 +7,7 @@ import {
   type Baseline,
   countMarkerLines,
   EXCLUDED_DIRECTORIES,
+  findRowsOutsideTable,
   isBaselineTarget,
 } from "./rules.js";
 
@@ -70,4 +71,28 @@ export function scanTree(root: string): Baseline {
 /** コミット済みのベースライン。 */
 export function readBaseline(): Baseline {
   return JSON.parse(fs.readFileSync(BASELINE_PATH, "utf8")) as Baseline;
+}
+
+/**
+ * ブロックマーカーに表から切り離された行。キーは相対パス、値はその行番号。
+ *
+ * @remarks
+ * Markdown だけを見ます。他の言語では `|` 始まりの行が表を意味しないので、当てると論理和や
+ * パイプ演算子を表の行として数えます。
+ *
+ * 行数のベースラインと違い、こちらは**あってはならない状態**なので基準値を持ちません。0 件が
+ * 唯一の合格で、数えて固定する対象ではない。
+ */
+export function scanRowsOutsideTable(root: string): Readonly<Record<string, number[]>> {
+  const found: Array<[string, number[]]> = [];
+
+  for (const relative of walk(root, root, []).sort((a, b) => (a < b ? -1 : 1))) {
+    if (!relative.endsWith(".md")) continue;
+
+    const rows = findRowsOutsideTable(fs.readFileSync(path.join(root, relative), "utf8"));
+
+    if (rows.length > 0) found.push([relative, rows]);
+  }
+
+  return Object.fromEntries(found);
 }

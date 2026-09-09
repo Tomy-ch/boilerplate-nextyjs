@@ -60,7 +60,7 @@ describe("toSarif", () => {
   it("所見を、ファイルと行に結び付いた結果へ直す", () => {
     const sarif = toSarif({ issues: [ISSUE] }, SERVER);
 
-    expect(sarif.runs[0].results).toEqual([
+    expect(sarif.runs[0]?.results).toEqual([
       {
         ruleId: "typescript:S1234",
         level: "error",
@@ -81,7 +81,7 @@ describe("toSarif", () => {
     const other = { ...ISSUE, rule: "typescript:S0001" };
     const sarif = toSarif({ issues: [ISSUE, ISSUE, other] }, SERVER);
 
-    expect(sarif.runs[0].tool.driver.rules).toEqual([
+    expect(sarif.runs[0]?.tool.driver.rules).toEqual([
       {
         id: "typescript:S0001",
         helpUri: "https://sonarcloud.io/coding_rules?open=typescript:S0001",
@@ -97,7 +97,9 @@ describe("toSarif", () => {
     const issue = { ...ISSUE, line: undefined, textRange: { startLine: 7 } };
     const sarif = toSarif({ issues: [issue] }, SERVER);
 
-    expect(sarif.runs[0].results[0].locations[0].physicalLocation.region).toEqual({ startLine: 7 });
+    expect(sarif.runs[0]?.results[0]?.locations[0]?.physicalLocation.region).toEqual({
+      startLine: 7,
+    });
   });
 
   it("取り込む側が読む器の綴りを添える", () => {
@@ -105,26 +107,26 @@ describe("toSarif", () => {
 
     expect(sarif.$schema).toBe("https://json.schemastore.org/sarif-2.1.0.json");
     expect(sarif.version).toBe("2.1.0");
-    expect(sarif.runs[0].tool.driver.name).toBe("SonarQube Cloud");
-    expect(sarif.runs[0].tool.driver.informationUri).toBe(SERVER);
+    expect(sarif.runs[0]?.tool.driver.name).toBe("SonarQube Cloud");
+    expect(sarif.runs[0]?.tool.driver.informationUri).toBe(SERVER);
   });
 
   it("所見が 1 件も無ければ、空の走査として書き出す", () => {
     const sarif = toSarif({ issues: [] }, SERVER);
 
-    expect(sarif.runs[0].results).toEqual([]);
-    expect(sarif.runs[0].tool.driver.rules).toEqual([]);
+    expect(sarif.runs[0]?.results).toEqual([]);
+    expect(sarif.runs[0]?.tool.driver.rules).toEqual([]);
   });
 
   // ----- 異常系 -----
   it("応答として読めない形も、空の走査として書き出す", () => {
-    expect(toSarif("応答ではない", SERVER).runs[0].results).toEqual([]);
+    expect(toSarif("応答ではない", SERVER).runs[0]?.results).toEqual([]);
   });
 
   it("項目の欠けた所見も、位置と規則を埋めて落とさない", () => {
     const sarif = toSarif({ issues: [{}] }, SERVER);
 
-    expect(sarif.runs[0].results).toEqual([
+    expect(sarif.runs[0]?.results).toEqual([
       {
         ruleId: "unknown",
         level: "warning",

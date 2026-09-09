@@ -44,7 +44,7 @@ export const DISPATCH_GROUPS: readonly PurchaseDispatchGroup[] = [
 ];
 
 /** 配達の確認を待っている注文。発送済みだけが並ぶ。 */
-export const SHIPPED_PURCHASES: readonly PurchaseHistoryEntry[] = [
+export const SHIPPED_PURCHASES = [
   {
     code: "0195f0c2-0000-7000-9000-000000000011",
     totalAmount: 8_580,
@@ -59,4 +59,4 @@ export const SHIPPED_PURCHASES: readonly PurchaseHistoryEntry[] = [
     statusName: "発送済み",
     orderedAt: new Date("2026-08-12T15:48:00+09:00"),
   },
-];
+] satisfies readonly [PurchaseHistoryEntry, ...PurchaseHistoryEntry[]];

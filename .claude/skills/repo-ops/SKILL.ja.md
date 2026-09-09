@@ -6,11 +6,41 @@
 **ワークフローではなくルックアップ表**: 症状を見つけて対処を打つ。破壊的またはルートファイルに触れるステップは
 `CLAUDE.md` に従い先にユーザへ伝える。
 
-> **スコープ注記。** この runbook は意図的に薄い。元にした go-boilerplate の `repo-ops` は Docker ツールランナー・
-> `sqlc` / `schema.gen.sql`・root 所有の生成ディレクトリ・稼働 DB が中心だったが、**それらはここには存在しない**
-> ([0011](../../../docs/adr/0011-no-docker.md)、DB なし、表示層のみ)。以下には実在する落とし穴だけを載せる。
-> 新たに踏んだら項目を足す
-> こと ── Go 固有のものを戻さない。
+> **スコープ注記。** この runbook は意図的に薄く、実在する落とし穴だけを載せる。本リポジトリは Docker
+> ツールランナーも DB も持たない表示層なので([0011](../../../docs/adr/0011-no-docker.md))、その種の項目は
+> ここに属さない。新たに踏んだら項目を足すこと。
+
+## Contract
+
+| | |
+| --- | --- |
+| **Owns** | 既知の症状 → 対処。索引に載っている落とし穴の、実際に効いた直し方 |
+| **Never** | 手順の発明 / **「手順が存在しない」という結論** / 索引に無い症状への推測 |
+| **Starts when** | 何かが予期しない振る舞いをし、それが下の索引に載っているとき |
+| **Stops when** | 症状が索引に無いとき —— `how-to`（目標）か `repo-truth`（現状）へ振って止まる |
+
+## 症状の索引
+
+| 症状 | 節 |
+| --- | --- |
+| `make install-tools` が `mise not found` で落ちる | 1 |
+| `pnpm` の script が落ちる / `pnpm-workspace.yaml` が勝手に変わる | 2 |
+| `DRY_RUN=1` を付けたのに `make setup-repo` が何も変わらない | 3 |
+| `pnpm install --frozen-lockfile` が落ちる | 4 |
+| `pnpm lint` は通るのに `pnpm lint:ci` が落ちる | 5 |
+| scratch の出力を `git status` に出したくない / どこへ置くか | 6 |
+| commit / push が hook に弾かれる | 7 |
+| mise 自身の版を上げたい / 上げたら CI が落ちた | 8 |
+
+**この索引が、このスキルに答えられることの全部である。**ここに無い症状は「たぶん大丈夫」でもなければ
+「手順が存在しない」でもない —— **この runbook は後者を結論できない。**結論できるようにすると、
+**その沈黙が答えと区別できなくなる。**代わりに振る。
+
+| 問いが実は何だったか | 扉 |
+| --- | --- |
+| 「これをやりたい。正規の手順は？」 | `how-to` —— 尽くしたレジストリの上で UNDEFINED を**結論できる** |
+| 「そもそもどうなっている / この規約の正本は？」 | `repo-truth` |
+| 「まだ誰も決めていない選択」 | `research` |
 
 ## 1. `make install-tools` が `mise not found` で落ちる
 
@@ -38,7 +68,7 @@ make install-tools     # mise.toml に従い Node.js + pnpm を入れ、両バ�
   `ERR_PNPM_IGNORED_BUILDS`、あるいはエージェントや CI の非対話シェルでは、別メジャーが書いた
   `node_modules` を破棄しようとして `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`。スタックの末尾が
   `runDepsStatusCheck` であることが目印で、落ちたのは前段のゲートであって `lint:ci` / `typecheck` /
-  `md-lint` ではない。
+  `lint:md` ではない。
 - **追跡対象のルート設定を書き換える。** pnpm 11 は `pnpm-workspace.yaml` の先頭にプレースホルダを追記する:
 
   ```yaml
@@ -176,7 +206,7 @@ worktree にも継承されるが、**`node_modules` は継承されない** ─
 
 | 段階 | 入口 | 検査内容 |
 | --- | --- | --- |
-| pre-commit | `pnpm lint:ci`、`*.md` が staged なら `pnpm md-lint`、workflow が staged なら `make actionlint` | biome 完全版 + ESLint 層境界 + `architecture.ts` 突合(§5) / markdownlint + mermaid 構文 + `.claude/**` の意味検査(`skill-lint`) / workflow 構文 + `run:` のシェル |
+| pre-commit | `pnpm lint:ci`、`*.md` が staged なら `pnpm lint:md`、workflow が staged なら `make actionlint` | biome 完全版 + ESLint 層境界 + `architecture.ts` 突合(§5) / markdownlint + mermaid 構文 + `.claude/**` の意味検査(`skill-lint`) / workflow 構文 + `run:` のシェル |
 | commit-msg | `make commitlint` | subject を ADR 0150 に照らす |
 | pre-push | `pnpm typecheck`、`make secret-scan` | `tsc --noEmit` / push 範囲の秘密(**fail-closed**) |
 
@@ -191,7 +221,7 @@ worktree にも継承されるが、**`node_modules` は継承されない** ─
 make secret-scan
 ```
 
-`.lefthook.yaml` の全コマンドは素で書いてある ── `mise exec --` は他と同様ここでも禁止 (ADR 0003 / 0151)。
+`.lefthook.yaml` の全コマンドは素で書いてある ── `mise exec --` は他と同様ここでも禁止 (§2; ADR 0003 / 0151)。
 `mise ls` にツールが入っているのに `❌ <tool> が PATH にありません` で落ちる場合、それは hook の不備ではなく
 環境の報告で、`git` を起動したシェルに activate 済みの `PATH` が無い。元から直す ── `make install-tools` の後、
 そのシェルで mise を activate する。プロファイルを読まない起動元 (GUI の git クライアント / エージェントの
@@ -268,5 +298,4 @@ make actions-mise-pin-lint
 - ✅ ルートファイル編集(§5 `biome.json`、§4 `package.json`)は事前にユーザ確認 ── 既定の
   AI 変更スコープ外。§2 の `git restore pnpm-workspace.yaml` は例外 ── 頼んでいない機械的な変更を
   作るのではなく捨てる操作だから。
-- ❌ go-boilerplate の Docker / sqlc / DB 項目をここに移植しない ──
-  適用外([0011](../../../docs/adr/0011-no-docker.md))。
+- ❌ Docker / DB の項目をここに足さない(スコープ注記)。

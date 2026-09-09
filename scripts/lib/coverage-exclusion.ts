@@ -2,9 +2,9 @@
  * カバレッジ除外の、所有側への記録の解決。
  *
  * @remarks
- * 除外の正は `untested-modules.ts` の宣言 1 箇所で、README が持つのは対象の並びだけである
- * ([0090](../../docs/adr/0090-testing-strategy.md))。ここが持つのはその解決規則だけで、
- * ツリーの走査は `scripts/coverage-exclusion.gate.test.ts` が担う。
+ * 除外の正は `untested-modules.ts` の宣言 1 箇所で、README が持つのは対象の並びだけである。
+ * ここが持つのはその解決規則だけで、ツリーの走査は
+ * `scripts/coverage-exclusion.gate.test.ts` が担う。
  */
 
 import { parseFrontmatter } from "./frontmatter";
@@ -26,7 +26,8 @@ export type ReadmeReader = (directory: string) => string | null;
  * @param pattern - リポジトリルート相対のパターン(区切りは `/`)
  */
 function literalDirectory(pattern: string): string {
-  const literal = pattern.split("*")[0];
+  const wildcardAt = pattern.indexOf("*");
+  const literal = wildcardAt < 0 ? pattern : pattern.slice(0, wildcardAt);
   const segments = literal.split("/");
 
   // 末尾が区切りで終わっていれば、その手前までが確定したディレクトリ。そうでなければ最後の
@@ -60,13 +61,18 @@ export function ownerDirectory(pattern: string, readReadme: ReadmeReader): strin
   return null;
 }
 
+/** ディレクトリ(リポジトリルート相対)の README のパス。 */
+function readmePath(directory: string): string {
+  return directory === "" ? "README.md" : `${directory}/README.md`;
+}
+
 /**
  * README の frontmatter が記録している除外を読む。
  *
  * @returns 記録が無ければ null。記録があっても並びとして読めなければ空の並び
  */
-function parseRecorded(source: string): readonly string[] | null {
-  const frontmatter = parseFrontmatter(source);
+function parseRecorded(source: string, origin: string): readonly string[] | null {
+  const frontmatter = parseFrontmatter(source, origin);
 
   if (frontmatter === null || !(DECLARATION_KEY in frontmatter)) {
     return null;
@@ -121,11 +127,11 @@ export function findExclusionDrift(
   const directories = new Set(owned.keys());
 
   // 記録だけが残った README も拾う。宣言の側から歩くと、除外が 1 つ残らず撤去されたディレクトリ
-  // には二度と到達できず、実態より多くの穴を告げる記録がそこに残り続ける。
+  // には到達できない。
   for (const directory of readmeDirectories) {
     const source = readReadme(directory);
 
-    if (source !== null && parseRecorded(source) !== null) {
+    if (source !== null && parseRecorded(source, readmePath(directory)) !== null) {
       directories.add(directory);
     }
   }
@@ -135,7 +141,9 @@ export function findExclusionDrift(
   for (const directory of [...directories].sort()) {
     const declared = owned.get(directory) ?? new Set<string>();
     const source = directory === UNOWNED ? null : readReadme(directory);
-    const recorded = new Set(source === null ? [] : (parseRecorded(source) ?? []));
+    const recorded = new Set(
+      source === null ? [] : (parseRecorded(source, readmePath(directory)) ?? []),
+    );
     const missing = [...declared].filter((pattern) => !recorded.has(pattern)).sort();
     const extra = [...recorded].filter((pattern) => !declared.has(pattern)).sort();
 

@@ -17,16 +17,15 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
- * 共有されたときに出る画像（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §1 /
- * [0045](../../docs/adr/0045-fonts-and-images.md) §4）。
+ * 共有されたときに出る画像。
  *
  * @remarks
  * root に置くので、自分の画像を持たない全 route がこれを名乗ります。画面ごとの画像は、その
  * segment に `opengraph-image.tsx` を置いて上書きします。
  *
  * **描くのはサイトの名だけです。** 説明文は和文で、既定の書体では描けません（`SITE_NAME` が
- * ラテン限定である理由と同じ。`site.ts`）。書体を持ち込む判断は fork 先が絵を決めるときに一緒に
- * 下します。
+ * ラテン限定である理由と同じ。`site.ts`）。書体を持ち込む判断はテンプレートから作った側が絵を
+ * 決めるときに一緒に下します。
  */
 export default function OpenGraphImage() {
   return new ImageResponse(

@@ -27,7 +27,7 @@ export type InvalidQueryFeedbackProps = {
  * 戻り先）とその理由は `README.md`「責務境界」。
  *
  * **直せる導線を必ず添えます。** 条件は URL に入っており、画面の操作だけでは戻せない状態になり得る
- * ためです（[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * ためです。
  *
  * @see Storybook `Feedback/InvalidQueryFeedback`
  */

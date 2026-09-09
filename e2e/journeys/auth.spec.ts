@@ -1,7 +1,7 @@
 import { expect, test } from "../lib/test";
 
 /**
- * 認証の前捌き（[0043](../../docs/adr/0043-middleware-policy.md) / [0079](../../docs/adr/0079-auth-frontend-seam.md)）。
+ * 認証の前捌き。
  *
  * @remarks
  * 見るのは**保護されている経路の扱い**であって、その先に画面が在るかではありません。判定は

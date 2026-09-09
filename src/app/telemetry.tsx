@@ -12,8 +12,7 @@ import { toRoutePattern } from "@/adapters/client/telemetry/route-pattern";
  *
  * @remarks
  * 描画が投げ続ける壊れ方では、同じ例外が毎フレーム上がります。最初の数件で発生源は分かるので、
- * それ以降は送りません。上限に意味があるのは送る側だけで、受け口の防御は別に持ちます
- * （[0077](../../docs/adr/0077-bff-abuse-protection-boundary.md)）。
+ * それ以降は送りません。上限に意味があるのは送る側だけで、受け口の防御は別に持ちます。
  */
 const MAX_ERROR_REPORTS = 8;
 
@@ -30,7 +29,7 @@ const MAX_ERROR_REPORTS = 8;
  * 報告時点の route ではなく**読み込みが始まった route** を載せます。例外は起きた時点の route を
  * 載せます。
  *
- * 送信そのものは `adapters/client` が持ちます（[0082](../../docs/adr/0082-client-observability.md)）。
+ * 送信そのものは `adapters/client` が持ちます。
  *
  * @param traceparent - この画面を組んだ要求の trace。器がサーバ側で取り出して渡す。例外の記録を
  *   その要求へ紐づけるために送り返す。静的生成された画面では渡らない

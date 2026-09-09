@@ -60,7 +60,7 @@ SSR first の選定では `◎` に当たります。hydration を必要とし�
 
 focus の可視化は outline で行います。`asChild` で button や link へ合成した吹き出しは、`focus-visible` のとき前景色の outline を表示します。
 
-vendor は Radix の `Slot`（`asChild` の合成）と `class-variance-authority` ですが、公開 API に vendor 名は含めません。
+vendor は Radix の `Slot`（`asChild` の合成）と `class-variance-authority` です。
 
 ## Storybook とテスト
 

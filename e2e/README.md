@@ -7,8 +7,8 @@ coverage-exclusions:
 
 # e2e
 
-**画面を通した検証**。組み上げたアプリを実際のブラウザで動かし、部品単体では見えないものだけを
-見る（[0090](../docs/adr/0090-testing-strategy.md) / [0091](../docs/adr/0091-test-verification-methods.md)）。
+**画面を通した検証**。組み上げたアプリを実際のブラウザで動かし、部品単体では
+見えないものだけを見る。
 
 story 単位の検査（[`vrt/`](../vrt/README.md)）とは**見ている対象が違う**。あちらは部品を単独で
 描いた姿で、ここは部品を組み上げた画面と、画面をまたぐ経路である。部品が個別に緑でも、並べた
@@ -21,26 +21,25 @@ story 単位の検査（[`vrt/`](../vrt/README.md)）とは**見ている対象�
 | ジャーニー | 画面をまたぐ遷移・絞り込み・認証の前捌き | 経路が繋がっているかは、画面 1 枚では答えられない |
 | Browser Errors | hydration の不一致・描画中の例外・通信の失敗・CSP 違反 | **hydration の不一致は build も型検査も通る。**実機で描いたときにしか現れない。CSP の違反も同じで、ヘッダを読む検査（DAST）は enforce の結果を見ない |
 | Responsive | 帯ごとの出し分け（[`docs/rules.md`](../docs/rules.md) #71） | 帯は viewport の関数であり、jsdom には幅が無い |
-| 履歴 | 被せた面と画面遷移が同じ履歴を奪い合わないか（[0053](../docs/adr/0053-ui-component-interaction-seam.md)） | 競合するのは実ブラウザの履歴操作どうしで、jsdom には相手が居ない |
+| 履歴 | 被せた面と画面遷移が同じ履歴を奪い合わないか | 競合するのは実ブラウザの履歴操作どうしで、jsdom には相手が居ない |
 | Cross Browser | 描画エンジン固有の破綻 | 1 つのエンジンで通ることは、他の 2 つで通ることを意味しない |
-| 別 origin | 宣言した origin から BFF が読めること・宣言に無い origin からの書き込みが止まること（[0111](../docs/adr/0111-csp-security-headers.md) §5） | preflight の自動発行と CORS の読み取り制限は実ブラウザにしか無い。宣言した origin の文書は起動側が別ポートに立てる（`scripts/e2e/partner-origin.ts`。偽装すると Chromium の Private Network Access に止められる） |
+| 別 origin | 宣言した origin から BFF が読めること・宣言に無い origin からの書き込みが止まること | preflight の自動発行と CORS の読み取り制限は実ブラウザにしか無い。宣言した origin の文書は起動側が別ポートに立てる（`scripts/e2e/partner-origin.ts`。偽装すると Chromium の Private Network Access に止められる） |
 | 画面単位の見た目 | 画面 1 枚ぶんの基準画像との比較 | 部品の比較を全部足しても、並べた結果にはならない |
 | 画面単位の a11y | landmark・`main`・h1 と、配信される document（[`lib/a11y-rules.ts`](lib/a11y-rules.ts)） | story は部品を単独で描くのでこの 4 つが成立せず、Storybook の iframe document を評価してしまう |
 | フォーカス | 被せた面が焦点を受け取り、閉じ込め、閉じたら返すか | **jsdom はフォーカスの実装を持たない。**`inert` も focus trap も無く、`Tab` の巡回順は近似である |
 | 配信の停止 | `APP_MAINTENANCE_MODE=on` で起動したプロセスが、実際に全ルートを差し替えるか | **入口の分岐も設定も、層ごとには mock 越しにしか確かめていない。**結線は起動してみないと分からない |
 | 公開面 | `robots.txt` / `sitemap.xml` / 各画面の canonical / アイコンと OG 画像が、クローラが読む形で成立しているか。索引させる設定と索引させない設定の両方（[`docs/rules.md`](../docs/rules.md) #63） | **metadata は中身が壊れていても画面が壊れない。**空の sitemap・他人を指す canonical・実行時に落ちる `ImageResponse` は build も単体テストも通る |
 
-**ジャーニーの実体は題材と一緒に消えるが、観点は消えない。** 上の表は fork が自分の画面へ
+**ジャーニーの実体は題材と一緒に消えるが、観点は消えない。** 上の表はテンプレートから作った側が自分の画面へ
 書き換えたあとも成り立つもので、題材の破棄で失われるのは spec ファイルだけである。**書き換える
 ときは、観点ごと落とさないこと** —— とくに履歴は、単体テストが原理的に届かない唯一の観点で、
 ここを落とすと「押しても移らない導線」を誰も見張らなくなる。
 
 ## テストの責務
 
-frontmatter の `test-requirement: unit` が掛かるのは、**Vitest から回る `lib/` の判定**である
-（[0090](../docs/adr/0090-testing-strategy.md)）。`*.spec.ts` は Playwright が実行する本体で
-Vitest からは呼べない。何を異常と数えるか・どの画面を開くかといった判定を `lib/` へ切り出して
-あるのは、spec の中に置くと 1:1 の対象にできないためである。
+frontmatter の `test-requirement: unit` が掛かるのは、**Vitest から回る `lib/` の判定**である。
+`*.spec.ts` は Playwright が実行する本体で Vitest からは呼べない。何を異常と数えるか・どの画面を
+開くかといった判定を `lib/` へ切り出してあるのは、spec の中に置くと 1:1 の対象にできないためである。
 
 ## 使い方
 
@@ -209,7 +208,7 @@ seed は要求の URL から導かれるので、暦日で区切る画面が実�
 「いま」は合成の入口が解決して props で配る。
 
 ログイン済みの状態は、テスト専用の session 発行の口
-（`src/app/api/auth/test-session/route.ts`）から作る。認証は OpenAPI 契約の外にあり、契約から
+（`src/app/api/auth/test-session/route.dev.ts`）から作る。認証は OpenAPI 契約の外にあり、契約から
 生成したモックでは偽装できないためである。口が開くのは `local` / `ci` だけで、開いていない環境では
 `signIn` が落ちる。
 
@@ -238,14 +237,8 @@ seed は要求の URL から導かれるので、暦日で区切る画面が実�
 確かめたい経路そのものを通せなくなる。5xx と transport の失敗は設計された結果になり得ないので、
 個別の spec ではなく見張りが持つ。
 
-**console の見分けに文言を使わない。**文言は描画エンジンごとに違い、増える一方の除外表になる。
-代わりに引数を持つかで分ける —— ブラウザ自身が書いた行は引数を持たない。
-
-打ち切りだけは逆に文言で見分ける。Playwright が打ち切りとそれ以外を区別して渡さないためで、
-綴りは描画エンジンごとに違う。**取りこぼしたときに出るのは偽陽性（赤くなる）であって見逃しでは
-ない**ので、この向きなら文言に頼れる。一覧は回すエンジンに閉じており、際限なく伸びない。
-
-判定は [`lib/browser-errors.ts`](lib/browser-errors.ts) が持つ。
+console の行と通信の打ち切りをどう見分けるか（文言に頼る向きと頼らない向き）を含め、判定は
+[`lib/browser-errors.ts`](lib/browser-errors.ts) が持つ。
 
 **CSP の違反は console の見張りには掛からない。** ブラウザ自身が書く行なので引数を持たず、上の
 規則で外される。document の `securitypolicyviolation` で受け、経路を分けて数える。見張りの外で
@@ -254,7 +247,7 @@ seed は要求の URL から導かれるので、暦日で区切る画面が実�
 
 ## 同意は選び終えた状態から始める
 
-同意を尋ねる面は、選び終えるまで画面を覆う（[0131](../docs/adr/0131-cookie-consent.md)）。
+同意を尋ねる面は、選び終えるまで画面を覆う。
 [`lib/test.ts`](lib/test.ts) はこれを**拒否の側で選んだ状態**にしてから spec へ渡す。ジャーニーが
 確かめたいのはその先の画面であり、全ての spec が最初に同意を押すことになると、押し忘れた spec
 だけが「面に覆われたまま緑」になる。同意ではなく拒否から始めるのは、同意すると計測 id が配られ、
@@ -273,8 +266,7 @@ seed は要求の URL から導かれるので、暦日で区切る画面が実�
 ### タグマネージャを読み込む側は、ここでは通らない
 
 `env/.env.ci` の容器 ID は空である。したがって **`script-src` に配信元を足し
-`Cross-Origin-Embedder-Policy` を降ろす分岐は、e2e でも DAST でも一度も踏まれない**
-（[0131](../docs/adr/0131-cookie-consent.md) §2）。
+`Cross-Origin-Embedder-Policy` を降ろす分岐は、e2e でも DAST でも一度も踏まれない**。
 
 **CI から Google を叩かせないための選択である。** ここは画像を差し替え API をモックして、外部の
 状態で赤くならないようにしてある。実在の容器を撃つ spec を置くと、その原則をこの 1 本だけが破り、
@@ -296,25 +288,21 @@ seed は要求の URL から導かれるので、暦日で区切る画面が実�
 - **帯**は [0051](../docs/adr/0051-styling-system.md) §2 が 3 つに固定し、境界の値は design token
   （`tokens/primitives.json`）が持つ。撮るのは**帯の下端** —— `min-width` で切り替わる以上、その帯の
   指定が初めて効く幅であり、崩れるならまずそこで崩れる。モバイルだけは下端を token が持たない
-  （下限は [0102](../docs/adr/0102-browser-support.md) が fork 先へ委ねている）ので、上端（`md - 1`）を
+  （下限は [0102](../docs/adr/0102-browser-support.md) が作った側へ委ねている）ので、上端（`md - 1`）を
   撮る。組み立ては [`lib/viewports.ts`](lib/viewports.ts)
 - **エンジン**は [0102](../docs/adr/0102-browser-support.md) の「Next.js の既定 browserslist を追認
   （モダンブラウザ）」から引く。モダンブラウザは実装としては 3 つの描画エンジンに畳まれ、
   Playwright の `chromium` / `firefox` / `webkit` がそれぞれに対応する。**見ているのは 3 つだけで、
   ブラウザの銘柄も版も見ていない。**版はイメージが決める。宣言は [`lib/browsers.ts`](lib/browsers.ts)
 
-見た目を撮るのは 1 つのエンジンだけである。同じ画面をエンジンを変えて撮ると必ず差分になり、
-「3 通りの正しい絵」を持つことになって退行と描画差の区別が付かない。他の 2 つで見るのは
-**見た目ではなく成立**である。
+見た目を撮るのは 1 つのエンジンだけで、他の 2 つで見るのは**見た目ではなく成立**である。1 つに
+絞る理由と選んだエンジンは [`lib/browsers.ts`](lib/browsers.ts) の `SHOT_ENGINE` が持つ。
 
 ## 何を開くか
 
-開く画面は **build の出力から列挙する**（`.next/app-path-routes-manifest.json`）。一覧を手で持つと、
-新しく足した画面が黙って対象外のまま残る。
-
-一方で URL は build の出力からは決まらない。動的区間へ何を入れるか、どの画面が URL では開けないかは
-宣言でしか表せないため、**route ごとの宣言を必須にしている**（[`lib/screens.ts`](lib/screens.ts)）。
-宣言の無い route が現れたら落ちるので、足した画面は必ず宣言に現れる。実体を失った宣言も落ちる。
+開く画面は **build の出力から列挙し**、URL は **route ごとの宣言**から決める。一覧を手で持たない
+理由と、宣言の無い route・実体を失った宣言が落ちることは [`lib/screens.ts`](lib/screens.ts) の冒頭が
+持つ。
 
 外してよいのは**開く手段が無い**画面だけである。「まだ書けていない」は理由にならない。
 
@@ -407,3 +395,20 @@ E2E だが、E2E は費用のため PR ごとには回らない（`.github/workf
 <!-- sample:end -->
 
 `tmp/e2e/` に出る実行結果（trace / HTML レポート / サーバのログ）は追跡しない。
+
+## 関連する ADR
+
+- [0021](../docs/adr/0021-frontend-responsibility.md) — アプリ側の宣言を写すときに越えている境界
+- [0028](../docs/adr/0028-naming-convention.md) — 画面の名前に許す綴り
+- [0043](../docs/adr/0043-middleware-policy.md) — 認証の前捌きが立つ位置
+- [0051](../docs/adr/0051-styling-system.md) — 帯の段数と、動きを止めて撮る根拠
+- [0053](../docs/adr/0053-ui-component-interaction-seam.md) — 被せた面の焦点と履歴
+- [0073](../docs/adr/0073-pagination-fetch-boundary.md) — 読み進めた件数が URL へ出ること
+- [0079](../docs/adr/0079-auth-frontend-seam.md) — 認証の front 側の受け持ち
+- [0090](../docs/adr/0090-testing-strategy.md) — 層別責務と、相手をモックに固定する理由
+- [0091](../docs/adr/0091-test-verification-methods.md) — 実ブラウザでしか負えない観点
+- [0100](../docs/adr/0100-accessibility-target.md) — 適合目標（WCAG 2.x レベル AA）
+- [0102](../docs/adr/0102-browser-support.md) — 回す描画エンジンの引き出し元
+- [0111](../docs/adr/0111-csp-security-headers.md) — CSP の enforce と別 origin の前捌き
+- [0131](../docs/adr/0131-cookie-consent.md) — 同意を尋ねる面の扱い
+- [0153](../docs/adr/0153-ci-configuration.md) — 公開の面へ出す文字集合

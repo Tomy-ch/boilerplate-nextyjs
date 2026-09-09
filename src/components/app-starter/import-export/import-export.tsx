@@ -165,6 +165,9 @@ export type ExportButtonProps = Omit<ComponentProps<typeof Button>, "children"> 
  *
  * 生成中は文言も変える。spinner だけでは、何を待っているのかが読み上げから分からない。
  *
+ * **`pending` と `href` が同時に立つときは、生成中が勝つ。** 前の出力の URL を持ったまま次を
+ * 生成している場面で、押せる link を残すと、いま生成しているものと違うファイルを受け取れてしまう。
+ *
  * 生成そのもの、出力形式、ファイルの中身は持たない。状態と URL を呼び出し元が渡す。
  *
  * `href` の検証も持たない。同一オリジンかつ `http` / `https` であることは呼び出し元が保証する。
@@ -183,6 +186,15 @@ export function ExportButton({
   pendingLabel = "書き出しています",
   ...props
 }: ExportButtonProps) {
+  if (pending) {
+    return (
+      <Button data-slot="export-button" disabled type="button" {...props}>
+        <Spinner />
+        {pendingLabel}
+      </Button>
+    );
+  }
+
   if (href !== undefined) {
     return (
       <Button asChild data-slot="export-button" {...props}>
@@ -190,15 +202,6 @@ export function ExportButton({
           <DownloadIcon aria-hidden="true" />
           {label}
         </a>
-      </Button>
-    );
-  }
-
-  if (pending) {
-    return (
-      <Button data-slot="export-button" disabled type="button" {...props}>
-        <Spinner />
-        {pendingLabel}
       </Button>
     );
   }

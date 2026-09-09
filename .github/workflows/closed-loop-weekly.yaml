@@ -1,0 +1,113 @@
+name: Closed Loop Weekly
+
+# Re-measures the development windows that were reported as issues: clusters them, ranks
+# them, and checks whether improvements that landed earlier have shown up again.
+#
+# The schedule is the point. The re-measurement is a required step of the loop —
+# "skip it and the decision is void" — and a step somebody has to remember is a step that
+# gets skipped. Nothing else in the repository calls `closed-loop-weekly`, so without this
+# workflow the loop degrades into an accumulator: findings pile up as issues and nobody
+# ever asks whether the fixes worked.
+#
+# It reads issues, never transcripts. Session transcripts live on the developer's machine
+# and stay there; everything this job needs was written into the
+# issue bodies when they were opened.
+#
+# It reads and reports; it never writes. Rolling findings up into concerns creates issues
+# and closes the originals, which is why `--consolidate` is left to a person at a terminal —
+# an unattended roll-up that grouped things wrongly would have nobody to notice it. The
+# model that step needs is not available here either.
+#
+# The period is absolute so a week the schedule missed can be re-run later with the same
+# boundaries it would have had.
+
+on:
+  schedule:
+    # 22:00 UTC Sunday — Monday 07:00 JST, so the report is waiting at the start of the week.
+    - cron: '0 22 * * 0'
+  workflow_dispatch:
+    inputs:
+      from:
+        description: 'Start of the period (YYYY-MM-DD). Defaults to seven days before `to`.'
+        required: false
+        type: string
+      to:
+        description: 'End of the period (YYYY-MM-DD). Defaults to today.'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  remeasure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # Reading the feedback issues. Nothing here writes them.
+      issues: read
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            *.githubapp.com:443
+            prod.app-api.stepsecurity.io:443
+            mise-versions.jdx.dev:443
+            nodejs.org:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup mise and the pinned tools
+        uses: ./.github/actions/setup-mise
+        with:
+          tools: core:node aqua:pnpm/pnpm
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # The report goes to the job summary rather than to an issue. The decision keeps the
+      # findings themselves in the tracker, but this is a view over them — writing the view
+      # back as another issue would put a second, staler copy beside the thing it summarises.
+      - name: Re-measure the period
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERIOD_FROM: ${{ inputs.from }}
+          PERIOD_TO: ${{ inputs.to }}
+        run: |
+          args=''
+          [ -n "${PERIOD_FROM}" ] && args="${args} --from ${PERIOD_FROM}"
+          [ -n "${PERIOD_TO}" ] && args="${args} --to ${PERIOD_TO}"
+
+          # shellcheck disable=SC2086 # the period flags are two optional words, not a path
+          pnpm exec tsx scripts/closed-loop/weekly ${args} > /tmp/closed-loop-weekly.txt
+
+          cat /tmp/closed-loop-weekly.txt
+
+          {
+            echo '## 開発の窓の再計測'
+            echo
+            echo '```text'
+            cat /tmp/closed-loop-weekly.txt
+            echo '```'
+            echo
+            echo '効いたかを決めるのはこの job ではない。保持 / 簡素化 / 撤回は人が決める（ADR 0160 決定 1）。'
+          } >> "$GITHUB_STEP_SUMMARY"

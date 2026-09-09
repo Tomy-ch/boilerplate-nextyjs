@@ -257,7 +257,8 @@ let client: UserScopedHttpClient | undefined;
  * [adapters](../../README.md) の「主体を名乗るかは、口ではなく client が決める」節。
  *
  * **だからこの口の分類は `user-scoped` で、キャッシュの指定は型として渡せません**
- * （`docs/rules.md` #86a）。入れてはいけない理由は同 #79b が持ちます。
+ * （`docs/rules.md`「データ分類と機微情報」の「取得の口は分類を宣言する」）。入れてはいけない理由は
+ * 同「描画とキャッシュ」の「Data Cache へ入れてよいのは主体を名乗らずに取れるものだけ」が持ちます。
  */
 function getClient(): UserScopedHttpClient {
   client ??= createHttpClient({
@@ -352,9 +353,8 @@ function toProductListItem(product: Product): ProductListItem {
  * 商品一覧を、表示に必要なものだけへ絞った 1 ページとして取得する。
  *
  * @remarks
- * 増分取得が同じ形を JSON で受け取るため、`Date` や省略可能な値を含まない形へここで落とします
- * （[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。初回ページと増分ページで
- * 形が違うと、積み上げた一覧の途中から表示が壊れます。
+ * 増分取得が同じ形を JSON で受け取るため、`Date` や省略可能な値を含まない形へここで落とします。
+ * 初回ページと増分ページで形が違うと、積み上げた一覧の途中から表示が壊れます。
  */
 export async function getProductListPage(
   query: ProductQuery = {},
@@ -368,8 +368,8 @@ export async function getProductListPage(
  * 条件に一致する商品の総数を取得する。
  *
  * @remarks
- * cursor ページネーションは総数を持たないため、一覧の応答からは取り出せません
- * （[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。総数はこの取得口だけが返します。
+ * cursor ページネーションは総数を持たないため、一覧の応答からは取り出せません。
+ * 総数はこの取得口だけが返します。
  *
  * 一覧と同じ条件を受け取ります。条件を渡さない口にすると、絞り込んだ後も絞り込む前の数が出て、
  * 一覧に並んでいる件数と食い違います。
@@ -401,8 +401,8 @@ export type ProductRankingQuery = {
  * どちらを見ているかが呼び出し側から読み取れなくなるためです。
  *
  * キャッシュを指定していません。ランキングは購入が発生するたびに変わる集計値であり、
- * 無効化の引き金になるのは商品の更新ではなく購入です。商品のタグへ相乗りさせると、商品を
- * 触らない限り古い集計が残り続けます（[0040](../../../../docs/adr/0040-routing-rendering-strategy.md)）。
+ * 無効化の引き金になるのは商品の更新ではなく購入です。商品のタグへ相乗りさせると、
+ * 商品を触らない限り古い集計が残り続けます。
  *
  * 件数と期間を既定へ寄せず呼び出し側から受けるのは、画面ごとに要る件数が違うためです。
  * 省略時は契約の既定値（全期間・上位 10 件）が効きます。
@@ -461,8 +461,7 @@ function toWirePublishedAt(publishedAt: Date | null): string | null {
  * 画像を 1 件アップロードし、保存されたオブジェクトキーを返す。
  *
  * @remarks
- * 受け口が multipart しか持たないため、この経路を通します
- * （[0075](../../../../docs/adr/0075-file-upload-seam.md)）。**再送しません** —— 同じ本文を
+ * 受け口が multipart しか持たないため、この経路を通します。**再送しません** —— 同じ本文を
  * 二度送れば別のキーで二重に保存され、片方が誰からも参照されないまま残ります。
  *
  * 返るのはキーだけで、表示 URL はここでは組みません。組み立てに要る配信元は表示側の関心です。

@@ -80,8 +80,7 @@ export type DefaultSessionResolverDeps = {
    *
    * @remarks
    * **役割の正本は IdP ではありません。** ID Token の claim から読むと、IdP を差し替えるたびに
-   * 役割の出所が変わります。誰であるかは IdP が、何をしてよいかはバックエンドが持ちます
-   * （[0070](../../../../docs/adr/0070-backend-role-separation.md)）。
+   * 役割の出所が変わります。誰であるかは IdP が、何をしてよいかはバックエンドが持ちます。
    *
    * 渡さなければ、権限を持たない側に倒します。判定材料が無いときに与えると、確定認可が拒否する
    * まで権限のある画面が見えてしまいます。
@@ -95,12 +94,11 @@ export type DefaultSessionResolverDeps = {
  * Authorization Code + PKCE と JWE 封緘による既定の Resolver を作る。
  *
  * @remarks
- * boilerplate が同梱する 1 つの実装です（[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §6）。
- * 差し替えの単位は `SessionResolver` の面であって、この関数の中身ではありません。
+ * boilerplate が同梱する 1 つの実装です。差し替えの単位は `SessionResolver` の面であって、
+ * この関数の中身ではありません。
  *
- * Discovery の結果は生成した Resolver が抱えます。**取得に失敗したときは抱え込みません。**
- * 失敗した結果を保持すると、IdP の一時的な不調で最初の 1 回が失敗しただけで、以後この Resolver を
- * 使うすべての操作が同じ失敗を返し続けます。
+ * Discovery の結果は生成した Resolver が抱えます。**取得に失敗したときは抱え込みません**
+ * （`resolveEndpoints` の `??=` を参照）。
  */
 export function createDefaultSessionResolver(deps: DefaultSessionResolverDeps): SessionResolver {
   const now = deps.now ?? Date.now;
@@ -187,8 +185,7 @@ export function createDefaultSessionResolver(deps: DefaultSessionResolverDeps): 
         issuer: deps.issuer,
         audience: deps.clientId,
         algorithms: ID_TOKEN_ALGORITHMS,
-        // 時刻の判定もこの Resolver が受け取った時計で行う。ここだけ実時計を見ると、
-        // 有効期限まわりの検証が実時間に依存し、境界のケースを再現できない。
+        // 時刻の判定もこの Resolver が受け取った時計で行う。省くと実時計になる。
         currentDate: new Date(now()),
       }).catch((cause: unknown) => {
         // 署名・iss・aud・exp のどれで落ちても、呼び出し側から見れば「認証されていない」で同じ。

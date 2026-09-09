@@ -7,7 +7,7 @@
 //   check   : apply と同じ判定を書き換えなしで行い、ずれがあれば非ゼロ終了する（CI / hook 用）
 //
 // resolve は不変を宣言した tag の解決先が変わった時点で fail-closed に落ちる。この設計の根拠は
-// [0153](../../docs/adr/0153-ci-configuration.md) の SHA ピンが持つ。
+// [README](../README.md) から辿る。
 //
 // 版の SSOT は `uses:` 行末尾のコメント tag であり、`@` 側の SHA ではない。固定済みの行も
 // コメント tag から再解決されるため resolve は冪等。ローカル参照（`uses: ./...`）は対象外。
@@ -91,7 +91,7 @@ async function runResolve(root: string, files: string[], options: ResolveOptions
 }
 
 // 不変を宣言した tag の解決先が変わった件を報告して落ちる。ロックファイルは書かない
-// （承認済みの移動も他のエントリも一切書かない — [0153](../../docs/adr/0153-ci-configuration.md)）。
+// （承認済みの移動も他のエントリも一切書かない）。
 // 旧新の SHA を並べるのは、上流へ付け替えを報告するときにこの 2 値が要るため。
 function failRepointed(repointed: MovedRef[]): never {
   printError(
@@ -100,7 +100,7 @@ function failRepointed(repointed: MovedRef[]): never {
   for (const move of repointed) {
     console.error(`   ${move.key}: ${move.from} -> ${move.to}`);
   }
-  // 承認コマンドにキーを埋め込まない（理由は [0153](../../docs/adr/0153-ci-configuration.md)）。
+  // 承認コマンドにキーを埋め込まない。
   console.error(`   意図した更新なら上記のキーを ${ALLOW_MOVED_ENV} へ並べて再実行してください:`);
   console.error(`   make actions-pin-resolve ${ALLOW_MOVED_ENV}="<キー> [<キー>...]"`);
   process.exit(1);
@@ -226,8 +226,7 @@ function assertAllUsesParsed(root: string, files: string[]): void {
   if (unparsed.length > 0) fail(`${UNPARSED_MESSAGE}: ${unparsed.join(", ")}`);
 }
 
-// 版に使えない文字を含む参照を、ネットワークへ出る前に落とす
-// （絞る理由は [0153](../../docs/adr/0153-ci-configuration.md)）。
+// 版に使えない文字を含む参照を、ネットワークへ出る前に落とす。
 function assertAllTagsSupported(root: string, files: string[]): void {
   const unsupported: string[] = [];
   for (const file of files) {
@@ -250,7 +249,7 @@ function parseMinAgeDays(args: string[]): number {
 }
 
 // 承認リストはコマンドライン引数ではなく環境変数で受ける。環境変数ならシェルを一度も経由
-// しない（理由は [0153](../../docs/adr/0153-ci-configuration.md)）。
+// しない。
 function readAllowMoved(): Set<string> {
   const raw = process.env[ALLOW_MOVED_ENV] ?? "";
   return new Set(raw.split(/\s+/).filter((key) => key !== ""));

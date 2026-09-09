@@ -13,5 +13,5 @@
 10202	IGNORE	anti-CSRF token が無いという指摘。Server Actions は Origin と Host の突合で自前の防御を持ち、ZAP はそれを知らない。form を素の POST で受ける経路を作った時点で見直す。
 10031	IGNORE	searchParams が HTML 属性へ現れるという指摘。React が値をエスケープする。dangerouslySetInnerHTML か手組みの HTML を増やした時点で見直す。
 10019	IGNORE	404 とリダイレクトの応答に Content-Type が無いという指摘。本文を持たない応答であり、宣言する型が無い。
-10049	IGNORE	保存可否の観察であって欠陥の指摘ではない。キャッシュの方針そのものは計画 P6-8 と rules.md が持つ。
+10049	IGNORE	保存可否の観察であって欠陥の指摘ではない。キャッシュの方針そのものは rules.md の「描画とキャッシュ」が持つ。
 10112	IGNORE	セッション管理の応答を見つけたという観察。認証の入口が意図どおり存在することの確認にあたる。

@@ -8,7 +8,7 @@ export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
 /**
- * ホーム画面に置かれるアイコン（[0044](../../docs/adr/0044-seo-metadata-strategy.md) §5）。
+ * ホーム画面に置かれるアイコン。
  *
  * @remarks
  * `icon.tsx` と同じ印を大きな枠で描きます。角は丸めません —— 置く側が自分の形に切り抜くため、

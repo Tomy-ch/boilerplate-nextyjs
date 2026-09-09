@@ -8,9 +8,7 @@
 
 ## Status
 
-Accepted（採番はブロック帯で確定〈2026-07-14・0001〜0155(トピック順ブロック帯)〉）
-
-> 本 ADR は 0.0.x の living document。設計フェーズ中は本文を直接上書きし、逐次改定の履歴は残さない(不可変化 + 改定履歴の規律は v1 凍結時から。[0140](0140-documentation-operations.md))。
+Accepted
 
 ## 採用理由
 
@@ -66,7 +64,7 @@ Biome は `next` / `react` の lint ドメインルールを内蔵しており�
 | `exactOptionalPropertyTypes` | **見送り** | React props との摩擦が高い。残る穴（「未指定」と「明示的 `undefined`」を型で区別できない）は下記の実行時機構で埋める |
 | `noUnusedLocals` / `noUnusedParameters` | **入れない** | biome が `correctness/noUnusedVariables` / `noUnusedFunctionParameters` で error として捕捉する（同じ検査を 2 つ持つと食い違う） |
 
-- **`target` は Next.js 16 / [0102](0102-browser-support.md) のサポート範囲に合わせて引き上げる**（`ES2017` 据え置きは実態と釣り合わない）。具体値は実装 PR で確定する
+- **`target` は `ES2022`**。[0102](0102-browser-support.md) が追認する Next.js の既定 browserslist（Chrome 111 / Edge 111 / Firefox 111 / Safari 16.4）のすべてが実装している最も新しい ECMAScript 版（ES2023 の配列複製系 `toSorted` 等は Firefox 111 に無い）。`tsc` は `noEmit` であり配布物の構文はビルド（SWC）が browserslist から決めるため、この値が定めるのは型検査の前提だけである
 - **`exactOptionalPropertyTypes` 見送りの穴を埋める機構**: `JSON.stringify` は値が `undefined` のキーを落とすため、`{name: undefined}` と `{}` はワイヤ上で同一になる。危険が残るのは直列化より手前のローカル組み立てだけなので、**`adapters` に PATCH ペイロードの正規化関数を置いて閉じ込める**。「触らない」= キーを含めない / 「消す」= `null` を明示とし、`undefined` に意味を持たせない。adapters の公開面は正規化済みの型でしか受け付けない形にする（散文の規約にしない）
 
 ## ESLint による補完
@@ -91,7 +89,7 @@ Biome は `next` / `react` の lint ドメインルールを内蔵しており�
 ### 現時点で ESLint 側に置く検査
 
 - **層境界の import 検査**（eslint-plugin-boundaries 等）。biome の `noRestrictedImports` + `overrides` では「import する側の層」を文脈に取る検査を表現できないため、現時点で biome 非対応の代表例である（`noImportCycles` が検出するのは循環のみで、層の依存方向違反は検出できない）
-- 具体プラグインの選定と層定義マッピングは、フロント内責務分離の ADR（[0021](0021-frontend-responsibility.md) = BACKLOG A3）の Enforcement 節で定める（プラグインは `eslint-plugin-boundaries`、層定義は同 ADR の依存マトリクス）
+- 具体プラグインの選定と層定義マッピングは、フロント内責務分離の ADR（[0021](0021-frontend-responsibility.md)）の Enforcement 節で定める（プラグインは `eslint-plugin-boundaries`、層定義は同 ADR の依存マトリクス）
 - **React のレンダリング規律の検査**（`eslint-plugin-react-hooks`）。React Compiler が持つ診断をルールとして提供するもので、**effect の中で state を導出する形・描画中の副作用・描画中に構築した JSX を try/catch で囲む形**などを検出する。biome の `react` ドメインが持つのは依存の網羅（`useExhaustiveDependencies`）と hook 呼び出し位置（`useHookAtTopLevel`）だけで、上記はいずれも表現できない
   - **食い違いうるルールは biome 側に残す**。実装が別なので提示される修正候補が異なり、設定を片方だけ緩めたときにどちらが正か決まらない。
     biome の `useExhaustiveDependencies` が既定で見るのは **`useEffect` / `useLayoutEffect` / `useInsertionEffect` / `useCallback` / `useMemo` / `useImperativeHandle`** であり、**effect だけでなく memo 系の依存も含む**。したがってこのプラグイン側では `exhaustive-effect-dependencies` と `memo-dependencies` の両方を有効化しない
@@ -186,6 +184,8 @@ ESLint 本体・プラグイン・設定の読み込みに要するツールも�
 - `**/*.d.ts` … `noExplicitAny` を off
 - `scripts/**` … `noConsole` / `noExplicitAny` を off（運用スクリプト用）
 - `public/**` … `noSvgWithoutTitle` を off（静的 SVG アセットは使用側の `alt` で代替テキストを担保する）
+- `src/adapters/gen/**` / `mocks/*/**` … **生成物は linter の対象外にし、整形だけ掛ける**。生成器の出力作風で CI が止まると、直す手段が生成器へのパッチしか無くなる。整形は生成物にも掛ける（差分が読める形に揃える）
+- `src/**/generated/**` … formatter も off（再生成で上書きされる出力であり、整形しても次の生成で戻る）
 
 ### ESLint（`eslint.config.ts` — 補完分）
 
@@ -222,10 +222,10 @@ pnpm exec biome check                                              # lint + form
 pnpm exec biome check --config-path=./biome.ci.jsonc --error-on-warnings  # 完全版
 pnpm exec biome check --fix                                        # 自動修正
 pnpm exec biome format --write
-pnpm exec eslint .                                                 # 補完検査（ESLint 導入後）
+pnpm exec eslint .                                                 # 補完検査
 ```
 
-ESLint 導入 PR では `lint:eslint`（`eslint .`）を scripts に追加し、`lint:ci` に直列で組み込む（`lint:ci` = biome 完全版 → ESLint）。**導入までは現行の scripts のまま**とする（`pnpm lint` / `pnpm lint:ci` は biome のみ）。境界検査系ルールは auto-fix をほぼ持たないため、`pnpm fix` は biome のみで変更しない。
+`lint:ci` は biome 完全版 → ESLint（`lint:eslint` = `eslint .`）→ 境界宣言の突合（`check:architecture`）を直列に回す。`pnpm lint` は biome のみである。境界検査系ルールは auto-fix をほぼ持たないため、`pnpm fix` は biome のみとする。
 
 ## エディタ連携
 
@@ -253,7 +253,7 @@ repo ルートに `.editorconfig` を置く。担当範囲は **biome が整形�
 
 ## 禁止事項
 
-- Prettier の併用は禁止（フォーマッタは biome 単独）
+- Prettier の併用は禁止（フォーマッタは biome 単独）。pre-commit と CI は `biome check` で整形を判定するため、Prettier が書いたファイルは hook が落とし、どちらが正かを決める仕事が恒久に増える。見直すのは biome の整形が本リポジトリで実際に扱う言語のいずれかを覆わなくなったとき（対応言語が減る、または新たに扱う言語が biome の対象外であるとき）だけで、Prettier の plugin が豊富であることは理由にならない
 - ESLint をフォーマッタとして使うことは禁止（`eslint.format.enable` の有効化 / stylistic・フォーマット系ルールの導入を含む）
 - `.editorconfig` に biome の対象ファイル向けの独自値を書くことは禁止（整形の権威は `biome.json`。`.editorconfig` は biome が見ないファイルのみを担当する）
 - biome が表現できる検査を ESLint 側に置くことは禁止（能力ベース。食い違いが成立する。「ESLint 利用の条件」を満たさない ESLint ルール追加はすべて本 ADR 違反）
@@ -268,17 +268,11 @@ repo ルートに `.editorconfig` を置く。担当範囲は **biome が整形�
 - バージョン更新時は `pnpm exec biome check` で差分が出ないことを確認し、出る場合は `pnpm fix` で吸収した上で同 PR に整形コミットを含める。biome 更新 PR では、ESLint 側に残している検査の biome 対応状況（移管可否）も併せて確認する
 - nursery ルールはバージョン更新で挙動・所属グループが変わり得る。exact pin 運用（[0004-library-management.md](0004-library-management.md)）を前提に、更新 PR で差分を確認する
 - `process.env` 直読禁止のような **biome で表現できる規約は biome 側（`noProcessEnv` 等）に置き、ESLint には置かない**（能力ベースの適用例。有効化は環境変数管理の ADR = [0030](0030-environment-variable-management.md) とセットで行う）
-- ESLint の導入自体は本 ADR が直接トリガーしない。層境界検査の中身（プラグイン・層定義）は A3 ADR([0021](0021-frontend-responsibility.md))で確定済みのため、0004 の採用フロー（採用チェック + `pnpm audit`）に従い導入 PR を立てられる
-
-## 今後の拡張
-
-- CI で完全版 `pnpm lint:ci` を必須化（PR チェックに組み込む。CI 構成自体は [0153](0153-ci-configuration.md) で決定済み）
-- pre-commit / pre-push フック（lefthook）は [0151-git-hooks.md](0151-git-hooks.md) で決定済み。段階責務は同 ADR を参照。pre-commit の速度目標（< 5 秒）を超えた場合の退避ルールも同 ADR に定める
-- 層境界検査の具体設定（プラグイン選定・層定義マッピング）は [0021](0021-frontend-responsibility.md)（A3）の Enforcement 節で定義済み（`eslint-plugin-boundaries` + 依存マトリクス）。マトリクスの正は `architecture.ts` が持ち、flat config はそれを import する
 
 ## 関連 ADR
 
 - [0001-package-manager.md](0001-package-manager.md) — pnpm 採用 / lockfile 取り扱い
 - [0004-library-management.md](0004-library-management.md) — ESLint 本体・プラグインの exact pin / `pnpm audit` / 移管判定の定期監査
-- [0151-git-hooks.md](0151-git-hooks.md) — `pnpm lint:ci` を呼ぶ pre-commit / pre-push の運用
-- [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — ESLint 層境界検査のプラグイン選定（`eslint-plugin-boundaries`）と層定義マッピング（Enforcement 節）
+- [0151-git-hooks.md](0151-git-hooks.md) — `pnpm lint:ci` を呼ぶ pre-commit / pre-push の運用（段階責務・pre-commit の速度目標と退避ルール）
+- [0153-ci-configuration.md](0153-ci-configuration.md) — 完全版 `pnpm lint:ci` を PR の必須チェックに置く CI 構成
+- [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — ESLint 層境界検査のプラグイン選定（`eslint-plugin-boundaries`）と層定義マッピング（Enforcement 節）。マトリクスの正は `architecture.ts` が持ち、flat config はそれを import する

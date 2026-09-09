@@ -10,7 +10,7 @@
 
 以下のいずれかに該当する場合に使用する。
 
-- 日本語版のみ存在する Markdown について、英語 canonical を作成したい（このリポジトリでは英語が canonical のため、典型的なケース）。
+- 日本語版のみ存在する Markdown について、英語 canonical を作成したい（典型的なケース — 「リポジトリ規約 › 言語」参照）。
 - 英語版のみ存在する Markdown について、日本語翻訳を作成したい。
 - 両方存在するが内容が乖離しており、再同期したい。
 
@@ -48,8 +48,18 @@
 
 ### 言語
 
-- **英語が canonical。** 英語ファイルが source of truth。
-- **日本語は翻訳。** canonical な英語版との同期を維持する。
+**v1.0.0 未満において、対が存在するのは `.claude/skills/<name>/` の 1 か所だけである。**
+ADR [0140](../../../docs/adr/0140-documentation-operations.md) は日本語をサフィックス無しのパスの
+canonical に置き、その隣に `*.ja.md` を作ることを禁じている。`SKILL.md` が英語なのは Claude Code が
+frontmatter を解釈するツール要件による例外（ADR 0154）。したがって README や `docs/**` の文書には
+**同期すべき翻訳が無い** —— このスキルをそれらに当てると、0140 が禁じているファイルをまさに作ることになる。
+前提を置く前に確かめること: `find src docs -name '*.ja.md'` は今日いま何も返さない。
+
+- **`SKILL` の対では、英語が canonical。** 英語ファイルが source of truth で、`SKILL.ja.md` が
+  それに追従する翻訳である。
+- **それ以外は、v1.0.0 未満ではサフィックス無しのパスの日本語が canonical で、翻訳は存在しない。**
+  *対象* に挙げた「英語 canonical + `docs/ja/**` mirror」は、0140 が **v1.0.0 の境界で切り替える**形であって、
+  いま効いている形ではない。
 
 ### SKILL ファイル（`.claude/skills/<name>/`）
 
@@ -87,7 +97,7 @@ AGENTS.md の "Exception: Skill Execution" 節に基づき、このスキル実�
 スキル実行中でも保護対象として維持されるもの:
 
 - `AGENTS.md` / `CLAUDE.md`
-- 生成ファイル（`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, `docs/` 配下の生成物）
+- 生成ファイル — `.gitattributes` が `linguist-generated` を宣言するパス（`git check-attr linguist-generated -- <path>` で引ける）と、`docs/` 配下の生成物
 - `.claude/settings.json` の `permissions.deny` に列挙された任意のパス
 
 ## Step 1. 元ファイルの読み込み
@@ -129,26 +139,9 @@ AGENTS.md の "Exception: Skill Execution" 節に基づき、このスキル実�
 - コードブロックがバイト同一であることを確認する（コードブロック内の翻訳済み散文部分を除く）。
 - きれいに対応付けられないセクションがあればユーザーに報告し、対応方針を確認する。
 
-## Step 7. Markdown Lint による検証
+## Step 7. 書いたファイルの整形
 
-生成ファイル（および `sync-both` モードでは同期側）の書き込み後、以下を実行する。
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` はリポジトリ全体に対して `markdownlint-cli2 --fix` を実行し、よくある違反（見出し / リスト / コードブロック周辺の空行、行末空白、ファイル末尾の改行など）を自動修正する。続けて `pnpm md-lint` が 3 段で検証する — `.markdownlint.yaml` に対する体裁、mermaid 図の構文、`.claude/**` に対する `skill-lint`（frontmatter / 対訳ペアの構造 / 参照の実在性）。
-
-`pnpm md-lint` がエラーを報告する場合:
-
-1. lint 出力を確認する。
-2. 自動修正で解消できないルール（見出し階層、重複見出し、bare URL など）を手で修正する。
-3. clean になるまで `pnpm md-fix` → `pnpm md-lint` を繰り返す。
-
-`pnpm md-lint` がクリーン終了するまでスキルを完了報告しない。
-
-`pnpm md-fix` はリポジトリ全体を対象にするため、確認済みペアとは無関係な Markdown も自動修正される可能性がある。その場合、変更された他ファイルの一覧を完了報告時にユーザーへ提示し、レビューできるようにする。
+生成ファイル（および `sync-both` モードでは同期側）の書き込み後、このスキルが書いたファイルだけに `pnpm exec markdownlint-cli2 --no-globs --fix <書いたパス>` を掛ける。`pnpm lint:md` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 ## チェックリスト
 
@@ -161,7 +154,7 @@ pnpm md-lint
 - [ ] frontmatter ルールが正しく適用されている（canonical SKILL には付与、翻訳 SKILL には付与しない）
 - [ ] 翻訳側 SKILL ファイルに同期ノートのヘッダが含まれている
 - [ ] セクション構造とコードブロックが 1:1 で一致している
-- [ ] `pnpm md-lint` がクリーン終了する
+- [ ] `markdownlint-cli2 --fix` を書いたファイルだけに掛けた
 - [ ] 確認済みペア以外のファイルを変更していない
 
 ## 注意事項

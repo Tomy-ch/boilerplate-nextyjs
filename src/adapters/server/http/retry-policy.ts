@@ -91,8 +91,8 @@ export function retryAfterDelayMs(header: string | null, now: number): number | 
  * HTTP status をプロトコル非依存の分類へ写す。
  *
  * @remarks
- * 対応表は [0080](../../../../docs/adr/0080-error-handling.md) が正です。表に無い status は
- * `internal` へ矯正します。分類できない応答を素通しすると、生の status が上位層へ漏れます。
+ * 表に無い status は `internal` へ矯正します。分類できない応答を素通しすると、生の status が
+ * 上位層へ漏れます。対応表の出所は[同区画の README](README.md)。
  */
 export function toErrorKind(status: number): ErrorKind {
   switch (status) {

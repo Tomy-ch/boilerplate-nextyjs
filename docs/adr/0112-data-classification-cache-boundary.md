@@ -6,15 +6,13 @@
 
 Accepted
 
-（採番はブロック帯([0140](0140-documentation-operations.md))に従い、セキュリティ帯 `011x` へ置く。pre-v1 の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
 Cache Components(PPR)を有効化すると、**user-scoped な値が共有・静的な領域へ載る経路が新たに生まれる**。User A の個人データが共有キャッシュへ入り User B へ配られる事故は、表示層で起こしうる中で最も損害が大きい。
 
-規約は既にある —— [`docs/rules.md`](../rules.md) #79b が「Data Cache へ入れてよいのは、主体を名乗らずに取れるものだけ」と定め、`adapters/server/api/products.ts` は同じ理由を自身のコメントにも書いている。**足りないのは強制**であり、`adapters/server/http` の `RequestSpec` は `cache` / `tags` を**どの client でも受け取れる**。資格情報を載せる口に `cache: "force-cache"` を渡す書き方が型検査を通る。
+規約([`docs/rules.md`「描画とキャッシュ」](../rules.md#描画とキャッシュ)の「Data Cache へ入れてよいのは、主体を名乗らずに取れるものだけ」)だけでは止まらない。`adapters/server/http` の `RequestSpec` が `cache` / `tags` を**どの client でも受け取れる**形なら、資格情報を載せる口に `cache: "force-cache"` を渡す書き方が型検査を通る。**要るのは強制**である。
 
-[0030](0030-environment-variable-management.md) §8 は Server → Client の誤送信に対する防御を持つが、**キャッシュ側の境界は誰も持っていない**。
+[0030](0030-environment-variable-management.md) §8 は Server → Client の誤送信に対する防御を持つ。**キャッシュ側の境界は本 ADR が持つ。**
 
 ## 不変条件
 
@@ -56,7 +54,7 @@ createHttpClient({ scope: "user-scoped" })  // 資格情報を載せられる。
 | 分類 | 何か | 許される置き場 |
 | --- | --- | --- |
 | **public** | 主体を名乗らずに取れるもの(マスタ・公開カタログ) | 静的描画 / 共有キャッシュ / PPR の静的な殻 / client 送信 |
-| **user-scoped** | 主体に紐づくもの(プロフィール・カート・購入・ダッシュボード) | request scope / 動的 RSC。**共有キャッシュと静的生成は不可**。client へは詰め替えた後のみ |
+| **user-scoped** | 主体に紐づくもの(プロフィール・利用者ごとの一覧・利用履歴) | request scope / 動的 RSC。**共有キャッシュと静的生成は不可**。client へは詰め替えた後のみ |
 | **secret** | 署名鍵・トークン | server 内部のみ。キャッシュ・静的描画・client DTO・client 送信のいずれも不可 |
 
 **`secret` はこの取得経路を通らない。** `config/*.server.ts` に閉じ、`import "server-only"` と [0030](0030-environment-variable-management.md) §8 の taint が持つ。**値の数が少なく描画へ出ないため、こちらは branded / opaque な値型が費用に見合う**(包むのは secret だけ)。
@@ -188,7 +186,7 @@ PII を含む画面 / component は、次の順で決める。**最初から CSR
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) — 設計原則 6(責務を超えた予防措置 / セキュリティ例外)
 - [0030-environment-variable-management.md](0030-environment-variable-management.md) — §8 漏洩防御(`server-only` + taint)。本 ADR の段 4
 - [0041-cache-components-decision.md](0041-cache-components-decision.md) — Cache Components(PPR)。本 ADR は有効化の前提
-- [0071-bff-api-integration.md](0071-bff-api-integration.md) — キャッシュ・再検証の所有層。`docs/rules.md` #79b の Rationale
+- [0071-bff-api-integration.md](0071-bff-api-integration.md) — キャッシュ・再検証の所有層。`docs/rules.md`「描画とキャッシュ」の「Data Cache へ入れてよいのは、主体を名乗らずに取れるものだけ」の Rationale
 - [0072-api-type-generation.md](0072-api-type-generation.md) — 型漏洩禁止(wire 型を内層へ出さない)
 - [0029-type-design-discipline.md](0029-type-design-discipline.md) — branded / opaque(secret の値型)
 - [0111-csp-security-headers.md](0111-csp-security-headers.md) — 応答ヘッダ。本 ADR の段 5

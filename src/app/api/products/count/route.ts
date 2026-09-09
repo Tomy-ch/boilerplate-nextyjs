@@ -10,8 +10,8 @@ import { ErrorKind } from "@/errors/error-kind";
  * 脇の絞り込みが、まだ URL に載っていない条件で何件になるかを問い合わせる口です。確定した条件
  * ぶんは Server Component が取得するため、ここは通りません。
  *
- * 一覧の増分取得と同じ組み立てです。持つのは、済んだ分類を HTTP へ写すところだけで、取得も
- * 検証も `adapters/server` が済ませています（[0025](../../../../../docs/adr/0025-app-layer-elements.md)）。
+ * 一覧の増分取得と同じ組み立てです。持つのは、済んだ分類を HTTP へ写すところだけで、
+ * 取得も検証も `adapters/server` が済ませています。
  */
 export async function GET(request: Request): Promise<Response> {
   const parsed = parseProductQuery(toRawQuery(new URL(request.url).searchParams));

@@ -43,7 +43,7 @@ SSR first の選定では `◎` に当たります。押下状態を `pressed` �
 
 icon だけを置く場合は `aria-label` でアクセシブルな名前を与えます。押下状態は `aria-pressed` が伝えるため、**名前を「〜を有効にする」「〜を無効にする」と状態で切り替えません**。名前は変えずに状態だけを変えます。
 
-focus 表示は `outline` の idiom（`focus-visible:outline-2` / `outline-offset-2` / `outline-active`）に揃えています。押下中と hover の面はどちらも `accent` を使います。生成物は hover に `muted` を当てますが、このリポジトリの `muted` は `muted-foreground` と同じ値のため、背景と文字が同色になって読めなくなります。
+focus 表示は `outline` の idiom（`focus-visible:outline-2` / `outline-offset-2` / `outline-active`）に揃えています。押下中と hover の面はどちらも `accent` を使います。生成物は hover に `muted` と `muted-foreground` を当てますが、押下中と同じ `accent` に揃えています。
 
 ## Storybook とテスト
 

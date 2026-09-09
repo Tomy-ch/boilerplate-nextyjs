@@ -17,14 +17,14 @@ TRIVY_FS_DETECT_EXIT ?= 0
 # 報告専用（exit code では落とさない）。脆弱性は「その変更の作者がその場で解消できない」うえ、
 # 変更と無関係に時間で状態が変わるため、変更を対象とするゲートには載せられない。
 # 止めるのは昇格（保護ブランチ宛 PR）の一点で、そこが CI 側の責務になる
-# （判断の全文は docs/adr/0110-security-operations.md）。
+# （判断の全文は [README](../README.md) が挙げる決定）。
 # --ignore-unfixed: 修正版のある脆弱性だけを報告する。
 # .trivyignore.yaml は自動検出に頼らず --ignorefile で明示し、抑止の適用先を本ターゲットに閉じる。
 trivy-fs:
 	@command -v trivy >/dev/null 2>&1 || { echo "❌ trivy が PATH にありません。make install-tools を実行し、shell の mise activate を済ませてください。"; exit 1; }
 	@trivy fs --scanners vuln --pkg-types library --severity CRITICAL,HIGH,MEDIUM --ignore-unfixed --exit-code $(TRIVY_FS_DETECT_EXIT) --ignorefile .trivyignore.yaml $(TRIVY_SKIP_FLAGS) .
 
-# 昇格（保護ブランチ宛 PR）の一点だけがゲートになる（docs/adr/0110-security-operations.md 3 / 5）。
+# 昇格（保護ブランチ宛 PR）の一点だけがゲートになる。
 # 上の報告専用との差分は --ignore-unfixed を外すことだけで、severity の範囲は同じ。修正版の無い
 # 脆弱性は「その場で直せない」が、昇格は誰かがそれを引き受けて判断する場面であり、判断の材料に
 # するには可視化されている必要がある。

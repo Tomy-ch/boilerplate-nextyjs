@@ -80,26 +80,12 @@ const OUTPUT_DIR = "tmp/lighthouse";
 const LIGHTHOUSE_CLI = createRequire(import.meta.url).resolve("lighthouse/cli/index.js");
 
 /**
- * 役割を持つ session を発行し、それを送るためのヘッダの宣言をファイルへ書き出す。
- *
- * @remarks
- * cookie の名前を写さず、返ってきた `Set-Cookie` をそのまま組み直します。名前を書き写すと、
- * 封緘の実装が名前を変えたときにここだけが古い名前を送り続け、ログインへ送られた画面を
- * 計測してしまいます。
- *
- * **返すのは値ではなくファイルの場所です。** `--extra-headers` は JSON そのものも受け取りますが、
- * それだと session が子プロセスの起動引数に載り、同じ機械の他の利用者が `ps` で読めます。この
- * session は役割を持つ本物で、読めた相手は同じ待ち受けへ admin として振る舞えます。
- *
- * @returns 書き出したヘッダ宣言のパス。
- */
-/**
  * 同意を選び終えたことをブラウザへ伝える cookie。
  *
  * @remarks
  * **選び終えた状態から測ります。** この面は選ぶまで画面を覆うので、置かずに測ると、どの画面の
- * 数値も面が乗った状態のものになります（[0131](../../docs/adr/0131-cookie-consent.md)）。拒否の側で
- * 選ぶのは、同意すると計測 id が配られ、測っている画面と関係のない `Set-Cookie` が応答に載るためです。
+ * 数値も面が乗った状態のものになります。拒否の側で選ぶのは、同意すると計測 id が配られ、
+ * 測っている画面と関係のない `Set-Cookie` が応答に載るためです。
  *
  * **要求ヘッダでは届きません。** 面を出すかどうかを決めるのはブラウザ側で `document.cookie` を
  * 読む層であり、Lighthouse に足させられるのは要求ヘッダだけだからです。だからブラウザを自分で
@@ -284,8 +270,7 @@ function trigger(baseRef: string): void {
  * 測り終えた結果を、予算と照らして報告する。
  *
  * @remarks
- * **全画面を測った側でしか呼べません。** 在るべき画面が居るかどうかの検査は、測った集合が
- * 全体であることを前提にしています。分割した 1 台がこれを呼ぶと、他の台が持つ画面がすべて
+ * **全画面を測った側でしか呼べません。** 分割した 1 台がこれを呼ぶと、他の台が持つ画面がすべて
  * 「宣言されているのに居ない」として上がります。
  */
 function judgeAll(measurements: readonly Measurement[], budget: Budget): void {
@@ -393,8 +378,7 @@ async function measureAll(): Promise<void> {
   // 呼ばれ方で決める。台数では決めない —— 1 台に割った実行も束ねる側を持っており、そちらが
   // 判定するのに、ここで台数を見て書き出しを飛ばすと束ねる側は何も見つけられない。
   //
-  // 判定するのは束ねる側 1 箇所。台は全画面を見ているとは限らず、在るべき画面の検査に
-  // 答えられない。
+  // 判定するのは束ねる側（`merge`）1 箇所で、台は判定しない。
   if (spec !== undefined) {
     writeFileSync(join(OUTPUT_DIR, shardFileName(shard)), JSON.stringify(measurements));
     console.error(

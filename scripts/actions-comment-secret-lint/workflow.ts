@@ -50,8 +50,8 @@ export type Workflow = {
  *
  * @remarks
  * ローカル参照（`./.github/workflows/x.yaml`）だけを解決します。リモート参照
- * （`owner/repo/.github/workflows/x.yaml@ref`）はこのリポジトリの中に定義が無く、渡した
- * secret がその先で何に使われるかを静的に読めないため `null` を返し、呼び出し側が落とします。
+ * （`owner/repo/.github/workflows/x.yaml@ref`）は `null` を返し、呼び出し側（`isPostingJob`）が
+ * 落とします。
  */
 export function localWorkflowFile(uses: string): string | null {
   const value = uses.trim();

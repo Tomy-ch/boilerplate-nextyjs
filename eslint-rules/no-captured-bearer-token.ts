@@ -3,7 +3,8 @@ import type { Rule, Scope } from "eslint";
 /**
  * 資格情報の取得口に、その場で組んだ関数や掴んだ値を渡させないルール。
  *
- * この検査が守る前提は [0112](../docs/adr/0112-data-classification-cache-boundary.md) 決定 5 が持つ。
+ * この検査が守る前提は `docs/rules.md`「データ分類と機微情報」の「資格情報は使用地点で
+ * `cookies()` から解決する」が持つ。
  *
  * 綴りごとに通す形が違う。
  *

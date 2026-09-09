@@ -31,7 +31,7 @@ function usesDevelopmentAuthorization(): boolean {
  * 同梱している Resolver を返す。
  *
  * @remarks
- * fork 先の差し替え単位は `SessionResolver` です（[README](./README.md) の「差し替え点」）。
+ * テンプレートから作った側の差し替え単位は `SessionResolver` です（[README](./README.md) の「差し替え点」）。
  *
  * cookie を触る側（`session.ts`）と入口の楽観判定（`optimistic-session.ts`）の両方から使うため、
  * どちらにも寄せずに独立させています。片方へ置くと、もう片方が `next/headers` のような
@@ -43,9 +43,8 @@ function usesDevelopmentAuthorization(): boolean {
 export function getSessionResolver(): SessionResolver {
   const config = getAuthConfig();
 
-  // 署名鍵を汚す。文字列は参照で追えないので値そのものを登録し、登録の寿命はこの値を持つ
-  // singleton に握らせる（[0030](../../../../docs/adr/0030-environment-variable-management.md) §8）。
-  // config カーネルは react を持ち込めないため、登録は読む側であるここが行う。
+  // 署名鍵を汚す。文字列は参照で追えないので値そのものを登録し、登録の寿命はこの値を持つ singleton
+  // に握らせる。config カーネルは react を持ち込めないため、登録は読む側であるここが行う。
   taintUniqueValue(
     "session の署名鍵は server 専用です。Client Component へ渡さないでください",
     config,

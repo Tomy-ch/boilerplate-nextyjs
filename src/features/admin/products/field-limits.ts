@@ -3,7 +3,7 @@
  *
  * @remarks
  * 契約が課す上限です。ここで止めるのは、超えた入力が往復してから 422 で返るのを待たせないため
- * だけで、**判定の正は backend にあります**（[0062](../../../../docs/adr/0062-form-input-validation.md)）。
+ * だけで、**判定の正は backend にあります**。
  */
 export const PRODUCT_NAME_MAX_LENGTH = 255;
 

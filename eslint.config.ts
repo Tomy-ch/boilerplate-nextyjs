@@ -34,8 +34,8 @@ const nodeBuiltinImports = {
 /**
  * アイコンの供給元の締め出し。
  *
- * 供給元を名指しできるのは `src/components/icon.ts` だけで、そこは締め出しの側から外してある
- * （[0052](docs/adr/0052-ui-component-policy.md)）。散らすと差し替えのときに取り残しが出る。
+ * 供給元を名指しできるのは `src/components/icon.ts` だけで、そこは締め出しの側から外してある。
+ * 散らすと差し替えのときに取り残しが出る。
  */
 const iconVendorImports = {
   group: ["@tabler/icons-react"],
@@ -115,10 +115,10 @@ export default [
     },
     rules: {
       // Biome では effect で state を導出する形や描画中の副作用を表現できないため、React Compiler
-      // 由来の診断だけを担う。有効化するルールの選び方は 0002 が正。
+      // 由来の診断だけを担う。
       //
       // **React Compiler を使うかどうかとは独立に維持する。** これらが止めるのは通常実装のバグで
-      // あって、Compiler の前提充足ではない（0042 決定 4）。
+      // あって、Compiler の前提充足ではない。
       "react-hooks/capitalized-calls": "error",
       "react-hooks/error-boundaries": "error",
       "react-hooks/gating": "error",
@@ -245,7 +245,7 @@ export default [
     },
   },
   {
-    // アイコンの公開面そのもの。ここだけが供給元を名指しするので、締め出しの側から外す。
+    // アイコンの公開面そのもの。`iconVendorImports` の締め出しから外す。
     files: ["src/components/icon.ts"],
     rules: {
       "no-restricted-imports": ["error", { patterns: commonImportRestrictions }],
@@ -253,8 +253,7 @@ export default [
   },
   {
     // ビューアーは `@` alias でアプリ本体のソースを直接参照する（`docs-viewer/README.md`）ので、
-    // アイコンも同じ公開面から取る。ここを締め出さないと、供給元を名指しできる場所が
-    // ワークスペースに 2 つできる。
+    // アイコンも同じ公開面から取る（`iconVendorImports`）。
     files: ["docs-viewer/src/**/*.{js,jsx,ts,tsx}"],
     languageOptions: { parser: tseslint.parser },
     rules: {
@@ -296,12 +295,11 @@ export default [
     // 危険なパターンの検出。SAST（opengrep）と同じ問いを、**型を解決したうえで
     // 編集中に**答える層として置く。走査が CI にしか無いと、指摘が届くのは push の後になる。
     //
-    // **推奨プリセット（`security.configs.recommended`）は当てない。** 0002 の能力ベース分担は
-    // 束の適用を禁じており、束を当てれば biome と重なる規則と、この層に対象の無い規則が同時に
-    // 入る。有効化するのは、biome に相当が無く、かつ表示層のコードで実際に起こりうるものだけ。
+    // **推奨プリセット（`security.configs.recommended`）は当てない。** 能力ベース分担は束の適用
+    // を禁じており、束を当てれば biome と重なる規則と、この層に対象の無い規則が同時に入る。有効化するのは、biome に相当が無く、かつ表示層のコードで実際に起こりうるものだけ。
     //
     // **入れる規則は、0 件の baseline を保てるものだけ。** 赤が常態になると、赤を見て手を
-    // 止める習慣のほうが先に壊れる（0110 §3.2）。除いた 5 つと、その理由:
+    // 止める習慣のほうが先に壊れる。除いた 5 つと、その理由:
     //
     // - `detect-object-injection` — `obj[key]` を全件鳴らす。TypeScript が型で保証している
     //   添字まで指摘になる

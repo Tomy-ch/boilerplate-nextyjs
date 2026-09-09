@@ -27,7 +27,7 @@ native `div` が持つ RDFa の `content` 属性も、名前を本文の props �
 だけで、この一段を通らない値は型として存在しません。
 
 ```tsx
-import { RichTextContent } from "@/components/rich-text/rich-text-content/rich-text-content";
+import { RichTextContent } from "@/components/design-system/rich-text/rich-text-content/rich-text-content";
 import { SanitizedRichText } from "@/model/rich-text/sanitized-rich-text";
 
 export function Body({ html }: { html: string }) {

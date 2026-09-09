@@ -26,9 +26,8 @@ import { DEV_AUTHORIZE_PATH, RETURN_URL_PARAM, STATE_PARAM } from "../../paths";
  *
  * @remarks
  * **1 つに畳んであります。** 対応づける値と理由を別々の nullable で受け取ると、「対応づける値が
- * 無いのに理由だけある」という到達し得ない組み合わせが型として書けます
- * （[0029](../../../../../docs/adr/0029-type-design-discipline.md)）。理由が立つのは認可 endpoint
- * から戻されたときだけで、そのときは対応づける値も必ず載っています。
+ * 無いのに理由だけある」という到達し得ない組み合わせが型として書けます。理由が立つのは
+ * 認可 endpoint から戻されたときだけで、そのときは対応づける値も必ず載っています。
  */
 export type AuthorizationHandoff = {
   /** 要求と応答を対応づける値。送信へそのまま載せる。 */
@@ -86,8 +85,7 @@ const ROLE_LABEL: Readonly<Record<SessionRole, string>> = {
  * 項目ごとの補足。
  *
  * @remarks
- * 同じ文言を複数の項目が使うため、リテラルを埋め込まず束ねます。外枠と入力欄の両方へ配るのは
- * `FormField` の側の仕事です。
+ * 外枠と入力欄の両方へ配るのは `FormField` の側の仕事です。
  */
 const SUBJECT_DESCRIPTION = "この値がそのまま session の利用者 ID になります。";
 const EXPIRES_DESCRIPTION = "短くすると、失効したあとの見え方をその場で確かめられます。";
@@ -158,8 +156,7 @@ function IssueSubmit() {
  * **接続先は書き換えられる形で出します**（{@link DevSessionFormProps.defaultIssuer}）。ずれたまま
  * 取ると、トークンは出るのに API で 401 になります。
  *
- * 役割は radio です。同時に 1 つしか選べないものを選ぶ操作であり、既定を持ちます
- * （[0053](../../../../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 役割は radio です。同時に 1 つしか選べないものを選ぶ操作であり、既定を持ちます。
  *
  * 失効までの秒数を指定できるのは、**失効したときの見え方を確かめるため**です。短い値を入れると、
  * その秒数のあとに保護された画面がどうなるかを実際に踏めます。

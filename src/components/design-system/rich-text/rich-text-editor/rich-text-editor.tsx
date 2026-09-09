@@ -4,10 +4,13 @@ import type { Editor } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import {
   type ChangeEvent,
+  type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
   useCallback,
+  useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 
@@ -43,6 +46,87 @@ const EDITOR_CONTENT_CLASS_NAME =
   "typeset typeset-docs min-h-40 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-active focus-visible:shadow-glow-primary";
 
 const TOOLBAR_BUTTON_CLASS_NAME = "size-8 min-w-8 p-0 [&_svg]:size-4";
+
+/**
+ * toolbar の中で矢印キーが行き来するボタンを、並び順に返します。
+ *
+ * 押せないボタンは focus も受けないため飛ばします。
+ *
+ * @param toolbar - `role="toolbar"` を持つ要素
+ * @returns いま押せるボタン
+ */
+function toolbarButtons(toolbar: HTMLElement): HTMLButtonElement[] {
+  return [...toolbar.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
+}
+
+/**
+ * 矢印キーで移った先の添字を返します。
+ *
+ * 端では反対側へ回ります。
+ *
+ * @param key - 押されたキー
+ * @param index - いま focus を持つボタンの添字
+ * @param count - 押せるボタンの数
+ * @returns 移る先の添字。toolbar の移動に使わないキーなら `undefined`
+ */
+function nextToolbarIndex(key: string, index: number, count: number): number | undefined {
+  switch (key) {
+    case "ArrowRight":
+      return (index + 1) % count;
+    case "ArrowLeft":
+      return (index - 1 + count) % count;
+    case "Home":
+      return 0;
+    case "End":
+      return count - 1;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * toolbar の中で場所を持つボタン（Tab の並びへ残すボタン）の添字を返します。
+ *
+ * focus を持つものが押せるボタンでなければ先頭にします。まだどれも focus を持っていない
+ * 初回と、focus を持ったまま押せなくなったときがこれにあたります。
+ *
+ * @param buttons - いま押せるボタン
+ * @param active - 最後に focus を持ったもの。まだ無ければ `undefined`
+ * @returns `buttons` の中の添字。`buttons` が空なら 0
+ */
+function toolbarStopIndex(
+  buttons: readonly HTMLButtonElement[],
+  active: EventTarget | undefined,
+): number {
+  // focus が乗った要素はボタンとは限らない（toolbar 自身が来る回がある）ので、型で絞ってから
+  // 引きます。絞れなければ -1 のまま先頭へ倒れ、絞れなかったことと「並びに居ない」ことが
+  // 同じ結果になります。
+  return Math.max(0, active instanceof HTMLButtonElement ? buttons.indexOf(active) : -1);
+}
+
+/**
+ * toolbar の tab stop を 1 つだけにします。
+ *
+ * `role="toolbar"` は Tab で 1 回に通り抜けられることを約束するため、場所を持つボタン
+ * （{@link toolbarStopIndex}）だけを Tab の並びへ残し、ほかは矢印キーでだけ届くようにします。
+ *
+ * @param toolbar - `role="toolbar"` を持つ要素
+ * @param active - 最後に focus を持ったもの。まだ無ければ `undefined`
+ * @returns Tab の並びへ残したボタン。押せるボタンが 1 つも無ければ `undefined`
+ */
+function syncToolbarTabStops(
+  toolbar: HTMLElement,
+  active: EventTarget | undefined,
+): HTMLButtonElement | undefined {
+  const buttons = toolbarButtons(toolbar);
+  const stop = buttons[toolbarStopIndex(buttons, active)];
+
+  for (const button of toolbar.querySelectorAll<HTMLButtonElement>("button")) {
+    button.tabIndex = button === stop ? 0 : -1;
+  }
+
+  return stop;
+}
 
 /**
  * 選択範囲にかかっている link の `href` を読み出します。
@@ -189,6 +273,39 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
     selector: (state) => state.editor.isActive("link"),
   });
   const isEditable = useEditorState({ editor, selector: (state) => state.editor.isEditable });
+  // toolbar は state で受ける。付く前の描画が 1 度あり、その回は揃える相手が無い。
+  const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null);
+  const activeToolbarButtonRef = useRef<HTMLButtonElement | undefined>(undefined);
+
+  // 描画のたびに揃える。プレビューの切り替えでボタンが作り直され、押せる操作も編集の内容で
+  // 変わるため、依存の列挙では取り切れない。
+  useEffect(() => {
+    if (toolbar === null) {
+      return;
+    }
+
+    activeToolbarButtonRef.current = syncToolbarTabStops(toolbar, activeToolbarButtonRef.current);
+  });
+
+  const handleToolbarFocus = useCallback((event: FocusEvent<HTMLDivElement>) => {
+    activeToolbarButtonRef.current = syncToolbarTabStops(event.currentTarget, event.target);
+  }, []);
+
+  const handleToolbarKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    const buttons = toolbarButtons(event.currentTarget);
+    const next = nextToolbarIndex(
+      event.key,
+      toolbarStopIndex(buttons, event.target),
+      buttons.length,
+    );
+
+    if (next === undefined) {
+      return;
+    }
+
+    event.preventDefault();
+    buttons[next]?.focus();
+  }, []);
 
   const togglePreview = useCallback(() => {
     setIsLinkFormOpen(false);
@@ -307,6 +424,9 @@ function RichTextEditorFrame({ className, editor }: { className?: string; editor
           aria-label="書式"
           className="flex flex-wrap items-center gap-1 border-border border-b p-1"
           data-slot="rich-text-editor-toolbar"
+          onFocus={handleToolbarFocus}
+          onKeyDown={handleToolbarKeyDown}
+          ref={setToolbar}
           role="toolbar"
         >
           {isPreviewing
@@ -375,7 +495,7 @@ export type RichTextEditorProps = {
   /**
    * 内容が変わるたびに、現在の内容を HTML 文字列として受け取る。
    *
-   * 保存・送信・検証は呼び出し元が行う。表示するときは `SanitizedRichText.from` を通す。
+   * 保存・送信・検証は呼び出し元が行う。表示前の扱いは {@link RichTextEditor} が持つ。
    */
   onChange: (html: string) => void;
   /**
@@ -421,7 +541,7 @@ export type RichTextEditorProps = {
  * リンクは toolbar の「リンク」から入力するほか、URL を入力または貼り付けると自動でリンクになる。
  * `http` / `https` / `mailto` とアプリ内のパスだけを受け付ける。
  *
- * 編集面は `textbox` として公開されるため、`label` でアクセシブルな名前を必ず与える。
+ * `label` は必ず与える（{@link RichTextEditorProps.label}）。
  *
  * @example
  * ```tsx
@@ -477,6 +597,8 @@ export function RichTextEditor({
       },
     },
     extensions: EDITOR_EXTENSIONS,
+    // これを外すと戻り値が `Editor | null` から `Editor` へ変わり、下の番人が死枝になる。
+    // 初回の描画を遅らせるのは、server の描画と食い違わせないためである。
     immediatelyRender: false,
     onUpdate: ({ editor: updated }) => onChange(updated.getHTML()),
   });

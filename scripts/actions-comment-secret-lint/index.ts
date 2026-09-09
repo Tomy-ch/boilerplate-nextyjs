@@ -6,7 +6,7 @@
 // 効かない。検査ログを `tee` でファイルへ落としたバイトは素通りするため、そのファイルを本文に
 // する `upsert-pr-comment` では、ログ上はマスク済みに見える値でも生のまま公開 PR コメントに
 // 載る。マスキングを当てにできない以上「本文を作るジョブに secret を渡さない」を規約として
-// 守るしかなく（ADR 0153）、この検査はその規約が将来 `env:` 1 行で破られることへの退行ガード。
+// 守るしかなく、この検査はその規約が将来 `env:` 1 行で破られることへの退行ガード。
 //
 // `GITHUB_TOKEN` はコメント投稿そのものに必要で、かつ Actions がジョブごとに発行する短命
 // トークンなので許可する。
@@ -44,7 +44,7 @@ function main(): void {
   const { findings, postingJobs } = collectFindings(sources, commentActions.dirs, postingWorkflows);
 
   // 定義があるのに投稿ジョブが 1 つも見つからないのは、参照の同定が壊れていることを意味する。
-  // 検査対象が消えたまま緑になるのを塞ぐ。
+  // `files` の 0 件と同じで、緑で返さない。
   if (commentActions.defined && postingJobs === 0) {
     abort(
       `${UPSERT_ACTION_DIR} の定義があるのに、それを使うジョブが 1 つも見つかりません（参照の同定が壊れています）`,
@@ -144,7 +144,7 @@ function report(
   findings: Finding[],
 ): void {
   if (findings.length === 0) {
-    // 投稿 action が無いリポジトリ（fork が削除した場合など）で「N ジョブ検査した」と出すと、
+    // 投稿 action が無いリポジトリ（テンプレートから作った側が削除した場合など）で「N ジョブ検査した」と出すと、
     // 検査が働いた結果に見える。実際は対象が無いだけなので、そう書く。
     console.log(
       defined

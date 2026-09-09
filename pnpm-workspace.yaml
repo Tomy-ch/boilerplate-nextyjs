@@ -10,6 +10,8 @@ packages:
 # pnpm は semver 種別ごとの冷却期間を設定できないため、minor の7日を一律下限にする。
 minimumReleaseAge: 10080
 # 緊急のセキュリティ修正は、影響を受ける特定バージョンだけを一時的に例外化する。(パッケージ名だけの例外は禁止)
+# 項目は `name@version` で書き、直上のコメントに理由と、窓が明ける日（YYYY-MM-DD）を添える。
+# 週次の棚卸し（make suppression-expiry）が宣言単位で読み、どちらか欠けていれば落ちる。
 minimumReleaseAgeExclude: []
 # 冷却期間を満たす版がなければ解決を失敗させる。
 minimumReleaseAgeStrict: true
@@ -24,7 +26,7 @@ minimumReleaseAgeIgnoreMissingTime: false
 # 各行には理由と撤去条件をコメントで添える。
 #
 # **上流が宣言した範囲の内側でだけ使う。** 範囲の外へ動かすと、上流が検証していない組み合わせを
-# こちらで作ることになる ([ADR 0110](docs/adr/0110-security-operations.md))。
+# こちらで作ることになる。
 overrides:
   # ajv (commitlint / orval / shadcn / @hookform/resolvers が引く) の推移的依存。
   # GHSA-7p8r-x3mc-p8w7 (high): authority 部のバックスラッシュで host の解釈が他のパーサとずれる。

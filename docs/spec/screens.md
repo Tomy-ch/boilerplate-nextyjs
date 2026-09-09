@@ -3,8 +3,8 @@
 輸入 EC サンプル(go-boilerplate 協調)。nextjs-boilerplate 実装時の入力資料。
 詳細な型・エラーコードは `go-boilerplate/openapi/openapi.gen.yaml` を正とする。本書は画面と API の対応関係・実装上の注意点の把握用である。認証だけは `go-boilerplate/docker/mock-auth-server/openapi/openapi.gen.yaml` の mock OIDC 契約を正とする。
 
-- 本書は**サンプルの仕様**であり、[v1 実装計画](plan/v1-implementation-plan.md) Phase 5 の PR 分解はここを入力とする
-- 本書に列挙された画面・feature は**原則としてサンプル破棄(爆破)の対象**である。**例外**(U9 ログイン画面等のコア残留分)と正確な境界は [v1 実装計画](plan/v1-implementation-plan.md) §3.5 が正
+- 本書は**サンプルの仕様**であり、[v1 実装計画](../plan/v1-implementation-plan.md) Phase 5 の PR 分解はここを入力とする
+- 本書に列挙された画面・feature は**原則としてサンプル破棄(爆破)の対象**であり、**本書自身も消える**。**例外**(ログイン画面等のコア残留分)と正確な境界は [`scripts/setup/remove-sample/sample-manifest.ts`](../../scripts/setup/remove-sample/sample-manifest.ts) の `SAMPLE_PATHS` が正
 - backend API の実装計画は [go-boilerplate #596](https://redirect.github.com/Tomy-ch/go-boilerplate/issues/596) を参照する。**未チェックの項目は未実装であり、OpenAPI に追加されるまでフロントから呼び出さない**。本書では現行 OpenAPI に存在する API だけを使用 API として記載する
 
 ---
@@ -19,9 +19,9 @@
 - 401 は「未ログイン / セッション切れ」として扱い、ログイン画面(U9、BFF route)へリダイレクト
 - 403 は「ログイン済みだが権限不足」。admin 系画面(A 系)で非 admin ユーザーがアクセスした場合に発生。UI 上は該当ボタン / 導線ごと出し分けるのが基本
 - 通貨: 商品の `price` は USD の decimal 文字列、購入集計の金額は USD セント整数である。`displayCurrency=JPY` を明示指定した時だけ `referenceAmount` が参考値として付与される。フロントは「参考」であることを表示上明示する
-- カート(U4)は **バックエンドが持つ**(`/v1/carts/me`)。未ログインでも使え、主体はゲストが `X-Cart-Session`、ログイン済みが Bearer で、両方あればログイン済みが優先される。**取得は明細ごとの再評価つき**で、買えない明細・値の変わった明細に `issues` が立ち、小計は `issues` が空の明細だけの合算(参考値)である。ログイン時のゲストからの引き継ぎは BFF が callback で起こす([ADR 0079](adr/0079-auth-frontend-seam.md) §7)
+- カート(U4)は **バックエンドが持つ**(`/v1/carts/me`)。未ログインでも使え、主体はゲストが `X-Cart-Session`、ログイン済みが Bearer で、両方あればログイン済みが優先される。**取得は明細ごとの再評価つき**で、買えない明細・値の変わった明細に `issues` が立ち、小計は `issues` が空の明細だけの合算(参考値)である。ログイン時のゲストからの引き継ぎは BFF が callback で起こす([ADR 0079](../adr/0079-auth-frontend-seam.md) §7)
 - 画像は `POST /v1/products/images`(multipart)でアップロードし、backend が発行したオブジェクトキー(`products/{uuid}.{ext}`)を保存する。配信元は Garage の公開エンドポイントで、`next/image` の `remotePatterns` へ allowlist 登録する。**ワイルドカードは使わない**
-- 商品説明(description)は **リッチテキスト**(TipTap で作成)。表示側は必ず sanitizer を通す(生の `dangerouslySetInnerHTML` 直接使用は禁止。`rules.md` #48)
+- 商品説明(description)は **リッチテキスト**(TipTap で作成)。表示側は必ず sanitizer を通す(生の `dangerouslySetInnerHTML` 直接使用は禁止。[実装規約「セキュリティ」](../rules.md)の「`dangerouslySetInnerHTML` は原則禁止する」)
 - ページネーションは基本 **cursor 方式**。無限スクロール(増分取得)の画面とページ送り相当の画面が混在するので、画面ごとの実装パターンに注意
 - Idempotency-Key が必要な書き込みは購入作成(U6)のみ。二重送信防止として実装すること
 
@@ -128,7 +128,7 @@
 
 ### ログイン / ログアウト(mock OIDC)
 
-Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock OIDC 契約を使う。フロントは BFF の URL(例: `/api/auth/login` / `/api/auth/logout`)だけを使い、IdP endpoint や token を直接扱わない。
+Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock OIDC 契約を使う。フロントが使うのは BFF の URL(例: `/api/auth/login` / `/api/auth/logout`)だけである(仲介の理由は §0)。
 
 | Method / Path | BFF の用途 | ブラウザが直接呼ばない理由 |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock 
 | 4 | ~~**在庫僅少一覧**~~ — **契約は決着済み**。`GET /v1/products/low-stock` が OpenAPI に入った。A1 の数値カードとは独立した後続機能なので、画面はまだ持たない | 契約は決着済み / 画面は後続 |
 | 5 | ~~**配達完了の対象を admin が指せない**~~ — **決着済み**。`GET /v1/purchases` に `statusCodes` と `includeOtherUsers` が入り、admin は発送済みの注文を列挙できる。A8 がその一覧と `deliver` を持つ | 決着済み |
 
-> **PostHog / Cookie 同意**: 本資料は「採否未決」としていたが、**v1 実装計画で「軽量 consent 機構 + ゲートは採用 / GTM・PostHog 本体は不採用」に確定**した([0131](adr/0131-cookie-consent.md) を exclusion から反転)。
+> **PostHog / Cookie 同意**: 軽量 consent 機構 + ゲートは採用、GTM・PostHog 本体は不採用([0131](../adr/0131-cookie-consent.md))。
 
 ---
 

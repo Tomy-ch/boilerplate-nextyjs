@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { stubValidEnvironment, VALID_ENVIRONMENT } from "./environment.fixture";
 
-/** リポジトリが同梱している秘密値。`env/.env.local` が積んでいるものと同じ。 */
+/** 同梱の秘密値。`AUTH_SESSION_SECRET` の schema が `local` / `ci` 以外で拒否する綴り。 */
 const SHIPPED_SESSION_SECRET = "local-development-session-secret-change-before-production";
 
 beforeEach(() => {

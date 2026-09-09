@@ -6,15 +6,11 @@
 
 Accepted
 
-（**採番はブロック帯で確定(2026-07-14・0001〜0155(トピック順ブロック帯))**。本 ADR は元 [0061](0061-form-mutation-ux.md)(フォーム・ミューテーション UX)を「1 ADR = 1 主題」方針で per-subject 分割した際、**変更結果の通知 UX(triage #19)**を独立起票したもの。日付 2026-07-14。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
-[0052](0052-ui-component-policy.md)(B2)は UI / form 部品(shadcn 系)を **v1 採用**したが、部品が手元にあっても「**操作結果をどの手段(インライン / トースト / redirect)で出すか**」(triage #19 通知 UI 使い分け)という規約は別途要る。これが空白のままだと、成功 / 失敗の通知手段が feature ごとにばらつき、実装者にも利用者にも一貫した UX が失われる。
+[0052](0052-ui-component-policy.md) は UI / form 部品(shadcn 系)を採用しているが、部品が手元にあっても「**操作結果をどの手段(インライン / トースト / redirect)で出すか**」という規約は別途要る。これが空白のままだと、成功 / 失敗の通知手段が feature ごとにばらつき、実装者にも利用者にも一貫した UX が失われる。
 
-triage 上、#19 の native 管轄は [0080](0080-error-handling.md)(エラー正規化)/ [0052](0052-ui-component-policy.md)(UI)/ [0100](0100-accessibility-target.md)(a11y)に分かれる。結果通知は送信メカニクス([0061](0061-form-mutation-ux.md))が返す `ActionState` を入力に、「フォーム文脈に留まる結果か離れる結果か」で手段を選ぶ層である。本 ADR はその使い分けの規約と live region a11y 要件を敷き、a11y の目標水準は [0100](0100-accessibility-target.md) に委ねる。
-
-本 ADR は decision 分類([0140](0140-documentation-operations.md))である。
+結果通知の隣接領域は [0080](0080-error-handling.md)(エラー正規化)/ [0052](0052-ui-component-policy.md)(UI)/ [0100](0100-accessibility-target.md)(a11y)に分かれる。結果通知は送信メカニクス([0061](0061-form-mutation-ux.md))が返す `ActionState` を入力に、「フォーム文脈に留まる結果か離れる結果か」で手段を選ぶ層である。本 ADR はその使い分けの規約と live region a11y 要件を敷き、a11y の目標水準は [0100](0100-accessibility-target.md) に委ねる。
 
 ## 決定
 
@@ -29,10 +25,12 @@ triage 上、#19 の native 管轄は [0080](0080-error-handling.md)(エラー�
 | **redirect + メッセージ** | 成功後に別画面へ遷移する結果(PRG) | Server Action の `redirect()` + 再検証([0071](0071-bff-api-integration.md) `revalidateTag` / `revalidatePath`) |
 
 - インラインに出す入力検証エラーの供給・検証タイミングは [0062](0062-form-input-validation.md) が管轄する。本 ADR はそれを**どの手段で表示するか**の使い分けを持つ
+- **インラインは、全体の要約と欄ごとの文言の両方を出す。** 項目が多いフォームでは、欄のそばの文言だけでは「どこがいくつ」誤っているのかを辿れない。要約は全体像と導線を、欄の文言はその場での指摘を担う。分岐条件は「直すべきものが入力の中に在るか」であり、送信そのものの失敗(通信・権限)は入力の中に直すものが無いため、要約ではなくフォーム全体の feedback として出す
+- **出し分けは失敗の種類で行い、文言では行わない。** `ActionState` は「何が起きたか」(機械向けの分類)と「何を言うか」(人間向けの文言)を別に持つ。画面が失敗の種類で出し分ける(衝突なら読み込み直す導線を添える、等)とき、文言そのものを合図にすると、文言へ動的な要素を足した瞬間に出し分けが黙って壊れる。両者は変更の理由が違う
 
 ### 2. トースト UI の帰属
 
-- **トースト UI の帰属**:トースト / 通知部品は **shadcn 系のトースト部品(sonner 等)**を `components` カーネルに置いて用いる([0052](0052-ui-component-policy.md) の shadcn/ui + copy-in 採用 / [0021](0021-frontend-responsibility.md)「`components` はトースト等の UI 状態を持てる」で帰属確定済み)。vendor 直参照は `components` カーネルに閉じ込める([0052](0052-ui-component-policy.md) の非ロックイン境界)
+- **トースト UI の帰属**:トースト / 通知部品は **`components` カーネル**に置いて用いる([0052](0052-ui-component-policy.md) の部品方針 / [0021](0021-frontend-responsibility.md)「`components` はトースト等の UI 状態を持てる」で帰属確定済み)。vendor 直参照は `components` カーネルに閉じ込める([0052](0052-ui-component-policy.md) の非ロックイン境界)
 - 本 ADR はトースト *コンポーネント* を再帰属させず、**使い分けの規約**と下記 a11y 要件を持つ
 
 ### 3. a11y(live region・権威は [0100](0100-accessibility-target.md))
@@ -43,21 +41,20 @@ triage 上、#19 の native 管轄は [0080](0080-error-handling.md)(エラー�
 ## 禁止事項
 
 - ❌ 通知手段(インライン / トースト / redirect)の使い分けを feature ごとにばらつかせること
+- ❌ 通知の出し分けを文言の一致で行うこと(分類で行う。文言は人間向け)
 - ❌ トースト等の非同期通知を live region なしで出すこと(支援技術に伝わらない = [0100](0100-accessibility-target.md) 違反)
 - ❌ トースト UI を `components` 以外へ置く / shadcn 以外の UI コンポーネントライブラリを並行導入して代替すること([0021](0021-frontend-responsibility.md) 帰属 / [0052](0052-ui-component-policy.md) の shadcn 採用・並行同梱禁止)
 
 ## 補足
 
-- **分割の家**:本 ADR は元 [0061](0061-form-mutation-ux.md) から #19 を分離したもの。native 管轄は [0080](0080-error-handling.md)(エラー供給元)/ [0052](0052-ui-component-policy.md)(トースト UI 帰属)/ [0100](0100-accessibility-target.md)(a11y 水準)に分かれるが、送信フロー UX の一部としての通知手段使い分け規約は本 ADR が束ねる。最終整理フェーズで #19 を [0080](0080-error-handling.md) 追補等へさらに寄せ直す余地がある(本 ADR は独立起票)
-- 本 ADR は [0140](0140-documentation-operations.md) タクソノミーで **decision** 分類。日常強制の細則(トースト表示秒数・文言トーン等)は `rules.md` 新設時にそちらへ寄せる
+- 日常強制の細則(トースト表示秒数・文言トーン等)は [docs/rules.md](../rules.md) が持つ
 
 ## 関連 ADR
 
 - [0061-form-mutation-ux.md](0061-form-mutation-ux.md) — 送信メカニクス(本 ADR が入力に選ぶ `ActionState` 契約の供給元)
-- [0062-form-input-validation.md](0062-form-input-validation.md) — 入力検証 UX(インラインに出すフィールドエラーの供給元・元 0061 の姉妹分割)
-- [0080-error-handling.md](0080-error-handling.md)(B6)— errors sentinel / 境界正規化(`ActionState` が運ぶエラーの供給元・#19 の native 管轄の一部)
-- [0052-ui-component-policy.md](0052-ui-component-policy.md)(B2)— UI / form 部品(shadcn 系)採用(v1)。トースト / 通知は shadcn 系部品(sonner 等)を `components` で用いる
-- [0100-accessibility-target.md](0100-accessibility-target.md)(C2)— a11y 目標水準の権威(live region 要件自体は本 ADR が規定)
-- [0071-bff-api-integration.md](0071-bff-api-integration.md)(B3)— Server Action / 再検証(redirect 通知・ミューテーション後反映の連動)
-- [0021-frontend-responsibility.md](0021-frontend-responsibility.md)(A3)— `components`(トースト UI 帰属)
-- [0140-documentation-operations.md](0140-documentation-operations.md)(D1)— ドキュメントタクソノミー(本 ADR = decision)
+- [0062-form-input-validation.md](0062-form-input-validation.md) — 入力検証 UX(インラインに出すフィールドエラーの供給元)
+- [0080-error-handling.md](0080-error-handling.md) — errors sentinel / 境界正規化(`ActionState` が運ぶエラーの供給元)
+- [0052-ui-component-policy.md](0052-ui-component-policy.md) — UI / form 部品(shadcn 系)採用。トースト / 通知部品は `components` で用いる
+- [0100-accessibility-target.md](0100-accessibility-target.md) — a11y 目標水準の権威(live region 要件自体は本 ADR が規定)
+- [0071-bff-api-integration.md](0071-bff-api-integration.md) — Server Action / 再検証(redirect 通知・ミューテーション後反映の連動)
+- [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — `components`(トースト UI 帰属)

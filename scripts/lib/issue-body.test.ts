@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { composeIssueBody } from "./issue-body";
+import { composeIssueBody, drawModelProse } from "./issue-body";
 
 describe("composeIssueBody", () => {
   // ----- 正常系 -----
@@ -53,5 +53,46 @@ describe("composeIssueBody", () => {
         note: "make baseline-prune を実行してください。",
       }),
     ).toBe("置き場の大きさ\n\nmake baseline-prune を実行してください。\n");
+  });
+
+  it("モデルの散文は字下げせず、取り消せない記法だけを外して描く", () => {
+    expect(
+      composeIssueBody({
+        evidence: { kind: "model-prose", text: "## 摩擦\n\n@octocat が指摘した" },
+        note: "案内",
+      }),
+    ).toBe("## 摩擦\n\n`@octocat` が指摘した\n\n案内\n");
+  });
+});
+
+describe("drawModelProse", () => {
+  // ----- 正常系 -----
+  it("散文と markdown の記法はそのまま残す", () => {
+    expect(
+      drawModelProse("## 摩擦\n\n- ゲートを 2 回回した（#12）\n\n`code` も **強調** も残る"),
+    ).toBe("## 摩擦\n\n- ゲートを 2 回回した（#12）\n\n`code` も **強調** も残る");
+  });
+
+  it("mention をコードスパンへ入れて、名前は読めるまま通知だけ殺す", () => {
+    expect(drawModelProse("@octocat と @some-user へ")).toBe("`@octocat` と `@some-user` へ");
+  });
+
+  it("他スレッドへの生のリンクを redirect.github.com へ寄せる", () => {
+    expect(drawModelProse("https://github.com/vercel/next.js/issues/1 を見る")).toBe(
+      "https://redirect.github.com/vercel/next.js/issues/1 を見る",
+    );
+  });
+
+  // ----- 異常系 -----
+  it("mention でないものを mention として囲まない", () => {
+    expect(drawModelProse("a@example.test / `@octocat` / path/@scope")).toBe(
+      "a@example.test / `@octocat` / path/@scope",
+    );
+  });
+
+  it("スレッドを指さない GitHub の URL は寄せない", () => {
+    expect(drawModelProse("https://github.com/o/r/commit/abc1234")).toBe(
+      "https://github.com/o/r/commit/abc1234",
+    );
   });
 });

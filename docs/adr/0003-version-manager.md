@@ -13,13 +13,15 @@ Accepted
 ### 1. バージョン宣言の SSOT 集約
 
 `mise.toml` 1 ファイルに「対象ツールとその固定バージョン」をまとめて宣言する。
-従来運用していた以下を集約・廃止できる。
+次のような、ツールごと・用途ごとに分かれた宣言は置かない。
 
 - `.node-version` / `.nvmrc`
-- `tools.yaml` ＋ それを `.makefiles/*.mk` へ同期する独自スクリプト
-- corepack 経由の pnpm バージョン埋め込み
+- ツール一覧の yaml と、それを `.makefiles/*.mk` へ同期する独自スクリプト
+- corepack 経由の pnpm バージョン埋め込み（`package.json` の `packageManager`）
 
-レビュー時に「何がどのバージョンか」を 1 ファイルで把握できる。
+宣言が 1 ファイルなので、レビュー時に「何がどのバージョンか」を 1 箇所で把握できる。
+
+`packageManager` + Corepack は冗長なだけでは済まない。Corepack と mise が同じ `pnpm` を PATH へ載せる 2 つ目の供給経路になり、pin が 2 箇所へ割れて SSOT が破れる。活性化していない側の `pnpm` が動けば、素の pnpm が `pnpm-workspace.yaml` を勝手に書き換える事故経路（`repo-ops` スキル）をリポジトリ自身が開くことになる。置くとすれば、mise が `packageManager` を読んで自らの pin と突き合わせ、二重管理にならない機構を持ったときに限る。素の pnpm を叩いて事故が起きたことは理由にならない —— それは宣言の不在ではなく実行経路の誤りである。
 
 ### 2. ベンダーロック耐性 — 仕様書として読めるファイル
 
@@ -45,7 +47,7 @@ mise の現状シェアは asdf / nodenv / nvm / volta 等と拮抗しており�
 │   └ ツール・言語バージョンの宣言（唯一の真実）            │
 ├─────────────────────────────────────────────────────────┤
 │ 契約層        :  Makefile                                │
-│   └ make install-tools / make sync-versions など        │
+│   └ make install-tools / make actions-pin-check など    │
 │     開発者が叩く I/F。実装の差し替え点はここに集約        │
 ├─────────────────────────────────────────────────────────┤
 │ 配送層        :  レイヤごとに別実装                       │
@@ -78,6 +80,7 @@ mise への依存は **配送層 (host)** に閉じている。SSOT / 契約 / �
 - バージョンはパッチまで明示する（再現性のため）
 - **backend (`core:` / `aqua:` 等) を全エントリで明示する**。mise のレジストリは 1 つの短縮名に複数 backend を対応させており、どれが既定かはレジストリ側の都合で変わりうる。短縮名で書くと、その差し替えが**取得元の変更として現れず、バージョンも lockfile も動かないまま別の配布物が入る**。明示すれば SSOT が「何を・どこから取るか」まで宣言したことになる
   - **一様に適用する**。一部のツールにだけ課す運用は、読み手が「意図的な線引き」と「書き漏れ」を区別できず、規約として機能しない
+  - 明示をやめる判断は前提の側からしか起きない —— mise がレジストリのマッピング固定を宣言の外で保証するようになるか、明示した backend が作った側の環境で解決できない事例が出るかのどちらかである。記述が冗長であることは理由にならない
   - これが守るのはレジストリのマッピング差し替えだけである。配布物そのものの改竄は mise 既定の checksum / cosign 検証が担う。両者は別の層であり、片方が他方を代替しない
 - mise の機能利用を前提とした追加機能（タスク定義 `[tasks]` / 環境変数 `[env]` 等）はここに置かない。SSOT の純度を保つため、mise 固有の付加機能は別ファイル / Makefile 側で扱う
 
@@ -86,13 +89,13 @@ mise への依存は **配送層 (host)** に閉じている。SSOT / 契約 / �
 ### host（開発者ワークステーション）
 
 - mise を既定の backend として推奨。`make install-tools` がエントリポイント
-- フォーク先や個人開発で mise を使いたくない場合、`.makefiles/tools/setup.mk` の `install-tools` ターゲットを別実装（nodenv / volta 等）に差し替えれば済む。SSOT (`mise.toml`) はそのままで読める
+- テンプレートから作った側や個人開発で mise を使いたくない場合、`.makefiles/tools/setup.mk` の `install-tools` ターゲットを別実装（nodenv / volta 等）に差し替えれば済む。SSOT (`mise.toml`) はそのままで読める
 
 ### Docker
 
-- 公式 base image (`node:X.Y.Z-alpine`) を使う。Docker レイヤキャッシュとの相性を優先
-- Dockerfile 内で `mise install` を実行しない（mise を Docker に持ち込むと、配送層に mise 依存が広がるため）
-- Dockerfile の `FROM` タグと `mise.toml` の整合性は **`make sync-versions` 相当の仕組み** で担保する（未整備の場合は手動で同期し、PR でレビューする）
+- **アプリ本体を動かす `Dockerfile` は同梱しない**([0011](0011-no-docker.md))。したがって配送する image のタグと `mise.toml` を突き合わせる問題は起きない
+- **開発を支える周辺サービス**（観測基盤 / 開発用 IdP 等）だけが container で立つ。そこへ mise を持ち込まない —— 配送層に mise 依存を広げないため
+- 周辺サービスの image は**タグではなく digest で固定**し、固定値はロックファイルが持つ（`make images-pin-check` が差分で落とす）。人が写す工程を作らない
 
 ### CI
 
@@ -121,6 +124,7 @@ mise への依存は **配送層 (host)** に閉じている。SSOT / 契約 / �
 - ❌ `mise.toml` を別の version manager で二重管理すること（SSOT が壊れる）
 - ❌ 配送層に mise コマンドを撒くこと（Dockerfile に `RUN mise install ...`、CI ジョブで直接 `mise install` チェーンを組む等）。配送層は各環境のネイティブ手段で完結させる
 - ❌ `mise.toml` に mise 固有のタスク / 環境変数定義を入れること（SSOT の純度を保つ）
+- ❌ npm パッケージを `npm:` backend で取ること。mise 経由の npm パッケージは lockfile にも `pnpm audit` にも載らず、[0001](0001-package-manager.md) の単一経路と冷却期間の検疫を迂回する 2 つ目の npm 供給経路になる。Node で動くものは `pnpm add -DE` で取る（[0156](0156-browser-observation-tooling.md) 取得経路）。見直すのは pnpm が冷却期間・lockfile・公開日時を返さないレジストリの拒否を提供しなくなったときだけで、「mise に寄せると SSOT が 1 つになる」は理由にならない —— バイナリと npm パッケージでは配布経路も検疫の手段も異なる
 - ❌ **`mise exec -- <command>` でコマンドを包むこと（全面禁止）**。手で打つコマンド・`.lefthook.yaml` の hook・`.makefiles/` のレシピ・スクリプトのいずれでも使わない。1 コマンドに 2 通りの書き方が生まれ、どちらが正か読めなくなる。加えて、包み込みは PATH の不備をその呼び出しの中だけで覆い隠すため、包み忘れた次の呼び出し側に同じ失敗が回る
 - ❌ メジャーのみ・マイナーのみのバージョン指定（再現性が劣化する）
 

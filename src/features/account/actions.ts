@@ -51,11 +51,10 @@ function rejectedFieldsState(error: unknown): ProfileFormState | undefined {
  *
  * @remarks
  * 入力の読み取りと検証は `parseProfileForm` が持ちます。ここが持つのは**編成**だけで、解いて、
- * 渡して、結果を分類します（[0021](../../../docs/adr/0021-frontend-responsibility.md)）。
+ * 渡して、結果を分類します。
  *
- * 成功しても画面を移しません。フォームの文脈に留まる保存なので、通知は toast が担います
- * （[0063](../../../docs/adr/0063-mutation-result-notification.md)）。マイページ側は次に開いた
- * ときに新しい内容が出るよう、ここで再検証を要求しておきます。
+ * 成功しても画面を移しません。フォームの文脈に留まる保存なので、通知は toast が担います。
+ * マイページ側は次に開いたときに新しい内容が出るよう、ここで再検証を要求しておきます。
  */
 export async function updateProfileAction(
   _previous: ProfileFormState,
@@ -86,8 +85,8 @@ export async function updateProfileAction(
  *
  * @remarks
  * 成立したら戻り先へ送ります。登録は画面に留まる操作ではなく、**登録を終えて初めて開ける画面**
- * があるためです（[0063](../../../docs/adr/0063-mutation-result-notification.md)）。戻り先は
- * 保護された画面で弾かれた利用者が元居た場所で、画面が hidden で載せています。
+ * があるためです。戻り先は保護された画面で弾かれた利用者が元居た場所で、画面が hidden で
+ * 載せています。
  *
  * 冪等キーは画面が載せたものをそのまま渡します（`newIdempotencyKey`）。
  *

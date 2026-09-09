@@ -16,9 +16,9 @@ export type FormFieldProps = {
    * 入力欄を組み立てる。渡される属性をそのまま入力欄へ広げる。
    *
    * @remarks
-   * **受け取る形にしてあるのは、付け忘れを起こせなくするためです。** 属性を呼び出し元が自分で
-   * 組んでいた頃は、`FormField` だけを使って属性を通さない画面が実在し、`aria-invalid` が
-   * 落ちていました。何を与えるかは `fieldControlAttributes` が 1 か所で決めます。
+   * **受け取る形にしてあるのは、付け忘れを起こせなくするためです。** 呼び出し元に組ませると、
+   * `FormField` だけを使って属性を通さない画面が書けてしまいます。何を与えるかは
+   * `fieldControlAttributes` が 1 か所で決めます。
    */
   children: (control: FieldControlAttributes) => ReactNode;
   /** 入力欄の `id`。label の `htmlFor` が指し、誤りと補足の `id` もここから導く。 */
@@ -52,8 +52,8 @@ export type FormFieldProps = {
  * label と入力欄へ配る。
  *
  * **入力欄の `aria-*` は、children へ渡して呼び出し元に広げてもらう。** 入力欄そのものは
- * 受け取らないので直接は触れないが、**何を与えるかはここが決める**。呼び出し元が組む形にすると、
- * 外枠だけを使って属性を通さない画面が書けてしまう。
+ * 受け取らないので直接は触れないが、**何を与えるかはここが決める**（理由は
+ * {@link FormFieldProps.children}）。
  *
  * 検証も、必須かどうかの判定も持たない。どちらも呼び出し元が検証スキーマから導いて渡す。
  *

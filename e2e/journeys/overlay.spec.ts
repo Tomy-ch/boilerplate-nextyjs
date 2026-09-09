@@ -2,7 +2,7 @@ import { expect, test } from "../lib/test";
 import { loadBreakpoints, VIEWPORT_HEIGHT } from "../lib/viewports";
 
 /**
- * 被せた面から画面を移す（[0053](../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 被せた面から画面を移す。
  *
  * @remarks
  * 背面を塞ぐ overlay は開いた時点で履歴を 1 つ積み、戻る操作でそれを消して自分だけを閉じます。

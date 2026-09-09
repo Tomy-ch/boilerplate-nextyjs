@@ -2,12 +2,12 @@ name: Build
 
 # next build, plus the checks that only the build artifact can answer. Nothing local
 # mirrors this one: the pre-push hook stops at typecheck because a full build is too
-# slow for a hook, so CI is the only place a broken build is caught (ADR 0153).
+# slow for a hook, so CI is the only place a broken build is caught.
 #
 # The render-mode check rides along because the artifact is already here. A page baked
 # at build time type-checks, passes its tests, and keeps CI green while serving content
 # that stopped being true — and baking it also demands the backend be reachable during
-# the build, which ADR 0011 does not promise. Adding a second build to catch that would
+# the build, which the delivery boundary does not promise. Adding a second build to catch that would
 # cost another ten minutes for a comparison a manifest already answers.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
@@ -24,9 +24,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development — the build then fails on a value that is only meant for a workstation.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 

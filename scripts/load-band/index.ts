@@ -18,7 +18,8 @@ function askWorktreeCount(): number | null {
 
 const worktrees = askWorktreeCount();
 const cpus = availableParallelism();
-const [loadAverage] = loadavg();
+// 1 分平均。値を持たない OS は 0 を返すので、届かなかったときも同じ 0 として扱う。
+const [loadAverage = 0] = loadavg();
 
 // 数えられなかったときは 1 窓として扱う。配分を絞らない側へ倒したうえで、倒した事実を根拠へ足す。
 const resolution = resolveBand({ worktrees: worktrees ?? 1, cpus, loadAverage });

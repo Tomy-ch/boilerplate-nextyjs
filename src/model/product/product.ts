@@ -7,7 +7,7 @@ import type { CursorPage } from "../pagination";
  *
  * @remarks
  * 生成スキーマの中で組み合わせる呼び出しがこれを直接使い、それ以外は {@link toProductId} を
- * 通します（[0029](../../../docs/adr/0029-type-design-discipline.md) §3）。
+ * 通します。
  */
 export const productIdSchema = z.string().brand<"product">();
 
@@ -16,8 +16,7 @@ export const productIdSchema = z.string().brand<"product">();
  *
  * @remarks
  * 素の `string` を代入できない形にしてあります。商品・利用者・購入の識別子はいずれも UUID の
- * 文字列で、取り違えても型では止まらないためです
- * （[0029](../../../docs/adr/0029-type-design-discipline.md) §3）。
+ * 文字列で、取り違えても型では止まらないためです。
  */
 export type ProductId = z.infer<typeof productIdSchema>;
 
@@ -29,7 +28,7 @@ export type ProductId = z.infer<typeof productIdSchema>;
  * フォームの受け取り・route の動的セグメント）で 1 度だけ通し、内側では確定した型を持ち回ります。
  *
  * 実在するかは検査しません。識別子を知っているのはバックエンドであり、存在しない値は取得が
- * `not-found` として返します（[0070](../../../docs/adr/0070-backend-role-separation.md)）。
+ * `not-found` として返します。
  * ここが担うのは、どの種類の識別子かを型に載せることだけです。
  */
 export function toProductId(value: string): ProductId {
@@ -86,7 +85,7 @@ export type ProductStatus = ProductRef & {
  *
  * @remarks
  * 契約の wire 型ではなく、表示のための型です。両者を分けるのは、契約の制約が表示の都合とは
- * 別の理由で動くためです（[0070](../../../docs/adr/0070-backend-role-separation.md)）。
+ * 別の理由で動くためです。
  */
 export type Product = {
   id: ProductId;
@@ -185,7 +184,7 @@ export type ProductPage = CursorPage<Product>;
  * 一覧に要るものだけを素の値で持つ形にして、往復しても壊れないことを型で示します。
  *
  * 画像は URL まで解決した状態で持ちます。オブジェクトキーから URL を組むには配信元の設定が
- * 要り、設定を読めるのは `adapters` までだからです（[0021](../../../docs/adr/0021-frontend-responsibility.md)）。
+ * 要り、設定を読めるのは `adapters` までだからです。
  */
 export type ProductListItem = {
   readonly id: ProductId;

@@ -3,8 +3,8 @@ import { expect, test } from "../lib/test";
 
 /**
  * 索引させない起動（`SITE_INDEXABLE` 未指定 = `off`）で、公開面が索引を断っていること
- * （`docs/rules.md` #63）。索引させる側は `make e2e-metadata` が別の build で確かめる
- * （`e2e/metadata/`）。両方が通ってはじめて、切り替えが設定で効いていると言える。
+ * （`docs/rules.md`「設定と環境」の「索引させてよい環境だけが `SITE_INDEXABLE=on` を宣言する」）。
+ * 索引させる側は `make e2e-metadata` が別の build で確かめる（`e2e/metadata/`）。両方が通ってはじめて、切り替えが設定で効いていると言える。
  */
 
 /**

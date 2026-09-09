@@ -11,9 +11,8 @@ import { findUndeclaredDirectories } from "./lib/test-requirement";
  * 検査の中身は `lib/test-requirement.ts` が持ち、ここはツリーの走査だけを担う
  * (`one-to-one.gate.test.ts` と同形)。
  *
- * 宣言が無いと、[0090](../docs/adr/0090-testing-strategy.md) の層別責務表のどの行に照らせば
- * よいかが引けない。レビューする側は「何を果たすべきか」を対象の見た目から推測することになり、
- * 推測は次に同じディレクトリを見る人と一致しない。
+ * 宣言が無いと、層別責務表のどの行に照らせばよいかが引けない。レビューする側は「何を果たす
+ * べきか」を対象の見た目から推測することになり、推測は次に同じディレクトリを見る人と一致しない。
  */
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, "..");

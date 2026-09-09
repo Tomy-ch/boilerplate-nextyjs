@@ -146,8 +146,7 @@ function scanRepository(): Scan {
       continue;
     }
 
-    // 検査はソース側から歩き、対応するテストを読む。対応するソースを持たないテストにはその
-    // 入口が無いため、宣言されているかどうかをここで見る。
+    // ソース側からは辿れないテスト。宣言されているかどうかをここで見る。
     if (/\.test\.tsx?$/.test(inRepository)) {
       const sourcePath = resolveSourceFile(absolute, existsSync);
 
@@ -208,8 +207,7 @@ describe("1:1 テスト対応", () => {
     () => {
       const scan = scanRepository();
 
-      // 依存を解決できないと型が any になり、呼べる export を取りこぼしたまま違反ゼロを
-      // 報告する。違反より先にこちらを主張して、ゲートが黙った状態を緑にしない。
+      // 違反より先に `unresolved` を主張して、ゲートが黙った状態を緑にしない。
       expect(scan.unresolved.join("\n")).toBe("");
       expect(scan.checkedFiles).toBeGreaterThan(0);
       expect(formatViolations(scan.violations)).toBe("");

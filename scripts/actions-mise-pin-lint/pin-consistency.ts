@@ -28,7 +28,7 @@ export function readPin(source: string): MisePin {
   return {
     version: VERSION_PATTERN.exec(source)?.[1] ?? null,
     digest: DIGEST_PATTERN.exec(source)?.[1] ?? null,
-    cacheKey: CACHE_KEY_PATTERN.exec(source)?.[1].trim() || null,
+    cacheKey: CACHE_KEY_PATTERN.exec(source)?.[1]?.trim() || null,
   };
 }
 

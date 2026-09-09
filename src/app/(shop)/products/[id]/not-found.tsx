@@ -8,8 +8,7 @@ import { ErrorKind } from "@/errors/error-kind";
  * 商品詳細の not-found 境界。
  *
  * @remarks
- * 表示だけを持ちます。文言は分類ごとに `errors` が持つため、ここで組み立てません
- * （[0080](../../../../../docs/adr/0080-error-handling.md)）。
+ * 表示だけを持ちます。文言は分類ごとに `errors` が持つため、ここで組み立てません。
  */
 export default function ProductDetailNotFound() {
   return (

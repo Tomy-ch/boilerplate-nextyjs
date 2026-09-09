@@ -28,6 +28,9 @@ export type ScrollAreaProps = ComponentProps<"section"> & {
  * が自動でスクロールするため、領域自体の tab stop は増えるだけになる。読み取り専用の内容では
  * 外さない。
  *
+ * 既定ではスクロールを親へ連鎖させない（`overscroll-contain`）。下層と独立した面として重なる領域を
+ * 想定した既定なので、本文の流れに置く領域は `className` に `overscroll-auto` を渡して連鎖させる。
+ *
  * scrollbar は browser と OS が描画するため、見た目は環境で異なる。統一した scrollbar が要件に
  * なった場合は、client island の scroll area を別途追加する。
  *

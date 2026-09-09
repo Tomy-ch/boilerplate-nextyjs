@@ -34,7 +34,7 @@
 
 import { useCallback, useState } from "react";
 
-import { SavedViews, type SavedView } from "@/components/ui/saved-views/saved-views";
+import { SavedViews, type SavedView } from "@/components/app-starter/saved-views/saved-views";
 
 export function ListToolbar({ initialViews }: { initialViews: readonly SavedView[] }) {
   const [views, setViews] = useState(initialViews);
@@ -106,7 +106,7 @@ keyboard 操作と読み上げが壊れるためです。
 名前は前後の空白を落として渡します。空白だけの名前では保存 button が押せません。名前の重複は
 許します。同じ名前を許すかどうかは保存先の制約であり、この component は判断しません。
 
-vendor は Radix（`DropdownMenu` / `Dialog` / `AlertDialog`）で、公開 API には出しません。
+vendor は Radix（`DropdownMenu` / `Dialog` / `AlertDialog`）です。
 
 ## Storybook とテスト
 

@@ -16,8 +16,7 @@ import { EXCLUDED_FROM_CHECKS } from "./lib/untested-modules";
  * `scripts/lib/` を開いた人にしか見えないものになる。
  *
  * **ゲートが見るのは記録の有無だけで、承認は見ない。** 除外を増やしてよいかの判断は PR の
- * レビューに残る([0090](../docs/adr/0090-testing-strategy.md))。機械が代われるのは「書いて
- * あるか」までである。
+ * レビューに残る。機械が代われるのは「書いてあるか」までである。
  */
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, "..");

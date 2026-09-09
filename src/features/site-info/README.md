@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 画面まるごとの story は例外
 test-requirement: feature
 ---
 
@@ -78,7 +78,6 @@ E2E の画面比較が受け持ちます（`e2e/lib/screens.ts` に `about` / `p
 ## 運用
 
 - **どちらも静的に描画します**。取得を持たず、内容が変わるのはコードを書き換えたときだけです
-  （[0040](../../../docs/adr/0040-routing-rendering-strategy.md)）
 - **保護の対象にしません**。免責も保存先も、ログインする前・入力する前に読めなければ意味を
   持ちません
 - **プライバシーの説明は一般的な体裁を採りません**。入力した情報がどこに残るかは、この
@@ -96,4 +95,10 @@ E2E の画面比較が受け持ちます（`e2e/lib/screens.ts` に `about` / `p
   状態を作れます
 - **リポジトリの説明を HoverCard にしか置きません**。常時出すとフッターが本文と同じ量の文字を
   持ちます。押した先が何かはボタンの文言だけで判るようにしてあるので、補足を読めなくても
-  導線としては成立します（[0053](../../../docs/adr/0053-ui-component-interaction-seam.md)）
+  導線としては成立します
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。他 feature へ貸すものを `facade/` に出す
+- [0040](../../../docs/adr/0040-routing-rendering-strategy.md) — 描画戦略。取得を持たない面を静的に配る
+- [0053](../../../docs/adr/0053-ui-component-interaction-seam.md) — 操作の a11y 継ぎ目。補足を読めなくても導線が成立する条件

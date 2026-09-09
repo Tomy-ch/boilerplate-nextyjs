@@ -21,10 +21,7 @@ on:
       - 'release/**'
   workflow_dispatch:
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development. Storybook loads `next.config.ts` to build the preview, so the refusal lands
-# there — and `storybook build` reports success anyway, leaving a tree with no preview.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 
@@ -133,7 +130,7 @@ jobs:
           # the issue matters more than the table, so every fallback ends in something
           # printable. **Which fallback fired decides how the evidence may be rendered**: the
           # table is this repository's own, while the log tail is whatever the tools printed
-          # and must not become markup (ADR 0153 §5).
+          # and must not become markup.
           kind=authored
           pnpm exec tsx scripts/vrt table tmp/vrt/report.json > /tmp/vrt-evidence.md 2>/dev/null ||
             : > /tmp/vrt-evidence.md

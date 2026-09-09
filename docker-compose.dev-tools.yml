@@ -1,8 +1,5 @@
-# 開発を補助するツールのコンテナ。**配送物ではない**
-# ([0011](docs/adr/0011-no-docker.md))。アプリ本体は `pnpm dev` でホスト実行する。
-#
-# 無印の `docker-compose.yml` を使わないのは、本体配送と読み違えられないようにするため。
-# 起動も `docker compose up` 単独では成立せず、このファイルを名指しする形にしてある。
+# 開発を補助するツールのコンテナ。**配送物ではない** —— アプリ本体は `pnpm dev` でホスト実行する。
+# 無印の `docker-compose.yml` を持たず、このファイルを名指しで起動する理由は docker/README.md が持つ。
 services:
   # visual regression のランナー。ブラウザとフォントをイメージ側に持ち、リポジトリは
   # マウントで見せる。基準画像の一意性はこのイメージが担保するので、`image:` は tag では
@@ -43,7 +40,7 @@ services:
   #
   # 公式の `zaproxy/action-*` を使わないのは、あの action が受け取る `docker_name` が tag であって
   # digest ではないため。このリポジトリは container image を digest で固定し `make images-pin-check`
-  # で突合する（[0011](docs/adr/0011-no-docker.md)）が、action の input はその走査対象に入らない。
+  # で突合する）が、action の input はその走査対象に入らない。
   # 固定したつもりで誰も検査していないピンが 1 つ増えるより、上の browser_runner と同じ形に揃える。
   zap:
     image: ghcr.io/zaproxy/zaproxy:stable@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef

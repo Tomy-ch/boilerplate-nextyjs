@@ -20,8 +20,7 @@ export const ONBOARDING_PATH = "/onboarding";
  *
  * @remarks
  * 戻り先を必ず検証してから載せます。受け取った値をそのまま置くと、自サイトの導線で外部の URL へ
- * 送れます（open redirect。[0079](../../../docs/adr/0079-auth-frontend-seam.md)）。検証は `model`
- * が持ち、ここはその結果を URL へ組むだけです。
+ * 送れます（open redirect）。検証は `model` が持ち、ここはその結果を URL へ組むだけです。
  *
  * @param returnTo - 登録後に戻す先。同一 origin の相対パスでなければ `/` へ倒れる
  */

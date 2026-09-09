@@ -12,6 +12,8 @@
 | --- | --- |
 | `skills/` | `AGENTS.md` が OpenAI Codex CLI 用に予約しているパス（実体は未作成） |
 | `purity-sweep/` | 純化パスの台帳と照会フック。下記 <!-- boilerplate-only:line --> |
+| `closed-loop/` | 開発の窓の打刻。下記 <!-- boilerplate-only:line --> |
+| `private/` | 機械ローカルの索引（追跡外）。再生成できる cache で、失っても費用がゼロ <!-- boilerplate-only:line --> |
 
 <!-- boilerplate-only:begin -->
 ## `purity-sweep/`
@@ -26,7 +28,7 @@
 
 | ファイル | 役割 |
 | --- | --- |
-| `purity-swept.toml` | 台帳。走査済み（`[swept]`）と、還元先が無くて止まったもの（`[pending]`） |
+| `purity-swept.toml` | 台帳。走査済み（`[swept]`）と、止まったもの（`[pending]`。値は**消せる条件**） |
 | `purity-swept.sh` | 照会。下記 |
 | `purity-sweep.prompt` | 手順。判定が「純化パスが要る」を返したときに読む |
 
@@ -34,7 +36,7 @@
 .agents/purity-sweep/purity-swept.sh <path>...   # パスごとの判定
 .agents/purity-sweep/purity-swept.sh --stat      # 走査対象 / 記帳済み / 保留 / 残量
 .agents/purity-sweep/purity-swept.sh --remaining # 未記帳のパスを並べる
-.agents/purity-sweep/purity-swept.sh --pending   # 止まっているものを理由付きで並べる
+.agents/purity-sweep/purity-swept.sh --pending   # 止まっているものを、消せる条件付きで並べる
 .agents/purity-sweep/purity-swept.sh --stale     # 台帳に在るが走査対象ではない鍵を並べる
 ```
 
@@ -56,10 +58,68 @@ submodule・スクラッチ）は `purity-swept.sh` が宣言する。個々の�
 2. `.claude/settings.json` の `PreToolUse` フック定義
 3. `AGENTS.md` の `Purity Sweep` 節
 
+**消す前に、この機構が肩代わりしていた検査を移す。** 純粋性の 3 つの問いのうち、
+「その文書より先に失効する前提を残る文書に書かない」（[`docs/rules.md`](../docs/rules.md) の
+「コメントと文書」）は、いま**この通過が唯一の強制**である。消した瞬間、流入を止めるのは
+レビューだけになる。機械へ寄せられる形なので、**撤去と同じ変更で検査を置く。**
+
 台帳は**走査の結果**なので、手で書き足したエントリは「実際には行われていない走査」を主張する。
 次に読む者はその主張を黙って引き継ぎ、そのファイルは二度と見られない。手編集が妥当なのは、
 失敗した実行が壊れた行を残した場合の修復だけである。
+
+## `closed-loop/`
+
+**開発の窓の段の境界**を打刻する。窓が何かと、なぜセッションでもコミットでも PR でもないのかは
+[0161](../docs/adr/0161-development-window-as-feedback-unit.md) が持ち、何のために測るのかは
+[0160](../docs/adr/0160-agent-environment-loop.md) が持つ。
+
+| ファイル | 役割 |
+| --- | --- |
+| `marks.sh` | 打刻。窓の開閉と、段の境界の記録 |
+| `send.sh` | 送出の起動。閉じたまま届いていない窓を issue へ渡す |
+
+**段の境界は、それを越えたワークフロー以外のどこにも存在しない。**記録は全部のやり取りを残すが、
+そのやり取りが**どの段のものだったか**を知らない。だから越えた側が刻む —— セッションの hook、
+git の hook、そしてスキル自身が。
+
+打刻は `tmp/closed-loop/` に落ちる（追跡外）。**1 つの名前に 1 ファイル、1 行 1 epoch、常に追記** ——
+読む側が最初の行・最後の行・行数のうち問いが要るものを取れるので、**どの打刻が繰り返しうるかを
+前もって決めなくてよい**。
+
+**再計測は週次の Actions が回す**（`.github/workflows/closed-loop-weekly.yaml`）。0160 決定 1 は再計測を省略できない段としており、**人が思い出す前提の段は省略される段**である。読むのは issue に書かれた観測だけで、記録は手元から出ない（同 決定 5）。畳み込みだけは人が端末から明示する —— 意図しない畳み込みが起きたとき、無人の実行には気づく人がいない。
+
+所見は**リポジトリの中に置かず、issue トラッカーが持つ**（0160 決定 4）。`send.sh` はセッションの
+開始時に、閉じたまま届いていない窓を渡す —— 終わろうとしているセッションで通信すると、誰も見て
+いない場所で固まるためである。送出先は `.git` の remote から導き、設定項目で宛先を持たない。
+
+**これはこのリポジトリの保守者のための機構であり、テンプレートから作った側へは配らない。**
+剥がしの対象として `scripts/setup/remove-boilerplate-only/manifest.ts` に登録してある。
+
 <!-- boilerplate-only:end -->
+
+## `doc-router/`
+
+**編集しようとしているパスを統べている文書**を、書こうとした瞬間に名指す。対応表は
+[`doc-router/routes.conf`](doc-router/routes.conf) が持ち、`PreToolUse` のフックが当たった行だけを
+返す。
+
+**不完全であることは欠陥ではない。**エントリの無いパスでは何も出さず、いつもどおり索引から辿る。
+欠陥なのは**間違ったエントリ**だけである —— 存在しない文書を指すと、読み手は名指された 1 本を
+読んで「これで足りた」と判断する。指し先の実在は `scripts/doc-router.gate.test.ts` が見る。
+
+**最近接の README は載せない。**上へ辿れば導出できるものを表に置くと、表と木の 2 つが同じ問いに
+答え、片方だけが古くなる。載せるのは辿っても出てこない行き先だけである。
+
+返す文面は、対応表の値をデータとして名乗らせ、指示にあたる 1 文を自分の言葉で後ろへ置く
+（[`docs/rules.md`](../docs/rules.md)「作業とエージェント」）。
+
+## 関連する ADR
+
+ここに居る機構が従う決定。**シェルのコメントからは ADR を直接指さず、この節を辿る**
+（[docs/rules.md](../docs/rules.md)「コメントと文書」）。
+
+- [0160](../docs/adr/0160-agent-environment-loop.md) — 何のために測るのか / 打刻の置き場 / 記録をどこまで読んでよいか
+- [0161](../docs/adr/0161-development-window-as-feedback-unit.md) — 単位が窓であること、打刻が第一で記録は補完であること
 
 ## 編集について
 

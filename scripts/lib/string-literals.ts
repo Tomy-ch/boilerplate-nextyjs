@@ -198,7 +198,7 @@ export function listStringLiterals(source: string): string[] {
   let afterValue = false;
 
   while (index < source.length) {
-    const char = source[index];
+    const char = source.charAt(index);
 
     const afterComment = skipCommentAt(source, index);
 

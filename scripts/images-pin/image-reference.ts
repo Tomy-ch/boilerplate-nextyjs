@@ -3,8 +3,7 @@
 //
 // 対象は compose の `image:`、Dockerfile の `FROM`、workflow / composite action の
 // `uses: docker://`。いずれも「接頭辞・参照・接尾辞」の 3 つに割れるため、書き換えは同じ
-// 関数で扱える。`uses: docker://` をこちらが持つ責務線は
-// [0011](../../docs/adr/0011-no-docker.md) が持つ。
+// 関数で扱える。
 import fs from "node:fs";
 import path from "node:path";
 import { blockScalarLines } from "../lib/block-scalar.js";
@@ -13,6 +12,7 @@ import {
   collectActionDefinitions,
   readDirOrEmpty,
 } from "../lib/composite-action-files.js";
+import { groupAt } from "../lib/regex-groups.js";
 
 /** container image の参照 1 件。key は `image:tag`。 */
 export type ImageRef = {
@@ -25,6 +25,7 @@ export type ImageRef = {
 /** 走査するファイルと、その参照行を捕まえるパターン。 */
 export type PinTarget = {
   file: string;
+  /** 参照行。第 1 群が接頭辞、第 2 群が参照、第 3 群が接尾辞。 */
   pattern: RegExp;
   /** 厳格なパターンで拾えなかった行を検出するパターン。 */
   loose: RegExp;
@@ -65,8 +66,7 @@ const FROM_STAGE_NAME = /\bas[ \t]+(\S+)/i;
 function dockerfileExemptTagless(data: string): ReadonlySet<string> {
   const exempt = new Set(["scratch"]);
   for (const match of data.matchAll(dockerfileFromPattern())) {
-    // 接尾辞のグループは空にも一致するため、常に文字列として得られる。
-    const stage = FROM_STAGE_NAME.exec(match[3])?.[1];
+    const stage = FROM_STAGE_NAME.exec(groupAt(match, 3))?.[1];
     if (stage) exempt.add(stage.toLowerCase());
   }
 
@@ -102,7 +102,8 @@ export function refKey(ref: ImageRef): string {
  * ファイルが持つためです。
  */
 export function parseRef(reference: string): ImageRef | null {
-  const [name] = reference.split("@");
+  const digestAt = reference.indexOf("@");
+  const name = digestAt < 0 ? reference : reference.slice(0, digestAt);
   const separator = name.lastIndexOf(":");
   if (separator < 0) return null;
   const image = name.slice(0, separator);
@@ -162,7 +163,7 @@ export function collectRefs(targets: PinTarget[]): Map<string, ImageRef> {
   for (const target of targets) {
     const data = fs.readFileSync(target.file, "utf8");
     for (const match of data.matchAll(target.pattern)) {
-      const ref = parseRef(match[2]);
+      const ref = parseRef(groupAt(match, 2));
       if (ref) refs.set(refKey(ref), ref);
     }
   }
@@ -206,7 +207,7 @@ function taglessLines(data: string, target: PinTarget): number[] {
   const exempt = target.exemptTagless?.(data) ?? new Set<string>();
   const lines: number[] = [];
   for (const match of data.matchAll(target.pattern)) {
-    const reference = match[2];
+    const reference = groupAt(match, 2);
     if (parseRef(reference) || exempt.has(reference.toLowerCase())) continue;
     lines.push(lineNumberAt(data, match.index));
   }

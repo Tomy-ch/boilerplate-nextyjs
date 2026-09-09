@@ -6,14 +6,13 @@ import { z } from "zod";
  *
  * @remarks
  * 値そのものは [`performance-budget.yaml`](../../performance-budget.yaml) が持ちます。コードの外へ
- * 出してあるのは、[0101](../../docs/adr/0101-performance-budget.md) が具体値を fork 先の判断として
- * いるためです。fork 先が触るのは値だけで、判定を読む必要はありません。
+ * 出してあるのは、具体値をテンプレートから作った側の判断としているためです。作った側が触るのは
+ * 値だけで、判定を読む必要はありません。
  *
  * 根拠を必須項目にしてあるのは、宣言だけが増えて理由が残らない状態を作らないためです。空文字は
  * 読み込みの時点で落ちます。
  *
- * **増分は初期 JS・合計 JS・CSS へ別々に効きます。** 3 つに割る理由は
- * [0101](../../docs/adr/0101-performance-budget.md) §2 と §3 が持ちます。
+ * **増分は初期 JS・合計 JS・CSS へ別々に効きます。**
  */
 
 const entrySchema = z.object({
@@ -103,7 +102,7 @@ export type GrowthMode = "gate" | "report";
  * 昇格の着地先。ここへ向いた PR は、変更 1 つではなくリリース 1 本を運ぶ。
  *
  * @remarks
- * [0150](../../docs/adr/0150-git-workflow.md) の昇格の連なりの、受ける側だけを並べます。
+ * 昇格の連なりの、受ける側だけを並べます。
  * `release/**` は受ける側でもあり出す側でもありますが、そこへ向く PR は変更 1 つなので入りません。
  */
 const PROMOTION_TARGETS: ReadonlySet<string> = new Set(["production", "staging"]);

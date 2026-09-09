@@ -11,19 +11,19 @@
 export type LayerContract = {
   /** その層が受け付けない対象。README の語をそのまま引き継ぐ。 */
   readonly forbidden: readonly string[];
-  /** その層のテスト責務（[0090](../../docs/adr/0090-testing-strategy.md) の層別表を引く鍵）。 */
+  /** その層のテスト責務（層別責務表を引く鍵）。 */
   readonly testRequirement: string;
 };
 
 /** `key: [a, b]` 形式の 1 行から値を取り出す。 */
 function readListValue(frontmatter: string, key: string): string[] | null {
-  const matched = new RegExp(String.raw`^${key}:\s*\[(.*)\]\s*$`, "m").exec(frontmatter);
+  const matched = new RegExp(String.raw`^${key}:\s*\[(.*)\]\s*$`, "m").exec(frontmatter)?.[1];
 
-  if (matched === null) {
+  if (matched === undefined) {
     return null;
   }
 
-  return matched[1]
+  return matched
     .split(",")
     .map((entry) => entry.trim())
     .filter((entry) => entry !== "");
@@ -31,9 +31,7 @@ function readListValue(frontmatter: string, key: string): string[] | null {
 
 /** `key: value` 形式の 1 行から値を取り出す。 */
 function readScalarValue(frontmatter: string, key: string): string | null {
-  const matched = new RegExp(String.raw`^${key}:\s*(\S+)\s*$`, "m").exec(frontmatter);
-
-  return matched === null ? null : matched[1];
+  return new RegExp(String.raw`^${key}:\s*(\S+)\s*$`, "m").exec(frontmatter)?.[1] ?? null;
 }
 
 /**
@@ -43,14 +41,14 @@ function readScalarValue(frontmatter: string, key: string): string | null {
  * @returns 読み取れた契約。frontmatter が無い / 必要な宣言が欠けている場合は `null`。
  */
 export function readLayerContract(readmeText: string): LayerContract | null {
-  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readmeText);
+  const frontmatter = /^---\n([\s\S]*?)\n---/.exec(readmeText)?.[1];
 
-  if (frontmatter === null) {
+  if (frontmatter === undefined) {
     return null;
   }
 
-  const forbidden = readListValue(frontmatter[1], "forbidden");
-  const testRequirement = readScalarValue(frontmatter[1], "test-requirement");
+  const forbidden = readListValue(frontmatter, "forbidden");
+  const testRequirement = readScalarValue(frontmatter, "test-requirement");
 
   if (forbidden === null || testRequirement === null) {
     return null;

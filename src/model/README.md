@@ -38,6 +38,10 @@ coverage-exclusions:
 | `idempotency-key.ts` | 変更 1 回ぶんを指す鍵と、それを載せるフォーム項目の名前 |
 | `consent.ts` | 任意の用途に cookie を使ってよいかという意思と、その区分ごとのゲート述語 |
 | `money.ts` | 最小単位の整数で持つ金額を、locale に沿った通貨表記へ整える |
+| `session.ts` | 認証済み利用者の身元と役割。cookie へ載せる payload はこの型に閉じ、Access Token も PII も持たない |
+| `authz.ts` | 経路の接頭辞ごとに許す役割。認証だけを要求する経路は全役割を並べて表す |
+| `return-url.ts` | 検証を通った復帰先。同一 origin の相対パスだけを通し、外れた値は既定の行き先へ倒す |
+| `cross-origin.ts` | 要求の origin の判定と、CORS / preflight の応答ヘッダの組み立て |
 | `cart/cart.ts` | サンプル画面が扱うカートの表示用の型 <!-- sample:line --> |
 | `dashboard/dashboard.ts` | サンプル画面が扱う管理側の横断集計の表示用の型と、集計対象期間の語彙 <!-- sample:line --> |
 | `product/product.ts` | サンプル画面が扱う商品の表示用の型 <!-- sample:line --> |
@@ -50,3 +54,18 @@ coverage-exclusions:
 
 - 依存先は `errors` のみ
 - ファイル名は kebab-case、型名は PascalCase、関数名は camelCase とする
+
+## 関連する ADR
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。ここが `errors` だけを引く根拠
+- [0029](../../docs/adr/0029-type-design-discipline.md) — 判別可能 union・branded id・境界で 1 度だけ parse する型設計
+- [0031](../../docs/adr/0031-policy-state-supply.md) — 同意などポリシー状態の供給の形
+- [0045](../../docs/adr/0045-fonts-and-images.md) — 画像の配信元と、組み立てた URL がそこから出ないこと
+- [0061](../../docs/adr/0061-form-mutation-ux.md) — Server Action が画面へ返す結果の器（`ActionState`）
+- [0062](../../docs/adr/0062-form-input-validation.md) — 表示のための入力検証と、生成スキーマを持ち込まない線
+- [0063](../../docs/adr/0063-mutation-result-notification.md) — 結果の通知手段（inline / toast / redirect）の選択
+- [0070](../../docs/adr/0070-backend-role-separation.md) — 業務ルールはバックエンドが持ち、ここは表示のための型だけを持つ分界
+- [0073](../../docs/adr/0073-pagination-fetch-boundary.md) — cursor 方式と offset 方式それぞれの取得境界
+- [0079](../../docs/adr/0079-auth-frontend-seam.md) — session の中身・復帰先・認可判定の front 側の持ち分
+- [0120](../../docs/adr/0120-locale-aware-formatting.md) — locale 依存の整形と、日付演算をタイムゾーンへ固定する扱い
+- [0131](../../docs/adr/0131-cookie-consent.md) — 同意管理を採らない決定と、それでも残す区分・期限

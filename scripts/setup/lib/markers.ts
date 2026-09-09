@@ -34,15 +34,17 @@ const REPLACE_HTML_COMMENT = /^([ \t]*)<!--[ \t]*=[ \t]?(.*)-->$/;
  * @returns 剥がした行。退避コメントとして書かれていなければ `null`。
  */
 function uncommentSubstitute(line: string): string | null {
-  const lineComment = REPLACE_LINE_COMMENT.exec(line);
+  const [, indent, body] = REPLACE_LINE_COMMENT.exec(line) ?? [];
 
-  if (lineComment !== null) {
-    return lineComment[1] + lineComment[2];
+  if (indent !== undefined && body !== undefined) {
+    return indent + body;
   }
 
-  const htmlComment = REPLACE_HTML_COMMENT.exec(line);
+  const [, htmlIndent, htmlBody] = REPLACE_HTML_COMMENT.exec(line) ?? [];
 
-  return htmlComment === null ? null : htmlComment[1] + htmlComment[2].trimEnd();
+  return htmlIndent === undefined || htmlBody === undefined
+    ? null
+    : htmlIndent + htmlBody.trimEnd();
 }
 
 /** 引用行。継ぎ目の両側が引用なら、空行では分断されてしまう。 */

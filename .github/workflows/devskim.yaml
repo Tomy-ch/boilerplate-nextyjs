@@ -4,7 +4,7 @@ name: DevSkim Scan
 # tree with one rule set. That is the whole reason it is here: opengrep goes deeper
 # but only reaches the languages it parses, so a weak cipher name
 # or a hardcoded credential in a file neither opens is currently seen by nothing
-# (ADR 0110 §3).
+#.
 #
 # The overlap with opengrep is real and accepted. What is NOT overlapped is the set of
 # files opengrep never opens — YAML that is not a workflow, JSON, plain text, the
@@ -116,14 +116,13 @@ jobs:
       # TEST FILES ARE EXCLUDED, and that is a considered exclusion rather than a
       # convenience. A regex secret-detector reads a fixture SHA, a fake bearer token
       # and a `http://localhost` target as findings, and in a test file every one of
-      # those is the normal case — measured here: three `DS173237` errors, all of them
-      # hex fixtures in one unit test. The layer that watches test files for a REAL
+      # those is the normal case. The layer that watches test files for a REAL
       # secret is gitleaks, which scans them and is fail-closed; leaving DevSkim on
       # them would only bury the surfaces where its verdict means something.
       #
       # Excluded by path, never by rule id. A rule id switched off globally would take
       # the same detection down on the files this scanner exists for
-      # (ADR 0110 §3.4).
+      #.
       - name: Run the DevSkim scan
         if: steps.scope.outputs.relevant == 'true'
         shell: bash

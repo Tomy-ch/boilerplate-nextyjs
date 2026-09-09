@@ -56,20 +56,20 @@ export function expectedShardTotal(
     found += 1;
   }
 
-  if (found === 0) {
+  const [total, ...others] = [...totals];
+
+  if (total === undefined) {
     throw new Error("分割の結果が 1 台ぶんも届いていません");
   }
 
-  if (totals.size > 1) {
+  if (others.length > 0) {
     throw new Error(
       `届いた結果が別々の台数で割られています: ${[...totals].sort((a, b) => a - b).join(", ")}`,
     );
   }
 
-  const [total] = [...totals];
-
   // 数が合わない向きで文面を分ける。多く届いているのに「しか届いていません」と言うと、
-  // 読み手は足りない台を探すことになる。多いほうは古い結果が残っている形である。
+  // 読み手は足りない台を探すことになる。
   if (found < total) {
     throw new Error(`分割 ${total} 台のうち ${found} 台ぶんしか結果が届いていません`);
   }

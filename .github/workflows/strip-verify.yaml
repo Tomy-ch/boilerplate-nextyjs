@@ -8,15 +8,16 @@ name: Strip Verify
 # (`scripts/setup/remove-boilerplate-only`). Nothing else would notice if it stopped
 # working: a marker whose pair was lost, a stripped section that takes a heading another
 # document links to, or a manifest entry gone stale would all stay green until someone
-# actually forked and ran it. The unit tests beside the manifest never run the strip, so
+# actually created a repository from the template and ran it. The unit tests beside the
+# manifest never run the strip, so
 # they cannot see the tree it leaves behind.
 #
 # The checkout is disposable, so the job deliberately deletes tracked files and never
 # pushes anything back.
 #
 # The strip deletes this file too — it is declared in `SELF_DESTRUCT_PATHS`. Do not
-# add the guard step `purge-verify.yaml` carries: the strip is mandatory, so every fork
-# would fail it on every PR forever.
+# add the guard step `purge-verify.yaml` carries: the strip is mandatory, so every
+# repository created from this template would fail it on every PR forever.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
 # every PR is in README.md.
@@ -32,9 +33,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development — the build then fails on a value that is only meant for a workstation.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 
@@ -187,6 +186,7 @@ jobs:
             --exclude-dir=node_modules \
             --exclude-dir=.next \
             --exclude-dir=coverage \
+            --exclude-dir=coverage-scripts \
             --exclude-dir=dist \
             --exclude-dir=storybook-static \
             --exclude-dir=tmp || true)"
@@ -209,7 +209,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Lint markdown of the stripped tree
-        run: pnpm md-lint
+        run: pnpm lint:md
 
       # The one class of breakage the language checks above cannot see: an entry that
       # no workflow references any more. A workflow the strip deletes takes its pins

@@ -8,7 +8,7 @@ import { axe } from "vitest-axe";
 import { Button } from "@/components/design-system/action/button/button";
 import { WizardForm, type WizardSteps } from "./wizard-form";
 
-const STEPS: WizardSteps = [
+const STEPS = [
   {
     id: "applicant",
     title: "申請者",
@@ -20,7 +20,7 @@ const STEPS: WizardSteps = [
     content: <input aria-label="用途" defaultValue="開発" name="purpose" />,
   },
   { id: "confirm", title: "確認", content: <p>この内容で申請します。</p> },
-];
+] satisfies WizardSteps;
 
 function WizardFixture({ steps = STEPS }: { steps?: WizardSteps } = {}) {
   return (
@@ -289,6 +289,60 @@ describe("WizardForm", () => {
 
     expect(screen.getByLabelText("氏名")).toBeVisible();
     expect(screen.getByLabelText("用途")).not.toBeVisible();
+  });
+
+  it("段階が減って現在地が並びの外へ出たら、先頭から始め直す", async () => {
+    const { rerender } = render(<WizardFixture />);
+
+    await next();
+    await next();
+    rerender(<WizardFixture steps={[{ ...STEPS[0], nextLabel: "申請内容へ" }, STEPS[1]]} />);
+
+    expect(screen.getByRole("group", { name: "申請者" })).toBeVisible();
+    expect(screen.getByRole("listitem", { current: "step" })).toHaveTextContent("申請者");
+    expect(screen.getByRole("button", { name: "申請内容へ" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "申請する" })).not.toBeInTheDocument();
+  });
+
+  it("段階が減って先頭から始め直したら、到達済みの印も残らない", async () => {
+    const { rerender } = render(<WizardFixture />);
+
+    await next();
+    await next();
+    rerender(<WizardFixture steps={[STEPS[0], STEPS[1]]} />);
+
+    const [first, second] = screen.getAllByRole("listitem");
+
+    expect(first).toHaveTextContent("現在の段階");
+    expect(first).not.toHaveTextContent("完了");
+    expect(second).toHaveAttribute("data-state", "upcoming");
+    expect(screen.queryByRole("button", { name: "申請内容" })).not.toBeInTheDocument();
+  });
+
+  it("段階が減って先頭から始め直したら、戻れない", async () => {
+    const { rerender } = render(<WizardFixture />);
+
+    await next();
+    await next();
+    rerender(<WizardFixture steps={[STEPS[0], STEPS[1]]} />);
+
+    expect(screen.getByRole("button", { name: "戻る" })).toBeDisabled();
+  });
+
+  it("段階が減って先頭から始め直したら、次へは 2 つ目の段階へ進む", async () => {
+    const { rerender } = render(
+      <WizardFixture steps={[...STEPS, { id: "done", title: "完了", content: <p>完了</p> }]} />,
+    );
+
+    await next();
+    await next();
+    await next();
+    rerender(<WizardFixture steps={STEPS} />);
+
+    await next();
+
+    expect(screen.getByRole("group", { name: "申請内容" })).toBeVisible();
+    expect(screen.getByRole("listitem", { current: "step" })).toHaveTextContent("申請内容");
   });
 
   it("隠れている段階の入力値も form に残る", async () => {

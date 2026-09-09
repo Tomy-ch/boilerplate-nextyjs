@@ -34,6 +34,14 @@
 route group は URL に現れないため、括弧を外した名前で置きます（`(group)` → `<group>/`）。動的
 セグメントは URL に現れるため、角括弧を含む名前のまま置きます。
 
+**並行ルートのスロット（`@slot/`）は置き場を持ちません。**URL に現れず、独立した画面でもないため、
+その約束はスロットを差し込む画面の仕様書が持ちます（`admin/@breadcrumb/products/page.tsx` の約束は
+`route/admin/products/page.screen.md`）。
+
+**開発専用の route も仕様書を持ちます。**`page.dev.tsx` は build から外れますが
+（[0113](../adr/0113-development-access-surface.md)）、**build から外れることと、約束を持たないことは
+別**です。置き場の写し方は他と同じです。
+
 **layout の仕様はその配下すべてに効きます。** 画面をまたぐ約束（外枠が供給する状態、認証の扱い、
 描画の時点への影響）は上位の `layout.*.md` に 1 回だけ書き、各画面はそこからの差分を書きます。
 
@@ -75,8 +83,13 @@ route group は URL に現れないため、括弧を外した名前で置きま
 | `/dev/session` | [`screen`](route/dev/session/page.screen.md) / [`function`](route/dev/session/page.function.md) |
 | `/maintenance` | [`screen`](route/maintenance/page.screen.md) / [`function`](route/maintenance/page.function.md) |
 
-**この目録は「書いた画面の一覧」であって、画面の一覧ではありません。**実装済みの画面は
-[`screens.md`](../screens.md) が持ちます。
+**この目録が画面の一覧です。** 画面の約束はここが持ち、ほかの文書が代わりに持つことはありません
+（[0143](../adr/0143-spec-driven-development.md)）。
+
+**仕様書を先に固めることは求めません。** 書ける時点は見た目が確定した後なので、画面実装の順序
+（[`playbook.md`](../playbook.md)）では story のレビューを通ったあとに置きます。ただし
+**仕様書を持たない route が残るのは埋めるべき穴であって、正常な状態ではありません。**
+`src/app` の route とこの目録を機械で突き合わせる検査は v1.0.0 到達前に入れます（同 ADR）。
 
 ## 何を書かないか
 
@@ -90,6 +103,7 @@ route group は URL に現れないため、括弧を外した名前で置きま
 | [`rules.md`](../rules.md) | 日常的に強制される規約 |
 | `components/**/README.md` + Storybook | 部品の語彙 |
 | [`adr/`](../adr/) | 機構の選択と、その理由 |
+| [`glossary.md`](glossary.md) | 仕様書の散文が使う、**契約に無い画面の側の語** |
 
 したがって、仕様書には次を書きません。
 

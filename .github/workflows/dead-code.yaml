@@ -1,6 +1,6 @@
 name: Dead Code
 
-# Reports files, exports and dependencies that nothing reaches (ADR 0004 / 0091).
+# Reports files, exports and dependencies that nothing reaches.
 #
 # This closes a gap the other gates cannot see. The 1:1 correspondence gate in Scripts Check
 # asks whether an export has a matching `describe`, and the coverage thresholds ask whether
@@ -9,8 +9,9 @@ name: Dead Code
 # "code that survived a refactor".
 #
 # The published surface is declared as entry points in `knip.ts`. A boilerplate exports the
-# components a fork consumes, so "unused inside this repository" is the expected steady
-# state there and is not a finding; everything else is internal and is.
+# components a repository created from this template consumes, so "unused inside this
+# repository" is the expected steady state there and is not a finding; everything else is
+# internal and is.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on every PR
 # is in README.md.

@@ -1,7 +1,7 @@
 name: Issue Field Lint
 
 # Checks that an implementation-task issue actually carries the fields its template
-# marks required (ADR 0140 / the v1 plan's traceability ledger).
+# marks required.
 #
 # The template's `required: true` binds the GitHub web form and nothing else.
 # `gh issue create --body-file` walks straight past it — and that is the path an agent

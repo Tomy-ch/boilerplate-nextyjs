@@ -53,7 +53,6 @@ function UploadPreviewRow({
     // 捨てられた描画のぶんが破棄されずに残る。
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 資源の生成を伴う同期のため
     setObjectUrl(url);
-    // 生成した URL は破棄しないと、選択をやり直すたびに解放されない参照が積み上がる。
     return () => {
       URL.revokeObjectURL(url);
       setObjectUrl(undefined);

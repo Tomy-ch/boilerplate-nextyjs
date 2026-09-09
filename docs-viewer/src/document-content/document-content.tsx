@@ -45,8 +45,8 @@ export type DocumentContentProps = Omit<
  * 描画は HTML 文字列を経由せず、木から React 要素を直接作ります。組版は `typeset` の CSS 基盤が
  * 持ち、ドキュメント用の preset を既定で当てます。
  *
- * 見出しは allowlist が `h1` を落とすため `h2` から始まります。文書の題は、この本文を開いた面の
- * title が持ちます。
+ * 見出しは文書自身の `h1` から始まります。本文を開いた面の title は manifest の項目名であって
+ * 文書の題ではないため、競合しません（`sanitize/document.definition.ts`）。
  *
  * mermaid のコードフェンスだけは図として描きます。差し替えは要素 1 つに閉じており、木のほかの
  * 部分は sanitize が通した形のまま描かれます。

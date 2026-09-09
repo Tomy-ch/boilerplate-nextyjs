@@ -38,19 +38,19 @@ export function readLock(file: string, format: LockFormat): Map<string, string> 
   for (const [index, raw] of lines.entries()) {
     const line = raw.trim();
     if (line === "" || line.startsWith("#")) continue;
-    const entry = ENTRY_PATTERN.exec(line);
-    if (!entry) {
+    const [, key, value] = ENTRY_PATTERN.exec(line) ?? [];
+    if (key === undefined || value === undefined) {
       throw new Error(`${file}:${index + 1} 形式が不正です（${format.entryLabel}）: ${raw}`);
     }
-    if (!format.value.test(entry[2])) {
-      throw new Error(`${file}:${index + 1} ${format.valueLabel}ではありません: ${entry[2]}`);
+    if (!format.value.test(value)) {
+      throw new Error(`${file}:${index + 1} ${format.valueLabel}ではありません: ${value}`);
     }
     // 後勝ちで上書きすると、どちらの値が実際に使われるかが行順に依存する。マージ衝突を
     // 機械的に解消すると同一キーが 2 行残るため、現実に起こりうる破損。
-    if (lock.has(entry[1])) {
-      throw new Error(`${file}:${index + 1} キーが重複しています: ${entry[1]}`);
+    if (lock.has(key)) {
+      throw new Error(`${file}:${index + 1} キーが重複しています: ${key}`);
     }
-    lock.set(entry[1], entry[2]);
+    lock.set(key, value);
   }
 
   return lock;

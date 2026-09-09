@@ -8,8 +8,6 @@
 
 | Component | 役割 |
 | --- | --- |
-| Component | 役割 |
-| --- | --- |
 | `Skeleton` | 装飾的な読み込み placeholder です。利用者への loading message は持たず、`aria-hidden` で隠します。 |
 
 ## 利用ケース

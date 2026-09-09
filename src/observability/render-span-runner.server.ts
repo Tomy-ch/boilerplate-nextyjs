@@ -14,8 +14,7 @@ const tracer = trace.getTracer("render");
  * span が覆うのはこの実行だけです。子は戻り値を React が受け取った後に描画されるため中に入らず、
  * 本体で待つ取得だけが中に入ります。
  *
- * この実装を feature へ直接持たせません。`@opentelemetry/api` がブラウザのバンドルへ入ると、
- * Vite が取り込む CJS ビルドが `__dirname` を参照して落ちます。起動境界がここを注入します。
+ * この実装を feature へ直接持たせません。起動境界が {@link RenderSpanRunner} としてここを注入します。
  */
 export const runRenderSpan: RenderSpanRunner = (name, render) =>
   tracer.startActiveSpan(`render ${name}`, (span) => {

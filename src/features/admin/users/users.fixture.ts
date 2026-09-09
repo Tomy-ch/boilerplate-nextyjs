@@ -59,7 +59,7 @@ export const ADMIN_USER_ROWS: readonly AdminUserRow[] = [
 
 /** 退会済みだけの並び。どの行にも操作が出ないことを見るために置く。 */
 export const WITHDRAWN_USER_ROWS: readonly AdminUserRow[] = [
-  ADMIN_USER_ROWS[3],
+  ...ADMIN_USER_ROWS.filter((row) => row.withdrawn),
   {
     id: toUserId("0195f0c2-0000-7000-8000-000000000006"),
     name: "伊藤 四郎",

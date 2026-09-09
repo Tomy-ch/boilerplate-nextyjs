@@ -8,9 +8,8 @@ import { getSessionResolver } from "./resolver";
  * cookie の値だけから身元を読む。入口の楽観判定に使う。
  *
  * @remarks
- * `proxy.ts` はリクエスト完了前に走り、prefetch を含む全経路を通ります。そこで使える材料は
- * cookie だけであり、データ源を引く判定は置けません
- * （[0043](../../../../docs/adr/0043-middleware-policy.md)）。
+ * `proxy.ts` はリクエスト完了前に走り、prefetch を含む全経路を通ります。そこで使える材料は cookie
+ * だけであり、データ源を引く判定は置けません。
  *
  * 受け取るのが `Request` ではなく cookie の値そのものなのは、取り出し方（`NextRequest` か
  * ヘッダの解析か）に依存させないためです。

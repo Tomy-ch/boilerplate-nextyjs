@@ -24,7 +24,7 @@
 
 SSR first の選定では、native の下地が `Field` + `Input type="file"` + Server Action にあたります。この component は、**送信前の検証・選択内容の表示・送信中の抑止と進捗**という、その下地では表せない部分だけを担う client island です。選択の保持のため hydration が必要で、Server Component からは直接 render できません。
 
-**送信経路を持ちません。** 実際の送信が presigned な直 PUT か multipart の proxy かをこの component は知りません。送信中かどうかは `pending`、進捗は `progress`、完了後の識別子の扱いは、すべて呼び出し元が props と callback で受け渡します。経路が決まるのを待たずに使えます。
+**送信経路を持ちません。** 選んだものをどこへ、どう送るかをこの component は知りません。送信中かどうかは `pending`、進捗は `progress`、完了後の識別子の扱いは、すべて呼び出し元が props と callback で受け渡します。経路が決まるのを待たずに使えます。
 
 **エラーの文言を持ちません。** `onReject` が渡すのは弾いたファイルと理由の組だけです。利用者へ見せる文言は呼び出し元が組み立て、`FieldError` として表示します。`aria-invalid` も呼び出し元が決めます。server 側の検証結果と client 側の検証結果を一箇所で扱うためです。
 

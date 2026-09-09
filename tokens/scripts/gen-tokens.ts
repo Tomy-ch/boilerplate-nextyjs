@@ -343,8 +343,8 @@ function assertSameSchemes(surfaces: readonly Surface[], reference: Surface): vo
  * すべての系統と配色が同じ token を宣言していることを確かめる。
  *
  * @remarks
- * 欠けた token は宣言が無いだけで済まず、カスケードにより既定の系統や既定の配色の値をそのまま
- * 引き継ぎます。系統を切り替えたつもりの箇所だけが元の色のまま残ります。
+ * 欠けた token は宣言が無いだけで済まず、カスケードで既定の値を引き継ぎます（壊れ方は
+ * `tokens/README.md`）。
  */
 function assertSameTokens(surfaces: readonly Surface[], reference: Scheme): void {
   const expected = flattenTokens(reference.tokens)

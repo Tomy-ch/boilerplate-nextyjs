@@ -88,7 +88,7 @@ describe("responsiveBands", () => {
   ]);
 
   // ----- 正常系 -----
-  it("ADR が固定した 3 段を返す", () => {
+  it("固定された 3 段を返す", () => {
     expect(responsiveBands(breakpoints).map(({ name }) => name)).toEqual([
       "mobile",
       "tablet",

@@ -49,8 +49,8 @@ export const AtAvailableMax: Story = {
  * 変更が通らなかった場合。操作の隣に、何ができなかったかと理由が出る。
  *
  * @remarks
- * 送信先は Server Action で、カタログでは差し替えてあります（[0054](../../../../../docs/adr/0054-ui-catalog-storybook.md)）。
- * 失敗は props では作れないため、戻り値の側から作ります。
+ * 送信先は Server Action で、カタログでは差し替えてあります。失敗は props では作れないため、
+ * 戻り値の側から作ります。
  */
 export const Failed: Story = {
   args: { quantity: 3 },

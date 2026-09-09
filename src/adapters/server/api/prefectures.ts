@@ -38,10 +38,9 @@ function toPrefectures(wire: WirePrefectures): readonly Prefecture[] {
  * 認証を要しない公開の口です。クライアントに Bearer の取得口を渡していないのはそのためで、
  * 未ログインの画面からも同じ取得口を使えます。
  *
- * 都道府県は画面を開くたびに変わる種類のデータではないので、キャッシュへ入れます。寿命と
- * 入れ物の性質は商品マスタと同じで、`getProductCategories` の項が持ちます。捨てる印だけが
- * 別で、{@link PREFECTURE_MASTERS_TAG} を使います
- * （[0071](../../../../docs/adr/0071-bff-api-integration.md)）。
+ * 都道府県は画面を開くたびに変わる種類のデータではないので、キャッシュへ入れます。
+ * 寿命と入れ物の性質は商品マスタと同じで、`getProductCategories` の項が持ちます。
+ * 捨てる印だけが別で、{@link PREFECTURE_MASTERS_TAG} を使います。
  */
 export const getPrefectures = cache(async (): Promise<readonly Prefecture[]> => {
   "use cache";

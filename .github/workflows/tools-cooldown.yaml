@@ -1,0 +1,158 @@
+name: Tools Cooldown
+
+# The supply-chain quarantine for the CLI tools `mise.toml` pins. A pin can
+# be edited by hand, and nothing else reads the publish date of the version it names, so
+# this is the one place a freshly published — possibly compromised — release is caught
+# before it lands on every developer's PATH.
+#
+# Two modes of the same script (`scripts/tools-cooldown`):
+#
+#   check  on a pull request — only the pins the diff moved. A pin inherited from base is not
+#          the author's to fix here; the weekly audit owns it.
+#   audit  on the schedule and on dispatch — every pin. Catches a pin merged past a red check.
+#
+# The window is per distribution channel and is passed in by the make target; an exemption
+# is a `tools-cooldown-ignore:` comment above the pin with a reason and the date the window
+# clears (README of the script). A backend whose publish date cannot be read fails the job
+# rather than passing it: not knowing the age is not the same as the version being old.
+# A language runtime (`core:`) is listed but never judged: a poisoned runtime is a failure
+# of the language's trust model, not of one link, and no window buys time against it. That
+# exclusion is a decision, so it is kept apart from the "could not read" exit above.
+#
+# Reaches the network (api.github.com / pypi.org / registry.npmjs.org) — that is the subject
+# of the check, so unlike `actions-pin` it cannot be an offline comparison.
+# Not a required check: the job stands down for a diff that does not touch `mise.toml`.
+#
+# Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is in
+# README.md.
+
+on:
+  pull_request:
+  schedule:
+    - cron: '30 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tools-cooldown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # The subject is `mise.toml`, not the tree: no source change alters a pin's publish
+      # date. Admissible as an allow-list only because the weekly audit above reads every
+      # pin — a mistake here defers a check by a week, it does not remove it.
+      - name: Decide whether the diff can reach the pins
+        id: scope
+        uses: ./.github/actions/diff-scope
+        with:
+          base-ref: ${{ github.base_ref }}
+          only: |
+            mise.toml
+            scripts/tools-cooldown/*
+            scripts/lib/*
+            .makefiles/security/tools-cooldown.mk
+            .github/workflows/tools-cooldown.yaml
+            .github/actions/diff-scope/*
+
+      - name: Setup mise and the pinned tools
+        if: steps.scope.outputs.relevant == 'true'
+        uses: ./.github/actions/setup-mise
+        with:
+          tools: core:node aqua:pnpm/pnpm
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        if: steps.scope.outputs.relevant == 'true'
+        uses: ./.github/actions/setup-deps
+
+      # `GITHUB_TOKEN` is the one secret a checking step may carry (README § PR コメント):
+      # the unauthenticated GitHub API budget does not cover one run. The base ref is handed
+      # to the script through the environment, never expanded into a make recipe line — a
+      # branch name may carry shell metacharacters.
+      - name: Check the pins against the cooldown window
+        id: cooldown
+        if: steps.scope.outputs.relevant == 'true'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set +e
+
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            # `diff-scope` already fetched the base tip; the script reads its mise.toml.
+            export TOOLS_COOLDOWN_BASE="origin/${BASE_REF}"
+            make tools-cooldown-check 2>&1 | tee /tmp/tools-cooldown.log
+          else
+            make tools-cooldown-audit 2>&1 | tee /tmp/tools-cooldown.log
+          fi
+          code=${PIPESTATUS[0]}
+
+          if [ "${code}" -eq 0 ]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+            echo "title=## ✅ Tools cooldown: PASS" >> "$GITHUB_OUTPUT"
+          elif [ "${code}" -eq 1 ]; then
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+            echo "title=## ❌ Tools cooldown: FAIL (a pin is inside its window)" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+            echo "title=## ❌ Tools cooldown: FAIL (the check could not run)" >> "$GITHUB_OUTPUT"
+          fi
+
+          exit 0
+
+      # A job that stood down still owes the pull request a verdict; see dependency-scan.yaml.
+      - name: Note that the diff cannot reach the pins
+        id: standdown
+        if: steps.scope.outputs.relevant != 'true'
+        shell: bash
+        run: |
+          echo 'title=## ⏭️ Tools cooldown: SKIP (mise.toml に届かない差分)' >> "$GITHUB_OUTPUT"
+          echo 'この PR の差分は mise.toml に届かないため、検査していません。全 pin は週次で棚卸しします。' > /tmp/tools-cooldown.log
+
+      - name: Comment cooldown result on PR
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: ./.github/actions/upsert-pr-comment
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          marker: '<!-- tools-cooldown-result -->'
+          status: ${{ steps.cooldown.outputs.status || 'success' }}
+          title: ${{ steps.cooldown.outputs.title || steps.standdown.outputs.title }}
+          body-file: /tmp/tools-cooldown.log
+          details-summary: 'tools-cooldown log'
+
+      # An empty status is the capture step never having run, which belongs on the failing side.
+      - name: Fail if a pin is inside its window or the check could not run
+        if: always() && steps.scope.outputs.relevant == 'true' && steps.cooldown.outputs.status != 'success'
+        run: exit 1
+
+  # See README.md § 通知 (why only scheduled runs notify, and why cancelled counts).
+  notify-failure:
+    needs: tools-cooldown
+    if: ${{ always() && github.event_name == 'schedule' && contains(fromJSON('["failure", "cancelled"]'), needs.tools-cooldown.result) }}
+    uses: ./.github/workflows/notify.yaml
+    with:
+      failed-job: tools-cooldown
+    secrets:
+      slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}

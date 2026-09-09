@@ -13,7 +13,7 @@ CI / CD のワークフロー定義。設計判断の出所は [ADR 0153](../../
 | Deployment | 保護ブランチへの push | ビルド成果物の配信 |
 | Documentation | portal 配信 | 生成ドキュメントの再生成と配信 |
 
-実体があるのは **CI Checks** / **Security** / **Documentation**。Deployment はアプリ本体の配信先が fork 先の決定であるため（[0011](../../docs/adr/0011-no-docker.md)）本リポには置かない。
+実体があるのは **CI Checks** / **Security** / **Documentation**。Deployment はアプリ本体の配信先がテンプレートから作った側の決定であるため（[0011](../../docs/adr/0011-no-docker.md)）本リポには置かない。
 
 ## ワークフロー一覧（CI Checks）
 
@@ -83,11 +83,11 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 | Scripts Check | `scripts-check.yaml` | `scripts-check` | 補助スクリプト（`scripts/**`）の Vitest をカバレッジ 100% で実行し、export と describe の 1:1 対応ゲートをリポジトリ全体へ掛ける |
 | Build | `build.yaml` | `build` | `next build` が通ることを検査する |
 | Bundle Budget | `bundle-budget.yaml` | `bundle-budget` | route ごとに browser が最初に読む client JS を測り、`performance-budget.yaml` の上限と base からの増分に照らす |
-| Dead Code | `dead-code.yaml` | `dead-code` | どの入口からも到達しない file / export / dependency を検出する。`src/components/**` は fork 先が使う口として入口に宣言し、未使用を問わない |
+| Dead Code | `dead-code.yaml` | `dead-code` | どの入口からも到達しない file / export / dependency を検出する。`src/components/**` は作った側が使う口として入口に宣言し、未使用を問わない |
 | Smoke | `smoke.yaml` | `smoke` | `next start` を起動し `/` が応答することを検査する |
 | Storybook Build | `storybook-build.yaml` | `storybook-build` | `build-storybook` が通ることを検査する。Vitest は story を直接 import するので addon やビルダーの解決までは見ず、`vrt` の build は「比較の前段」なので失敗が別の意味に読める。配信（`deploy-docs`）とは分けている |
 | Purge Verify | `purge-verify.yaml` | `purge-verify` | 使い捨てチェックアウトで同梱サンプルを破棄し、破棄後のツリーで整形・検査・build・test が通ることと、過不足・残留参照が無いことを検査する |
-| Strip Verify | `strip-verify.yaml` | `strip-verify` | 使い捨てチェックアウトで boilerplate 限定の記述を剥がし、剥がした後のツリーで整形・検査・build・test が通ることと、マーカーが 1 件も残っていないことを検査する。**剥がしの対象に自分自身を含む**（[`../../scripts/setup/remove-boilerplate-only/manifest.ts`](../../scripts/setup/remove-boilerplate-only/manifest.ts) の `SELF_DESTRUCT_PATHS`）。剥がしは任意ではないので、fork には検証する相手が残らない <!-- boilerplate-only:line --> |
+| Strip Verify | `strip-verify.yaml` | `strip-verify` | 使い捨てチェックアウトで boilerplate 限定の記述を剥がし、剥がした後のツリーで整形・検査・build・test が通ることと、マーカーが 1 件も残っていないことを検査する。**剥がしの対象に自分自身を含む**（[`../../scripts/setup/remove-boilerplate-only/manifest.ts`](../../scripts/setup/remove-boilerplate-only/manifest.ts) の `SELF_DESTRUCT_PATHS`）。剥がしは任意ではないので、作った側には検証する相手が残らない <!-- boilerplate-only:line --> |
 | Lockfile Drift | `lockfile-drift.yaml` | `lockfile-drift` | ロックファイルが `package.json` と一致し、install が追跡ファイルを書き換えないことを検査する |
 | Package Version | `package-version.yaml` | `package-version` | `package.json` の `version` が PR の base が名乗る版と一致するか検査する。版の出所はリリースブランチ名（= タグから数えた次の版）1 つで、焼き込みは `make branch-*` がブランチを切る手順の中で行う。base がリリースブランチでない PR では据え置きとして緑を返す |
 | Tokens Drift | `tokens-drift.yaml` | `tokens-drift` | hand-written token SSOT と追跡する CSS 生成物が一致することを検査する |
@@ -104,9 +104,9 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 
 `a11y` だけが `--workers=100%` を渡し、`vrt` は Playwright の既定（論理コア数の半分）に任せる。`a11y` は違反の有無を見るだけだが、VRT は画素を比較するので、並列度が撮影のタイミングに影響しうる。
 
-どちらも**台数は書かない**。standard runner のコア数は public リポジトリで 4、private で 2 であり、fork 先が受け取るのは後者。台数を書けばこのリポジトリの事情がそのまま fork 先の既定になる。割合指定なら、その意思だけが渡ってコア数は実行環境が決める。
+どちらも**台数は書かない**。standard runner のコア数は public リポジトリで 4、private で 2 であり、作った側が受け取るのは後者。台数を書けばこのリポジトリの事情がそのまま作った側の既定になる。割合指定なら、その意思だけが渡ってコア数は実行環境が決める。
 
-大きいランナーを使う fork 側で調整したい場合の口は `VRT_ARGS` で、`make vrt` / `make a11y` の双方が受け取る（[`.makefiles/testing/vrt.mk`](../../.makefiles/testing/vrt.mk)）。
+大きいランナーを使う作った側で調整したい場合の口は `VRT_ARGS` で、`make vrt` / `make a11y` の双方が受け取る（[`.makefiles/testing/vrt.mk`](../../.makefiles/testing/vrt.mk)）。
 
 ## ワークフロー一覧（Security）
 
@@ -126,11 +126,8 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 | OSV Scan | `osv-scan.yaml` | `osv-scan` / `osv-gate` | 同じ依存を OSV データベースで読む。報告と昇格ゲートの二段は Trivy と同じ形 |
 | Dependency Review | `dependency-review.yaml` | `dependency-review` | **この PR が増やした依存**だけを見る。他の依存スキャナが見るのは木の現状で、持ち越しと増分を区別できない。**このリポジトリの運用にだけ置く**（呼ぶ API が無料なのは public のときだけで、private では Code Security のライセンスを要求するため） <!-- boilerplate-only:line --> |
 | Bearer Scan | `bearer.yaml` | `bearer` | 値がプロセスの外へ出る地点を、その値の分類と併せて見る。**落とさない**（下記） |
-<!-- boilerplate-only:replace-begin -->
-| DevSkim Scan | `devskim.yaml` | `devskim` | 言語フロントエンドを持たない regex 検査。opengrep も CodeQL も開かないファイルを読む。**落とさない**（下記） |
-<!-- boilerplate-only:replace-with -->
-<!-- = | DevSkim Scan | `devskim.yaml` | `devskim` | 言語フロントエンドを持たない regex 検査。opengrep が開かないファイルを読む。**落とさない**（下記） | -->
-<!-- boilerplate-only:replace-end -->
+| DevSkim Scan | `devskim.yaml` | `devskim` | 言語フロントエンドを持たない regex 検査。**構文木を組む検査が開かないファイル**を読む。**落とさない**（下記） |
+| Tools Cooldown | `tools-cooldown.yaml` | `tools-cooldown` | `mise.toml` の pin が配布経路ごとの冷却期間を満たすかを、版の公開日時を上流から引いて見る。PR では**差分で動いた pin だけ**、週次は全 pin。公開日時を引けない backend は「違反なし」ではなく検査不成立として落ちる。免除は pin の直上のコメント（[`scripts/tools-cooldown/README.md`](../../scripts/tools-cooldown/README.md)） |
 | OpenSSF Scorecard | `scorecard.yaml` | `scorecard` | リポジトリ自身の設定を測る。PR では走らない |
 | SonarQube Cloud Scan | `sonarcloud.yaml` | `preflight` / `sonarcloud` / `report` / `unconfigured-notice` | **外部アカウントを要する唯一の検査。** `SONAR_TOKEN` が無ければ走らず、緑のまま「未設定」を PR へ述べる。剥がしの対象 <!-- boilerplate-only:line --> |
 | DAST | `dast.yaml` | `dast` | **ここだけが応答を読む。** アプリを立てて OWASP ZAP で HTTP を撃ち、配信面を見る。既知の欠落は `.github/zap/rules.tsv` の一覧が持ち、**一覧に無い所見は赤にする** |
@@ -151,19 +148,13 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 
 | 配線 | 該当 job | 何が赤にするか |
 | --- | --- | --- |
-<!-- boilerplate-only:replace-begin -->
-| ゲート | `secret-scan` / `sast` / `dependency-audit` / `dependency-gate` / `osv-gate` / `dependency-review` / `dast` | job の exit code |
-<!-- boilerplate-only:replace-with -->
-<!-- = | ゲート | `secret-scan` / `sast` / `dependency-audit` / `dependency-gate` / `osv-gate` / `dast` | job の exit code | -->
-<!-- boilerplate-only:replace-end -->
+| ゲート | `secret-scan` / `sast` / `dependency-audit` / `dependency-gate` / `osv-gate` / `dast` | job の exit code |
+| ゲート | `dependency-review` | job の exit code <!-- boilerplate-only:line --> |
 | 報告専用 | `dependency-scan` / `osv-scan` | 何も赤にしない（スキャナが走らなかったときだけ落ちる） |
-<!-- boilerplate-only:replace-begin -->
-| code scanning へ送る | `codeql` / `bearer` / `devskim` / `sonarcloud` | **差分が新しく持ち込んだ alert** に対する GitHub 側のチェック |
-<!-- boilerplate-only:replace-with -->
-<!-- = | code scanning へ送る | `bearer` / `devskim` | **差分が新しく持ち込んだ alert** に対する GitHub 側のチェック | -->
-<!-- boilerplate-only:replace-end -->
+| code scanning へ送る | `bearer` / `devskim` | **差分が新しく持ち込んだ alert** に対する GitHub 側のチェック |
+| code scanning へ送る | `codeql` / `sonarcloud` | 同上 <!-- boilerplate-only:line --> |
 
-**「落とさない」のは所見に対してだけで、機構が壊れたら落ちる。** `bearer` / `devskim` / `scorecard` は報告が出力のすべてなので、走らなかった走査・書かれなかった SARIF・届かなかったアップロードは、いずれも綺麗な結果と同じ緑になってしまう。**検査しない gate は「違反なし」と見分けが付かない。**
+**「落とさない」のは所見に対してだけで、機構が壊れたら落ちる。** `bearer` / `devskim` / `scorecard` は報告が出力のすべてなので、走らなかった走査・書かれなかった SARIF・届かなかったアップロードは、いずれも綺麗な結果と同じ緑になってしまう。**検査しない gate は「違反なし」と見分けが付かない**（下記「`paths:` フィルタを使わない」）。
 
 3 つ目は「落とさない」と「見せない」を分けるための配線で、job は緑を返すが差分が持ち込んだ alert は PR を赤にする。
 
@@ -212,7 +203,7 @@ PR ごとには走らず、ラベルや保護ブランチへの push で起動�
 | --- | --- | --- | --- |
 | Baseline Retake | `baseline-retake.yaml` | `retake` / `report` | VRT または E2E の**完了**で発火し、`baseline-retake` ラベルが付いていれば、**story と画面の基準画像をまとめて**撮り直し、置き場へ push してサブモジュールのポインタを進める。story も画面も**報告された差分だけ**が対象で、報告はそれぞれの実行の artifact（`vrt-report` / `e2e-report`）から引く。画面の報告が無いときは撮らない —— 全数へ落とすと、コメントが誰にも見せていない画素を正にしてしまう。両方が赤いときは E2E 側の実行が VRT 側へ譲る —— 片方だけでラベルを使い切らないためで、これが「1 ラベル 1 撮り直し」を保つ。ラベルはトリガではなく条件なので、PR 作成時に付けておける（VRT の完了を待つ必要がない）。**絵を動かしうるチェック**（`baseline-retake.yaml` の `DECIDES_PIXELS` が名指しする）が落ちている間は撮らずに見送り、ラベルを残す（次の実行で自動的に再開する）。見るのは各チェックの最新の試行だけで、名指しは allowlist である — 落ちているもの全部を数えると、撮るまで存在しない画像を待つ `baseline-approval` と互いに待ち合う。`revert-` で始まるブランチではラベル無しで全数を撮り直す（掃除で復帰先の一式が消えているため）。ポインタの push は `GITHUB_TOKEN` ではなく App のトークンで行う（`GITHUB_TOKEN` の push は実行を起こさないため、確認用の VRT が走らない）。**承認ではない** — 画素の判断は、コメントが並べる動いた画像の前後を見て PR レビューで行う |
 | VRT Guard | `vrt-guard.yaml` | `guard` | 保護ブランチへの push 後に story の比較をやり直す。通常は鳴らない（PR はマージ結果に対して判定され、ブランチは最新であることを要求されるため）。鳴ったら前提が崩れた合図として issue を立てる。**基準画像は撮り直さない** |
-| Lighthouse | `lighthouse.yaml` | `lighthouse` | 保護ブランチへの push と毎日 1 回、`e2e/lib/screens.ts` が宣言する画面を 1 枚ずつ Lighthouse で開き、LCP / CLS / TBT を `performance-budget.yaml` の上限と照らす（[0101](../../docs/adr/0101-performance-budget.md)）。落ちたら issue を立てる（ブランチごとに 1 本、2 度目は同じ issue へコメント）。**performance スコアは見ない** —— 5 指標の加重平均は、下がったときにどれが下がったかを答えられない。INP は実ユーザの操作を要して lab では測れないため TBT が代わる。撮影（`vrt` / `a11y` / `e2e`）と違ってブラウザをコンテナへ閉じ込めないのは、比べるのが画素ではなく数値だから —— 固定すべきはフォントのラスタライズではなくブラウザの版で、それは lockfile が担う。**PR でも起動はするが、測るのは差分が要求したときだけ** —— 画面の宣言か器が動いていれば待たずに測る。**この job が見るのは、自分で測ると決められる構造だけ**で、ラベルで回すべき差分の名指しは `Deferred Checks` が 3 本ぶんまとめて行う。ラベル（`run-lighthouse`）でも回る。**全量を PR で回さない理由は実測にある** —— 計測は直列でしか成立せず（同時に測ると並列度そのものが数値へ混ざる）、23 画面 × 3 試行 × 約 14 秒 ≒ 16 分に対し build は約 1 分。費用は `画面数 × 試行回数` に張り付いており、試行を削れば runner のぶれを吸う中央値を失い、画面を削れば宣言から全数を引く意味を失う。**削るなら網羅ではなく頻度**という判断で、検知が 1 マージぶん遅れる代わりに PR は 1 秒も待たない |
+| Lighthouse | `lighthouse.yaml` | `lighthouse` | 保護ブランチへの push と毎日 1 回、`e2e/lib/screens.ts` が宣言する画面を 1 枚ずつ Lighthouse で開き、LCP / CLS / TBT を `performance-budget.yaml` の上限と照らす（[0101](../../docs/adr/0101-performance-budget.md)）。落ちたら issue を立てる（ブランチごとに 1 本、2 度目は同じ issue へコメント）。**performance スコアは見ない** —— 5 指標の加重平均は、下がったときにどれが下がったかを答えられない。INP は実ユーザの操作を要して lab では測れないため TBT が代わる。撮影（`vrt` / `a11y` / `e2e`）と違ってブラウザをコンテナへ閉じ込めないのは、比べるのが画素ではなく数値だから —— 固定すべきはフォントのラスタライズではなくブラウザの版で、それは lockfile が担う。**PR でも起動はするが、測るのは差分が要求したときだけ** —— 画面の宣言か器が動いていれば待たずに測る。**この job が見るのは、自分で測ると決められる構造だけ**で、ラベルで回すべき差分の名指しは `Deferred Checks` が 3 本ぶんまとめて行う。ラベル（`run-lighthouse`）でも回る。**全量を PR で回さない理由は実測にある** —— 計測は直列でしか成立せず（同時に測ると並列度そのものが数値へ混ざる）、23 画面 × 3 試行 × 約 14 秒 ≒ 16 分に対し build は約 1 分。費用は `画面数 × 試行回数` に張り付いており、試行を削れば runner のぶれを吸う中央値を失い、画面を削れば宣言から全数を引く意味を失う。**削るなら網羅ではなく頻度**という判断で、払う代償は上記「先送りにする検査」と同じ、買うのは PR が 1 秒も待たないことである |
 | Baseline Prune | `baseline-prune.yaml` | `report` | 月次で基準画像の置き場を測り、閾値を超えたときだけ掃除を促す issue を立てる。**消さない** — 履歴の書き換えは取り消せないので、実行は人が `make baseline-prune` で起こす |
 
 ## ワークフロー一覧（Documentation）
@@ -242,7 +233,7 @@ PR ごとには走らず、ラベルや保護ブランチへの push で起動�
 
 [`../settings/branch-protection.json`](../settings/branch-protection.json) が **CI Checks 群を必須**にし、`strict` でブランチが最新であることを要求する。これは VRT が成立する条件でもある — 判定しているのは base へマージした結果の木（`refs/pull/N/merge`）なので、base が動いた後の緑をそのまま通すと、基準画像が「実際にマージされる木」とずれる。
 
-**登録してよいのは、すべての PR でその名前を報告し続ける job だけ。**報告されない context を登録すると、GitHub はその PR を「必須チェック待ち」のまま永久にブロックする。`deploy-docs` の `docs-build` は `paths:` で自分自身の変更に絞ってあるため登録しない。
+**登録してよいのは、すべての PR でその名前を報告し続ける job だけ。**報告されない context を登録すると PR は永久に止まる（下記「`paths:` フィルタを使わない」）。`deploy-docs` の `docs-build` は `paths:` で自分自身の変更に絞ってあるため登録しない。
 
 この条件は `make actions-required-check-lint` が機械検査する（`actions-lint` job と pre-commit が回す）。落ちる条件は `.makefiles/README.md` が持つ（[`.makefiles/README.md`](../../.makefiles/README.md)）。
 
@@ -253,7 +244,7 @@ context 名は**ワークフロー名ではなく job 名**である点に注意
 **PR に context を報告しない job はこの制約の外**にある。`notify-failure` / `notify-detection` はスケジュール実行でしか起動せず、10 本のワークフローで同じ名前を名乗る —— これは重複ではなく、**同じ役割に同じ名前が付いている**状態である。名前を workflow ごとに割ると、通知という 1 つの関心事が 10 個の別物に見える。`baseline-prune` / `baseline-retake` の `report` も同じ理由で並んでいる。
 
 <!-- boilerplate-only:replace-begin -->
-**fork の初期化を生き延びないジョブ（`purge-verify` / `strip-verify`）も登録しない。** `strip-verify` は剥がしで自分ごと消え、消えた後は context を報告しない。`purge-verify` は残るが、破棄を済ませた fork では「破棄済みなのでこのワークフローを消せ」と赤で止まる設計であり、指示どおり消せば同じく報告されなくなる。`branch-protection.json` は JSON でコメントを持てず削除のマーカーを置けないので、登録すると初期化を済ませた fork のすべての PR が必須待ちで止まる。
+**作った側の初期化を生き延びないジョブ（`purge-verify` / `strip-verify`）も登録しない。** `strip-verify` は剥がしで自分ごと消え、消えた後は context を報告しない。`purge-verify` は残るが、破棄を済ませた作った側では「破棄済みなのでこのワークフローを消せ」と赤で止まる設計であり、指示どおり消せば同じく報告されなくなる。`branch-protection.json` は JSON でコメントを持てず削除のマーカーを置けないので、登録すると初期化を済ませた作った側のすべての PR が必須待ちで止まる。
 <!-- boilerplate-only:replace-with -->
 <!-- = **`purge-verify` は登録しない。** サンプルを破棄した後は「破棄済みなのでこのワークフローを消せ」と赤で止まる設計で、指示どおり消せば context を報告しなくなる。`branch-protection.json` は JSON でコメントを持てず削除のマーカーを置けないので、登録すると破棄を済ませた後のすべての PR が必須待ちで止まる。 -->
 <!-- boilerplate-only:replace-end -->
@@ -301,7 +292,7 @@ Node / pnpm などの供給は composite action [`../actions/setup-mise`](../act
 | `lockfile-drift` | CI のみ | install が追跡ファイルを書き換えたことは、手元では「自分が触った変更」と区別が付かない。第三者の目で見る CI が持つ |
 | commitlint | hook のみ | コミット件名の検査。作り直しがコミット単位でしか効かず、PR 到達後に落としても直す手段が rebase になる |
 | secret-scan | hook + CI | 同じ `make secret-scan` を呼ぶが、**走査範囲の決まり方が違う**。hook の既定は「どのリモートにも無いコミット」で、PR のブランチは既に push 済みなので CI では 0 件になる。CI は `SECRET_SCAN_LOG_OPTS` で base からの範囲を渡す。履歴全体は週次だけ（`make secret-scan-history`） |
-| 依存の脆弱性 | CI のみ | 変更の作者がその場で解消できず、変更と独立に状態が変わる。hook に載せると `--no-verify` の常用を教える（[0110](../../docs/adr/0110-security-operations.md) 3.1 / 撤回条件 W1・W2） |
+| 依存の脆弱性 | CI のみ | 上記「依存の脆弱性は、3 つの判定が同じ対象を見る」と同じ理由で、hook に載せると `--no-verify` の常用を教える |
 | `sast` | CI のみ | 走査に 1 分前後かかり hook の速度目標に収まらない。手元で確かめるなら `make sast` がそのまま同じ検査を回す |
 | `sonarcloud` | CI のみ | 解析を実行するのは SonarCloud 側で、手元には結果を読む口しか無い。そもそも `SONAR_TOKEN` を開発者の環境へ配らない <!-- boilerplate-only:line --> |
 | `dast` | CI のみ | build と起動を伴うので hook には収まらない。手元で確かめるなら `pnpm start` したものへ `DAST_TARGET=http://host.docker.internal:3000 make dast` を当てる |
@@ -344,7 +335,7 @@ CI Checks のワークフローには `paths:` / `paths-ignore:` を付けない
 
 ### 依存スキャナだけは「影響しうるもの」の側を書く
 
-`dependency-scan` / `dependency-audit` / `osv-scan` は `ignore:` ではなく **`only:`** を渡す。依存の脆弱性を決めているのは lockfile であって、ソースをいくら動かしてもスキャナの答えは変わらない。「影響しえないもの」を列挙する側で書こうとすると、それは「lockfile 以外のすべて」になり、書ける形にならない。
+`dependency-scan` / `dependency-audit` / `osv-scan` / `tools-cooldown` は `ignore:` ではなく **`only:`** を渡す。依存の脆弱性を決めているのは lockfile、pin の公開日時を決めているのは `mise.toml` であって、ソースをいくら動かしてもスキャナの答えは変わらない。「影響しえないもの」を列挙する側で書こうとすると、それは「lockfile 以外のすべて」になり、書ける形にならない。
 
 **許可リストが許されるのはここだけで、条件が 2 つある。**
 
@@ -372,7 +363,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 - コメントは HTML マーカー（`<!-- lint-result -->` 等）で同定し、**同一 PR では増やさず更新する**。マーカーは job ごとに一意
 - **緑のときはコメントを作らない。** 呼び出し側が `status:` に判定を渡し、`success` のときだけ新規作成を抑止する。すべての job が毎回コメントを残すと、PR の会話は 20 件を超える「PASS」で埋まり、その中に混ざった 1 件の FAIL が読み手に届かない。**通知の価値は件数ではなく信号対雑音比**で決まる
 - **ただし抑止するのは「作ること」だけで、「更新すること」は抑止しない。** 既にコメントがあれば `success` でも上書きする。FAIL → PASS で直したときに古い FAIL が残るのを避けるためで、これは「緑のときは何もしない」では達成できない
-- **REST を叩くジョブは App の installation token を使う。** `GITHUB_TOKEN` の上限は **1,000 req/h・リポジトリ単位**で、全ワークフローと開いている全 PR で共有する。installation token は 5,000 req/h。`baseline-retake` は VRT / E2E の完了ごとに発火して 1 回あたり約 10 回叩くため最初に枯れる側で、実際に `API rate limit exceeded for installation` で撮り直しが止まった。鋳造時の権限は**そのジョブの呼び出しが要るものだけ**を名指しする（push 用の鋳造は `setup-baselines` の側にあり、別の権限で別に取る）。**鋳造は落ちてよい**（`continue-on-error`）—— installation が許可していない権限を求めると 422 になり、そのままではジョブごと落ちる。避けようとした枠切れより悪い。落ちれば出力が空になり、呼び出しは `GITHUB_TOKEN` へ落ちて撮り直しは進む。App を登録していない fork も同じ経路で動き続ける —— 枠が小さいだけである。**コメントを投稿するジョブはこの対象外**：長命の秘密鍵が本文を作るジョブへ入ることになり、下の「`secrets.*` を `env:` で渡さない」に反する。`a11y` / `e2e` が既にコメントを別ジョブへ割ってあるのはこの形で、issue を開く側だけがトークンを持つ。`lighthouse` は同じジョブで両方をやるため寄せられていない —— 寄せるならジョブを割る
+- **REST を叩くジョブは App の installation token を使う。** `GITHUB_TOKEN` の上限は **1,000 req/h・リポジトリ単位**で、全ワークフローと開いている全 PR で共有する。installation token は 5,000 req/h。`baseline-retake` は VRT / E2E の完了ごとに発火して 1 回あたり約 10 回叩くため最初に枯れる側で、実際に `API rate limit exceeded for installation` で撮り直しが止まった。鋳造時の権限は**そのジョブの呼び出しが要るものだけ**を名指しする（push 用の鋳造は `setup-baselines` の側にあり、別の権限で別に取る）。**鋳造は落ちてよい**（`continue-on-error`）—— installation が許可していない権限を求めると 422 になり、そのままではジョブごと落ちる。避けようとした枠切れより悪い。落ちれば出力が空になり、呼び出しは `GITHUB_TOKEN` へ落ちて撮り直しは進む。App を登録していない作った側も同じ経路で動き続ける —— 枠が小さいだけである。**コメントを投稿するジョブはこの対象外**：長命の秘密鍵が本文を作るジョブへ入ることになり、下の「`secrets.*` を `env:` で渡さない」に反する。`a11y` / `e2e` が既にコメントを別ジョブへ割ってあるのはこの形で、issue を開く側だけがトークンを持つ。`lighthouse` は同じジョブで両方をやるため寄せられていない —— 寄せるならジョブを割る
 - **本文ファイルが無いことは、投稿ステップの失敗ではなく job の打ち切りとして扱う。** 打ち切られた job は本文を書くステップまで到達しない。ここで失敗させると、結果が出ていないだけの実行で投稿ステップだけが赤くなる。**何も投稿せずに戻る** —— 打ち切られたことはチェック一覧が示しており、コメントはそれを言い換えるだけである。加えて費用の形が悪い：打ち切りは判定を持たないため `success` の抑止を通り抜けて必ず書き込みを起こし、それが出る状況（job の中断）は push が連続している状況と重なるので、**API の枠が一番苦しいときに消費が跳ねる**
 - **`diff-scope` で降りたときは `status: success` を渡して更新する。**降りた job は緑を報告するので、投稿ごと落とすと前の push が出した FAIL コメントが緑チェックの隣に残り続ける。赤くした変更を base と同一内容へ戻す直し方（履歴を書き換えないこのリポジトリでは、これが正）で必ず踏む経路である。降りたことを述べる本文を書いて upsert すれば、コメントが無い PR には何も付かず、赤が残っている PR ではそれが置き換わる
 - **報告専用のスキャナは、判定を「走ったか」ではなく「見つかったか」で渡す。** `dependency-scan` / `osv-scan` の job は検出で落ちない設計なので、`status` に job の成否をそのまま渡すと、脆弱性を見つけた実行が `success` としてコメントを抑止する。3 値（`success` / `findings` / `failure`）に割り、スキャナの exit code で区別する（`TRIVY_FS_DETECT_EXIT` / `OSV_DETECT_EXIT`）
@@ -393,19 +384,19 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 > You may use the rules only for your own internal business purposes.
 > This license does not allow you to distribute the rules, or to make them available to others as a service.
 
-エンジンに OSS fork の opengrep を採った判断は「fork 先へライセンスの判断を渡さない」ことだった（[0110](../../docs/adr/0110-security-operations.md) 3）。**ルールをレジストリから引いている限り、その判断は成立しない** —— エンジンが LGPL でも、走らせているルールが内部利用限定なら、判断は層をずれて渡されているだけである。
+エンジンに OSS fork の opengrep を採った判断は「作った側へライセンスの判断を渡さない」ことだった（[0110](../../docs/adr/0110-security-operations.md) 3）。**ルールをレジストリから引いている限り、その判断は成立しない** —— エンジンが LGPL でも、走らせているルールが内部利用限定なら、判断は層をずれて渡されているだけである。
 
 | | 取得元 | ライセンス |
 | --- | --- | --- |
 | エンジン | mise が固定する opengrep | LGPL-2.1-or-later |
-| ルール（変更前） | 走査のたびに semgrep.dev | **Semgrep Rules License v1.0** |
-| ルール（現在） | 固定した commit の `opengrep/opengrep-rules` | LGPL-2.1 + Commons Clause |
+| ルール（レジストリ `p/*`、採らない） | 走査のたびに semgrep.dev | **Semgrep Rules License v1.0** |
+| ルール（採用） | 固定した commit の `opengrep/opengrep-rules` | LGPL-2.1 + Commons Clause |
 
 ### 取り出し方は 3 つの制約で決まっている
 
 **1. 検体を 1 つもディスクへ置かない。** 置き場はルールとほぼ同数の**検体**（意図的に脆弱なソース）を抱えており、`java/` `php/` には本物の webshell が含まれる。そのまま展開すると開発者のマシンとランナーへ置かれ、ウイルス対策が反応する。よって**言語で絞ったうえで、アーカイブから YAML だけを名指しで取り出す** —— 「全部展開してから消す」では同じ集合になっても途中でディスクへ出る。
 
-**2. `audit` 分類を取らない。** 実測で、`security/` を丸ごと採ると 28 件（うち 23 件が `detect-non-literal-regexp` と `detect-redos`）出て 0 件 baseline が保てなかった。レジストリの `p/javascript` も既定では含めていない分類で、**読んで判断するための所見**であってゲートに載る前提ではない。同じ規則を [`eslint.config.ts`](../../eslint.config.ts) の security でも落としており、理由も同じ。
+**2. `audit` 分類を取らない。** `security/` を丸ごと採ると `audit` の所見で 0 件 baseline が保てない。レジストリの `p/javascript` も既定では含めていない分類で、**読んで判断するための所見**であってゲートに載る前提ではない。同じ規則を [`eslint.config.ts`](../../eslint.config.ts) の security でも落としており、理由も同じ。
 
 **3. 照合はアーカイブではなく取り出したものに掛ける。** GitHub が自動生成する tarball はバイト単位で不変ではない（gzip の設定が変われば同じ commit でも digest が動く）。照合したいのは「走らせるルールが固定したものと同じか」であって包み方ではないので、**取り出した YAML の集合に対して digest を取る**。一致しなければ**何も置かずに**落ちる —— 置いてから照合すると、落ちた後のツリーに照合できなかったルールが残り、次の実行がそれを「固定済み」と読む。
 
@@ -413,7 +404,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 
 ### 引き換えに失うもの
 
-**ルール数が減る。** レジストリの 3 パックで 563 ルールだったところ、いまは 77 ルールである。`p/owasp-top-ten` は複数言語を跨ぐパックで、その大半はこのリポジトリに対象が無いが、**それを差し引いても減っている**。
+**ルール数が減る。** 固定した commit から取り出す集合は、レジストリの 3 パックより小さい。`p/owasp-top-ten` は複数言語を跨ぐパックで、その大半はこのリポジトリに対象が無いが、**それを差し引いても減っている**。
 
 <!-- boilerplate-only:replace-begin -->
 **ルールが更新されない。** `opengrep/opengrep-rules` はライセンス変更直前（2024-12-13）の fork で、上流の動きは鈍い。新しい規則は入ってこない。**この層の鮮度は CodeQL が補っている**（GitHub 側が更新し続ける）ため、SAST 全体が固まるわけではない。
@@ -421,7 +412,31 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 <!-- = **ルールが更新されない。** `opengrep/opengrep-rules` はライセンス変更直前（2024-12-13）の fork で、上流の動きは鈍い。新しい規則は入ってこない。**固定した commit を上げるまで、この層の鮮度は動かない。** -->
 <!-- boilerplate-only:replace-end -->
 
-撤回条件は BACKLOG の W24 が持つ。
+この判断を見直すのは、レジストリのルールが OSI 承認ライセンスへ戻ったときか、固定先が更新を止めて**他の層でも補えない面**が実測で見つかったときである。**ルールが少ないこと・上流の更新が鈍いことだけでは条件にならない** —— 減ること自体は承知のうえで選んでおり、条件は「減った分がどこにも無い」と実測で言えることである。
+
+## Related ADRs
+
+The decisions the workflows here follow. **Comments in the workflow definitions do not cite an ADR
+directly — they come here instead.** An ADR's number, section and owning record all move, while this
+README moves with the workflows, so the movement never reaches the definitions
+（[docs/rules.md](../../docs/rules.md)「コメントと文書」）。
+
+- [0004](../../docs/adr/0004-library-management.md) — dependency update policy: majors go in their own PR
+- [0011](../../docs/adr/0011-no-docker.md) — what the delivery boundary does and does not promise
+- [0051](../../docs/adr/0051-styling-system.md) — the responsive bands the screen checks read
+- [0054](../../docs/adr/0054-ui-catalog-storybook.md) — the catalogue the visual and a11y checks ride on
+- [0072](../../docs/adr/0072-api-type-generation.md) — generated artefacts carry no findings of their own
+- [0082](../../docs/adr/0082-client-observability.md) — which metrics are collected from real users
+- [0090](../../docs/adr/0090-testing-strategy.md) / [0091](../../docs/adr/0091-test-verification-methods.md) — the framework split and what a real browser owns
+- [0101](../../docs/adr/0101-performance-budget.md) — the budget and the metrics it is written against
+- [0102](../../docs/adr/0102-browser-support.md) — the support matrix the checks are run against
+- [0110](../../docs/adr/0110-security-operations.md) — scan thresholds, suppression format, fail-closed gates
+- [0140](../../docs/adr/0140-documentation-operations.md) — what a document must carry
+- [0141](../../docs/adr/0141-portal-operations.md) — what the documentation site publishes
+- [0150](../../docs/adr/0150-git-workflow.md) — the branches an environment is deployed from
+- [0153](../../docs/adr/0153-ci-configuration.md) — job partitioning, SHA pinning, secrets, the character set the public surface may carry
+- [0155](../../docs/adr/0155-claude-skills-development.md) — shell as the exception to TypeScript
+- [0160](../../docs/adr/0160-agent-environment-loop.md) — the re-measurement step and what the loop may read <!-- boilerplate-only:line -->
 
 ## 通知
 
@@ -434,7 +449,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 | failure | 週次で走る全セキュリティ検査 | job が落ちた（または打ち切られた）こと。**走査の出力は載せない** —— 実行 URL だけを渡すので、秘密や脆弱性の詳細が通知先へ届く経路が無い |
 | detection | `dependency-scan` / `osv-scan` | **落とさない設計の検査が何かを見つけた**こと。job は緑で終わるので failure では永久に発火しない |
 
-detection は「何が見つかったか」を言えなければ、報告している出来事を特定できない。そこで本文を持つが、**載せるのは識別子だけ**とする（[`../actions/notify-detail`](../actions/notify-detail/action.yaml) が CVE / GHSA の形をした文字列だけをログから抜く）。「先頭 N 行」のような規則にすると、いつかは値そのものを運ぶ。`secret-scan` に detection モードを与えていないのも同じ理由で、あちらのログに載りうるのは検出された秘密そのものである。
+detection は「何が見つかったか」を言えなければ、報告している出来事を特定できない。そこで本文を持つが、**載せるのは識別子だけ**とする（[`../actions/notify-detail`](../actions/notify-detail/action.yaml) が advisory 識別子の形をした文字列だけをログから抜く）。「先頭 N 行」のような規則にすると、いつかは値そのものを運ぶ。`secret-scan` に detection モードを与えていないのも同じ理由で、あちらのログに載りうるのは検出された秘密そのものである。
 
 **打ち切り（`cancelled`）を失敗として数える。** 週次の実行が打ち切られるのは、通常は前の実行が残っているか runner が落ちたときで、いずれも「走らなかった」ことに変わりはない。緑と区別できないまま放置すると、走っていない週が積み上がる。
 

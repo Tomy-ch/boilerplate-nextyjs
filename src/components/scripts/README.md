@@ -84,7 +84,7 @@ select:
 | `original` | 上流に相当する item が存在せず、最初から自前で作った | なし | 何もしない |
 | `not-adopted` | 検討したうえで作らないと決めた。実体を持たない | なし | 何もしない |
 
-`kind` を分けているのは、「manifest に無い」だけでは**自前実装なのか、まだ取り込んでいないのか**を区別できないためです。実際にこの曖昧さのせいで、copy-in である `alert-dialog` と `field` の記録欠落が長く見過ごされていました。
+`kind` を分けているのは、「manifest に無い」だけでは**自前実装なのか、まだ取り込んでいないのか**を区別できないためです。
 
 `not-adopted` はその裏返しで、**「検討したのか、まだ見ていないのか」**を区別します。実体が無いので `layer` / `as` / `directory` を持たず、代わりに `reason` と `revisitWhen` が必須です。`revisitWhen` を必須にするのは、条件を書けない「やらない」が判断ではなく先送りだからです。registry に存在しない候補を退けた場合は `registryItem` も持ちません。
 
@@ -119,11 +119,11 @@ pnpm check:ui --offline   # 整合性だけ（通信しない）
 記録の無いディレクトリ、実体を失ったエントリ、同じ場所を二重に宣言したエントリ、`kind` と
 `source` の食い違いを見ます。ここで問題があれば通信せずに終わります。
 
-**台帳の対象は `src/components` 配下のすべての役割です。** `ui` だけでなく `feedback` /
-`foundation` / `navigation` / `sugar` / `view-state` も含みます。役割ディレクトリは列挙せず、
-**`README.md` を持つディレクトリを component とみなします**。役割を列挙すると、役割が増える
-たびにこの script を直す必要が生まれ、直し忘れた役割が台帳から静かに抜けるためです。この
-判定なら入れ子（`sugar/table` とその配下）も、`ui` の外へ移した component も記録漏れとして
+**台帳の対象は `src/components` 配下のすべての層です。** `design-system` だけでなく `patterns` /
+`shell` / `app-starter` も含みます。層のディレクトリは列挙せず、
+**`README.md` を持つディレクトリを component とみなします**。層を列挙すると、層が増える
+たびにこの script を直す必要が生まれ、直し忘れた層が台帳から静かに抜けるためです。この
+判定なら入れ子（`patterns/table` とその配下）も、層を移した component も記録漏れとして
 現れます。判定の根拠は「component ごとに README を co-locate する」という
 [`components/README.md`](../README.md) の規約です。
 

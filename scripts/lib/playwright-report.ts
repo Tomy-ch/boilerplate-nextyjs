@@ -82,16 +82,6 @@ export function isFailed(test: JSONTest): boolean {
 }
 
 /**
- * 注記に載せて運ばれた値を、型を指定して取り出す。
- *
- * @remarks
- * Playwright のレポートは test ごとに注記を持ちます。同じ型の注記が複数あることを前提に、
- * すべてを順に返します。
- *
- * @param tests - 1 つの spec の test
- * @param type - 取り出す注記の型
- */
-/**
  * tag で選んだ spec が注記へ載せた値を集める。
  *
  * @remarks

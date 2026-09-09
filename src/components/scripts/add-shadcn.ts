@@ -132,14 +132,12 @@ const registryItemSchema = z.object({
   files: z.array(z.object({ path: z.string() })).min(1),
 });
 
-const upstreamCommitsSchema = z
-  .array(
-    z.object({
-      sha: z.string(),
-      commit: z.object({ committer: z.object({ date: z.iso.datetime() }) }),
-    }),
-  )
-  .min(1);
+const upstreamCommitSchema = z.object({
+  sha: z.string(),
+  commit: z.object({ committer: z.object({ date: z.iso.datetime() }) }),
+});
+
+const upstreamCommitsSchema = z.tuple([upstreamCommitSchema], upstreamCommitSchema);
 
 type ComponentManifest = z.infer<typeof componentManifestSchema>;
 
@@ -378,7 +376,7 @@ async function moveComponentToPackage(
   await rename(sourcePath, destinationPath);
 }
 
-/** shadcn CLI が依存として出力した、`ui/` 直下のフラットな生成物の部品名を返す。 */
+/** shadcn CLI が依存として出力した、`design-system/` 直下のフラットな生成物の部品名を返す。 */
 async function listFlatGeneratedComponents(): Promise<string[]> {
   const entries = await readdir(stagingDirectoryPath, { withFileTypes: true });
   return entries
@@ -417,8 +415,9 @@ async function pointImportsAtPackagedComponents(
 /**
  * shadcn CLI が依存として出力した生成物を整理し、package 済みの依存は実体へ寄せる。
  *
- * CLI はこのリポジトリの `ui/<name>/<name>.tsx` という配置を知らないため、依存部品を
- * `ui/<name>.tsx` へ出力し、取り込んだ component からは `@/components/ui/<name>` を import する。
+ * CLI はこのリポジトリの `<層>/<目的>/<name>/<name>.tsx` という配置を知らないため、依存部品を
+ * `design-system/<name>.tsx` へ出力し、取り込んだ component からは
+ * `@/components/design-system/<name>` を import する。
  * 放置すると実体の重複と解決しない import が同時に残り、次に typecheck を回した別の作業まで
  * 巻き込んで失敗する。
  *
@@ -492,14 +491,14 @@ async function resolveUpstreamItem(
     item.files.map(async (file) => {
       const path = `${UPSTREAM_REGISTRY_ROOT}/${file.path}`;
       const commitsUrl = `${UPSTREAM_API_URL}/repos/${UPSTREAM_REPOSITORY}/commits?path=${encodeURIComponent(path)}&per_page=1`;
-      const commits = upstreamCommitsSchema.parse(await fetchJson(commitsUrl));
+      const [latest] = upstreamCommitsSchema.parse(await fetchJson(commitsUrl));
 
       return {
         repository: UPSTREAM_REPOSITORY,
         path,
         localPath: `${componentDirectory(component, as, layer)}/${basename(file.path)}`,
-        commit: commits[0].sha,
-        committedAt: commits[0].commit.committer.date,
+        commit: latest.sha,
+        committedAt: latest.commit.committer.date,
       };
     }),
   );
@@ -664,7 +663,7 @@ export async function addShadcnComponents(arguments_: string[]): Promise<void> {
 
   if (unpackagedDependencies.length > 0) {
     process.stdout.write(
-      `未 package の依存が ui/ 直下に残りました: ${unpackagedDependencies.join(", ")}。` +
+      `未 package の依存が design-system/ 直下に残りました: ${unpackagedDependencies.join(", ")}。` +
         "先に該当部品を pnpm add:ui で取り込み・監査してから、この component を取り込み直してください。\n",
     );
   }

@@ -16,7 +16,7 @@ function count(statusName: string, value: number): PurchaseStatusCount {
 }
 
 /** 実測した契約の応答と同じ顔ぶれ。マスタの表示順で並ぶ。 */
-const STATUS_COUNTS: readonly PurchaseStatusCount[] = [
+const STATUS_COUNTS = [
   count("未処理", 7),
   count("受付中", 4),
   count("確認中", 3),
@@ -25,7 +25,7 @@ const STATUS_COUNTS: readonly PurchaseStatusCount[] = [
   count("キャンセル", 1),
   count("支払い済み", 4),
   count("発送済み", 1),
-];
+] satisfies readonly [PurchaseStatusCount, ...PurchaseStatusCount[]];
 
 const meta = {
   title: "Features/Admin/StatusBreakdown",

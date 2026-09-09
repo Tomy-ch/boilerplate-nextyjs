@@ -31,6 +31,9 @@ export type InputGroupProps = ComponentProps<"div"> & {
  * 描画し、内側の control は枠を持たない。addon の `align` に応じて、外枠は横並びと縦積みを
  * 切り替える。
  *
+ * control の名前は `Label` / `Field` の `htmlFor` か `aria-label` で与える。addon に置いた記号や
+ * アイコンは名前にならない。
+ *
  * 枠線は control の `disabled` から自動で控えめな色へ落ちる。addon も同時に減光する場合は、
  * 外枠へ `disabled` を渡す。減光の見た目を作る `data-disabled` と、枠ごと操作できないことを
  * 支援技術へ伝える `aria-disabled` の両方が付く。
@@ -237,8 +240,7 @@ export type InputGroupTextProps = ComponentProps<"span">;
  * addon 内へ単位・記号・短い説明を置く文字列。
  *
  * @remarks
- * 入力欄そのものの意味を伝えるものではない。control のアクセシブルな名前は `Label` /
- * `Field` か `aria-label` で別に与える。子にアイコンを置いた場合は既定の大きさへ揃える。
+ * 入力欄の名前にはならない（{@link InputGroup}）。子にアイコンを置いた場合は既定の大きさへ揃える。
  *
  * @param props - native `span` 属性。
  * @see Storybook `Form/InputGroup`
@@ -268,8 +270,7 @@ export type InputGroupInputProps = ComponentProps<"input">;
  * `aria-invalid` を `true` にすると、外枠の枠線も invalid の表示へ変わる。
  *
  * @remarks
- * 項目名は `Label` / `Field` の `htmlFor` か `aria-label` で必ず与える。addon に置いた記号や
- * アイコンはアクセシブルな名前にならない。
+ * 名前の与え方は {@link InputGroup} が持つ。
  *
  * @param props - native `input` 属性。
  * @see Storybook `Form/InputGroup`
@@ -302,7 +303,7 @@ export type InputGroupTextareaProps = ComponentProps<"textarea">;
  * 周囲が押し下げられる。高さを固定したい場所では単一行の `InputGroupInput` を選ぶ。
  *
  * @remarks
- * 項目名は `Label` / `Field` の `htmlFor` か `aria-label` で必ず与える。
+ * 名前の与え方は {@link InputGroup} が持つ。
  *
  * @param props - native `textarea` 属性。
  * @see Storybook `Form/InputGroup`

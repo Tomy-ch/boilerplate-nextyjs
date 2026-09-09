@@ -164,7 +164,7 @@ describe("Sheet", () => {
     await userEvent.click(screen.getByRole("button", { name: "適用" }));
 
     expect(onSubmitted).toHaveBeenCalledTimes(1);
-    expect(onSubmitted.mock.calls[0][0].get("keyword")).toBe("標準");
+    expect(onSubmitted.mock.lastCall?.[0].get("keyword")).toBe("標準");
   });
 
   it("SheetPortal と SheetOverlay を直接指定して描画先と背面を差し替えられる", () => {

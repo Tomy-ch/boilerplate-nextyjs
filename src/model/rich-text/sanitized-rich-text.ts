@@ -80,9 +80,8 @@ export class SanitizedRichText {
   /**
    * HTML 文字列を parse して sanitize し、Value Object を構築します。
    *
-   * parse は fragment として行うため、`html` / `head` / `body` は補われません。仕様準拠の parser で
-   * 木にしてから木を検査するため、文字列置換による sanitize で起こる parser の解釈差を持ちません。
-   * 不正な入れ子は parse の段階で正規化され、例外にはなりません。
+   * parse は fragment として行うため、`html` / `head` / `body` は補われません。不正な入れ子は parse の
+   * 段階で正規化され、例外にはなりません。検査の方式は同層の README「実装の要点」が持ちます。
    *
    * @param html - 未検査の HTML 文字列
    * @returns allowlist の範囲だけを残した {@link SanitizedRichText}

@@ -34,10 +34,10 @@ const LINK_CHOICES: readonly { readonly period: DashboardPeriod; readonly label:
  *
  * **日付を選ぶ選択肢だけを外から受け取ります。** 両端を決めてからでないと行き先が決まらず、
  * 押した瞬間に遷移する link にできません。overlay を開く分だけ hydration が要るので、島を
- * この 1 つに閉じ込めています（[0040](../../../../../../docs/adr/0040-routing-rendering-strategy.md)）。
+ * この 1 つに閉じ込めています。
  *
  * `aria-current` でいま見ている項目を示します。色の違いだけで現在地を表すと、色を区別できない
- * 利用者に伝わりません（[0100](../../../../../../docs/adr/0100-accessibility-target.md)）。
+ * 利用者に伝わりません。
  *
  * @see Storybook `Features/Admin/Analytics/PeriodSwitch`
  */

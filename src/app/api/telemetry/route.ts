@@ -11,9 +11,8 @@ import { ErrorKind } from "@/errors/error-kind";
  * ブラウザ発の報告を OTLP へ中継する。
  *
  * @remarks
- * ブラウザから collector を直接叩かせないための口です
- * （[0081](../../../../docs/adr/0081-observability-logging.md)）。endpoint も資格情報もブラウザへ
- * 出さず、ここが受けて `adapters/server` へ渡します。
+ * ブラウザから collector を直接叩かせないための口です。endpoint も資格情報もブラウザへ出さず、
+ * ここが受けて `adapters/server` へ渡します。
  *
  * 認証を要求しない口なので、本体を読む前に型と大きさで落とします（防御の中身と根拠は
  * [`readJsonBody`](../../../adapters/server/http/json-request.ts)）。

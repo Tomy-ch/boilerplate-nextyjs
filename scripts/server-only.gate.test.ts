@@ -15,10 +15,9 @@ import {
  * 判定の中身は `lib/server-only.ts` が持ち、ここはツリーの走査だけを担う
  * （`client-schema-weight.gate.test.ts` と同形）。
  *
- * **境界検査は層の間しか見ておらず、server と client の区別を持たない。** 番人が
- * ([0030](../docs/adr/0030-environment-variable-management.md)) 抜けても、その module を client
- * から引く経路が今たまたま無ければ何も起きない。次に誰かが引いたときに初めて壊れ、そのときの
- * 失敗は引いた側の変更として現れる。
+ * **境界検査は層の間しか見ておらず、server と client の区別を持たない。** 番人が抜けても、
+ * その module を client から引く経路が今たまたま無ければ何も起きない。次に誰かが引いたときに
+ * 初めて壊れ、そのときの失敗は引いた側の変更として現れる。
  */
 
 const REPOSITORY_ROOT = resolve(import.meta.dirname, "..");
@@ -46,13 +45,21 @@ function collect(directory: string, into: ServerModule[]): ServerModule[] {
   return into;
 }
 
+// 木を歩くので既定の 5 秒では足りない。全量を並列で回すと取り合いでさらに伸び、走査の遅さが
+// そのまま赤になる（`docs/testing-conventions.md`「リポジトリ全体を走査するゲート」）。
+const TIMEOUT_MS = 300_000;
+
 describe("server 専用 module の番人", () => {
   // ----- 正常系 -----
-  it("`*.server.ts` は import の先頭で `server-only` を引いている", () => {
-    const modules = collect(SOURCE_ROOT, []);
+  it(
+    "`*.server.ts` は import の先頭で `server-only` を引いている",
+    () => {
+      const modules = collect(SOURCE_ROOT, []);
 
-    // 走査が空振りすると、違反ゼロを報告したままゲートが黙る。違反より先に「見た件数」を主張する。
-    expect(modules.filter(({ path }) => /\.server\.tsx?$/.test(path)).length).toBeGreaterThan(0);
-    expect(formatUnguardedServerModules(findUnguardedServerModules(modules))).toBe("");
-  });
+      // 走査が空振りすると、違反ゼロを報告したままゲートが黙る。違反より先に「見た件数」を主張する。
+      expect(modules.filter(({ path }) => /\.server\.tsx?$/.test(path)).length).toBeGreaterThan(0);
+      expect(formatUnguardedServerModules(findUnguardedServerModules(modules))).toBe("");
+    },
+    TIMEOUT_MS,
+  );
 });

@@ -21,8 +21,8 @@ export const metadata: Metadata = {
  * 集計の中身。
  *
  * @remarks
- * **`searchParams` を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません
- * （[0041](../../../../docs/adr/0041-cache-components-decision.md)）。器は promise のまま渡し、穴の内側で解きます。
+ * **`searchParams` を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません。
+ * 器は promise のまま渡し、穴の内側で解きます。
  *
  * **「いま」を読むのもここです。** 実時計はプリレンダーの最中には値が定まらないため、
  * `connection()` を待って「要求のときに描く」ことを確定させてから読みます。

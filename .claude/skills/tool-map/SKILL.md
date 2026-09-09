@@ -1,8 +1,9 @@
 ---
 name: tool-map
+usage-class: lifecycle
 description: Inventory every command / skill / agent registered under this project's `.claude/` directory and produce an inventory table plus a dependency map (Mermaid). Reads frontmatter and bodies, extracts cross-references, and renders the report inline or to a file. Read-only by default; writes only when `--output=file` is chosen.
 argument-hint: [--lang=en|ja] [--output=inline|file] [--output-path=<path>] [--include=commands,skills,agents]
-allowed-tools: Bash(ls:*), Bash(find:*), Bash(test:*), Bash(pnpm md-fix:*), Bash(pnpm md-lint:*), Read, Write, AskUserQuestion
+allowed-tools: Bash(ls:*), Bash(find:*), Bash(test:*), Bash(pnpm exec markdownlint-cli2:*), Read, Write, AskUserQuestion
 ---
 
 # Tool Map
@@ -146,26 +147,9 @@ A short prose section calling out:
 - `inline`: include the full report in the response and stop.
 - `file`: write the report to `--output-path` and respond with a short confirmation (one-line summary + the file path). Do NOT also duplicate the full report in the response.
 
-## Step 7. Verify with Markdown Lint (only when `--output=file`)
+## Step 7. Format the written file (only when `--output=file`)
 
-When `--output=file`, after writing the report run:
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` runs `markdownlint-cli2 --fix` on the entire repository to auto-fix common issues (blank-line placement around headings / lists / code blocks, trailing whitespace, file-final newline, etc.). `pnpm md-lint` then verifies the result in three stages — markdownlint against `.markdownlint.yaml`, mermaid diagram syntax, and `skill-lint` over `.claude/**` (frontmatter / translation-pair structure / reference existence).
-
-If `pnpm md-lint` reports remaining errors:
-
-1. Read the lint output.
-2. Fix the violations manually (rules that auto-fix cannot resolve, e.g., heading hierarchy, duplicate headings, bare URLs).
-3. Re-run `pnpm md-fix` then `pnpm md-lint` until clean.
-
-Do NOT report the command as complete until `pnpm md-lint` exits cleanly.
-
-`pnpm md-fix` operates on the entire repository, so it may modify Markdown files unrelated to the report. List any such files when reporting completion so the user can review the broader change set.
+When `--output=file`, after writing the report, run `pnpm exec markdownlint-cli2 --no-globs --fix <path>` on that file. Leave `pnpm lint:md` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 When `--output=inline`, skip this step (no file was written).
 
@@ -188,5 +172,5 @@ Before reporting completion, confirm:
 - [ ] Dependencies detected per the documented rules (self-refs excluded; broken edges recorded)
 - [ ] Report contains Summary, Inventory Tables, Dependency Graph (Mermaid), Notes
 - [ ] Standalone entries appear as isolated nodes in the graph
-- [ ] If `--output=file`, the file was written and `pnpm md-lint` exits cleanly
-- [ ] If `--output=file`, no other path outside the confirmed output (and `pnpm md-fix` side effects) was modified
+- [ ] If `--output=file`, the file was written and `markdownlint-cli2 --fix` was run on it
+- [ ] If `--output=file`, no other path outside the confirmed output was modified

@@ -93,18 +93,105 @@ describe("scanSuppressions", () => {
     ]);
   });
 
+  // ----- 正常系: 冷却の免除 -----
+  it("pnpm の免除を、直上のコメント塊と行末コメントを理由にして宣言単位で読む", () => {
+    place(
+      "pnpm-workspace.yaml",
+      [
+        "minimumReleaseAgeExclude:",
+        "  # GHSA-0000 の修正版。",
+        "  # 窓が明ける 2026-08-02 に外す。",
+        '  - "pkg@1.2.3" # 影響は docs-viewer のみ',
+        "",
+      ].join("\n"),
+    );
+
+    expect(scanSuppressions(root)).toEqual([
+      {
+        source: "pnpm-workspace.yaml",
+        subject: "pkg@1.2.3",
+        condition: "GHSA-0000 の修正版。 窓が明ける 2026-08-02 に外す。 影響は docs-viewer のみ",
+        kind: "cooldown-exemption",
+      },
+    ]);
+  });
+
+  it("pnpm の免除の行は、コメント行の読み取りに二重に載せない", () => {
+    place(
+      "pnpm-workspace.yaml",
+      "minimumReleaseAgeExclude:\n  # 2026-08-02 に外す。\n  - pkg@1.2.3 # 2026-08-02\n",
+    );
+
+    expect(scanSuppressions(root).map((entry) => entry.subject)).toEqual(["pkg@1.2.3"]);
+  });
+
+  it("同じ項目が 2 度書かれていても、それぞれ自分の行の理由を持つ", () => {
+    place(
+      "pnpm-workspace.yaml",
+      "minimumReleaseAgeExclude:\n  # 先に 2026-08-02\n  - a@1\n  # 後に 2026-09-02\n  - a@1\n",
+    );
+
+    expect(scanSuppressions(root).map((entry) => entry.condition)).toEqual([
+      "先に 2026-08-02",
+      "後に 2026-09-02",
+    ]);
+  });
+
+  it("行を突き止められない pnpm の免除は、条件を空にして載せる", () => {
+    // flow 記法は行を持たない。落とすと、理由の無い免除がいちばん見えなくなる。
+    place("pnpm-workspace.yaml", 'minimumReleaseAgeExclude: ["pkg@1.2.3"]\n');
+
+    expect(scanSuppressions(root)).toEqual([
+      {
+        source: "pnpm-workspace.yaml",
+        subject: "pkg@1.2.3",
+        condition: "",
+        kind: "cooldown-exemption",
+      },
+    ]);
+  });
+
+  it("文字列でない pnpm の項目は宣言として読まない", () => {
+    place("pnpm-workspace.yaml", "minimumReleaseAgeExclude:\n  - 1\n  - [a]\n");
+
+    expect(scanSuppressions(root)).toEqual([]);
+  });
+
+  it("mise の pin に添えた免除を、pin の名前で宣言単位に読む", () => {
+    place(
+      "mise.toml",
+      [
+        "[tools]",
+        "# Lint",
+        '"aqua:rhysd/actionlint" = "1.7.12"',
+        "# tools-cooldown-ignore: 直前の版に脆弱性がある。窓が明ける 2026-09-21 に外す。",
+        '"aqua:koalaman/shellcheck" = "0.11.0"',
+        "",
+      ].join("\n"),
+    );
+
+    expect(scanSuppressions(root)).toEqual([
+      {
+        source: "mise.toml",
+        subject: "aqua:koalaman/shellcheck@0.11.0",
+        condition: "直前の版に脆弱性がある。窓が明ける 2026-09-21 に外す。",
+        kind: "cooldown-exemption",
+      },
+    ]);
+  });
+
   // ----- 正常系: 条件をコメントとして持つ面 -----
   it("コメントに条件を持つ面からは、日付を含む行だけを拾う", () => {
     place(
       "pnpm-workspace.yaml",
-      "minimumReleaseAgeExclude:\n  - pkg@1.2.3 # 2026-08-02 以降に削除する\noverrides:\n  # ajv が 3.1.6 以上を要求したら撤去する。\n",
+      'overrides:\n  # 2026-08-02 に markdownlint-cli2 を上げた時点で撤去する。\n  "js-yaml@>=5 <5.2.2": ">=5.2.2 <6"\n',
     );
 
     expect(scanSuppressions(root)).toEqual([
       {
         source: "pnpm-workspace.yaml",
         subject: "L2",
-        condition: "- pkg@1.2.3 # 2026-08-02 以降に削除する",
+        condition: "# 2026-08-02 に markdownlint-cli2 を上げた時点で撤去する。",
       },
     ]);
   });
@@ -179,6 +266,8 @@ describe("scanSuppressions", () => {
     place("osv-scanner.toml", "[[IgnoredVulns\nid = ");
     place("bearer.ignore", "{壊れた JSON");
     place(".trivyignore.yaml", "vulnerabilities: [\n");
+    place("mise.toml", "[settings]\n");
+    place("pnpm-workspace.yaml", "minimumReleaseAgeExclude: [\n");
     place(".github/zap/rules.tsv", "10055\tIGNORE\t理由\n");
 
     expect(scanSuppressions(root)).toEqual([

@@ -29,9 +29,9 @@ OTel を用いた server-side の trace、metrics、logs のためのカーネ�
 
 ## 描画の計装
 
-`withScreenSpan(name, render)` と `withPartSpan(name, render)` は、渡されたコンポーネントを span で包んだ同じ形のコンポーネントを返す。span 名は `render <name>` で、`name` には `src/` からのモジュールパスを渡す。tracer の scope 名は `render` である。**span 名に利用者の入力を混ぜてはならない** —— 名前が要求ごとに散ると、名前を単位にした集計が成り立たなくなる（[0081](../../docs/adr/0081-observability-logging.md)）。
+`withScreenSpan(name, render)` と `withPartSpan(name, render)` は、渡されたコンポーネントを span で包んだ同じ形のコンポーネントを返す。span 名は `render <name>` で、`name` には `src/` からのモジュールパスを渡す。tracer の scope 名は `render` である。**span 名に利用者の入力を混ぜてはならない** —— 名前が要求ごとに散ると、名前を単位にした集計が成り立たなくなる。
 
-2 つは載せる対象が違う。`withScreenSpan` は**画面の最上位**（`features/<name>/<screen>/` の `page-content` と `view`）、`withPartSpan` は **feature が持つ部品**（`ui/`）である。装備の手順と対象の線引きは [features/README.md](../features/README.md) が持つ。`components` は横断 UI であり画面ごとの帰属を持たないので対象にせず、route segment は Next.js が `render route (app)` を張るので二重に持たない。
+2 つは載せる対象が違う。`withScreenSpan` は**画面の最上位**（`features/<name>/<screen>/` の `page-content` と `view`、および殻の側で取得を持つ合成。殻と穴に割れた画面では 1 route に複数立つ）、`withPartSpan` は **feature が持つ部品**（`ui/`）である。装備の手順と対象の線引きは [features/README.md](../features/README.md) が持つ。`components` は横断 UI であり画面ごとの帰属を持たないので対象にせず、route segment は Next.js が `render route (app)` を張るので二重に持たない。
 
 ### 載せる範囲
 
@@ -63,7 +63,7 @@ OTel を用いた server-side の trace、metrics、logs のためのカーネ�
 
 ## ブラウザ側のシグナル
 
-ブラウザで測った値と、ブラウザで捕捉されなかった例外は、**同一オリジンの BFF が中継する**。ブラウザから collector を直接叩かせない（[0081](../../docs/adr/0081-observability-logging.md)）——endpoint も資格情報もブラウザへ出さないためであり、RUM の SaaS SDK を同梱しないのと同じ理由に立つ。経路は `adapters` が持ち、口は `app/api/telemetry/route.ts` である（[0082](../../docs/adr/0082-client-observability.md)）。
+ブラウザで測った値と、ブラウザで捕捉されなかった例外は、**同一オリジンの BFF が中継する**。ブラウザから collector を直接叩かせない ——endpoint も資格情報もブラウザへ出さないためであり、RUM の SaaS SDK を同梱しないのと同じ理由に立つ。経路は `adapters` が持ち、口は `app/api/telemetry/route.ts` である。
 
 このカーネルが受け持つのは、届いた測定を signal へ載せるところと、**ブラウザへ渡す trace 相関の出し入れ**（`trace-context.server.ts`）である。
 
@@ -85,7 +85,7 @@ OTel を用いた server-side の trace、metrics、logs のためのカーネ�
 
 **dev では同じ測定が 2 回届く。** React の Strict Mode が effect を 2 度呼び、`useReportWebVitals` は購読を解除しないため、計測器への登録が 2 つ残る。production build では 1 回である。
 
-**閾値はここに置かない。** [0101](../../docs/adr/0101-performance-budget.md) が持つのは計測の仕組みであり、good / poor の境界をどこに引くかは fork 先の判断である。属性の `rating` は web.dev が公表している境界による評価で、このリポジトリが引いた線ではない。
+**閾値はここに置かない。** [0101](../../docs/adr/0101-performance-budget.md) が持つのは計測の仕組みであり、good / poor の境界をどこに引くかはテンプレートから作った側の判断である。属性の `rating` は web.dev が公表している境界による評価で、このリポジトリが引いた線ではない。
 
 **伏せる項目は中継が伏せる。** ブラウザが作った span の属性のうち、`logging` が持つ表（`authorization` / `cookie` / `password` / `token`）に当たる名前は、collector へ渡す前に censor へ置き換わる。掛ける場所が中継なのは、そこが全部を通る唯一の場所だからである —— ブラウザ側で掛けても送信者は差し替えられる。**値の中身は見ない**（名前で持ち回っている限り効き、そうでないものは元の設計が誤っている）。
 
@@ -119,5 +119,12 @@ Next.js は Node.js サーバーを準備すると `src/instrumentation.ts` の 
 - OTLP と公式 semconv のみを使用する
 - 実装時に設定値を注入し、vendor 固定を避ける
 - local 開発では go 側 compose の `observability` が公開する OTLP HTTP `http://localhost:4318` と Grafana `http://localhost:3000` を使う
-- fork 先のバックエンドや collector に合わせて endpoint、`service.name`(`OBS_SERVICE_NAME`)、signal 有効化を設定する。`service.name` は同じ trace に載る他サービスと異なる値にする。Grafana、Sentry、Faro などの SDK をこのカーネルへ直接固定しない
+- テンプレートから作った側のバックエンドや collector に合わせて endpoint、`service.name`(`OBS_SERVICE_NAME`)、signal 有効化を設定する。`service.name` は同じ trace に載る他サービスと異なる値にする。Grafana、Sentry、Faro などの SDK をこのカーネルへ直接固定しない
 - Next.js が自前で張る `fetch` span は、span 名に query 付きの URL をそのまま載せる。名前が要求ごとに散って集計の単位にならないので、抑止するなら `NEXT_OTEL_FETCH_DISABLED=1` を使う。同じ外向き通信は Undici instrumentation の span が覆い、そちらの名前は経路だけを持つ
+
+## 関連する ADR
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — config を import せず起動境界から注入を受ける層の線
+- [0081](../../docs/adr/0081-observability-logging.md) — OTLP と公式 semconv だけを使うベンダ中立の方針、伝播先と redaction
+- [0082](../../docs/adr/0082-client-observability.md) — ブラウザ側の測定と例外を同一オリジンの BFF が中継する経路
+- [0101](../../docs/adr/0101-performance-budget.md) — Core Web Vitals をどう測るか。good / poor の閾値はここに置かない

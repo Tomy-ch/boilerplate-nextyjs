@@ -51,3 +51,19 @@ element が決めるものなので、宣言は `architecture.ts` の `APP_ELEME
 | `products/` | 一覧の増分取得を中継する BFF |
 | `addresses/` | 郵便番号からの住所補完を中継する BFF。入力中の画面が叩く |
 <!-- sample:end -->
+
+## 関連する ADR
+
+この区画のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります**
+（[docs/rules.md](../../../docs/rules.md)「コメントと文書」）。層全体の一覧は
+[親の README](../README.md) が持ちます。
+
+- [0025](../../../docs/adr/0025-app-layer-elements.md) — Route Handler が持てるもの（thin proxy と、その例外）
+- [0071](../../../docs/adr/0071-bff-api-integration.md) — `/api/*` の範囲と、外部 API を `adapters` 経由で叩くこと
+- [0070](../../../docs/adr/0070-backend-role-separation.md) — 業務ロジックを持たない責務の線
+- [0073](../../../docs/adr/0073-pagination-fetch-boundary.md) — 増分取得をどの境界が受けるか
+- [0077](../../../docs/adr/0077-bff-abuse-protection-boundary.md) — 認証を要求しない口の最小の防御
+- [0079](../../../docs/adr/0079-auth-frontend-seam.md) — 認証の往復（認可コード交換 / session cookie の発行・破棄）
+- [0080](../../../docs/adr/0080-error-handling.md) — 分類から status と文言への対応
+- [0081](../../../docs/adr/0081-observability-logging.md) — ブラウザ発シグナルの中継と、ログに何を残すか
+- [0090](../../../docs/adr/0090-testing-strategy.md) — Route Handler を `integration` として検証すること

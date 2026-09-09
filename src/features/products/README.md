@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 画面まるごとの story は例外
 test-requirement: feature
 ---
 
@@ -55,8 +55,8 @@ error の面を出すのは route の境界（`error.tsx`）で、上の story �
 
 ## 構成
 
-画面（`list` / `detail`）ごとに掘り、その中を性質で分けます（[0027](../../../docs/adr/0027-directory-structure.md)）。
-どの画面にも属さず feature 全体が所有するものは、同 ADR に従って画面を挟まず直下へ置きます。
+画面（`list` / `detail`）ごとに掘り、その中を性質で分けます。どの画面にも属さず feature 全体が
+所有するものは、同じ決まりで画面を挟まず直下へ置きます。
 
 | ファイル | 役割 |
 | --- | --- |
@@ -174,8 +174,8 @@ error の面を出すのは route の境界（`error.tsx`）で、上の story �
 - **在庫状況は、契約の在庫数の条件へ写して URL に載せます**。契約が持つのは数の下限と上限で、
   「在庫あり」という状態ではありません。利用者が選ぶのは有無なので、その橋渡しを
   `stock-availability.ts` が持ちます
-- **供給の購読者には `"use memo"` を付けています**（[0042](../../../docs/adr/0042-react19-rendering-api.md)
-  決定 4）。この画面には、1 つの state の変化が購読者へ直に及ぶ供給が 2 つあります —— 組み立て中の条件
+- **供給の購読者には `"use memo"` を付けています**。この画面には、1 つの state の変化が購読者へ
+  直に及ぶ供給が 2 つあります —— 組み立て中の条件
   （`filter-draft.tsx`。1 打鍵・1 チェックで動く）と、上端の取り合いの状態（`ui/sticky-region/`。scroll の
   向きと帯の高さで動く）です。印を付けるのは**その 2 つを購読する部品と、その子孫**に限ります。
   購読しない部品は、供給が何度動いても再描画されません —— 部分木は `children` として受け取った同じ
@@ -203,3 +203,15 @@ error の面を出すのは route の境界（`error.tsx`）で、上の story �
   `categoryCodes` / `statusCodes` であり、UUID を取る `categoryId` / `statusId` は非推奨として
   残っているだけです。後継と同時に送ると 400 になるため、`adapters` が受け付ける口はコードの側
   だけに寄せています（`products.ts`）
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。他 feature へ貸すものを `facade/` に出す
+- [0026](../../../docs/adr/0026-layout-shell-mount.md) — 殻と Provider の据え付け。画面ごとには置かない横断 UI の位置
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面ごとに掘り、その中を性質で分ける
+- [0042](../../../docs/adr/0042-react19-rendering-api.md) — React 19 の描画 API 規約。`"use memo"` を付ける範囲
+- [0044](../../../docs/adr/0044-seo-metadata-strategy.md) — metadata の方針。検索エンジンへ何を名乗るかの持ち場
+- [0051](../../../docs/adr/0051-styling-system.md) — デザイントークンと帯ごとの出し分け
+- [0073](../../../docs/adr/0073-pagination-fetch-boundary.md) — ページ送り / 増分取得の境界。cursor 方式と client 取得の限定例外
+- [0080](../../../docs/adr/0080-error-handling.md) — エラーの扱い。`error` / `not-found` の受け持ち
+- [0101](../../../docs/adr/0101-performance-budget.md) — 性能予算。client の束に何を載せるか

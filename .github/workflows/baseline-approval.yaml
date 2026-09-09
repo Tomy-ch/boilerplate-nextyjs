@@ -73,8 +73,8 @@ jobs:
 
           git fetch --no-tags --depth=1 origin "${BASE_REF}" >/dev/null 2>&1 || true
 
-          # Two commits, not `...`. A merge base needs shared history, which a shallow
-          # checkout does not have. Not being able to answer means asking for the label.
+          # Two commits, not `...` — the shallow-checkout reason `actions/diff-scope` gives.
+          # Not being able to answer means asking for the label.
           if ! changed="$(git diff --name-only "origin/${BASE_REF}" HEAD -- baseline/images 2>/dev/null)"; then
             echo 'moved=true' >> "$GITHUB_OUTPUT"
             echo '::notice::Could not diff the pointer; asking for the label.'

@@ -2,9 +2,9 @@
 //
 // **なぜレジストリを引かないか。** `--config p/javascript` は semgrep.dev からルールを取る。
 // あの集合は Semgrep Rules License v1.0 で、「自社内部の目的に限る」「再頒布不可」「サービスと
-// して提供不可」を課す。エンジンを OSS fork の opengrep へ替えた判断（fork 先へライセンスの
+// して提供不可」を課す。エンジンを OSS fork の opengrep へ替えた判断（テンプレートから作った側へライセンスの
 // 判断を渡さない）は、ルールをレジストリから引いている限り成立しない —— 判断の所在が層を
-// ずれただけになる。判断の全文は docs/adr/0110-security-operations.md が持つ。
+// ずれただけになる。
 
 /** ルールの供給元（GitHub のリポジトリ）。 */
 export const RULES_REPO = "opengrep/opengrep-rules";
@@ -15,7 +15,7 @@ export const RULES_REPO = "opengrep/opengrep-rules";
  * @remarks
  * **値をソースへ書かないのは、人が digest を手で写す工程を作らないためです。** `--resolve` が
  * 書き、取得側が読む。同じ形を `.github/actions-pin.toml` と `docker/images-pin.toml` が採って
- * います（[0153](../../docs/adr/0153-ci-configuration.md) 3）。
+ * います。
  *
  * キーは `<repo>@<commit>` で、値は取り出したルール集合の digest です。**digest はアーカイブ
  * ではなく取り出した YAML そのものに対して取ります** —— GitHub が自動生成する tarball は
@@ -63,8 +63,7 @@ export const RULES_LANGUAGES = ["javascript", "typescript"] as const;
  * @remarks
  * `security/` だけを採り、その下の `audit/` は捨てます。**`audit` は「読んで判断するための
  * 所見」であって、ゲートに載る前提の分類ではありません** —— レジストリの `p/javascript` も
- * 既定では含めていません。実測でも、含めると 28 件（うち 23 件が `detect-non-literal-regexp`
- * と `detect-redos`）出て 0 件 baseline が保てませんでした。同じ規則を
+ * 既定では含めていません。同じ規則を
  * [eslint.config.ts](../../eslint.config.ts) の security でも落としており、理由も同じです。
  */
 export const RULES_CATEGORY = "security";

@@ -1,5 +1,6 @@
 ---
 name: readme-review
+usage-class: situational
 description: Review a single canonical README and judge whether it has "manual-worthy" characteristics for inclusion in the portal manifest curated per ADR 0141. The evaluation criteria are derived from patterns observed in currently-registered manifest entries (役割と境界 / 設計判断 / 規約 / 実行機序 / 索引 / 運用 / substantive prose), and exclude the two shapes that are deliberately not portal content: the per-component reference READMEs Storybook and TSDoc already carry, and feature slices graded by their own required-section check. Produces a scorecard with strengths, gaps, concrete improvement suggestions, and a final classification (manual-worthy / borderline / not-yet-manual-grade / out-of-scope-for-portal). Read-only by default; never edits the README or the manifest. For a README under `src/features/`, it additionally grades the required sections a feature README must carry (route + contract, state-to-story map, kernel dependencies, Server Action contract, test viewpoints), reading that list from `docs/templates/feature-readme.md` at runtime and resolving every story id, operationId, spec link and Action name the README asserts; a missing or thin required section caps the verdict at `borderline`. When the result is manual-worthy, the skill suggests chaining into `portal-manifest-sync` (curation flow) as the natural next step; it does not perform the addition itself.
 ---
 
@@ -53,10 +54,10 @@ manual-worthy means, so the criteria follow the manifest rather than the other w
 
 Both are large enough that mistaking them for candidates makes any repo-wide report unreadable.
 
-- **Per-component reference** — the READMEs under `src/components/**` share a fixed section shape
-  (用途 / 役割と公開 component / 利用ケース / 責務境界 / Storybook とテスト). They document one component's
-  surface, and this repository answers that with Storybook (a standing `meta.reference_links` entry
-  in the manifest) plus the component's own TSDoc. That is this repo's reading of N1.
+- **Per-component reference** — the READMEs under `src/components/**` share the fixed section shape
+  that N1 in Step 2 names. They document one component's surface, and this repository answers that
+  with Storybook (a standing `meta.reference_links` entry in the manifest) plus the component's own
+  TSDoc. That is this repo's reading of N1.
 - **Feature slice** — a README under `src/features/` is graded by the required-section check in
   Step 2b instead, against the sections `docs/templates/feature-readme.md` declares.
 
@@ -145,7 +146,7 @@ the `required-sections:` list its header comment declares. That template is the 
 truth for what a feature README must carry; if it gains or loses a section, this check follows
 without editing this skill. **Do not derive the set from the template's H2 headings** — the template
 also carries sections that are deliberately optional (a design-rationale section whose heading name
-is not fixed, and a fork-notes section that only some slices need), and treating those as required
+is not fixed, and a template-adaptation section that only some slices need), and treating those as required
 would fail every README in the repository.
 
 The table below explains what each currently-declared section means. It is a reading aid, not the

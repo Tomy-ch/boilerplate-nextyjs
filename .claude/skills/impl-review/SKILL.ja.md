@@ -30,15 +30,50 @@
 
 **このスキルは変更そのものだけを監査する。** テストのレンズもコメントのレンズも持たず、他のスキルを呼ばない。それらは `/test-review` と `/comment-sweep` の主題であり、`AGENTS.md` の Review Phase Protocol に従って、このスキルの傍らでそれぞれ独立に問われ実行される。次を呼びますかと差し出すレビュースキルは、3 つの主題を独立に答えられないものにし、入口の問いのずれが、そこを通った全ての流れから残り 2 つを黙って落とす。
 
+## 優先順位 —— 所見は集めるだけでなく順位を持つ
+
+レビュアーは食い違い、重なり、同じ事実を 2 つの語彙で報告する。順位が無ければ、報告は
+「命名の些事が、境界の誤った側に置かれたカーネルより上に来る」平らな一覧になる —— finder が
+それを "high" と呼んだ、というだけの理由で。Step 2 の表が持つ tier がその順位である。
+
+| Tier | レンズ | 何を決めるか |
+| --- | --- | --- |
+| 1 | `architecture` | コードが**何であるべきか** |
+| 2 | `security` / `correctness` | いま在る形が、動くかどうか |
+| 3 | `runtime-gap` / `cohesion` | 実システムで保つか、そしてその単位を人が持ち続けられるか |
+
+**上位の変更は下位へ伝播し、下位は原則として上位に作用しない。** 責務を別のカーネルへ移せば、
+元の位置で検証された振る舞いは無効になる。1 ファイルを割るだけの seam が、その責務の移動を
+正当化することはない。ここから 4 つの帰結が出る。**どれも提案ではなく規則である。**
+
+1. **tier 順に並べ、tier 内で重大度順に並べる** —— 重大度だけで並べない。tier 3 の `high` は
+   architecture の `medium` より下に来る。上位の所見が、下位の所見の対象コードごと消しうるため
+2. **依存する上位の所見が未決の間、下位の所見は `保留` と印を付ける。** 報告はする。何を待って
+   いるかを書く。着手可能なものとして提示しない。上位の決着後に見直すと、たいてい消えている
+3. **2 つの tier が同じ事実を報告したら、上位の framing を残し、下位はその裏付けとして畳む** ——
+   1 件であって 2 件ではない。1 つの事実に 2 行あると問題が 2 つあるように読め、変更の risk を
+   二重に数える
+4. **同 tier のレンズどうしの一致は確度を上げる。下位からの一致は上位の重大度を上げない。**
+   tier 2 の 2 レンズが独立に同じ欠陥へ到達したなら強い証拠であり、そう書く。tier 3 が tier 1 に
+   同意しても重大度は動かない（裏付けとして引くことはできる）
+
+**例外は緊急度であり、それは気づく仕事であって解決する仕事ではない。** 下位の所見のほうが急ぐ
+ことはある —— `runtime-gap` が炙り出した悪用可能な穴は、配置の議論を待たない。下位の所見が上位を
+覆すほど critical に見えるときは、**黙って並べ替えず、両方を出して user に問え。** 順位は
+「ふつうの食い違いを人手なしに解く」ために在る。順位を破る所見は、まさに人が見るべき場合である。
+
 ## Step 0 — スコープ確認
 
-即座に `AskUserQuestion`。ベースは `gh repo view --json defaultBranchRef -q '.defaultBranchRef.name'` で取得（本リポジトリのベースは `release/*`）。未マージのコミットがあれば「変更ファイルのみ」を既定、なければ作業ツリー / 指定パスを既定。
+何より先に、この実行が越える境界を打刻する: `.agents/closed-loop/marks.sh reviewStartedAt`。 <!-- boilerplate-only:line -->
+
+即座に `AskUserQuestion`。ベースは `commit` / `submit-pr` と同じ解き方で —— `gh pr view --json baseRefName -q .baseRefName`、PR が無ければ `make -s base-branch`。`gh repo view --json defaultBranchRef` は使わない（理由は `.makefiles/README.md` が持つ。この綴りで解くと diff がリリース 1 世代ぶん黙って広がる）。未マージのコミットがあれば「変更ファイルのみ」を既定、なければ作業ツリー / 指定パスを既定。
 
 ```text
 質問: どの範囲をレビューしますか？
 選択肢:
   - 変更ファイルのみ（ベースブランチとの diff）  ← 未マージのコミットがある場合の既定
   - 作業ツリーの未コミット変更（git status の差分）
+  - レビュー指摘への対応分（前回レビューの最終コミット...HEAD）  ← 反映そのものが未レビュー
   - 特定のパス/ファイルを指定
   - キャンセル
 ```
@@ -59,7 +94,7 @@
 
 *auto* は、実装者が `sonnet` でなければエージェント定義の既定（`sonnet`）へ、`sonnet` なら別ティアへ解決する。ユーザーが実装者自身のモデルを選んだ場合は中核アイデアに従って警告し、続行前に確認する。選ばれたモデルは Step 2 / Step 3 の全 `adversarial-reviewer` / `review-verifier` の `Agent` 呼び出しへ `model` 引数で渡す。
 
-**問いは 2 つで、それ以上は置かない。** テストの問いもコメントの問いもここには無い。それらは `/test-review` と `/comment-sweep` の主題で、ユーザーが別に問われる。ここへ畳み込むと、ある主題についての判断が別の主題のために始めた実行の中に埋もれ、このスキルが残り 2 つを思い出す唯一の経路になってしまう。
+**問いは 2 つで、それ以上は置かない。** テストの問いもコメントの問いもここには無い —— それらは `/test-review` と `/comment-sweep` の主題で、ユーザーが別に問う（中核アイデア「このスキルは変更そのものだけを監査する」）。
 
 ### フラグ
 
@@ -71,6 +106,27 @@
 - どの**カーネル / element** が触られたか検出する。何が在るかは ADR [0027](../../../docs/adr/0027-directory-structure.md) の物理レイアウト、各々が何を import してよいかは ADR [0021](../../../docs/adr/0021-frontend-responsibility.md) の依存マトリクスが正: `src/app/**`（3 element — route-segment `page`/`layout` / route-handler `route.ts` / metadata）、`src/features/<name>/**`、`src/model/**`、`src/components/**`、`src/adapters/server/**`・`src/adapters/client/**`、`src/capabilities/**`、`src/stores/**`、`src/config/**`、`src/errors/**`、`src/logging/**`、`src/observability/**` — に加えて**カーネルの外側にある起動 / ビルド境界エントリ**: `src/proxy.ts`、`src/instrumentation.ts`、`next.config.ts`。いくつかのカーネルはまだディスク上に無い（ADR 0027 は対応決定が下りた時点で作成する）ので、全部揃っている前提を置かず実在するものを検出する。
 - **リクエスト時の seam** が触られたか — Route Handler（`src/app/**/route.ts`）/ Server Action（`src/features/<name>/actions.ts`）/ `src/proxy.ts` / レスポンスヘッダ設定（`next.config.ts` の `headers()`）/ **layout shell・Provider 合成**（`src/app/**/layout.tsx` — ADR [0026](../../../docs/adr/0026-layout-shell-mount.md)。Provider の欠落は当該ルートが実際に描画されて初めて落ちる）。Step 4-2 を回すかの判定。 <!-- skill-lint-ignore -->
 - **生成 API 成果物**（`**/gen/**` — ADR [0072](../../../docs/adr/0072-api-type-generation.md) の型 / zod スキーマ）が触られたか。再生成は全 consumer に波及するので、変更ファイルだけでなくそれを import する `adapters` 変換と feature までレビュー範囲を広げる。
+
+### 静的な判定は、ここで 1 回だけ解く
+
+lens にゲートを回させない。**回せば同じ判定が lens の数だけ再計算され**、そもそもこのリポジトリで
+ゲートの判定を持つのは CI である（`AGENTS.md` の *Do not pre-run the gates*）。だから
+**統合側が 1 回だけ解いて、全 finder へ渡す**。
+
+```bash
+gh pr checks --json name,state,link 2>/dev/null   # ブランチに PR が在れば
+```
+
+結果は次の 3 つのどれかとして渡し、**畳まない**。
+
+| 形 | いつ | lens 側の扱い |
+| --- | --- | --- |
+| **緑** | この head で必須チェックが全部通った | 静的ゲートが既に見ている範囲を飛ばし、表現できないものへ lens を使う |
+| **赤: `<check>`** | 必須チェックが落ちている | その失敗を確定した所見の根拠として読み、導出し直さない |
+| **未取得** | PR が無い / チェック未開始 / `gh` が無い | ゲートを**不明として扱う。緑ではない** —— 走っていない検査は通った検査ではない（[0157](../../../docs/adr/0157-inspection-declaration-discipline.md)） |
+
+**未取得を埋めるためにここでゲートを回さない。**3 つめの行の要点は、判定が無いこと自体が報告に
+値するということで、手元で走らせると**正直な空白が、CI の同意していない数字に置き換わる**。
 
 ## Step 2 — Finder の fan-out（別モデル、並列）
 
@@ -84,7 +140,7 @@
 | `cohesion` | adversarial-reviewer | 常時 |
 | `runtime-gap` | adversarial-reviewer | Route Handler / Server Action / `src/proxy.ts` / Provider マウント / 生成 API 成果物が触られた時 — モックのコンポーネントテストが通らない継ぎ目 |
 
-**ここにテストやコメントを監査するレンズは無い。** 変更が未テストであるという finding は `/test-review` の、コメントの内容についての finding は `/comment-sweep` の主題である。レンズがついでに気づいたなら、補足の節に観察として書き、所管するスキル名を添える —— レンズを生やしてはならない。ここで生やしたレンズは、主題を所管スキルから取り上げるだけで、深さは連れてこない。
+**ここにテストやコメントを監査するレンズは無い**（中核アイデア「このスキルは変更そのものだけを監査する」）。未テストの変更やコメントの内容にレンズがついでに気づいたなら、補足の節に観察として書き、所管するスキル名を添える —— レンズを生やしてはならない。
 
 各 `adversarial-reviewer` プロンプトに必ず含める: レンズ名 + その定義、ベース ref + 変更ファイル一覧 + diff、`AGENTS.md` / 該当 `README.md` / 根拠となる ADR へのポインタ。
 
@@ -94,7 +150,7 @@
 
 ## Step 3 — 敵対的 verify
 
-全 finding を集め、(file, line, claim) で **dedup**。残った finding ごとに `review-verifier` subagent を1体（並列）起動し、単一 finding + ベース ref を渡す。`agentType: "review-verifier"`、`label` は `verify:<file>`、`model` は Step 0 でユーザーが選んだ reviewer モデル（reviewer ≠ implementer の規則は同じ）。
+全 finding を集め、(file, line, claim) で **dedup**。2 つのレンズが同じ事実を報告したら両方を残さず、下位 tier の項を上位 tier の framing へ裏付けとして畳む —— 1 つの事実は 1 件のままにする。残った finding ごとに `review-verifier` subagent を1体（並列）起動し、単一 finding + ベース ref を渡す。`agentType: "review-verifier"`、`label` は `verify:<file>`、`model` は Step 0 でユーザーが選んだ reviewer モデル（reviewer ≠ implementer の規則は同じ）。
 
 - **CONFIRMED** と **PLAUSIBLE** を残す。**REFUTED** は落とす（件数はレポート用に保持）。
 - critical/high で単一判定が頼りないときは verifier を 2〜3 体立て多数決。重要な finding ほど単一意見より多様性。
@@ -118,7 +174,7 @@ build 失敗は **それ自体が CONFIRMED な finding**。出力付きで報�
 
 ### 4-2 リクエスト検証 — リクエスト時 seam が触られた時のみ
 
-ゲート: Step 1 が Route Handler（`src/app/**/route.ts`）/ Server Action（`src/features/<name>/actions.ts`）/ `src/proxy.ts` / レスポンスヘッダ設定（`next.config.ts` の `headers()`）/ layout shell・Provider 合成（`src/app/**/layout.tsx`）の変更を検出している。 <!-- skill-lint-ignore -->
+ゲート: Step 1 が**リクエスト時の seam**の変更を検出している（一覧は Step 1 が持つ）。
 
 1. 4-1 でビルドしたアプリを起動: `pnpm start --port <3000+N>`。並行 worktree のサーバーを叩いてしまわないよう、他と異なるポートを使う。バックグラウンドで走らせ、終わったら止める。
 2. 対象パスへ `curl -i` し検証する:
@@ -146,6 +202,7 @@ build 失敗は **それ自体が CONFIRMED な finding**。出力付きで報�
 
 スコープ: <base>...HEAD（<N> files） / lens: correctness, security, architecture, cohesion, runtime-gap
 未監査の観点: テスト（/test-review）・コメント（/comment-sweep）は本スキルの対象外
+静的ゲート: 緑 / 赤（<check>）/ 未取得（走っていない検査は通った検査ではない）
 ランタイム検証: 4-1 build 実施 / 4-2 リクエスト検証 実施（curl）・対象外（リクエスト時 seam の変更なし）・到達不能（バックエンド不在で未検証の経路: <経路>）
 
 ### CONFIRMED（要対応）
@@ -166,13 +223,13 @@ build 失敗は **それ自体が CONFIRMED な finding**。出力付きで報�
 
 **`未監査の観点:` 行は必須**であり、定型文ではない。このスキルが監査するのは 3 つのレビュー主題のうち 1 つだけで、残り 2 つについて何も言わないレポートは、それらを回していない読み手には全体レビューとして読める。テストとコメントをここでは見ていないことを平明に述べ、`lens:` 行に現れなかったという事実からの推測にしない。推奨の形に和らげないこと —— 残り 2 つを回すかは Review Phase Protocol の下でユーザーが決めることであり、この行が記録するのはこの実行が覆わなかった範囲だけである。
 
-重大度順、CONFIRMED を PLAUSIBLE より先に。ランタイムで何を検査し何をスキップしたかは必ず明記する（黙って省くと「全部見た」と誤読される）。
+tier 順に、tier 内で重大度順、CONFIRMED を PLAUSIBLE より先に —— 重大度だけで並べない。未決の上位所見に待たされている所見は `保留` と印を付け、何を待っているかを書く。ランタイムで何を検査し何をスキップしたかは必ず明記する（黙って省くと「全部見た」と誤読される）。
 
 ## Step 6 — finding を PR インラインコメントとして投稿（既定。`--no-comment` で opt out）
 
 既定では、残った **CONFIRMED + PLAUSIBLE** の finding を、現ブランチの PR へ **インラインレビューコメント**として投稿する — 1 つの巨大コメントではなく、finding ごとに 1 件、その `path:line` へアンカーする。**REFUTED は決して投稿しない。** Step 5 のローカルレポートはいずれにせよ出力する。本ステップは追加分。
 
-投稿するのはこのスキル自身の finding だけである。`/test-review` と `/comment-sweep` はそれぞれ自分の出力を持ち、ここからそこへ手を伸ばさない —— 他スキルの finding をこのスキルのレビューとして投稿すると、ある主題の監査が別の主題の中で起きたように見える。
+投稿するのはこのスキル自身の finding だけである —— `/test-review` と `/comment-sweep` はそれぞれ自分の出力を持つ（中核アイデア「このスキルは変更そのものだけを監査する」）。
 
 以下の場合は本ステップを丸ごとスキップ:
 

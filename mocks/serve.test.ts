@@ -15,8 +15,8 @@ let server: ReturnType<typeof startMockApi> | undefined;
  *
  * @remarks
  * 応答は契約のハンドラではなくこの場で割り当てます。確かめたいのは**口が interception の応答を
- * そのまま出すこと**であって、契約が何を返すかではありません。契約に頼ると、サンプルを破棄した
- * fork でこのテストだけが落ちます。
+ * そのまま出すこと**であって、契約が何を返すかではありません。契約に頼ると、テンプレートから作って
+ * サンプルを破棄した側でこのテストだけが落ちます。
  */
 async function serve(): Promise<string> {
   server = startMockApi(0);

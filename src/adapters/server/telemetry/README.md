@@ -27,3 +27,13 @@ test-requirement: unit
 ## 受け入れないもの
 
 - 業務ロジック、送信面の組み立て（`client/telemetry/` が持つ）
+
+## 関連する ADR
+
+この区画のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります**
+（[docs/rules.md](../../../../docs/rules.md)「コメントと文書」）。層全体の一覧は
+[親の README](../../README.md) が持ちます。
+
+- [0081](../../../../docs/adr/0081-observability-logging.md) — OTLP への載せ方と、構造化ログの規則
+- [0082](../../../../docs/adr/0082-client-observability.md) — ブラウザ発の Web Vitals と例外を、どの signal へ写すか
+- [0077](../../../../docs/adr/0077-bff-abuse-protection-boundary.md) — 認証を要求しない受け口が自分で確かめること

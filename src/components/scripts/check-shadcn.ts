@@ -13,7 +13,7 @@ const COMPONENTS_ROOT = "src/components";
 /**
  * component ディレクトリの目印。
  *
- * 実装ファイルの拡張子では判定できない。CSS 基盤は `.tsx` を持たず、`sugar` は入れ子になり、
+ * 実装ファイルの拡張子では判定できない。CSS 基盤は `.tsx` を持たず、`patterns/table` の配下は入れ子になり、
  * 同じディレクトリに実装・test・story が並ぶ。「component ごとに README を co-locate する」は
  * `components/README.md` が定める規約なので、これを唯一の目印にする。
  */
@@ -36,7 +36,7 @@ const registrySourceSchema = z.object({
  * `components/README.md` の component 目録で、その component が載る見出し。
  *
  * @remarks
- * `ui` の部品は目的ごとの見出しに分かれ、それ以外の役割はディレクトリ名がそのまま見出しになる。
+ * `design-system` の部品は目的ごとの見出しに分かれ、それ以外の層は目的で割らないため `as` だけが見出しを持つ。
  * `navigation` のように両方へ現れる値があるのは、同じ目的の部品が基底と合成の両方に存在する
  * ためであり、どちらの層かは `directory` が持つ。目的と層は別の軸なので畳まない。
  */
@@ -69,7 +69,7 @@ export type CatalogHeading = (typeof CATALOG_HEADING)[keyof typeof CATALOG_HEADI
  * - `design-system` — 契約を知らず、読んでも役割が増えない。目的別に置く
  * - `patterns` — 契約は知らないが、複数の役割を合成する。目的を一つに決められないので割らない
  * - `shell` — アプリのどこに・いくつ置くかが部品側で決まっている。mount 位置が制約になる
- * - `app-starter` — バックエンドの契約を知っている。fork 先が作り替える前提
+ * - `app-starter` — バックエンドの契約を知っている。テンプレートから作った側が作り替える前提
  */
 export const COMPONENT_LAYER = {
   DESIGN_SYSTEM: "design-system",
@@ -181,11 +181,12 @@ const componentManifestSchema = z.object({
   ),
 });
 
-const upstreamCommitsSchema = z
-  .array(
-    z.object({ sha: z.string(), commit: z.object({ committer: z.object({ date: z.string() }) }) }),
-  )
-  .min(1);
+const upstreamCommitSchema = z.object({
+  sha: z.string(),
+  commit: z.object({ committer: z.object({ date: z.string() }) }),
+});
+
+const upstreamCommitsSchema = z.tuple([upstreamCommitSchema], upstreamCommitSchema);
 
 type RegistrySource = z.infer<typeof registrySourceSchema>;
 
@@ -230,15 +231,15 @@ export async function checkUpstreamDrift(
       result.checked += 1;
       try {
         // biome-ignore lint/performance/noAwaitInLoops: 記録件数ぶんの GitHub API 呼び出しを並列化すると、subprocess の大量生成と API のレート制限を同時に踏む
-        const commits = upstreamCommitsSchema.parse(await fetchUpstreamJson(commitsUrl(source)));
-        if (commits[0].sha === source.commit) continue;
+        const [latest] = upstreamCommitsSchema.parse(await fetchUpstreamJson(commitsUrl(source)));
+        if (latest.sha === source.commit) continue;
         result.drifted.push({
           component,
           kind: entry.kind,
           path: source.path,
           recorded: source.commit,
-          latest: commits[0].sha,
-          latestCommittedAt: commits[0].commit.committer.date,
+          latest: latest.sha,
+          latestCommittedAt: latest.commit.committer.date,
         });
       } catch (error) {
         result.failed.push(
@@ -271,8 +272,7 @@ const RUNTIME_PACKAGES: ReadonlySet<string> = new Set(["react", "react-dom"]);
  * 「どの package を参照しているか」であって、その package のどの入口を使ったかではない。
  */
 export function packageOf(specifier: string): string {
-  const segments = specifier.split("/");
-  return specifier.startsWith("@") ? segments.slice(0, 2).join("/") : segments[0];
+  return specifier.replace(/^((?:@[^/]+\/)?[^/]+).*/, "$1");
 }
 
 /**
@@ -286,8 +286,7 @@ export function packageOf(specifier: string): string {
 export function vendorImportsOf(sources: readonly string[]): string[] {
   const packages = new Set<string>();
   for (const source of sources) {
-    for (const match of source.matchAll(/from "([^"]+)"/g)) {
-      const specifier = match[1];
+    for (const [specifier] of source.matchAll(/(?<=from ")[^"]+(?=")/g)) {
       if (specifier.startsWith(".") || specifier.startsWith("@/")) continue;
       const name = packageOf(specifier);
       if (RUNTIME_PACKAGES.has(name)) continue;
@@ -312,10 +311,10 @@ export function registryItemOf(upstreamPath: string): string {
  * component ディレクトリと、その配下のファイルを、リポジトリ相対パスの一覧から取り出す。
  *
  * @remarks
- * 役割ディレクトリ（`ui` / `feedback` / `foundation` / `navigation` / `sugar` / `view-state`）を
- * 列挙しない。列挙すると、役割が増えるたびに script を直す必要が生まれ、直し忘れた役割が
- * 台帳から静かに抜ける。代わりに {@link COMPONENT_MARKER} を持つディレクトリをすべて
- * component として扱うため、入れ子になっていても、`ui` の外へ移しても記録漏れとして現れる。
+ * 層のディレクトリ（{@link COMPONENT_LAYER}）と目的のディレクトリを列挙しない。列挙すると、
+ * 層や目的が増えるたびに script を直す必要が生まれ、直し忘れたものが台帳から静かに抜ける。
+ * 代わりに {@link COMPONENT_MARKER} を持つディレクトリをすべて component として扱うため、
+ * 入れ子になっていても、層を移しても記録漏れとして現れる。
  *
  * @param filePaths - `src/components` 配下のファイルのリポジトリ相対パス。
  */

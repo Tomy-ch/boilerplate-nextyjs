@@ -26,13 +26,12 @@ const PAGE_SUFFIX = "/page";
  * 画面の名前が採れる形。
  *
  * @remarks
- * kebab-case に限るのは [0028](../../docs/adr/0028-naming-convention.md) の命名規約に従うためですが、
- * 効いている先はそれだけではありません。**この名前は 2 つの経路でそのまま外へ出ます** ——
- * 基準画像のファイル名（[`screen-baselines.ts`](screen-baselines.ts)）と、CI が PR へ書く表の
- * セル（`scripts/lighthouse/report.ts`）です。前者では区切りや `..` がパスを外れさせ、後者では
+ * kebab-case に限るのは命名規約に従うためですが、効いている先はそれだけではありません。
+ * **この名前は 2 つの経路でそのまま外へ出ます** —— 基準画像のファイル名
+ * （[`screen-baselines.ts`](screen-baselines.ts)）と、CI が PR へ書く表のセル
+ * （`scripts/lighthouse/report.ts`）です。前者では区切りや `..` がパスを外れさせ、後者では
  * バッククォートや角括弧が Markdown を作ります。**ここで狭めておけば、その先のどこでも濾し直さずに
- * 済みます**（[0153](../../docs/adr/0153-ci-configuration.md) §5 が言う「許可した集合は markup も
- * mention も作れない」を、出口ではなく入口で満たす形）。
+ * 済みます**（「許可した集合は markup も mention も作れない」を、出口ではなく入口で満たす形）。
  */
 const SCREEN_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -102,8 +101,7 @@ export type ScreenDeclaration =
  * 巡回・撮影の対象と、対象から外す route の宣言。
  *
  * @remarks
- * 外してよいのは**開く手段が無い**画面だけです。「まだ書けていない」は理由になりません
- * （[0091](../../docs/adr/0091-test-verification-methods.md) の除外の規律と同じ）。
+ * 外してよいのは**開く手段が無い**画面だけです。「まだ書けていない」は理由になりません。
  */
 export const SCREENS: readonly ScreenDeclaration[] = [
   // 入口はどのサイトにもあるので、題材を破棄しても残る（`src/app/sitemap.ts` / `src/proxy.ts` の

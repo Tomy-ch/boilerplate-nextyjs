@@ -9,8 +9,9 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 
+import { errorMessage } from "../lib/error-message.js";
 import { collectMarkdownFiles } from "../lib/markdown-files.js";
-import { errorMessage, extractMermaidBlocks, isDependencyMissing } from "./mermaid-blocks.js";
+import { extractMermaidBlocks, isDependencyMissing } from "./mermaid-blocks.js";
 
 // このスクリプトが使う mermaid の最小面。mermaid の公開型は DOM 前提で重く、
 // ここで必要なのは initialize / parse の 2 つだけなので構造的に絞る。

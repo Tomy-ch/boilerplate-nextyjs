@@ -14,9 +14,14 @@ import { ErrorKind, type ErrorKind as ErrorKindType } from "@/errors/error-kind"
  *
  * `414` を載せるのは、経路の中継が返すためです。予算を広く取りすぎた設定では送信前の判定を
  * すり抜け、ブラウザには中継が組み立てた応答だけが返ります。
+ *
+ * **`401` を内部の失敗へ畳みません。** 認証の内側にある口は、読み進めている最中に session が
+ * 切れることがあります。畳むと画面に出せるのは読み直す操作だけで、押しても同じ経路を辿るので
+ * 永久に直りません。分類が分かれていれば、呼び出し側は入り直しを促せます。
  */
 const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
   400: ErrorKind.INVALID_ARGUMENT,
+  401: ErrorKind.UNAUTHENTICATED,
   414: ErrorKind.URI_TOO_LONG,
 };
 
@@ -24,16 +29,14 @@ const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
  * 同一オリジンの BFF を叩き、応答を検証して返す。
  *
  * @remarks
- * ブラウザから出る要求はここだけを通ります。timeout・再試行・遮断は `adapters/server` が持ちます
- * （[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。ここで独自に持つと、同じ要求に
- * 対して 2 つの再試行が別々の勘定で走ります。
+ * ブラウザから出る要求はここだけを通ります。timeout・再試行・遮断は `adapters/server` が持ちます。
+ * ここで独自に持つと、同じ要求に対して 2 つの再試行が別々の勘定で走ります。
  *
  * **送る前に予算を確かめます。** 予算を超えた要求は経路の中継が弾き、返るのは中継が
  * 組み立てた応答です。送る前に落とせば、条件が多すぎることを画面が同じ 1 つの分類で扱えます。
  *
  * 生の status を投げ直さず分類へ写します。呼び出し側は「入力が悪いのか、取得できなかったのか」
- * だけを見て表示を決めます（[0080](../../../../docs/adr/0080-error-handling.md)）。
-
+ * だけを見て表示を決めます。
  *
  * @param path - 同一オリジンの絶対パス。クエリを含み、percent-encode 済みであること
  * @param schema - 応答の検証スキーマ。**流儀は問わない** —— `zod` と `zod/mini` は同じ core の型を

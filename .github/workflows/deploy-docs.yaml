@@ -1,6 +1,6 @@
 name: Deploy Docs
 
-# Publishes the generated-HTML documentation site to GitHub Pages (ADR 0141).
+# Publishes the generated-HTML documentation site to GitHub Pages.
 #
 # Storybook is the site's first tenant, not the site itself. The docs portal and
 # any further generated HTML (coverage, OpenAPI) join it under sibling paths
@@ -35,10 +35,7 @@ on:
       - .github/workflows/deploy-docs.yaml
   workflow_dispatch:
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development. Storybook loads `next.config.ts` to build the preview, so the refusal lands
-# there — and `storybook build` reports success anyway, leaving a tree with no preview.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 
@@ -47,7 +44,7 @@ permissions:
 
 # Deliberately deviates from the repo-wide skeleton of
 # `${{ github.workflow }}-${{ github.ref }}` / `cancel-in-progress: true`
-# (ADR 0153 §3). A Pages deployment is one shared resource rather than a per-ref
+#. A Pages deployment is one shared resource rather than a per-ref
 # one, so the group names the resource; and a running deploy is never cancelled,
 # because interrupting one leaves the live site serving a half-uploaded artifact.
 concurrency:

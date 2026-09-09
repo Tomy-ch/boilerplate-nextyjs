@@ -75,6 +75,7 @@ export const Failed: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const [first] = canvas.getAllByRole("button", { name: "注文を確定する" });
+    if (first === undefined) throw new Error("注文を確定する操作が無い");
 
     await userEvent.click(first);
     await canvas.findByText("注文を確定できませんでした");

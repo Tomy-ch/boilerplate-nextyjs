@@ -4,7 +4,7 @@
 
 紙とその代替（PDF 保存）へ出したときの体裁を定める CSS 基盤です。React component は公開しません。
 
-ADR [0051](../../../../../docs/adr/0051-styling-system.md) §4 は拡張点（`print:` variant / `@media print`）だけを定め、最小実装の同梱は実装フェーズの判断としていました。これがその実装です。
+拡張点（`print:` variant / `@media print`）は ADR [0051](../../../../../docs/adr/0051-styling-system.md) §4 が定め、この基盤はその最小実装です。
 
 ## 何を持つか
 

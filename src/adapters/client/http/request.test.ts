@@ -68,6 +68,12 @@ describe("request", () => {
     expect(await kindOf(() => request("/api/ping", schema))).toBe(ErrorKind.INVALID_ARGUMENT);
   });
 
+  it("401 を unauthenticated へ写し、内部の失敗へ畳まない", async () => {
+    stubFetch(401, {});
+
+    expect(await kindOf(() => request("/api/ping", schema))).toBe(ErrorKind.UNAUTHENTICATED);
+  });
+
   it("分類の定まらない status を internal へ畳む", async () => {
     stubFetch(503, {});
 

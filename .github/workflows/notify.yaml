@@ -208,8 +208,7 @@ jobs:
           fi
 
       # ---------------------------------------------------------------------------
-      # Backend-specific: replace this step wholesale to notify somewhere else, and leave
-      # "Build notification payload" untouched.
+      # Backend-specific — part 2 of the split declared in the header.
       # ---------------------------------------------------------------------------
       - name: Send to Slack
         if: ${{ steps.backend.outputs.configured == 'true' }}

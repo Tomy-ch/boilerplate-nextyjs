@@ -76,7 +76,7 @@ describe("deferredChunks", () => {
 
   // ----- 異常系 -----
   // 成果物に在るはずの chunk が読めないのは、manifest と成果物の食い違いであって、
-  // 契約が宣言した不在ではない（ADR 0090「在るべきものの不在」）。
+  // 契約が宣言した不在ではない。
   it("読めない chunk は辿らない", () => {
     expect(deferredChunks(["static/chunks/missing.js"], () => null)).toEqual([]);
   });

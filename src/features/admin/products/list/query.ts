@@ -24,9 +24,8 @@ export const CURSOR_KEY = "after";
  * ここまでに通ってきたページの起点を載せる URL のキー。
  *
  * @remarks
- * cursor は「次の位置」しか指さないため、戻る先はどこにも書かれていません
- * （[0073](../../../../../docs/adr/0073-pagination-fetch-boundary.md)）。覚える場所を URL にする理由は
- * `docs/spec/route/admin/products/page.function.md`「戻る先は URL が覚える」。
+ * cursor は「次の位置」しか指さないため、戻る先はどこにも書かれていません。覚える場所を URL に
+ * する理由は `docs/spec/route/admin/products/page.function.md`「戻る先は URL が覚える」。
  */
 export const TRAIL_KEY = "trail";
 

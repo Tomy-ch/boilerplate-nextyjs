@@ -1,8 +1,7 @@
 // 必須ステータスチェックの宣言と、それを報告する job の実体が噛み合っているかの判定。
 //
 // GitHub は「context が報告されない」を「該当なし」とは読まない。よって必須へ登録してよいのは
-// **すべての PR で必ずその名前を報告する job** だけで、落とす条件は
-// [0153](../../docs/adr/0153-ci-configuration.md) §5 と `.makefiles/README.md` が持つ。
+// **すべての PR で必ずその名前を報告する job** だけで、落とす条件は `.makefiles/README.md` が持つ。
 //
 // **`if:` で降りる job は違反にしない。**降りた job は `skipped` を報告し、必須チェックはそれを
 // 成功として数えるため、報告は途切れない。検査していないのではなく、検査する必要が無い。
@@ -159,13 +158,14 @@ export function findViolations(
         .map((job) => ({ workflow: candidate, job })),
     );
 
-    if (declaring.length === 0) {
+    const [only, ...others] = declaring;
+    if (only === undefined) {
       violations.push(
         `\`${context}\`: この名前を宣言する job がありません。報告されない context は永久に待たれます`,
       );
       continue;
     }
-    if (declaring.length > 1) {
+    if (others.length > 0) {
       const where = [...new Set(declaring.map((entry) => entry.workflow.file))].join(" / ");
       violations.push(
         `\`${context}\`: ${declaring.length} 個の job が同じ名前を宣言しています（${where}）。どの結果を必須にしているのか決まりません`,
@@ -173,7 +173,6 @@ export function findViolations(
       continue;
     }
 
-    const only = declaring[0];
     violations.push(
       ...findJobViolations(context, only.workflow, only.job),
       ...findTriggerViolations(context, only.workflow),

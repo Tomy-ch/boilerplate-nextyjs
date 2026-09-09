@@ -2,6 +2,7 @@ import { readFileSync, statSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
 
 import { hasAnchor } from "./markdown-anchor";
+import { groupsAt } from "./regex-groups";
 
 /** 解決しなかったリンク 1 件。 */
 export type BrokenLink = {
@@ -79,9 +80,9 @@ function scannableLines(file: string, content: string): string[] {
     return lines.map((line) => {
       if (COMMENT_LINE.test(line)) return withoutSpans(line);
 
-      const trailing = TRAILING_COMMENT.exec(line);
+      const trailing = TRAILING_COMMENT.exec(line)?.[1];
 
-      return trailing === null ? "" : withoutSpans(trailing[1]);
+      return trailing === undefined ? "" : withoutSpans(trailing);
     });
   }
 
@@ -104,11 +105,16 @@ function scannableLines(file: string, content: string): string[] {
 
 /** その行に書かれた相対リンクをすべて取り出す。 */
 function hrefsIn(text: string): string[] {
-  const definition = LINK_DEFINITION.exec(text);
+  const definition = LINK_DEFINITION.exec(text)?.[1];
 
   return [
-    ...[...text.matchAll(LINK)].map((match) => match[1] ?? match[2]),
-    ...(definition ? [definition[1]] : []),
+    // 囲みと素書きは選択肢なので、参加したのはどちらか一方。
+    ...[...text.matchAll(LINK)].map((match) => {
+      const [bracketed, bare] = groupsAt(match, 1, 2);
+
+      return bracketed || bare;
+    }),
+    ...(definition === undefined ? [] : [definition]),
   ];
 }
 
@@ -136,29 +142,42 @@ export function findBrokenDocLinks(file: string, content: string, root: string):
     for (const href of hrefsIn(text)) {
       if (NOT_RELATIVE.test(href)) continue;
 
-      const [path, fragment] = href.split("#");
-      const target = path === "" ? resolve(root, file) : resolve(root, dirname(file), path);
-      const line = index + 1;
+      const reason = brokenReasonOf(file, href, root);
 
-      if (escapesRoot(root, target) || !exists(target)) {
-        broken.push({ file, href, line, reason: "path" });
-        continue;
-      }
-
-      if (!fragment) continue;
-      if (extname(target) !== ".md") continue;
-
-      // 在るかを確かめてから開くのではなく、開いて確かめる。2 度触ると、その間に消えた場合に
-      // 「在ることになっているのに読めない」経路が生まれる。
-      const markdown = readOf(target);
-
-      if (markdown !== null && !hasAnchor(markdown, fragment)) {
-        broken.push({ file, href, line, reason: "anchor" });
-      }
+      if (reason !== null) broken.push({ file, href, line: index + 1, reason });
     }
   });
 
   return broken;
+}
+
+/** そのリンクが切れている理由。切れていなければ null。 */
+function brokenReasonOf(file: string, href: string, root: string): BrokenLink["reason"] | null {
+  // `#` より前が指し先。見出しは `#` の直後の 1 区画。
+  const hashAt = href.indexOf("#");
+  const path = hashAt === -1 ? href : href.slice(0, hashAt);
+  const [, fragment] = href.split("#");
+  const target = path === "" ? resolve(root, file) : resolve(root, dirname(file), path);
+
+  if (escapesRoot(root, target) || !exists(target)) return "path";
+
+  return lacksAnchor(target, fragment) ? "anchor" : null;
+}
+
+/**
+ * 指し先が Markdown で、その見出しを持たないか。見出しを指していないリンクと Markdown 以外は false。
+ *
+ * @remarks
+ * 在るかを確かめてから開くのではなく、開いて確かめる。2 度触ると、その間に消えた場合に
+ * 「在ることになっているのに読めない」経路が生まれる。
+ */
+function lacksAnchor(target: string, fragment: string | undefined): boolean {
+  if (!fragment) return false;
+  if (extname(target) !== ".md") return false;
+
+  const markdown = readOf(target);
+
+  return markdown !== null && !hasAnchor(markdown, fragment);
 }
 
 /** 指し先が在るか。 */

@@ -72,14 +72,11 @@
 
 ## Step 3. story 先行（工程 2）
 
-スライスに `pnpm gen feature <name>` を、設計が要求する共有部品に `pnpm gen component <name>` を回す。
+スライスに `pnpm gen feature <name> --screen=<画面>` を、設計が要求する共有部品に `pnpm gen component <name> --as=<見出し>` を回す。
 配置・命名・境界は生成器に委ね、**手で置かない**。生成器が取る入力以外を渡さない（`architecture.ts`
 ＋層 README が唯一の入力であり、`docs/spec/**` は**生成入力ではない**）。
 
-出るのは `README.md` / `<name>.tsx` / `<name>.test.tsx` のフラットな 3 ファイルで、`list/` と
-`detail/` への**分割はしない**。これは意図されたもので、ADR 0027 が「2 つ目の画面が来るまで画面軸を
-畳んでおく」と定めているためである。分割は Step 5 の仕事であり、ここではない。生成器が作らなかった
-ディレクトリを先回りして作らない。
+出るのは slice の `README.md` と画面のディレクトリ（`<画面>/view.tsx` / `<画面>/page-content.tsx` / `<画面>/view.stories.tsx` と、それぞれの隣のテスト）で、**画面軸は 1 画面目から在る**。**2 画面目は同じコマンドをもう一度回す** —— 生成器は新しい画面のディレクトリだけを足し、README には触らない。`<name>/<画面>/` が既に在れば止まる。生成器が書くはずのものを手で置かない。
 
 そのうえで、README の状態表が宣言する 4 状態 —— loading / empty / error / success —— すべての story
 を書く。取得を持たない形へ view を切ると、全状態が story から出せる。
@@ -100,8 +97,13 @@ script 側が `APP_ENV` を `local` に既定しているので、前置きは�
 
 ## Step 5. 分離（工程 4）
 
+レビューが見た目を確定させたので、この段が挟む 2 つの境界を打刻する: `.agents/closed-loop/marks.sh planApprovedAt` のあと `.agents/closed-loop/marks.sh implStartedAt`。 <!-- boilerplate-only:line -->
+
 レビューが確定させたものを層へ移す。置き場は `docs/playbook.md` の逆引きと各カーネル README から
 決める。基準はコードにも README にも書き写さず、それを所有する ADR への参照パスとして持つ。
+**参照パスそのものは `docs/playbook.md` の「工程 4（分離）で読むもの」の表が持つ** —— 該当する行を
+開いて ADR の節を当てる。棄却側の行も必ず含める。同じ発想を思いつくたびに一から議論し直さない
+ためである。
 
 ## Step 6. 仕様書（工程 5）
 

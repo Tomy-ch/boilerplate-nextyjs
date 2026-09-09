@@ -20,9 +20,8 @@ export const metadata: Metadata = {
  * 一覧の中身。
  *
  * @remarks
- * **`searchParams` を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません
- * （[0041](../../../../docs/adr/0041-cache-components-decision.md)）。器は promise のまま渡し、
- * 穴の内側で解きます。
+ * **`searchParams` を解くのはここです。** 器の側で待つと、待っている間は殻すら配れません。
+ * 器は promise のまま渡し、穴の内側で解きます。
  */
 async function AdminProductListContent({
   searchParams,

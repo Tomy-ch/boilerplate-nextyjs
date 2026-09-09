@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
@@ -51,9 +51,9 @@ describe("CheckoutConfirmView", () => {
     placeOrderAction.mockResolvedValue(failedActionState({ formError: "在庫が変わりました。" }));
 
     renderView();
-    const [aside] = screen.getAllByRole("button", { name: "注文を確定する" });
+    const aside = screen.getByRole("complementary", { name: "お支払い金額" });
 
-    await userEvent.click(aside);
+    await userEvent.click(within(aside).getByRole("button", { name: "注文を確定する" }));
 
     // 脇と下端は CSS で出し分けるだけで、DOM には両方が居る。送信の状態を姿ごとに持つと、
     // 送った直後に幅が境界を跨いだとき、表に出る側が「何も送っていない」姿になる。

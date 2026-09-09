@@ -1,7 +1,7 @@
 name: VisualRegressionTest
 
 # Compares every Storybook story against its committed baseline image
-# (ADR 0091: visual regression runs on Playwright's screenshot comparison).
+# (visual regression runs on Playwright's screenshot comparison).
 #
 # The run happens inside the digest-pinned Playwright container declared in
 # `docker-compose.dev-tools.yml`, invoked through the same `make vrt` a developer
@@ -11,10 +11,8 @@ name: VisualRegressionTest
 #
 # CI never writes baselines on its own. Producing new ones is a deliberate human act
 # — either `make vrt-update` locally, or the `baseline-retake` label handled by
-# `baseline-retake.yaml`. Neither is the approval: the images live in the store, so this
-# repository only ever shows a moved submodule pointer, and the pixels are judged in
-# the store's compare view and accepted with the `baseline-approve` label that
-# `baseline-approval.yaml` requires.
+# `baseline-retake.yaml`. Neither is the approval; that is the `baseline-approve` label
+# `baseline-approval.yaml` requires (`vrt/README.md`, 「撮り直しと承認は別の操作」).
 #
 # ## Why the comparison is split across machines
 #
@@ -29,7 +27,7 @@ name: VisualRegressionTest
 # The comparison and the pull-request comment are separate jobs. The baseline store
 # may be private, which means the comparison job needs a GitHub App secret; a job
 # holding a secret must not also produce a comment body, because secret masking does
-# not survive a `tee` to a file (ADR 0153).
+# not survive a `tee` to a file.
 #
 # Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
 # every PR is in README.md. `vrt-scope` always starts and asks `diff-scope` whether the
@@ -41,10 +39,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development. Storybook loads `next.config.ts` to build the preview, so the refusal lands
-# there — and `storybook build` reports success anyway, leaving a tree with no preview.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 
@@ -135,7 +130,8 @@ jobs:
         #
         # Four is where the curve flattens. The fixed cost per machine (setup, Storybook build,
         # image pull) is roughly 80s against a comparison of roughly 380s, so a fifth machine
-        # buys seconds while every machine is billed to whoever forked this.
+        # buys seconds while every machine is billed to whoever created their repository from
+        # this template.
         shard: [1, 2, 3, 4]
 
     steps:
@@ -292,8 +288,8 @@ jobs:
 
   # **The required status check.** Runs on every pull request except a cancelled one,
   # including the ones where every shard stood down — a required context that never reports
-  # blocks its pull request forever (README.md). Holds no App secret: it builds the comment
-  # body, and a job that holds a secret must not (ADR 0153).
+  # blocks its pull request forever (README.md). Holds no App secret, because it builds the
+  # comment body (header: the comparison and the comment are separate jobs).
   vrt:
     needs: [vrt-scope, vrt-shard]
     # Not `always()`: reading a cancelled run as a failure is the condition's responsibility to
@@ -487,7 +483,7 @@ jobs:
 
             # The command below is pasted into a shell, so a value outside the accepted set
             # drops the whole block rather than being quoted into it. Both the set and that
-            # decision live in `scripts/lib/review-command.ts` (ADR 0153 §5).
+            # decision live in `scripts/lib/review-command.ts`.
             echo
             pnpm exec tsx scripts/ci-report review-block \
               --kind story \

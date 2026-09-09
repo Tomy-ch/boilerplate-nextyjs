@@ -1,5 +1,4 @@
 // リリースブランチ名から `package.json` の version を決める判断。
-// 版の出所をブランチ名へ一本化する理由は [0150](../../docs/adr/0150-git-workflow.md)。
 
 import { normalizeVersion } from "../semver/bump.js";
 

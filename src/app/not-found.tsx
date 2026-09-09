@@ -9,7 +9,7 @@ import { ErrorKind } from "@/errors/error-kind";
  *
  * @remarks
  * root layout の中で描画されるため `html` / `body` を持ちません。route group の shell は
- * 通らないので、この画面だけで戻る導線を完結させます（[0026](../../docs/adr/0026-layout-shell-mount.md)）。
+ * 通らないので、この画面だけで戻る導線を完結させます。
  *
  * **`main` もこの画面が自分で置きます**（[README](./README.md)）。
  *

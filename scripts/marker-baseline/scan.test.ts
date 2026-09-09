@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { diffBaseline, EXCLUDED_DIRECTORIES } from "./rules";
-import { REPO_ROOT, readBaseline, scanTree } from "./scan";
+import { REPO_ROOT, readBaseline, scanRowsOutsideTable, scanTree } from "./scan";
 
 // リポジトリ全体を歩くため、既定の 5 秒では足りない（`docs/testing-conventions.md`）。
 const TIMEOUT_MS = 300_000;
@@ -89,6 +89,30 @@ describe("scanTree", () => {
     chmodSync(join(root, "locked.md"), 0o000);
 
     expect(() => scanTree(root)).toThrow();
+  });
+});
+
+describe("scanRowsOutsideTable", () => {
+  // ----- 正常系 -----
+  it(
+    "実ツリーの Markdown に、表として成立していない行が無い",
+    () => {
+      expect(scanRowsOutsideTable(REPO_ROOT)).toEqual({});
+    },
+    TIMEOUT_MS,
+  );
+
+  it("Markdown 以外は見ない", () => {
+    place("src/a.ts", "| a | b |", "| 1 | 2 |");
+
+    expect(scanRowsOutsideTable(root)).toEqual({});
+  });
+
+  // ----- 異常系 -----
+  it("区切り行を持たない `|` 始まりの行を挙げる", () => {
+    place("docs/a.md", "| a | b |", "| 1 | 2 |");
+
+    expect(scanRowsOutsideTable(root)).toEqual({ "docs/a.md": [1, 2] });
   });
 });
 

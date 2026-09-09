@@ -71,7 +71,7 @@ export const PERIOD_KEY_LABEL: Readonly<Record<string, string>> = {
  * @remarks
  * 契約は前後の入れ替わった区間を 400 で返し、日付の欠けた `range` はそもそも区間へ解けませんが、
  * どちらも **これから日付を選ぶ状態**と同じ URL の形をしています。往復させてから拒まれる形に
- * しないため、送る前にこの層で見ます（[0062](../../../../docs/adr/0062-form-input-validation.md)）。
+ * しないため、送る前にこの層で見ます。
  */
 export type PeriodRequest =
   /** 集計を求められる。区間は解決済みで、そのまま契約へ渡せる。 */
@@ -89,7 +89,7 @@ export type PeriodRequest =
  * 順になります。`Date` へ直すと、ブラウザの時差で暦日がずれた値どうしを比べることになります。
  *
  * **区分をここで区間へ解きます。** 契約が受け取るのは瞬時の半開区間だけで、「今日」「今月」を
- * 暦の上で解く役は持ちません（[0120](../../../../docs/adr/0120-locale-aware-formatting.md)）。
+ * 暦の上で解く役は持ちません。
  *
  * @param selection - URL が表している期間の選択
  * @param now - 相対の期間を解く基準の瞬時

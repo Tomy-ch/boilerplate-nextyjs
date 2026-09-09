@@ -21,7 +21,7 @@ export type PurchaseLineListProps = {
  * 購入完了と購入詳細の両方がこれを出すため `facade` に置いています（README 参照）。
  *
  * 行ごとの金額は出しません。単価と数量を掛けると、画面が金額を作ることになります。合算した
- * 値は内訳が持ちます（[0070](../../../../../docs/adr/0070-backend-role-separation.md)）。
+ * 値は内訳が持ちます。
  */
 export function PurchaseLineList({ lines }: PurchaseLineListProps) {
   return (

@@ -29,6 +29,19 @@ function scanTargets(): string[] {
     );
 }
 
+// リポジトリ全体を走査するため、既定の 5 秒では足りない。全量を並列で回すと取り合いでさらに伸び、
+// 走査の遅さがそのまま赤になる（`docs/testing-conventions.md`「リポジトリ全体を走査するゲート」）。
+const TIMEOUT_MS = 300_000;
+
+describe("EXCLUDED_DIRECTORIES", () => {
+  // ----- 正常系 -----
+  it("すべて区切りを含まないディレクトリ名である", () => {
+    // 走査は `excludedDirectories.has(entry.name)` で**名前を完全一致**させる。区切りを
+    // 含む要素は一度も一致せず、除外が無言で効かないまま走査が生成物の配下へ降りる。
+    expect([...EXCLUDED_DIRECTORIES].filter((name) => name.includes("/"))).toEqual([]);
+  });
+});
+
 describe("EXCLUDED_PATH_PREFIXES", () => {
   // ----- 正常系 -----
   it("すべて区切りで終わる", () => {
@@ -70,35 +83,39 @@ describe("SELF_DESTRUCT_PATHS", () => {
   // 見るのはリテラルの言及だけで、TypeScript の import グラフは辿らない。捕まえたいのは
   // 「`pnpm exec tsx scripts/<区画>` で起動される区画」であり、その起動は Makefile か workflow の
   // 文字列として必ず現れる。相対 import しか経路を持たない区画は、この検査には載らない。
-  it("消える検査だけが呼ぶ scripts の区画を、道具ごと消す", () => {
-    const covered = (relativePath: string): boolean =>
-      SELF_DESTRUCT_PATHS.some(
-        (target) => relativePath === target || relativePath.startsWith(`${target}/`),
-      );
-    const referrers = new Map<string, string[]>();
+  it(
+    "消える検査だけが呼ぶ scripts の区画を、道具ごと消す",
+    () => {
+      const covered = (relativePath: string): boolean =>
+        SELF_DESTRUCT_PATHS.some(
+          (target) => relativePath === target || relativePath.startsWith(`${target}/`),
+        );
+      const referrers = new Map<string, string[]>();
 
-    for (const relativePath of scanTargets()) {
-      for (const [, area] of (readUtf8File(path.join(ROOT_DIR, relativePath)) ?? "").matchAll(
-        /scripts\/([a-z0-9][a-z0-9-]*)/g,
-      )) {
-        const key = `scripts/${area}`;
+      for (const relativePath of scanTargets()) {
+        for (const [, area] of (readUtf8File(path.join(ROOT_DIR, relativePath)) ?? "").matchAll(
+          /scripts\/([a-z0-9][a-z0-9-]*)/g,
+        )) {
+          const key = `scripts/${area}`;
 
-        // 区画そのものと、その中からの言及は数えない。中だけで閉じた参照は「誰が要るか」を
-        // 答えないので、これを数えると消してよい区画が消せなくなる。
-        if (relativePath.startsWith(`${key}/`) || !isDirectory(key)) {
-          continue;
+          // 区画そのものと、その中からの言及は数えない。中だけで閉じた参照は「誰が要るか」を
+          // 答えないので、これを数えると消してよい区画が消せなくなる。
+          if (relativePath.startsWith(`${key}/`) || !isDirectory(key)) {
+            continue;
+          }
+
+          referrers.set(key, [...(referrers.get(key) ?? []), relativePath]);
         }
-
-        referrers.set(key, [...(referrers.get(key) ?? []), relativePath]);
       }
-    }
 
-    expect(
-      [...referrers]
-        .filter(([area, from]) => !covered(area) && from.every(covered))
-        .map(([area]) => area),
-    ).toEqual([]);
-  });
+      expect(
+        [...referrers]
+          .filter(([area, from]) => !covered(area) && from.every(covered))
+          .map(([area]) => area),
+      ).toEqual([]);
+    },
+    TIMEOUT_MS,
+  );
 
   it("共有機構は消さない", () => {
     const shared = "scripts/setup/lib/markers.ts";
@@ -107,14 +124,10 @@ describe("SELF_DESTRUCT_PATHS", () => {
   });
 });
 
-// リポジトリ全体を走査するため、既定の 5 秒では足りない。全量を並列で回すと取り合いでさらに伸び、
-// 走査の遅さがそのまま赤になる（`docs/testing-conventions.md`「リポジトリ全体を走査するゲート」）。
-const TIMEOUT_MS = 300_000;
-
 describe("BOILERPLATE_ONLY_MARKER", () => {
   // ----- 正常系 -----
   // サンプル側の定数を import せず literal で持つ。`remove-sample/` はサンプル破棄で消えるため、
-  // 破棄を先に走らせた fork でこのテストが解決不能な import で落ちる。
+  // テンプレートから作って破棄を先に走らせた側でこのテストが解決不能な import で落ちる。
   it("サンプル破棄とは別の族を指す", () => {
     expect(BOILERPLATE_ONLY_MARKER).not.toBe("sample");
   });

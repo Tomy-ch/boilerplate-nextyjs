@@ -29,8 +29,8 @@ export type AppShellMenuProps = {
  *
  * @remarks
  * **押せないだけで、大きさは同じです。** menu は現在地を読むため、動的な区間を持つ route では
- * 殻の中で解決できません（[0041](../../../../docs/adr/0041-cache-components-decision.md)）。枠を
- * 置かずに待つと、届いた瞬間に header の中身が右へずれます（`docs/rules.md` #17b）。
+ * 殻の中で解決できません。枠を置かずに待つと、届いた瞬間に header の中身が右へずれます
+ * （`docs/rules.md`「UI 部品と操作」の「状態で出入りする表示のせいで操作の位置を動かさない」）。
  */
 export function AppShellMenuFallback() {
   return (
@@ -49,7 +49,7 @@ export function AppShellMenuFallback() {
  *
  * **選んだら閉じますが、閉じるのは移った後です。** 押した時点で閉じると、overlay が積んだ履歴 1 件を
  * 戻す動きが遷移そのものと競合し、閉じるだけで移らない回が出ます。移る側は置き換えで移るため、
- * 積んだ 1 件は移り先に上書きされます（[0053](../../../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 積んだ 1 件は移り先に上書きされます。
  *
  * @see Storybook `Layout/AppShell`
  */

@@ -106,9 +106,8 @@ export async function findMyProfile(): Promise<UserProfile | null> {
  *
  * @remarks
  * **session の読み取りをこの境界の内側に留めるための口です。** 確定認可は `adapters/server` が
- * 持ち（[0079](../../../../docs/adr/0079-auth-frontend-seam.md)）、身元とトークンは外の層へ
- * 出しません。画面側が要るのは「入れるか、どちらの理由で入れないか」だけなので、それだけを
- * 返します。
+ * 持ち、身元とトークンは外の層へ出しません。画面側が要るのは「入れるか、どちらの理由で入れないか」
+ * だけなので、それだけを返します。
  *
  * 未認証を先に判定します。身元が無いまま `/v1/users/me` を叩いても `401` が返るだけで、
  * 往復が 1 つ増えます。
@@ -150,8 +149,7 @@ export const getMyPurchaseSummary = cache(async (): Promise<PurchaseSummary> => 
  *
  * @remarks
  * 認証と利用者の登録は別物です。IdP を通った主体には身元がありますが、この系にはまだ利用者の
- * 記録がありません（[0070](../../../../docs/adr/0070-backend-role-separation.md)）。ここはその
- * 記録を初めて作る口で、以後 `/v1/users/me` が引けるようになります。
+ * 記録がありません。ここはその記録を初めて作る口で、以後 `/v1/users/me` が引けるようになります。
  *
  * **冪等キーは呼び出し側から受け取ります。** 送信のたびに新しい鍵を作ると、二重送信は 2 人の
  * 利用者になります。鍵は「この登録という 1 つの試み」に結び付いた値でなければならず、それを
@@ -268,9 +266,8 @@ export const MANAGED_USER_PAGE_MAX: number = getUsersQueryPageMax;
  * 一覧を絞り込む条件。
  *
  * @remarks
- * **1 ページの件数を呼び出し側から受け取ります。** 何件並べると読めるかは表示の判断で、外部接続の
- * 都合ではありません（[0021](../../../../docs/adr/0021-frontend-responsibility.md)）。ここが持つのは
- * 「受け取った条件を契約の形へ写す」ことだけです。
+ * **1 ページの件数を呼び出し側から受け取ります。** 何件並べると読めるかは表示の判断で、
+ * 外部接続の都合ではありません。ここが持つのは「受け取った条件を契約の形へ写す」ことだけです。
  */
 export type ManagedUserQuery = {
   /** 1 から数えるページ番号。 */
@@ -297,9 +294,8 @@ function toManagedUser(wire: z.infer<typeof GetUsersResponse>["users"][number]):
  * 利用者を一覧で取得する。
  *
  * @remarks
- * **offset 方式です**（[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。契約が
- * 位置と全件数を返すため、任意のページへ跳べます。cursor 方式の一覧（商品・購入）とはページ
- * 送りの部品から違います。
+ * **offset 方式です**。契約が位置と全件数を返すため、任意のページへ跳べます。cursor 方式の
+ * 一覧（商品・購入）とはページ送りの部品から違います。
  *
  * `active` を省くと退会済みを含む全件が返ります。3 値であることを `boolean | undefined` で
  * そのまま表すのは、「有効だけ」「退会済みだけ」「区別しない」がいずれも意味を持つためです。

@@ -16,7 +16,8 @@ export type PlannedReplacement = {
  * @remarks
  * **順序が効きます。** portal を先に置くと、差し込んだ URL の `<owner>.github.io/<repo>` が
  * リポジトリ参照のスラッグとして読まれ、host ごと書き換わります。オーナーだけを変えて
- * リポジトリ名を据え置く fork（`currentName` と書き換え先の名前が同じ）で必ず踏みます。
+ * リポジトリ名を据え置いてテンプレートから作った場合（`currentName` と書き換え先の名前が同じ）で
+ * 必ず踏みます。
  *
  * @param relativePath - 対象ファイルのリポジトリルート相対パス
  * @param original - 対象ファイルの本文

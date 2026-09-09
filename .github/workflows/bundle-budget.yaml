@@ -1,7 +1,7 @@
 name: Bundle Budget
 
 # Measures what each route makes the browser download, and holds it against
-# `performance-budget.yaml` (ADR 0101).
+# `performance-budget.yaml`.
 #
 # Next 16 prints no size column, so the numbers come from the build output itself: the
 # route's own client chunks (`__RSC_MANIFEST`) unioned with the shared runtime chunks (the
@@ -13,7 +13,7 @@ name: Bundle Budget
 # without it, moving something heavy behind a dynamic import reads as a shrink even though
 # the person using the screen downloads exactly as much. **Total** is the sum, and it is
 # what keeps such a move honest. **CSS** is measured because it blocks rendering and lands
-# straight on LCP, which is the metric ADR 0101 budgets.
+# straight on LCP, which is the metric the budget is written against.
 #
 # The base branch is built too. A ceiling alone lets a change spend the headroom a few KB at
 # a time until some later pull request crosses the line — the red then lands on whoever went
@@ -39,9 +39,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development — the build then fails on a value that is only meant for a workstation.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 
@@ -168,10 +166,8 @@ jobs:
 
           exit 0
 
-      # A job that stood down still owes the pull request a verdict. Without this, the ❌
-      # comment an earlier push produced stays beside a green check once the diff stops
-      # reaching the bundle — README.md's "update the comment on success too" invariant,
-      # applied to standing down. The body file is the one the comment step reads, so it has
+      # A job that stood down still owes the pull request a verdict (README § PR コメント,
+      # the `diff-scope` bullet). The body file is the one the comment step reads, so it has
       # to be written here too.
       - name: Note that the diff cannot reach the bundle
         id: standdown

@@ -16,8 +16,7 @@ import { openAtDeclaredViewport } from "./lib/viewport";
 
 // Storybook の全 story を基準画像と比べる。
 //
-// 比較単位を story に取る理由は [README](README.md) と
-// [0091](../docs/adr/0091-test-verification-methods.md) §3 にある。
+// 比較単位を story に取る理由は [README](README.md) にある。
 
 /** 撮影対象。`pnpm build-storybook` の出力先。 */
 const STORYBOOK_DIR = "storybook-static";

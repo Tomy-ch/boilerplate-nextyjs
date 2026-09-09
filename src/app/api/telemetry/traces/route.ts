@@ -15,8 +15,8 @@ import { ErrorKind } from "@/errors/error-kind";
  * **OTLP そのもの**で、読み替えずに collector へ渡します。分けているのは中身が違うからではなく、
  * **契約の出所が違う**ためです —— 隣は変えられますが、こちらは OTel が決めます。
  *
- * ブラウザは collector の endpoint を知りません（[0081](../../../../../docs/adr/0081-observability-logging.md)）。
- * 送り先はこの口で、資格情報が要る構成でもそれを載せるのはサーバー側です。
+ * ブラウザは collector の endpoint を知りません。送り先はこの口で、資格情報が要る構成でもそれを
+ * 載せるのはサーバー側です。
  *
  * 認証を要求しない口なので、本体を読む前に型と大きさで落とします（防御の中身と根拠は
  * [`readJsonBody`](../../../../adapters/server/http/json-request.ts)）。

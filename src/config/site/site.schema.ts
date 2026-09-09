@@ -21,7 +21,8 @@ const publicOrigin = z.string().refine(isOrigin, {
  * @remarks
  * **パスを持たせません。** canonical / sitemap / OG 画像の絶対 URL はこの値へ経路を足して組み立てる
  * ため、パス付きの base を許すと `new URL("/about", base)` がそのパスを捨て、書いた人の意図と
- * 組み立ての結果が食い違います。サブパス配備が要る fork は、組み立ての側ごと見直します。
+ * 組み立ての結果が食い違います。サブパス配備が要るなら、テンプレートから作った側で組み立ての側ごと
+ * 見直します。
  */
 export function publicOriginValidator() {
   return publicOrigin;
@@ -40,7 +41,8 @@ const indexable = z
  * @remarks
  * **未設定と空文字はどちらも「索引させない」です。** 索引はいったん載ると取り下げに時間が掛かり、
  * 載せる側を既定にすると、設定を忘れた preview / staging が本番と並んで検索結果へ出ます。
- * 載せてよい環境だけが明示します（`docs/rules.md` #63）。
+ * 載せてよい環境だけが明示します（`docs/rules.md`「設定と環境」の「索引させてよい環境だけが
+ * `SITE_INDEXABLE=on` を宣言する」）。
  */
 export function indexableValidator() {
   return indexable;

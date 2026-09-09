@@ -5,7 +5,7 @@ import type { ProductId } from "../product/product";
  *
  * @remarks
  * カートを取得するたびに、バックエンドが明細と商品の現在値を突き合わせて立てます。判定そのものは
- * 業務ロジックであり、表示側は結果を受け取るだけです（[0070](../../../docs/adr/0070-backend-role-separation.md)）。
+ * 業務ロジックであり、表示側は結果を受け取るだけです。
  *
  * 1 つの明細に複数立つことがあります。
  */
@@ -76,7 +76,7 @@ export type CartMergeResult = {
  *
  * @remarks
  * 明細も小計もバックエンドが持ちます。手元に写して持ち回ると、在庫切れと値上がりに気づけないまま
- * 購入確認へ渡ることになります（[0023](../../../docs/adr/0023-stores-kernel.md)）。
+ * 購入確認へ渡ることになります。
  */
 export type Cart = {
   readonly lines: readonly CartLine[];

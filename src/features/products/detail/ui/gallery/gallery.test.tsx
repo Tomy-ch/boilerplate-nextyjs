@@ -77,7 +77,9 @@ describe("ProductGallery", () => {
 
   it("先頭では前へを出さず、末尾では次へを出さない", () => {
     render(<ProductGallery imageUrls={THREE_IMAGE_URLS} productName={PRODUCT_NAME} />);
-    const [first, middle, last] = screen.getAllByRole("group");
+    const first = screen.getByRole("group", { name: "1 / 3" });
+    const middle = screen.getByRole("group", { name: "2 / 3" });
+    const last = screen.getByRole("group", { name: "3 / 3" });
 
     expect(within(first).queryByRole("link", { name: "前へ" })).not.toBeInTheDocument();
     expect(within(first).getByRole("link", { name: "次へ" })).toBeVisible();

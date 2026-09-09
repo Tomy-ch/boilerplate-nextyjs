@@ -2,8 +2,7 @@
  * 認証済み利用者の身元。cookie へ載せる payload はこの型に閉じる。
  *
  * @remarks
- * 後続のリクエストで使う一意な値だけを持ち、氏名・メール・電話番号のような PII は持ちません
- * （[0079](../../docs/adr/0079-auth-frontend-seam.md) §1）。
+ * 後続のリクエストで使う一意な値だけを持ち、氏名・メール・電話番号のような PII は持ちません。
  *
  * Access Token はこの型に含めません。ブラウザへ渡してよい値と、境界の内側だけで使う値を同じ型に
  * 混ぜると、内側へ渡す段で落とし忘れが起きます。トークンの保管形式は `adapters/server` の
@@ -23,7 +22,7 @@ export type Session = {
  *
  * @remarks
  * boilerplate は「特権を持つ側」と「持たない側」の 2 つだけを敷きます。実際の役割体系は
- * バックエンドと IdP が所有するため、fork 先はこの集合を自分の体系へ置き換えます。
+ * バックエンドと IdP が所有するため、テンプレートから作った側はこの集合を自分の体系へ置き換えます。
  */
 export const SESSION_ROLE: Readonly<{ admin: "admin"; user: "user" }> = {
   admin: "admin",

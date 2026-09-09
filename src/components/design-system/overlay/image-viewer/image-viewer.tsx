@@ -56,7 +56,7 @@ function alignToIndex(content: Element, index: number): void {
  * 渡します。carousel に載せるのか単独で置くのかで枠が変わるためです。
  *
  * **trigger は `button` です。** 画像に click を付ける形は keyboard から辿れず、押せることも
- * 伝わりません（[0100](../../../../../docs/adr/0100-accessibility-target.md)）。
+ * 伝わりません。
  *
  * 拡大版も carousel です。1 枚だけを見せると、次を見るために閉じて選び直す往復が要ります。送りは
  * 本体と同じ機構（横スクロールと吸着）に乗るため、touch のスワイプがそのまま効きます。

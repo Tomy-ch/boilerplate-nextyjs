@@ -2,8 +2,7 @@
  * 接続先ごとの resilience 設定。
  *
  * @remarks
- * 値は [0071](../../../../docs/adr/0071-bff-api-integration.md) が定めたものです。接続先ごとに
- * 差し替えられるようにしているのは、劣化の許容度が接続先の性質で変わるためです。
+ * 接続先ごとに差し替えられるようにしているのは、劣化の許容度が接続先の性質で変わるためです。
  */
 export type ResilienceProfile = {
   /** 1 回の試行に許す時間。これを超えた試行だけを中断し、再試行の余地は残す。 */
@@ -31,9 +30,8 @@ export type ResilienceProfile = {
  * 既定の resilience 設定。
  *
  * @remarks
- * `maxAttempts` だけは ADR が数を挙げていないため 3 とします。全体時間の上限が
- * per-attempt の 3 倍を少し超える値であり、それ以上の試行は overall に阻まれて
- * 実行されないためです。
+ * `maxAttempts` は 3 とします。全体時間の上限が per-attempt の 3 倍を少し超える値であり、
+ * それ以上の試行は overall に阻まれて実行されないためです。
  */
 export const DEFAULT_PROFILE: ResilienceProfile = {
   perAttemptTimeoutMs: 3_000,

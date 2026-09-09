@@ -33,6 +33,8 @@
 
 SSR first の選定では `△` に当たります。既定は通常の link / button と Server 側で組み立てた内容であり、overlay の開閉・focus 管理・Escape・animation が必要になった場合にこの client island を選びます。開閉状態と focus trap のため hydration が必要で、Server Component からは直接 render できません。内容自体に client runtime が要らない場合は、Server Component で組み立てた要素を `children` として渡します。
 
+開いているあいだは履歴を 1 つ持ち、**戻る操作で自分だけを閉じます**（[0053](../../../../../docs/adr/0053-ui-component-interaction-seam.md)）。積むのは同じ URL の履歴 entry だけで、URL 自体は変わりません。
+
 表示する文言、取得、保存、業務判断、開閉を URL へ載せるかの選択は持ちません。`side` は現れる画面端だけを決め、viewport 幅に応じて sheet と常時表示を切り替える判断は feature 側が持ちます。
 
 `SheetContent` は縦方向の flex で内容を並べ、`SheetFooter` の `mt-auto` によって余白があるときは footer が下端へ寄ります。内容が sheet の高さを超える場合のスクロールは持たないため、必要な場合は呼び出し元が `className` で overflow を指定します。

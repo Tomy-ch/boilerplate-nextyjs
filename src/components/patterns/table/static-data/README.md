@@ -17,7 +17,7 @@ Server で取得した一覧を、列幅と配置を保って表示する場合�
 
 ## 責務境界
 
-`Table` の低レベル構成は `ui/`、列定義の展開は `sugar/` が担います。取得、URL、filter、行操作は feature の責務です。
+`Table` の低レベル構成は `design-system/display/table`、列定義の展開は `patterns/table` が担います。取得、URL、filter、行操作は feature の責務です。
 
 ## Storybook とテスト
 

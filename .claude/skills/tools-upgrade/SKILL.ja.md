@@ -4,7 +4,7 @@
 
 # ツールバージョン更新
 
-このスキルは `mise.toml` の `[tools]` table に並ぶ全ツールについて、upstream 最新版との差分を監査し、**サプライチェーン隔離ゲート（supply-chain quarantine gate）** 付きで適用候補を提示する。`min_age_days` 未満の新しいリリースは「通知のみ」として扱い、自動適用しない。
+このスキルは `mise.toml` の `[tools]` table に並ぶ全ツールについて、upstream 最新版との差分を監査し、**サプライチェーン隔離ゲート（supply-chain quarantine gate）** 付きで適用候補を提示する。`min_age_days` 未満の新しいリリースは「通知のみ」として扱い、自動適用しない（窓の解決とその理由は Step 0 が持つ）。
 
 理由: npm / PyPI / Go module proxy への悪意あるリリースの大半は、公開後 24〜72 時間以内に検知・取り下げが行われる。backend ごとに定めた窓のあいだ待つことで、コミュニティが検知する前に取り込んでしまうリスクを抑える。
 
@@ -20,7 +20,8 @@
 
 - Node.js 自体のアップグレード → `/node-upgrade` を使う（その Node ラインのリリースノート / 破壊的変更をレビューする）
 - npm 依存のアップデート（`package.json`）→ `pnpm add` / `pnpm update` を直接使う（[0004](../../../docs/adr/0004-library-management.md)）
-- 単発のアドホックなバージョン bump → `mise.toml` を直接編集して `make install-tools`
+- 単発のアドホックなバージョン bump → `mise.toml` を直接編集して `make install-tools`。
+  **検疫はこの経路にも掛かる** —— `make tools-cooldown-check` が、窓を満たさない pin をどの経路で入れたかに依らず落とす
 - **mise 自身**のアップグレード → `mise.toml` が宣言するのは mise が解決する対象であって mise 自身は
   宣言できないため、版は `.github/actions/setup-mise/action.yaml` にあり本スキルの射程外。揃えるべき
   3 箇所を含む手順は `repo-ops` runbook の項目 8
@@ -30,7 +31,8 @@
 **窓は単一の数値ではなく、この文書が決めるものでもない。** ADR
 [0110](../../../docs/adr/0110-security-operations.md) 1.1 が backend ごとに定めている。窓が追うのは
 その配布経路で悪性のリリースが検知・撤回されるまでの速さであって、そのツールが何を壊しうるかではない。
-全 backend に同じ値を当てると、窓の長いほうの経路が黙って検疫不足になる。
+全 backend に同じ値を当てると、窓の長いほうの経路が黙って検疫不足になる。待つこと自体が防御の大半を買う
+—— 典型的な悪性リリース（npm `ua-parser-js` 2021、PyPI `ctx` 2022）は公開後 24〜72 時間以内に検知・yank されている。
 
 手順:
 
@@ -54,9 +56,7 @@
 
 - `mise.toml`（`[tools]` table のみ、ユーザーが承認したエントリだけを書き換え）
 
-本スキルが書き換える追跡ファイルは `mise.toml` だけ。そこから配信層へ伝播するものは無く、バージョンを
-二重に持つ Dockerfile / ランタイムマニフェストも存在しない（[0003](../../../docs/adr/0003-version-manager.md) /
-[0011](../../../docs/adr/0011-no-docker.md)）。
+本スキルが書き換える追跡ファイルは `mise.toml` だけ（Step 6: そこから伝播するものは無い）。
 
 以下は引き続き保護対象（スキル実行中でも変更不可）。
 
@@ -98,7 +98,7 @@ GitHub Releases 系は `gh api` を優先する（`GITHUB_TOKEN` 経由で認証
 | **pending** | `pinned != latest` かつ `now - release_date < MIN_AGE_DAYS(backend)` |
 | **resolution_failed** | backend lookup が失敗（ネットワークエラー / 404 / parse 失敗） |
 
-ここで使う窓は Step 0 が**そのツールの backend について**解決したものである（backend は Step 1 で判明している）。全ツールを 1 つの数値と突き合わせることが、この段が避けている欠陥そのものである。
+ここで使う窓は Step 0 が**そのツールの backend について**解決したものである（backend は Step 1 で判明している）。全ツールを 1 つの数値と突き合わせない。
 
 セーフガード: semver で「downgrade」になる場合は `resolution_failed` 扱い（reason: "potential downgrade"）。
 
@@ -125,6 +125,8 @@ GitHub Releases 系は `gh api` を優先する（`GITHUB_TOKEN` 経由で認証
   - pipx:sqlfluff: PyPI への接続失敗
 ```
 
+`pending` の版は `supply-chain-triage` の対象である —— 4 つの軸で直接証拠を採点し、**待つことでしか解除できなかった窓を証拠で解除できる**ようにする。**帯を報告するだけで、低いスコアを根拠に採用しない** —— その判断は user のものである（[0110](../../../docs/adr/0110-security-operations.md) §1.2）。
+
 ## Step 4. 適用候補の per-tool 確認
 
 **eligible** が空ならステップ 6 へスキップし、書き換えは行わない。
@@ -148,8 +150,9 @@ GitHub Releases 系は `gh api` を優先する（`GITHUB_TOKEN` 経由で認証
 `make install-tools` を実行し、固定し直したバージョンを実際に `PATH` 上のものにする。これを回すまでは
 `mise.toml` と導入済みツールチェインが食い違い、以降の検証は古いバージョンを検証してしまう。
 
-下流への伝播ステップは無い。`mise.toml` が単一の正であり、バージョンを二重に持つ配信層のファイルは
-存在しない（[0003](../../../docs/adr/0003-version-manager.md)）。
+下流への伝播ステップは無い。`mise.toml` が単一の正であり、バージョンを二重に持つ配信層のファイル
+—— Dockerfile もランタイムマニフェストも —— 存在しない（[0003](../../../docs/adr/0003-version-manager.md) /
+[0011](../../../docs/adr/0011-no-docker.md)）。
 
 ## Step 7. 検証
 
@@ -174,12 +177,12 @@ pnpm build
 
 ## 注意事項
 
-- **supply-chain quarantine の根拠**: 典型的な dependency confusion / malicious release インシデント（npm `ua-parser-js` 2021、PyPI `ctx` 2022 等）は公開後 24〜72 時間以内に検知・yank されている。待つこと自体が防御の大半を買う。**backend ごとに何日待つかは ADR [0110](../../../docs/adr/0110-security-operations.md) 1.1 の決定であって、このスキルのものではない** —— 検知の速さとルーチン bump への追従のバランス点であり、動きうる。
+- **supply-chain quarantine の根拠**: Step 0 —— backend ごとの窓は ADR [0110](../../../docs/adr/0110-security-operations.md) 1.1 の決定であって、このスキルのものではなく、動きうる。
 - **pre-release の除外**: 常に最新の **stable** リリースを選ぶ。upstream が pre-release タグを出していても latest として選択しない。
 - **calendar versioning**: `2024.12.30` のような calendar versioning を使うツールは lexicographic + semver fallback で比較する。downgrade ガードは常時有効。
 - **rate limit**: GitHub API は anonymous で 60 req/h（IP 単位）。本スキルは `gh api` を経由して `GITHUB_TOKEN` 認証で 1000 req/h に上げる。
 - **idempotency**: 複数回起動しても安全。適用後に再実行すると、適用済みツールは up-to-date として表示される。
-- スキルは auto-push しない。ユーザーが working tree をレビューしたうえでコミット・push する。
+- コミット / stage / push は行わない（Step 8）。
 
 ## チェックリスト
 

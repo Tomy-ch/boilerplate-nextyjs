@@ -31,8 +31,8 @@ export type PortalSidebarProps = {
  * （axe の `nested-interactive`）。遷移は section 側の link が担い、link は group と section の
  * 両方を指すため、section を選べば group も切り替わります。
  *
- * 遷移は位置ハッシュへの link で表します。ビューアーは静的配信されるため、共有・履歴・戻る操作に
- * 対して復元可能なのはハッシュだけです。
+ * 遷移は位置ハッシュへの link で表します。ハッシュだけが復元可能である理由は `PortalApp`
+ * （portal-app.tsx）が持ちます。
  */
 export function PortalSidebar({ activeGroupSlug, groups, referenceLinks }: PortalSidebarProps) {
   const referenceHeadingId = useId();

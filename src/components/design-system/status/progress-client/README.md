@@ -23,7 +23,7 @@ browser 側で更新される進捗度を、値と最大値の関係として視
 
 SSR first の選定では `△` に当たります。既定は `ProgressNative` であり、値を browser 側で連続更新する要件が確定した場合にこちらを選びます。hydration が必要で、Server Component からは直接 render できません。値の保持と更新は呼び出し元の client island が持ち、この component は state も timer も購読も持ちません。取得、完了後の遷移、百分率の文言整形も持ちません。
 
-`value` は必須です。進捗不明（indeterminate）は表現の対象外にしています。このリポジトリは animation plugin を採用していないため待機中であることを動きで伝えられず、静止した bar は停止しているように見えるためです。
+`value` は必須です。進捗不明（indeterminate）は表現の対象外にしています。待機の表現は `Skeleton` / `Shimmer` が担うため、進捗部品は値の判っている進捗だけを引き受けます（[0051](../../../../../docs/adr/0051-styling-system.md)）。
 
 `progressbar` role として公開され、値は `value` と `max` から百分率として読み上げられます。要素自体は名前を持たないため、`aria-label` か `aria-labelledby` で**アクセシブルな名前を必ず与えます**。`ProgressNative` と違い実体は `div` であり labelable 要素ではないため、**`label` の `htmlFor` では名前が付きません**。見出しテキストと関連付ける場合は、その要素の `id` を `aria-labelledby` から参照します。
 

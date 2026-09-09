@@ -13,7 +13,7 @@ test-requirement: component
 ## ここにあるものは参考実装です
 
 **作り替えてもよく、捨ててもよい。**この目録に並んでいる部品も、[`tokens/`](../../tokens/README.md)
-が持つ値も、fork した先が自分のデザインへ差し替える前提で置いてあります。**そのまま使うことは
+が持つ値も、テンプレートから作った側が自分のデザインへ差し替える前提で置いてあります。**そのまま使うことは
 要件ではありません。**
 
 残してほしいのは部品ではなく、部品の**置き方**です。
@@ -41,7 +41,7 @@ test-requirement: component
 - 本ディレクトリの部品は shadcn/ui の copy-in を起点にする。Radix など vendor の import を採る場合も `components` に閉じ、feature から直接参照しない
 - **SSR first** とし、初期表示に必要な基礎部品は native HTML と Server Component を優先する。`"use client"`、Radix、Portal など browser runtime を必要とする実装は、native 要素では満たせない操作要件がある client island に限る。静的な少数選択は `select-native` を優先し、初期配置だけを理由に CSR へ寄せない
 - 見た目は Storybook の story を正として確認する。story は対象コンポーネントと同じディレクトリに co-locate する
-- 各 component ディレクトリには `README.md` を co-locate する。短い props の転記ではなく、少なくとも**用途・役割・配置される公開 component・利用ケース・責務境界・Storybook / test の確認範囲**を記す。公開 component がある場合は、名称と個別の役割を表にする。native / Server Component を既定にする部品と client island の部品は、その境界と hydration の要否を明記する
+- 各 component ディレクトリには `README.md` を co-locate する。必須の節は「配置・命名」が持つ。native / Server Component を既定にする部品と client island の部品は、その境界と hydration の要否を明記する
 - shadcn CLI はアイコンを lucide で出力する（`components.json` の `iconLibrary` に Tabler の選択肢が無い）。copy-in したら、その import を [`icon.ts`](./icon.ts) 経由へ差し替える。必要な名前が無ければ `icon.ts` へ 1 行足す。差し替え漏れは、package が解決できないことと `pnpm lint:eslint` の両方で落ちる
 - 新しい shadcn copy-in では [`component-template.md`](./component-template.md) を component ディレクトリの `README.md` として自動コピーする。テンプレートの placeholder は、同じ取り込み作業で実装に合わせて必ず具体化する
 - component を足したら [component 目録](#component-目録) へ 1 行足す。名前を変えたら書き換え、消したら消す。目録に無い component は、これを読む人にとって存在しないのと同じである。`ContextMenu` のように可視の trigger を持たず、既存の部品を読まなければ気付けないものほどこの影響を受ける
@@ -119,7 +119,7 @@ subcomponent が多い compound では、root に `@example` で組み合わせ�
 ### 文字の太さ
 
 - **強調は `font-emphasis` で書く。太さを直に指定しない。** 書体ごとに持っている太さが違い、持っていない段を指定しても丸められるだけで強調にならない（`tokens/README.md`「強調は 1 段だけ持つ」）。**`no-raw-font-weight` が機械で見る**（`eslint-rules/`）。`font-normal` は「強調しない」の打ち消しなので使ってよい
-- **段は 1 つしかない。** 見出しと本文の差は寸法（`text-lg` 等）と位置が作り、太さはその上乗せである。太さで階層をもう 1 段作ろうとしない —— OS 同梱の書体では出ない環境がある（[0051](../../docs/adr/0051-styling-system.md) §5）
+- **段は 1 つしかない。** 見出しと本文の差は寸法（`text-lg` 等）と位置が作り、太さはその上乗せである。太さで階層をもう 1 段作ろうとしない —— OS 同梱の書体では出ない環境がある
 
 ### 系統（`data-surface`）と Portal
 
@@ -135,7 +135,7 @@ subcomponent が多い compound では、root に `@example` で組み合わせ�
 ### 境界を示す線
 
 - **その線が要素の境界を示すなら `border-input`、区画の仕切りなら `border-border` を使う。** `Input` / `Textarea` のように枠が無いと入力できる範囲が判らなくなるもの、`Badge` の `outline` のように縁だけで成り立つ variant は、いずれも `input` を取る
-- 分けるのは**コントラストの要求が違う**ためである。入力できる範囲の境界は **WCAG 1.4.11 が隣接色との 3:1 を求める**対象で（[0100](../../docs/adr/0100-accessibility-target.md)）、`border` は仕切りとしてどの面でも 1.2〜1.6:1 しかなく満たさない。`input` は `background` / `card` / `popover` / `muted` / `accent` のすべての上で 3:1 を満たすよう定めてある。仕切りは同条の対象外なので `border` のままでよい
+- 分けるのは**コントラストの要求が違う**ためである。入力できる範囲の境界は **WCAG 1.4.11 が隣接色との 3:1 を求める**対象で、`border` は仕切りとしてどの面でも 1.2〜1.6:1 しかなく満たさない。`input` は `background` / `card` / `popover` / `muted` / `accent` のすべての上で 3:1 を満たすよう定めてある。仕切りは同条の対象外なので `border` のままでよい
 - **`primary` と `emphasis` を本文の色に使わない。** この 2 つは面と図形のための色で、WCAG 1.4.11 の **3:1** しか満たさない。文字に置くと AA の 4.5:1 を割る。リンクや状態の文言には `secondary` / `success` / `warning` / `destructive` / `info` を使う（いずれも 4.5:1 を満たす）。アイコンは非テキストなので 3:1 で足り、`primary` を置いてよい
 - 判断の根拠は token の値にあるため、配色を変えたときはこの節を先に確認し、**比を測り直す**。呼び出し側のコメントに理由を書くと、token を直しても気づかれない
 
@@ -155,7 +155,7 @@ subcomponent が多い compound では、root に `@example` で組み合わせ�
 
 Tailwind は認識できない class に対して CSS を出力せず、そのことを何も報告しない。要素はその宣言が無いまま描画されるだけなので、**面が透明になる・focus ring が出ない・選択状態が見えない**といった欠陥が、browser で見るまで現れない。shadcn 生成物は上流の theme が持つトークンを前提にしているため、取り込みのたびにこれが混入しうる。
 
-検出は `pnpm check:classes` が行う。`globals.css` を実際に build し、`src/components` 配下の `.tsx` に書かれた class がすべて出力に現れるかを照合する。CI では component・`globals.css`・トークンのいずれかを触った PR で走る。
+検出は `pnpm check:classes` が行う。`globals.css` を実際に build し、`src/components` 配下の `.tsx` に書かれた class がすべて出力に現れるかを照合する。CI では**全 PR で走る** —— この検査は変更起因ではなく、上流の theme を前提にした class は他の変更でも出力から外れうるため。
 
 **「定義が無いから消す」は行わない。** 出力が無いことと、書いてはいけないことは別である。animation plugin を採らないために CSS が出ない `animate-in` / `fade-in-*` / `slide-in-from-*` や、子孫の variant から参照されるだけの `group` / `peer` は、意図して CSS を持たない。これらは [`scripts/check-classes.ts`](./scripts/check-classes.ts) の `KNOWN_WITHOUT_CSS` に理由とともに置いてあり、新たに見つけた場合も実装から消さずにそこへ足す。生成物から消すと、その生成物が持っていた情報が失われる。
 
@@ -190,7 +190,7 @@ Next.js と React は、`components/` 配下のディレクトリ構造・ディ
 - **`design-system/<目的>/` のようなまとめるためのディレクトリには README を置かない。** 置くとそれ自体が component として数えられ、台帳に記録が無いものとして落ちる。まとめるためのディレクトリが何を受け持つかは、この README の下の一覧が持つ
 - component かどうかを実装ファイルの有無で判定しない。`layout-patterns` のように story だけを持つ component が実在するため、内容から身元を推測すると破綻する
 - 同じ UI 概念に SSR first と client island の実装が並ぶ場合、ディレクトリ・ファイル名は `<concept>-native` / `<concept>-client`、公開 component 名は `ConceptNative` / `ConceptClient` にする。`client` は利用上の境界を表し、現在の Radix など vendor 名は README にだけ記す
-- `native` / `client` の対は runtime 実装だけを分ける。取り込み監査の時点でもサイズ・semantic token・focus・disabled・invalid の基本設計を可能な限り揃え、SSR・form・a11y と公開 API を確認する。layout・motion・visual regression を含む完全整合は P3-8 のデザインシステム構築で Storybook を見ながら仕上げる。OS が描画する popup など native 固有の部分まで pixel-perfect に一致させる必要はない
+- `native` / `client` の対は runtime 実装だけを分ける。取り込み監査の時点でもサイズ・semantic token・focus・disabled・invalid の基本設計を可能な限り揃え、SSR・form・a11y と公開 API を確認する。layout・motion・visual regression を含む完全整合は、デザインシステムの構築で Storybook を見ながら仕上げる。OS が描画する popup など native 固有の部分まで pixel-perfect に一致させる必要はない
 - コンポーネントの静的な定数・値集合・型・見た目の定義は `<コンポーネント名>.definition.ts` に置く。描画・操作を担う公開コンポーネントは `<コンポーネント名>.tsx` に置き、静的定義を import して使う
 - 値集合の公開定数は `export const BUTTON_SIZE: Readonly<{ ... }> = { ... }` の形式で定義する
 - 公開 API でなくても、複数ファイルが同じ UI 概念の値を使う場合は owner を一つ決めて定義し、各ファイルから参照する。native HTML 要素名など JSX／型構文そのものを表す値は直接記述してよい
@@ -206,7 +206,7 @@ Next.js と React は、`components/` 配下のディレクトリ構造・ディ
 | `design-system` | 契約を知らず、**読んでも役割が増えない**部品。`list` が `separator` を使うように、合成していても役割の中で閉じているものはここに入る | 目的別に割る |
 | `patterns` | 契約は知らないが、**複数の役割を合成する**部品。目的を一つに決められないので割らない | 割らない |
 | `shell` | **どこに・いくつ置くかが部品側で決まっている**部品。`toaster` は root layout に一度、`content-container` は `main` の内側、`page-header` はページ先頭 | 割らない |
-| `app-starter` | **バックエンドの契約を知っている**部品。HTTP status の意味付け、送信結果、upload の段取りなど。fork 先が作り替える前提 | 割らない |
+| `app-starter` | **バックエンドの契約を知っている**部品。HTTP status の意味付け、送信結果、upload の段取りなど。テンプレートから作った側が作り替える前提 | 割らない |
 
 判定はこの順に当てる。**契約 → mount 位置 → 役割の閉じ方**である。順序を変えると、契約を知りつつ mount 位置も決まっている部品の行き先が揺れる。
 
@@ -218,7 +218,7 @@ Next.js と React は、`components/` 配下のディレクトリ構造・ディ
 
 ### `design-system/` の目的別ディレクトリ
 
-`design-system/` は件数が多いため、目的で分けて置く。`patterns/` と `app-starter/` は目的を一つに決められないものの置き場なので割らない。どこに置くかは [`shadcn-manifest.yaml`](./shadcn-manifest.yaml) の `layer` と `as` が正で、`pnpm check:ui` が実配置との一致を検査する。
+`design-system/` は件数が多いため、目的で分けて置く。`patterns/` と `app-starter/` は目的を一つに決められないものの置き場なので割らない。置き場の正と検査は「運用」の `shadcn-manifest.yaml` の項が持つ。
 
 | ディレクトリ | 受け持つもの | 置かないもの |
 | --- | --- | --- |
@@ -281,7 +281,7 @@ components/
 - **feature の story は上の 13 見出しに入れない。** 目録はこのカーネルが持つ部品の一覧であり、feature の部品はここの持ち物ではないためである。feature 側は次の 2 つの先頭セグメントを使う
   - `Page/<feature>/<画面>` — 画面の合成（`features/<name>/<screen>/view.tsx`）。取得を伴わない状態で画面全体の見え方を確かめる場所
   - `Features/<feature>/…` — 画面固有の部品（`features/<name>/<screen>/ui/<part>/`）。以降のセグメントは実装のディレクトリと同じ形にする
-- **取得を行うもの（`page-content.tsx`）は story にしない。** story は取得の実体を持てないため、確かめられるのは合成した結果だけである。取得の検証は unit テストが持つ（[0091](../../docs/adr/0091-test-verification-methods.md)）
+- **取得を行うもの（`page-content.tsx`）は story にしない。** story は取得の実体を持てないため、確かめられるのは合成した結果だけである。取得の検証は unit テストが持つ
 - **`Icons/` も component の見出しではない。** [`icon.ts`](./icon.ts) が配るアイコンの目録（[`.storybook/icon.stories.tsx`](../../.storybook/icon.stories.tsx)）で、`Tokens/` と同じ理由で層にも目録にも載らない。名前を書き写さず公開面から実行時に読むので、`icon.ts` へ足せばこの画面に出る
 - **`Tokens/` は component の見出しではない。** design token の目録（[`.storybook/design-token.stories.tsx`](../../.storybook/design-token.stories.tsx)）で、アプリが描画する部品ではないため `components/` の層にも目録にも載らない。`components/` 直下は「誰が書き換えるか」で層を分ける規約なので、そこへ 5 つ目の層として足すと規約が嘘になる。Storybook 自身の資料として `.storybook/` に置き、`main.ts` の `stories` が拾う
 - sidebar の並び順は [`.storybook/preview.ts`](../../.storybook/preview.tsx) の `storySort` が持つ。**`Page` → `Features` → `Tokens` → `Icons` → 目録**の順に置き、その中は名前順である。組んでいる間に開くのは前の 2 つで、目録は参照物として後ろにある方が探す手数が少ない。目録自身の並びは sidebar に持ち込まない。目録は層と目的で読む順を作るが、sidebar は目当ての部品を名前で引く場所なので、二つの並びを揃える必要がない
@@ -289,6 +289,22 @@ components/
 - Controls が推論した props は任意の React 要素を生成できない。`asChild` のように単一の要素 child を必要とする props は Control を公開せず、必要な child を `render` で明示した専用 story を用意する
 - **どの story file にも component の説明と story ごとの説明を書く。** component の説明には、その部品が何のためにあるかと、**隣の似た部品との使い分け**を書く。`Accordion` と `Collapsible`、`Alert` と `Toaster` と `FeedbackState` のように、見た目が近く責務が違う部品は、並べて初めて選び分けられる。story の説明は、その story が何を示しているのかを書く
 - 説明の置き場は 2 つある。component 全体は `parameters.docs.description.component`、story ごとは export の直前の JSDoc（または `parameters.docs.description.story`）である。**どちらも Docs ページにしか描画されない。** [`.storybook/preview.ts`](../../.storybook/preview.tsx) が `tags: ["autodocs"]` を付けているのはこのためで、外すと書いた説明がどこにも出なくなる
+
+## 関連する ADR
+
+部品ごとの README はこの節を持たない。ADR への参照はこの層の README に集める。
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。ここが `model` と `errors` だけを引く根拠
+- [0026](../../docs/adr/0026-layout-shell-mount.md) — `shell/` の器と Provider をどこに mount するか
+- [0027](../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。実装・test・story・README を 1 ディレクトリに置く形
+- [0050](../../docs/adr/0050-styling-strategy.md) — Tailwind と design token、`cn()` による class の解決
+- [0051](../../docs/adr/0051-styling-system.md) — token の体系・段の切り方・motion・印刷
+- [0052](../../docs/adr/0052-ui-component-policy.md) — shadcn/ui を起点にする選択と、アイコンの供給元を `icon.ts` へ閉じる規約
+- [0053](../../docs/adr/0053-ui-component-interaction-seam.md) — 開閉・focus・履歴など操作まわりの a11y seam
+- [0054](../../docs/adr/0054-ui-catalog-storybook.md) — Storybook をカタログとして持つ運用
+- [0080](../../docs/adr/0080-error-handling.md) — `app-starter` が知っているバックエンドエラーの正規化と、画面側との責務分担
+- [0091](../../docs/adr/0091-test-verification-methods.md) — story と unit テストの分担、a11y 自動検査の組み込み
+- [0100](../../docs/adr/0100-accessibility-target.md) — 到達すべきアクセシビリティの水準
 
 ## component 目録
 
@@ -298,7 +314,7 @@ components/
 
 ### design-system
 
-契約を知らず、読んでも役割が増えない部品。fork 後も土台として残る。
+契約を知らず、読んでも役割が増えない部品。テンプレートから作った後も土台として残る。
 
 #### foundation
 
@@ -461,7 +477,7 @@ trigger から本文の上へ面を開く部品。
 
 ### patterns
 
-契約は知らないが、複数の役割を合成する部品。目的を一つに決められないので目的別に分けない。
+契約を知らずに複数の役割を合成する部品（[層](#層)）。
 
 | component | 概要 |
 | --- | --- |
@@ -477,7 +493,7 @@ trigger から本文の上へ面を開く部品。
 
 ### shell
 
-どこに・いくつ置くかが部品側で決まっている部品。mount 位置が制約になるため目的別に分けない。
+mount 位置が部品側で決まっている部品（[層](#層)）。
 
 | component | 概要 |
 | --- | --- |
@@ -489,7 +505,7 @@ trigger から本文の上へ面を開く部品。
 
 ### app-starter
 
-アプリの契約や画面骨格を前提にする部品。fork 先が作り替える前提で、目的別に分けない。
+バックエンドの契約を知っている部品（[層](#層)）。
 
 | component | 概要 |
 | --- | --- |

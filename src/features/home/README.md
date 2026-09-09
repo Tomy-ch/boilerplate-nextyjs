@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 相手の facade/ と、画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 相手の facade/ と、画面まるごとの story は例外
 test-requirement: feature
 ---
 
@@ -52,7 +52,7 @@ test-requirement: feature
 
 ## 構成
 
-画面が 1 つしかないため、画面を挟まず直下へ置きます（[0027](../../../docs/adr/0027-directory-structure.md)）。
+画面が 1 つしかないため、画面を挟まず直下へ置きます。
 
 | ファイル | 役割 |
 | --- | --- |
@@ -79,7 +79,7 @@ test-requirement: feature
 | `observability` | 描画を span に載せる |
 
 他 feature の `facade/` も引きます —— 一覧の URL（`products`）と、利用規約への行き先
-（`site-info`）。**内部は見ません**（[0021](../../../docs/adr/0021-frontend-responsibility.md)）。
+（`site-info`）。**内部は見ません**。
 
 ## Action 戻り値契約
 
@@ -96,8 +96,7 @@ test-requirement: feature
 ## 運用
 
 - **要求ごとに取る 2 系統は `Promise.allSettled` で取ります**。`all` は最初の失敗で待機を打ち切るため、
-  成功した系統の結果が手元にあっても使えません。1 つ落ちても残りは出す、が
-  [0080](../../../docs/adr/0080-error-handling.md) の部分エラーです
+  成功した系統の結果が手元にあっても使えません。1 つ落ちても残りは出す、が部分エラーの扱いです
 - **分類だけは待機の外に居ます**。取得がキャッシュを持つので
   （[product-masters](../../adapters/server/api/product-masters.ts)）、要求を待たずに静的な殻へ入り、
   最初の HTML から辿れます。**この節の失敗は値へ落としません** —— 殻は組み立て時に作られてそのまま
@@ -109,7 +108,7 @@ test-requirement: feature
   複雑さではありません
 - **一覧の URL は自分で組みません**。パスと絞り込みのキーは `products` の
   `facade/list-url/` が持ちます。キーの綴りを写すと、一覧が契約に合わせて変えたときにこちら
-  だけが古いままになり、絞り込まれない一覧へ飛びます（[0021](../../../docs/adr/0021-frontend-responsibility.md)）
+  だけが古いままになり、絞り込まれない一覧へ飛びます
 - **中身が空の節は描きません**。「該当がありません」はトップでは利用者が取れる行動を持たない
   告知で、場所を取るだけです。空を伝える必要があるのは、利用者が条件を指定した画面です
 - **サンプルである断り書きを最初に出します**。実在しそうな商品名と企業名を並べている以上、書かないと
@@ -118,3 +117,9 @@ test-requirement: feature
 - **利用規約への導線を同じ断り書きに置きます**。閲覧した時点で同意とみなす以上、同意の対象へ
   最初に届く必要があり、フッターまで下りないと辿れない位置では成立しません
 - **段組みはコンテナクエリで決めます**（[`docs/rules.md`](../../../docs/rules.md) #73）
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。他 feature へは `facade/` 越しにだけ触る
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面が 1 つなら画面ディレクトリを挟まない
+- [0080](../../../docs/adr/0080-error-handling.md) — エラーの扱い。片方が落ちても残りを配る部分エラー

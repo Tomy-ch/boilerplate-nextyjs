@@ -2,14 +2,12 @@
  * 差分から、その PR を測るべきかを決める。
  *
  * @remarks
- * 全数の計測は保護ブランチと日次に置いてあります（[0101](../../docs/adr/0101-performance-budget.md)
- * §2）。ここが答えるのは**その待ち方では遅すぎる差分かどうか**だけです。
+ * 全数の計測は保護ブランチと日次に置いてあります。ここが答えるのは**その待ち方では遅すぎる
+ * 差分かどうか**だけです。
  *
  * **ここが答えるのは、待たずに測ってしまう理由だけです。**ラベルを勧めるところまでの合図は
  * [`../deferred-checks/recommend.ts`](../deferred-checks/recommend.ts) が 3 つの検査ぶんまとめて
- * 持ち、ここが force と答えた差分では計測を勧めません。分担の理由は
- * [0101](../../docs/adr/0101-performance-budget.md) §2 と
- * [0153](../../docs/adr/0153-ci-configuration.md) §2。
+ * 持ち、ここが force と答えた差分では計測を勧めません。
  */
 
 import type { Change } from "../lib/numstat";

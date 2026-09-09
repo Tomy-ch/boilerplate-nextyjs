@@ -2,9 +2,9 @@
  * 差分から、その PR でジャーニーと画面の比較を回すべきかを決める。
  *
  * @remarks
- * 全数は保護ブランチへの merge と日次が持ちます（`.github/workflows/e2e.yaml` 冒頭と
- * [0153](../../docs/adr/0153-ci-configuration.md) §2）。ここが答えるのは**その待ち方では遅すぎる
- * 差分かどうか**だけで、[`../lighthouse/trigger.ts`](../lighthouse/trigger.ts) と同じ位置にいます。
+ * 全数は保護ブランチへの merge と日次が持ちます（`.github/workflows/e2e.yaml` 冒頭）。ここが
+ * 答えるのは**その待ち方では遅すぎる差分かどうか**だけで、
+ * [`../lighthouse/trigger.ts`](../lighthouse/trigger.ts) と同じ位置にいます。
  *
  * **待たせる代償は、検出が 1 merge 遅れることだけではありません** —— 基準画像の撮り直しは PR の
  * 実行が出した報告にしか乗らないため（`baseline/README.md`）、merge 後に食い違うと撮り直す相手を

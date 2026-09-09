@@ -233,8 +233,14 @@
       ],
       "linter": {
         "rules": {
+          "complexity": {
+            "useLiteralKeys": "off"
+          },
           "correctness": {
             "noEmptyPattern": "off"
+          },
+          "performance": {
+            "noAwaitInLoops": "off"
           },
           "style": {
             "noProcessEnv": "off"

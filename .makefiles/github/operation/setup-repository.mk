@@ -1,7 +1,7 @@
 ## リポジトリの初期化
 .PHONY: setup-repo ## リポジトリの初期化
 .PHONY: setup-replace-license-copyright ## LICENSEの著作権表示を更新
-.PHONY: setup-replace-repository-reference ## リポジトリ参照とプロジェクト名をフォーク先へ置換
+.PHONY: setup-replace-repository-reference ## リポジトリ参照とプロジェクト名をテンプレートから作った側へ置換
 # boilerplate-only:begin
 .PHONY: setup-remove-boilerplate-only ## boilerplate 限定の記述を剥がす
 # boilerplate-only:end
@@ -9,8 +9,7 @@
 .PHONY: setup-remove-sample ## 同梱サンプルを一括破棄し、検証まで実行
 # sample:end
 
-# make の $(if) は空文字列判定のため、そのまま使うと DRY_RUN=0 も真になる。
-# 文書化された唯一の有効値 1 に限定する
+# 有効値は 1 のみ（[README](../../README.md)）。$(if) は空文字列判定なので filter で絞る。
 SETUP_DRY_RUN_FLAG := $(if $(filter 1,$(DRY_RUN)),--dry-run,)
 
 # 利用者が渡す値はレシピ文字列へ直接展開せず、環境変数としてシェルに渡して
@@ -134,8 +133,8 @@ setup-replace-repository-reference:
 # boilerplate-only:begin
 # boilerplate 限定の記述（この template を配る側にしか意味を持たない規則・注記）を剥がす。
 #
-# サンプル破棄と違い、飛ばす選択肢が無い。fork を作った時点で前提が失効するため、残すと fork 先が
-# 自分に効かない規則に従うことになる。破棄と同じく、剥がしの道具そのものも消える。
+# サンプル破棄と違い、飛ばす選択肢が無い。テンプレートから作った時点で前提が失効するため、残すと
+# 作った側が自分に効かない規則に従うことになる。破棄と同じく、剥がしの道具そのものも消える。
 #
 # 剥がすのは散文だけなので build / test は連鎖させない。手順の最後の確認でまとめて通す。
 setup-remove-boilerplate-only:
@@ -143,7 +142,7 @@ setup-remove-boilerplate-only:
 	@if [ -n "$(filter 1,$(DRY_RUN))" ]; then \
 		echo "🟡 DRY_RUN のため整形・検査はスキップしました。"; \
 	else \
-		pnpm md-fix && pnpm md-lint && \
+		pnpm fix:md && pnpm lint:md && \
 		echo "✅ boilerplate 限定の記述を剥がしました。"; \
 	fi
 # boilerplate-only:end
@@ -166,7 +165,7 @@ setup-remove-sample:
 		pnpm fix && \
 		pnpm lint:ci && \
 		pnpm typecheck && \
-		pnpm md-lint && \
+		pnpm lint:md && \
 		APP_ENV=local pnpm build && \
 		pnpm test && \
 		echo "🔍 過不足と残留参照を検証します..." && \

@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 相手の facade/ と、画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 相手の facade/ と、画面まるごとの story は例外
 test-requirement: feature
 ---
 
@@ -17,7 +17,7 @@ test-requirement: feature
 ## 受け入れないもの
 
 - 認証そのもの（IdP との往復、トークンの交換、session の作成）。すべて `/api/auth/*` の
-  Route Handler と `adapters/server/auth` が持ちます（[0079](../../../docs/adr/0079-auth-frontend-seam.md) §6）
+  Route Handler と `adapters/server/auth` が持ちます
 - メールアドレスとパスワードの入力欄。資格情報は IdP の画面が受け取るもので、この画面を通りません
 - session の読み取り（画面は認証済みかどうかを知らない。判定は `verifySession()` と `proxy.ts`）
 
@@ -30,8 +30,8 @@ test-requirement: feature
 外枠の約束は [`auth` の layout](../../../docs/spec/route/auth/layout.screen.md) が持ちます。
 
 **operationId は使いません。** この画面が呼ぶのは同一オリジンの `/api/auth/login` だけで、IdP と
-やり取りするのは Route Handler です（[0079](../../../docs/adr/0079-auth-frontend-seam.md) §6）。
-どの IdP を繋いでも画面が変わらないのは、契約をここへ持ち込んでいないためです。
+やり取りするのは Route Handler です。どの IdP を繋いでも画面が変わらないのは、契約をここへ
+持ち込んでいないためです。
 
 ## 状態とデザイン参照
 
@@ -46,14 +46,14 @@ loading / empty / error の 3 つは持ちません。**取得が無いためで
 
 ## 構成
 
-画面が 1 つしかないため、画面を挟まず直下へ置きます（[0027](../../../docs/adr/0027-directory-structure.md)）。
+画面が 1 つしかないため、画面を挟まず直下へ置きます。
 
 | モジュール | 役割 |
 | --- | --- |
 | `login-view.tsx` | ログイン画面。認証を始める form と、始められなかったときの案内 |
 | `read-login-notice.ts` | URL から案内する理由を読む（読む側） |
 | `facade/paths.ts` | 他の feature が指すための、この画面への行き先 |
-| `facade/login-notice.ts` | 案内の語彙と、始められなかったときの行き先（組む側）。**行き先を組むのは Route Handler**（`app/api/auth/login`）で、Route Handler が引けるのは feature の `facade/` だけ（[0025](../../../docs/adr/0025-app-layer-elements.md)） |
+| `facade/login-notice.ts` | 案内の語彙と、始められなかったときの行き先（組む側）。**行き先を組むのは Route Handler**（`app/api/auth/login`）で、Route Handler が引けるのは feature の `facade/` だけ |
 
 ## 依存カーネル
 
@@ -81,3 +81,11 @@ Action の `redirect()` は Route Handler へ遷移できません** —— clie
 - 保護ルートの判定と未認証時のリダイレクトは [`src/proxy.ts`](../../proxy.ts)
 - 認証の往復は [`src/app/api/auth/`](../../app/api/auth)
 - 確定認可は [`adapters/server/auth`](../../adapters/server/auth)
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。他 feature へ貸すものを `facade/` に出す
+- [0025](../../../docs/adr/0025-app-layer-elements.md) — app 層の構成要素。Route Handler が引ける先は feature の `facade/` まで
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面が 1 つなら画面ディレクトリを挟まない
+- [0043](../../../docs/adr/0043-middleware-policy.md) — 入口（proxy）の役割。保護ルートの判定と未認証時の送り先はそちらが持つ
+- [0079](../../../docs/adr/0079-auth-frontend-seam.md) — 認証の前面の継ぎ目。資格情報を持たず、IdP との往復を Route Handler へ渡す

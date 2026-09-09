@@ -33,7 +33,7 @@ export type CopyButtonProps = Omit<ButtonProps, "children" | "onClick" | "type">
  *
  * 写す文字列は `value` として呼び出し元が渡す。表示している値と写る値がずれないよう、整形済みの
  * 同じ文字列を渡す。整形はこの部品が持たない。
-
+ *
  * clipboard そのものを `capabilities` の hook へ切り出していないのは、再利用したい実体が
  * browser 能力ではなく「写して、写せたと伝える操作」だからである。名前の必須化・読み上げ・合図の
  * 時間・失敗時の扱いはいずれも UI の決定で、hook へ移しても呼び出し元へ残る。ボタン以外の面
@@ -42,7 +42,6 @@ export type CopyButtonProps = Omit<ButtonProps, "children" | "onClick" | "type">
  * clipboard は安全な文脈でしか使えず、利用者が許可しない場合もある。失敗しても例外は投げず、
  * 合図を出さないだけにとどめる。写せたかどうかを前提にした導線を feature 側で組まない。
  *
- * @remarks
  * `label` は必須である。アイコンだけの操作は、名前が無いと支援技術から用途が分からない。
  *
  * @param props - `Button` の props から `children` / `onClick` / `type` を除いたものに、上記を加えたもの。

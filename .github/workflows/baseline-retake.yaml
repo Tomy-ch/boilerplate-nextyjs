@@ -35,10 +35,7 @@ on:
     workflows: [VisualRegressionTest, E2E]
     types: [completed]
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development. Storybook loads `next.config.ts` to build the preview, so the refusal lands
-# there — and `storybook build` reports success anyway, leaving a tree with no preview.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 
@@ -95,17 +92,17 @@ jobs:
       # The REST calls below run on an app installation token rather than `GITHUB_TOKEN`.
       # `GITHUB_TOKEN` is capped at 1,000 requests per hour per repository, shared across
       # every workflow and every open pull request; an installation token carries 5,000.
-      # This job is the one that ran out first — it fires on every VRT and E2E completion
-      # and makes about ten calls each time, so a busy day took it down while nothing was
-      # wrong with the change under test.
+      # This job fires on every VRT and E2E completion and makes about ten calls each time,
+      # so it is the first consumer to exhaust the shared cap on a busy day — a failure
+      # unrelated to the change under test.
       #
       # The permissions are the union of what the steps below need and nothing else:
       # reading the pull request and its check runs, and taking the label off once the
       # pointer has moved. Pushing is a separate mint inside `setup-baselines`, narrowed
       # to what pushing needs.
       #
-      # A fork that has not registered the app falls back to `GITHUB_TOKEN`. The retake
-      # still works there; it just draws on the smaller budget.
+      # A repository created from this template that has not registered the app falls back
+      # to `GITHUB_TOKEN`. The retake still works there; it just draws on the smaller budget.
       #
       # **The mint is allowed to fail.** Asking for a permission the installation has not
       # granted 422s, and without this that would take the whole job down — worse than the
@@ -498,7 +495,7 @@ jobs:
           # message and the pull-request comment. It originates in the story catalogue
           # committed to this repository, so it should never leave the accepted set — if it
           # does, the report's shape changed, and this refuses rather than pass it on
-          # (ADR 0153 §5).
+          #.
           if printf '%s' "$ids" | LC_ALL=C grep -q '[^A-Za-z0-9/._,-]'; then
             echo '❌ 報告の story id が許可した文字集合を外れています。'
             exit 1
@@ -673,7 +670,7 @@ jobs:
           body: ${{ steps.pointer-body.outputs.body }}
 
       # The body is built here but published by a job that holds no App secret, so a
-      # token cannot reach a public comment through the file (ADR 0153).
+      # token cannot reach a public comment through the file.
       - name: Build the outcome comment
         id: outcome
         if: always() && steps.mode.outputs.mode != 'none' && steps.mode.outputs.mode != ''

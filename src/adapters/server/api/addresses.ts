@@ -26,13 +26,12 @@ function toAddressCandidates(wire: WireAddresses): readonly AddressCandidate[] {
  * 認証を要しない公開の口です。登録の途中、まだ session を持たない利用者も同じ経路を通ります。
  *
  * **外部の lookup が落ちても失敗しません。** 契約は `503` ではなく空の候補と `isFallback: true` で
- * 返すと定めており、登録を止めないためです（[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * 返すと定めており、登録を止めないためです。
  *
  * **リクエストをまたぐキャッシュを持ちません。** 応答は落ちているときの形（`isFallback: true` と
  * 空の候補）も含むため、残すと外部の lookup が戻ったあとも空を配り続けます。鍵も郵便番号ごとに
  * 割れるので、再利用はほとんど起きないまま入れ物だけが増えます。マスタの口と分類は同じ public
- * でも、寿命の考え方が違います（[0071](../../../../docs/adr/0071-bff-api-integration.md) の
- * 既定 uncached のまま）。
+ * でも、寿命の考え方が違います。
  *
  * `isFallback` は落とさずに運びます。該当なし（候補 0 件・`isFallback: false`）なら郵便番号を
  * 直せば埋まりますが、lookup 機構が動いていないなら何度引いても埋まりません。**画面が利用者へ

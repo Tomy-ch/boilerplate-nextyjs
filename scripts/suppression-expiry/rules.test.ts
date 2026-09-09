@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { expiredSuppressions, type Suppression } from "./rules";
+import { expiredSuppressions, malformedSuppressions, type Suppression } from "./rules";
 
 function suppression(condition: string): Suppression {
   return { source: "osv-scanner.toml", subject: "GHSA-0000-0000-0000", condition };
@@ -68,5 +68,59 @@ describe("expiredSuppressions", () => {
         "2026-09-06",
       ),
     ).toEqual([]);
+  });
+});
+
+describe("malformedSuppressions", () => {
+  function exemption(subject: string, condition: string): Suppression {
+    return { source: "pnpm-workspace.yaml", subject, condition, kind: "cooldown-exemption" };
+  }
+
+  // ----- 正常系 -----
+  it("理由と日付を持ち、版を名指しした免除は様式を満たす", () => {
+    expect(
+      malformedSuppressions([exemption("pkg@1.2.3", "修正版。窓が明ける 2026-08-02 に外す。")]),
+    ).toEqual([]);
+  });
+
+  it("免除でない宣言は、理由さえあれば日付を求めない", () => {
+    expect(
+      malformedSuppressions([
+        suppression("Storybook が image-size を引かなくなった時点で削除する"),
+      ]),
+    ).toEqual([]);
+  });
+
+  // ----- 異常系 -----
+  it("理由が空の宣言は、面を問わず落とす", () => {
+    expect(malformedSuppressions([suppression("   ")])).toEqual([
+      { ...suppression("   "), defects: ["理由と撤回条件が書かれていない"] },
+    ]);
+  });
+
+  it("版を名指ししない免除は落とす。名前だけの免除は将来の版まで外す", () => {
+    expect(malformedSuppressions([exemption("pkg", "窓が明ける 2026-08-02 に外す。")])).toEqual([
+      {
+        ...exemption("pkg", "窓が明ける 2026-08-02 に外す。"),
+        defects: ["対象が版を名指ししていない（<name>@<version> の形で書く）"],
+      },
+    ]);
+  });
+
+  it("日付の無い免除は落とす。免除の撤回条件は窓が明ける日付でしか書けない", () => {
+    expect(malformedSuppressions([exemption("pkg@1.2.3", "上流が直したら外す。")])).toEqual([
+      {
+        ...exemption("pkg@1.2.3", "上流が直したら外す。"),
+        defects: ["撤回条件に日付が無い（窓が明ける日を YYYY-MM-DD で書く）"],
+      },
+    ]);
+  });
+
+  it("欠けているものが複数あれば、1 件の宣言にまとめて添える", () => {
+    expect(malformedSuppressions([exemption("pkg", "")])[0]?.defects).toEqual([
+      "理由と撤回条件が書かれていない",
+      "対象が版を名指ししていない（<name>@<version> の形で書く）",
+      "撤回条件に日付が無い（窓が明ける日を YYYY-MM-DD で書く）",
+    ]);
   });
 });

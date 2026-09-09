@@ -1,5 +1,6 @@
 ---
 name: portal-manifest-sync
+usage-class: situational
 description: >-
   Audit `docs/portal/manifest.yaml` against the READMEs that actually exist, and against the two
   generators that consume it (`pnpm portal:guides` / `pnpm portal:docs`). The manifest is a curated

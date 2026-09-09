@@ -13,8 +13,7 @@ inputs:
     default: ""
     description: >-
       呼び出し元の判定。`success` だけがコメントの新規作成を抑止し、それ以外の値 —— 空文字を含む
-      —— は投稿する。既存コメントの更新は `success` でも行う（FAIL → PASS の直しで古い赤が
-      残らない）
+      —— は投稿する。既存コメントの更新は `success` でも行う（理由は本文の `quiet` の注記）
   body-file:
     required: true
     description: >-
@@ -133,10 +132,8 @@ runs:
             return '`'.repeat(Math.max(3, longestRun + 1));
           };
 
-          // 囲むかどうかを決めるのは、折り畳むかどうかではなく**未加工かどうか**である。
-          // 呼び出し元が値を濾してから組み立てた本文は、表なら表として読めたほうがよい
-          // （0153 §5 の「許可した集合は markup も mention も作れない」）。濾していない本文は、
-          // 折り畳もうと折り畳むまいと囲む。
+          // 囲むかどうかは折り畳むかどうかではなく未加工かどうかで決まる —— 基準は入力
+          // `body-sanitized` の契約が持つ。
           const rendered = bodySanitized
             ? content
             : [fenceFor(content), content, fenceFor(content)].join('\n');
@@ -144,9 +141,8 @@ runs:
             ? [`<details><summary>${detailsSummary}</summary>`, '', rendered, '', '</details>'].join('\n')
             : rendered;
 
-          // 添える散文はフェンスへ入れない。フェンスの中身は Markdown として描画されないので、
-          // 表も、コピーさせたいコマンドのブロックも、そこでは字面のまま出てしまう。
-          // 入れてよいのはワークフローが書いた文だけである — 呼び出し元が本文と分けて渡す。
+          // 添える散文はフェンスへ入れない —— フェンスの中身は Markdown として描画されず、表も
+          // コマンドのブロックも字面のまま出る。何を入れてよいかは入力 `notes-file` の契約が持つ。
           let notes = '';
           if (notesFile) {
             if (!fs.existsSync(notesFile)) {

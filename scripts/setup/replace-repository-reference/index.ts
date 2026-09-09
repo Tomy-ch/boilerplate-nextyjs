@@ -50,7 +50,7 @@ const TARGET_EXTENSIONS = new Set([
 ]);
 const TARGET_FILE_NAMES = new Set(["Makefile"]);
 
-// docs は boilerplate 自身の設計記録であり、フォーク先の名前へ書き換える対象ではない。
+// docs は boilerplate 自身の設計記録であり、作った側の名前へ書き換える対象ではない。
 // .claude はエージェント設定と worktree の実体を含む。
 const EXCLUDED_DIRECTORIES = new Set([
   "node_modules",
@@ -118,7 +118,7 @@ function parseArgs(argv: string[]): Options {
   }
 
   ensureRepositoryReference(options.repository);
-  ensurePackageName(options.repository.split("/")[1]);
+  ensurePackageName(options.repository.slice(options.repository.indexOf("/") + 1));
 
   // 検証しただけの生値を後段へ流さない。戻り値を捨てると入口の検査が意味を失う
   if (options.portalUrl !== undefined) {

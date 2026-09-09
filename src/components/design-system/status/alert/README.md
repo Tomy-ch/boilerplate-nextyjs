@@ -8,8 +8,6 @@
 
 | Component | 役割 |
 | --- | --- |
-| Component | 役割 |
-| --- | --- |
 | `Alert` | `role="alert"` を持つ通知全体です。`variant` で通常・warning・destructive の見た目を選びます。 |
 | `AlertTitle` | 通知内容を短く要約する見出しです。 |
 | `AlertDescription` | 詳細、影響、次に取る行動を置く領域です。 |

@@ -1,5 +1,6 @@
 ---
 name: canonicalize-doc
+usage-class: situational
 description: Create or sync a canonical English / Japanese translation pair for a specified README, SKILL, or similar Markdown document. Detects the existing file (canonical, translation, or both), confirms the source file and direction with the user via AskUserQuestion, and produces the missing side or syncs both sides while preserving repo conventions (frontmatter rules for SKILL files, sync-note headers for translations, cross-reference links).
 ---
 
@@ -13,7 +14,7 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 
 Use this skill when:
 
-- A Japanese-only Markdown doc exists and you need to produce the English canonical version (the typical case in this repo, where English is canonical).
+- A Japanese-only Markdown doc exists and you need to produce the English canonical version (the typical case here — see Repo Conventions › Language).
 - An English-only Markdown doc exists and you need to produce its Japanese translation.
 - Both versions exist but have drifted apart and need to be synchronized.
 
@@ -51,8 +52,18 @@ Apply these rules when producing each side of the pair.
 
 ### Language
 
-- **English is canonical.** The English file is the source of truth.
-- **Japanese is a translation.** It must be kept in sync with the canonical English version.
+**Below v1.0.0, a pair exists in exactly one place: `.claude/skills/<name>/`.** ADR
+[0140](../../../docs/adr/0140-documentation-operations.md) keeps Japanese canonical on the
+suffix-less path and forbids creating a `*.ja.md` beside it; `SKILL.md` is English only because
+Claude Code parses the frontmatter (ADR 0154). So a README or a `docs/**` document has **no
+translation to sync** — running this skill on one would create the very file 0140 forbids. Verify
+before assuming otherwise: `find src docs -name '*.ja.md'` returns nothing today.
+
+- **For a `SKILL` pair — English is canonical.** The English file is the source of truth, and
+  `SKILL.ja.md` is the translation kept in sync with it.
+- **Everywhere else, below v1.0.0 — Japanese on the suffix-less path is canonical, and there is no
+  translation.** The EN-canonical + `docs/ja/**` mirror described under *Targets* is the shape 0140
+  switches to **at the v1.0.0 boundary**, not the shape in force now.
 
 ### SKILL files (`.claude/skills/<name>/`)
 
@@ -90,7 +101,7 @@ Paths that may be modified:
 The following remain protected even during skill execution:
 
 - `AGENTS.md` / `CLAUDE.md`
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, generated content under `docs/`)
+- Generated files — the paths `.gitattributes` declares `linguist-generated` (`git check-attr linguist-generated -- <path>`), and generated content under `docs/`
 - Any path listed under `permissions.deny` in `.claude/settings.json`
 
 ## Step 1. Read the source
@@ -132,26 +143,9 @@ Read the confirmed source file in full. If the direction is `sync-both`, read bo
 - Confirm code blocks are byte-identical (except where prose was translated inside them).
 - Report any sections that could not be cleanly mapped and ask the user how to resolve them.
 
-## Step 7. Verify with Markdown Lint
+## Step 7. Format the written files
 
-After writing the produced file (and the synced side in `sync-both` mode), run:
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` runs `markdownlint-cli2 --fix` on the entire repository to auto-fix common issues (blank-line placement around headings / lists / code blocks, trailing whitespace, file-final newline, etc.). `pnpm md-lint` then verifies the result in three stages — markdownlint against `.markdownlint.yaml`, mermaid diagram syntax, and `skill-lint` over `.claude/**` (frontmatter / translation-pair structure / reference existence).
-
-If `pnpm md-lint` reports remaining errors:
-
-1. Read the lint output.
-2. Fix the violations manually (rules that auto-fix cannot resolve, e.g., heading hierarchy, duplicate headings, bare URLs).
-3. Re-run `pnpm md-fix` then `pnpm md-lint` until clean.
-
-Do NOT report the skill as complete until `pnpm md-lint` exits cleanly.
-
-`pnpm md-fix` operates on the entire repository, so it may modify Markdown files unrelated to the confirmed pair. List any such files when reporting completion so the user can review the broader change set.
+After writing the produced file (and the synced side in `sync-both` mode), run `pnpm exec markdownlint-cli2 --no-globs --fix <paths you wrote>` on the files this skill produced. Leave `pnpm lint:md` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 ## Checklist
 
@@ -164,7 +158,7 @@ Confirm the following before reporting completion:
 - [ ] Frontmatter rules applied correctly (canonical SKILL has it; translation SKILL does not)
 - [ ] Translation sync-note header present in `*.ja.md` SKILL files
 - [ ] Section structure and code blocks match 1:1
-- [ ] `pnpm md-lint` exits cleanly
+- [ ] `markdownlint-cli2 --fix` was run on the written files only
 - [ ] No unintended files modified outside the confirmed pair
 
 ## Notes

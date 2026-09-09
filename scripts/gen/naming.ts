@@ -1,5 +1,5 @@
 /**
- * 生成対象の名前を [0028](../../docs/adr/0028-naming-convention.md) の規約へ照らす。
+ * 生成対象の名前を命名規約へ照らす。
  *
  * @remarks
  * ファイル名は kebab-case、識別子は PascalCase という対応が決まっているため、利用者から

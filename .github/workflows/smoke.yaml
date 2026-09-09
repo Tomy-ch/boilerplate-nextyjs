@@ -3,7 +3,7 @@ name: Smoke
 # Boot check: build, start the production server, and require it to answer a real
 # request. A green `next build` only proves the bundle compiled — a provider that
 # throws on mount, a missing runtime env value, or a server component that fails to
-# render all surface at boot, not at build (ADR 0153).
+# render all surface at boot, not at build.
 #
 # It builds for itself rather than taking an artifact from the Build workflow: one
 # concern per workflow means neither job may sit behind the other's runner. Both
@@ -25,9 +25,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Select the CI environment file (env/.env.ci). Without this the loader falls back to
-# `local`, which ships a placeholder session secret that the config layer refuses outside
-# development — the build then fails on a value that is only meant for a workstation.
+# Select the CI environment file (env/.env.ci).
 env:
   APP_ENV: ci
 

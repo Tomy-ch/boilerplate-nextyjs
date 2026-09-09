@@ -20,9 +20,8 @@ type ProfileEditViewProps = {
  * プロフィール編集の表示。
  *
  * @remarks
- * パンくずを置くのは、この画面が global nav から 1 手で戻れない祖先を持つためです
- * （[0026](../../../../docs/adr/0026-layout-shell-mount.md)）。nav が直接指すのはマイページまでで、
- * ここはその下の階層にあります。
+ * パンくずを置くのは、この画面が global nav から 1 手で戻れない祖先を持つためです。
+ * nav が直接指すのはマイページまでで、ここはその下の階層にあります。
  */
 export const ProfileEditView = withScreenSpan(
   "features/account/edit/view",

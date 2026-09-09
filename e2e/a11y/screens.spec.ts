@@ -21,8 +21,7 @@ import { expect, test } from "../lib/test";
  * 持つのは [`SCREEN_ONLY_RULES`](../lib/a11y-rules.ts) で、適合目標のタグでは走らないため
  * **axe を 2 度に分けて掛けます**。
  *
- * 開く画面は撮影と同じ一覧（[screens](../lib/screens.ts)）から採ります。手で持つと、新しく
- * 足した画面が黙って対象外のまま残ります。
+ * 開く画面は撮影と同じ一覧（[screens](../lib/screens.ts)）から採ります。
  *
  * **回すエンジンは 1 つです。** 見ているのは DOM の構造で、描画エンジンでは変わりません。
  * どのエンジンで回すかは `playwright.e2e.config.ts` が決めます。

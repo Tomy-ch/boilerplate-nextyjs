@@ -37,12 +37,11 @@ type ProfileFormProps = {
  * この部品が持つのは**並びだけ**です。検証といつ誤りを見せるかは `useProfileFields`、住所の
  * 補完は `useAddressField` が持ちます。
  *
- * 送信は `<form action>` に委ねます（[0061](../../../../../../docs/adr/0061-form-mutation-ux.md)）。
- * react-hook-form が持つのは入力中の検証だけで、送信機構は置き換えません。JavaScript が動かない
- * 環境でも form はそのまま送信され、server 側が同じスキーマで検証します。
+ * 送信は `<form action>` に委ねます。react-hook-form が持つのは入力中の検証だけで、送信機構は
+ * 置き換えません。JavaScript が動かない環境でも form はそのまま送信され、server 側が同じ
+ * スキーマで検証します。
  *
- * 成功は toast で伝えます。画面を移さない保存なので、この場に留まる通知が合います
- * （[0063](../../../../../../docs/adr/0063-mutation-result-notification.md)）。
+ * 成功は toast で伝えます。画面を移さない保存なので、この場に留まる通知が合います。
  */
 export function ProfileForm({ prefectures, profile }: ProfileFormProps) {
   const [state, formAction] = useActionState<ProfileFormState, FormData>(

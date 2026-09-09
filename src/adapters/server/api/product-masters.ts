@@ -41,16 +41,15 @@ function toProductCategories(wire: WireCategories): readonly ProductCategory[] {
  * 商品カテゴリのマスタを取得する。
  *
  * @remarks
- * 分類は画面を開くたびに変わる種類のデータではないので、キャッシュへ入れます。寿命は
- * `next.config.ts` の `masters` profile、捨てる印は {@link PRODUCT_MASTERS_TAG} が持ちます
- * （[0071](../../../../docs/adr/0071-bff-api-integration.md)）。
+ * 分類は画面を開くたびに変わる種類のデータではないので、キャッシュへ入れます。
+ * 寿命は `next.config.ts` の `masters` profile、捨てる印は {@link PRODUCT_MASTERS_TAG} が持ちます。
  *
  * **確実に残るのは、組み立て時に殻へ焼かれた分だけです**（入れ物の性質は
  * [adapters](../../README.md) の「リクエストをまたいで残すのは `use cache` の側」）。
  *
  * **このリポジトリから {@link PRODUCT_MASTERS_TAG} を撃つ経路はありません。** マスタの更新は
  * バックエンド側で起きるためで、古さの上限を決めているのは profile の時間だけです。タグは
- * webhook などの無効化口を持つ fork のために置いてあります。
+ * webhook などの無効化口を持つ、テンプレートから作った側のために置いてあります。
  *
  * 外側の `cache()` は同一リクエスト内の重複を畳みます。`use cache` はリクエストをまたぐ層で、
  * 別物です。

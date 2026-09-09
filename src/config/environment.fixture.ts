@@ -54,8 +54,8 @@ export function stubValidEnvironment(): void {
  * 生の値を parse した結果ではありません。**あちらは受理される形を敢えて散らして検証そのものを
  * 確かめる値で、こちらは観測が信号を出さないよう exporter を落とした値です。
  *
- * **境界のテストが自分で組み立てないための 1 か所です。**全 purpose の変数を揃える必要があり、
- * 各テストが literal を持つと、変数を 1 つ足すたびに同じ追記がテストの数だけ要ります。
+ * **境界のテストが自分で組み立てないための 1 か所です。** 理由は {@link VALID_ENVIRONMENT} と
+ * 同じです。
  */
 export const PARSED_ENVIRONMENT: Environment = {
   APP_API_BASE_URL: "https://api.example.test",

@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 相手の facade/ と、画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 相手の facade/ と、画面まるごとの story は例外
 test-requirement: feature
 coverage-exclusions:
   - "src/features/checkout/__mocks__/**"
@@ -74,13 +74,13 @@ error は route の `error` 境界（`src/app/(shop)/checkout/error.tsx`）が�
 
 ## 構成
 
-画面（`confirm` / `complete`）ごとに掘り、その中を性質で分けます（[0027](../../../docs/adr/0027-directory-structure.md)）。
+画面（`confirm` / `complete`）ごとに掘り、その中を性質で分けます。
 どちらの画面にも属さないものは画面を挟まず直下へ置きます。
 
 | ファイル | 役割 |
 | --- | --- |
 | `actions.ts` | 購入確定の Server Action。編成と分類だけを持ち、通信は `adapters` が行う |
-| `__mocks__/actions.ts` | カタログでの Server Action の差し替え（[0054](../../../docs/adr/0054-ui-catalog-storybook.md)） |
+| `__mocks__/actions.ts` | カタログでの Server Action の差し替え |
 | `form-state.ts` | 確定の戻り値の型。`ActionState<T>` をこの画面の形で閉じる |
 | `form-fields.ts` | 値の変更を承知した合図を載せるフォーム項目の名前 |
 | `order.ts` | 購入に載せる明細の取り出しと、金額が変わった明細の判定 |
@@ -95,7 +95,7 @@ error は route の `error` 境界（`src/app/(shop)/checkout/error.tsx`）が�
 | `confirm/ui/place-order-form/` | 確定の送信。そのまま送る姿 |
 | `confirm/ui/price-change-confirm/` | 金額が変わったときに確かめてから送る姿 |
 | `confirm/ui/place-order-submit/` | 送信部と失敗の表示。2 つの姿が共有する |
-| `confirm/ui/place-order-state/` | 確定の結果を 2 つの姿へ配る器。鍵ごとに鮮度を持つ |
+| `confirm/ui/place-order-state/` | 確定の送信状態を画面に 1 つだけ置き、2 つの姿へ配る器 |
 | `confirm/ui/skeleton/` | 購入確認の待機表示 |
 | `complete/page-content.tsx` | 成立した購入の取得。指し先が読めなければ `not-found` |
 | `complete/purchase-code.ts` | 完了画面が見せる購入を検索条件から読む |
@@ -157,4 +157,16 @@ Server Action の側でも止まります（画面を経由しない呼び出し
 隠すと、購入できなかったように映るためです。
 
 **参考換算額が読めなくても購入は続きます。** 請求されるのは基準通貨の金額で、換算額は読み手が
-大きさを掴むための添え物です（[0080](../../../docs/adr/0080-error-handling.md) の部分エラー）。
+大きさを掴むための添え物です。
+
+## 関連する ADR
+
+- [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。`cart` / `purchases` の `facade/` 越しにだけ触る
+- [0027](../../../docs/adr/0027-directory-structure.md) — 物理配置と co-location。画面ごとに掘り、その中を性質で分ける
+- [0040](../../../docs/adr/0040-routing-rendering-strategy.md) — 描画戦略。取得の境界をどこへ置くか
+- [0053](../../../docs/adr/0053-ui-component-interaction-seam.md) — 操作の a11y 継ぎ目。確認と送信の継ぎ目
+- [0054](../../../docs/adr/0054-ui-catalog-storybook.md) — カタログの方針。Server Action の差し替え
+- [0063](../../../docs/adr/0063-mutation-result-notification.md) — 送信結果の伝え方。成立の知らせと戻り先
+- [0070](../../../docs/adr/0070-backend-role-separation.md) — バックエンドとの責務線。金額と成立の判定を画面で決めない
+- [0080](../../../docs/adr/0080-error-handling.md) — エラーの扱い。`error` 境界の受け持ちと部分エラー
+- [0100](../../../docs/adr/0100-accessibility-target.md) — アクセシビリティの目標水準。色だけで区別させない

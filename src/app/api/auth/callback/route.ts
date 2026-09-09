@@ -12,9 +12,9 @@ const LOGIN_PATH = "/login";
  * 未認証のまま貯めた状態を、確立した session の主体へ引き継ぐ。
  *
  * @remarks
- * **失敗させません。** ログインの成否は認証の成否で決まり、それに付随する処理の結果を従属させません
- * （[0079](../../../../../docs/adr/0079-auth-frontend-seam.md) §7）。利用者から見えるのはログインの
- * 成功だけで、引き継げなかったことは記録から辿ります。
+ * **失敗させません。** ログインの成否は認証の成否で決まり、それに付随する処理の結果を
+ * 従属させません。利用者から見えるのはログインの成功だけで、引き継げなかったことは記録から
+ * 辿ります。
  *
  * 起こすのはここだけです。未認証時の識別子と確立直後の session が同時に手元にあるのはこの 1 箇所で、
  * 複数の起点を持つと同じ状態遷移に二重適用と競合の面が増えます。
@@ -82,8 +82,8 @@ export async function GET(request: Request): Promise<Response> {
     // 検証を入口の 1 回に頼ると、cookie を差し替えられる経路が見つかった時点で外部へ飛ばせる。
     return Response.redirect(new URL(toSafeReturnUrl(transaction.returnUrl), request.url), 302);
   } catch (cause) {
-    // 画面へは理由を出さないが、記録には残す。残さないと、IdP 側の設定違いで全員が入れない状態に
-    // なっても、手掛かりが「ログイン画面へ戻る」だけになる（[0081](../../../../../docs/adr/0081-observability-logging.md)）。
+    // 画面へは理由を出さないが、記録には残す。残さないと、IdP 側の設定違いで全員が入れない
+    // 状態になっても、手掛かりが「ログイン画面へ戻る」だけになる。
     reportQuietly(() => getLogger().warn("認可の完了に失敗しました", { cause: String(cause) }));
 
     return Response.redirect(new URL(LOGIN_PATH, request.url), 302);

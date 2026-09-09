@@ -61,7 +61,7 @@ describe("collectFailures", () => {
       },
     ]);
 
-    expect(collectFailures(json)[0].diffPixels).toBe(908440);
+    expect(collectFailures(json)[0]?.diffPixels).toBe(908440);
   });
 
   it("入れ子の suite に居る spec も拾う", () => {
@@ -101,7 +101,7 @@ describe("collectFailures", () => {
   it("見出しが読めなければ id を代わりに置く", () => {
     const json = reportOf([{ title: 42, tests: [test({ id: "a--x" })] }]);
 
-    expect(collectFailures(json)[0].title).toBe("a--x");
+    expect(collectFailures(json)[0]?.title).toBe("a--x");
   });
 
   it("テーマを読めなければ空にして報告を続ける", () => {
@@ -109,7 +109,7 @@ describe("collectFailures", () => {
       { title: "A", tests: [{ ...(test({ id: "a--x" }) as object), projectName: 42 }] },
     ]);
 
-    expect(collectFailures(json)[0].theme).toBe("");
+    expect(collectFailures(json)[0]?.theme).toBe("");
   });
 
   // ----- 異常系 -----
@@ -157,7 +157,7 @@ describe("collectFailures", () => {
       },
     ]);
 
-    expect(collectFailures(json)[0].diffPixels).toBeNull();
+    expect(collectFailures(json)[0]?.diffPixels).toBeNull();
   });
 
   it("suites を持たないレポートを落とす", () => {

@@ -10,8 +10,7 @@ import { EXCLUDE_DIRS, EXCLUDE_PREFIXES } from "./lib/markdown-files";
  *
  * @remarks
  * `lib/markdown-files.ts` は「対象範囲は markdownlint-cli2 の `ignores` と揃える」と宣言して
- * いますが、揃っていることを確かめるものがどこにも無く、宣言は doc コメントだけが担って
- * いました。片方だけが見るファイルがあると「markdownlint は通るのに mermaid-lint で落ちる」
+ * います。片方だけが見るファイルがあると「markdownlint は通るのに mermaid-lint で落ちる」
  * 形の差が出ます。
  *
  * **走査の実装ではなく宣言どうしを突き合わせます。** 走査の振る舞いは

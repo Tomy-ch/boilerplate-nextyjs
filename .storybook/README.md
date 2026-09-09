@@ -33,6 +33,29 @@ coverage-exclusions:
 **`@` で始まる別名にはしない。** `@x/y` は npm の scope と同じ形なので、biome の
 `noUndeclaredDependencies` が未宣言の依存として弾く。
 
+## story がカタログの器から受ける制約
+
+部品ではなくカタログの器に由来する決まりは、ここが持つ。story を書く側の規約は
+[`src/components/README.md`](../src/components/README.md) と
+[`src/features/README.md`](../src/features/README.md) にある。
+
+- **overlay の中身は canvas の外に出る。** dialog / menu / combobox の面は Portal で `document.body`
+  直下へ描かれるので、`play` は開く操作を `within(canvasElement)` から、開いた面を
+  `within(document.body)` から引く。canvas の内側で待つと、開いているのに見つからないまま timeout する
+- **同じ store を読む story を 1 つの docs ページへ並べるときは、iframe を分ける**
+  （`parameters.docs.story.inline: false`）。docs ページは載せた story を 1 つの木で描くので、開いた状態と
+  閉じた状態のように store の値が違う story を並べると、後の story が立てた値が先の story にも及ぶ。
+  focus を閉じ込める面も同じ形で分ける —— 展開すると資料そのものを操作できなくなる
+
+## `msw/` の答え方
+
+- **契約が区別している 2 つの結果は、別々に到達できる入力を持つ。** 「該当なし」と「機構が使えない」の
+  ように、契約が別の印で返し画面も言い分ける結果を、モックが片方へ畳むと、画面が言い分けている側を
+  カタログで確かめられない
+- **読み進める一覧に続きを持たせない**（cursor は `null`）。カタログの一覧は数件しか置かないので末尾の
+  目印が最初から見えており、続きを返すと届いた先でまた末尾が見え、際限なく取りに行く。DOM が静止しない
+  ので基準画像も撮れない（[`vrt/README.md`](../vrt/README.md)「揺らぎを止めてある」）
+
 ## テストの責務
 
 frontmatter の `test-requirement: unit` が掛かるのは `lib/` である。

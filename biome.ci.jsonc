@@ -4,6 +4,17 @@
   // biome.json (簡易版) を継承し、保存時には走らせたくない重いルールだけを上乗せする。
   // 実行: biome check --config-path=./biome.ci.jsonc --error-on-warnings
   //   --error-on-warnings により、簡易版で warn 表示のみのルールが CI/pre-commit ではブロックになる。
+  //
+  // biome.json 側の override で off にしている 2 つの規則の理由（あちらは厳密な JSON で
+  // コメントを書けないため、ここが置き場）。`useLiteralKeys` は e2e / vrt / playwright・vitest の
+  // 設定に限るが、`noAwaitInLoops` はそれに加えて `src/adapters/server/http/**` でも外してある。
+  // - complexity/useLiteralKeys —— tsconfig の `noPropertyAccessFromIndexSignature` が
+  //   `process.env["X"]` と `dataset["y"]` に角括弧を要求する。型を見ない biome には索引
+  //   シグネチャと宣言された属性の区別が付かないので、この規則はここでは成立しない。
+  //   撤去条件: 同オプションを外すか、biome が型を見るようになったとき。
+  // - performance/noAwaitInLoops —— 当たる反復はどれも順序そのものが検査の主題である
+  //   （Tab を 1 つずつ送る / URL を 1 件ずつ引いて件ごとに理由を付ける）。並列にすると
+  //   測る対象が変わる。撤去条件: 順序に依らない反復だけが残ったとき。
   "extends": ["./biome.json"],
   "linter": {
     "rules": {

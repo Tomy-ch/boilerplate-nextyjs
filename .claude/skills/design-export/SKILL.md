@@ -1,5 +1,6 @@
 ---
 name: design-export
+usage-class: situational
 description: Export this repository's design system to an external design tool and hand it over for design work. Runs `pnpm design:bundle` to produce `tmp/design-bundle/` (a shadcn registry of every component's source, a `catalog.md` of purposes and responsibility boundaries and story names, and the generated `tokens.css`), then carries that bundle to the destination the user names. Two destination families are covered: file-reading assistants (Claude, v0, Lovable and the like) receive the bundle as-is, and Figma is reached by delegating to the `figma-generate-library` / `figma-use` plugin skills, because Figma's REST API cannot create design content. Use this skill whenever the user wants to look at, review, redesign, or extend the design system somewhere outside the repository — triggers include "デザインシステムを書き出す", "Figma に反映", "デザインを AI に見せたい", "外部ツールへ渡す", "design system export", "push the design system to Figma", or asking for a design review of the components as a whole. Do NOT use it to change components (edit them under `src/components/` directly), to write stories or docs (that is ordinary component work), or to pull anything from the design tool back into the repository — the dependency runs one way, repo to design, and results come back only through a human reading them and implementing.
 ---
 
@@ -31,9 +32,8 @@ a skill; for human reference only).
 - **Changing components.** Edits happen under `src/components/`, governed by
   [`components/README.md`](../../../src/components/README.md). This skill only reads.
 - **Writing stories or component docs.** That is ordinary component work.
-- **Pulling anything back into the repository.** The dependency direction is fixed at repo → design.
-  What the design tool produces is a proposal that a human reads and implements; there is no
-  automatic path back, and adding one would make the design tool an upstream of the code.
+- **Pulling anything back into the repository.** The dependency direction is fixed at repo → design —
+  see §The one-way rule.
 
 ## The one-way rule
 
@@ -44,7 +44,7 @@ implementation task where a human decides what to take.
 
 The reason is that a design tool's output is a *proposal about how things should look*, while the
 repository is *what actually ships*. Letting the proposal flow back automatically means the code
-starts tracking a tool nobody validates, and the tool becomes an upstream that every fork inherits.
+starts tracking a tool nobody validates, and the tool becomes an upstream that every repository created from this template inherits.
 
 ## Step 1. Confirm the destination and the scope
 

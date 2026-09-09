@@ -55,26 +55,27 @@ user-scoped な値をキャッシュしたいときの手段は `use cache: priv
 二重に持つと内側が切れないぶん、外側が取り直しても同じ古い応答を掴みます。
 
 **寿命は profile の名前で名乗り、秒数は `next.config.ts` の `cacheLife` が持ちます。** 口の側は「何の
-寿命か」だけを言い、fork は口を触らずに値を動かせます。**殻へ載る取得の profile に `expire` を置きません**
+寿命か」だけを言い、テンプレートから作った側は口を触らずに値を動かせます。**殻へ載る取得の profile に `expire` を置きません**
 —— `expire` はその時間トラフィックが途絶えた直後の 1 要求へ同期の取り直しを課すので、そこで取得先へ届かないと
 殻を配れていたはずの route が丸ごと失敗へ倒れます。
 
 **確実に残るのは、組み立て時に殻へ焼かれた分だけです。** `use cache` の既定の入れ物はプロセスのメモリなので、
 serverless では要求ごとに別のインスタンスへ着地しえて再利用が起きない回があり、デプロイをまたぐと鍵ごと
 捨てられます。`fetch` の `cache: "force-cache"` が持っていた「デプロイとインスタンスをまたいで残る」性質は
-ここで失われるもので、**request 時の再利用を保証と読まないでください**。必要になった fork は `cacheHandlers`
-か `use cache: remote` を選びます（配備先に依存するので本体は選びません）。
+ここで失われるもので、**request 時の再利用を保証と読まないでください**。必要になったテンプレートから作った側は
+`cacheHandlers` か `use cache: remote` を選びます（配備先に依存するので本体は選びません）。
 
 **`use cache` を持つモジュールは `createHttpClient` を直に引けません。** 直に引けるモジュールは
 user-scoped な client も組める状態にあり、`project-rules/no-user-scoped-in-cached-module` が止めます。
-公開の口は `server/api/public-client.ts` の `getPublicClient` を引きます —— そこが作れるのは公開の
-client だけなので、キャッシュの下で分類を取り違えようがありません。
+代わりに、**公開の分類だけを作る口を `server/` 側に 1 つ置き**、そこを引きます —— その口が作れる
+のは公開の client だけなので、キャッシュの下で分類を取り違えようがありません。
 
 その口が 1 つである理由はもう 1 つあります。retry budget と circuit breaker は client の中に状態として
 載るため、同じ downstream へ client を分けると、劣化したかどうかの判断が分けた数だけ割れます。**この理由は
-user-scoped 側にも同じだけ当てはまりますが、そちらはまだ各口が自前で組んでいます** —— 資格情報の取得口を
-どこへ寄せるかが `project-rules/no-captured-bearer-token` と交差するためで、扱いは
-[BACKLOG](../../docs/adr/BACKLOG.md) の Tier 4 が持ちます。
+user-scoped 側にも同じだけ当てはまりますが、そちらは各口が自前で組み、module 変数に固定します** ——
+資格情報の取得口をどこへ寄せるかが `project-rules/no-captured-bearer-token` と交差し、その検査の形と
+同時にしか決められないためです（[0071](../../docs/adr/0071-bff-api-integration.md)「fetch wrapper の
+resilience」）。user-scoped でも downstream ごとに 1 つが原則で、破るなら理由をその場に書きます。
 
 ## 主体を名乗るかは、口ではなく client が決める
 
@@ -126,9 +127,10 @@ cookie がまだ無い session 確立の 1 往復だけは `bearerToken` とい�
 広げた時点でこの計算は崩れます。
 <!-- sample:end -->
 
-閾値は `NEXT_PUBLIC_HTTP_MAX_URL_BYTES` が持ちます（[env/README](../../env/README.md)）。直値で
-持たないのは、経路のどこが最初に弾くかが配信構成で決まるためです。fork は自分の経路の最小値へ
-書き換えてください。`NEXT_PUBLIC_` はビルド時にリテラルへ置換されるため、変更には再ビルドが要ります。
+**閾値は経路が最初に弾く長さで、実務上は 8 KB 前後です。** 値は `NEXT_PUBLIC_HTTP_MAX_URL_BYTES` が
+持ちます（[env/README](../../env/README.md)）。直値で持たないのは、経路のどこが最初に弾くかが配信構成で
+決まるためです。テンプレートから作った側は自分の経路の最小値へ書き換えてください。`NEXT_PUBLIC_` は
+ビルド時にリテラルへ置換されるため、変更には再ビルドが要ります。
 
 判定は `http/url-budget.ts` の 1 つで、呼ぶのは 2 つの要求境界——`server/http/request.ts` と
 `client/http/request.ts`——だけです。**画面ごとの事前チェックは置きません。** 閾値は画面からは
@@ -244,3 +246,31 @@ taintUniqueValue("署名鍵は server 専用です", config, config.sessionSecre
 
 - `server/` は server config を利用でき、`client/` は secret を利用しない
 - 外部型・生成型はここで変換し、内側へ漏らさない
+
+## 関連する ADR
+
+この層のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります** ——
+ADR は番号も節も動くので、動いたことに気づける場所を 1 つに寄せています（[docs/rules.md](../../docs/rules.md)
+「コメントと文書」）。子ディレクトリの README を持つ区画（[`server/auth`](server/auth) /
+[`server/http`](server/http) / [`server/telemetry`](server/telemetry) /
+<!-- sample:replace-begin -->
+[`client/telemetry`](client/telemetry) / [`gen`](gen)）は、そちらの節が持ちます。
+<!-- sample:replace-with -->
+<!-- = [`client/telemetry`](client/telemetry)）は、そちらの節が持ちます。 -->
+<!-- sample:replace-end -->
+
+- [0024](../../docs/adr/0024-adapters-server-client-split.md) — `server/` と `client/` の分割と、client 側の外部接続境界
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界（server config を引けるのは `server/` だけ）
+- [0020](../../docs/adr/0020-adopted-architecture.md) — 内向きの依存と、外部型を内層へ漏らさないこと
+- [0070](../../docs/adr/0070-backend-role-separation.md) — バックエンドとの責務の線。業務ロジックを持たないこと
+- [0071](../../docs/adr/0071-bff-api-integration.md) — 外部 API クライアントと fetch wrapper、取得の口が寿命を持つこと
+- [0073](../../docs/adr/0073-pagination-fetch-boundary.md) — ページングと増分取得の取得境界
+- [0075](../../docs/adr/0075-file-upload-seam.md) — ファイルアップロードの seam（署名付き直接 PUT と多重部の例外）
+- [0079](../../docs/adr/0079-auth-frontend-seam.md) — 資格情報を組む境界と、主体を名乗る要求の扱い
+- [0080](../../docs/adr/0080-error-handling.md) — バックエンド由来の失敗を分類へ正規化すること
+- [0081](../../docs/adr/0081-observability-logging.md) — ブラウザから collector を直接叩かせず、BFF が中継すること
+- [0082](../../docs/adr/0082-client-observability.md) — Web Vitals と client 例外の収集、送信面の置き場
+- [0112](../../docs/adr/0112-data-classification-cache-boundary.md) — 取得の口が分類を宣言し、キャッシュと資格情報の口を型で塞ぐこと
+- [0030](../../docs/adr/0030-environment-variable-management.md) — secret の扱いと、client へ渡せないものを登録する口
+- [0040](../../docs/adr/0040-routing-rendering-strategy.md) — 再検証の契機（取り直しが起きるまで古い値が残ること）
+- [0090](../../docs/adr/0090-testing-strategy.md) — 層別の検証責務（`integration` が掛かる範囲）

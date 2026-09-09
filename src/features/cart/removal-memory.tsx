@@ -32,7 +32,7 @@ const DisplayedOrderContext = createContext<readonly string[]>([]);
  * @remarks
  * **どちらもサーバが持たない情報です。** 取り除いた明細はサーバの応答から既に消えており、並びは
  * 画面の見え方そのものです。サーバの応答から直前の姿を組み立て直すのではなく、見せていた側が
- * そのまま覚えます（[0060](../../../docs/adr/0060-state-management.md) の線引き）。
+ * そのまま覚えます。
  *
  * **1 件ずつではなく溜めます。** 続けて 2 件取り除いたときに先の 1 件を忘れると、戻す手段が
  * 消えた側だけ失われます。商品で引ける形にしてあるのは、取り除き直したときに古い記録を置き換える
@@ -41,8 +41,7 @@ const DisplayedOrderContext = createContext<readonly string[]>([]);
  * **カートの器よりも外に置きます。** 最後の 1 件を取り除くとカートの表示自体が空の姿へ変わるため、
  * 中身の側に持つとその切り替わりで記憶ごと失われます。
  *
- * `stores` へは置きません。これはカートの中だけで閉じる状態で、他の feature は読みません
- * （[0023](../../../docs/adr/0023-stores-kernel.md) の受入基準）。
+ * `stores` へは置きません。これはカートの中だけで閉じる状態で、他の feature は読みません。
  */
 export function CartRemovalNoticeProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<{

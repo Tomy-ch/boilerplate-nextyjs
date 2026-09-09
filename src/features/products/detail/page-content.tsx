@@ -22,7 +22,7 @@ export type ProductDetailPageContentProps = {
  *
  * @remarks
  * 分類ごとの分岐を持つと、画面が増えるたびに同じ分岐が写るため、`not-found` 以外はそのまま投げて
- * `error.tsx` に委ねます（[0080](../../../../docs/adr/0080-error-handling.md)）。
+ * `error.tsx` に委ねます。
  *
  * try の範囲は取得だけです。**JSX の構築を try に入れても、描画中の例外はここでは捕まりません** —
  * React が描画するのは戻り値を受け取った後だからです。捕まるように見える形にしないため分けています。
@@ -46,7 +46,7 @@ async function loadProduct(id: string) {
  * 取得と画像 URL の解決をここで行います。理由は [feature の README](../README.md) が持ちます。
  *
  * 構造化データもここで置きます。商品を知っているのは取得を済ませたこの層で、表示（`view`）は
- * 検索エンジンへ何を名乗るかを持ちません（[0044](../../../../docs/adr/0044-seo-metadata-strategy.md) §4）。
+ * 検索エンジンへ何を名乗るかを持ちません。
  */
 export const ProductDetailPageContent = withScreenSpan(
   "features/products/detail/page-content",

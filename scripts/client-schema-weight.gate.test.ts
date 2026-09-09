@@ -83,29 +83,33 @@ describe("client bundle の重さ", () => {
 
   // 上の 1 件は「見つからなかった」ことしか言わない。走査が木に届かなくなっても、解決が
   // 黙って null を返すようになっても、同じ緑になる。射程そのものをここで押さえる。
-  it("検査の射程が、木と解決の双方に届いている", () => {
-    const modules = collect(SOURCE_ROOT, []);
-    const resolved = { alias: 0, relative: 0 };
+  it(
+    "検査の射程が、木と解決の双方に届いている",
+    () => {
+      const modules = collect(SOURCE_ROOT, []);
+      const resolved = { alias: 0, relative: 0 };
 
-    for (const module of modules) {
-      for (const specifier of runtimeSpecifiers(module.content)) {
-        if (resolveModule(module.path, specifier) === null) {
-          continue;
-        }
+      for (const module of modules) {
+        for (const specifier of runtimeSpecifiers(module.content)) {
+          if (resolveModule(module.path, specifier) === null) {
+            continue;
+          }
 
-        if (specifier.startsWith("@/")) {
-          resolved.alias += 1;
-        } else if (specifier.startsWith(".")) {
-          resolved.relative += 1;
+          if (specifier.startsWith("@/")) {
+            resolved.alias += 1;
+          } else if (specifier.startsWith(".")) {
+            resolved.relative += 1;
+          }
         }
       }
-    }
 
-    expect(modules.filter((module) => isClientEntry(module.content)).length).toBeGreaterThan(0);
-    // 別名と相対の双方。どちらかが解けなくなると、上のゲートは推移的な違反を見逃す。宛先を
-    // 名指しせず走査した木から数えるのは、名指しするとサンプルの破棄でその宛先が消えたときに、
-    // 検査すべきものが残っているのにゲートの側が落ちるため。
-    expect(resolved.alias).toBeGreaterThan(0);
-    expect(resolved.relative).toBeGreaterThan(0);
-  });
+      expect(modules.filter((module) => isClientEntry(module.content)).length).toBeGreaterThan(0);
+      // 別名と相対の双方。どちらかが解けなくなると、上のゲートは推移的な違反を見逃す。宛先を
+      // 名指しせず走査した木から数えるのは、名指しするとサンプルの破棄でその宛先が消えたときに、
+      // 検査すべきものが残っているのにゲートの側が落ちるため。
+      expect(resolved.alias).toBeGreaterThan(0);
+      expect(resolved.relative).toBeGreaterThan(0);
+    },
+    TIMEOUT_MS,
+  );
 });

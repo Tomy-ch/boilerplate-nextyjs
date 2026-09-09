@@ -1,5 +1,6 @@
 ---
 name: sync-readme
+usage-class: situational
 description: Update a specified canonical README so it matches the actual files and directories beneath its location. Detects drift between what the README documents and what exists on disk (missing files, renamed files, removed entries, outdated descriptions) and rewrites the README to reflect reality. For child directories that have their own README, includes only a short digest plus a reference link rather than recursing into their contents. After updating the canonical README, automatically chains into the `canonicalize-doc` skill to re-sync any sibling translation file. Confirms the target README path and update scope with the user via AskUserQuestion before writing.
 ---
 
@@ -28,12 +29,15 @@ This skill **MUST call `AskUserQuestion` immediately after invocation** to confi
 
 Do NOT read the file tree or write any file until these are confirmed.
 
-This skill always operates on the **canonical** (English) README. Translation files (`README.ja.md` etc.) are re-synced automatically by chaining into the `canonicalize-doc` skill after the canonical update completes — do NOT modify translation files inline within this skill.
+This skill always operates on the **canonical** README — and below v1.0.0 that is the **Japanese**
+file on the suffix-less path. ADR [0140](../../../docs/adr/0140-documentation-operations.md) keeps
+Japanese canonical there and forbids creating a `*.ja.md` beside it until the v1.0.0 boundary, so a
+README in this repository has **no translation sibling**: `find src docs -name '*.ja.md'` returns
+nothing. Do not create one, and do not chain into `canonicalize-doc` to "re-sync" a file that must
+not exist.
 
-If the target the user supplied is itself a translation file (e.g., `README.ja.md` without a sibling `README.md`), ask whether to:
-
-- Treat it as the canonical (rare; only when no English version exists).
-- Generate the canonical first via the `canonicalize-doc` skill, then re-run this skill against the canonical.
+If a `README.ja.md` ever does turn up next to a `README.md`, that is a finding to report, not a pair
+to sync — 0140 decides which side survives, and this skill does not.
 
 ## How the Sync Works
 
@@ -59,15 +63,14 @@ Compare the README's documented entries against the actual entries:
 
 - Hidden files/dirs (`.git`, `.DS_Store`, `.gitkeep`, etc.) unless the README clearly documents them.
 - Build artifacts and ignored files (anything matched by `.gitignore` at or above the scope root).
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, `vendor/`).
+- Generated files (the paths `.gitattributes` marks `linguist-generated`).
 - Nested directory internals when that directory has its own README.
 
 ## Repo Conventions
 
-- The canonical README is `README.md` (English). The Japanese translation, if present, is `README.ja.md` co-located in the same directory.
-- When updating both, keep heading structure, list order, and table columns 1:1 between the two files.
+- The canonical README is `README.md`, written in **Japanese** below v1.0.0 (ADR 0140). There is no co-located translation, and this skill does not create one.
 - Preserve existing section ordering and styling (tables vs lists vs prose) unless the user explicitly asks to restructure.
-- Preserve existing prose that is still accurate. Do not rewrite for stylistic reasons.
+- Preserve existing prose that is still accurate. Do not rewrite for stylistic reasons — minimize churn.
 
 ## AI Modification Scope
 
@@ -79,7 +82,7 @@ Per the "Exception: Skill Execution" clause in AGENTS.md, the normal AI Modifica
 The following remain protected even during skill execution:
 
 - `AGENTS.md` / `CLAUDE.md`
-- Generated files (`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, generated content under `docs/`)
+- Generated files (the paths `.gitattributes` marks `linguist-generated`, and the generated content under `docs/portal/`)
 - Any path listed under `permissions.deny` in `.claude/settings.json`
 - All other files and directories under the scope root (the skill reads them but never modifies them).
 
@@ -126,38 +129,19 @@ Rewrite the README so it reflects reality:
 - Confirm no real entry (other than ignored ones) is missing.
 - Confirm no nested README was inadvertently expanded.
 
-## Step 6. Chain into `canonicalize-doc` to sync the translation
+## Step 6. Confirm there is no translation to sync
 
-After the canonical README is written:
+Below v1.0.0 there is nothing to chain into: the README just written **is** the canonical, and 0140
+forbids a `*.ja.md` beside it. Check that the update did not produce one, and report the canonical as
+updated standalone.
 
-1. Check whether a sibling translation file exists (e.g., `README.ja.md` next to the updated `README.md`).
-2. If it does, invoke the `canonicalize-doc` skill via the Skill tool with:
-    - source path: the canonical README that was just updated
-    - direction: `translation-from-canonical` (or `sync-both` with the canonical as source of truth, if the translation already exists)
-3. If no translation file exists, skip this step and report that the canonical was updated standalone.
+The one place this repository does keep a pair is `.claude/skills/<name>/SKILL.md` + `SKILL.ja.md`,
+which exists because Claude Code parses the frontmatter in English (ADR 0154). That pair belongs to
+`manage-skill`, not here.
 
-The chained `canonicalize-doc` call will perform its own `AskUserQuestion` confirmation; that is expected and not redundant — it lets the user veto the translation sync if needed.
+## Step 7. Format the written files
 
-## Step 7. Verify with Markdown Lint
-
-After writing the canonical README (and after `canonicalize-doc` has produced any translation), run:
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` runs `markdownlint-cli2 --fix` on the entire repository to auto-fix common issues (blank-line placement around headings / lists / code blocks, trailing whitespace, file-final newline, etc.). `pnpm md-lint` then verifies the result in three stages — markdownlint against `.markdownlint.yaml`, mermaid diagram syntax, and `skill-lint` over `.claude/**` (frontmatter / translation-pair structure / reference existence).
-
-If `pnpm md-lint` reports remaining errors:
-
-1. Read the lint output.
-2. Fix the violations manually (rules that auto-fix cannot resolve, e.g., heading hierarchy, duplicate headings, bare URLs).
-3. Re-run `pnpm md-fix` then `pnpm md-lint` until clean.
-
-Do NOT report the skill as complete until `pnpm md-lint` exits cleanly.
-
-`pnpm md-fix` operates on the entire repository, so it may modify Markdown files unrelated to the README pair. List any such files when reporting completion so the user can review the broader change set.
+After writing the canonical README (and after `canonicalize-doc` has produced any translation), run `pnpm exec markdownlint-cli2 --no-globs --fix <paths you wrote>` on the files this skill produced. Leave `pnpm lint:md` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 ## Step 8. Final verification
 
@@ -174,13 +158,12 @@ Confirm the following before reporting completion:
 - [ ] Canonical README rewritten with correct entries and preserved structure
 - [ ] Child directories with their own README represented as one-line digests + reference links (not expanded)
 - [ ] If a sibling translation file exists, `canonicalize-doc` was invoked to re-sync it
-- [ ] `pnpm md-lint` exits cleanly
+- [ ] `markdownlint-cli2 --fix` was run on the written files only
 - [ ] No file outside the canonical README (and the chained `canonicalize-doc` scope) modified
 
 ## Notes
 
 - Do NOT recursively rewrite nested READMEs. Each invocation handles exactly one README's scope.
 - Do NOT delete documented entries blindly. When an entry is removed from disk, confirm it isn't referenced from elsewhere before pruning the line.
-- Do NOT restructure or restyle sections that are still accurate. Minimize churn.
 - If the directory has no obvious convention to follow (e.g., a fresh README with no structure), ask the user whether to use a table, a bulleted list, or prose.
 - If the README intentionally documents items outside its directory (e.g., a top-level README listing project-wide entries), confirm the scope with the user before treating those external references as drift.

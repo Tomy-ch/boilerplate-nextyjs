@@ -9,9 +9,9 @@ import { EXPERIMENTAL_REACT_MODULES } from "./experimental-react.fixture";
 /**
  * `react` を Next.js 同梱の experimental build（react-server）へ向ける。
  *
- * 本番で `experimental.taint` を立てた Next.js が RSC の描画に使うのはこのビルドで、stable の
- * `react` は taint の口を持たない。**防御の側に「口があれば呼ぶ」分岐を置かないため、テストの
- * 側で解決先を決める**（[0030](../../../../docs/adr/0030-environment-variable-management.md) §8）。
+ * 本番で `experimental.taint` を立てた Next.js が RSC の描画に使うのはこのビルドで、
+ * stable の `react` は taint の口を持たない。**防御の側に「口があれば呼ぶ」分岐を置かないため、
+ * テストの側で解決先を決める**。
  */
 vi.mock("react", async () => {
   const { createRequire: create } = await import("node:module");

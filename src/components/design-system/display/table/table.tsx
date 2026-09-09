@@ -185,8 +185,7 @@ function TableHead({ className, ...props }: ComponentProps<"th">) {
  * データを表す cell。
  *
  * @remarks
- * 内容は既定で折り返さない。長い本文を折り返す場合は `className="whitespace-normal"` を渡す。
- * 複数の列や行にまたがる場合は native の `colSpan` / `rowSpan` を渡す。
+ * 折り返しは {@link TableHead} と同じで、既定では折り返さない。複数の列や行にまたがる場合は native の `colSpan` / `rowSpan` を渡す。
  *
  * @param props - native `td` 属性。
  * @see Storybook `Display/Table`

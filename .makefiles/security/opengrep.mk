@@ -3,25 +3,19 @@
 .PHONY: sast-sarif ## 同じ検査を SARIF で書き出す（code scanning への取り込み用）
 
 # 依存スキャナが「引き込んだライブラリが既知の脆弱性を持つか」を問うのに対し、こちらは
-# 「自分が書いたコードが脆弱なパターンを含むか」を問う（docs/adr/0110-security-operations.md）。
+# 「自分が書いたコードが脆弱なパターンを含むか」を問う。
 #
 # Semgrep 本体ではなく OSS fork の opengrep を使う。ルール記法は互換で、抑止も
 # `// nosemgrep: <rule-id>` がそのまま効く。CodeQL は GitHub の外へ持ち出せないため、
-# private + GHAS 無しの fork 先では層ごと消える。持ち出せる SAST を別に持つのはそのため。
+# private + GHAS 無しのテンプレートから作った側では層ごと消える。持ち出せる SAST を別に持つのはそのため。
 #
 # **検査条件は 1 箇所に持つ。** ゲート（text）と code scanning への取り込み（SARIF）は
 # 同じ対象・同じルール・同じ除外でなければ、落ちた内容と Security タブの一覧が食い違う。
 # 変数へ括り出してあるのはそれを構造的に保証するためで、両方の行に書き写さない。
 
-# ルールセット。**レジストリ（semgrep.dev）は引かない。**
-#
-# `--config p/javascript` の類が取ってくる集合は Semgrep Rules License v1.0 で、「自社内部の
-# 目的に限る」「再頒布不可」「サービスとして提供不可」を課す。エンジンを OSS fork の opengrep へ
-# 替えた判断（fork 先へライセンスの判断を渡さない）は、ルールをそこから引いている限り成立せず、
-# 判断の所在が層をずれただけになる（docs/adr/0110-security-operations.md 3）。
-#
-# 代わりに、ライセンス変更前から分岐している opengrep-rules を commit で固定して読む。取得と
-# 照合は scripts/opengrep-rules が担い、置き場・選別・digest の宣言もそちらが持つ。
+# ルールセット。**レジストリ（semgrep.dev）は引かず**、opengrep-rules を commit で固定して読む。
+# 理由と取り出し方は .github/workflows/README.md の「SAST のルールをレジストリから引かない」が
+# 持つ。取得と照合は scripts/opengrep-rules が担い、置き場・選別・digest の宣言もそちらが持つ。
 OPENGREP_RULES_DIR := tmp/opengrep-rules
 OPENGREP_CONFIGS := --config $(OPENGREP_RULES_DIR)
 
@@ -52,8 +46,8 @@ sast: opengrep-rules
 # 取り込み用。ここでは落とさない（落とす判断は上の sast が持つ）。
 #
 # **抑止済みの所見は取り込む前に落とす**（scripts/sarif）。opengrep は `// nosemgrep:` で消した
-# 所見を SARIF には残し、GitHub はそれを閉じた alert として扱わない。渡すと上の「ゲートと取り込みは
-# 同じ走査を指す」が崩れる。
+# 所見を SARIF には残し、GitHub はそれを閉じた alert として扱わない。渡すと冒頭の「検査条件は
+# 1 箇所に持つ」が崩れる。
 sast-sarif: opengrep-rules
 	@command -v opengrep >/dev/null 2>&1 || { echo "❌ opengrep が PATH にありません。make install-tools を実行し、shell の mise activate を済ませてください。"; exit 1; }
 	@opengrep scan $(OPENGREP_FLAGS) --sarif --output $(SAST_SARIF_FILE) $(OPENGREP_TARGETS)

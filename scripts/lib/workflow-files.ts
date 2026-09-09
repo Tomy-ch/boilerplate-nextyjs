@@ -9,7 +9,7 @@
 //
 // **ジョブの境界も同じ理由で YAML パーサに判定させる。**行単位の正規表現で切ると、インデント幅や
 // フロー記法といった書式の違いでヘッダが 1 つも一致せず、やはり検査対象が空のまま緑になる。書式に
-// 依存しない形にしておけば、fork がワークフローを別の記法で書き直しても検査は残る。
+// 依存しない形にしておけば、テンプレートから作った側がワークフローを別の記法で書き直しても検査は残る。
 import path from "node:path";
 
 import {
@@ -78,8 +78,9 @@ export function parseWorkflowDocument(
   lineCounter?: LineCounter,
 ): Document {
   const doc = parseDocument(source, lineCounter === undefined ? {} : { lineCounter });
-  if (doc.errors.length > 0) {
-    throw new Error(`${file}: YAML として読めません: ${doc.errors[0].message}`);
+  const [parseError] = doc.errors;
+  if (parseError !== undefined) {
+    throw new Error(`${file}: YAML として読めません: ${parseError.message}`);
   }
   return doc;
 }

@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { posix, resolve } from "node:path";
 
+import { groupAt } from "./regex-groups";
+
 /** なぜ解決しないか。 */
 type AssetFailure =
   /** 配信の根のどこにも実体が無い。 */
@@ -80,13 +82,13 @@ const INTENTIONALLY_UNRESOLVED: ReadonlySet<string> = new Set([
  * @param source - `.storybook/main.ts` の中身
  */
 export function parseStaticDirs(source: string): string[] {
-  const declaration = /staticDirs:\s*\[([^\]]*)\]/.exec(source);
+  const declaration = /staticDirs:\s*\[([^\]]*)\]/.exec(source)?.[1];
 
-  if (declaration === null) {
+  if (declaration === undefined) {
     throw new Error("`.storybook/main.ts` に `staticDirs` の宣言が見つかりません。");
   }
 
-  const dirs = [...declaration[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+  const dirs = [...declaration.matchAll(/"([^"]+)"/g)].map((match) => groupAt(match, 1));
 
   if (dirs.length === 0) {
     throw new Error("`.storybook/main.ts` の `staticDirs` が空です。");
@@ -136,7 +138,7 @@ export function findUnresolvedAssets(
 
   content.split("\n").forEach((text, index) => {
     for (const match of text.matchAll(ASSET_URL)) {
-      const url = match[1];
+      const url = groupAt(match, 1);
       const line = index + 1;
 
       if (url.startsWith("/src/")) {

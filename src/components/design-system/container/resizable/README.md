@@ -35,7 +35,7 @@ SSR first の選定では `○` に当たります。配分の保持と境界の
 
 `withHandle` を指定すると掴む場所の標識を中央へ置きます。境界は 1px しかなく、標識が無いと動かせることに気付けません。標識そのものは装飾で、操作は境界全体が受けます。
 
-境界の実装は `react-resizable-panels` です。vendor 名は公開 API に現れません。
+境界の実装は `react-resizable-panels` です。
 
 ## Storybook とテスト
 

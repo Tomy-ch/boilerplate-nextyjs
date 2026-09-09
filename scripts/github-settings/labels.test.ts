@@ -1,6 +1,18 @@
+// boilerplate-only:begin
+import { readFileSync } from "node:fs";
+
+// boilerplate-only:end
 import { describe, expect, it } from "vitest";
 
-import { diffLabels, type LabelSpec, parseLabelSpecs } from "./labels";
+// boilerplate-only:begin
+import { FINDING_KINDS, KIND_LABEL_PREFIX } from "../closed-loop/summarize";
+// boilerplate-only:end
+// boilerplate-only:replace-begin
+import { diffLabels, LABELS_PATH, type LabelSpec, parseLabelSpecs } from "./labels";
+
+// boilerplate-only:replace-with
+// = import { diffLabels, type LabelSpec, parseLabelSpecs } from "./labels";
+// boilerplate-only:replace-end
 
 const spec = (name: string): LabelSpec => ({ name, description: name, color: "d73a4a" });
 
@@ -21,7 +33,7 @@ describe("parseLabelSpecs", () => {
   it("説明が空のラベルも読み取る", () => {
     const source = JSON.stringify([{ name: "wontfix", description: "", color: "ffffff" }]);
 
-    expect(parseLabelSpecs(source)[0].description).toBe("");
+    expect(parseLabelSpecs(source)).toEqual([expect.objectContaining({ description: "" })]);
   });
 
   // ----- 異常系 -----
@@ -79,7 +91,6 @@ describe("diffLabels", () => {
     expect(diff.alreadyPresent).toEqual([]);
   });
 
-  // ----- 異常系 -----
   it("ラベルが 1 つも実在しなければ宣言の全数を作る", () => {
     const diff = diffLabels([], [spec("bug"), spec("release")]);
 
@@ -94,3 +105,33 @@ describe("diffLabels", () => {
     expect(diff.alreadyPresent).toEqual(["bug", "release"]);
   });
 });
+
+// boilerplate-only:begin
+describe("LABELS_PATH", () => {
+  // ----- 正常系 -----
+  it("所見の分類をすべてラベルとして宣言している", () => {
+    const declared = new Set(
+      parseLabelSpecs(readFileSync(LABELS_PATH, "utf8")).map((label) => label.name),
+    );
+
+    // 分類を足してラベルを足し忘れると、`gh issue create` がその窓だけ拒否し、送出が静かに
+    // 溜まり続ける。宣言と綴りを機械で結んでおく。
+    for (const kind of FINDING_KINDS) {
+      expect(declared).toContain(`${KIND_LABEL_PREFIX}${kind}`);
+    }
+
+    expect(declared).toContain("feedback");
+  });
+
+  // ----- 異常系 -----
+  it("分類でないものが、分類の接頭辞で名乗っていない", () => {
+    const kinds = new Set<string>(FINDING_KINDS);
+
+    for (const label of parseLabelSpecs(readFileSync(LABELS_PATH, "utf8"))) {
+      if (label.name.startsWith(KIND_LABEL_PREFIX)) {
+        expect(kinds).toContain(label.name.slice(KIND_LABEL_PREFIX.length));
+      }
+    }
+  });
+});
+// boilerplate-only:end

@@ -58,7 +58,7 @@ describe("listStringLiterals", () => {
   });
 
   it("値の直後の区切りは除算として読む", () => {
-    // 正規表現と読むと、次の区切りまでの `"` を飲み込んで後続が消える。
+    // 正規表現と読むと、次の区切りまでの `"` を飲み込む。
     expect(listStringLiterals('const half = width / 2; goto("/maintenance");')).toEqual([
       "/maintenance",
     ]);
@@ -81,7 +81,6 @@ describe("listStringLiterals", () => {
   });
 
   it("ソースの先頭に来た区切りは正規表現として読む", () => {
-    // 直前に何も無い状態を、値の直後と取り違えると走査が乗っ取られる。
     expect(listStringLiterals('/["]/.test(x); goto("/maintenance");')).toEqual(["/maintenance"]);
   });
 
@@ -94,7 +93,7 @@ describe("listStringLiterals", () => {
   });
 
   it("文字クラスの中で逃がした閉じ括弧でクラスを閉じない", () => {
-    // 閉じたと読むと正規表現が早く終わり、残りの引用符から文字列を読み始めて後続が消える。
+    // 閉じたと読むと正規表現が早く終わり、残りの引用符から文字列を読み始める。
     expect(listStringLiterals(String.raw`if (/[\]/"]/.test(x)) goto("/maintenance");`)).toEqual([
       "/maintenance",
     ]);

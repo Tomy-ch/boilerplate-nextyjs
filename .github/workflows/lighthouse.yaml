@@ -1,7 +1,7 @@
 name: Lighthouse
 
 # Measures the Core Web Vitals of every screen and holds them against
-# `performance-budget.yaml` (ADR 0101).
+# `performance-budget.yaml`.
 #
 # The screens come from `e2e/lib/screens.ts` — the same declaration the E2E job walks. The
 # list is deliberately not restated here: a second list would let a screen be added to one
@@ -9,7 +9,7 @@ name: Lighthouse
 #
 # Only three metrics are judged, not the performance score. The score is a weighted mean of
 # five metrics, so a drop in it cannot say WHICH metric dropped. INP needs a real user
-# interaction and cannot be measured in a lab, so TBT stands in for it (ADR 0082 owns the
+# interaction and cannot be measured in a lab, so TBT stands in for it (RUM owns the
 # field side).
 #
 # The browsers here are NOT the digest-pinned Playwright container the VRT and E2E jobs use.
@@ -21,11 +21,11 @@ name: Lighthouse
 #
 # The measurement is serial by necessity — running several screens at once has them compete
 # for the same CPU, and Lighthouse's simulated throttling scales with the CPU time it
-# observes, so the parallelism would land in the numbers the budget then judges. Measured on
-# this repository's own sample: 23 screens x 3 runs x ~14 s = ~16 minutes, against ~1 minute
-# of build. The cost is therefore `screens x runs`, and neither factor can be cut without
-# giving something up: fewer runs loses the median that absorbs runner variance, and fewer
-# screens gives up the reason the list is read from the declaration in the first place.
+# observes, so the parallelism would land in the numbers the budget then judges. The cost is
+# therefore `screens x runs` — minutes of measurement against a build that takes one — and
+# neither factor can be cut without giving something up: fewer runs loses the median that
+# absorbs runner variance, and fewer screens gives up the reason the list is read from the
+# declaration in the first place.
 #
 # So the cadence moves instead of the coverage. A merge is judged after it lands rather than
 # before, which delays detection by one merge and costs no pull request any waiting. Every
@@ -57,7 +57,7 @@ name: Lighthouse
 #
 # The job reports a context on every pull request either way, which is what would let it
 # become a required check later; it is deliberately not one today, because the budget is not
-# yet reachable on this sample (`docs/adr/0101-performance-budget.md`).
+# yet reachable on this sample.
 
 on:
   pull_request:
@@ -75,9 +75,6 @@ on:
     - cron: '0 18 * * *'
   workflow_dispatch:
 
-# Select the CI environment file (env/.env.ci), which is the one that puts the API in mock
-# mode. Without a mocked API the screens would need a backend, and a slow response over
-# there would read as a regression in here.
 # ## Why the measurement is split across machines
 #
 # The cost is linear in the number of screens and each screen is measured three times over,
@@ -103,6 +100,9 @@ on:
 # answered by something that saw all of them. The shards write their measurements out; the
 # merge reads every one before judging.
 
+# Select the CI environment file (env/.env.ci), which is the one that puts the API in mock
+# mode. Without a mocked API the screens would need a backend, and a slow response over
+# there would read as a regression in here.
 env:
   APP_ENV: ci
 
@@ -114,8 +114,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Asked once, for every job below. Deciding it per shard would be four answers to one
-  # question, and the answer decides whether any machine starts at all.
+  # Asked once, for every job below (header: "The decision to measure is asked once"); the
+  # answer decides whether any machine starts at all.
   plan:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -268,12 +268,8 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          # The base ref has to be resolvable for the `trigger` diff; the default shallow
-          # checkout leaves it a bad object and the decision would silently see no changes.
-          #
-          # The condition is inverted on purpose. `<cond> && 0 || 1` always yields 1, because
-          # GitHub's pseudo-ternary falls through to the `||` side whenever the value before it
-          # is falsy — and `0` is. So the branch that has to carry `0` is the one after `||`.
+          # Same depth and same inverted condition as the `plan` job's checkout, for the reason
+          # given there.
           fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Setup mise and the pinned tools
@@ -376,12 +372,8 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          # The base ref has to be resolvable for the `trigger` diff; the default shallow
-          # checkout leaves it a bad object and the decision would silently see no changes.
-          #
-          # The condition is inverted on purpose. `<cond> && 0 || 1` always yields 1, because
-          # GitHub's pseudo-ternary falls through to the `||` side whenever the value before it
-          # is falsy — and `0` is. So the branch that has to carry `0` is the one after `||`.
+          # Same depth and same inverted condition as the `plan` job's checkout, for the reason
+          # given there.
           fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Setup mise and the pinned tools
@@ -479,7 +471,7 @@ jobs:
         run: |
           # The table is what says which screen moved, and it is left to render as markdown:
           # its cells are screen names the declaration fixes and numbers this job computed
-          # (ADR 0153 §5 — the accepted character set cannot make markup). The measurement
+          #. The measurement
           # may never have produced a table at all — the browser can fail to install — so
           # every fallback ends in something printable.
           # `|| true` is what makes the fallbacks below reachable: under `-e`, a `sed` against

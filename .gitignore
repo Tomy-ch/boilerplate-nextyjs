@@ -58,6 +58,10 @@ next-env.d.ts
 # エージェントが作る worktree の実体。別ブランチの作業ツリーであってこのリポジトリのソースではない
 /.claude/worktrees/
 
+# 機械ローカルの索引。再生成できる cache であり、失っても費用がゼロ。コミットすると
+# 別のマシンでそれが正を主張する（[0160](docs/adr/0160-agent-environment-loop.md) 決定 4）
+/.agents/private/
+
 # graphify の出力（graph.json / GRAPH_REPORT.md 等）。コード変更ごとに動く派生物
 /graphify-out
 

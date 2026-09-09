@@ -35,11 +35,12 @@ export type ProgressClientProps = Omit<
  * `Skeleton` を使う。
  *
  * `progressbar` role として公開され、値は `value` と `max` から百分率として読み上げられる。要素
- * 自体は名前を持たないため、`aria-label` か、`label` 要素と `id` の関連付けでアクセシブルな名前を
- * 必ず与える。
+ * 自体は名前を持たないため、`aria-label` か `aria-labelledby` でアクセシブルな名前を必ず与える。
+ * 実体は `div` で labelable 要素ではないため、`ProgressNative` と違い `label` の `htmlFor` では
+ * 名前が付かない。
  *
- * 完了時期が不明な進捗（indeterminate）は扱わない。このリポジトリは animation plugin を採用して
- * いないため、待機中であることを動きで伝えられず、静止した bar は停止しているように見える。
+ * 完了時期が不明な進捗（indeterminate）は扱わない。待機の表現は `Skeleton` / `Shimmer` が担う
+ * ため、進捗部品は値の判っている進捗だけを引き受ける。
  *
  * @see Storybook `Status/ProgressClient`
  */

@@ -10,7 +10,6 @@ const execFileAsync = promisify(execFile);
 
 const NETWORK_TIMEOUT_MS = 30_000;
 const MS_PER_DAY = 86_400_000;
-const LS_REMOTE_COLUMNS = 2;
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
 const MOVING_TAG_PATTERN = /^v?\d+$/;
@@ -42,15 +41,13 @@ export type MoveCandidate = {
 
 // コメント tag が「前進してよい」と宣言しているか。bare な major 番号（`v6` / `6`）だけを
 // moving とみなし、宣言の外にある形（`v6.1.0` / `v6.1` / `main`）はすべて不変として扱う。
-// tag の形を宣言として読む根拠は [0153](../../docs/adr/0153-ci-configuration.md) が持つ。
 export function isMovingTag(tag: string): boolean {
   return MOVING_TAG_PATTERN.test(tag);
 }
 
 // 解決先が変わったキーを、付け替えを疑うものと採用してよいものへ分ける。
 //
-// 渡す sha は検疫を掛ける前の候補でなければならない（理由は
-// [0153](../../docs/adr/0153-ci-configuration.md)）。
+// 渡す sha は検疫を掛ける前の候補でなければならない。
 export function classifyMoves(
   existing: Map<string, string>,
   candidates: readonly MoveCandidate[],
@@ -86,9 +83,8 @@ export function selectSHA(out: string, tag: string): string {
   let tagSHA = "";
   let headSHA = "";
   for (const line of out.trim().split("\n")) {
-    const columns = line.split(/\s+/).filter((column) => column !== "");
-    if (columns.length !== LS_REMOTE_COLUMNS) continue;
-    const [sha, name] = columns;
+    const [sha, name, ...extra] = line.split(/\s+/).filter((column) => column !== "");
+    if (sha === undefined || name === undefined || extra.length > 0) continue;
     if (name === `refs/tags/${tag}^{}`) derefSHA = sha;
     else if (name === `refs/tags/${tag}`) tagSHA = sha;
     else if (name === `refs/heads/${tag}`) headSHA = sha;
@@ -105,8 +101,7 @@ export function selectSHA(out: string, tag: string): string {
 // 日付が付く）。commit の日付は git のメタデータなので発行者が任意の値を書ける。新しい方を
 // 採れば、少なくとも片方が「新しい」と言っている限り検疫は掛かる。
 //
-// tag 付け替えそのものの検知は classifyMoves が担う（検疫が耐えられる範囲は
-// [0153](../../docs/adr/0153-ci-configuration.md)）。
+// tag 付け替えそのものの検知は classifyMoves が担う。
 export async function refAgeDays(repo: string, tag: string, sha: string): Promise<number> {
   const release = await githubGet<ReleaseResponse>(
     `https://api.github.com/repos/${repo}/releases/tags/${encodeURIComponent(tag)}`,

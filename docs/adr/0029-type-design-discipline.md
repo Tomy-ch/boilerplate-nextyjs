@@ -10,7 +10,7 @@ Accepted
 
 ## 背景
 
-型の付け方は各所の判断に任されていた。結果として、同じ関心が 3 通りの形で書かれうる状態にある —— 真偽値を並べた状態、`unknown` を持ち回って使う直前に確かめる境界、`string` のまま渡される識別子。いずれも実行時にしか誤りが出ず、テストで踏まなければ気づけない。
+型の付け方を各所の判断に任せると、同じ関心が 3 通りの形で書かれうる —— 真偽値を並べた状態、`unknown` を持ち回って使う直前に確かめる境界、`string` のまま渡される識別子。いずれも実行時にしか誤りが出ず、テストで踏まなければ気づけない。
 
 型で表せるものを型で表すことは、検証の前倒しであると同時に**読む側への説明**でもある。関数の形を見れば何が来るか判るなら、呼び出し側は本文を読まずに済む。
 
@@ -41,6 +41,16 @@ Accepted
 
 **生成物を経由して `zod` が client へ入る経路がある間は、client 側だけを移しても classic は消えない**(mini が上乗せされるだけになる)。その経路と順序は [BACKLOG](BACKLOG.md) の「予算に対して残っている重さ」が持つ。
 
+#### 部分更新の payload は `undefined` に意味を持たせず、`adapters` で正規化する
+
+`exactOptionalPropertyTypes` は有効にしない。その穴 —— 「キーが無い」と「値が `undefined`」を型が区別しないこと —— は、散文の規約ではなく機構で埋める。
+
+`JSON.stringify` は値が `undefined` のキーを落とすため、`{ name: undefined }` と `{}` はワイヤ上で同一になる。「消したい」つもりの `undefined` は「触らない」として届き、受け取り側からは判別できない。残る危険は直列化より手前のローカル組み立てだけなので、**PATCH payload の正規化を `adapters`(`adapters/server/http`)の 1 か所に閉じ込める**。
+
+- 「触らない」= キーを含めない / 「消す」= `null` を明示する。`undefined` に意味を持たせない
+- `adapters` の公開面は**正規化済みの型でしか受け付けない**(`PatchPayload<T>` = 値に `undefined` を許さない型)。規律を型で強制し、呼び出し側の注意に頼らない
+- 「`undefined` のキーは消える / `null` は残る」はテストで固定する
+
 ### 3. 識別子は branded type にする
 
 **外部から来る識別子は、素の `string` として扱わない。** 資源ごとの ID のように、**同じ形をしていて取り違えても型が通ってしまう**値には brand を付ける。
@@ -70,6 +80,7 @@ Accepted
 - ❌ リテラルへ型注釈を付けて情報を落とすこと(`satisfies` を使う)
 - ❌ `as` による型表明で検証を省くこと(境界の検証は zod が行う)
 - ❌ client へ届くスキーマを `zod` の既定の入口で書くこと(呼ばない機能ごと配られる)
+- ❌ 部分更新の payload で `undefined` に「消す」の意味を持たせること、および正規化を `adapters` の外で行うこと
 - ❌ 取得の口が持つ検証と別に、内側で独自の写し(数値化・既定値への丸め等)を作ること
 - ❌ 契約を外れた条件を黙って捨て、既定の結果を出すこと
 
@@ -78,4 +89,5 @@ Accepted
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 責務の置き場所 / feature 内で部品を分ける基準
 - [0062-form-input-validation.md](0062-form-input-validation.md) — 表示検証スキーマの二層分離
 - [0070-backend-role-separation.md](0070-backend-role-separation.md) — 業務判断の所在
+- [0071-bff-api-integration.md](0071-bff-api-integration.md) — fetch wrapper(部分更新の正規化が座る口)
 - [0072-api-type-generation.md](0072-api-type-generation.md) — 契約からの型生成 / 生成物の扱い

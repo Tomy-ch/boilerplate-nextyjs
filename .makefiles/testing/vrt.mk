@@ -67,7 +67,7 @@ VRT_INPUTS_FILE := baseline/images/render-inputs.sha256
 VRT_VERIFIED_FILE := tmp/vrt/verified-inputs.sha256
 A11Y_VERIFIED_FILE := tmp/a11y/verified-inputs.sha256
 
-# 記録は検査が通った後にだけ書く。手前で書くと、落ちた状態を「通った」として残す。
+# 記録の実体。いつ書くかは vrt-record-verified が持つ。
 RECORD_VERIFIED = mkdir -p "$$(dirname $(1))" && pnpm exec tsx scripts/vrt inputs > $(1)
 
 # 省いたのか走ったのかを機械可読で残す。CI の報告文言がこれを読む。緑の理由が「検査して
@@ -118,8 +118,9 @@ vrt: build-storybook
 vrt-gate:
 	@pnpm exec tsx scripts/vrt gate $(VRT_INPUTS_FILE) $(VRT_VERIFIED_FILE)
 
-# 記録の実体を書くだけ。**いつ確定させるかは呼ぶ側が決める** —— 割った実行では全台の結果を
-# 知っている `vrt` ジョブ (.github/workflows/vrt.yaml)、割らない実行では本ファイルの `vrt` 自身。
+# 記録の実体を書くだけ。**検査が通った後にだけ書き、いつ確定させるかは呼ぶ側が決める** —— 手前で
+# 書くと、落ちた状態を「通った」として残す。呼ぶのは、割った実行では全台の結果を知っている `vrt`
+# ジョブ (.github/workflows/vrt.yaml)、割らない実行では本ファイルの `vrt` 自身。
 vrt-record-verified:
 	@$(call RECORD_VERIFIED,$(VRT_VERIFIED_FILE))
 
@@ -149,7 +150,7 @@ vrt-retake:
 
 # ブランチを移っても git は基準画像の実体を動かさない。記録された指し先と食い違ったまま残り、
 # `git status` には他の変更と同じ顔で出る。**その汚れを commit すると間違った指し先が載る**。
-# hook から呼んで、移動のたびに実体を指し先へ合わせる（ADR 0151）。
+# hook から呼んで、移動のたびに実体を指し先へ合わせる。
 #
 # --init は付けない。付けると worktree を足すたびに置き場を丸ごと取りに行く。取り込んでいない
 # 作業ツリーは撮影の前提検査が名指しで案内するので、ここは在るものを合わせるだけに留める。

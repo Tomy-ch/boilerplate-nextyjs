@@ -169,8 +169,7 @@ function parseCommon(form: FormData): CommonFields {
  * 作成のフォームを読む。
  *
  * @remarks
- * 検証をここに置くのは、**送信の編成と入力の読み取りを分ける**ためです
- * （[0021](../../../../docs/adr/0021-frontend-responsibility.md)）。ここが持つのは form の
+ * 検証をここに置くのは、**送信の編成と入力の読み取りを分ける**ためです。ここが持つのは form の
  * 綴りと、利用者へ返す文言までで、業務としての妥当性は backend が決めます。
  */
 export function parseProductDraftForm(form: FormData): ProductFormParseResult<ProductDraft> {

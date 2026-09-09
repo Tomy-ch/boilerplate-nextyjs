@@ -65,7 +65,7 @@
 
 - `AGENTS.md` / `CLAUDE.md`
 - `.github/release/` 配下の既存ファイル（このスキルは既存ファイルの上書きを一切行わない。`.github/release/<NEW_VERSION>.md` が既に存在する場合は処理を中止してユーザーに確認する）
-- 生成物（`**/*.gen.go`, `*.sql.go`, `*_mock.go`, `**/openapi.gen.yaml`, `docs/` 配下の生成物）
+- 生成物（`.gitattributes` が `linguist-generated` を付けるパスと、`docs/portal/` 配下の生成物）
 - `.github/release/` 以外のすべて
 
 ## Step 1. ガード: 出力先ファイルが存在しないこと
@@ -180,30 +180,13 @@ git log --no-merges --pretty=format:'%h%n%s%n%b%n---' <FROM_TAG>..HEAD
 
 ユーザーが確定したあとに限り `Write` を実行する。
 
-## Step 6. Markdown Lint による検証
+## Step 6. 書いたファイルの整形
 
-書き込み後、以下を実行する。
-
-```sh
-pnpm md-fix
-pnpm md-lint
-```
-
-`pnpm md-fix` はリポジトリ全体に対して `markdownlint-cli2 --fix` を実行し、よくある違反（見出し / リスト / コードブロック周辺の空行、行末空白、ファイル末尾の改行など）を自動修正する。続けて `pnpm md-lint` が 3 段で検証する — `.markdownlint.yaml` に対する体裁、mermaid 図の構文、`.claude/**` に対する `skill-lint`（frontmatter / 対訳ペアの構造 / 参照の実在性）。
-
-`pnpm md-lint` がエラーを報告する場合:
-
-1. lint 出力を確認する。
-2. 自動修正で解消できないルール（見出し階層、重複見出し、bare URL など）を手で修正する。
-3. clean になるまで `pnpm md-fix` → `pnpm md-lint` を繰り返す。
-
-`pnpm md-lint` がクリーン終了するまでスキルを完了報告しない。
-
-`pnpm md-fix` はリポジトリ全体を対象にするため、本リリースノートとは無関係な Markdown も自動修正される可能性がある。その場合、変更された他ファイルの一覧を完了報告時にユーザーへ提示し、レビューできるようにする。
+書き込み後、リリースノートのファイルに `pnpm exec markdownlint-cli2 --no-globs --fix <パス>` を掛ける。`pnpm lint:md` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 ## Step 7. 最終確認
 
-書き込みおよび lint 後:
+書き込みおよび整形後:
 
 - `.github/release/<NEW_VERSION>.md` が存在することを確認する。
 - ステージ・コミット・プッシュは行わない。ファイルを作成した旨をユーザーに伝え、git 操作は AGENTS.md のルールに従ってユーザー自身に委ねる。
@@ -220,7 +203,7 @@ pnpm md-lint
 - [ ] リリースノートを日本語で、正規フォーマットに沿って起草した
 - [ ] プレビューをユーザーが承認した
 - [ ] `.github/release/<NEW_VERSION>.md` を書き出した
-- [ ] `pnpm md-lint` がクリーン終了する
+- [ ] `markdownlint-cli2 --fix` をリリースノートだけに掛けた
 - [ ] git 操作を行っていないことをユーザーに伝えた
 
 ## 注意事項

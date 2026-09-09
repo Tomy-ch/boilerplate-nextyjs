@@ -77,7 +77,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # `high` matches the dependency audit gate's threshold (ADR 0110 §3), so the two
+      # `high` matches the dependency audit gate's threshold, so the two
       # do not disagree about the same package for different reasons.
       #
       # `comment-summary-in-pr` posts through the action rather than the shared upsert

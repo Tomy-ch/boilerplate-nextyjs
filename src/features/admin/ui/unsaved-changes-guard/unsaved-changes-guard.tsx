@@ -39,8 +39,8 @@ export type UnsavedChangesGuardProps = {
  * page と layout が別の木だからで、その 1 段だけを context が繋ぎます。
  *
  * **横断 client 状態の store には上げません。** 使うのがこの feature の画面だけである以上、
- * 受入基準（複数 feature の参照）を満たしません（[0023](../../../../../docs/adr/0023-stores-kernel.md)）。
- * 2 つ目の feature が申告するようになった時点で昇格させます。
+ * 受入基準（複数 feature の参照）を満たしません。2 つ目の feature が申告するようになった時点で
+ * 昇格させます。
  *
  * 永続化しません。リロードすれば書きかけは失われており、申告だけが残ると出る理由の無い確認が
  * 出ます。

@@ -19,8 +19,8 @@ export type ProgressNativeProps = Omit<ComponentProps<"progress">, "max" | "valu
  * 持たない。値の取得・更新間隔・完了後の遷移は呼び出し元が決める。
  *
  * URL や Server 側で確定した進捗（手続きの段階表示など）に使う。browser 側の計測値を連続更新
- * する場合や、完了時期が不明で indeterminate を表示する場合は `ProgressClient` を使う。骨格を
- * 見せるだけでよい待機には `Skeleton` を使う。
+ * する場合は `ProgressClient` を使う。完了時期が不明な待機には使わず、骨格を見せるだけでよい
+ * 場合は `Skeleton` を使う。
  *
  * `progress` 要素は screen reader に `progressbar` として公開され、値は `value` と `max` から
  * 百分率として読み上げられる。要素自体は名前を持たないため、`aria-label` か、`label` 要素と

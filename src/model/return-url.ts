@@ -4,8 +4,7 @@ import * as z from "zod/mini";
  * 検証を通った復帰先を確定させるスキーマ。
  *
  * @remarks
- * {@link toSafeReturnUrl} を通った値だけがこの型になります
- * （[0029](../../docs/adr/0029-type-design-discipline.md) §2）。
+ * {@link toSafeReturnUrl} を通った値だけがこの型になります。
  */
 const safeReturnUrlSchema = z.string().brand<"safeReturnUrl">();
 
@@ -29,8 +28,7 @@ const PROBE_ORIGIN = "http://internal.invalid"; // DevSkim: ignore DS137138
  *
  * @remarks
  * 受け取った値をそのままリダイレクト先にすると、攻撃者の用意した URL へ自サイトの導線で送れて
- * しまいます（open redirect）。同一 origin の相対パスだけを通し、それ以外は既定の行き先へ倒します
- * （[0079](../../docs/adr/0079-auth-frontend-seam.md)）。
+ * しまいます（open redirect）。同一 origin の相対パスだけを通し、それ以外は既定の行き先へ倒します。
  *
  * **判定は文字列の見た目ではなく、URL パーサに解かせた結果で行います。** 文字列を先頭から検査する
  * 書き方は、パーサ側の正規化を再現できません。たとえば `/\t/evil.com` はタブが解析時に除去されて

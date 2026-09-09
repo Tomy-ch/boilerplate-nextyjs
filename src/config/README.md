@@ -91,7 +91,7 @@ OTel SDK と logger へ値を注入します。Config 自身は logger / observa
 - `adapters/server` と `proxy.ts` は必要な目的の `get*Config()` だけを import し、feature / model / component は Config を import しない。
 - 内側のロジックへ設定値が必要な場合は、adapter が getter から取り出した値を引数で渡す。
 - Config class と ENV parser は module 外へ export しない。通常コードが任意の ENV から Config を再生成する経路を持たせない。
-- P3-6 以降の unit test は `vi.stubEnv()` と `vi.resetModules()` で module cache を再評価し、公開 singleton を検証する。
+- unit test は `vi.stubEnv()` と `vi.resetModules()` で module cache を再評価し、公開 singleton を検証する。
 
 ## 運用
 
@@ -99,3 +99,13 @@ OTel SDK と logger へ値を注入します。Config 自身は logger / observa
 - server config は `import "server-only"` で保護し、`adapters/server` と起動・ビルド境界、そして入口の `proxy.ts` だけが import する。
 - client config は `NEXT_PUBLIC_` の静的ドット参照だけを持つ `*.client.ts` に置く（`http/http.client.ts`）。ここで検証はしない（ブラウザは検証の実行点ではない）。server config の値を props として client へ渡さない。
 - 環境変数の一覧・テンプレート・secret 管理ラベルは [env/README.md](../../env/README.md) を正とする。
+
+## 関連する ADR
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 設定を読めるのがどの層までかという線
+- [0030](../../docs/adr/0030-environment-variable-management.md) — `env/` の構成、目的別 config、`NEXT_PUBLIC_` の境界、secret の扱い、code default の位置付け
+- [0075](../../docs/adr/0075-file-upload-seam.md) — アップロードの経路と、中継に許すバイト数をどこより内側に取るか
+- [0076](../../docs/adr/0076-payment-ui-seam.md) — 決済 UI の seam。`payment` を既定で閉じる根拠
+- [0079](../../docs/adr/0079-auth-frontend-seam.md) — 認証モードと session の front 側の持ち分
+- [0111](../../docs/adr/0111-csp-security-headers.md) — CSP と同伴ヘッダの内容、要求に依らないヘッダを配信側へ置く判断、別 origin から BFF を呼ばせる条件
+- [0131](../../docs/adr/0131-cookie-consent.md) — 同意管理を採らない決定と、タグマネージャを既定で読み込まない指定

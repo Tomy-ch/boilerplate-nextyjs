@@ -7,20 +7,18 @@ hook の役割は「壊れた状態を CI に到達させない第一段の防�
 
 Accepted
 
-> 本 ADR は 0.0.x の living document。設計フェーズ中は本文を直接上書きし、逐次改定の履歴は残さない(不可変化 + 改定履歴の規律は v1 凍結時から。[0140](0140-documentation-operations.md))。
-
 ## 採用理由 / 目的
 
 - ローカルで lint / format / 型エラーを早期検出し、CI 失敗による待ち時間を削減する
 - 「commit / push してから気づく」を構造的に減らす
 - 設定ファイル (`.lefthook.yaml`) で hook の挙動を SSOT 化し、`.git/hooks/` への直接書き込みや個別 shell スクリプトの散在を避ける
-- boilerplate として fork 先が「最初から品質ゲートが動く」状態を引き継げるようにする
+- boilerplate としてテンプレートから作った側が「最初から品質ゲートが動く」状態を引き継げるようにする
 
 ## 採用ツール
 
 [lefthook](https://github.com/evilmartians/lefthook) を採用する。
 
-インストールは npm devDependency 経由 (`pnpm add -D lefthook`)。バージョンは exact pin とする (0004 のコア dev ツール扱い)。
+インストールは npm devDependency 経由 (`pnpm add -D lefthook`)。バージョンは exact pin とする ([0004](0004-library-management.md) のコア dev ツール扱い)。
 
 ### lefthook を選んだ理由
 
@@ -37,13 +35,14 @@ Accepted
 
 | 段階 | 目的 | 想定処理 | 速度目標 |
 | --- | --- | --- | --- |
-| pre-commit | 「壊れた diff を commit に乗せない」 | `pnpm lint:ci` (biome 完全版 = `biome.ci.jsonc` + `--error-on-warnings`。ESLint 導入後は境界検査も直列 — [0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm md-lint` = markdownlint + mermaid 構文 + `.claude/**` の意味検査 (`skill-lint`)。対象ファイルが staged のときのみ) / ワークフロー検査 (`make actionlint` = 構文 + `run:` のシェル / `make actions-shellcheck` = composite action の `run:` のシェル / `make actions-pin-check` = `uses:` の SHA ピン / `make actions-comment-secret-lint` = PR コメントを投稿するジョブへの secret 混入。ワークフロー / composite action の定義が staged のときのみ — [0153](0153-ci-configuration.md)) | < 5 秒 |
+| pre-commit | 「壊れた diff を commit に乗せない」 | 静的検査 — lint 完全版 (`pnpm lint:ci` = biome の完全プロファイル + ESLint 境界検査。[0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm lint:md` = markdownlint + mermaid 構文 + `.claude/**` の意味検査) / ワークフロー・composite action 定義の検査とピンの突合 ([0153](0153-ci-configuration.md)) / 生成物の版の突合 ([0072](0072-api-type-generation.md)) — と、キャッシュ付きのテスト (`make test-cached`)。各検査は対象ファイルが staged のときのみ走る | < 5 秒 |
 | commit-msg | 「規約外のコミットメッセージを積ませない」 | commitlint ([0150](0150-git-workflow.md) の prefix 11 種を検証) | < 5 秒 |
-| pre-push | 「壊れた push・秘密を含む push を上げない」 | 型チェック (`pnpm typecheck` = `tsc --noEmit`) / 秘密スキャン (`make secret-scan` = push 予定コミット範囲) / テスト (整備後) | < 30 秒 |
+| pre-push | 「壊れた push・秘密を含む push を上げない」 | 型チェック (`pnpm typecheck` = `tsc --noEmit`) / キャッシュ無しの完全テスト (`make test-full`) / 秘密スキャン (`make secret-scan` = push 予定コミット範囲) | < 30 秒 |
 | post-checkout / post-merge | 「基準画像の実体を、指し先から取り残さない」 | サブモジュールの同期 (`make baseline-sync`)。移動と pull のたび | < 1 秒 |
+| post-commit | 「実装が形になった瞬間を、後から言えるようにする」 | 開発の窓への打刻 ([0161](0161-development-window-as-feedback-unit.md))。追跡外の `tmp/` へ 1 行書くだけ | < 0.1 秒 |
 | (CI) | 権威ある検査 | lint / 型 / test / build / e2e 等 | 制約なし |
 
-- pre-commit で走らせる biome は、エディタ保存時の簡易版ではなく **完全版** (`pnpm lint:ci`)。保存時は軽量・commit 時は厳格という二段構え（プロファイル分割の詳細は [0002-formatter-linter.md](0002-formatter-linter.md)）
+- pre-commit で走らせる biome は、エディタ保存時の簡易版ではなく **完全版** (`pnpm lint:ci`)。保存時は軽量・commit 時は厳格という二段構え（プロファイル分割の詳細は [0002](0002-formatter-linter.md)）
 - biome は Rust 実装で高速なため、完全版（`noImportCycles` の複数ファイル走査を含む）でも本リポジトリ規模では sub-second に収まり、速度目標を満たす
 - pre-push の commands は `parallel: true` で並列実行する。秘密スキャンは型チェックと独立しており、直列化すると速度目標を割るため
 - **飽和したホストでは、CI が同じコマンドを持つゲートを CI へ委ねる**。`make load-status` が帯を出し、pre-push の各 command は `gate-*` ターゲット越しに走る(実体は `scripts/load-band/`)。委ねるのは型チェックとテストで、秘密スキャンは帯に関わらず必ず走る(push は不可逆で、CI に対応ワークフローが無い)
@@ -58,6 +57,7 @@ Accepted
 ### 設計原則
 
 - **post-checkout / post-merge は検査ではない。** 壊れを止めるのではなく、git が動かさない実体をブランチの記録へ合わせるだけである。落ちる余地を持たせない —— 取り込んでいない作業ツリーでは何もせず、撮影の前提検査が名指しで案内する側に任せる
+- **post-commit も検査ではない。** 記録するだけで、何も止めない。**段の境界はそれを越えた側にしか存在しない**ので、コミットという境界をここで刻む（[0161](0161-development-window-as-feedback-unit.md)）。スクリプトが無い checkout —— 剥がした後のテンプレート —— でも成立するよう存在確認を挟み、**常に成功で抜ける**。打刻が失敗して作業が止まる形にしない
 - **pre-commit は速さ優先**。重い処理 (テスト全件 / `pnpm build` / e2e) は入れない
 - **pre-push は中速まで許容**。push の機会は commit より少ないため
 - **CI が権威**。hook は「早く気づく」ための補助層であり、hook 通過 = 正しい状態ではない
@@ -69,7 +69,7 @@ Next.js の build (`pnpm build`) はキャッシュが効いても数秒〜数�
 
 ### ESLint 境界検査の pre-commit 組込みと速度目標
 
-[0002](0002-formatter-linter.md) の「biome 優先 + ESLint 補完」方針に基づき、ESLint の層境界検査は導入後 `pnpm lint:ci` の一部として **pre-commit に glob スコープで組み込む**（変更ファイルに関係する層のみを対象にし、リポジトリ全体走査を避ける）。ただし ESLint（TS resolver を伴う boundaries 検査）を加えた結果 pre-commit の速度目標（< 5 秒）を超える場合は、ESLint 実行のみを **pre-push 側へ退避してよい**。これは commands 粒度の調整であり本 ADR の改訂を要しない（後述「改変ルール」）。なお速度目標そのものの引き上げは ADR 改訂を要する。
+[0002](0002-formatter-linter.md) の「biome 優先 + ESLint 補完」方針に基づき、ESLint の層境界検査は `pnpm lint:ci` の一部として **pre-commit に glob スコープで組み込む**（変更ファイルに関係する層のみを対象にし、リポジトリ全体走査を避ける）。ESLint（TS resolver を伴う boundaries 検査）が pre-commit の速度目標（< 5 秒）を超える場合は、ESLint 実行のみを **pre-push 側へ退避してよい**。これは commands 粒度の調整であり本 ADR の改訂を要しない（後述「改変ルール」）。なお速度目標そのものの引き上げは ADR 改訂を要する。
 
 ## bypass ポリシー
 
@@ -86,6 +86,27 @@ Next.js の build (`pnpm build`) はキャッシュが効いても数秒〜数�
 
 - PR 内のすべての commit を積み終わった時点で、**必ず 1 回 hook 相当の検査をローカルで通す** (`pnpm lint:ci && pnpm typecheck`)
 - 「途中の commit が壊れていてもよい」のはあくまでローカル中間状態。push の時点では pre-push が動くため、最終的に検査される
+
+`commit` スキルはこの例外の機械化である。分割した commit ごとに hook を通さず、最後に pre-commit の各 command を直接 1 回ずつ呼んで検証する。`lefthook run pre-commit` を経由しないのは、全 commit を積み終えた時点では staged が無く、lefthook が command を飛ばすためである。
+
+### 例外: 機械が導いた 1 行のコミット
+
+自動化が焼き込んだ値をコミットへ落とすとき (ブランチ名から導いた版数の stamp) は hook を通さない。載るのは規則から機械的に導いた 1 行であり、pre-commit が回す検査は派生元の保護ブランチが既に通している。同じ規則で導き直す突合は CI が持つ。
+
+### 例外: 変更の外の理由で落ちたゲート
+
+hook の失敗が変更の証拠になるのは、その失敗を**変更が引き起こした**ときだけである。次の 3 つはそれに当たらない。
+
+- **別のセッションのファイル**。型チェックと完全テストはコミット範囲ではなく作業ツリー全体を読むため、別の窓が編集中の未コミットファイルが、それを含まない push のゲートを落とす
+- **出力先を共有する 2 つの実行**。テストの実行が重なると、互いの中間ファイルを消し合って落ちる。コードには何も問題が無い
+- **ベースブランチが既に落ちている**。ベースを checkout して同じゲートを回せば確かめられる
+
+この 3 つでは `--no-verify` が正しく、原因は別に直す。ゲートを満たすために変更の形を変えると、壊していないゲートのために変更が悪くなる。ただし 2 つの条件が付く。
+
+- **どのゲートが落ち、なぜ変更の外なのかを、報告と PR に書く**。黙って取った例外は、本物の失敗を飛ばしたのと見分けが付かない
+- **push 自体が取り返しを失わせるゲートには適用しない**。秘密スキャンは push された秘密を取り消せず、commitlint は件名が既に履歴に載っている。この 2 つは直すものであって、飛ばすものではない
+
+ゲートを手で先回りして回さない。同じ検査を手元でもう一度掛けても結果はより正しくならず、飽和したホストではその二重実行そのものが上の 2 番目の失敗を作る。push が検証の段である。
 
 ### 禁止される bypass
 
@@ -117,26 +138,20 @@ pnpm exec lefthook install    # .git/hooks/ に symlink を配置
 
 ## 設定の最小構成
 
-**`.lefthook.yaml` が唯一の正**。本 ADR は骨格 (どの段に、いくつの、どういう名前の command を置くか) だけを定め、各 command が実際に実行するコマンド行は転記しない。転記は写しがずれる場所を増やすだけで、hook の挙動を知りたい者は必ず `.lefthook.yaml` を読む。
+**`.lefthook.yaml` が唯一の正**。本 ADR は骨格 (どの段に、どういう関心の command を置くか) だけを定め、各 command が実際に実行するコマンド行は転記しない。転記は写しがずれる場所を増やすだけで、hook の挙動を知りたい者は必ず `.lefthook.yaml` を読む。
 
 ```yaml
 pre-commit:
   parallel: true
   commands:
-    lint: ...
-    md-lint: ...
-    actionlint: ...
-    actions-shellcheck: ...
-    actions-pin-check: ...
-    actions-comment-secret-lint: ...
+    <関心事ごとに 1 command>: ...
 commit-msg:
   commands:
     commitlint: ...
 pre-push:
   parallel: true
   commands:
-    typecheck: ...
-    secret-scan: ...
+    <関心事ごとに 1 command>: ...
 ```
 
 - 各段の責務と、そこで走らせる検査は上の「hook 段階の責務分担」表が定める
@@ -160,14 +175,13 @@ pre-push:
 - ❌ CI 側で hook 相当の検査をスキップすること
 - ❌ `.git/hooks/` 配下に直接 shell script を書き込むこと (lefthook 経由のみ)
 - ❌ hook 設定 (どの段階でどの command を走らせるか) を `.lefthook.yaml` 以外のファイル (script / Makefile 等) に分散させること。`run:` から `pnpm <script>` / `make <target>` のような既存の実行入口を 1 行で呼ぶのは分散にあたらない (ローカルと CI で同じコマンドを呼ぶための要件でもある)
-- ❌ lefthook 自体のバージョンを caret (`^`) で指定すること (0004 のコア dev ツール方針に従い exact pin)
+- ❌ lefthook 自体のバージョンを caret (`^`) で指定すること ([0004](0004-library-management.md) のコア dev ツール方針に従い exact pin)
 
 ## 補足
 
 - 「hook はあると邪魔、ないと事故」のジレンマを、**速い hook + 権威ある CI** の二重化で解く方針
 - lefthook 設定の具体内容 (どの段階でどの command を走らせるか) はリポジトリの肥大化に応じて調整する
 - hook の存在は README で利用者向けに案内する (`pnpm exec lefthook install` の必要性)
-- 旧運用との差分: 過去は `.git/hooks/` に shell script を直接置く時期もあり得たが、本 ADR 採用以降は lefthook 経由でのみ管理する
 
 ## 関連 ADR
 
@@ -175,3 +189,4 @@ pre-push:
 - [0004-library-management.md](0004-library-management.md) — lefthook を devDependency として exact pin する根拠
 - [0110-security-operations.md](0110-security-operations.md) — pre-push で走る秘密スキャンの内容、および脆弱性スキャンを hook に載せない判断
 - [0150-git-workflow.md](0150-git-workflow.md) — hook 通過後の commit / PR / リリース運用フロー
+- [0153-ci-configuration.md](0153-ci-configuration.md) — hook と同じコマンドを回す CI 側 (hooks mirror CI)

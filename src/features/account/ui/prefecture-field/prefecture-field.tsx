@@ -19,7 +19,7 @@ type PrefectureFieldProps = ProfileFieldProps & {
  * 入力欄が `Input` ではなく `SelectNative` になるだけで、`TextField` と配線の規則は変わりません。
  *
  * 検索つきの client island を使いません。契約が全 47 件を固定で返す静的な候補なので、
- * 持ち込む理由がありません（[0053](../../../../../docs/adr/0053-ui-component-interaction-seam.md)）。
+ * 持ち込む理由がありません。
  */
 export function PrefectureField({
   controlId,

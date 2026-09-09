@@ -13,14 +13,16 @@ import { CartHeaderToggle } from "../header-toggle/header-toggle";
  *
  * @remarks
  * 静的に import すると、被せる器（overlay の機構と中身一式）がどの画面の最初の読み込みにも乗ります。
- * 出るのは `lg` 未満だけなので、そこへ来たときに読みます
- * （[0101](../../../../../docs/adr/0101-performance-budget.md)）。
+ * 出るのは `lg` 未満だけなので、そこへ来たときに読みます。
  */
 const CartHeaderDrawer = dynamic(() =>
   import("../header-drawer/header-drawer").then((module) => module.CartHeaderDrawer),
 );
 
-/** 脇に常設できない幅。タブレットを含む（`docs/rules.md` #71）。 */
+/**
+ * 脇に常設できない幅。タブレットを含む
+ * （`docs/rules.md`「レイアウトと帯」の「脇に常設する領域は `lg` 以上でだけ出す」）。
+ */
 const NARROW = mediaBelow("lg");
 
 /** `CartHeaderAction` の props。 */

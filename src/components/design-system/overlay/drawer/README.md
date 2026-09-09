@@ -30,6 +30,8 @@
 
 drag の追従と慣性、閉じる判定のため hydration が必要な client island です。Server Component からは直接 render できません。内容自体に client runtime が要らない場合は、Server Component で組み立てた要素を `children` として渡します。
 
+開いているあいだは履歴を 1 つ持ち、**戻る操作で自分だけを閉じます**（[0053](../../../../../docs/adr/0053-ui-component-interaction-seam.md)）。積むのは同じ URL の履歴 entry だけで、URL 自体は変わりません。
+
 表示する文言、取得、保存、業務判断、開閉を URL へ載せるかの選択は持ちません。`direction` は引き出す方向だけを決め、viewport 幅に応じて drawer と常時表示を切り替える判断は feature 側が持ちます。
 
 内容が高さを超える場合のスクロールは持ちません。必要な場合は呼び出し元が `className` で overflow を指定します。drag と内容のスクロールは競合しうるため、スクロールする領域を作るときは実機で操作を確認します。

@@ -22,8 +22,8 @@ export type AppShellProps = {
    *
    * @remarks
    * **主体を知らなければ決まらない導線の置き場です。** 取得を待つものを {@link navItems} へ混ぜると、
-   * 器そのものが待つことになり、この器を通る画面がすべて動的描画になります
-   * （[0041](../../../../docs/adr/0041-cache-components-decision.md)）。待つ側を穴として渡します。
+   * 器そのものが待つことになり、この器を通る画面がすべて動的描画になります。待つ側を穴として
+   * 渡します。
    *
    * **side menu の側は {@link menuNavSlot} が別に受け取ります。** 同じ要素を両方へ流せないのは、
    * menu の中の導線だけが履歴を積まずに移るためです（`AppShellNavLink`）。
@@ -52,7 +52,7 @@ export type AppShellProps = {
  * 置く画面も、shell を剥がさずに済みます。
  *
  * skip link を先頭に置くのは、キーボードと支援技術の利用者が header の導線を毎回辿らずに
- * 本文へ入れるようにするためです（[0100](../../../../docs/adr/0100-accessibility-target.md)）。
+ * 本文へ入れるようにするためです。
  *
  * admin 側は別の shell を持ちます。見せる相手も導線も違うため、1 枚にまとめると分岐を shell の
  * 中に抱えることになります。
@@ -68,7 +68,7 @@ export type AppShellProps = {
  *
  * **`sidebar` と `headerActions` の中身は知りません。** 置き場所だけを用意し、何を出すか・いつ出すか・
  * どれだけの幅を取るかは渡す側が決めます。shell が中身を知ると、画面ごとの出し分けが分岐として
- * ここに集まります（[0026](../../../../docs/adr/0026-layout-shell-mount.md)）。
+ * ここに集まります。
  *
  * @see Storybook `Layout/AppShell`
  */

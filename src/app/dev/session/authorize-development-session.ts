@@ -14,9 +14,8 @@ const AUTH_CALLBACK_PATH = "/api/auth/callback";
  *
  * @remarks
  * **受け口が自分で持ちます。** `next.config.ts` の `bodySizeLimit` は Server Action にしか及ばず、
- * Route Handler へ寄せた時点で外れます（[0075](../../../../docs/adr/0075-file-upload-seam.md) の
- * 「Route Handler へ寄せたら route ごとに扱いを決められる」の裏返し）。ここが受けるのは短い指定
- * だけで、貼られた Bearer を含めても収まります。
+ * Route Handler へ寄せた時点で外れます。ここが受けるのは短い指定だけで、貼られた Bearer を
+ * 含めても収まります。
  */
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -24,10 +23,8 @@ const MAX_BODY_BYTES = 64 * 1024;
  * 認可の結果。HTTP の形へ直すのは呼び出し側（Route Handler）。
  *
  * @remarks
- * 状態ごとに持つ値が違うため判別可能 union にしてあります
- * （[0029](../../../../docs/adr/0029-type-design-discipline.md)）。転送先まで組んで返すのは、
- * 戻す行き先が `features` の語彙（失敗の分類）で決まるためです。**Route Handler は `features` を
- * 参照できません**（[0025](../../../../docs/adr/0025-app-layer-elements.md) の element 表）。
+ * 状態ごとに持つ値が違うため判別可能 union にしてあります。転送先まで組んで返すのは、戻す行き先が
+ * `features` の語彙（失敗の分類）で決まるためです。**Route Handler は `features` を引けません。**
  */
 export type AuthorizeOutcome =
   | { readonly kind: "redirect"; readonly destination: string }
@@ -39,8 +36,8 @@ export type AuthorizeOutcome =
  *
  * @remarks
  * **Route Handler の本体をここへ置きます。** `route.ts` に許される import 先は `adapters/server` /
- * `errors` / `logging` で、原則は thin proxy です（[0025](../../../../docs/adr/0025-app-layer-elements.md)）。
- * form の解析も失敗の分類も `features` の語彙なので、受け口の隣へ出して口そのものを薄く保ちます。
+ * `errors` / `logging` で、原則は thin proxy です。form の解析も失敗の分類も `features` の
+ * 語彙なので、受け口の隣へ出して口そのものを薄く保ちます。
  *
  * 失敗は分類だけを URL へ載せて画面へ戻します。分類しか戻さない理由は
  * `features/dev-session/authorize-error.ts` の `AUTHORIZE_ERROR` が持ちます。項目ごとの理由は、

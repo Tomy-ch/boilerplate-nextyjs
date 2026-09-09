@@ -12,11 +12,11 @@ type Item = {
   status: string;
 };
 
-const ITEMS: Item[] = [
+const ITEMS = [
   { id: "1", name: "標準プラン", status: "公開中" },
   { id: "2", name: "特別プラン", status: "下書き" },
   { id: "3", name: "旧プラン", status: "終了" },
-];
+] satisfies readonly [Item, ...Item[]];
 
 function itemRowKey(item: Item) {
   return item.id;

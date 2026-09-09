@@ -1,7 +1,7 @@
 name: Secret Scan
 
 # gitleaks over the commits a pull request adds, and over the whole history once a
-# week (ADR 0110 §2). Detection is fail-closed: a secret is the one finding whose
+# week. Detection is fail-closed: a secret is the one finding whose
 # author can always resolve it on the spot, so there is nothing to weigh.
 #
 # The hook runs the same `make secret-scan`. What differs is the range, and it has
@@ -17,7 +17,7 @@ on:
   pull_request:
   schedule:
     # Weekly. The whole-history pass belongs here rather than in the hook because its
-    # runtime grows with the commit count (ADR 0110 §2 / revert condition W4).
+    # runtime grows with the commit count.
     - cron: '45 1 * * 1'
   workflow_dispatch:
 

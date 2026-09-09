@@ -1,15 +1,20 @@
 name: Suppression Expiry
 
-# Weekly re-read of the suppressions this repository declares (ADR 0110 §3.4).
+# Weekly re-read of the suppressions this repository declares.
 #
-# Why the rule needs a job that looks is ADR 0110 §3.4; this file is that job.
+# Why the rule needs a job that looks is in the README; this file is that job.
 #
 # Two limits are deliberate, and the report states both rather than reading as complete.
 # Only dates are decided: "once upstream requires N or later" and "after the sample purge
 # runs" cannot be evaluated, so every declaration is listed, not only the judged ones.
 # And the surfaces that keep their reason in a comment (gitleaks, zizmor, the pnpm
-# cooldown block, sonar) cannot be read per declaration at all — a parser drops comments —
+# overrides, sonar) cannot be read per declaration at all — a parser drops comments —
 # so only their date-bearing lines appear.
+#
+# Cooldown exemptions (`minimumReleaseAgeExclude` in pnpm-workspace.yaml, the
+# `tools-cooldown-ignore:` comment above a mise.toml pin) are read per declaration, with the
+# comment beside them as the reason, and fail when the reason, the version, or the date the
+# window clears is missing — an exemption without a date has no withdrawal condition.
 #
 # Not attached to pull requests. Nothing a pull request changes can make a date arrive,
 # and running it there would spend a job on every change to say the same thing.

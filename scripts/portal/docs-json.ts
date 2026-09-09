@@ -18,7 +18,7 @@ const groupConfigSchema = z.object({
 /**
  * サイドバー下部の常設リンク。
  *
- * section id を書くと、その section の代表項目へのリンクになる（go 由来）。加えて
+ * section id を書くと、その section の代表項目へのリンクになる。加えて
  * `{title, path}` を直接書ける。Storybook のように portal と同じサイトへ並ぶが `docs/`
  * 配下には存在しない生成物は、section として発見されないため id では指せない。
  */

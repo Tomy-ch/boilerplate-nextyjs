@@ -7,8 +7,7 @@ import { ErrorKind } from "@/errors/error-kind";
  * 取得の口が扱う値の分類。
  *
  * @remarks
- * 分類を値ではなく**口**に持たせる理由は
- * [0112](../../../../docs/adr/0112-data-classification-cache-boundary.md) 決定 1 が持ちます。
+ * 分類を値ではなく**口**に持たせる理由は [adapters の README](../../README.md) が持ちます。
  *
  * 呼び出し側に値を綴りのまま書かせるのは、この宣言を検査が読むためです
  * （`project-rules/no-user-scoped-in-cached-module`）。綴りを定数へ寄せると検査が黙って外れるので、
@@ -30,9 +29,8 @@ const CREDENTIAL_HEADERS: ReadonlySet<string> = new Set(["authorization", "cooki
  * 呼び出しごとの指定が、口の分類に許された範囲に収まっていることを確かめる。
  *
  * @remarks
- * 同じことを型が既に禁じています（`request.ts` の `UserScopedRequestSpec`）。ここに置くのは
- * **型を迂回した書き方**への後詰めで、別の口の使い回しや組み立てた spec から入ってくる経路を
- * 止めます（[0112](../../../../docs/adr/0112-data-classification-cache-boundary.md) 決定 4）。
+ * 同じことを型が既に禁じています（`request.ts` の `UserScopedRequestSpec`）。ここに置くのは **型を
+ * 迂回した書き方**への後詰めで、別の口の使い回しや組み立てた spec から入ってくる経路を止めます。
  *
  * @throws 分類に許されない指定を含むとき
  */
@@ -51,9 +49,9 @@ export function assertSpecWithinScope(
  * 資格情報のヘッダが呼び出しごとの指定に混ざっていないことを確かめる。
  *
  * @remarks
- * 資格情報を組むのは要求境界だけです（[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §6）。
- * 呼び出しごとに組める余地が残っていると、**口の分類が「その client が資格情報を載せるか」を
- * 言い当てられなくなります** —— 分類の前提そのものが崩れるため、綴りの段階で塞ぎます。
+ * 資格情報を組むのは要求境界だけです。呼び出しごとに組める余地が残っていると、
+ * **口の分類が「その client が資格情報を載せるか」を言い当てられなくなります** —— 分類の
+ * 前提そのものが崩れるため、綴りの段階で塞ぎます。
  *
  * @throws 資格情報のヘッダを含むとき
  */

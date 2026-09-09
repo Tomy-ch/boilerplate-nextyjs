@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 import { SHOT_THEMES, THEMES } from "./vrt/lib/themes";
 
 /**
- * story 単位の visual regression の設定([0091](docs/adr/0091-test-verification-methods.md))。
+ * story 単位の visual regression の設定。使い方は [`vrt/README.md`](vrt/README.md)。
  *
  * @remarks
  * 実行は必ず Playwright 公式イメージのコンテナ内で行います(`make vrt`)。フォントの
@@ -71,8 +71,8 @@ export default defineConfig({
     timezoneId: "Asia/Tokyo",
     locale: "ja-JP",
     contextOptions: {
-      // Framer Motion の動きは CSS animation ではないため、撮影時の停止では止まらない
-      // ([0051](docs/adr/0051-styling-system.md))。動きを求めない設定にして初期状態で撮る。
+      // Framer Motion の動きは CSS animation ではないため、撮影時の停止では止まらない。
+      // 動きを求めない設定にして初期状態で撮る。
       reducedMotion: "reduce",
     },
   },
@@ -80,8 +80,8 @@ export default defineConfig({
   // [themes](vrt/lib/themes.ts)。
   //
   // 全 story を撮り axe を掛けるのは `SHOT_THEMES` のテーマだけ。もう片方は配色が `:root` へ
-  // 届いているかだけを見る spec に絞る。両方で全 story を回すと実行が倍になり、fork 先の CI が
-  // その分だけ課金される。
+  // 届いているかだけを見る spec に絞る。両方で全 story を回すと実行が倍になり、テンプレートから
+  // 作った側の CI がその分だけ課金される。
   projects: THEMES.map((name) => ({
     name,
     ...(SHOT_THEMES.some((shot) => shot === name) ? {} : { testMatch: "**/theme-tokens.spec.ts" }),

@@ -6,13 +6,7 @@ App Router の採用を追認し、**Server / Client Components の境界 / Serv
 
 Accepted
 
-（採番はブロック帯で確定(2026-07-14・0001〜0155。トピック順ブロック帯(10 番台=主題ブロック))([0140](0140-documentation-operations.md))。本 ADR の内容自体はユーザ決定済み。日付 2026-07-12。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
-バッテリー採用への転換(2026-07-14・v1): route-as-modal(intercepting / parallel routes)を選択肢として認める追補を追加(triage #22・ユーザ採用決定)。App Router 単独・Server Components 既定は不変。
-
 ## 背景
-
-`src/app/`(`layout.tsx` / `page.tsx` / `globals.css`)が既に存在し、App Router は事実上採用済みだが、「Server Components 既定」「`"use client"` の置き方」「Server Actions の採否」「CSR/SSR/SSG/ISR の使い分け」は未文書化だった。AGENTS.md の `[TODO] Routing & Rendering Strategy` が敷いていた暫定運用(App Router 既定挙動 = Server Components / `"use client"` 追加は最小化しコミットに理由記載 / Pages Router 不採用)を、本 ADR が確定させる。
 
 本リポジトリは **Next.js 16 / React 19** を採用しており、レンダリング・キャッシュの既定が従来の Next.js と異なる。実装前に `node_modules/next/dist/docs/` を確認した結果、以下を前提とする:
 
@@ -47,11 +41,11 @@ Accepted
 - 本 boilerplate は **CSR / SSR / SSG / ISR のいずれのモードも閉ざさない**。特定モードを一律強制せず、静的シェルのプリレンダーと request-time のストリーミングの**両対応を保つ**
 - 導出根拠: [0011](0011-no-docker.md) の想定デプロイは静的 CDN と SSR PaaS の**両方が主想定**であり、boilerplate 本体はどのモードも前提にしない
 - **モードの選択は機密性に従属する。** Server Components 既定は**性能と UX 上の既定値**であって、PII / user-scoped データの機密性を上回る制約ではない。PII を含む範囲のモード選択は [0112](0112-data-classification-cache-boundary.md)(不変条件 1 / 決定 8・10)が正であり、**PII のために SSR / PPR を諦めることは許可される**(ただし CSR にする範囲は最小の Client Island に限る)
-- **ただし、どちらで描くかを画面が宣言することはない。** Cache Components が有効なので（[0041](0041-cache-components-decision.md)）、殻と穴の分かれ目は器の形そのもの —— 何を `<Suspense>` の外に置き、何を内に置くか —— で決まり、segment config（`export const dynamic`）は併存しない。取得・`params` / `searchParams`・cookie・認可の判定・実時計は、すべて穴の内側で解く。**殻を配れない画面だけが `export const instant = false` を理由つきで名乗る。** 宣言と実態の突合は `scripts/render-mode` が `prerender-manifest.json` の `compute` に照らし、宣言なしにブロックしている route と、宣言が余っている route の双方を見る。**機械で確かめられるのは殻を配れたかどうかまで**で、「殻へ入れてよい内容か」は成果物から読めない
-- **描画モードは page 単体ではなく、layout の連なりを含めた route 全体で決まる。** 祖先の器が request 時の API(`cookies()` / `headers()` 等)に触れれば、その配下の画面は**自分が取得を持たなくても、宣言の有無によらず**動的になる。静的な殻と動的な穴に割る仕組みは 0.0.x では採らないため([0041](0041-cache-components-decision.md))、画面側から逃げる手立ては無い。したがって**固めたい画面を含む route group の器に、request 時の取得を置かない**。器がその取得を必要とするなら、固めたい画面をその器の外へ出す(器を分ける判断は [0026](0026-layout-shell-mount.md))
-- **宣言は行儀ではなく、この伝播を検知する唯一の手段である。** 前段のとおり機械が読めるのは固まったかどうかまでで、**「固められるのに固まっていない」は成果物から読めない**。宣言の無い画面が器の都合で動的になっても何も赤くならず、静的にできる画面が黙って動的なまま座り続ける。固めてよい画面へ `force-static` を宣言してあれば、後から器へ取得が足された時点で「宣言したのに動的」として落ちる
-- **Next.js 16 のキャッシュ挙動**: `fetch` 既定 uncached を前提とし、キャッシュは opt-in とする(Cache Components 有効時は `use cache` / PPR、無効の間は従来モデルの `cache: 'force-cache'` 等)。ただし**具体的なキャッシュ方針(どこを `use cache` するか / `cacheLife` / `<Suspense>` 境界の切り方)は本 ADR で固定しない**。データ取得のキャッシュ・再検証設計は **B3([0071](0071-bff-api-integration.md))「データ取得のキャッシュ・再検証」節**、`loading.tsx` / Suspense 境界は **B6([0080](0080-error-handling.md))** が引き取り確定済み
-- **`Cache Components`(PPR を既定化する設定)の有効化可否は [0041](0041-cache-components-decision.md) が「0.0.x = 無効」に確定済み**。本 ADR は「モードを強制しない」ことのみ確定し、有効化判断は 0041 に委ねる
+- **ただし、どちらで描くかを画面が宣言することはない。** Cache Components が有効なので([0041](0041-cache-components-decision.md))、殻と穴の分かれ目は器の形そのもの —— 何を `<Suspense>` の外に置き、何を内に置くか —— で決まり、segment config(`export const dynamic`)は併存しない。取得・`params` / `searchParams`・cookie・認可の判定・実時計は、すべて穴の内側で解く。**殻を配れない画面だけが `export const instant = false` を理由つきで名乗る。** 宣言と実態の突合は `scripts/render-mode` が `prerender-manifest.json` の `compute` に照らし、宣言なしにブロックしている route と、宣言が余っている route の双方を見る。**機械で確かめられるのは殻を配れたかどうかまで**で、「殻へ入れてよい内容か」は成果物から読めない
+- **描画モードは page 単体ではなく、layout の連なりを含めた route 全体で決まる。** 祖先の器が request 時の API(`cookies()` / `headers()` 等)を穴の外で読めば、その配下の画面は**自分が取得を持たなくても**殻を配れなくなる。画面側から逃げる手立ては無い。したがって**固めたい画面を含む route group の器は、request 時の読みを穴の内側に閉じるか、持たない**。器がその読みを殻の側で必要とするなら、固めたい画面をその器の外へ出す(器を分ける判断は [0026](0026-layout-shell-mount.md))
+- **宣言は行儀ではなく、この伝播を検知する唯一の手段である。** 前段のとおり機械が読めるのは殻を配れたかまでで、**「配れるのに配れていない」は成果物から読めない**。宣言の無い画面が器の都合でブロックしても何も赤くならず、静的にできる画面が黙って動的なまま座り続ける。`instant = false` を名乗る画面を「殻を配れない画面だけ」に限っておけば、宣言の無い画面がブロックした時点で `scripts/render-mode` が落とし、器へ足された読みが露見する
+- **キャッシュは opt-in とする**(`fetch` 既定 uncached を前提に `use cache`)。ただし**具体的なキャッシュ方針(どこを `use cache` するか / `cacheLife` / `<Suspense>` 境界の切り方)は本 ADR で固定しない**。データ取得のキャッシュ・再検証設計は [0071](0071-bff-api-integration.md)「データ取得のキャッシュ・再検証」節、`loading.tsx` / Suspense 境界は [0080](0080-error-handling.md) が正
+- **`Cache Components`(PPR を既定化する設定)の有効化判断は [0041](0041-cache-components-decision.md) が持つ**(採用)。本 ADR は「モードを強制しない」ことのみ確定する
 
 ### route-as-modal(intercepting / parallel routes)を認める
 
@@ -67,7 +61,7 @@ Accepted
 
 ### `loading.tsx` / `error.tsx` の配置
 
-- App Router の `loading.tsx` / `error.tsx` / `not-found.tsx` / `global-error.tsx` の配置・責務は **B6([0080](0080-error-handling.md))が確定済み**(`error.tsx` 系 = 同 3 節 / `loading.tsx`・Suspense 境界 = 同 4 節)。本 ADR は特殊ファイルの命名([0028](0028-naming-convention.md))と「driving adapter に業務ロジックを置かない」原則のみを敷く
+- App Router の `loading.tsx` / `error.tsx` / `not-found.tsx` / `global-error.tsx` の配置・責務は [0080](0080-error-handling.md) が正(`error.tsx` 系 = 同 3 節 / `loading.tsx`・Suspense 境界 = 同 4 節)。本 ADR は特殊ファイルの命名([0028](0028-naming-convention.md))と「driving adapter に業務ロジックを置かない」原則のみを敷く
 
 ### 採らない分割モデル
 
@@ -96,22 +90,19 @@ Accepted
 - ❌ route-as-modal を全モーダルの既定として強制すること(あくまで**選択肢**。既定手段の判断は [0053](0053-ui-component-interaction-seam.md) 管轄)
 - ❌ intercepting / parallel routes の代替に独自ルーティング機構を発明・中立化すること(Next.js file convention にそのまま乗る。[0010](0010-standards-and-non-lockin.md) §1)
 
-## 補足
-
-- 本 ADR の Accepted に伴い、AGENTS.md の `[TODO] Routing & Rendering Strategy` 節の削除・書き換えを実施する(未実施 — AGENTS.md は Protected Documentation のため、変更案の提示とユーザ承認を経て適用する)
-- 本 ADR は方針を定める。`Cache Components` 有効化・具体キャッシュ設計は B3 / B6 確定後の実装 PR で扱う
-
 ## 関連 ADR
 
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) — driving adapter 非分割軸 / `page.tsx` 薄化 / feature 第一軸(本 ADR の親原則)
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — Server Action の置き場(`actions.ts`)・`"use client"` 押し下げ
 - [0011-no-docker.md](0011-no-docker.md) — thin proxy(driving adapter に業務ロジックを置かない)/ 静的 CDN・SSR 両対応の想定デプロイ(モード非強制の根拠)
+- [0026-layout-shell-mount.md](0026-layout-shell-mount.md) — 器を分ける判断(描画モードが route 全体で決まることの相方)
 - [0028-naming-convention.md](0028-naming-convention.md) — App Router 特殊ファイル・route セグメントの命名
-- [0030-environment-variable-management.md](0030-environment-variable-management.md) — SSG / ISR での env プリレンダー凍結(Cache Components 判断との交差)
+- [0030-environment-variable-management.md](0030-environment-variable-management.md) — プリレンダーでの env 凍結
+- [0041-cache-components-decision.md](0041-cache-components-decision.md) — Cache Components(PPR)の採用(殻と穴・`instant` 宣言の機構)
 - [0060-state-management.md](0060-state-management.md) — Server state = Server Component fetch 既定 / URL state(search params / route params は本 ADR の App Router 標準機構の上で扱う)
-- [0090-testing-strategy.md](0090-testing-strategy.md)(B8)— Server Components / route handler / E2E のテスト線引き(同日 Accepted)
-- [0071-bff-api-integration.md](0071-bff-api-integration.md)(B3)— データ取得のキャッシュ・再検証設計(本 ADR から引き取り確定済み)
-- [0080-error-handling.md](0080-error-handling.md)(B6)— `loading.tsx` / Suspense 境界 + `error.tsx` 系の配置・責務(本 ADR から引き取り確定済み)
-- [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) — モーダル/ダイアログの既定手段(native `<dialog>` / a11y 必須要件)。route-as-modal 採否を本 ADR に委譲(本節がその受け皿。triage #22)
+- [0090-testing-strategy.md](0090-testing-strategy.md) — Server Components / route handler / E2E のテスト線引き
+- [0071-bff-api-integration.md](0071-bff-api-integration.md) — データ取得のキャッシュ・再検証設計
+- [0080-error-handling.md](0080-error-handling.md) — `loading.tsx` / Suspense 境界 + `error.tsx` 系の配置・責務
+- [0053-ui-component-interaction-seam.md](0053-ui-component-interaction-seam.md) — モーダル/ダイアログの既定手段(native `<dialog>` / a11y 必須要件)。route-as-modal 採否を本 ADR に委譲(本節がその受け皿)
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — 標準準拠と非ロックインの判断軸(route-as-modal = Next.js 規約に乗る seam / 構造は代替可能 = vendor-independent 正当化の根拠)
 - [0004-library-management.md](0004-library-management.md) — ライブラリ管理方針(route-as-modal はネイティブ機能で新規依存を増やさない = 本 ADR は同方針の対象外)

@@ -8,7 +8,7 @@
 
 このコマンドは作業ツリーの未コミット変更を分析し、適切な粒度とプロジェクトの prefix 規約に沿った 1 つ以上の git コミットを作る。コミットメッセージはすべて日本語（`CLAUDE.md` に従う）。
 
-このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm md-lint`）が N 回発火しないようにするため。代わりに全コミット成功後、Step 6 で lefthook 定義の各 `pre-commit` コマンドと `pnpm fix` を 1 回の検証パスとして直接実行する。`lefthook run pre-commit` 自体を呼ばないのは、staged が空のとき lefthook が登録コマンドをスキップしてしまうため（このコマンドが staging とコミットを終えた後は、まさにその状態になる）。
+このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm lint:md`）が N 回発火しないようにするため。あとから回すこともしない。`AGENTS.md` の *Do not pre-run the gates* がゲートを hook と CI に置き、**判定は CI が正**としているためである。Step 6 はこの実行が書いたものだけを整形し、どのゲートを CI へ預けたかを報告する。
 
 ## Step 0. 自動フォーマット
 
@@ -63,11 +63,13 @@ gh pr view --json number,state,mergedAt,baseRefName,headRefName,url 2>/dev/null
     - 「新しいブランチを切る（推奨）」 — 未コミットの変更内容から導いたブランチ名（例: `feature/<topic>`）を提案して確認し、base を最新化してから切り替える:
 
       ```sh
-      git fetch origin <baseRefName>
-      git switch -c <new-branch> origin/<baseRefName>
+      BASE=$(make -s base-branch)
+      test -n "$BASE" || { echo "ベースブランチを解決できませんでした"; exit 1; }
+      git fetch origin "$BASE"
+      git switch -c <new-branch> "origin/$BASE"
       ```
 
-      未コミットの作業ツリー変更は新ブランチへ持ち越される。以降は新ブランチ上で通常フロー（Step 2 以降）を続ける。**例外:** `--dry-run` のときはブランチを切り替えない — 警告と推奨コマンドを提示するだけにし、dry-run の提案を続ける。
+      ここでの base は**現行の**リリースラインであり、`make base-branch` が `origin` の実状態から解決する。マージ済み PR の `baseRefName` は使わない。あれは古い作業がマージされた先を記録しているだけで、その後に新しいリリースラインが開いていることは十分あり、そこから切ると新しい作業が 1 世代遅れて始まる。`gh repo view --json defaultBranchRef` が答えにならないのも同じ理由で、GitHub のデフォルトブランチも現行のラインより遅れうる。`git switch -c … origin/release/*` は新ブランチの upstream を**保護された** base に設定するため、最終的な push は明示 refspec（`git push -u origin <new-branch>`）を使い、素の `git push`（保護 base を対象にしてしまう）は決して使わないこと。未コミットの作業ツリー変更は新ブランチへ持ち越される。以降は新ブランチ上で通常フロー（Step 2 以降）を続ける。**例外:** `--dry-run` のときはブランチを切り替えない — 警告と推奨コマンドを提示するだけにし、dry-run の提案を続ける。
     - 「このブランチのまま続ける」 — マージ済みブランチ上でのコミットをユーザが受け入れた場合。現在のブランチで続行する。
 - **`state` が `CLOSED`**（マージされずクローズ）→ 中断はしないが、その旨を一度ユーザへ伝えて続行する。
 
@@ -97,8 +99,6 @@ git diff --name-only
 - ロックファイル: `pnpm-lock.yaml` は、それを生んだ `package.json` の変更に相乗りする（[0001](../../../docs/adr/0001-package-manager.md) — ロックファイルはコミット必須であり、単独ではコミットしない）
 - 生成された API 生成物: `src/adapters/gen/**` と取り込んだ `openapi.gen.yaml`（[0072](../../../docs/adr/0072-api-type-generation.md) — 編集禁止。バックエンドの spec から再生成される） <!-- skill-lint-ignore -->
 - Next.js が管理する型: `next-env.d.ts`
-
-例: `package.json` の依存変更は、再生成された `pnpm-lock.yaml` を同じコミットへ連れてくる。バックエンドの `openapi.gen.yaml` を再取り込みした場合は、その `src/adapters/gen/**` 出力を同じコミットへ連れてくる。 <!-- skill-lint-ignore -->
 
 これらのパスの一部はまだ存在しない（生成パイプラインは [0072](../../../docs/adr/0072-api-type-generation.md) の実装 PR で着地する）。存在しないパスは「rider 無し」として扱い、エラーにしない。
 
@@ -154,22 +154,21 @@ git diff --name-only
 
 - **1 つの意味的変更 = 1 コミット。** feature + refactor + fix を 1 コミットへ混ぜない。
 - **テストは対象の実装と同居してよい**（新規ハンドラとそのテストは一緒でよい）。既存コードへテストだけを追加する場合は、単独の `Test:` コミットにする。
-- **生成物はソース変更と同居する。** `package.json` の依存が変わったら、再生成された `pnpm-lock.yaml` は同じコミットに属する。取り込んだ `openapi.gen.yaml` が変わったら、再生成された `src/adapters/gen/**` は同じコミットに属する（[0072](../../../docs/adr/0072-api-type-generation.md)）。 <!-- skill-lint-ignore -->
+- **生成物はソース変更と同居する。** Step 2 の rider ファイルは、それを生んだ変更と同じコミットに相乗りする。
 - **フォーマットのみの変更は単独の `Style:` コミット。** Step 0 の `pnpm fix` が生んだ出力は、明らかに同じ変更の一部なら該当グループへ畳み込んでよい。無関係なら別の `Style:` コミットとして出す。
 - **`Docs:` は既定で単独。** 例外として、ドキュメントが新機能の一部である場合（新規パッケージに添える README 等）は同居してよい。
 - **1 コミット 1 prefix。** 2 つ書きたくなったら、その分割が間違っている。
 
 ### lefthook の通知
 
-分割提案とあわせて、コミット段階では**スキップ**され Step 6 で検証ゲートとして**直接実行**される lefthook コマンドを表示する。一覧は `.lefthook.yaml` から動的に読む（設定であり、ハードコードしない）。現在の設定に対応する出力例:
+分割提案とあわせて、コミット段階では**スキップ**され、そのまま **CI へ預けられる** lefthook コマンドを表示する。一覧は `.lefthook.yaml` から動的に読む（設定であり、ハードコードしない）。現在の設定に対応する出力例:
 
 ```txt
 This command will run `git commit --no-verify` on every commit.
-The following lefthook pre-commit commands will be SKIPPED during commits but
-EXECUTED automatically in Step 6 (verification) after all commits succeed:
+The following lefthook pre-commit commands are SKIPPED here and left to CI,
+which is the authority on whether they pass:
   - lint     (pnpm lint:ci)
-  - md-lint  (pnpm md-lint)   ※ glob: *.md
-Plus `pnpm fix` as a final formatting pass.
+  - md-lint  (pnpm lint:md)   ※ glob: *.md
 ```
 
 `pre-push` のコマンド（現状は `pnpm typecheck`）はこのゲートに**含まない**。それらは push 経路に留まり、このコマンドは push を起動しない。
@@ -211,7 +210,7 @@ EOF
 - **`Co-Authored-By` フッタ**: 必須。形式は `Co-Authored-By: <実行中のモデル名> <noreply@anthropic.com>` — 例: `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`。実際にコミットを生成しているモデルの識別子を、環境 / `CLAUDE.md` の記載どおりに使う。本ドキュメントにハードコードされたモデル名を写さないこと — モデルのリリースごとに古くなり、誤った名前はコミットの帰属を誤らせる。
 - **`Refs:` footer（レビュー適用コミットのみ）**: `full-apply` / `impl-review` / `code-review` の指摘を適用したコミットには、`Refs: tmp/reviews/mod_*.md (<severity>)` の行を footer へ足し、コミットからfinding へ辿れるようにする。通常のコミットには付けない。
 - **HEREDOC**: 必須（タイトル + 空行 + 本文 + フッタの体裁を保つ）。
-- **`--no-verify`**: このコマンドが作る全コミットで必須。プロジェクト全体の規則に対するコマンド限定の明示的な例外であり、根拠は Step 4 に記載（lefthook は分割中に N 回ではなく、push 前に 1 回手動で回す）。
+- **`--no-verify`**: このコマンドが作る全コミットで必須 — 冒頭で述べたコマンド限定の例外であり、検証は Step 6 の 1 回のパスで行う。
 - **`-a` / `git add -A` / `git add .` は決して使わない。** 常にファイル名を指定して staging する（`.env` や資格情報の巻き込みを避ける）。
 - **`--no-gpg-sign` と `--amend` は引き続き禁止。**
 
@@ -233,60 +232,62 @@ EOF
 
 ## Step 6. 検証
 
-全コミット成功後、(a) `.lefthook.yaml` の `pre-commit:` `commands:` 配下で定義された各コマンドと、(b) 最終フォーマットパスとしての `pnpm fix` からなる検証ゲートを回す。`lefthook run pre-commit` 自体は実行しないこと — staged が空のとき（コミット後はまさにその状態）lefthook は登録コマンドをスキップし、「一致する staged ファイルなし」として何も検査せず終了してしまう。代わりに各コマンドを直接実行する。
+<!-- boilerplate-only:replace-begin -->
+**ここでゲートを回さない。** `AGENTS.md` の *Do not pre-run the gates* は「hook と CI が回す。
+**判定は CI が正**」と明言している。コミット後にリポジトリ全体へ `pnpm lint:ci` / `pnpm lint:md` を
+掛け直しても判定が真になるわけではなく、負荷の高いホストでは二重実行そのものが、変更と無関係な失敗の
+発生源になる。`make load-status` はいまローカルでどのゲートが走る帯かを表示し、その帯は推測ではなく実測で決まる。
+
+**その規約はこのリポジトリだけのもの**で、テンプレートから作ったリポジトリからは剥がされる ——
+この節ごと剥がされるのはそのためで、下に退避してある版がゲートの実行を戻す。作った側の
+リポジトリは作業ツリーが 1 本で、ゲートの実行は書いてあるとおりの費用しか掛からない。
+
+したがってこのステップがやることは 2 つだけである。
 
 ### 手順
 
-1. `.lefthook.yaml` を読み直し、`pre-commit.commands.*.run` の値を列挙する。`.lefthook.yaml` が無ければこのステップをスキップする。
-2. 各コマンドを**逐次**実行する（並列より出力が明快で、どこで失敗したかがユーザに見える）。それぞれ終了ステータスと出力の末尾を短く捕捉する。
-3. lefthook 定義のコマンドがすべて終わったら `pnpm fix` を実行する。`pnpm fix` が追跡対象ファイルを変更した場合は、その差分をユーザへ提示する — コミットした状態が完全にはフォーマットされていなかったことを示すため、それらの修正を staging してコミットするかはユーザが判断する。
-4. 結果を表形式でユーザへ要約する:
+1. **この実行が触ったものだけを整形する。**この実行が書いた Markdown に対して
+   `pnpm exec markdownlint-cli2 --no-globs --fix <パス>`。`--no-globs` は効力を持つ ——
+   付けないと設定の `globs` が引数へ**追加され**、木全体が書き換わる。
+2. **どのゲートを CI へ預けたかを報告する。**ここに一覧を焼き込まず `.lefthook.yaml` から読む。
 
    ```txt
-   検証コマンドの実行結果:
-     - pnpm lint:ci   → OK / FAIL
-     - pnpm md-lint   → OK / FAIL
-     - pnpm fix       → no changes / changes detected
+   検証は CI が持ちます。手元では回していません。
+     - pre-commit で走るもの: <.lefthook.yaml の pre-commit.commands から列挙>
+     - pre-push で走るもの:   <同 pre-push から列挙>
    ```
 
-5. いずれかのコマンドが**失敗**した場合は、失敗サマリ（終了コード + 出力末尾）を報告して停止する。コミットはロールバック**しない** — 失敗は情報提供であり、修正コミットを積むか amend するかはユーザが決める。ユーザへ明示的に伝える:
-
-   ```txt
-   検証で失敗があります。push 前に修正してください。
-   失敗したコマンド: <name> (<command>)
-   ```
-
-6. すべて**成功**し `pnpm fix` が変更を生まなかった場合は Step 7 へ進む。
-
-### 検証のスキップ
-
-`/commit` 自体へ `--no-verify` が渡された場合（将来互換のフラグ）、または `.lefthook.yaml` が無い場合は、このステップを丸ごとスキップし、Step 7 の報告にその旨を記す。既定の挙動は検証を実行することである。
+整形が追跡下のファイルを変えたら差分を提示する。コミットした状態が整形されていなかったということで、
+追加のコミットを積むかは user が決める。
+<!-- boilerplate-only:replace-with -->
+<!-- = 全コミット成功後、検証ゲートを回す。`.lefthook.yaml` の `pre-commit:` に定義された各 -->
+<!-- = コマンドと、最後に整形パスとして `pnpm fix`。`lefthook run pre-commit` 自体は呼ばない —— -->
+<!-- = staged が空のとき lefthook は登録コマンドをスキップし、このスキルが残すのはまさにその状態。 -->
+<!-- = -->
+<!-- = ### 手順 -->
+<!-- = -->
+<!-- = 1. `.lefthook.yaml` を読み直し `pre-commit.commands.*.run` を列挙する。ファイルが無ければ -->
+<!-- =    このステップを飛ばす。 -->
+<!-- = 2. 各コマンドを順に実行し、終了状態と出力の末尾を控える。 -->
+<!-- = 3. 最後に `pnpm fix`。追跡下のファイルが変わったら差分を提示する —— コミットした状態が -->
+<!-- =    整形されていなかったということで、追加のコミットを積むかは user が決める。 -->
+<!-- = 4. 各コマンドを OK / FAIL で報告する。失敗があればそれを報告して止める。コミットは -->
+<!-- =    巻き戻さない —— 失敗は情報であり、どう答えるかは user が決める。 -->
+<!-- boilerplate-only:replace-end -->
 
 ## Step 7. push 方針と最終リマインド
 
 - **自動 push しない**（`CLAUDE.md` の git 規約に従う）。
-- Step 6 が終わったら（全チェック成功か否かに関わらず）ユーザへ報告する。テンプレートは検証結果に応じて変える:
-
-  すべて成功した場合:
+- Step 6 が終わったらユーザへ報告する:
 
   ```txt
-  N 件のコミットを作成し、検証コマンドも全て成功しました。
-  プッシュは手動で実行してください: `git push`
+  N 件のコミットを作成しました。
+  検証は CI が持ちます（手元では回していません）。
+  プッシュは手動で実行してください: `git push --no-verify`
   ```
 
-  一部が失敗した場合:
-
-  ```txt
-  N 件のコミットを作成しましたが、Step 6 の検証で失敗があります。
-  失敗内容を修正してから push してください。
-  ```
-
-  検証をスキップした場合（`.lefthook.yaml` 無し、または明示的スキップ）:
-
-  ```txt
-  N 件のコミットを作成しました（検証はスキップしました）。
-  push 前に手動で動作確認してください。
-  ```
+  Step 6 の整形が追跡下のファイルを変えたなら、そう述べてファイル名を挙げる —— コミットした状態が
+  整形されていなかったということで、追加のコミットを積むかは user が決める。
 
 - 既存 PR ブランチで作業している場合は `CLAUDE.md` に従い、push 前に確認する:
   「変更はローカルにコミット済みです。これらの変更をプルリクエストにプッシュしますか？」
@@ -309,7 +310,7 @@ EOF
 - ✅ Step 1 で現ブランチの PR がマージ済みかを検出し（`gh pr view`）、コミット前に base から新ブランチを切ることを推奨する（`gh` が使えない場合は穏当に縮退する）
 - ✅ 失敗時は `AskUserQuestion` で `git reset --mixed <ORIGINAL_HEAD>` を提案する
 - ✅ Step 6 は lefthook 定義の各コマンド + `pnpm fix` を直接実行する（`lefthook run pre-commit` は使わない）
-- ❌ `lefthook run pre-commit` を呼ばない — staged が空のときコマンドをスキップしてしまい、それがコミット後の状態にあたる
+- ❌ `lefthook run pre-commit` を呼ばない（冒頭参照）
 
 ## チェックリスト
 

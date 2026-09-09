@@ -42,7 +42,7 @@
 pnpm exec tsx scripts/bootstrap-plugins
 ```
 
-この bootstrap は `claude-plugins-official` marketplace を宣言し、本リポジトリが依存する公式プラグイン（`skill-creator`）を **project スコープ**で有効化する。宣言が本リポジトリの `.claude/settings.json` に載るため、信頼済みの clone であれば開発者ごとのセットアップ無しに同じ資産が揃う。冪等であり、再実行は no-op。新たに有効化したプラグインが読み込まれるのは*次の*セッションからで、そのとき `skill-creator` は `/skill-creator` としても起動できるようになる。ただしこのラッパはそれに依存しない — パス指定でファイルを読むため、同一セッション内でも動く。
+この bootstrap は `claude-plugins-official` marketplace を宣言し、本リポジトリが依存する公式プラグイン（`skill-creator` と `feature-dev`。各プラグインのどの資産を使い、どれを意図して使わないかは ADR 0155 が持つ）を **project スコープ**で有効化する。宣言が本リポジトリの `.claude/settings.json` に載るため、信頼済みの clone であれば開発者ごとのセットアップ無しに同じ資産が揃う。冪等であり、再実行は no-op。新たに有効化したプラグインが読み込まれるのは*次の*セッションからで、そのとき `skill-creator` は `/skill-creator` としても起動できるようになる。ただしこのラッパはそれに依存しない — パス指定でファイルを読むため、同一セッション内でも動く。
 
 実際に宣言が行われる回では、`claude` CLI は `.claude/settings.json` へ追記するのではなく**ファイル全体を書き直す** — `permissions` 内のキー順序が動きうる。追加される 2 キー以上の差分ノイズが出ることを見込み、内容を確認したうえで変更の一部としてコミットする。
 
@@ -68,10 +68,12 @@ bootstrap が失敗した場合（ネットワーク不通 / `claude` CLI 不在
 
 ### 新規スキルの所属を決める
 
-| 系統 | ADR | 定義 | 既存例 |
-| --- | --- | --- | --- |
-| 運用系 | [0154](../../../docs/adr/0154-claude-skills-operations.md) | 開発プロセスを進めるためのオペレーション — Git / GitHub、リリース、依存・ツール監査、`.claude/` のメタ inventory。コード生成・編集を主目的としないもの | `commit` / `submit-pr` / `release-notes` / `tools-upgrade` / `node-upgrade` / `repo-ops` / `tool-map` |
-| 開発系 | [0155](../../../docs/adr/0155-claude-skills-development.md) | コード / ドキュメント / 設定の生成・編集・レビュー | `canonicalize-doc` / `sync-readme` / `readme-review` / `new-env` / `impl-review` / `full-verify` / `full-apply` / `adr-scan` |
+| 系統 | ADR | 定義 |
+| --- | --- | --- |
+| 運用系 | [0154](../../../docs/adr/0154-claude-skills-operations.md) | 開発プロセスを進めるためのオペレーション — Git / GitHub、リリース、依存・ツール監査、`.claude/` のメタ inventory。コード生成・編集を主目的としないもの |
+| 開発系 | [0155](../../../docs/adr/0155-claude-skills-development.md) | コード / ドキュメント / 設定の生成・編集・レビュー |
+
+各系統の現在の構成員は、その ADR のカバー範囲テーブルが持つ。ここに一覧を置かず、今回の実行で読む。
 
 提案されたスキルが、`BACKLOG.md` でまだ未決の領域に新しい規約・パターン・ライブラリを持ち込むことになる場合は、**そこで止めて ADR の判断をユーザへ委ねる**（`AGENTS.md`「Pending Decisions」）。スキルを、規約が暗黙に決まる場所にしてはならない。
 
@@ -163,14 +165,14 @@ subagent を持ち出すのは、ADR が認める理由があるときだけ —
 ## Step 6. 検証
 
 - `pnpm lint:ci` と `pnpm typecheck` — 同梱スクリプトまたは `scripts/` の TypeScript を追加・変更した場合は必須。先に `pnpm fix` で自動修正可能な指摘を潰す。
-- `pnpm md-lint` — `.claude/**` を含め、Markdown に触れたら必ず実行する。3 段で走る — markdownlint（体裁）、mermaid-lint（図の構文）、`skill-lint`（frontmatter のキー、`SKILL.md` / `SKILL.ja.md` の見出し構造、本文が参照する `make` ターゲット・パスの実在性）。`skill-lint` が判定できない部分 — 対訳が同じことを言っているか、本文の内容が今も正しいか — は引き続きこのスキルの責務。
+- `pnpm lint:md` — `.claude/**` を含め、Markdown に触れたら必ず実行する。3 段で走る — markdownlint（体裁）、mermaid-lint（図の構文）、`skill-lint`（frontmatter のキー、`SKILL.md` / `SKILL.ja.md` の見出し構造、本文が参照する `make` ターゲット・パスの実在性）。`skill-lint` が判定できない部分 — 対訳が同じことを言っているか、本文の内容が今も正しいか — は引き続きこのスキルの責務。
 - eval 生成物が staged になっていないこと（`git status`）と、保護対象パスに触れていないことを確認する。
 
 ## Definition of Done
 
 - 公式 `skill-creator` の方法論を解決して読み込んだ（Step 0）。
-- `.claude/skills/<slug>/SKILL.md` が存在し、`name` がディレクトリ名と一致した kebab-case、`description` が密度のある英語の "pushy" 記述、本文が ADR 0154 の構造。
-- `SKILL.ja.md` を `canonicalize-doc` 経由で canonical 側から生成 / 同期済み。frontmatter 無し、sync ノートあり、`SKILL.md` と 1:1。
+- `.claude/skills/<slug>/SKILL.md` が存在し、frontmatter と本文が Step 2 の *frontmatter* 表と*本文構造*の箇条書きに合致している。
+- `SKILL.ja.md` が Step 4 のとおり同期済み（`canonicalize-doc` 経由、`SKILL.md` と 1:1）。
 - スキルが ADR 0154 または 0155 のカバー範囲テーブルへ登録済み。
 - 同梱スクリプトが `tsx` 実行の TypeScript である（インストール前単体実行の例外に当たる場合を除く）。
 - eval 生成物をコミットしていない。保護対象パスに触れていない。

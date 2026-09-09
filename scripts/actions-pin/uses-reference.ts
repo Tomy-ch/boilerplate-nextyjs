@@ -7,6 +7,7 @@ import {
   collectActionDefinitions,
   readDirOrEmpty,
 } from "../lib/composite-action-files.js";
+import { groupsAt } from "../lib/regex-groups.js";
 
 // GitHub Actions の参照 1 件。repo は owner/repo、sub は `codeql-action/init` のようなサブパス、
 // tag は固定対象の版。
@@ -47,8 +48,7 @@ function isDockerRef(value: string): boolean {
 // 固定対象になりうる値の形。owner/repo で始まるものだけを通す。
 const REPO_VALUE_PATTERN = /^[^/\s]+\/[^/\s]+/;
 
-// 版として受け付ける文字集合。GitHub の tag / branch 名として現実的な範囲だけを通す
-// （入口で 1 度絞る理由は [0153](../../docs/adr/0153-ci-configuration.md)）。
+// 版として受け付ける文字集合。GitHub の tag / branch 名として現実的な範囲だけを通す。
 const TAG_PATTERN = /^[A-Za-z0-9._+/-]+$/;
 
 const WORKFLOW_DIR = ".github/workflows";
@@ -109,8 +109,9 @@ export function collectRefs(files: string[]): Map<string, ActionRef> {
   for (const file of files) {
     const data = fs.readFileSync(file, "utf8");
     for (const match of data.matchAll(usesPattern())) {
-      const ref = parseUses(match[2], match[3], match[4]);
-      if (ref) refs.set(refKey(ref), ref);
+      const [usesPath, ref, comment] = groupsAt(match, 2, 3, 4);
+      const parsed = parseUses(usesPath, ref, comment);
+      if (parsed) refs.set(refKey(parsed), parsed);
     }
   }
   return refs;
@@ -163,8 +164,9 @@ export function unparsedUsesLines(data: string): number[] {
 export function unsupportedTagLines(data: string): number[] {
   const lines: number[] = [];
   for (const match of data.matchAll(usesPattern())) {
-    const ref = parseUses(match[2], match[3], match[4]);
-    if (ref === null || isSupportedTag(ref.tag)) continue;
+    const [usesPath, ref, comment] = groupsAt(match, 2, 3, 4);
+    const parsed = parseUses(usesPath, ref, comment);
+    if (parsed === null || isSupportedTag(parsed.tag)) continue;
     lines.push(lineNumberAt(data, match.index));
   }
   return lines;

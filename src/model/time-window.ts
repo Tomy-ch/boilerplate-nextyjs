@@ -132,10 +132,8 @@ function startOfDay(calendar: CalendarDate): string {
  *
  * @remarks
  * **`Date.UTC` の上で動かします。** `date-fns` の日付演算はランタイムのタイムゾーンで境界を
- * 解決するため、実行場所によって答えが変わります。このリポジトリは表示も集計も
- * {@link DEFAULT_TIME_ZONE} に固定しており（[0120](../../docs/adr/0120-locale-aware-formatting.md)）、
- * ランタイムへの依存をここで持ち込むと、その固定が意味を失います。閏年と月末の繰り上げは
- * `Date.UTC` が持っています。
+ * 解決し、{@link DEFAULT_TIME_ZONE} への固定と両立しません（同層の README「関連する ADR」）。
+ * 閏年と月末の繰り上げは `Date.UTC` が持っています。
  */
 function shift({ year, month, day }: CalendarDate, months: number, days: number): CalendarDate {
   const moved = new Date(Date.UTC(year, month - 1 + months, day + days));
@@ -208,7 +206,7 @@ export function todayWindow(now: Date): TimeWindow {
  *
  * @remarks
  * 契約はもう月を受け取りません。区分を組み立てるのは画面の側なので、形を決めるのもこちらです。
- * 入力欄が送る前に確かめるために公開します（[0062](../../docs/adr/0062-form-input-validation.md)）。
+ * 入力欄が送る前に確かめるために公開します。
  */
 export const CALENDAR_MONTH_PATTERN = /^\d{4}-(?:0[1-9]|1[0-2])$/;
 

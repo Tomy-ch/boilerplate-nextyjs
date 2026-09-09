@@ -6,11 +6,10 @@
  * manifest の和集合（{@link initialChunks}）へ落とします。CSS は `entryCSSFiles`、遅延の側は
  * `deferred.ts` が引きます。
  *
- * **なぜ 4 つを測るのかは [0101](../../docs/adr/0101-performance-budget.md) §2 が持ちます。**
+ * **なぜ 4 つを測るのかは [README](../README.md) から辿ります。**
  *
  * `polyfillFiles` を数えないのは、Next.js がそれを `<script nomodule>` で出すためです。
- * [0102](../../docs/adr/0102-browser-support.md) が対応対象とするブラウザ（Next.js 既定の
- * browserslist = モダン）は一度も取得しません。
+ * 対応対象とするブラウザ（Next.js 既定の browserslist = モダン）は一度も取得しません。
  */
 
 /** `__RSC_MANIFEST` の 1 route ぶん。必要な形だけを受け取る。 */
@@ -195,7 +194,7 @@ export function unionByRoute(entries: readonly RouteChunks[]): RouteChunks[] {
  * 共有が 8 KB 増えれば route ごとの行はすべて +8 KB として並びますが、原因は 1 つです。報告の側で
  * 1 度だけ出すために、どれが共有かをここで決めます。
  *
- * route が 1 つしかない fork では全てが固有になりますが、そのとき共有の内訳は情報を持たないので
+ * テンプレートから作った側に route が 1 つしかなければ全てが固有になりますが、そのとき共有の内訳は情報を持たないので
  * それで正しい判定です。
  *
  * @param byRoute - 公開 route ごとの資材。

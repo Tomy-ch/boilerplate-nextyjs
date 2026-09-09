@@ -32,8 +32,7 @@ export type InfinitePurchases = {
  * 購入履歴を読み進める。
  *
  * @remarks
- * 使うのがこの一覧だけなので `features` の中へ置いています
- * （[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md) の昇格ルール）。
+ * 使うのがこの一覧だけなので `features` の中へ置いています。
  *
  * 初回ページは受け取るだけで取得しません。取得するのは Server Component であり、この hook が
  * 担うのは 2 ページ目以降だけです。
@@ -43,10 +42,10 @@ export type InfinitePurchases = {
  * なく解いた区間を受け取るのは、「直近 N 日」をページごとに解き直すとその条件が崩れるためです。
  *
  * **資格情報が切れたら、続きの失敗として扱いません。** `router.refresh()` でサーバへ描き直しを
- * 頼み、送り先の判断は route の確定認可へ委ねます（[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。
+ * 頼み、送り先の判断は route の確定認可へ委ねます。
  *
  * **積み上げを捨てる判断は持ちません。** 別の一覧になったかどうかは置く側が鍵で表し、React が
- * 作り直します（[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。
+ * 作り直します。
  *
  * @param initial - Server Component が取得した最初のページ
  * @param window - いま効いている期間の区間。続きの取得にそのまま渡す

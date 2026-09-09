@@ -23,8 +23,8 @@ export const PRODUCT_LIST_MAX_ITEMS = getProductsQueryFirstMax;
  * 契約から生成したスキーマではありません。この経路が受け取るのはバックエンドの応答ではなく、
  * `/api/products` が組み立てた表示用の形だからです。生成物を当てても、形が違うので通りません。
  *
- * それでも検証するのは、応答を検証せずに UI へ流さない原則が client 側の経路にも等しく効くため
- * です（[0073](../../../../docs/adr/0073-pagination-fetch-boundary.md)）。
+ * それでも検証するのは、応答を検証せずに UI へ流さない原則が client 側の経路にも等しく
+ * 効くためです。
  */
 const ProductListPagePayload = z.object({
   items: z.array(

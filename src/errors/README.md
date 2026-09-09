@@ -64,3 +64,9 @@ const meta = resolveErrorMeta(error);
 - 生の transport 応答からの分類は `adapters` 境界で一度だけ行う
 - 未分類エラーを `internal` に正規化する判断も境界の責務
 - ログレベルとログ出力は `logging` と境界の責務。errors 自身は出力しない
+
+## 関連する ADR
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。分類を transport から切り離す線
+- [0029](../../docs/adr/0029-type-design-discipline.md) — 分類を判別可能な値として持つ型設計
+- [0080](../../docs/adr/0080-error-handling.md) — バックエンドエラーの正規化と、画面側（`error.tsx` / `not-found.tsx`）との責務分担

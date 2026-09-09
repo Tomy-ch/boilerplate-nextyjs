@@ -6,8 +6,6 @@ React 19 のレンダリング関連 API —— **ref as prop(`forwardRef` 廃�
 
 Accepted
 
-（**採番はブロック帯で確定(2026-07-14・0001〜0155(トピック順ブロック帯))**。独立起票。本 ADR の内容自体はこの設計討議でユーザ確定済み。日付 2026-07-14。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
 [0040](0040-routing-rendering-strategy.md) は「Server / Client 境界を **どこに置くか**(WHERE)」を定めるルーティング ADR であり、「境界の内側で React API を **どう書くか**(HOW)」は射程外である。本 ADR がその HOW を持つ。
@@ -60,10 +58,10 @@ Accepted
   - **再描画が起きても費用が問題にならない** —— エッジケースのさらにエッジケースだけを捕まえるもの
 - **計測は「書いてよいかの条件」ではない。** 意味があるかを言えないときの決め手である。逆に、意味があると言えるものを書くのに計測は要らない。
 - **理由は成熟度ではなく blast radius**: Compiler は stable であり、実装も React 本体である。問題は品質ではなく**壊れ方が fail-fast でない**ことにある。[0030](0030-environment-variable-management.md) §8 の taint は違反時に throw し、[0041](0041-cache-components-decision.md) の Cache Components は前提を満たさなければ build が落ちる。Compiler は落ちない —— build 時に component を自動変換してメモ化を導入するため、**値の参照同一性・effect の依存・購読・第三者ライブラリとの相互作用**に、fail-fast でない静かな挙動差分が出うる。lint / E2E / VRT / a11y の網は持っているが、それを**全体自動適用を正当化する根拠にはしない**。
-- **コストの及ぶ範囲は適用範囲に一致させる**: full-auto は共有 chunk +16.4 KB gzip・各 route の初期 JS +4〜15 KB を全 route へ乗せる。`annotation` は共有 chunk を増やさず、印を付けた component が乗る route だけが増える —— 同梱サンプルの実測で、供給の購読者 13 個を付けた `/products` が +2.4 KB、印を 1 つも持たない他の route は増分 0(`pnpm bundle-budget <現行の .next> <比較先の .next>`)。
+- **コストの及ぶ範囲は適用範囲に一致させる**: full-auto は共有 chunk +16.4 KB gzip・各 route の初期 JS +4〜15 KB を全 route へ乗せる。`annotation` は共有 chunk を増やさず、印を付けた component が乗る route だけが増える —— 同梱サンプルの実測で、供給の購読者 13 個を付けた 1 つの画面が +2.4 KB、印を 1 つも持たない他の route は増分 0(`pnpm bundle-budget <現行の .next> <比較先の .next>`)。
 - **利益は TBT ではなく INP に出る。** JS の増加は TBT(実行時間)を悪化させる側であり、Compiler が縮めるのは再描画で、これは実ユーザーの操作からしか観測できない。したがって**測れているコストを払って、まだ測れていない利益を全 route へ先行適用することはしない**。
 - **採用条件は「stable 化」ではない**(既に stable である)。**再描画が集中する経路であると言えること**、および**払う費用がその route に収まっていることを実測で示せること**が条件である。
-- **効果の実測を印の条件にしない。** Compiler が縮めるのは event の processing(handler の中で React が同期に行う仕事)であり、体感を決める interaction latency のうち presentation(style / layout / paint)は縮めない。同梱サンプルの実測では、CPU を 4 倍に絞っても processing は全操作で中央値 0〜4 ms・最悪 94 ms(8 倍絞り)で、**同一 build を 2 度測った差(+12〜+63%)のほうが Compiler の差より大きい**(測り方: build 済みのアプリを実ブラウザで操作し、`event` と `long-animation-frame` の `PerformanceObserver` を CPU 絞りのもとで反復して読む。`processingEnd - processingStart` が Compiler の縮める部分で、`duration` の残りは縮まない)。ここで「効果が測れないから付けない」と決めると、本リポジトリが配るのは題材の画面が軽いという事情であって、fork 先の画面の話ではなくなる。**本リポジトリが持つのは機構と、印を置く場所の実例**であり、自分の画面で釣り合うかは fork 先が RUM([0082](0082-client-observability.md))の INP で決め直す。
+- **効果の実測を印の条件にしない。** Compiler が縮めるのは event の processing(handler の中で React が同期に行う仕事)であり、体感を決める interaction latency のうち presentation(style / layout / paint)は縮めない。同梱サンプルの実測では、CPU を 4 倍に絞っても processing は全操作で中央値 0〜4 ms・最悪 94 ms(8 倍絞り)で、**同一 build を 2 度測った差(+12〜+63%)のほうが Compiler の差より大きい**(測り方: build 済みのアプリを実ブラウザで操作し、`event` と `long-animation-frame` の `PerformanceObserver` を CPU 絞りのもとで反復して読む。`processingEnd - processingStart` が Compiler の縮める部分で、`duration` の残りは縮まない)。ここで「効果が測れないから付けない」と決めると、本リポジトリが配るのは題材の画面が軽いという事情であって、テンプレートから作った側の画面の話ではなくなる。**本リポジトリが持つのは機構と、印を置く場所の実例**であり、自分の画面で釣り合うかは作った側が RUM([0082](0082-client-observability.md))の INP で決め直す。
 
 ### 4-1. 性能改善の順序(Compiler はその一手段)
 
@@ -115,13 +113,13 @@ Compiler を SSR-First の前提や標準挙動には置かない。Compiler を
 
 - [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — App Router のレンダリング機構 / RSC・Client 境界の置き方(本 ADR の親。WHERE を所有、本 ADR は HOW を所有)
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) — 機能スライス × 表示層カーネル(`"use client"` 葉押し下げ・昇格の親原則)
-- [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 昇格ルール(横断 client hook → `capabilities`)/ rule の rules.md 段階移行
+- [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — 昇格ルール(横断 client hook → `capabilities`)
 - [0022-capabilities-kernel.md](0022-capabilities-kernel.md) — reactive な横断 client hook の家(`useEffect` 昇格先)
 - [0071-bff-api-integration.md](0071-bff-api-integration.md) — `use()` を用いるデータ取得の編成・キャッシュ・重複排除(本 ADR から委譲)
 - [0041-cache-components-decision.md](0041-cache-components-decision.md) — Cache Components の採否(前提を満たさなければ build が落ちる fail-fast 型の機構。決定 4 の blast radius の対比先)
 - [0080-error-handling.md](0080-error-handling.md) — `<Suspense>` / `loading.tsx` 境界の配置・粒度(`use()` の前提)
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) — 標準準拠(React 規約に乗る)+ vendor-independent 正当性材料の必須化
 - [0140-documentation-operations.md](0140-documentation-operations.md) — decision / rule タクソノミー(本 ADR = decision / 連動制約 = rule → rules.md)
-- [0004-library-management.md](0004-library-management.md) — `babel-plugin-react-compiler` を実際に opt-in する時点での exact pin + `pnpm audit` フロー
+- [0004-library-management.md](0004-library-management.md) — `babel-plugin-react-compiler` の exact pin + `pnpm audit` フロー
 - [0101-performance-budget.md](0101-performance-budget.md) — 性能予算(Compiler の適用可否を判断する計測の側)
 - [0082-client-observability.md](0082-client-observability.md) — INP を含む Web Vitals の RUM(効果測定の前提)

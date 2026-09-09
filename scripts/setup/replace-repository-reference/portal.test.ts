@@ -33,6 +33,12 @@ describe("buildDefaultPortalUrl", () => {
       "https://example-org.github.io/",
     );
   });
+  // ----- 異常系 -----
+  it('"/" を含まない参照は、空の答えを返さずに落ちる', () => {
+    expect(() => buildDefaultPortalUrl("owner-only")).toThrow(
+      '所有者とリポジトリ名を "/" で繋いだ形ではありません',
+    );
+  });
 });
 
 describe("applyPortalUrl", () => {

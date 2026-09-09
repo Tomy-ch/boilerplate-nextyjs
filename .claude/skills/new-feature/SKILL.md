@@ -1,5 +1,6 @@
 ---
 name: new-feature
+usage-class: situational
 description: >-
   End-to-end driver that takes one screen from a direction to a reviewed, spec-backed, tested feature slice, chaining the rails this repository already ships instead of inventing a parallel path — `docs/playbook.md` (where things go), `pnpm gen` (placement / naming / boundaries), `docs/templates/feature-readme.md` (the spec sections a feature README must carry), `mocks/` (implement against the contract without a backend), and `docs/spec/route/**` (what the screen promises). It follows the repository's screen-implementation order — direction → story → review → split → spec → tests — because tests written before the look is settled get rewritten, and it reads that order from `docs/playbook.md` at runtime rather than hardcoding it. Use it whenever a NEW screen or feature slice is being added and you want the whole path built consistently: 「画面を追加したい」「feature を新しく作りたい」「新しい画面を一から作って」「new-feature」, or when a direction exists and the placement, README sections, spec, and tests all still have to be produced. Do NOT use it to modify an existing feature (edit it directly), to add anything under `src/components/**`, `src/adapters/**`, `src/model/**`, `src/stores/**`, or `src/capabilities/**` — those are kernels, so run `pnpm gen <kind> <name>` directly and skip the story-first order, which exists only where a screen's look is being settled, to write tests for code that already exists (`scaffold-test`), or to review anything (`impl-review` / `test-review` / `comment-sweep` are peers under the Review Phase Protocol and this skill never invokes them). Halts on a failing phase and never auto-rollbacks; the user stays the author-of-record for the direction, the look, and the promises.
 ---
@@ -81,15 +82,16 @@ product behavior. The user is the author-of-record for what the screen promises.
 
 ## Step 3. Story first (order step 2)
 
-Run `pnpm gen feature <name>` for the slice, plus `pnpm gen component <name>` for any shared part the
+Run `pnpm gen feature <name> --screen=<screen>` for the slice, plus `pnpm gen component <name> --as=<heading>` for any shared part the
 design calls for. Let the generator place, name, and bound the files — never hand-place them, and
 never pass it an input other than the one it takes (`architecture.ts` + the layer README are its
 single source; `docs/spec/**` is **not** a generation input).
 
-It emits three flat files — `README.md`, `<name>.tsx`, `<name>.test.tsx` — and does **not** split the
-slice into `list/` and `detail/`. That is deliberate: ADR 0027 keeps the screen axis collapsed until a
-second screen arrives, so the split belongs to Step 5, not here. Do not pre-create the directories the
-generator declined to make.
+It emits the slice `README.md` plus a screen directory — `<screen>/view.tsx`,
+`<screen>/page-content.tsx`, `<screen>/view.stories.tsx` and a test beside each — so the screen axis
+is there from the first screen. **A second screen is the same command run again**: the generator adds
+only the new screen directory and leaves the README alone. It refuses when `<name>/<screen>/` already
+exists. Do not hand-place what the generator would have written.
 
 Then write the stories for all four states the README's state table declares — loading / empty /
 error / success. Split the view so it holds no fetching, which is what lets every state come out of
@@ -113,9 +115,14 @@ passes rather than until it is right.
 
 ## Step 5. Split (order step 4)
 
+The review has settled the look, so stamp both boundaries this step sits between: `.agents/closed-loop/marks.sh planApprovedAt` then `.agents/closed-loop/marks.sh implStartedAt`. <!-- boilerplate-only:line -->
+
 Move what the review settled into its layers. Decide placement from `docs/playbook.md`'s reverse
 index and the kernel READMEs; carry the criteria as a reference path to the ADR that owns it rather
-than restating it in code or in the README.
+than restating it in code or in the README. **The reference paths themselves are a table in
+`docs/playbook.md`, 「工程 4（分離）で読むもの」** — open the rows that apply and read the ADR
+sections they name, including the rejected-alternative rows, which exist so the same idea is not
+re-argued from scratch each time.
 
 ## Step 6. Spec (order step 5)
 

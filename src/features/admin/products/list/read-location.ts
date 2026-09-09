@@ -10,8 +10,7 @@ import { type AdminProductListLocation, CURSOR_KEY, FILTER_KEY, TRAIL_KEY } from
  * @remarks
  * 読むのは画面を組み立てる地点だけで、組むのは絞り込みの入力欄といった client の部品です。同じ
  * module に置くと、スキーマを組み立てる module 直下の式が tree-shaking を妨げ、**検証ライブラリごと
- * client の束に載ります**（[0101](../../../../../docs/adr/0101-performance-budget.md)）。境界を
- * 強制しているのは束であって、読みやすさではありません。
+ * client の束に載ります**。境界を強制しているのは束であって、読みやすさではありません。
  */
 
 /** 1 つしか受け取らない条件。読めなければ未指定（空文字）として扱う。 */
@@ -45,8 +44,8 @@ const cursorsSchema = repeatedValues(z.array(z.string())).catch([]);
  * **URL は利用者が直接編集できます。** 起点が消えているのに通ってきた道だけが残った URL も届き得る
  * ため、先頭ページでは道を捨てます。捨てないと、先頭ページで「前へ」が押せる状態になります。
  *
- * 読み方はスキーマが持ちます（`docs/rules.md` #42）。1 つしか受け取らない条件が繰り返されていたら
- * 未指定として扱い、複数を選べる条件だけが並びのまま残ります。
+ * 読み方はスキーマが持ちます（`docs/rules.md`「URL と条件」の「`searchParams` は zod で検証する」）。
+ * 1 つしか受け取らない条件が繰り返されていたら未指定として扱い、複数を選べる条件だけが並びのまま残ります。
  */
 export function toAdminProductListLocation(params: RawSearchParams): AdminProductListLocation {
   const cursor = textSchema.parse(params[CURSOR_KEY]);

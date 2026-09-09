@@ -46,7 +46,7 @@ Accepted
 
 - ディレクトリ名 `<slug>` は **kebab-case**、動詞ベース
 - ユーザは `/<slug>` で起動する
-- 既存例: `commit` / `submit-pr` / `release-notes` / `tools-upgrade` / `tool-map` / `design-export`
+- 例: `commit` / `submit-pr` / `release-notes` / `tools-upgrade` / `tool-map` / `design-export`
 
 ## frontmatter
 
@@ -56,8 +56,11 @@ Accepted
 | --- | --- | --- |
 | `name` | ✓ | スキル名 (ディレクトリ名と一致) |
 | `description` | ✓ | スキルが何をするかの 1 段落説明。Claude Code の skill picker / トリガ判定に使われる |
+| `usage-class` | ✓ | 利用の型。`frequent` / `situational` / `lifecycle` / `automatic` / `safety` のいずれか |
 | `argument-hint` | 任意 | 起動引数の形式ヒント (例: `[--dry-run]`) |
 | `allowed-tools` | 任意 | 使用許可するツールの明示 (Bash の細粒度許可など) |
+
+`usage-class` は [0160](0160-agent-environment-loop.md) の決定 3 が定める。**判定は呼出回数ではなく型に対して行う** —— 型を持たないスキルは「呼ばれなかった」を根拠に退役させられる側へ落ちる。宣言をスキル自身に持たせるのは、別ファイルの台帳に置くと**スキルが増えた日に台帳だけが古くなる**ためで、機械強制は `scripts/skill-lint` の enum 検査が持つ（[0144](0144-decision-enforcement-pairing.md)）。ツール側が解釈しない追加キーであり、読むのはこのリポジトリの機構だけである。
 
 `description` は **どのような状況で発火すべきか** を含めること (機能の説明ではなく「いつ使うか」)。
 
@@ -68,9 +71,27 @@ Accepted
 1. **タイトル** (`# <Skill Name>`) と冒頭 1 段落の概要
 2. **(任意) `SKILL.ja.md` への言及** — 翻訳が存在する場合、その旨を明記
 3. **When to Use** — 利用すべき状況の列挙
-4. **Do NOT use this skill for** — 利用すべきでない状況・代替手段の列挙
-5. **Step <番号>. <タイトル>** — 番号付き手順 (Step 0 から始める慣例。前処理がある場合)
-6. **検証 / 終了処理** — `pnpm fix` / `pnpm lint` 等の最終確認 (`pnpm test` はテスト導入 ([0090](0090-testing-strategy.md)) 後に加える)
+4. **(任意) Contract** — 下記
+5. **Do NOT use this skill for** — 利用すべきでない状況・代替手段の列挙
+6. **Step <番号>. <タイトル>** — 番号付き手順 (前処理がある場合は Step 0 から始める)
+7. **検証 / 終了処理** — `pnpm fix` / `pnpm lint` / テスト等の最終確認
+
+### Contract 表 —— 隣に扉を持つスキルだけが置く
+
+**問いの受け口になるスキル**は、`## Contract` の 2 列表を When to Use の直後に置く。同じ名詞が
+複数のスキルの description に現れ、**区別する信号が語彙ではなく意図**になる領域があり、そこでは
+「何を所有し、何を決してやらないか」を 4 行で宣言しないと、隣の扉との境界が本文の散文へ溶ける。
+
+| 行 | 何を書くか |
+| --- | --- |
+| **Owns** | このスキルだけが答える主題 |
+| **Never** | 主題に隣接するが、このスキルが決してやらないこと |
+| **Starts when** | 起動してよい状況 |
+| **Stops when** | 途中でも打ち切る条件 |
+
+**持たせるのは扉だけ。**全スキルへ必須化しない —— 扉を持たないスキル（生成・同期・リリース操作）では
+4 行が `description` の Do NOT 節の写しになり、[0140](0140-documentation-operations.md) の
+「同じ判定を 2 か所に持たない」に当たる。**扉かどうかは「同じ問いが別のスキルへ行きうるか」**で決める。
 
 ## カバー範囲 (既存スキル)
 
@@ -82,7 +103,14 @@ Accepted
 | `tools-upgrade` | `mise.toml` の依存監査 | upstream の latest と比較し、backend 別の窓（[0110](0110-security-operations.md) 1.1）でサプライチェーン検疫。承認後に `mise.toml` 更新 |
 | `node-upgrade` | Node.js バージョン更新 | SSOT である `mise.toml` `[tools] node` ([ADR 0003](0003-version-manager.md)) を対象バージョンへ更新し、lockfile 再構築 + `pnpm install` / `pnpm lint` / `pnpm build` で検証。`@types/node` のメジャー追随は別 PR ([0004](0004-library-management.md)) |
 | `actions-pin` | GitHub Actions の SHA ピン監査 | `.github/actions-pin.toml` を SSOT に `uses:` の版を検疫付きで更新する。除外窓より新しいリリースは採らず、窓を通過済みの版へ step-back する。実体は `make actions-pin-{resolve,apply,check}` ([0153](0153-ci-configuration.md)) |
-| `repo-ops` | 運用 gotcha のランブック | mise ツールチェーン / pnpm lockfile / make `DRY_RUN` / `tmp/reviews` 等の再発しやすい躓きへの対処手順集。read-only の知識スキルで、状態は変更しない |
+| `repo-truth` | 現状の事実回答 | 「このリポジトリはいまどうなっているか」を一次資料から答え、根拠と推論を分ける。索引を関心で先に読み、キーワード検索は最後の網にする（文書は所有する関心で名付けられるため、統べるファイルは問いの語を含まない）。**未定義**（所有索引を通読した上で無い）と**確認できず**（通読していない）を別の結論として出し、覆った前線を添える。read-only で、見つけた drift は直さない |
+| `how-to` | 目標 → 正規手順 | 実行したい操作に対し、前提 / コマンド / 成功判定 / 復旧 / 破壊性を揃えて返す。まず所有スキルへ振って止まり、無ければ make ターゲットと `package.json` の scripts の両方を索引で読む。手順が無ければ **UNDEFINED** と前線を出し、**コマンドを発明しない**。`repo-ops` が症状駆動で「手順が無い」と結論できないのに対し、こちらは目標駆動でそれを結論できる。`--mode=run` でもゲートは回さない |
+| `question` | 問いの読みの解決とルーティング | 3 軸（世界 / 意図 / 対象）で問いの読みを解き、**本当に割れた軸だけ**を `AskUserQuestion` で確認して所有スキルへ渡す。自分では答えない。行き先は `.claude/skills/*/SKILL.md` の frontmatter を実行時に読んで解決し、表をハードコードしない。**世界の軸が「この窓の差分」に解けたときは `AGENTS.md` の Review Phase Protocol へ渡す** —— レビュー 1 本へ直接振ると、3 本を対等に問う規律を迂回する |
+| `research` | 未決の選択の比較 | 評価軸を**選択肢を挙げる前に**固定し、案 / 利点欠点 / リスク / 既存構造との整合 / コストで比較して、反転条件付きの推奨を出す。案数は合わせない。まず問いを溶かす —— 現行 ADR / BACKLOG の**撤回条件** / `docs/project/out-of-scope.md` / カーネルを列挙して探す同型の前例。コストは述べるが判定に重みとして入れない。採択・ADR 執筆・起票はしない |
+| `resolve-merge` | マージの着地 | 衝突パスをクラスへ分け、クラスごとの機械的解決を当てる —— 生成物は片側を選ばず出典から作り直し、pin lockfile は resolver を回し、追記専用のレジストリは和集合にする。**衝突が無くても走る**（派生物は無衝突マージでも古くなる）。ベースの取り込みは `make base-merge` が持つ。終わり方は 2 つだけで、機械的に解けないものが 1 つでも残ればマーカーを残して打ち切りコミットしない、全部解ければコミットと push の可否を聞く。ゲートは回さない |
+| `new-issue` | issue の起票 | 前提を実装で裏取りしてから起票する。**5 つの blocker**（観測していない振る舞いの断定 / 鮮度未確認の引用 / 測っていない比較 / 部分的な探索からの影響範囲 / 既存 issue の未検索）が下書きを止める。本文の欄は `.github/ISSUE_TEMPLATE/` を実行時に読んで埋め（`scripts/issue-field-lint` が `###` の完全一致で見る）、そこへ 前提 / 論点 / やらないこと を足す。最後に「そもそも issue か」の関門を通す |
+| `supply-chain-triage` | 検疫に掛かった版の証拠採点 | 窓に捕まった 1 つの版について、[0110](0110-security-operations.md) の 4 つの問いを 4 軸 0–12 で採点する。**report-only** —— lockfile も pin も窓も触らない。成果物を読むが決して実行しない。**取れなかった証拠は `?` として報告し `0` に数えない**（`?` が 2 つ以上なら帯を出さず INSUFFICIENT-EVIDENCE）。暴露面はスコアと別の行で報告する。`actions-pin` / `images-pin` / `tools-upgrade` / Dependabot の連鎖先 |
+| `repo-ops` | 運用 gotcha のランブック | mise ツールチェーン / pnpm lockfile / make `DRY_RUN` / `tmp/reviews` 等の再発しやすい躓きへの対処手順集。read-only の知識スキルで、状態は変更しない。**症状駆動**であり、答えるのは自分の索引に載っているものだけ —— 載っていない症状は `how-to`（目標。手順の不在を結論できる）か `repo-truth`（現状）へ振る。**このランブックは意図的に不在を結論できない**（できるようにすると沈黙が答えと区別できなくなる） |
 | `tool-map` | `.claude/` 配下の inventory | commands / skills / agents の表 + Mermaid 依存マップを生成 |
 | `design-export` | デザインシステムの外部書き出し | `pnpm design:bundle` が作る `tmp/design-bundle`（shadcn registry / 目録 / トークン）を、送り先ごとの手順で運ぶ。依存の向きは repo → design の一本で、書き出した先の成果物を取り込む経路は持たない。特定 SaaS の手順は [0010](0010-standards-and-non-lockin.md) の非ロックインによりこのスキルの中だけに閉じる |
 
@@ -119,11 +147,13 @@ Accepted
 
 **列挙ではなくパターンで書く。** 上流はプラットフォーム対応を継続的に足しており、名前を並べた deny は次の pin bump で黙って穴が開く。塞ぐべきは「そのとき存在した名前」ではなく「install という形」である。
 
-ただし deny が塞ぐのは正面の経路だけである。上の「外向き操作の統制をどこに置くか」に書いたとおり、パターンは前方一致のグロブで、同じ実行は汎用インタプリタからも絶対パスからも起こせる。deny は取り違えと自走を止める第一段であって、統制の全体ではない。
+ただし deny が塞ぐのは正面の経路だけである。後述「外向き操作の統制をどこに置くか」のとおり、パターンは前方一致のグロブで、同じ実行は汎用インタプリタからも絶対パスからも起こせる。deny は取り違えと自走を止める第一段であって、統制の全体ではない。
 
 ### 前提にしない
 
 外部スキルは **lint / CI / git hook / build のいずれのゲートにも接続しない**。導入しなくても何も壊れない状態を保つ。上流が pre-1.0 でも採れるのはこの構成が理由であり、逆に言えばゲートへ繋いだ時点でその根拠は失われる ([0110](0110-security-operations.md))。
+
+繋げない理由はもう 1 つある。外部スキルの出力 (graphify ならグラフ) は最後に走らせた時点のスナップショットで、未コミットの変更を映さない。ゲートへ載せれば「古い出力で緑」が成立し、検査していないものを合格へ倒す ([0157](0157-inspection-declaration-discipline.md))。繋ぐ判断が起きるとすれば、本リポジトリでの価値が実測で確かめられ、かつ鮮度をゲートの中で保証する機構が入ったときだけで、導入済みであることも上流が pre-1.0 を抜けたことも理由にならない —— 成熟度が上がっても鮮度の問題は消えない。
 
 現在の外部スキルは graphify (コードベース知識グラフ) 1 件。導入手順と運用上の注意は [`.claude/README.md`](../../.claude/README.md) が持つ。
 
@@ -177,7 +207,7 @@ Accepted
 
 ## 補足
 
-- スキルは現状 Claude Code 専用。Codex / Cursor 等の他エージェントは将来別途検討
+- スキルは Claude Code 専用。Codex / Cursor 等の他エージェントへは展開していない
 - スキルの粒度は「1 起動 = 1 オペレーション」を原則とする。複数オペレーションを束ねたい場合は別スキルとして分けるか、メタスキルから個別スキルを呼ぶ形にする
 - スキル数の上限は設けないが、似た役割の重複は避ける
 

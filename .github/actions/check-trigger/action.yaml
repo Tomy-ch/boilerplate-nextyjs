@@ -10,7 +10,7 @@ description: Decide whether an expensive check has to run on this event, or can 
 #   * Not a pull request at all. A push into a protected branch and the nightly pass ARE the
 #     cadence; there is nothing to defer to.
 #   * A promotion pull request (`develop` / `staging` / `production` as the base) — why
-#     promotion needs a complete answer rather than a recent one is in ADR 0153 §2.
+#     promotion needs a complete answer rather than a recent one is in the workflows README.
 #   * The pull request carries the label. A human looked at the diff and decided this one is
 #     worth the wait. This is the one reason a caller can opt out of, by omitting `label`.
 #   * `workflow_dispatch`. Someone asked for it by hand.
@@ -91,8 +91,10 @@ runs:
           decide true "${EVENT_NAME} is the cadence itself; running."
         fi
 
-        # The branches an environment is deployed from (ADR 0150). Held here rather than in
-        # each caller so that adding an environment is one edit, not one per check.
+        # The branches an environment is deployed from. Every workflow that runs on
+        # push carries the same list under `on.push.branches` — a trigger cannot ask the ruleset —
+        # so adding an environment edits each of those too. What is held in one place here is
+        # only the judgment made inside a job.
         case "${BASE_REF}" in
           develop | staging | production)
             decide true "Promotion into ${BASE_REF}; the answer has to be complete here."

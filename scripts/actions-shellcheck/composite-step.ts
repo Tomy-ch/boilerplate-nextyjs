@@ -61,8 +61,9 @@ export function targetFiles(root: string): string[] {
 export function parseActionFile(file: string, source: string): ActionFile {
   const lineCounter = new LineCounter();
   const doc = parseDocument(source, { lineCounter });
-  if (doc.errors.length > 0) {
-    throw new Error(`${file}: YAML として読めません: ${doc.errors[0].message}`);
+  const [parseError] = doc.errors;
+  if (parseError !== undefined) {
+    throw new Error(`${file}: YAML として読めません: ${parseError.message}`);
   }
 
   // 件数は `using:` の値と無関係に数える。`using` の綴りを取り違えた action を「対象外」に
@@ -155,9 +156,7 @@ function columnBase(run: Scalar, source: string, firstLine: number, col: number)
 // ブロックスカラーのインデント幅は最初の非空行が決める（YAML の規則）。本文が空行で
 // 始まる場合にその行の幅 0 を採ると、そのステップの全指摘の列がずれる。
 function blockIndentWidth(source: string, firstLine: number): number {
-  const lines = source.split("\n");
-  for (let i = firstLine - 1; i < lines.length; i++) {
-    const line = lines[i];
+  for (const line of source.split("\n").slice(firstLine - 1)) {
     if (line.trim() === "") continue;
     return line.length - line.trimStart().length;
   }

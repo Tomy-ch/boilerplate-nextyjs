@@ -99,11 +99,13 @@ export const ManyNotifications: Story = {
       <NotificationPanel {...args}>
         <NotificationList>
           <Items
-            notifications={Array.from({ length: 12 }, (_, index) => ({
-              ...NOTIFICATIONS[index % NOTIFICATIONS.length],
-              id: `n-${index}`,
-              unread: index < 8,
-            }))}
+            notifications={Array.from({ length: 4 }, () => NOTIFICATIONS)
+              .flat()
+              .map((notification, index) => ({
+                ...notification,
+                id: `n-${index}`,
+                unread: index < 8,
+              }))}
           />
         </NotificationList>
       </NotificationPanel>

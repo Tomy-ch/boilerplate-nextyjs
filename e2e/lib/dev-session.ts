@@ -2,7 +2,7 @@
 //
 // アプリ側の宣言（`src/features/dev-session/paths.ts` /
 // `src/app/api/auth/test-session/route.dev.ts`）を写す。読み込まないのは、feature と Route Handler
-// の内部へ触れてよいのが app 層だけであるため（[0021](../../docs/adr/0021-frontend-responsibility.md)）。
+// の内部へ触れてよいのが app 層だけであるため。
 // 検査の側がその境界を越えても eslint の境界検査は `src/**` しか見ないので、越えたことに誰も
 // 気づかない。
 //

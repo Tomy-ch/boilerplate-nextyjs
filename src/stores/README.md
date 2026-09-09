@@ -34,3 +34,11 @@ test-requirement: unit
 
 - client-only の実装では `"use client"` を最小の境界に置く
 - 単一 feature の状態は feature 内の local state に留める
+
+## 関連する ADR
+
+- [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界
+- [0023](../../docs/adr/0023-stores-kernel.md) — このカーネルが受け持つ横断 client 状態と、server state の写しを置かない線
+- [0031](../../docs/adr/0031-policy-state-supply.md) — 同意などポリシー状態の供給の形
+- [0041](../../docs/adr/0041-cache-components-decision.md) — Cache Components の下での hydration。サーバとブラウザで同じ初期値を返す制約
+- [0060](../../docs/adr/0060-state-management.md) — Zustand の採用と、server state をどこが持つか

@@ -5,7 +5,7 @@
  * 置き場の既定名を作る接尾辞。
  *
  * @remarks
- * fork 先の名前置換に追随するよう、親の名前から導きます。
+ * テンプレートから作った側の名前置換に追随するよう、親の名前から導きます。
  *
  * `images` まで含めるのは、**`.gitmodules` で置き場のパスと URL が隣り合わせに並ぶ**ためです。
  * 配線先は `baseline/images` なので、名前を揃えると 2 行が同じものを指していると読めます。
@@ -29,7 +29,7 @@ export const VISIBILITIES: readonly string[] = ["public", "private", "internal"]
  *
  * @remarks
  * 基準画像は画面の見た目そのものなので、公開側へ倒れる既定は取れません。親に合わせると、
- * 公開リポジトリを fork した非公開プロジェクトが黙って画面を公開します。
+ * 公開のテンプレートから作った非公開プロジェクトが黙って画面を公開します。
  *
  * 代償として、**置き場が非公開だと fork からの PR で `vrt` が落ちます**。fork の PR には
  * secrets が渡らず、App のトークンを取れないためです。公開のまま運用するリポジトリは、
@@ -39,11 +39,11 @@ export const DEFAULT_VISIBILITY = "private";
 
 /** `owner/repo` を owner と repo に割る。 */
 export function splitRepository(repository: string): { owner: string; name: string } {
-  const match = /^([^/\s]+)\/([^/\s]+)$/.exec(repository);
-  if (match === null) {
+  const [, owner, name] = /^([^/\s]+)\/([^/\s]+)$/.exec(repository) ?? [];
+  if (owner === undefined || name === undefined) {
     throw new Error(`owner/repo の形ではありません: ${JSON.stringify(repository)}`);
   }
-  return { owner: match[1], name: match[2] };
+  return { owner, name };
 }
 
 /** 親リポジトリから導く置き場の既定名。 */
@@ -89,7 +89,7 @@ export function normalizeVisibility(value: string): string {
  * サブモジュールへ書く URL。
  *
  * @remarks
- * HTTPS を使うのは、CI と fork 先が鍵の配置なしに読めるためです。撮り直しの push は
+ * HTTPS を使うのは、CI とテンプレートから作った側が鍵の配置なしに読めるためです。撮り直しの push は
  * GitHub App のトークンを `http.extraheader` へ載せて通します。
  */
 export function cloneUrl(repository: string): string {
@@ -171,12 +171,12 @@ export function isAffirmative(answer: string): boolean {
  * 番号は App の General ページに出ているので、控える手間は URL を控えるのと変わりません。
  */
 export function parseAppId(input: string): string {
-  const matched = /^(?:App ID[:：]?\s*)?(\d+)$/.exec(input.trim());
+  const appId = /^(?:App ID[:：]?\s*)?(\d+)$/.exec(input.trim())?.[1];
 
-  if (matched === null) {
+  if (appId === undefined) {
     throw new Error(
       `App ID（General ページに出ている数字）を入力してください（受け取った値: ${JSON.stringify(input)}）`,
     );
   }
-  return matched[1];
+  return appId;
 }

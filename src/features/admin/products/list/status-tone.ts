@@ -8,12 +8,10 @@ import {
  *
  * @remarks
  * **契約は状態の意味を返しません。** マスタが持つのは `code` と表示名だけなので、意味づけはこの
- * 画面が持ちます（[0070](../../../../../docs/adr/0070-backend-role-separation.md)）。色は 1 件の状態
- * ではなく扱いの区分に付けます。区分と割り当ての理由は
+ * 画面が持ちます。色は 1 件の状態ではなく扱いの区分に付けます。区分と割り当ての理由は
  * `docs/spec/route/admin/products/page.function.md`「状態に色を割り当てるのはこの画面」。
  *
- * バッジは状態名も出すので、色だけで区別させません
- * （[0100](../../../../../docs/adr/0100-accessibility-target.md)）。
+ * バッジは状態名も出すので、色だけで区別させません。
  */
 const STATUS_TONE: Readonly<Record<number, BadgeVariant>> = {
   1: BADGE_VARIANT.SECONDARY, // 在庫あり
@@ -34,7 +32,8 @@ const STATUS_TONE: Readonly<Record<number, BadgeVariant>> = {
  * @remarks
  * **マスタはこちらの都合と関係なく増えます。** 知らない状態を既存のどれかへ寄せると、意味を
  * 取り違えた色が付きます。**装飾を持たない姿**は「区分を決めていない」ことをそのまま示します。
- * 区分の決まっている状態が縁を持つので、決まっていないものだけが枠を持ちません。
+ * 区分の決まっている状態は塗りか枠線で囲まれた形を持つので、決まっていないものだけが形を持たず、
+ * 素の文字で出ます。
  */
 const UNKNOWN_STATUS_TONE: BadgeVariant = BADGE_VARIANT.GHOST;
 

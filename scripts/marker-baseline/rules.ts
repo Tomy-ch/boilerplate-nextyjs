@@ -21,6 +21,83 @@
 const MARKER_LINE =
   /(?:\/\/|#|<!--)\s*(?:sample|boilerplate-only):(?:begin|end|line|replace-begin|replace-with|replace-end)\b/;
 
+/**
+ * ブロックで囲む形のマーカー行。行内で完結する `:line` は含めない。
+ *
+ * @remarks
+ * `:line` を外すのは、行内形だけが表の行で安全だからです。Markdown の表は表の行でない行に
+ * 出会った時点で終わるので、コメント**行**を表の途中へ置くとそれ以降の行が表から落ちます。
+ * 行内形はセルの中に納まるため表を割りません。
+ */
+const MARKER_BLOCK_LINE =
+  /(?:\/\/|#|<!--)\s*(?:sample|boilerplate-only):(?:begin|end|replace-begin|replace-with|replace-end)\b/;
+
+/** 表の区切り行。列の数は問わない。 */
+const TABLE_DELIMITER = /^\|[\s:|-]+\|\s*$/;
+
+/** 囲みコードの境界。中の `|` は表ではないので数えない。 */
+const CODE_FENCE = /^\s*(?:```|~~~)/;
+
+/**
+ * 表として成立していない `|` 始まりの行の行番号（1 始まり）。
+ *
+ * @remarks
+ * 空行で区切られたひとまとまりを 1 つの表とみなし、**先頭行の次が区切り行**であるものだけを
+ * 表として認めます。認められなかったまとまりの `|` 始まりの行は、描画すると生のパイプを含む
+ * 段落になります。
+ *
+ * 割れ方は 2 通りあり、どちらも同じ症状に着地するのでここでまとめて見ます。
+ *
+ * - **ブロックマーカーを表の途中へ置いた** —— 表の行が「消える固有名を 1 セルに束ねている」と
+ *   きに、部分置換のつもりで使われます。その形は退避側へ行を丸ごと複製するので、変えたいのが
+ *   数文字でも数百字の写しができます。**表は 1 行 1 実体にし、消える実体は自分の行を持って
+ *   行内の `:line` で落とす**のが置き換えです
+ * - **表の途中に空行が入った** —— 以降の行が区切り行を持たない別のまとまりになります
+ */
+export function findRowsOutsideTable(content: string): number[] {
+  const lines = content.split("\n");
+  const outside: number[] = [];
+  let block: { index: number; line: string }[] = [];
+  let fenced = false;
+
+  const flush = (): void => {
+    const [first, second] = block;
+    const isTable =
+      first?.line.startsWith("|") === true &&
+      second !== undefined &&
+      TABLE_DELIMITER.test(second.line);
+
+    if (!isTable) {
+      for (const { index, line } of block) {
+        if (line.startsWith("|")) outside.push(index + 1);
+      }
+    }
+    block = [];
+  };
+
+  lines.forEach((line, index) => {
+    if (CODE_FENCE.test(line)) {
+      if (!fenced) flush();
+      fenced = !fenced;
+      return;
+    }
+    if (fenced) return;
+    if (line.trim() === "") {
+      flush();
+      return;
+    }
+    if (MARKER_BLOCK_LINE.test(line)) {
+      // マーカー行そのものは表の行ではない。ここでまとまりが切れる。
+      flush();
+      return;
+    }
+    block.push({ index, line });
+  });
+  flush();
+
+  return outside;
+}
+
 /** 走査から外すディレクトリ名。依存の取得物と VCS の内部、および生成物。 */
 export const EXCLUDED_DIRECTORIES: ReadonlySet<string> = new Set([
   ".git",

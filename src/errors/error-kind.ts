@@ -1,7 +1,8 @@
 /**
  * errors カーネルが扱う、プロトコルに依存しないエラー分類です。
  *
- * この値は transport の変換前後で共通に用いるため、分類の追加は ADR の更新を伴います。
+ * この値は transport の変換前後で共通に用いるため、分類を足すときは同層の [README](README.md) の
+ * 分類表と、変換を持つ `adapters` 境界を併せて直します。
  */
 /** errors カーネルが受け入れるエラー分類です。 */
 export type ErrorKind =

@@ -197,7 +197,7 @@ export function AttachmentTitle({ className, ...props }: ComponentProps<"span">)
  * 大きさ・進行状況・失敗理由などの補足。
  *
  * @remarks
- * `state` は見た目にしか出ないため、進行中や失敗であることはここのテキストで示す。
+ * 進行中や失敗であることはここのテキストで示す（{@link Attachment} の `state` は見た目にしか出ない）。
  *
  * @param props - native `span` 属性。
  *

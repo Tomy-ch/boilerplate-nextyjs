@@ -11,8 +11,7 @@ import { withPartSpan } from "@/observability/render-span";
  * @remarks
  * 「まだ買っていない」と「絞り込んだ結果が無い」は、利用者にとって別の事態です。前者から出せる
  * のは買い物へ戻る道だけで、後者は条件を外せば結果が出ます。真偽値で分けると、条件を外す行き先を
- * 渡し忘れた「絞り込んだ結果が無い」を書けてしまいます
- * （[0029](../../../../../../docs/adr/0029-type-design-discipline.md)）。
+ * 渡し忘れた「絞り込んだ結果が無い」を書けてしまいます。
  */
 export type PurchaseHistoryEmptyProps =
   /** 購入そのものが 1 件も無い。 */

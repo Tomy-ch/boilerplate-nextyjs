@@ -1,5 +1,6 @@
 ---
 name: scaffold-test
+usage-class: situational
 description: >-
   Write the Vitest test files for existing symbols in this repository — one symbol or a whole screen's worth at once — the counterpart to `test-review`, which only judges tests that already exist. Use it whenever a callable export has no test and the 1:1 gate is about to fail (`missing-test-file` / `missing-describe`), when a screen has just been implemented and its twenty-odd modules need their tests placed together, when a new function / component / hook / Server Action lands and its test still has to be written, when coverage falls below the 100 % gate and the uncovered branches need cases, or when someone asks 「テストを書いて」「このコンポーネントのテストを足して」「カバレッジが足りないので埋めて」. It hardcodes no viewpoints and no conventions: ADR 0090 (structure, naming, skip discipline, per-layer duties), ADR 0091 (async RSC placement, a11y automated checks), the nearest ancestor README's `test-requirement` frontmatter, the 1:1 gate itself (the authority on what is deliberately out of scope, including the `RUNTIME_ONLY_MODULES` globs that exclude `src/app/**/page.tsx`), sibling tests in the same directory, and the subject source are all read at runtime, so the generated test tracks the conventions as they evolve rather than freezing a copy. Derives the case set from the subject's own branches — every conditional, thrown error kind, boundary pair and null/undefined guard — and asserts each branch's distinctive outcome rather than merely executing it, because a repository with a 100 % coverage gate gets no information from coverage alone. Emits Japanese `it` names, the export-name `describe` the 1:1 gate requires, and comment separators on whichever axis ADR 0090 assigns to that kind of subject (`正常系` / `異常系` for a value, display states for rendering). Strictly read-only on the subject: it never edits, renames, or "makes testable" the implementation — when a symbol cannot be verified without changing it, that is reported as a finding for the user to decide. Do NOT use it to review or critique existing tests (`test-review`), to write HTTP-boundary integration tests for an adapter client or Route Handler (`scaffold-integration-test`), to run the suite (`make test-full`), or to fix a failing test whose subject changed (that is ordinary work on the change that broke it).
 argument-hint: '[path/to/subject.ts[:symbol] | path/to/dir/ | (省略で未テストを一括解決)]'
@@ -11,9 +12,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 Write the test files for the symbols that do not have one, in the shape this repository's gates
 already enforce.
 
-**The unit of work is a set.** A screen lands with twenty-odd untested modules at once, and the
-procedure that produced it asks for the tests to be placed together. Resolving one symbol is the same
-path with a set of size one.
+**The unit of work is a set**, resolved in Step 0; one symbol is just a set of size one.
 
 A Japanese reference translation of this skill is available at `SKILL.ja.md` in the same directory
 (not loaded as a skill; for human reference only).
@@ -39,8 +38,9 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 
 ## What this skill reads and writes
 
-Everything below is read **at runtime**. Nothing about the conventions is copied into this file,
-because a copy drifts and the gates follow the sources, not this skill.
+Everything below is read **at runtime**. The lists later in this file say how the skill applies the
+conventions; they are not the rules, and where they and the sources differ the sources win — the
+gates follow the sources, not this skill.
 
 | Source | What it decides |
 | --- | --- |
@@ -118,7 +118,10 @@ not one.
 ## Step 1. Read the layer context
 
 1. Walk up from the subject to the nearest ancestor `README.md` carrying `test-requirement` in its
-   frontmatter, and read both the frontmatter and the body.
+   frontmatter, and read both the frontmatter and the body — **including its `## テスト観点` section
+   when it has one.** Those lines are perspectives a human wrote for this slice, and they are the one
+   part of the input this skill did not derive. They are declarations with a reader: a slice README
+   that lists a perspective nothing ever asserts is a checklist that rots unwatched.
 2. Read ADR 0090 and ADR 0091.
 3. Read the subject source in full.
 4. Read the sibling tests in the same directory.
@@ -194,6 +197,33 @@ is on the ADR's ❌ list.
 Where the `正常系` / `異常系` axis does apply, assign by **whether the case sits inside or outside the
 happy path**, not by how the subject expresses the failure — the ADR is explicit that a thrown error,
 a returned error state and a silently dropped value all belong on the same side.
+
+### Enumerate before deriving, in a different head
+
+Before listing anything yourself, spawn one `test-perspective-enumerator` per subject group
+(`agentType: "test-perspective-enumerator"`, `label` like `perspectives:<group>`). It reads the
+subject, the nearest `test-requirement` README including its `## テスト観点`, and ADR 0090 / 0091,
+and returns one line per perspective with the assertion that would distinguish it.
+
+**The split is the point.** A model that writes a test decides what to test while deciding how to
+assert it, and those are not independent — the cases that get listed are the cases that are easy to
+assert. Holding a list you did not produce does not make the list complete; it makes the omissions
+**visible**, because a perspective that never becomes a case now has to be declined out loud.
+
+Reconcile its output against your own derivation:
+
+- Every returned perspective becomes a case, **or is declined in the Step 3 confirmation with the
+  reason.** "Covered by another test" is not a reason (ADR 0090).
+- A `宣言` perspective the subject does not appear to implement is **not** dropped. Put it to the
+  user: the README and the code disagree, and which one is wrong is not this skill's call.
+- Its 「区別できない」 block feeds Step 5 — those are subjects that cannot be verified as written.
+- Its 「読めなかった」 block goes into the report verbatim. An input that could not be read is not an
+  input that held nothing ([0157](../../../docs/adr/0157-inspection-declaration-discipline.md)).
+
+**When the README has no `## テスト観点` section, or it holds only the template placeholder, say so
+and do not invent one.** The absence is reportable: it means this slice's perspectives live only in
+whoever is reading the code right now. Proceed on the derived set, and name the gap in Step 3 so the
+user can decide whether the README should gain the section before the tests are written.
 
 ## Step 3. Plan and confirm, one group at a time
 
@@ -332,7 +362,7 @@ whether the layer's duty is actually exercised.
 - ❌ Write `it.skip` / `it.todo` to make the file pass
 - ❌ Write a test for a subject the 1:1 gate does not report as missing
 - ❌ Hand-roll a `fetch` stub where MSW owns the boundary
-- ❌ Copy the conventions into this file instead of reading them
+- ❌ Treat the lists in this file as the rules — where they and the sources differ, the sources win
 
 ## Checklist
 

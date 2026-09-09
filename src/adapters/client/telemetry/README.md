@@ -30,3 +30,13 @@ test-requirement: unit
 ## 受け入れないもの
 
 - 業務ロジック、受け側の検証（`server/telemetry/` が持つ）
+
+## 関連する ADR
+
+この区画のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります**
+（[docs/rules.md](../../../../docs/rules.md)「コメントと文書」）。層全体の一覧は
+[親の README](../../README.md) が持ちます。
+
+- [0082](../../../../docs/adr/0082-client-observability.md) — 何を測って何を送るか。span の名前に載せてよいもの
+- [0077](../../../../docs/adr/0077-bff-abuse-protection-boundary.md) — 受け口が持つ上限。送る側の切り詰めはその写しであること
+- [0090](../../../../docs/adr/0090-testing-strategy.md) — 層別の検証責務（`unit` として扱う理由）

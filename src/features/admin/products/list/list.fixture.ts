@@ -49,7 +49,7 @@ export const NO_CONDITIONS: AdminProductListConditions = {
  * **状態は 4 つの区分がそろうように選んであります。**色の割り当てを 1 画面で見比べられるように
  * するためで、マスタに無いコード（`99`）が縁だけの姿へ倒れることまで含みます。
  */
-export const PRODUCT_ROWS: readonly AdminProductRow[] = [
+export const PRODUCT_ROWS = [
   {
     id: toProductId("0195f0c2-0000-7000-8000-000000000001"),
     name: "ワイヤレスイヤホン",
@@ -115,7 +115,7 @@ export const PRODUCT_ROWS: readonly AdminProductRow[] = [
     // `row.ts` が持ち、対応は `row.test.ts` が押さえる。
     statusTone: BADGE_VARIANT.DEFAULT,
   },
-];
+] satisfies readonly [AdminProductRow, ...AdminProductRow[]];
 
 /** 契約上の最大長を持つ商品名。列幅を押し広げず折り返すかを見るために置く。 */
 export const LONG_NAME_PRODUCT_ROW: AdminProductRow = {

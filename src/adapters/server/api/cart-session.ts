@@ -8,9 +8,9 @@ import { baseCookieOptions } from "../auth/session-cookie";
  * ゲストのカートを指す識別子を載せる cookie の名前。
  *
  * @remarks
- * 用途を接頭辞に含めます（`docs/rules.md` #44）。認証の cookie と別に置くのは、未認証でも
- * 発行され、寿命も主体も session と一致しないためです
- * （[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §7）。
+ * 用途を接頭辞に含めます（`docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に
+ * 含め、属性を用途ごとに明示する」）。認証の cookie と別に置くのは、未認証でも発行され、
+ * 寿命も主体も session と一致しないためです。
  */
 const CART_SESSION_COOKIE_NAME = "cart_session";
 
@@ -33,8 +33,8 @@ export async function readCartSession(): Promise<string | null> {
  * ゲストのカートを指す識別子を cookie へ載せる。
  *
  * @remarks
- * ブラウザから読める形には置きません。この値だけがゲストのカートへ到達する手段であり、露出は
- * そのまま他人のカートへの到達経路になります（[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §7）。
+ * ブラウザから読める形には置きません。この値だけがゲストのカートへ到達する手段であり、
+ * 露出はそのまま他人のカートへの到達経路になります。
  *
  * cookie の寿命はカートの有効期限に合わせます。カートが先に消えると、残った cookie は何も
  * 指さない値になります。期限が判らない場合はブラウザを閉じるまでとし、こちらで年数を決めません。
@@ -55,8 +55,8 @@ export async function storeCartSession(token: string, expiresAt: Date | null): P
  * ゲストのカートを指す識別子を破棄する。
  *
  * @remarks
- * ログアウトの teardown に含めます。次に画面を開いた利用者へ、前の利用者のカートが見えないよう
- * にするためです（[0079](../../../../docs/adr/0079-auth-frontend-seam.md) §5 / §7）。
+ * ログアウトの teardown に含めます。次に画面を開いた利用者へ、前の利用者のカートが
+ * 見えないようにするためです。
  */
 export async function clearCartSession(): Promise<void> {
   (await cookies()).delete(CART_SESSION_COOKIE_NAME);

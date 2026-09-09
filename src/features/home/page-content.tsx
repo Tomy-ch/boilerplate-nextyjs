@@ -20,7 +20,7 @@ const NEW_ARRIVAL_COUNT = 8;
  *
  * @remarks
  * 表示する文言は分類から引きます。取得側のメッセージをそのまま出すと、バックエンドの都合が
- * 画面の文言になります（[0080](../../../docs/adr/0080-error-handling.md)）。
+ * 画面の文言になります。
  */
 function toSectionState<T>(section: string, settled: PromiseSettledResult<T>): SectionState<T> {
   if (settled.status === "fulfilled") {

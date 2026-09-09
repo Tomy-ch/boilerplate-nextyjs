@@ -13,7 +13,7 @@
  *
  * @remarks
  * ブランチ名をそのまま使うので、`a` と `a/b` が同時に存在すると git の ref が衝突します。
- * ADR 0150 の命名では到達しません。**命名規約を緩めるときはここも見直すこと。**
+ * 現行のブランチ命名では到達しません。**命名規約を緩めるときはここも見直すこと。**
  */
 export const SNAPSHOT_REF_PREFIX = "snapshot/";
 
@@ -25,11 +25,11 @@ export const SNAPSHOT_REF_PREFIX = "snapshot/";
  * 保持しない ref から到達するコミットは消えるため、**過去のコミットへ遡ると基準画像は無い**
  * のが仕様です。
  *
- * - `production` / `staging` / `develop` — ADR 0150 が固定する常設ブランチ
+ * - `production` / `staging` / `develop` — ブランチ戦略が固定する常設ブランチ
  * - `release/*` / `hotfix/*` — リリース作業中に checkout される
  * - 開いている PR の head — 撮り直した本人がまだ見ている
  *
- * 撤去条件は、それぞれのブランチ運用が ADR 0150 から外れた時点。
+ * 撤去条件は、それぞれのブランチ運用が現行のブランチ戦略から外れた時点。
  */
 export const LIVE_BRANCH_PATTERNS = [
   "production",

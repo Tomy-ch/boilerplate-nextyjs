@@ -6,11 +6,9 @@
 
 Accepted
 
-（採番はブロック帯で確定(2026-07-14・0001〜0155。トピック順ブロック帯(10 番台=主題ブロック))([0140](0140-documentation-operations.md))。本 ADR の内容自体はユーザ決定済み(Tier 5)。日付 2026-07-13。0.0.x の ADR は living document として本文を直接上書きし、改定履歴を積まない）
-
 ## 背景
 
-BACKLOG C5 は、`next/font` / `next/image` の使い方規約・`public/` の扱い・動的 OG 画像を未決としていた。本 ADR は Next.js 組込み機構を既定とする方針を定める。
+`next/font` / `next/image` の使い方・`public/` の扱い・動的 OG 画像は、いずれも Next.js が組込み機構を持つ領域である。本 ADR はその組込み機構を既定とする方針を定め、独自の代替を持ち込まない。
 
 ## 決定
 
@@ -23,7 +21,7 @@ BACKLOG C5 は、`next/font` / `next/image` の使い方規約・`public/` の�
 ### 2. 画像 = `next/image`
 
 - ラスター画像は **`next/image`** を用いる(最適化・遅延読み込み・レイアウトシフト抑制)。生の `<img>` は原則使わない(装飾的 SVG 等の例外は可)
-- 配送前提([0011](0011-no-docker.md))に応じて画像最適化の loader を選ぶ(PaaS の組込み最適化 / 静的書き出し時の扱いは実装 PR で確定)
+- 配送前提([0011](0011-no-docker.md))に応じて画像最適化の loader を選ぶ(PaaS の組込み最適化か、静的書き出し時の loader かは配備先で決める)
 
 ### 2.1 バックエンド由来画像 = public storage 前提・自前の配信レイヤを持たない
 
@@ -32,7 +30,7 @@ BACKLOG C5 は、`next/font` / `next/image` の使い方規約・`public/` の�
 - 配信オリジンは env(`MEDIA_ORIGIN`)で供給する([0030](0030-environment-variable-management.md))。`remotePatterns` と CSP の `img-src`([0111](0111-csp-security-headers.md))の**両方**に同一オリジンを登録し、**ワイルドカードは使わない**
 - **`mediaUrl()` はオリジンの前置ではなく閉じ込めである。** キーは検証されないまま届くため、`data:` のように自分でスキームを持つ値は前置をすり抜けて配信元の外を指す。`next/image` はスキームを持つ値を最適化の経路から外すので、`remotePatterns` の許可はこの経路に効かない。**組み立てた URL が配信元の下に収まらなければ表示 URL を作らない**(代替画像へ倒す)
 - private なオブジェクトを扱う必要が生じた場合は、署名付き URL の発行を backend の責務とする([0075](0075-file-upload-seam.md) と同型)。フロントに配信レイヤを生やして解決しない
-- **EC サンプルの通常 API 契約に blur プレースホルダ(`blurDataURL`)は載せない** — バックエンド由来画像では自前供給が必要で、一覧レスポンスが件数分肥大するため。`MediaImage` は `next/image` 標準の `placeholder` / `blurDataURL` を明示的に渡す利用(静的 import を含む)は妨げない。一方、既定は `components` カーネルの**アスペクト比固定 + CSS Skeleton**によるローディングとし、`"use client"` を要しない。LCP になる画像(一覧先頭・詳細のメイン)は `preload` を指定して Skeleton を挟まない
+- **同梱サンプルの通常 API 契約に blur プレースホルダ(`blurDataURL`)は載せない** — バックエンド由来画像では自前供給が必要で、一覧レスポンスが件数分肥大するため。`MediaImage` は `next/image` 標準の `placeholder` / `blurDataURL` を明示的に渡す利用(静的 import を含む)は妨げない。一方、既定は `components` カーネルの**アスペクト比固定 + CSS Skeleton**によるローディングとし、`"use client"` を要しない。LCP になる画像(一覧先頭・詳細のメイン)は `preload` を指定して Skeleton を挟まない
 
 ### 3. `public/` の扱い
 
@@ -53,9 +51,10 @@ BACKLOG C5 は、`next/font` / `next/image` の使い方規約・`public/` の�
 
 ## 関連 ADR
 
-- [0044-seo-metadata-strategy.md](0044-seo-metadata-strategy.md)(C7)— SEO / メタデータ戦略(OG 画像・メタデータの所有者。責務境界を共有)
-- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md)(A4)— App Router / Metadata API / 特殊ファイル
-- [0027-directory-structure.md](0027-directory-structure.md)(A5)— `src/app/` / `public/` 配置
-- [0028-naming-convention.md](0028-naming-convention.md)(A6)— `opengraph-image` 等の特殊ファイル命名
+- [0044-seo-metadata-strategy.md](0044-seo-metadata-strategy.md) — SEO / メタデータ戦略(OG 画像・メタデータの所有者。責務境界を共有)
+- [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — App Router / Metadata API / 特殊ファイル
+- [0027-directory-structure.md](0027-directory-structure.md) — `src/app/` / `public/` 配置
+- [0028-naming-convention.md](0028-naming-convention.md) — `opengraph-image` 等の特殊ファイル命名
 - [0011-no-docker.md](0011-no-docker.md) — 配送前提(画像最適化 loader の選択)
-- [0101-performance-budget.md](0101-performance-budget.md)(C3)— フォント / 画像は CWV(LCP / CLS)に直結
+- [0051-styling-system.md](0051-styling-system.md) — 書体の役割(semantic 層)と和文本文書体の扱い
+- [0101-performance-budget.md](0101-performance-budget.md) — フォント / 画像は CWV(LCP / CLS)に直結

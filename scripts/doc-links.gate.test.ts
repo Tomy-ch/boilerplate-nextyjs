@@ -13,7 +13,7 @@ import { collectMarkdownFiles } from "./lib/markdown-files";
  * `scripts/` へ置くのは、これがアプリの振る舞いではなく開発機構の検査だから
  * （`one-to-one.gate.test.ts` と同形）。
  *
- * `pnpm md-lint` は Markdown の体裁だけを見てリンク先の実在は見ないため、この検査はそちらでは
+ * `pnpm lint:md` は Markdown の体裁だけを見てリンク先の実在は見ないため、この検査はそちらでは
  * 代替できない。
  *
  * 見る先は 2 系統ある。Markdown は本文（コードフェンスとコードスパンを除く）、ソースはコメント行。

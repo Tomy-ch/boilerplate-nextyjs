@@ -28,20 +28,22 @@ export function* eachLineOutsideFence(
 ): Generator<{ line: string; lineNo: number }> {
   const lines = content.split("\n");
   let fence: string | null = null;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const marker = /^\s*(`{3,}|~{3,})(.*)$/.exec(line);
+  for (const [i, line] of lines.entries()) {
+    const opener = /^[ \t]*(`{3,}|~{3,})/.exec(line);
+    const marker = opener?.[1];
+    const info = opener === null ? undefined : line.slice(opener[0].length);
     if (fence) {
       const closes =
-        marker !== null &&
-        marker[1][0] === fence[0] &&
-        marker[1].length >= fence.length &&
-        marker[2].trim() === "";
+        marker !== undefined &&
+        info !== undefined &&
+        marker.startsWith(fence.charAt(0)) &&
+        marker.length >= fence.length &&
+        info.trim() === "";
       if (closes) fence = null;
       continue;
     }
-    if (marker) {
-      fence = marker[1];
+    if (marker !== undefined) {
+      fence = marker;
       continue;
     }
     yield { line, lineNo: i + 1 };
@@ -61,19 +63,19 @@ export function splitFrontmatter(content: string): Frontmatter | null {
 // インデント行を連結して値とする（YAML パーサを持ち込まずに済む範囲に限定した簡易解析）。
 export function parseFrontmatterKeys(fmLines: string[]): Map<string, string> {
   const keys = new Map<string, string>();
-  for (let i = 0; i < fmLines.length; i++) {
-    const m = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(fmLines[i]);
-    if (!m) continue;
-    let value = m[2].trim();
+  for (const [i, fmLine] of fmLines.entries()) {
+    const [, key, raw] = /^([\w-]+):(.*)$/.exec(fmLine) ?? [];
+    if (key === undefined || raw === undefined) continue;
+    let value = raw.trim();
     if (value === ">-" || value === ">" || value === "|" || value === "|-") {
       const folded: string[] = [];
-      for (let j = i + 1; j < fmLines.length; j++) {
-        if (fmLines[j].trim() !== "" && !/^\s/.test(fmLines[j])) break;
-        folded.push(fmLines[j].trim());
+      for (const continuation of fmLines.slice(i + 1)) {
+        if (continuation.trim() !== "" && !/^\s/.test(continuation)) break;
+        folded.push(continuation.trim());
       }
       value = folded.join(" ").trim();
     }
-    keys.set(m[1], value);
+    keys.set(key, value);
   }
   return keys;
 }
@@ -81,8 +83,13 @@ export function parseFrontmatterKeys(fmLines: string[]): Map<string, string> {
 export function extractHeadings(content: string): Heading[] {
   const headings: Heading[] = [];
   for (const { line, lineNo } of eachLineOutsideFence(content)) {
-    const m = /^(#{1,6})\s+(.*?)\s*$/.exec(line);
-    if (m) headings.push({ level: m[1].length, text: m[2], lineNo });
+    const [, hashes, raw] = /^(#{1,6})[ \t](.*)$/.exec(line) ?? [];
+    const text = raw?.trim();
+    // 文言が空でも列から落とさない。落とすと、片側にだけ在る見出しで**対訳の列がずれた分だけ
+    // 詰まって揃い**、本来報告すべき構造ずれが無報告になる。空であることは呼び出し側が見る。
+    if (hashes !== undefined && text !== undefined) {
+      headings.push({ level: hashes.length, text, lineNo });
+    }
   }
   return headings;
 }

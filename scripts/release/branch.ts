@@ -46,7 +46,7 @@ export type ReleaseBranchPlan = {
  * 次の版のブランチを `production` から切り、GitHub の既定ブランチをそこへ張り替える手順を組む。
  *
  * @remarks
- * hotfix も release も `production` から切ります([0150](../../docs/adr/0150-git-workflow.md))。
+ * hotfix も release も `production` から切ります。
  * 出荷済みの断面から切らないと、まだ出していない変更をリリース版へ引き連れます。
  *
  * **順序は入れ替えられません。** 既定ブランチの張り替えは、push で ref が向こうに在ることが
@@ -81,7 +81,7 @@ export function planReleaseBranch(input: {
       // コミットを作るかどうかは焼き込む側が決める（`.makefiles/README.md` の「版の焼き込み関連」）。
       runStep("make", ["version-stamp-commit", `REF=${branchName}`]),
       // push も `--no-verify`。押すのは production が全ゲートを通過した木と、その上へブランチ名
-      // から導いた 1 行だけ。bypass の可否は [0151](../../docs/adr/0151-git-hooks.md) に従う。
+      // から導いた 1 行だけ。bypass の可否は [README](../README.md) から辿る。
       runStep("git", ["push", "--no-verify", "origin", branchName]),
       logStep(`⚙️ GitHub上のデフォルトブランチを ${branchName} に設定します。`),
       runStep("gh", ["repo", "edit", "--default-branch", branchName]),
@@ -99,7 +99,7 @@ const BASELINE_STORE_PATH = "baseline/images";
  * @remarks
  * **ここを分けないと、案内が嘘になります。** ずれは撮り直しでポインタが進んだ後に実体が
  * 追いつかないと起き、`git status` には他の変更と同じ顔で出ます。案内どおり commit すると
- * **間違った基準画像の指し先を保護ブランチへ載せる**ことになり、押した後では取り消せません。
+ * **間違った基準画像の指し先を保護ブランチへ載せる**ことになります。
  */
 function isOnlyBaselinePointer(workTreeStatus: string): boolean {
   const paths = workTreeStatus

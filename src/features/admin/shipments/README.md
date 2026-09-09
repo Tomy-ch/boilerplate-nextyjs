@@ -1,6 +1,6 @@
 ---
 imports-allowed: [model, components, adapters, capabilities, stores, errors, logging, observability]
-forbidden: [features] # 相方の facade/ と、画面まるごとの story は例外 (ADR 0021)
+forbidden: [features] # 相方の facade/ と、画面まるごとの story は例外
 test-requirement: feature
 ---
 
@@ -16,8 +16,8 @@ test-requirement: feature
 
 ## 受け入れないもの
 
-- 便の分け方と並び順（契約が決める。[0070](../../../../docs/adr/0070-backend-role-separation.md)）
-- 役割の確認（送信の受け口である app 層が持つ。[0025](../../../../docs/adr/0025-app-layer-elements.md)）
+- 便の分け方と並び順（契約が決める）
+- 役割の確認（送信の受け口である app 層が持つ）
 - 購入 1 件の詳細（本人向けの画面が持ち、管理側に 1 件を眺める面は無い）
 
 ## Route と契約
@@ -112,3 +112,12 @@ test-requirement: feature
   対象は押す前から画面に出ています
 - **購入者は識別子のまま出します。** 契約が呼び名を載せません。便を見分けるのが目的なので識別子で
   足ります
+
+## 関連する ADR
+
+- [0021](../../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。他 feature へ貸すものを `facade/` に出す
+- [0025](../../../../docs/adr/0025-app-layer-elements.md) — app 層の構成要素。送信の受け口が役割の確認を持つ
+- [0040](../../../../docs/adr/0040-routing-rendering-strategy.md) — 描画戦略。取得と client 島の分界
+- [0061](../../../../docs/adr/0061-form-mutation-ux.md) — `<form action>` + Server Action の正機構
+- [0070](../../../../docs/adr/0070-backend-role-separation.md) — バックエンドとの責務線。便の分け方と並び順は契約が決める
+- [0073](../../../../docs/adr/0073-pagination-fetch-boundary.md) — ページ送り / 増分取得の境界。一覧に送りを持たせる条件

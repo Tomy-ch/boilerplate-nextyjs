@@ -12,6 +12,9 @@ async function renderPage(searchParams: Record<string, string | string[] | undef
 describe("LoginPage", () => {
   it("この画面の名前と説明を metadata に持つ", () => {
     expect(metadata.title).toBe("ログイン");
+    expect(metadata.description).toBe(
+      "認証を始めます。資格情報の入力は認証基盤の画面で行われます。",
+    );
   });
 
   it("検索エンジンに拾わせない", () => {

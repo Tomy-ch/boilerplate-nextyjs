@@ -1,8 +1,8 @@
 // 画面を撮る帯（viewport の幅）の宣言。
 //
-// 帯そのものは [0051](../../docs/adr/0051-styling-system.md) §2 が 3 つに固定しており、境界の値は
-// design token（`tokens/primitives.json`）が持つ。ここに数値を書かないのは、token を差し替えた
-// fork 先で、レイアウトの分岐と撮影の幅が別々に動き始めるためである。
+// 帯そのものは 3 つに固定されており、境界の値は design token（`tokens/primitives.json`）が持つ
+// （[README](../README.md)「帯とエンジンは宣言から引く」）。ここに数値を書かないのは、token を
+// 差し替えたテンプレートから作った側で、レイアウトの分岐と撮影の幅が別々に動き始めるためである。
 import { readFileSync } from "node:fs";
 
 /** ブレークポイントの宣言を持つ design token。 */
@@ -81,19 +81,18 @@ export function parseBreakpoints(json: string): ReadonlyMap<string, number> {
 const BAND_EDGES = ["md", "lg"] as const;
 
 /**
- * [0051](../../docs/adr/0051-styling-system.md) §2 の 3 段と、各段で撮る幅を組み立てる。
+ * 3 段の帯と、各段で撮る幅を組み立てる。
  *
  * @remarks
- * 段の呼び名と境界は ADR が決めています。`md` 未満がモバイル、`md` 以上 `lg` 未満がタブレット、
- * `lg` 以上が PC です。
+ * `md` 未満がモバイル、`md` 以上 `lg` 未満がタブレット、`lg` 以上が PC です。
  *
  * 撮るのは**帯の下端**です。レイアウトは mobile-first の `min-width` で切り替わるので、下端は
  * その帯の指定が初めて効く幅であり、崩れるならまずそこで崩れます。PC で常設する脇の領域が
  * 最も本文を圧迫するのも `lg` ちょうどです。
  *
- * モバイルだけは下端を token が持ちません（対応する下限は
- * [0102](../../docs/adr/0102-browser-support.md) が fork 先へ委ねています）。代わりに上端
- * （`md - 1`）を撮ります。この帯は幅が広いほど余白が伸びるため、崩れるとすれば上端です。
+ * モバイルだけは下端を token が持ちません（対応する下限はテンプレートから作った側へ委ねて
+ * います）。代わりに上端（`md - 1`）を撮ります。この帯は幅が広いほど余白が伸びるため、崩れると
+ * すれば上端です。
  */
 export function responsiveBands(breakpoints: ReadonlyMap<string, number>): readonly Band[] {
   const missing = BAND_EDGES.filter((edge) => !breakpoints.has(edge));
@@ -116,9 +115,8 @@ export function responsiveBands(breakpoints: ReadonlyMap<string, number>): reado
  * 撮影・巡回する高さ。
  *
  * @remarks
- * 帯を決めるのは幅だけです（[0051](../../docs/adr/0051-styling-system.md) §2）。高さは story 単位の
- * 撮影（`playwright.config.ts`）と同じ値に揃えてあります。画面は全体を撮るので、収まらない分は
- * 縦に伸びます。
+ * 帯を決めるのは幅だけです。高さは story 単位の撮影（`playwright.config.ts`）と同じ値に
+ * 揃えてあります。画面は全体を撮るので、収まらない分は縦に伸びます。
  */
 export const VIEWPORT_HEIGHT = 720;
 

@@ -52,7 +52,7 @@ test-requirement: unit
 
 ## 差し替え点
 
-`session-resolver.ts` の `SessionResolver` が唯一の差し替え単位です。fork 先が自社方式へ移るときは
+`session-resolver.ts` の `SessionResolver` が唯一の差し替え単位です。テンプレートから作った側が自社方式へ移るときは
 `resolver.ts` が返す実装を替えます。cookie を扱う側は封緘された文字列しか触らないため、方式が
 変わっても書き直しになりません。
 
@@ -79,3 +79,16 @@ test-requirement: unit
 
 - 認証の往復の口は [`src/app/api/auth/`](../../../app/api/auth)
 - 入口の楽観判定は [`src/proxy.ts`](../../../proxy.ts)
+
+## 関連する ADR
+
+この区画のコードが依存する決定です。**コメントからは ADR を直接指さず、この節を辿ります**
+（[docs/rules.md](../../../../docs/rules.md)「コメントと文書」）。層全体の一覧は
+[親の README](../../README.md) が持ちます。
+
+- [0079](../../../../docs/adr/0079-auth-frontend-seam.md) — 認証の前面の seam。IdP を検証せず資格情報を中継し、サインインの面は自分で持つこと
+- [0030](../../../../docs/adr/0030-environment-variable-management.md) — secret の読み方と、client へ渡せない値を登録する口
+- [0070](../../../../docs/adr/0070-backend-role-separation.md) — 身元の扱いと、認可の判断をバックエンドから奪わないこと
+- [0043](../../../../docs/adr/0043-middleware-policy.md) — 入口（`proxy.ts`）が持てるのは楽観判定までであること
+- [0021](../../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界
+- [0090](../../../../docs/adr/0090-testing-strategy.md) — 層別の検証責務（`integration` が掛かる範囲）

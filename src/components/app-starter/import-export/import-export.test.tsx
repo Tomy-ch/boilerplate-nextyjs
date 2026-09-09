@@ -78,20 +78,25 @@ describe("ImportErrorList", () => {
     render(<ImportErrorList errors={ERRORS} />);
 
     const table = screen.getByRole("table", { name: "取り込めなかった行" });
-    const rows = within(table).getAllByRole("row");
+    const cells = within(table)
+      .getAllByRole("row")
+      .map((row) =>
+        within(row)
+          .queryAllByRole("cell")
+          .map((cell) => cell.textContent),
+      );
 
-    expect(rows).toHaveLength(3);
-    expect(within(rows[1]).getByText("12")).toBeInTheDocument();
-    expect(within(rows[1]).getByText("月額")).toBeInTheDocument();
-    expect(within(rows[1]).getByText("数値として読めません")).toBeInTheDocument();
+    expect(cells).toEqual([
+      [],
+      ["12", "月額", "数値として読めません"],
+      ["27", "—", "列の数が合いません"],
+    ]);
   });
 
   it("行全体が原因の場合は項目を空にする", () => {
     render(<ImportErrorList errors={ERRORS} />);
 
-    const rows = screen.getAllByRole("row");
-
-    expect(within(rows[2]).getByText("—")).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "—" })).toBeInTheDocument();
   });
 
   it("表の名前を呼び出し元が差し替えられる", () => {
@@ -133,6 +138,13 @@ describe("ExportButton", () => {
 
     expect(link).toHaveAttribute("href", "/exports/plans.csv");
     expect(link).toHaveAttribute("download", "plans.csv");
+  });
+
+  it("前の出力を持ったまま生成中なら、受け取る link を出さない", () => {
+    render(<ExportButton fileName="plans.csv" href="/exports/plans.csv" pending />);
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "書き出しています" })).toBeDisabled();
   });
 
   it("文言を呼び出し元が差し替えられる", () => {

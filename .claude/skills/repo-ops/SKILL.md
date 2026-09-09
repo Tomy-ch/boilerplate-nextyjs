@@ -1,6 +1,7 @@
 ---
 name: repo-ops
-description: Operational runbook for this repository's recurring, easy-to-trip-on gotchas around the mise-managed toolchain, the pnpm lockfile, the Makefile setup targets, the scratch directories, and the lefthook git hooks. Read-only knowledge skill — it tells you the exact command to run; it does not silently mutate state. This is deliberately a SPARSE STARTER for the Next.js boilerplate: it carries only the gotchas that genuinely exist today (mise / pnpm / make DRY_RUN / scratch paths / lefthook hooks), and grows as new operational traps are discovered (in contrast to the go-boilerplate original, whose items were mostly Docker / sqlc / DB-runner specific and do not apply here — ADR 0011 no-docker). Triggers: "make install-tools が mise not found で落ちる", "DRY_RUN はどのターゲットで効くのか", "setup-repo を試しに実行したい", "pnpm install --frozen-lockfile が落ちる", "mise.toml を変えた後の反映", "pnpm のスクリプトが ERR_PNPM_IGNORED_BUILDS で落ちる", "pnpm-workspace.yaml に覚えのない allowBuilds が付いている", "スクラッチ出力をどこに置くか", "commit が commitlint に弾かれる", "hook が command not found で落ちる", "mise 自身の版を上げたい", "mise を上げたら CI の digest 照合で落ちた".
+usage-class: situational
+description: Operational runbook for this repository's recurring, easy-to-trip-on gotchas around the mise-managed toolchain, the pnpm lockfile, the Makefile setup targets, the scratch directories, and the lefthook git hooks. Read-only knowledge skill — it tells you the exact command to run; it does not silently mutate state. It is SYMPTOM-driven and answers only from its own index: a symptom that is not listed is routed to `how-to` (a goal, which can conclude that no procedure exists) or `repo-truth` (the current state), because this runbook deliberately cannot conclude an absence and its silence must not read as an answer. This is deliberately a SPARSE STARTER for the Next.js boilerplate: it carries only the gotchas that genuinely exist today (mise / pnpm / make DRY_RUN / scratch paths / lefthook hooks), and grows as new operational traps are discovered (in contrast to the go-boilerplate original, whose items were mostly Docker / sqlc / DB-runner specific and do not apply here — ADR 0011 no-docker). Triggers: "make install-tools が mise not found で落ちる", "DRY_RUN はどのターゲットで効くのか", "setup-repo を試しに実行したい", "pnpm install --frozen-lockfile が落ちる", "mise.toml を変えた後の反映", "pnpm のスクリプトが ERR_PNPM_IGNORED_BUILDS で落ちる", "pnpm-workspace.yaml に覚えのない allowBuilds が付いている", "スクラッチ出力をどこに置くか", "commit が commitlint に弾かれる", "hook が command not found で落ちる", "mise 自身の版を上げたい", "mise を上げたら CI の digest 照合で落ちた".
 ---
 
 # Repo Ops Runbook
@@ -9,12 +10,42 @@ Concrete recovery + procedure steps for the operational gotchas that recur in th
 **lookup table, not a workflow**: find the symptom, run the fix. When a step is destructive or touches a
 root file, say so to the user first per `CLAUDE.md`.
 
-> **Scope note.** This runbook is intentionally sparse. The go-boilerplate `repo-ops` it was adapted
-> from centred on Docker tool-runners, `sqlc` / `schema.gen.sql`, root-owned generated dirs, and a
-> live DB — **none of which exist here** ([0011](../../../docs/adr/0011-no-docker.md); no DB;
-> presentation layer only). Only the
-> genuinely-present traps are listed below. Add an item when a new one bites — do not port the
-> Go-specific ones back in.
+> **Scope note.** This runbook is intentionally sparse: only the traps that genuinely exist here are
+> listed. This repository is a presentation layer with no Docker tool-runner and no DB
+> ([0011](../../../docs/adr/0011-no-docker.md)), so items about either do not belong. Add an item
+> when a new trap bites.
+
+## Contract
+
+| | |
+| --- | --- |
+| **Owns** | 既知の症状 → 対処。索引に載っている落とし穴の、実際に効いた直し方 |
+| **Never** | 手順の発明 / **「手順が存在しない」という結論** / 索引に無い症状への推測 |
+| **Starts when** | 何かが予期しない振る舞いをし、それが下の索引に載っているとき |
+| **Stops when** | 症状が索引に無いとき —— `how-to`（目標）か `repo-truth`（現状）へ振って止まる |
+
+## Symptom index
+
+| 症状 | 節 |
+| --- | --- |
+| `make install-tools` が `mise not found` で落ちる | 1 |
+| `pnpm` の script が落ちる / `pnpm-workspace.yaml` が勝手に変わる | 2 |
+| `DRY_RUN=1` を付けたのに `make setup-repo` が何も変わらない | 3 |
+| `pnpm install --frozen-lockfile` が落ちる | 4 |
+| `pnpm lint` は通るのに `pnpm lint:ci` が落ちる | 5 |
+| scratch の出力を `git status` に出したくない / どこへ置くか | 6 |
+| commit / push が hook に弾かれる | 7 |
+| mise 自身の版を上げたい / 上げたら CI が落ちた | 8 |
+
+**This index is the whole of what this skill can answer.** A symptom that is not in it is not
+"probably fine" and it is not "no procedure exists" — **this runbook cannot conclude the latter**, and
+teaching it to would make its silence indistinguishable from an answer. Route instead:
+
+| The question turned out to be | Door |
+| --- | --- |
+| 「これをやりたい。正規の手順は？」 | `how-to` — it *can* conclude UNDEFINED, on an exhausted registry |
+| 「そもそもどうなっている / この規約の正本は？」 | `repo-truth` |
+| 「まだ誰も決めていない選択」 | `research` |
 
 ## 1. `make install-tools` fails with `mise not found`
 
@@ -43,7 +74,7 @@ then behaves in two ways that both point the blame somewhere else:
   naming `esbuild` / `lefthook` / `sharp`, or, in the non-interactive shell an agent or CI has,
   `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` because it wants to purge a `node_modules` the other
   major wrote. The stack ends in `runDepsStatusCheck`, which is the tell: the gate failed, not
-  `lint:ci` / `typecheck` / `md-lint`.
+  `lint:ci` / `typecheck` / `lint:md`.
 - **It edits a tracked root config.** pnpm 11 prepends a placeholder block to `pnpm-workspace.yaml`:
 
   ```yaml
@@ -187,7 +218,7 @@ in it or every hook fails with `command not found`.
 
 | Stage | Entry point | What it checks |
 | --- | --- | --- |
-| pre-commit | `pnpm lint:ci`; `pnpm md-lint` when `*.md` is staged; `make actionlint` when a workflow is staged | biome full profile + ESLint layer boundaries + `architecture.ts` cross-check (§5); markdownlint + mermaid syntax + `.claude/**` semantics (`skill-lint`); workflow syntax + `run:` shell |
+| pre-commit | `pnpm lint:ci`; `pnpm lint:md` when `*.md` is staged; `make actionlint` when a workflow is staged | biome full profile + ESLint layer boundaries + `architecture.ts` cross-check (§5); markdownlint + mermaid syntax + `.claude/**` semantics (`skill-lint`); workflow syntax + `run:` shell |
 | commit-msg | `make commitlint` | the subject against ADR 0150 |
 | pre-push | `make test-full`; `pnpm typecheck`; `make secret-scan` | Vitest cache 無効 + カバレッジしきい値; `tsc --noEmit`; secrets in the range being pushed (**fail-closed**) |
 
@@ -203,7 +234,7 @@ make secret-scan
 ```
 
 Every command in `.lefthook.yaml` is written bare — `mise exec --` is forbidden there like everywhere
-else (ADR 0003 / 0151). A hook dying with `❌ <tool> が PATH にありません` while `mise ls` shows the tool
+else (§2; ADR 0003 / 0151). A hook dying with `❌ <tool> が PATH にありません` while `mise ls` shows the tool
 installed is therefore an environment report, not a hook bug: the shell that launched `git` does not have
 the activated `PATH`. Fix it at the source — `make install-tools`, then activate mise in that shell. For
 a launcher that never sources a profile (a GUI git client, an agent shell, CI), put mise's **shims**
@@ -295,5 +326,4 @@ does not touch mise itself.
 - ✅ Confirm with the user before editing root files (`biome.json` in §5, `package.json` in §4) —
   they are outside the default AI Modification Scope. §2's `git restore pnpm-workspace.yaml` is the
   exception: it discards an unrequested machine edit rather than making one.
-- ❌ Do not port the go-boilerplate Docker / sqlc / DB items here — they do not apply
-  ([0011](../../../docs/adr/0011-no-docker.md)).
+- ❌ Do not add Docker / DB items here (Scope note).

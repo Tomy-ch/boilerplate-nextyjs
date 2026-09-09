@@ -7,7 +7,9 @@ const DEFAULT_LIST_ITEM_MEDIA_VARIANT = "default";
 const ICON_LIST_ITEM_MEDIA_VARIANT = "icon";
 const IMAGE_LIST_ITEM_MEDIA_VARIANT = "image";
 
-/** 行の面の見せ方を表す定数。  *
+/**
+ * 行の面の見せ方を表す定数。
+ *
  * @see Storybook `Display/List`
  */
 export const LIST_ITEM_VARIANT: Readonly<{
@@ -20,7 +22,9 @@ export const LIST_ITEM_VARIANT: Readonly<{
   MUTED: MUTED_LIST_ITEM_VARIANT,
 };
 
-/** 行の余白の大きさを表す定数。  *
+/**
+ * 行の余白の大きさを表す定数。
+ *
  * @see Storybook `Display/List`
  */
 export const LIST_ITEM_SIZE: Readonly<{
@@ -31,7 +35,9 @@ export const LIST_ITEM_SIZE: Readonly<{
   SMALL: SMALL_LIST_ITEM_SIZE,
 };
 
-/** 行の先頭に置く媒体の種類を表す定数。  *
+/**
+ * 行の先頭に置く媒体の種類を表す定数。
+ *
  * @see Storybook `Display/List`
  */
 export const LIST_ITEM_MEDIA_VARIANT: Readonly<{

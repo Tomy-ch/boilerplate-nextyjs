@@ -122,6 +122,12 @@ export const SAMPLE_RESTORATIONS: readonly SampleRestoration[] = [
     from: "scripts/setup/remove-sample/templates/app-page.tsx.template",
     to: "src/app/page.tsx",
   },
+  // 置き直した入口の画面要件。route が戻る以上、突合の相手も戻らなければ
+  // `spec-routes.gate` が破棄後の木でだけ落ちる（[0143](../../../docs/adr/0143-spec-driven-development.md)）。
+  {
+    from: "scripts/setup/remove-sample/templates/page-screen.md.template",
+    to: "docs/spec/route/page.screen.md",
+  },
 ];
 
 /**

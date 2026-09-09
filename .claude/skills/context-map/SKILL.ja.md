@@ -66,10 +66,12 @@
 | `src/app` の metadata / `robots` / `sitemap` | 呼び出し元ではなく**標準**である入りの辺 |
 | `src/proxy.ts` | 上のどれよりも先に横取りされるもの |
 
+<!-- sample:begin -->
 **サンプル破棄で消える辺と、残る辺を分ける。**サンプルが在るからこそ存在する相手は、
 テンプレート利用者が受け取る地図の一部ではない —— 範囲は
 [`scripts/setup/remove-sample/sample-manifest.ts`](../../../scripts/setup/remove-sample/sample-manifest.ts)。
 
+<!-- sample:end -->
 **接触点は資源ではなく相手で数える。**1 つのバックエンドに対する 10 個の endpoint は 1 つの辺である。
 **地図はこの層が誰と話すかの話であって、何を頼むかの話ではない。**
 

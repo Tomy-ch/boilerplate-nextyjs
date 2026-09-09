@@ -84,11 +84,11 @@ rhf を使うときの配線は次のとおり。
 | 層 | 何を判定するか | 置き場 | 流儀 | 届く先 |
 | --- | --- | --- | --- | --- |
 | **表示検証** | 必須・長さ・形式。人向けの文言を持つ | `src/model/<領域>/*-schema.ts` | `zod/mini` | ブラウザ（resolver）と Server Action（解き手）の**両方** |
-| **契約検証** | 要求と応答が契約の形か | [`src/adapters/gen/api/endpoints.zod.ts`](../../src/adapters/gen/api/endpoints.zod.ts)。実施点は [`adapters/server/http/request.ts`](../../src/adapters/server/http/request.ts) | `zod` | サーバのみ。画面には分類だけが返る |
+| **契約検証** | 要求と応答が契約の形か | `src/adapters/gen/api/endpoints.zod.ts`。実施点は [`adapters/server/http/request.ts`](../../src/adapters/server/http/request.ts) | `zod` | サーバのみ。画面には分類だけが返る |
 
 **正は Server Action の側で通し直した表示検証である。** ブラウザ側の判定は即時に返すためのもので、送信者が差し替えられる。同じスキーマを両側で通すのは、判定と文言を 1 か所に置くためであり、ブラウザ側を信用するためではない。
 
-**契約由来の上限をブラウザで使うときは、生成スキーマではなく定数を引く。** [`src/adapters/gen/api/limits.ts`](../../src/adapters/gen/api/limits.ts) は生成物のうち zod を参照しない定数だけを写したもので、client はこちらだけを import する。スキーマ本体を引くと全エンドポイント分の生成物がブラウザへ配られる（[ADR 0072](../adr/0072-api-type-generation.md)）。
+**契約由来の上限をブラウザで使うときは、生成スキーマではなく定数を引く。** `src/adapters/gen/api/limits.ts` は生成物のうち zod を参照しない定数だけを写したもので、client はこちらだけを import する。スキーマ本体を引くと全エンドポイント分の生成物がブラウザへ配られる（[ADR 0072](../adr/0072-api-type-generation.md)）。
 
 **接続先が項目を名指しして拒んだ結果は、表示検証と同じ形へ写す。** 契約が返す `details` は項目名だけで理由を含まないので、文言は「〈項目名〉は受け付けられませんでした」の形にしか書けない。この画面の入力欄に結び付かない名前は捨てる —— 鍵にすると、どこにも出ない文言を持った「項目の誤りがある」状態が生まれる。写す先は `ActionState` の `fieldErrors` で、画面は送る前に弾かれたのか接続先に弾かれたのかを知らずに同じように出せる。
 
@@ -191,7 +191,7 @@ Server Action 経路で押さえること。
 | 冪等キー | [`src/model/idempotency-key.ts`](../../src/model/idempotency-key.ts) |
 | 表示検証スキーマ | `src/model/<領域>/*-schema.ts`（`zod/mini`） |
 | 契約検証の実施点 | [`src/adapters/server/http/request.ts`](../../src/adapters/server/http/request.ts) |
-| 契約由来の定数 | [`src/adapters/gen/api/limits.ts`](../../src/adapters/gen/api/limits.ts) |
+| 契約由来の定数 | `src/adapters/gen/api/limits.ts` |
 | 部分更新の正規化 | [`src/adapters/server/http/patch-payload.ts`](../../src/adapters/server/http/patch-payload.ts) |
 | エラー分類 | [`src/errors/error-kind.ts`](../../src/errors/error-kind.ts) |
 | 欄の外枠 / 属性 | [`src/components/patterns/form-field/`](../../src/components/patterns/form-field/README.md) / [`src/components/design-system/form/field/`](../../src/components/design-system/form/field/README.md) |

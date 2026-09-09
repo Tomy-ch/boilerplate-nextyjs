@@ -36,6 +36,7 @@ const MARKERS: readonly string[] = ["sample", "boilerplate-only"];
 // = const MARKERS: readonly string[] = ["sample"];
 // boilerplate-only:replace-end
 
+// boilerplate-only:replace-begin
 /**
  * 作った側へ渡る本文だけを残す。
  *
@@ -45,6 +46,16 @@ const MARKERS: readonly string[] = ["sample", "boilerplate-only"];
  * この検査の失敗として出ます** —— 直す場所を取り違えさせるより、囲われていない扱いで読むほうが
  * 安全側です（囲えていない前提は、いずれにせよ渡ってしまう）。
  */
+// boilerplate-only:replace-with
+// = /**
+// =  * 作った側へ渡る本文だけを残す。
+// =  *
+// =  * @remarks
+// =  * マーカーが対応していない本文は**そのまま読みます**。ここで落とすと**囲い方の誤りが、
+// =  * 前提の検査の失敗として出ます** —— 直す場所を取り違えさせるより、囲われていない扱いで
+// =  * 読むほうが安全側です（囲えていない前提は、いずれにせよ渡ってしまう）。
+// =  */
+// boilerplate-only:replace-end
 export function survivingText(content: string): string {
   return MARKERS.reduce((text, marker) => {
     try {

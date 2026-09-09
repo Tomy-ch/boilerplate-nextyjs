@@ -77,13 +77,15 @@
 | `docs/rules.md` | 制約。制約そのものの語彙を持つ |
 | `docs/adr/*.md` | 名前が**記述される**のではなく**決められる**場所 |
 
-除外は 2 つ。**どちらも機械的である。**
+機械的な除外を挙げる。
 
 - **`SKILL.ja.md` は翻訳である。**canonical の語をすべて重複させるので、数えると**すべての一致が
   2 倍になり、1 つの定義が衝突に化ける。**
+<!-- sample:begin -->
 - **爆破で消える面。**サンプル破棄で消えるファイルにしか住んでいない語は、テンプレートを使った後の
   読み手の問題ではない。**そこにしか無い所見はそう述べる**（範囲は
   [`scripts/setup/remove-sample/sample-manifest.ts`](../../../scripts/setup/remove-sample/sample-manifest.ts)）。
+<!-- sample:end -->
 
 ## Step 3 —— 4 つの所見を、分けたまま保つ
 

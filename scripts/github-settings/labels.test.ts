@@ -1,11 +1,18 @@
+// boilerplate-only:begin
 import { readFileSync } from "node:fs";
 
+// boilerplate-only:end
 import { describe, expect, it } from "vitest";
 
 // boilerplate-only:begin
 import { FINDING_KINDS, KIND_LABEL_PREFIX } from "../closed-loop/summarize";
 // boilerplate-only:end
+// boilerplate-only:replace-begin
 import { diffLabels, LABELS_PATH, type LabelSpec, parseLabelSpecs } from "./labels";
+
+// boilerplate-only:replace-with
+// = import { diffLabels, type LabelSpec, parseLabelSpecs } from "./labels";
+// boilerplate-only:replace-end
 
 const spec = (name: string): LabelSpec => ({ name, description: name, color: "d73a4a" });
 

@@ -253,7 +253,11 @@ taintUniqueValue("署名鍵は server 専用です", config, config.sessionSecre
 ADR は番号も節も動くので、動いたことに気づける場所を 1 つに寄せています（[docs/rules.md](../../docs/rules.md)
 「コメントと文書」）。子ディレクトリの README を持つ区画（[`server/auth`](server/auth) /
 [`server/http`](server/http) / [`server/telemetry`](server/telemetry) /
+<!-- sample:replace-begin -->
 [`client/telemetry`](client/telemetry) / [`gen`](gen)）は、そちらの節が持ちます。
+<!-- sample:replace-with -->
+<!-- = [`client/telemetry`](client/telemetry)）は、そちらの節が持ちます。 -->
+<!-- sample:replace-end -->
 
 - [0024](../../docs/adr/0024-adapters-server-client-split.md) — `server/` と `client/` の分割と、client 側の外部接続境界
 - [0021](../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界（server config を引けるのは `server/` だけ）

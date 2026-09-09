@@ -85,14 +85,16 @@ looked. Collect from the documents that actually use or own this vocabulary:
 | `docs/rules.md` | The constraints, which carry the vocabulary of the constraints themselves |
 | `docs/adr/*.md` | Where a name is decided rather than described |
 
-Two exclusions, both mechanical:
+Mechanical exclusions:
 
 - **`SKILL.ja.md` is a translation.** It duplicates every term in its canonical, so counting it
   doubles every match and turns a single definition into a collision.
+<!-- sample:begin -->
 - **Purged surface.** A term that lives only in files the sample purge removes is not the reader's
   problem after the template is used. Say when a finding sits only there
   ([`scripts/setup/remove-sample/sample-manifest.ts`](../../../scripts/setup/remove-sample/sample-manifest.ts)
   is the range).
+<!-- sample:end -->
 
 ## Step 3 — Four findings, kept apart
 

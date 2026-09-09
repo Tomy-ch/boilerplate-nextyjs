@@ -77,10 +77,12 @@ One `AskUserQuestion`:
 | `src/app` metadata / `robots` / `sitemap` | The inbound edges that are standards rather than callers |
 | `src/proxy.ts` | What is intercepted before any of the above runs |
 
+<!-- sample:begin -->
 **Separate the edges the sample purge removes from the ones that survive.** A counterpart that only
 exists because the sample does is not part of the map a template user receives — the range is
 [`scripts/setup/remove-sample/sample-manifest.ts`](../../../scripts/setup/remove-sample/sample-manifest.ts).
 
+<!-- sample:end -->
 **Count contact points by counterpart, not by resource.** Ten endpoints against one backend are one
 edge; the map is about who this layer talks to, not about what it asks them.
 

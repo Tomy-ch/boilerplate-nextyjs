@@ -16,6 +16,9 @@ describe("survivingText", () => {
     expect(survivingText(text)).toContain("残る行");
   });
 
+  // boilerplate-only:begin
+  // 剥がしの後の `MARKERS` は sample だけになる。この検査ごと消えるのが正しい姿なので、
+  // 入力のマーカーではなく、この it を丸ごと囲んでいる。
   it("boilerplate 限定の区画も落とす", () => {
     const text = [
       "残る行",
@@ -26,6 +29,7 @@ describe("survivingText", () => {
 
     expect(survivingText(text)).not.toContain("順次同梱");
   });
+  // boilerplate-only:end
 
   it("差し替えマーカーの退避側を、剥がした後の本文として読む", () => {
     const text = [

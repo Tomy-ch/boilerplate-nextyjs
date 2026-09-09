@@ -120,7 +120,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Lint markdown of the purged tree
-        run: pnpm md-lint
+        run: pnpm lint:md
 
       - name: Build the purged tree
         run: pnpm build

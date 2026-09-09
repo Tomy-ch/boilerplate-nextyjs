@@ -209,7 +209,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Lint markdown of the stripped tree
-        run: pnpm md-lint
+        run: pnpm lint:md
 
       # The one class of breakage the language checks above cannot see: an entry that
       # no workflow references any more. A workflow the strip deletes takes its pins

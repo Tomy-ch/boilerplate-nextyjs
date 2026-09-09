@@ -182,7 +182,7 @@ git log --no-merges --pretty=format:'%h%n%s%n%b%n---' <FROM_TAG>..HEAD
 
 ## Step 6. 書いたファイルの整形
 
-書き込み後、リリースノートのファイルに `pnpm exec markdownlint-cli2 --no-globs --fix <パス>` を掛ける。`pnpm md-lint` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
+書き込み後、リリースノートのファイルに `pnpm exec markdownlint-cli2 --no-globs --fix <パス>` を掛ける。`pnpm lint:md` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 ## Step 7. 最終確認
 

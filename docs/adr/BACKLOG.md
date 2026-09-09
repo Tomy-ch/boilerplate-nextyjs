@@ -45,7 +45,7 @@
 
 ### Tier 0 の実装ギャップ
 
-- なし (G2 は解消済: `.lefthook.yaml` + lefthook devDependency (exact pin) を導入。pre-commit = `pnpm lint:ci` + `pnpm md-lint` + `make actionlint` / commit-msg = `make commitlint` / pre-push = `pnpm typecheck` + `make secret-scan`)
+- なし (G2 は解消済: `.lefthook.yaml` + lefthook devDependency (exact pin) を導入。pre-commit = `pnpm lint:ci` + `pnpm lint:md` + `make actionlint` / commit-msg = `make commitlint` / pre-push = `pnpm typecheck` + `make secret-scan`)
 
 ---
 

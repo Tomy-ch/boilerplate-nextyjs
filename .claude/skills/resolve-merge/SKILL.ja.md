@@ -136,7 +136,7 @@ make images-pin-check
 make version-stamp-check
 ```
 
-**ここでゲートを回さない。**`pnpm lint:ci` / `pnpm md-lint` / テスト一式は hook と CI のもので、
+**ここでゲートを回さない。**`pnpm lint:ci` / `pnpm lint:md` / テスト一式は hook と CI のもので、
 判定は CI が正である（`AGENTS.md`）。上に挙げたものはそれより狭く、**種類が違う** ——
 どれも **resolver 自身の整合検査**であり、**このスキルの機械的解決が実際に再現したかを言える
 唯一のもの**である。**どれを回したかを述べる。**

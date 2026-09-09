@@ -143,7 +143,7 @@ setup-remove-boilerplate-only:
 	@if [ -n "$(filter 1,$(DRY_RUN))" ]; then \
 		echo "🟡 DRY_RUN のため整形・検査はスキップしました。"; \
 	else \
-		pnpm md-fix && pnpm md-lint && \
+		pnpm fix:md && pnpm lint:md && \
 		echo "✅ boilerplate 限定の記述を剥がしました。"; \
 	fi
 # boilerplate-only:end
@@ -166,7 +166,7 @@ setup-remove-sample:
 		pnpm fix && \
 		pnpm lint:ci && \
 		pnpm typecheck && \
-		pnpm md-lint && \
+		pnpm lint:md && \
 		APP_ENV=local pnpm build && \
 		pnpm test && \
 		echo "🔍 過不足と残留参照を検証します..." && \

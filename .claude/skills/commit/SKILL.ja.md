@@ -8,7 +8,7 @@
 
 このコマンドは作業ツリーの未コミット変更を分析し、適切な粒度とプロジェクトの prefix 規約に沿った 1 つ以上の git コミットを作る。コミットメッセージはすべて日本語（`CLAUDE.md` に従う）。
 
-このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm md-lint`）が N 回発火しないようにするため。あとから回すこともしない。`AGENTS.md` の *Do not pre-run the gates* がゲートを hook と CI に置き、**判定は CI が正**としているためである。Step 6 はこの実行が書いたものだけを整形し、どのゲートを CI へ預けたかを報告する。
+このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm lint:md`）が N 回発火しないようにするため。あとから回すこともしない。`AGENTS.md` の *Do not pre-run the gates* がゲートを hook と CI に置き、**判定は CI が正**としているためである。Step 6 はこの実行が書いたものだけを整形し、どのゲートを CI へ預けたかを報告する。
 
 ## Step 0. 自動フォーマット
 
@@ -168,7 +168,7 @@ This command will run `git commit --no-verify` on every commit.
 The following lefthook pre-commit commands are SKIPPED here and left to CI,
 which is the authority on whether they pass:
   - lint     (pnpm lint:ci)
-  - md-lint  (pnpm md-lint)   ※ glob: *.md
+  - md-lint  (pnpm lint:md)   ※ glob: *.md
 ```
 
 `pre-push` のコマンド（現状は `pnpm typecheck`）はこのゲートに**含まない**。それらは push 経路に留まり、このコマンドは push を起動しない。
@@ -234,7 +234,7 @@ EOF
 
 <!-- boilerplate-only:replace-begin -->
 **ここでゲートを回さない。** `AGENTS.md` の *Do not pre-run the gates* は「hook と CI が回す。
-**判定は CI が正**」と明言している。コミット後にリポジトリ全体へ `pnpm lint:ci` / `pnpm md-lint` を
+**判定は CI が正**」と明言している。コミット後にリポジトリ全体へ `pnpm lint:ci` / `pnpm lint:md` を
 掛け直しても判定が真になるわけではなく、負荷の高いホストでは二重実行そのものが、変更と無関係な失敗の
 発生源になる。`make load-status` はいまローカルでどのゲートが走る帯かを表示し、その帯は推測ではなく実測で決まる。
 

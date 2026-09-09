@@ -185,7 +185,7 @@ Only proceed with `Write` after the user confirms.
 
 ## Step 6. Format the written file
 
-After writing, run `pnpm exec markdownlint-cli2 --no-globs --fix <path>` on the release note. Leave `pnpm md-lint` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
+After writing, run `pnpm exec markdownlint-cli2 --no-globs --fix <path>` on the release note. Leave `pnpm lint:md` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 ## Step 7. Final Verification
 

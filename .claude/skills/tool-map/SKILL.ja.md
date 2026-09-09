@@ -145,7 +145,7 @@ graph LR
 
 ## Step 7. 書いたファイルの整形（`--output=file` のときのみ）
 
-`--output=file` の場合、レポート書き出し後にそのファイルへ `pnpm exec markdownlint-cli2 --no-globs --fix <パス>` を掛ける。`pnpm md-lint` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
+`--output=file` の場合、レポート書き出し後にそのファイルへ `pnpm exec markdownlint-cli2 --no-globs --fix <パス>` を掛ける。`pnpm lint:md` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 `--output=inline` のときは本ステップをスキップする（ファイルを書いていないため）。
 

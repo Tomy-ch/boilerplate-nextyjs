@@ -155,7 +155,7 @@ pnpm exec markdownlint-cli2 --no-globs --fix <書いたパス>
 ```
 
 `--no-globs` は効力を持つ —— 付けないと設定の `globs` が引数へ**追加され**、木全体が書き換わる。
-`pnpm md-lint` は hook と CI に任せる。
+`pnpm lint:md` は hook と CI に任せる。
 
 ## Step 5 —— 完了報告（日本語）
 
@@ -197,7 +197,7 @@ detector。**述べない省略は「そこは綺麗だった」と読まれる�
 - ❌ E2 を承認にかける / glossary を編集して E を黙らせる。
 - ❌ 該当が 3 件未満の (B) パターンを提示する。
 - ❌ 検出の基準をここへ書き直す（`prompts/detect-drift.md` を指す）。
-- ❌ `pnpm md-lint` などのゲートを回す。
+- ❌ `pnpm lint:md` などのゲートを回す。
 - ❌ commit / push する。
 
 ## チェックリスト

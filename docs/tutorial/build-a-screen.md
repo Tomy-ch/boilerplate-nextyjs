@@ -2206,7 +2206,7 @@ route が行う（外枠の前捌きは防御線ではない。[0079](../../../.
 **確認:**
 
 ```bash
-pnpm md-lint
+pnpm lint:md
 pnpm exec vitest run --config vitest.scripts.config.ts scripts/doc-links.gate.test.ts
 ```
 
@@ -2236,7 +2236,7 @@ git commit   # `/commit` skill があれば、それが prefix と分割を決�
 | 6 | 送信 | `actions.ts` + `edit/` | 編成だけ。失敗は戻り値、`kind` で出し分け | `pnpm exec vitest run …/actions.test.ts` |
 | 7 | テスト | 各層の隣 | 同じことを 2 層で見ない。1:1 | `pnpm exec vitest run <対象>` |
 | 8 | カタログ | `*.stories.tsx` / `e2e/lib/screens.ts` | `ui/` は全部 story を持つ。撮り直しは送るまでが 1 手 | `make vrt` / `make e2e` |
-| 9 | 約束 | `docs/spec/route/notes/` / feature README | 仕様書は指すだけで写さない | `pnpm md-lint` |
+| 9 | 約束 | `docs/spec/route/notes/` / feature README | 仕様書は指すだけで写さない | `pnpm lint:md` |
 
 ## 次に進む先
 

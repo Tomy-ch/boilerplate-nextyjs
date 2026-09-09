@@ -253,7 +253,7 @@
 
 ## コメントと文書
 
-> Rationale: [ADR 0140](adr/0140-documentation-operations.md) / [ADR 0021](adr/0021-frontend-responsibility.md); review（`comment-reviewer` / `doc-reviewer`）と `premise-lint`（`pnpm md-lint`）が見る。biome は export への doc comment を要求しないので、内容の規約は `premise-lint` が拾う形を除いてレビューが持つ。
+> Rationale: [ADR 0140](adr/0140-documentation-operations.md) / [ADR 0021](adr/0021-frontend-responsibility.md); review（`comment-reviewer` / `doc-reviewer`）と `premise-lint`（`pnpm lint:md`）が見る。biome は export への doc comment を要求しないので、内容の規約は `premise-lint` が拾う形を除いてレビューが持つ。
 
 - **公開 API には TSDoc を書く。** コメントは「なぜ」を日本語で記し、廃止予定の API は `@deprecated` を付ける。export の doc comment が実在する契約を述べているなら書き換えか加筆で応じ、削除しない —— 消してよいのは名前の言い換えだけのもの。
 - **コメントは What（契約）と、前提がその呼び出し地点に在る制約であり、How ではない。** 制約かどうかは「この宣言を編集せずにこの記述を偽にできるか」（[README](README.md) の前提の所在テスト）で決める。できないなら残す。できるなら（上流の振る舞い・運用方針・業務規則）家は別にあり、コードには作用する残りと、**同層 README への 1 行の参照**だけを置く。

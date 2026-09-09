@@ -145,7 +145,7 @@ Read the confirmed source file in full. If the direction is `sync-both`, read bo
 
 ## Step 7. Format the written files
 
-After writing the produced file (and the synced side in `sync-both` mode), run `pnpm exec markdownlint-cli2 --no-globs --fix <paths you wrote>` on the files this skill produced. Leave `pnpm md-lint` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
+After writing the produced file (and the synced side in `sync-both` mode), run `pnpm exec markdownlint-cli2 --no-globs --fix <paths you wrote>` on the files this skill produced. Leave `pnpm lint:md` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 ## Checklist
 

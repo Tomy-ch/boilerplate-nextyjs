@@ -86,7 +86,7 @@ function main(): void {
   process.exit(1);
 }
 
-/* istanbul ignore next -- CLI entry。起動経路は pnpm md-lint が実地で通す。 */
+/* istanbul ignore next -- CLI entry。起動経路は pnpm lint:md が実地で通す。 */
 try {
   main();
 } catch (error) {

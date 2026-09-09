@@ -167,7 +167,7 @@ pnpm exec markdownlint-cli2 --no-globs --fix <paths you wrote>
 ```
 
 `--no-globs` is load-bearing — without it the configured `globs` are *added* to your arguments and
-the whole tree is rewritten. Leave `pnpm md-lint` to the hooks and CI.
+the whole tree is rewritten. Leave `pnpm lint:md` to the hooks and CI.
 
 ## Step 5 — Closing report (Japanese)
 
@@ -209,7 +209,7 @@ These stay protected even during execution: `AGENTS.md`, `LICENSE`, ADR bodies, 
 - ❌ Put an E2 finding to approval, or silence an E finding by editing the glossary.
 - ❌ Surface a (B) pattern with fewer than three sites.
 - ❌ Restate the detection criteria here instead of pointing at `prompts/detect-drift.md`.
-- ❌ Run `pnpm md-lint` or any other gate.
+- ❌ Run `pnpm lint:md` or any other gate.
 - ❌ Commit or push.
 
 ## Checklist

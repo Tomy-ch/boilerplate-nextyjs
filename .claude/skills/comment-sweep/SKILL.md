@@ -359,7 +359,7 @@ because nobody read the edits one at a time.
 ```sh
 pnpm fix
 pnpm lint:ci
-pnpm md-lint
+pnpm lint:md
 ```
 
 Then re-read the diff of the touched files and confirm only comments and documents changed. Behavior
@@ -427,6 +427,6 @@ separately, decided separately, and never delegating to one another.
 - [ ] Each 集約 carried its shape, every member, the owning site with evidence, the consolidated
       wording, each pointer, and a 確度
 - [ ] After a 集約, the whole file re-read top to bottom
-- [ ] `pnpm fix` / `pnpm lint:ci` / `pnpm md-lint` run when something was written
+- [ ] `pnpm fix` / `pnpm lint:ci` / `pnpm lint:md` run when something was written
 - [ ] Diff confirmed to change only comments and documents
 - [ ] What was not swept stated explicitly

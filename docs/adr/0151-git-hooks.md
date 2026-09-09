@@ -35,7 +35,7 @@ Accepted
 
 | 段階 | 目的 | 想定処理 | 速度目標 |
 | --- | --- | --- | --- |
-| pre-commit | 「壊れた diff を commit に乗せない」 | 静的検査 — lint 完全版 (`pnpm lint:ci` = biome の完全プロファイル + ESLint 境界検査。[0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm md-lint` = markdownlint + mermaid 構文 + `.claude/**` の意味検査) / ワークフロー・composite action 定義の検査とピンの突合 ([0153](0153-ci-configuration.md)) / 生成物の版の突合 ([0072](0072-api-type-generation.md)) — と、キャッシュ付きのテスト (`make test-cached`)。各検査は対象ファイルが staged のときのみ走る | < 5 秒 |
+| pre-commit | 「壊れた diff を commit に乗せない」 | 静的検査 — lint 完全版 (`pnpm lint:ci` = biome の完全プロファイル + ESLint 境界検査。[0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm lint:md` = markdownlint + mermaid 構文 + `.claude/**` の意味検査) / ワークフロー・composite action 定義の検査とピンの突合 ([0153](0153-ci-configuration.md)) / 生成物の版の突合 ([0072](0072-api-type-generation.md)) — と、キャッシュ付きのテスト (`make test-cached`)。各検査は対象ファイルが staged のときのみ走る | < 5 秒 |
 | commit-msg | 「規約外のコミットメッセージを積ませない」 | commitlint ([0150](0150-git-workflow.md) の prefix 11 種を検証) | < 5 秒 |
 | pre-push | 「壊れた push・秘密を含む push を上げない」 | 型チェック (`pnpm typecheck` = `tsc --noEmit`) / キャッシュ無しの完全テスト (`make test-full`) / 秘密スキャン (`make secret-scan` = push 予定コミット範囲) | < 30 秒 |
 | post-checkout / post-merge | 「基準画像の実体を、指し先から取り残さない」 | サブモジュールの同期 (`make baseline-sync`)。移動と pull のたび | < 1 秒 |

@@ -149,7 +149,7 @@ A short prose section calling out:
 
 ## Step 7. Format the written file (only when `--output=file`)
 
-When `--output=file`, after writing the report, run `pnpm exec markdownlint-cli2 --no-globs --fix <path>` on that file. Leave `pnpm md-lint` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
+When `--output=file`, after writing the report, run `pnpm exec markdownlint-cli2 --no-globs --fix <path>` on that file. Leave `pnpm lint:md` to the pre-commit hook and CI (AGENTS.md: do not pre-run the gates).
 
 When `--output=inline`, skip this step (no file was written).
 

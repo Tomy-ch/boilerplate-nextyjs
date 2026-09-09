@@ -24,7 +24,7 @@ pre-commit:
         - "*.md"
         - "Makefile"
         - ".makefiles/**/*.mk"
-      run: pnpm md-lint
+      run: pnpm lint:md
     test-cached:
       # pre-commit は Vitest のキャッシュを使い、CI のカバレッジ付き完全実行よりも
       # 速くフィードバックする。対象の TypeScript・設定・依存定義が変わるときだけ起動する。

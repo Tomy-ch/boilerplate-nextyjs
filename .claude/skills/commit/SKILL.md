@@ -3,7 +3,7 @@ name: commit
 usage-class: frequent
 description: Analyze the current working-tree changes (staged + unstaged), group them into appropriately-scoped commits with the project's prefix convention (Feat / Fix / Refactor / Perf / Docs / Test / Build / CI / Chore / Style / Revert), and execute each commit in Japanese after user approval. Pre-flight also checks whether the current branch's PR is already merged and, if so, recommends cutting a fresh branch from the base before committing. Commits are made with `git commit --no-verify` to skip lefthook during the split; after all commits succeed, the command formats only the Markdown it wrote and reports which gates were left to CI, which is the authority on them (AGENTS.md: do not pre-run the gates). Respects CLAUDE.md's git rules (no direct commits to protected branches, no force-push, no auto-push after PR amend, Co-Authored-By footer, HEREDOC commit messages).
 argument-hint: [--dry-run] [--scope=staged|all]
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(git reset:*), Bash(git fetch:*), Bash(git switch:*), Bash(gh pr view:*), Bash(pnpm fix:*), Bash(pnpm lint:*), Bash(pnpm md-lint:*), Bash(pnpm typecheck:*), Read, AskUserQuestion
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(git reset:*), Bash(git fetch:*), Bash(git switch:*), Bash(gh pr view:*), Bash(pnpm fix:*), Bash(pnpm lint:*), Bash(pnpm lint:md:*), Bash(pnpm typecheck:*), Read, AskUserQuestion
 ---
 
 # Commit
@@ -12,7 +12,7 @@ You have been invoked via `/commit`. Argument string: `$ARGUMENTS`
 
 This command analyzes uncommitted changes in the working tree and produces one or more git commits with appropriate granularity and the project's prefix convention. All commit messages are in Japanese, per `CLAUDE.md`.
 
-This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` (currently `pnpm lint:ci` / `pnpm md-lint`) do not fire N times during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
+This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` (currently `pnpm lint:ci` / `pnpm lint:md`) do not fire N times during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
 
 ## Step 0. Auto-format
 
@@ -172,7 +172,7 @@ This command will run `git commit --no-verify` on every commit.
 The following lefthook pre-commit commands are SKIPPED here and left to CI,
 which is the authority on whether they pass:
   - lint     (pnpm lint:ci)
-  - md-lint  (pnpm md-lint)   ※ glob: *.md
+  - md-lint  (pnpm lint:md)   ※ glob: *.md
 ```
 
 `pre-push` commands (currently `pnpm typecheck`) are **not** part of this gate — they stay on the push path, which this command never triggers.
@@ -238,7 +238,7 @@ If `git add` or `git commit` fails for any group (file-path typo, mid-operation 
 
 <!-- boilerplate-only:replace-begin -->
 **Do not run the gates here.** `AGENTS.md`'s *Do not pre-run the gates* is explicit that the hooks and
-CI run them and that **CI is the authority**; running `pnpm lint:ci` / `pnpm md-lint` over the whole
+CI run them and that **CI is the authority**; running `pnpm lint:ci` / `pnpm lint:md` over the whole
 repository after committing does not make the verdict more true, and on a loaded host the duplicate
 run is itself a source of failures that have nothing to do with the change. `make load-status` prints
 which gates run locally right now, and that band is measured rather than guessed.

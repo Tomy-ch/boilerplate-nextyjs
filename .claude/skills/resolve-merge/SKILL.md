@@ -146,7 +146,7 @@ make images-pin-check
 make version-stamp-check
 ```
 
-**Do not run the gates here.** `pnpm lint:ci` / `pnpm md-lint` / the test suites belong to the hooks
+**Do not run the gates here.** `pnpm lint:ci` / `pnpm lint:md` / the test suites belong to the hooks
 and CI, and CI is the authority (`AGENTS.md`). What runs above is narrower and different in kind:
 each one is the resolver's own consistency check, and it is the only thing that can tell you whether
 *this skill's* mechanical resolution actually reproduced. Say which of them you ran.

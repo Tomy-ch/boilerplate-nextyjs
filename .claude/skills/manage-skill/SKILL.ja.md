@@ -165,7 +165,7 @@ subagent を持ち出すのは、ADR が認める理由があるときだけ —
 ## Step 6. 検証
 
 - `pnpm lint:ci` と `pnpm typecheck` — 同梱スクリプトまたは `scripts/` の TypeScript を追加・変更した場合は必須。先に `pnpm fix` で自動修正可能な指摘を潰す。
-- `pnpm md-lint` — `.claude/**` を含め、Markdown に触れたら必ず実行する。3 段で走る — markdownlint（体裁）、mermaid-lint（図の構文）、`skill-lint`（frontmatter のキー、`SKILL.md` / `SKILL.ja.md` の見出し構造、本文が参照する `make` ターゲット・パスの実在性）。`skill-lint` が判定できない部分 — 対訳が同じことを言っているか、本文の内容が今も正しいか — は引き続きこのスキルの責務。
+- `pnpm lint:md` — `.claude/**` を含め、Markdown に触れたら必ず実行する。3 段で走る — markdownlint（体裁）、mermaid-lint（図の構文）、`skill-lint`（frontmatter のキー、`SKILL.md` / `SKILL.ja.md` の見出し構造、本文が参照する `make` ターゲット・パスの実在性）。`skill-lint` が判定できない部分 — 対訳が同じことを言っているか、本文の内容が今も正しいか — は引き続きこのスキルの責務。
 - eval 生成物が staged になっていないこと（`git status`）と、保護対象パスに触れていないことを確認する。
 
 ## Definition of Done

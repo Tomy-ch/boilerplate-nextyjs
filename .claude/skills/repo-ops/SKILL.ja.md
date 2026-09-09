@@ -68,7 +68,7 @@ make install-tools     # mise.toml に従い Node.js + pnpm を入れ、両バ�
   `ERR_PNPM_IGNORED_BUILDS`、あるいはエージェントや CI の非対話シェルでは、別メジャーが書いた
   `node_modules` を破棄しようとして `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`。スタックの末尾が
   `runDepsStatusCheck` であることが目印で、落ちたのは前段のゲートであって `lint:ci` / `typecheck` /
-  `md-lint` ではない。
+  `lint:md` ではない。
 - **追跡対象のルート設定を書き換える。** pnpm 11 は `pnpm-workspace.yaml` の先頭にプレースホルダを追記する:
 
   ```yaml
@@ -206,7 +206,7 @@ worktree にも継承されるが、**`node_modules` は継承されない** ─
 
 | 段階 | 入口 | 検査内容 |
 | --- | --- | --- |
-| pre-commit | `pnpm lint:ci`、`*.md` が staged なら `pnpm md-lint`、workflow が staged なら `make actionlint` | biome 完全版 + ESLint 層境界 + `architecture.ts` 突合(§5) / markdownlint + mermaid 構文 + `.claude/**` の意味検査(`skill-lint`) / workflow 構文 + `run:` のシェル |
+| pre-commit | `pnpm lint:ci`、`*.md` が staged なら `pnpm lint:md`、workflow が staged なら `make actionlint` | biome 完全版 + ESLint 層境界 + `architecture.ts` 突合(§5) / markdownlint + mermaid 構文 + `.claude/**` の意味検査(`skill-lint`) / workflow 構文 + `run:` のシェル |
 | commit-msg | `make commitlint` | subject を ADR 0150 に照らす |
 | pre-push | `pnpm typecheck`、`make secret-scan` | `tsc --noEmit` / push 範囲の秘密(**fail-closed**) |
 

@@ -138,7 +138,7 @@ Claude Code が frontmatter を英語で解釈するツール要件による（A
 
 ## Step 7. 書いたファイルの整形
 
-canonical README の書き込みが完了した後、このスキルが書いたファイルだけに `pnpm exec markdownlint-cli2 --no-globs --fix <書いたパス>` を掛ける。`pnpm md-lint` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
+canonical README の書き込みが完了した後、このスキルが書いたファイルだけに `pnpm exec markdownlint-cli2 --no-globs --fix <書いたパス>` を掛ける。`pnpm lint:md` は pre-commit hook と CI に任せる（AGENTS.md: ゲートを先回りして回さない）。
 
 ## Step 8. 最終検証
 

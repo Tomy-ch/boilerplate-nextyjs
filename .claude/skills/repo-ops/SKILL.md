@@ -74,7 +74,7 @@ then behaves in two ways that both point the blame somewhere else:
   naming `esbuild` / `lefthook` / `sharp`, or, in the non-interactive shell an agent or CI has,
   `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` because it wants to purge a `node_modules` the other
   major wrote. The stack ends in `runDepsStatusCheck`, which is the tell: the gate failed, not
-  `lint:ci` / `typecheck` / `md-lint`.
+  `lint:ci` / `typecheck` / `lint:md`.
 - **It edits a tracked root config.** pnpm 11 prepends a placeholder block to `pnpm-workspace.yaml`:
 
   ```yaml
@@ -218,7 +218,7 @@ in it or every hook fails with `command not found`.
 
 | Stage | Entry point | What it checks |
 | --- | --- | --- |
-| pre-commit | `pnpm lint:ci`; `pnpm md-lint` when `*.md` is staged; `make actionlint` when a workflow is staged | biome full profile + ESLint layer boundaries + `architecture.ts` cross-check (§5); markdownlint + mermaid syntax + `.claude/**` semantics (`skill-lint`); workflow syntax + `run:` shell |
+| pre-commit | `pnpm lint:ci`; `pnpm lint:md` when `*.md` is staged; `make actionlint` when a workflow is staged | biome full profile + ESLint layer boundaries + `architecture.ts` cross-check (§5); markdownlint + mermaid syntax + `.claude/**` semantics (`skill-lint`); workflow syntax + `run:` shell |
 | commit-msg | `make commitlint` | the subject against ADR 0150 |
 | pre-push | `make test-full`; `pnpm typecheck`; `make secret-scan` | Vitest cache 無効 + カバレッジしきい値; `tsc --noEmit`; secrets in the range being pushed (**fail-closed**) |
 

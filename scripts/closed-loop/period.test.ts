@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DAY_BOUNDARY_OFFSET_SEC, resolvePeriod, toDay, withinPeriod } from "./period";
+import { DAY_BOUNDARY_OFFSET_SEC, resolvePeriod, toDay, toEpochSec, withinPeriod } from "./period";
 
 /** 2026-09-09 00:00 JST。 */
 const JST_DAY_START = Date.parse("2026-09-08T15:00:00Z") / 1000;
@@ -82,5 +82,23 @@ describe("toDay", () => {
   // ----- 異常系 -----
   it("境界の 1 秒前は前の日になる", () => {
     expect(toDay(JST_DAY_START - 1)).toBe("2026-09-08");
+  });
+});
+
+describe("toEpochSec", () => {
+  // ----- 正常系 -----
+  it("ISO の時刻を秒へ直す", () => {
+    expect(toEpochSec("2026-09-09T00:00:00Z")).toBe(1_788_912_000);
+  });
+
+  it("時刻が無ければ undefined を返す", () => {
+    // 閉じていない issue の closedAt。契約が宣言する不在なので 0 へ倒さない。
+    expect(toEpochSec(null)).toBeUndefined();
+  });
+
+  // ----- 異常系 -----
+  it("読めない綴りを 0 や現在時刻へ倒さない", () => {
+    // 倒すと、読めなかった窓が期間の内側や外側として静かに数えられる。
+    expect(toEpochSec("いつか")).toBeUndefined();
   });
 });

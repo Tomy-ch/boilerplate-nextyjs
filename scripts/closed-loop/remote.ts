@@ -1,5 +1,5 @@
-// 送出先を `.git` の remote から導く判定。読み取りは入口が持ち、ここは受け取った URL から
-// 送出先を決める。
+// GitHub の綴りから答えを読む判定。読み取りと遣り取りは入口が持ち、ここは受け取った文字列
+// だけから答えを出す —— `.git` の remote からの送出先と、`gh` が返した URL からの issue 番号。
 //
 // **送出先を設定で持たない。**このリポジトリが押している先そのものへ送るのが、
 // [0160](../../docs/adr/0160-agent-environment-loop.md) 決定 4 の「所見は issue トラッカーへ」
@@ -61,4 +61,28 @@ function pathOf(url: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * `gh issue create` が返した URL から issue 番号を読む。
+ *
+ * @remarks
+ * 読めなければ**例外で止めます**。投稿は成っているので、番号を落として先へ進むと
+ * 「立ったが索引に無い」窓が残り、次の週次が同じ窓をもう一度立てます。止まれば人が見て、
+ * 二度立っても題で気づけます。
+ *
+ * @param url - `gh` が標準出力へ返した issue の URL
+ * @returns issue 番号
+ * @throws 末尾が数として読めないとき
+ */
+export function issueNumberFrom(url: string): number {
+  // `split` は必ず 1 要素以上返すので `at(-1)` の不在は起こり得ない。その形で書くと、
+  // 通らない枝を残したまま「網羅した」ことになる。区切りが無ければ全体を読ませて落とす。
+  const number = Number.parseInt(url.slice(url.lastIndexOf("/") + 1), 10);
+
+  if (!Number.isFinite(number)) {
+    throw new TypeError(`URL から issue の番号を読めない: ${url}`);
+  }
+
+  return number;
 }

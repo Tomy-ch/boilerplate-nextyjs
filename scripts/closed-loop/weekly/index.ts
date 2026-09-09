@@ -30,8 +30,8 @@ import {
   rollupTargets,
 } from "../integration.js";
 import { parseObservation } from "../observation.js";
-import { resolvePeriod, withinPeriod } from "../period.js";
-import { toRepoSlug } from "../remote.js";
+import { resolvePeriod, toEpochSec, withinPeriod } from "../period.js";
+import { issueNumberFrom, toRepoSlug } from "../remote.js";
 import {
   clusterIssues,
   type FeedbackIssue,
@@ -70,16 +70,6 @@ function flag(name: string): string | undefined {
 
 function gh(args: readonly string[]): string {
   return execFileSync("gh", args, { cwd: REPO_ROOT, encoding: "utf8" }).trim();
-}
-
-function epoch(iso: string | null): number | undefined {
-  if (iso === null) {
-    return undefined;
-  }
-
-  const seconds = Math.floor(Date.parse(iso) / 1000);
-
-  return Number.isFinite(seconds) ? seconds : undefined;
 }
 
 /**
@@ -170,11 +160,7 @@ function applyRollup(slug: string, concerns: readonly Concern[]): void {
         "--label",
         INTEGRATION_LABEL,
       ]);
-      const number = Number.parseInt(url.split("/").at(-1) ?? "", 10);
-
-      if (!Number.isFinite(number)) {
-        throw new TypeError(`URL から番号を読めない: ${url}`);
-      }
+      const number = issueNumberFrom(url);
 
       console.log(`  #${number} ${concern.title}  ← ${issueRefs(concern.sources)}`);
       created.push({ issue: number, sources: concern.sources });
@@ -223,14 +209,14 @@ function main(): void {
       continue;
     }
 
-    const createdAt = epoch(item.createdAt);
+    const createdAt = toEpochSec(item.createdAt);
     const issue: FeedbackIssue = {
       number: item.number,
       kinds: labelsToKinds(item.labels.map((label) => label.name)),
       observation,
       sections: parseSections(item.body),
       ...(createdAt === undefined ? {} : { createdAt }),
-      ...(epoch(item.closedAt) === undefined ? {} : { resolvedAt: epoch(item.closedAt) }),
+      ...(toEpochSec(item.closedAt) === undefined ? {} : { resolvedAt: toEpochSec(item.closedAt) }),
       completed: item.stateReason === "COMPLETED",
     };
 

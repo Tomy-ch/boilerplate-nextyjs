@@ -12,6 +12,7 @@ import {
 } from "./plan";
 import {
   BINARY_EXTENSIONS,
+  EXCLUDED_DIRECTORIES,
   EXCLUDED_PATH_PREFIXES,
   MARKER_LITERAL_FILES,
   SAMPLE_MARKER,
@@ -85,6 +86,15 @@ describe("MARKER_LITERAL_FILES", () => {
     );
 
     expect(withoutMarker).toEqual([]);
+  });
+});
+
+describe("EXCLUDED_DIRECTORIES", () => {
+  // ----- 正常系 -----
+  it("すべて区切りを含まないディレクトリ名である", () => {
+    // 走査は `excludedDirectories.has(entry.name)` で**名前を完全一致**させる。区切りを
+    // 含む要素は一度も一致せず、除外が無言で効かないまま走査が生成物の配下へ降りる。
+    expect([...EXCLUDED_DIRECTORIES].filter((name) => name.includes("/"))).toEqual([]);
   });
 });
 

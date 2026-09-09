@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toRepoSlug } from "./remote";
+import { issueNumberFrom, toRepoSlug } from "./remote";
 
 describe("toRepoSlug", () => {
   // ----- 正常系 -----
@@ -34,5 +34,20 @@ describe("toRepoSlug", () => {
   it("URL として読めない綴りを送出先にしない", () => {
     expect(toRepoSlug("")).toBeNull();
     expect(toRepoSlug("not a url")).toBeNull();
+  });
+});
+
+describe("issueNumberFrom", () => {
+  // ----- 正常系 -----
+  it("URL の末尾を issue の番号として読む", () => {
+    expect(issueNumberFrom("https://github.com/o/r/issues/581")).toBe(581);
+  });
+
+  // ----- 異常系 -----
+  it("番号を読めなければ、落として先へ進まず例外で止める", () => {
+    // 投稿は成っているので、番号を落とすと「立ったが索引に無い」窓が残り、次の週次が
+    // 同じ窓をもう一度立てる。
+    expect(() => issueNumberFrom("https://github.com/o/r/issues/")).toThrow(TypeError);
+    expect(() => issueNumberFrom("まったく URL でない")).toThrow("番号を読めない");
   });
 });

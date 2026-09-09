@@ -73,6 +73,27 @@ export function resolvePeriod(
 }
 
 /**
+ * GitHub が返す ISO の時刻を秒へ直す。
+ *
+ * @remarks
+ * 読めなかったものを 0 や現在時刻へ倒しません。**倒すと、読めなかった窓が期間の内側や
+ * 外側として静かに数えられます** —— `undefined` を返せば、呼ぶ側は集計から外すか
+ * 数え直すかを選べます（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ *
+ * @param iso - GitHub が返す時刻。閉じていない issue では `null`
+ * @returns epoch 秒。時刻が無いか読めなければ `undefined`
+ */
+export function toEpochSec(iso: string | null): number | undefined {
+  if (iso === null) {
+    return undefined;
+  }
+
+  const seconds = Math.floor(Date.parse(iso) / 1000);
+
+  return Number.isFinite(seconds) ? seconds : undefined;
+}
+
+/**
  * ある時刻が期間に入るか。両端を含む。
  *
  * @remarks

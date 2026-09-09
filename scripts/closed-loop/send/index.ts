@@ -23,7 +23,7 @@ import { issueTitle, renderIssueBody } from "../issue.js";
 import { collectWindows, type MarksReader, toWorktreePaths } from "../marks-store.js";
 import { toObservation } from "../observation.js";
 import { markAt } from "../phases.js";
-import { toRepoSlug } from "../remote.js";
+import { issueNumberFrom, toRepoSlug } from "../remote.js";
 import { parseSent, type SentIndex, unsent, withSent } from "../sent-index.js";
 import { buildPrompt, issueLabels, parseSummary, readingGap, type Summary } from "../summarize.js";
 import { countEvents, toProjectSlug } from "../transcript.js";
@@ -125,17 +125,12 @@ function createIssue(slug: string, title: string, body: string, labels: readonly
     args.push("-l", label);
   }
 
-  const url = execFileSync("gh", args, {
-    encoding: "utf8",
-    input: body,
-  }).trim();
-  const number = Number.parseInt(url.split("/").at(-1) ?? "", 10);
-
-  if (!Number.isFinite(number)) {
-    throw new TypeError(`issue の番号を読めませんでした: ${url}`);
-  }
-
-  return number;
+  return issueNumberFrom(
+    execFileSync("gh", args, {
+      encoding: "utf8",
+      input: body,
+    }).trim(),
+  );
 }
 
 /** 記録の全行。置き場が無ければ空。 */

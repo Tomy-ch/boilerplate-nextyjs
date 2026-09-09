@@ -33,6 +33,15 @@ function scanTargets(): string[] {
 // 走査の遅さがそのまま赤になる（`docs/testing-conventions.md`「リポジトリ全体を走査するゲート」）。
 const TIMEOUT_MS = 300_000;
 
+describe("EXCLUDED_DIRECTORIES", () => {
+  // ----- 正常系 -----
+  it("すべて区切りを含まないディレクトリ名である", () => {
+    // 走査は `excludedDirectories.has(entry.name)` で**名前を完全一致**させる。区切りを
+    // 含む要素は一度も一致せず、除外が無言で効かないまま走査が生成物の配下へ降りる。
+    expect([...EXCLUDED_DIRECTORIES].filter((name) => name.includes("/"))).toEqual([]);
+  });
+});
+
 describe("EXCLUDED_PATH_PREFIXES", () => {
   // ----- 正常系 -----
   it("すべて区切りで終わる", () => {

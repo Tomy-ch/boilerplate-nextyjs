@@ -1,5 +1,5 @@
 ## ドキュメントサイトの配信先を設定する
-.PHONY: apply-pages-delivery ## GitHub Pages を Actions 配信にし、配信元ブランチを許可
+.PHONY: pages-delivery-apply ## GitHub Pages を Actions 配信にし、配信元ブランチを許可
 
 # 配信を起こすブランチ。`.github/workflows/deploy-docs.yaml` の push トリガと同じ値を指す。
 # 片方だけ変えると、job は起動するが environment に弾かれ、step を 1 つも実行せずに落ちる。
@@ -12,7 +12,7 @@ PAGES_DELIVERY_BRANCH ?= production
 # 3 段とも現状を読んでから書くので、適用済みのリポジトリで実行しても何も変えない。environment への
 # PUT を「まだ名指し方式でないとき」に限るのは、この PUT が body に無い項目（レビュアー・待ち時間）を
 # 消すためで、既に整っているリポジトリの設定を巻き込まないようにしている。
-apply-pages-delivery:
+pages-delivery-apply:
 	@set -e; \
 	REPO=$$(gh repo view --json name,owner -q '.owner.login + "/" + .name'); \
 	BRANCH="$(PAGES_DELIVERY_BRANCH)"; \

@@ -1,10 +1,10 @@
 ## ブランチ保護ルールを設定する
-.PHONY: apply-branch-protection ## .github/settings/branch-protection.json を対象リポジトリにPOST
+.PHONY: branch-protection-apply ## .github/settings/branch-protection.json を対象リポジトリにPOST
 
-apply-branch-protection:
+branch-protection-apply:
 	@set -e; \
 	REPO=$$(gh repo view --json name,owner -q '.owner.login + "/" + .name'); \
-	echo "🔧 Applying branch protection rules to $$REPO..."; \
+	echo "🔧 $$REPO へブランチルールを適用します..."; \
 	RESPONSE=$$(mktemp); \
 	if ! gh api \
 		--method POST \
@@ -15,13 +15,13 @@ apply-branch-protection:
 		--verbose \
 		> $$RESPONSE 2>&1; then \
 			echo ""; \
-			echo "❌ gh api failed."; \
-			echo "------ GitHub API Response ------"; \
+			echo "❌ gh api が失敗しました。"; \
+			echo "------ GitHub API の応答 ------"; \
 			cat $$RESPONSE; \
-			echo "----------------------------------"; \
+			echo "------------------------------"; \
 			echo ""; \
-			echo "👉 Please check the error above."; \
-			echo "👉 If this is an API compatibility issue, please update GitHub CLI (gh) via your package manager."; \
+			echo "👉 上のエラーを確認してください。"; \
+			echo "👉 API の互換性が原因の場合は、パッケージマネージャで GitHub CLI (gh) を更新してください。"; \
 			echo ""; \
 			rm -f $$RESPONSE; \
 			exit 1; \

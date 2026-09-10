@@ -5,13 +5,13 @@ name: Gen Drift
 #
 #   1. the committed artifacts were hand-edited, were generated from something other than the
 #      committed contract, or outlived the schema they came from — caught by regenerating and
-#      diffing. `make gen-api` empties the output directories first, so a file the contract no
+#      diffing. `make api-gen` empties the output directories first, so a file the contract no
 #      longer produces shows up as a deletion instead of sitting there unchanged;
 #   2. a contract was fetched but never regenerated from — caught by comparing the blob SHA in
 #      openapi/sources.yaml against the version stamp the generator copies into its output.
 #
 # The second check is cheap and names the failure precisely, so it runs first. Neither step reaches
-# the network: the contract itself is committed, and fetching it is a deliberate act (make fetch-api).
+# the network: the contract itself is committed, and fetching it is a deliberate act (make api-fetch).
 
 on:
   pull_request:
@@ -61,10 +61,10 @@ jobs:
         uses: ./.github/actions/setup-deps
 
       - name: Verify the contract and the generated artifacts carry the same version
-        run: make gen-api-check
+        run: make api-gen-check
 
       - name: Regenerate from the committed contract
-        run: make gen-api
+        run: make api-gen
 
       - name: Verify the regenerated artifacts match what is committed
         shell: bash
@@ -76,6 +76,6 @@ jobs:
           drift="$(git status --porcelain -- src/adapters/gen mocks)"
           if [[ -n "${drift}" ]]; then
             echo "${drift}"
-            echo "::error::生成物が契約と一致しません。make gen-api を実行して結果を commit してください。"
+            echo "::error::生成物が契約と一致しません。make api-gen を実行して結果を commit してください。"
             exit 1
           fi

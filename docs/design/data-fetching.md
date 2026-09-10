@@ -63,14 +63,14 @@ client 側の要求境界が resilience を持たないのは、同じ往復に�
 
 ```text
 openapi/sources.yaml            取得座標。repo / path / ref を人が書き、sha は取得時に書き戻る
-  └─ make fetch-api ──▶ openapi/<契約名>.gen.yaml     取得物。do-not-edit
-        └─ make gen-api ──▶ src/adapters/gen/<契約名>/model/          wire 型
+  └─ make api-fetch ──▶ openapi/<契約名>.gen.yaml     取得物。do-not-edit
+        └─ make api-gen ──▶ src/adapters/gen/<契約名>/model/          wire 型
                             src/adapters/gen/<契約名>/endpoints.zod.ts  operation ごとの zod
                             src/adapters/gen/<契約名>/limits.ts        検証を伴わない定数だけ
                             mocks/<契約名>/endpoints.msw.ts            契約駆動モック
 ```
 
-**生成物を編集しない理由は「次で消える」だけではない。** `make gen-api` は置き場を空にしてから生成するので、手で足したファイルも、契約から消えたスキーマの残骸も、次の生成で無くなる。残っていれば `make gen-api-check` が差分として落とす。linter も掛かっていない（`biome.json` の overrides）ので、規約違反として気づく機会も無い。
+**生成物を編集しない理由は「次で消える」だけではない。** `make api-gen` は置き場を空にしてから生成するので、手で足したファイルも、契約から消えたスキーマの残骸も、次の生成で無くなる。残っていれば `make api-gen-check` が差分として落とす。linter も掛かっていない（`biome.json` の overrides）ので、規約違反として気づく機会も無い。
 
 ### 変換はどこに居るか
 
@@ -248,7 +248,7 @@ wrapper は**単発の往復**だけを扱う。締切・再試行・遮断は�
 
 ### 応答が契約と違うと `internal` になり、500 と見分けが付かない
 
-`schema.safeParse` に失敗した応答は `internal` に分類され、再試行されない。画面から見れば 500 と同じ表示になる。原因は cause chain の zod エラーにしか残っていない。**契約を取り込み直したのに生成していない**ときにこの形で現れるので、先に `make gen-api-check` を疑う。
+`schema.safeParse` に失敗した応答は `internal` に分類され、再試行されない。画面から見れば 500 と同じ表示になる。原因は cause chain の zod エラーにしか残っていない。**契約を取り込み直したのに生成していない**ときにこの形で現れるので、先に `make api-gen-check` を疑う。
 
 ### 本文を読むのは 422 だけ
 
@@ -294,7 +294,7 @@ open の間、`request()` は `fetchImpl` を呼ばずに `unavailable` を投�
 
 ```bash
 # 契約と生成物の版が揃っているか（取り込んだのに生成していない状態を検出する）
-make gen-api-check
+make api-gen-check
 
 # BFF が返す失敗の形（本文は分類の定型文だけで、バックエンドの message は出ない）
 curl -s -i 'http://localhost:3000/api/<資源>?first=abc' | head -20

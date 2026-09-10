@@ -25,7 +25,7 @@ include .makefiles/tools/commitlint.mk
 include .makefiles/tools/actions-pin.mk
 include .makefiles/tools/images-pin.mk
 include .makefiles/tools/egress.mk
-include .makefiles/tools/gen-api.mk
+include .makefiles/tools/api.mk
 
 # テスト関連
 include .makefiles/testing/test.mk
@@ -50,6 +50,9 @@ include .makefiles/security/tools-cooldown.mk
 # 一括実行系ファイル
 # GitHub関連
 include .makefiles/github/operation/setup-repository.mk
+
+# エージェント関連
+include .makefiles/agents/quiet.mk
 include .makefiles/agents/closed-loop.mk # boilerplate-only:line
 
 .PHONY: help

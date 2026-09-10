@@ -8,7 +8,7 @@
 | パス | 役割 |
 | --- | --- |
 | `sources.yaml` | 取得座標の宣言。`name` / `repo` / `path` / `ref` は人が書き、`sha` / `fetchedAt` は取得時に書き戻される |
-| `<name>.gen.yaml` | 取得物。**do-not-edit**。`make fetch-api` が上書きする |
+| `<name>.gen.yaml` | 取得物。**do-not-edit**。`make api-fetch` が上書きする |
 
 取得物は `name` から一意に決まります(`api` → `api.gen.yaml`)。宣言側で出力先は指定できません。
 名前と置き場所が別々に決まると、生成物がどの契約に対応するのかを宣言だけからは追えなくなるためです。
@@ -16,12 +16,12 @@
 ## 取得
 
 ```bash
-make fetch-api            # sources.yaml の全契約を取得する
-make fetch-api NAME=api   # 契約を 1 本だけ取得する
+make api-fetch            # sources.yaml の全契約を取得する
+make api-fetch NAME=api   # 契約を 1 本だけ取得する
 ```
 
-取得は生成を伴いません。取得したら `make gen-api` で型 / zod / MSW ハンドラを生成します。
-取得したまま生成し忘れた状態は `make gen-api-check` が検出します。
+取得は生成を伴いません。取得したら `make api-gen` で型 / zod / MSW ハンドラを生成します。
+取得したまま生成し忘れた状態は `make api-gen-check` が検出します。
 
 生成物の置き場と読み方は [src/adapters/gen/README.md](../src/adapters/gen/README.md) が持ちます。 <!-- sample:line -->
 
@@ -59,16 +59,15 @@ make fetch-api NAME=api   # 契約を 1 本だけ取得する
 <!-- = 宣言は空です。**`name` は `api` のまま使うのが既定です。** 取得先（`api.gen.yaml`）と版の -->
 <!-- = 突合は `name` から導かれますが、生成の側は綴りを直に持っており、`orval.config.ts` の -->
 <!-- = `apiInput.target` / `output.target` / `output.schemas` と `scripts/openapi/gen-api-plan.ts` の -->
-<!-- = `GEN_API_OUTPUTS` を一緒に揃えないと、`make gen-api-check` が「生成物がありません」で止まります。 -->
+<!-- = `GEN_API_OUTPUTS` を一緒に揃えないと、`make api-gen-check` が「生成物がありません」で止まります。 -->
 <!-- =  -->
 <!-- = **分けるかどうかは契約の側の都合で決めます** —— 1 本の契約に admin と一般が同居していても、 -->
 <!-- = tags でも `security` でも scope でも機械的に分割できないなら 1 ユニットとして扱います。 -->
 <!-- sample:replace-end -->
 
-**認証の契約はここに置きません。** 開発用 IdP は既製の OIDC Provider を立てて済ませており、
-取り込む先の契約が存在しないためです。フロントが認証で使うのは OIDC Discovery が実行時に
-示す口だけで（[`src/adapters/server/auth/`](../src/adapters/server/auth/README.md)）、契約から
-生成した型を通りません。
+**認証の契約はここに置きません。** フロントが認証で使うのは OIDC Discovery が実行時に示す口
+だけで（[`src/adapters/server/auth/`](../src/adapters/server/auth/README.md)）、契約から生成した
+型を一切通らないためです。取り込む対象がそもそも無いので、IdP をどう用意したかには依存しません。
 
 ## ref の固定
 

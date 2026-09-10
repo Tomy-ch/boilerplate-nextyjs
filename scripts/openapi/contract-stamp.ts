@@ -13,7 +13,7 @@ const STAMPABLE_SCALAR_TYPES: readonly string[] = [
 
 /** 取得物の先頭に置く do-not-edit ヘッダ。 */
 export const CONTRACT_HEADER = [
-  "# do-not-edit: このファイルは make fetch-api が取得した上流の契約です。",
+  "# do-not-edit: このファイルは make api-fetch が取得した上流の契約です。",
   "# 取得座標は openapi/sources.yaml が持ちます。手で編集しても次の取得で失われます。",
   "",
 ].join("\n");

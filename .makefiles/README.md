@@ -54,10 +54,10 @@ make help
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
 | `make gh-login` | `gh` コマンドで GitHub にログインします。 | ブラウザ認証方式でログインを行います。 |
-| `make delete-all-labels` | GitHub リポジトリ上の既存ラベルをすべて削除します。 | なし |
-| `make create-default-labels` | `.github/settings/labels.json` をもとに、デフォルトラベルを作成します。 | 宣言の読み取りと、宣言と実在の差分は [`scripts/github-settings/labels.ts`](../scripts/github-settings/labels.ts) が持ちます。名前が実在するラベルは色や説明が宣言と違っても触りません。 |
-| `make apply-branch-protection` | `.github/settings/branch-protection.json` をもとに、対象リポジトリへブランチルールセットを適用します。 | なし |
-| `make apply-pages-delivery [PAGES_DELIVERY_BRANCH=<branch>]` | GitHub Pages を Actions 配信にし、`github-pages` environment へ配信元ブランチを許可します。 | 既定の配信元は `production` で、[`deploy-docs.yaml`](../.github/workflows/deploy-docs.yaml) の push トリガと揃える必要があります。3 段とも現状を読んでから書くため、適用済みのリポジトリで実行しても何も変えません。**許可が無いと `docs-deploy` は step を 1 つも実行せずに落ちます**（job 自体は起動するので、失敗の理由がログに出ません）。 |
+| `make labels-delete-all` | GitHub リポジトリ上の既存ラベルをすべて削除します。 | なし |
+| `make labels-create-default` | `.github/settings/labels.json` をもとに、デフォルトラベルを作成します。 | 宣言の読み取りと、宣言と実在の差分は [`scripts/github-settings/labels.ts`](../scripts/github-settings/labels.ts) が持ちます。名前が実在するラベルは色や説明が宣言と違っても触りません。 |
+| `make branch-protection-apply` | `.github/settings/branch-protection.json` をもとに、対象リポジトリへブランチルールセットを適用します。 | なし |
+| `make pages-delivery-apply [PAGES_DELIVERY_BRANCH=<branch>]` | GitHub Pages を Actions 配信にし、`github-pages` environment へ配信元ブランチを許可します。 | 既定の配信元は `production` で、[`deploy-docs.yaml`](../.github/workflows/deploy-docs.yaml) の push トリガと揃える必要があります。3 段とも現状を読んでから書くため、適用済みのリポジトリで実行しても何も変えません。**許可が無いと `docs-deploy` は step を 1 つも実行せずに落ちます**（job 自体は起動するので、失敗の理由がログに出ません）。 |
 
 ### GitHub リポジトリ初期化関連
 
@@ -83,6 +83,7 @@ make help
 | `make setup-replace-license-copyright COPYRIGHT_HOLDER=<name> [COPYRIGHT_YEAR=<year>]` | LICENSE の著作権表記を更新します。 | 年は省略可能です。 |
 | `make setup-replace-repository-reference REPOSITORY=<owner>/<repo> [PORTAL_URL=<url>]` | GitHub リポジトリ参照とプロジェクト名（`package.json` の `name`）、およびドキュメントポータルへのリンクを、テンプレートから作った側へ置換します。 | `PORTAL_URL` を省くと GitHub Pages の配信先（`https://<owner>.github.io/<repo>/`）を組み立てます。custom domain のときだけ渡します。`docs/` / `.claude/` / `scripts/setup/` / ビルド成果物（`.next` / `dist` / `build` / `tmp`）/ ロックファイルは対象外です。 |
 | `make setup-remove-boilerplate-only` | boilerplate 限定の記述（配る側にしか意味を持たない規則・注記）を剥がします。 | 剥がし終えると道具自身も消えます。飛ばす選択肢はありません（[0152](../docs/adr/0152-agents-md-policy.md)）。 <!-- boilerplate-only:line --> |
+| `make setup-remove-sample` | 同梱のサンプル画面一式を破棄し、検証まで実行します。 | **破壊的です。** 残す側にサンプル固有の語彙を持ち込まないための出口で、削除後にゲートが通ることまで確かめます。 |
 
 いずれの補助コマンドも `DRY_RUN=1` を付けると、書き換えずに変更予定だけを出力します。有効値は `1` のみで、
 それ以外（`DRY_RUN=0` や変数の省略）はすべて実際に書き換えます。
@@ -108,6 +109,7 @@ make help
 | `make actions-comment-secret-lint` | PR コメントを投稿するジョブに `GITHUB_TOKEN` 以外の secret が渡っていないか検査します。 | 規約違反は exit 1、検査そのものが成立していない状態は exit 2 で区別します。 |
 | `make actions-required-check-lint` | required status check に登録した context が、すべての PR で報告されるか検査します。 | 判定に要るのが ruleset の宣言とワークフロー定義の 2 ファイルなので actionlint では表現できません。宣言違反は exit 1、検査が成立していない状態は exit 2 で区別します。 |
 | `make actions-zizmor` | workflows と composite action の定義を zizmor で静的解析します。 | actionlint / `actions-shellcheck` が shellcheck へ渡す前に `${{ … }}` を潰すため見えない観点（`run:` での未クオートな式展開など）を担います。落とすのは high の所見だけで、抑止は `.github/zizmor.yml` に理由付きで宣言します。hook / CI とも `--offline` で走ります。 |
+| `make issue-field-lint` | 実装タスクの issue が、テンプレートの必須項目を実際に持っているかを見ます。 | フォームで立てた issue と `--body-file` で立てた issue は同じ項目を負うのに、後者だけ無検査になるためです。 |
 | `make shellcheck` | 追跡下の `*.sh` を shellcheck で検査します。 | 対象は「依存の導入前に走る必要があってシェルで書くしかないもの」（ADR 0155 の例外）です。TypeScript ではないので 1:1 ゲートもカバレッジも掛からず、`.github` の外なので actionlint も届きません。shellcheck が無ければ検査範囲が黙って縮むため落とします。 |
 
 actionlint は `run:` ステップのシェルも shellcheck 経由で検査するため、両バイナリを `mise.toml` で版固定して
@@ -230,13 +232,23 @@ pre-commit hook と CI の `actions-lint` job が実行します。actionlint �
 
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
-| `make install-tools` | `mise.toml` の `[tools]`（Node.js / pnpm / actionlint / shellcheck / zizmor / gitleaks / Trivy）をインストールします。 | mise の事前インストールが必要。全エントリが backend を明示します。詳細は [ADR 0003](../docs/adr/0003-version-manager.md) 参照 |
+| `make install-tools` | [`mise.toml`](../mise.toml) の `[tools]` を一括でインストールします。 | mise の事前インストールが必要。何が入るかは `mise.toml` が正で、ここには写しません。全エントリが backend を明示します（[ADR 0003](../docs/adr/0003-version-manager.md)）。 |
 
 ### コミットメッセージ検証関連
 
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
 | `make commitlint [COMMIT_MSG_FILE=<path>]` | コミットメッセージを commitlint で検証します。 | `.lefthook.yaml` の commit-msg hook から呼ばれます。`COMMIT_MSG_FILE` 省略時は編集中のコミットメッセージを対象にします。規約は [ADR 0150](../docs/adr/0150-git-workflow.md) 参照 |
+
+### API 契約の取り込み関連
+
+契約は上流のリポジトリが正本で、こちらは取得して生成するだけです（[ADR 0072](../docs/adr/0072-api-type-generation.md)）。
+
+| コマンド | 説明 | 補足 |
+| --- | --- | --- |
+| `make api-fetch [NAME=<name>]` | `openapi/sources.yaml` の座標から契約を取得し、blob SHA をスタンプします。 | `gh` の認証が要ります。`NAME` を省くと `sources.yaml` の全件を取得します。 |
+| `make api-gen` | 取得済みの契約から型 / zod / MSW ハンドラを生成します。 | 生成の直後に整形まで掛けます。整形を別手順にすると生成しただけの状態が commit され、drift ゲートが「生成し忘れ」ではなく「整形し忘れ」で落ちます。 |
+| `make api-gen-check` | 契約と生成物の版が揃っているか検証します（生成はしません）。 | CI / hook 用。 |
 
 ### GitHub Actions の SHA ピン関連
 
@@ -330,7 +342,15 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make test-full` | Vitest を cache 無効・coverage 付きで実行します。 | pre-push / CI 用。Statements / Branches / Functions / Lines の各 100% を下回ると失敗します。 |
 | `make scripts-test-cached` | 補助スクリプト（`scripts/**`）の suite を cache 利用で実行します。 | pre-commit 用。export と describe の 1:1 ゲートを含みます。 |
 | `make scripts-test` | 補助スクリプトの suite を cache 無効・coverage 付きで実行します。 | pre-push / CI（`scripts-check`）用。アプリ本体の suite と分けるのは、`scripts/` に居るのが検査機構そのもので、落ちた理由を取り違えないためです（[0090](../docs/adr/0090-testing-strategy.md)）。 |
+| `make test-shard SHARD=<i>/<n>` | 分割の 1 台ぶんを走らせ、blob を書き出します。 | 割るのは PR の待ち時間のためだけです。**各台は閾値を持ちません** —— 割った実行が見るのは自分に割り当てられたファイルだけで、他の台が覆う行は未到達として数えられます。判定は合流させた側が行います。 |
+| `make test-shards-verify` | 分割の結果が全台ぶん届いているかを確かめます（合流の前）。 | 足りないまま束ねると、走らなかったテストがカバレッジ不足として現れ、原因を取り違えます。台数は各台が書いた名前から読み戻します。 |
+| `make test-merge` | 分割の blob を合流させ、カバレッジのしきい値を検証します。 | 合流後の母数と到達は 1 台で全量を走らせたときと同じになるため、**閾値そのものは緩みません**。 |
+| `make gate-typecheck` | 帯が `ci-first` でなければ型チェックを実行します。 | hook が呼びます。帯が `ci-first` のときは委ねた先のワークフロー名と理由を出して素通しします（委ねる先は `typecheck.yaml`）。 |
+| `make gate-test-full` | 帯が `ci-first` でなければアプリのテストをカバレッジ付きで実行します。 | 同上（委ねる先は `test.yaml`）。 |
+| `make gate-scripts-test` | 帯が `ci-first` でなければ補助スクリプトのテストを実行します。 | 同上（委ねる先は `scripts-check.yaml`）。 |
+| `make load-status` | ローカルゲートの負荷帯と 1 窓あたりの CPU 配分を表示します。 | 帯は測って決めます（[ADR 0151](../docs/adr/0151-git-hooks.md)）。**出力そのものが答えなので `make ai-<target>` で包みません。** |
 | `make build-storybook` | Storybook を静的に build します。 | VRT の撮影対象。`make vrt` / `make vrt-update` が前段で呼びます。 |
+| `make a11y` | 全 story に axe を掛けます。 | VRT と同じ digest 固定のコンテナ内で実行します（[ADR 0091](../docs/adr/0091-test-verification-methods.md)）。 |
 | `make vrt [VRT_SHARD=<i>/<N>] [VRT_ARGS=<args>]` | 全 story を基準画像と比較します。`VRT_SHARD` は撮影対象の何分割目かで、渡すのは CI だけです。 | digest 固定した Playwright コンテナ内で実行します（[`vrt/README.md`](../vrt/README.md)）。ホスト直実行は比較の前に落ちます。 |
 | `make vrt-retake [VRT_ONLY=<id>,<id>] [VRT_ARGS=<args>] [BASELINE_BRANCH=<branch>]` | 基準画像を撮り直して置き場へ送ります（`vrt-update` → `baseline-push`）。 | 手元から撮り直す入口はこれです。撮って送らないと親の gitlink が古いままになり、手元の `make vrt` は通るのに CI だけ落ちます。 |
 | `make vrt-update [VRT_ONLY=<id>,<id>] [VRT_ARGS=<args>]` | 基準画像を撮り直します（置き場へは送りません）。 | `VRT_ONLY` は撮り直す story を id で絞ります（該当 0 件なら失敗）。CI 側の同じ操作は `baseline-retake` ラベルが起動し、直前の実行が報告した story だけを対象にします。撮り直しは承認ではなく、見た目の判断は置き場の compare ビューを見て PR レビューで行います。 |
@@ -343,11 +363,15 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make e2e-maintenance [E2E_PORT=<port>] [E2E_HOSTNAME=<addr>]` | `APP_MAINTENANCE_MODE=on` でアプリを起動し、全ルートが停止画面へ差し替わること・生存確認が通ること・状態を変える要求が 503 で断られることを確かめます。 | `make e2e` と同じ立て付け（build → 起動 → コンテナのブラウザから当てる → 片付け）に、起動の環境と当てる設定だけを差し替えて乗せています。**基準画像を撮らない**ので置き場（submodule）を要求しません。停止は全ルートに効き、切り替えに起動し直しが要るため、通常の巡回へ混ぜられません（[`e2e/README.md`](../e2e/README.md)）。 |
 | `make e2e-metadata [E2E_PORT=<port>] [E2E_HOSTNAME=<addr>]` | `SITE_INDEXABLE=on` でアプリを build して起動し、`robots.txt` が巡回を許すこと・`sitemap.xml` が挙げる URL が実在し自分を正規 URL として名乗ること・アイコンと OG 画像が絵として返ることを確かめます。 | `make e2e-maintenance` と同じ立て付けですが、**build から差し替えます** —— 静的に描かれる画面の metadata は build 時の設定で焼き込まれるためです（[`src/config/site/site.server.ts`](../src/config/site/site.server.ts)）。外から見た origin にはコンテナから見たアプリの場所を渡し、画面が名乗る URL と開いた URL を同じ綴りにします。索引させない側は通常の巡回が見ます（[`e2e/README.md`](../e2e/README.md)）。 |
 | `make e2e-update [E2E_ARGS=<args>]` | 画面の基準画像を撮り直します（置き場へは送りません）。 | 送るのは `make baseline-push` です。画面の基準画像も story と同じ置き場の `screen/` 区画に入ります。撮り直しは承認ではありません。 |
-| `make e2e-report` | 直前の実行の HTML レポートを開きます。 | 出力は `tmp/e2e/`（追跡対象外）。trace も同じ場所に出ます。 |
+| `make e2e-retake [E2E_ARGS=<args>]` | 画面の基準画像を撮り直して置き場へ送ります（`e2e-update` → `baseline-push`）。 | 手元から撮り直す入口はこれです。story 側の `make vrt-retake` と同じ関係で、撮って送らないと親の gitlink が古いまま残ります。 |
+| `make e2e-build` | 画面を通した検証が使う本番ビルドを作ります。 | `make e2e` / `make lighthouse` が前段で呼びます。単体で叩くのは、起動だけを繰り返して切り分けるときです。 |
+| `make e2e-run` | アプリを起動してブラウザから当て、終了時に後片付けします。 | 同じく `make e2e` / `make lighthouse` から呼ばれます。起動・待ち受け・片付けの 1 組をここが持つので、上位のターゲットは環境と当てる設定だけを差し替えます。 |
+| `make e2e-report` | 直前の実行の HTML レポートを開きます。 | 出力は `tmp/e2e/`（追跡対象外）。trace も同じ場所に出ます。**レポートサーバとして常駐するので `make ai-<target>` で包みません。** |
 | `make lighthouse [E2E_PORT=<port>]` | `e2e/lib/screens.ts` が宣言する画面を 1 枚ずつ Lighthouse で開き、LCP / CLS / TBT を `performance-budget.yaml` の上限と照らします。 | 起動は `make e2e` と同じ仕組みを使い、**ブラウザだけホストで動かします** —— 比べるのが画素ではなく数値なので、固定すべきはフォントのラスタライズではなくブラウザの版で、それは lockfile の `@playwright/test` が担います。画面ごとに複数回測って中央値を採り、回数も同じ宣言が持ちます（[ADR 0101](../docs/adr/0101-performance-budget.md)）。 |
 | `make lighthouse-gate` | 測定を省いてよいかだけを答えます（`run` / `skip`）。 | 数える入力は build 生成物ではなく元なので、**台を割る前の段で 1 度だけ引けます**。撮影側（`vrt-gate`）が台ごとに引くのは `storybook-static` を数えているためで、こちらにその制約はありません。 |
 | `make lighthouse-record-verified` | 予算を通った時点の入力のハッシュを記録します。 | CI が呼びます。割った実行では**全台の結果を知っている束ねる側**が書きます（`lighthouse.yaml`）。 |
-| `make lighthouse-report` | 直前の実行が残した LHR から、動いた要素・押し下げの量・重い script を引きます。 | 出力は `tmp/lighthouse/`（追跡対象外）。 |
+| `make lighthouse-merge` | 分割した台の結果を束ね、予算と照らします。 | 判定を持つのは束ねる側だけです。台ごとに予算を掛けると、割り方を変えるたびに落ち方が変わる検査になります。 |
+| `make lighthouse-report` | 直前の実行が残した LHR から、動いた要素・押し下げの量・重い script を引きます。 | 出力は `tmp/lighthouse/`（追跡対象外）。**出力そのものが答えなので `make ai-<target>` で包みません。** |
 | `make vrt-review BRANCH=<branch> VRT_ONLY=<id>,<id> [RUN=<run-id>] [VRT_REVIEW_PORT=<port>]` | CI が落とした story を、使い捨ての作業ツリーで立てた Storybook に並べます。 | 引数は PR コメントがコピー用の 1 行として書き出します。**手元の作業ツリーは動かしません** —— `tmp/review/vrt/<ブランチ>` に `origin/<ブランチ>` を切り離して展開します。`RUN` を渡すと `vrt-diff` も落として隣のポートで配ります（`gh` が要る）。ここで見えるのは「なぜ変わったか」であって画素の一致ではありません（ホストのフォントで描くため）。 |
 | `make e2e-review BRANCH=<branch> E2E_ONLY=<name>,<name> [RUN=<run-id>] [E2E_REVIEW_PORT=<port>]` | CI が落とした画面を、使い捨ての作業ツリーで起動したアプリに並べます。 | 起動するのは**本番ビルド**です（画面の基準画像がそれで撮られているため）。役割の要る画面は行き先を持たせた開発用 session の面を経由します。待ち受けは loopback へ絞ります —— `APP_ENV=ci` で session 発行の口が開いているためです。 |
 | `make review-clean` | 上の 2 つが生やした作業ツリーを、git の登録ごと片付けます。 | 作業ツリーは Ctrl-C では消えず、`node_modules` と build 生成物を抱えたまま `tmp/review/` に溜まります。ディレクトリを直接消すと実体を失った登録が残り、次の `git worktree add` がそこで断られるため、片付けはこの入口から行います。 |
@@ -373,19 +397,26 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make bearer-scan` | 値がプロセスの外へ出る地点を、その値の分類と併せて見ます。 | **落としません。** 誤検知の傾向が強く、fail-closed にすると規則単位の無効化へ寄っていくためです（それは禁止）。所見は code scanning へ送り、差分が持ち込んだものを GitHub 側のチェックが赤にします。個別の誤検知は `bearer.ignore` がフィンガープリントで受けます。 |
 | `make bearer-sarif` | 同じ検査を SARIF で書き出します。 | code scanning への取り込み用。所見が 0 件のとき Bearer は `results: null` を書きますが SARIF にその値は無いため、`scripts/sarif` が配列へ揃えます。揃えないと取り込みが弾かれ、「所見が無い」と「報告できていない」が見分けられなくなります。 |
 | `make suppression-expiry` | 抑止の撤回条件を突き合わせ、満たしたものか様式を欠くものがあれば落とします。 | 週に一度 CI が回します。**限界が 2 つあり、報告がそれを名指しします。** 決められるのは日付だけなので出力は全件の一覧を伴い、理由をコメントに持つ面（gitleaks / zizmor / pnpm の override / sonar）は宣言単位では読めず日付を含む行だけが出ます。冷却の免除（`pnpm-workspace.yaml` の `minimumReleaseAgeExclude` と `mise.toml` の `tools-cooldown-ignore:`）は宣言単位で読み、理由が無い・版を名指ししていない・日付を持たないものを様式違反として落とします。`SUPPRESSION_REPORT` を環境から渡すと issue の本文を書き出します（recipe 行へは展開しません）。 |
-| `make tools-cooldown-check TOOLS_COOLDOWN_BASE=<ref>` | `mise.toml` の pin のうち base から動いたものが、配布経路ごとの冷却期間を満たすか検査します。 | PR で CI が base ブランチを渡して回します。窓は `TOOLS_COOLDOWN_RELEASE_DAYS`（GitHub Releases。`ACTIONS_PIN_MIN_AGE_DAYS` と同じ値）/ `TOOLS_COOLDOWN_REGISTRY_DAYS`（npm / PyPI）/`core:node`）。窓の内側の pin は exit 1、公開日時を引けない pin や経路を持たない backend は exit 2（検査が成立していない）。免除は pin の直上に `# tools-cooldown-ignore: <理由>。<窓が明ける日> に外す` を置きます（[`scripts/tools-cooldown/README.md`](../scripts/tools-cooldown/README.md)）。`GITHUB_TOKEN` が無ければ `gh auth token` を借ります。 |
+| `make tools-cooldown-check TOOLS_COOLDOWN_BASE=<ref>` | `mise.toml` の pin のうち base から動いたものが、配布経路ごとの冷却期間を満たすか検査します。 | PR で CI が base ブランチを渡して回します。窓は配布経路ごとに 2 つあります —— `TOOLS_COOLDOWN_RELEASE_DAYS`（GitHub Releases。`ACTIONS_PIN_MIN_AGE_DAYS` と同じ値）と `TOOLS_COOLDOWN_REGISTRY_DAYS`（npm / PyPI）で、言語ランタイム（`core:`）は窓の対象外です。窓の内側の pin は exit 1、公開日時を引けない pin や経路を持たない backend は exit 2（検査が成立していない）。免除は pin の直上に `# tools-cooldown-ignore: <理由>。<窓が明ける日> に外す` を置きます（[`scripts/tools-cooldown/README.md`](../scripts/tools-cooldown/README.md)）。`GITHUB_TOKEN` が無ければ `gh auth token` を借ります。 |
 | `make tools-cooldown-audit` | `mise.toml` の全 pin を冷却期間に照らして棚卸しします。 | 週に一度 CI が回します。手元でも引けます。免除の無いまま窓の内側に居る pin で落ち、免除の期限切れは `make suppression-expiry` が見ます。 |
 | `make audit` | 依存監査ゲート（`pnpm audit`）。 | 修正版のある `high` / `critical` が 1 件でもあれば exit 1。判定と表の組み立ては `scripts/audit-gate` が持ちます。Trivy とは集計単位も参照する DB も違うため件数は一致せず、**突合して差分を潰そうとしません** —— どちらか一方でも閾値に達したものを blocking として扱います（[ADR 0110](../docs/adr/0110-security-operations.md) 3）。 |
 
-<!-- boilerplate-only:begin -->
 ## `.makefiles/agents` 系
 
+### 静音実行関連
+
+| コマンド | 説明 | 補足 |
+| --- | --- | --- |
+| `make ai-<target>` | 任意のターゲットを静かに実行し、出力を `tmp/ai-logs/<target>.txt` へ退避します。 | エージェントが呼ぶときの既定の形です。成功時の出力は 0 バイト、終了コードは素通し、失敗時だけ読むべきログを 1 行で指します。**ハーネスは失敗時に抜粋しか渡さずファイルのパスを渡さない**ため、最も読みたい失敗のときに限って切り落とされた行が取り戻せないという穴を、出力元で塞ぎます。**出力そのものが答えのターゲット**（`help` / `load-status` / `lighthouse-report`）と**常駐するターゲット**（`e2e-report` / `vrt-report`）には使いません —— 前者は読めなくなるだけ、後者は完了しないので呼び出し側が待ち続けます。 |
+| `make clean-ai-logs` | 退避したログ（`tmp/ai-logs`）を削除します。 | ログは成功時も残します。生成系のように「落ちてはいないが何が起きたか確かめたい」ときに実行し直さず読めるほうが安いためです。 |
+
+<!-- boilerplate-only:begin -->
 ### 開発の窓の観測関連
 
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
 | `make closed-loop-report` | 打刻された開発の窓の、段の区間と所見を報告します。 | 読むだけで何も刻みません。打刻は `.agents/closed-loop/marks.sh` が hook とスキルから行い、置き場は追跡外の `tmp/closed-loop/` です。**決定的な集計だけでモデルを使いません**（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 2）。窓が 0 件のときは「所見なし」ではなく 0 件であること自体を出します（[ADR 0157](../docs/adr/0157-inspection-declaration-discipline.md)）。**この機構はテンプレートから作った側へは配りません。** |
-| `make closed-loop-send` | 閉じたまま届いていない窓の所見を issue へ送出します。 | **先に `make create-default-labels` を 1 回通しておくこと。**`feedback` 系のラベルが実在しないと `gh issue create` が拒否し、窓は未送出のまま溜まり続けます。送出先は `.git` の remote から導き、設定項目で宛先を持ちません（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 4）。送るのは**閉じていて、段の境界を 1 つ以上越えた窓**だけです。通常はセッション開始時に `.agents/closed-loop/send.sh` が自動で回すので、これを叩くのは取りこぼしを手で流すときです。 |
+| `make closed-loop-send` | 閉じたまま届いていない窓の所見を issue へ送出します。 | **先に `make labels-create-default` を 1 回通しておくこと。**`feedback` 系のラベルが実在しないと `gh issue create` が拒否し、窓は未送出のまま溜まり続けます。送出先は `.git` の remote から導き、設定項目で宛先を持ちません（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 4）。送るのは**閉じていて、段の境界を 1 つ以上越えた窓**だけです。通常はセッション開始時に `.agents/closed-loop/send.sh` が自動で回すので、これを叩くのは取りこぼしを手で流すときです。 |
 | `make closed-loop-send-dry` | 送出する内容だけを出します。 | 何も送らず、送出済みの索引にも触れません。送出が走っている最中でも見られます。 |
 | `make closed-loop-weekly` | 期間ぶんの所見を束ね、点の高い順に並べ、着地した改善を測り直します。 | **週次で `.github/workflows/closed-loop-weekly.yaml` が同じものを回す**ので、手で叩くのは期間を指定して見直すときです。既定は直近 7 日。`ARGS="--from 2026-09-01 --to 2026-09-07"` で期間を指定します。**読むだけで、issue を作りも閉じもしません。**再計測は省略できない段です（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 1）—— 省略した時点でループは蓄積器へ退化します。 |
 | `make closed-loop-weekly-consolidate` | 同じことをした上で、未クローズの所見を関心へ畳みます。 | **issue を作り、畳んだ大元を閉じます。**畳み込みだけを明示指定にしてあるのは、副作用が既定に入ると意図しない畳み込みに誰も気づかないためです。 |

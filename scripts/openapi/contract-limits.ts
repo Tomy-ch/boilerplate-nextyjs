@@ -34,7 +34,7 @@ const DECLARATION_END = /;\s*$/m;
 const USES_ZOD = /\bzod\b/;
 
 /**
- * @param source - 生成器の**整形前の生の出力**。`make gen-api` は orval のあとに `pnpm fix` を
+ * @param source - 生成器の**整形前の生の出力**。`make api-gen` は orval のあとに `pnpm fix` を
  *   掛けるが、この抜き出しはその前に走る（`extract-limits.ts`）。
  * @returns 宣言された順のまま。zod を引く宣言は落とす。
  */
@@ -61,7 +61,7 @@ export function collectContractLimits(source: string): ContractLimit[] {
     });
 }
 
-/** 生成元のヘッダから契約の版を取り出す。突合（`make gen-api-check`）が読む行。 */
+/** 生成元のヘッダから契約の版を取り出す。突合（`make api-gen-check`）が読む行。 */
 const SPEC_VERSION = /OpenAPI spec version:\s*(\S+)/;
 
 /**

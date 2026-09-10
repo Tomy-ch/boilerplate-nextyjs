@@ -44,8 +44,7 @@ Biome は `next` / `react` の lint ドメインルールを内蔵しており�
 
 ### 4. 設定の見通しの良さ
 
-- `biome.json`（簡易版 / エディタの基点）に lint / format / assist / overrides を集約
-- CI / pre-commit 用の完全版 `biome.ci.jsonc` は `extends` で簡易版を継承し、差分のみを持つ（設定を二重管理しない）
+- `biome.json` **1 枚**に lint / format / assist / overrides を集約する（下記「設定を分けない」）
 - VCS 連携 (`.gitignore` 尊重) も設定ファイル内で完結
 
 ## TypeScript コンパイラによる検査（`tsconfig.json`）
@@ -79,11 +78,11 @@ Biome は `next` / `react` の lint ドメインルールを内蔵しており�
 | --- | --- |
 | フォーマット | biome 単独（ESLint のフォーマッタ機能は使わない） |
 | import 整理 (organize imports) | biome（assist） |
-| biome が表現できる lint 検査 | biome（簡易版 / 完全版のプロファイル配置は「設定方針」参照） |
+| biome が表現できる lint 検査 | biome（設定は `biome.json` 1 枚。「設定を分けない」参照） |
 | biome で表現できない検査 | ESLint |
 
 - **同じ検査を両方のツールに持たせない**（上記の食い違いが成立するため）
-- **biome が実装済みのルールは biome 側で有効化して使う**。「biome にルールは存在するが有効化していない」状態を理由に ESLint へ置くことは能力ベースに反する（例: import の循環検出は biome の `noImportCycles` を完全版で有効化済みのため、ESLint に持たせない）
+- **biome が実装済みのルールは biome 側で有効化して使う**。「biome にルールは存在するが有効化していない」状態を理由に ESLint へ置くことは能力ベースに反する（例: import の循環検出は biome の `noImportCycles` を有効化済みのため、ESLint に持たせない）
 - **縮小方向での運用**: biome が対応した検査は ESLint から削除し biome へ移管する。ESLint 側は常に「biome の隙間」だけを持つ
 
 ### 現時点で ESLint 側に置く検査
@@ -109,15 +108,7 @@ ESLint およびそのルールをリポジトリに追加してよいのは、�
 
 ## バージョン管理
 
-Biome は npm devDependency として固定する。バージョンは `package.json` の `devDependencies` に明示する。
-
-```json
-{
-  "devDependencies": {
-    "@biomejs/biome": "2.4.10"
-  }
-}
-```
+Biome は npm devDependency として exact pin する。**版の正は `package.json` の `devDependencies` であり、ここには写さない。**
 
 実体は `pnpm install` で取得され、ローカル / CI いずれでも同一バージョンで動作する（pnpm 採用方針については [0001-package-manager.md](0001-package-manager.md) を参照）。
 
@@ -127,19 +118,19 @@ ESLint 本体・プラグイン・設定の読み込みに要するツールも�
 
 `biome.json` の要点は次の通り。詳細は同ファイルを参照すること。
 
-### プロファイル分割（簡易版 / 完全版）
+### 設定を分けない
 
-保存時の即時フィードバックと、commit / CI での厳格な検査を両立するため、設定を 2 プロファイルに分ける。
+**biome の設定は `biome.json` 1 枚とし、プロファイルを持たない。** 保存時・手元・pre-commit・CI のどこから呼んでも同じ規則が掛かる。
 
-| プロファイル | ファイル | 用途 | 実行 |
-| --- | --- | --- | --- |
-| 簡易版 | `biome.json` | エディタ保存時（format / organize imports / safe fix）。canonical 名のため biome / エディタが自動採用 | `pnpm lint` |
-| 完全版 | `biome.ci.jsonc` | CI / pre-commit。簡易版を `extends` し重いルールを上乗せ、warn もブロック | `pnpm lint:ci` |
+分けない理由は、**弱いほうが暗黙に探索される名前を持つと、構造的な false pass ができる**ことにある。`--config-path` を渡さない呼び出し —— エディタの拡張、素の `biome check`、このリポジトリを初めて触る人 —— は弱いほうを読んで緑を返すが、ゲートは強いほうで拒否する。緑と赤のどちらが正しいのかは、呼び出しに `--config-path` が付いていたかどうかで決まり、**出力のどこにも現れない**。
 
-- 完全版は `extends: ["./biome.json"]` で簡易版を継承し、**差分ルールのみ**を記述する
-- 完全版でのみ `noImportCycles`（`project` ドメイン = 複数ファイル走査で重い）を有効化し、保存時の負荷を避ける
-- 完全版は `--error-on-warnings` 付きで実行し、簡易版では warn 表示に留まるルールを CI / pre-commit ではブロック（exit code）に昇格させる
-- `biome.ci.jsonc` は canonical 名ではないため、エディタは自動採用しない（`--config-path` 明示時のみ有効）
+分ける根拠になりうるのは保存時の応答性だけであり、**このリポジトリではその根拠が成立しない** —— 全ファイル走査で 2,332 ファイル / 約 2 秒であり、`project` ドメインのルール（`noImportCycles`）を含めても含めなくても差が測れない。根拠が実測で消えた以上、分割は費用だけが残る。
+
+したがって:
+
+- **`--error-on-warnings` は既定に含める**（`pnpm lint` が付ける）。付ける / 付けないで結果が変わる呼び出しを 2 通り持たない
+- `pnpm lint` と `pnpm lint:ci` の差は**規則ではなく、走る道具**である（後者は ESLint と境界の突合が続く）。同じ biome にどこまで見せるかで差を付けない
+- 応答性を根拠に規則を落とす提案は、**このリポジトリでの実測を添える**こと。上流の一般論では足りない
 - hook / CI からの実行フローは [0151-git-hooks.md](0151-git-hooks.md) を参照
 
 ### VCS 連携
@@ -163,7 +154,7 @@ ESLint 本体・プラグイン・設定の読み込みに要するツールも�
 
 - `recommended: true` を基準に運用
 - `next` / `react` ドメインの推奨ルールを有効化
-- 追加で有効化（簡易版 = `biome.json` の現行値）：
+- 追加で有効化（現行値は `biome.json` が正）：
   - `noConsole: warn`
   - `noExplicitAny: error`
   - `noUnusedImports / noUnusedVariables: error`
@@ -171,8 +162,7 @@ ESLint 本体・プラグイン・設定の読み込みに要するツールも�
   - `noNestedComponentDefinitions: error` / `noNextAsyncClientComponent: error`
   - `noUnknownAtRules: off`（Tailwind ディレクティブ用）
 - バグ性検出ルール群（`noConstantBinaryExpressions` / `noLeakedRender` / `noShadow` / `useIframeSandbox` 等）も有効化する
-- 完全版のみで有効化（`biome.ci.jsonc`）：
-  - `noImportCycles: error`
+- `noImportCycles: error`（`project` ドメイン。保存時も含めて常に掛ける）
 
 ### Assist
 
@@ -192,7 +182,7 @@ ESLint 本体・プラグイン・設定の読み込みに要するツールも�
 - flat config 1 ファイル（`eslint.config.ts`）で管理する。カスタムルールの実装だけは `eslint-rules/` へ分ける（設定と実装を同じファイルに積むと設定の見通しが落ちるため）
 - 依存マトリクスは `architecture.ts` を単一の正とし、flat config はそれを import して検査へ変換する。**マトリクスを config 側へ書き写さない**
 - 置くのは「ESLint 利用の条件」を満たす補完検査（現時点では層境界検査）のみ。formatter 連携・stylistic 系・biome 重複ルールは設定しない
-- 実行はプロファイル分割の**完全版フロー側**（pre-commit / CI = `pnpm lint:ci`）に直列で組み込む。層境界検査は TS resolver を伴い保存時実行には重いため、エディタでは拡張の診断並走のみとする
+- 実行は `pnpm lint:ci` の 2 段目に直列で組み込む（pre-commit / CI）。層境界検査は TS resolver を伴い保存時実行には重いため、エディタでは拡張の診断並走のみとする
 - **import resolver を設定する**。層境界検査は import 先を実ファイルまで解決できて初めて成立し、解決できない import は「どの層でもない」として黙って通る。`@/*` を解く TypeScript resolver を設定し、**違反を仕込んで error になることを確認してから**検査を導入したと見なす
 - ignore 対象（`.next/` / `out/` / 生成物等）を flat config 内で宣言し、biome の除外方針と食い違わせない
 - 各ルールには「なぜ biome で表現できないか」を示すコメントを付し、移管判定を容易にする
@@ -202,10 +192,10 @@ ESLint 本体・プラグイン・設定の読み込みに要するツールも�
 `package.json` の scripts を経由して実行する。
 
 ```bash
-# Lint + Format チェック（簡易版 / エディタ相当）
+# Lint + Format チェック（biome。warn もブロックする）
 pnpm lint
 
-# Lint（完全版 / CI・pre-commit 用。warn もブロック）
+# 上に ESLint と境界宣言の突合を続ける（CI・pre-commit が回すゲート）
 pnpm lint:ci
 
 # Lint + Format を自動修正
@@ -218,14 +208,13 @@ pnpm format
 直接実行する場合：
 
 ```bash
-pnpm exec biome check                                              # lint + format チェック（簡易版）
-pnpm exec biome check --config-path=./biome.ci.jsonc --error-on-warnings  # 完全版
+pnpm exec biome check --error-on-warnings                          # lint + format チェック（= pnpm lint）
 pnpm exec biome check --fix                                        # 自動修正
 pnpm exec biome format --write
 pnpm exec eslint .                                                 # 補完検査
 ```
 
-`lint:ci` は biome 完全版 → ESLint（`lint:eslint` = `eslint .`）→ 境界宣言の突合（`check:architecture`）を直列に回す。`pnpm lint` は biome のみである。境界検査系ルールは auto-fix をほぼ持たないため、`pnpm fix` は biome のみとする。
+`lint:ci` は `pnpm lint`（biome）→ ESLint（`lint:eslint` = `eslint .`）→ 境界宣言の突合（`check:architecture`）を直列に回す。`pnpm lint` は biome のみである。境界検査系ルールは auto-fix をほぼ持たないため、`pnpm fix` は biome のみとする。
 
 ## エディタ連携
 
@@ -239,7 +228,7 @@ VSCode を前提に統合を行う。`.vscode/extensions.json` で `biomejs.biom
   - `source.fixAll.eslint` を併記（境界系ルールは auto-fix をほぼ持たないため、biome の整形と衝突しない）
   - `editor.formatOnSave`: `true`
 
-これにより、保存ごとに整形・import 整理・自動修正は biome（簡易版 `biome.json` を自動採用）が担い、ESLint は補完検査の診断を並行表示する。保存時は完全版の重いルールを実行しない。
+これにより、保存ごとに整形・import 整理・自動修正は biome（canonical 名の `biome.json` を自動採用）が担い、ESLint は補完検査の診断を並行表示する。**保存時に掛かる規則はゲートと同じである**（上記「設定を分けない」）。
 
 なお、`dbaeumer.vscode-eslint` は `.vscode/extensions.json` の推奨拡張に含める。フォーマットは biome が担うため、`.vscode/settings.json` では ESLint のフォーマッタ機能を無効にする。
 
@@ -260,7 +249,7 @@ repo ルートに `.editorconfig` を置く。担当範囲は **biome が整形�
 - `eslint:recommended` / `eslint-config-next` 等のプリセット一括適用は禁止（ルール単位 opt-in のみ）
 - `biome.json` のフォーマッタ・リンタを個別案件理由で一方的に無効化しない（必要なら ADR 改訂で合意する）
 - 自動生成物や `node_modules` などは `biome.json` の `files.includes` / `eslint.config.ts` の ignore で除外し、`biome-ignore` / `eslint-disable` コメントの多用は避ける
-- 完全版 `biome.ci.jsonc` に簡易版と重複するルールをコピーしない（`extends` の差分のみを記述する）
+- biome の設定ファイルを増やさない（プロファイル分割の禁止。上記「設定を分けない」）
 
 ## 補足
 
@@ -274,5 +263,5 @@ repo ルートに `.editorconfig` を置く。担当範囲は **biome が整形�
 - [0001-package-manager.md](0001-package-manager.md) — pnpm 採用 / lockfile 取り扱い
 - [0004-library-management.md](0004-library-management.md) — ESLint 本体・プラグインの exact pin / `pnpm audit` / 移管判定の定期監査
 - [0151-git-hooks.md](0151-git-hooks.md) — `pnpm lint:ci` を呼ぶ pre-commit / pre-push の運用（段階責務・pre-commit の速度目標と退避ルール）
-- [0153-ci-configuration.md](0153-ci-configuration.md) — 完全版 `pnpm lint:ci` を PR の必須チェックに置く CI 構成
+- [0153-ci-configuration.md](0153-ci-configuration.md) — `pnpm lint:ci` を PR の必須チェックに置く CI 構成
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) — ESLint 層境界検査のプラグイン選定（`eslint-plugin-boundaries`）と層定義マッピング（Enforcement 節）。マトリクスの正は `architecture.ts` が持ち、flat config はそれを import する

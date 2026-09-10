@@ -58,7 +58,8 @@
         "noUnknownAttribute": "on",
         "noUnusedExpressions": "on",
         "noVar": "on",
-        "useStaticResponseMethods": "on"
+        "useStaticResponseMethods": "on",
+        "noImportCycles": "error"
       },
       "correctness": {
         "noUnusedImports": "error",

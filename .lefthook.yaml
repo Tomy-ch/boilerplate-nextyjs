@@ -11,8 +11,8 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      # biome の完全版 (biome.ci.jsonc + --error-on-warnings) に続けて ESLint と境界の突合まで
-      # 回す。biome だけの `pnpm lint` が通ってもここは落ちうる。
+      # biome (`pnpm lint`) に続けて ESLint と境界の突合まで回す。biome だけの `pnpm lint` が
+      # 通ってもここは落ちうる —— 差は規則ではなく、続く 2 段の道具にある。
       run: pnpm lint:ci
     md-lint:
       # Markdown の体裁 (markdownlint-cli2)、mermaid 図の構文、`.claude/**` の意味
@@ -98,7 +98,7 @@ pre-commit:
         - ".github/settings/branch-protection.json"
         - "scripts/required-check-lint/*.ts"
       run: make actions-required-check-lint
-    gen-api-check:
+    api-gen-check:
       # 取得した契約と生成物の版が揃っているかを検査する。CI は再生成して差分を
       # 見るが、hook では生成せず版の突合だけを行う。生成は数秒かかるうえ、契約を取得した
       # まま生成し忘れた状態はこの突合で捕まる。
@@ -107,7 +107,7 @@ pre-commit:
         - "src/adapters/gen/**"
         - "mocks/**"
         - "orval.config.ts"
-      run: make gen-api-check
+      run: make api-gen-check
     actions-pin-check:
       # uses: がロックファイル通りに SHA 固定されているかを検査する。
       # 検査はネットワークに出ないため hook の速度目標に収まる。

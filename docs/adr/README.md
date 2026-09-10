@@ -95,5 +95,7 @@
 - [0157-inspection-declaration-discipline.md](0157-inspection-declaration-discipline.md) - 検査の宣言規律（成立しない検査を「違反なし」へ倒さない / 抑止は理由と撤去条件を持つ）
 - [0158-code-search-tooling.md](0158-code-search-tooling.md) - コード検索・影響解析ツール（採用範囲 / 導入経路 / allow・deny 境界）
 - [0159-script-structure.md](0159-script-structure.md) - 補助スクリプトの言語と構造（TypeScript / 1 ツール 1 ディレクトリ / 入口と判定の分離）
+- [0159-1-cross-repository-references.md](0159-1-cross-repository-references.md) - 他リポジトリへの参照（既定は `redirect.github.com` / 素のリンクは留保 / 使う判断は人のもの）
 - [0160-agent-environment-loop.md](0160-agent-environment-loop.md) - エージェント環境の改善をループにする（観測 → 改善 → 再計測 / 利用の型で判定する / 状態の 3 つの置き場）
 - [0161-development-window-as-feedback-unit.md](0161-development-window-as-feedback-unit.md) - 開発の窓をフィードバックの単位とする（セッション・コミット・PR を母数にしない理由 / 打刻が第一で記録は補完）
+- [0162-application-independence-from-ai.md](0162-application-independence-from-ai.md) - アプリケーションは AI に依存しない（成立の条件にエージェントを置かない / 依存は開発の流れに閉じる / 経路に自分を置く道具を採らない）

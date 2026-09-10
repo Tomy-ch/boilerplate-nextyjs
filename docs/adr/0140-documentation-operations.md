@@ -28,8 +28,9 @@ boilerplate のドキュメントは、日本語の読者と、英語の frontma
 
 - **最終形は三層**: 英語 canonical(`docs/**/*.md`、`docs/ja/**` と `docs/portal/**`(生成ビュー)を除く)+ 日本語 mirror(`docs/ja/**/*.ja.md`、人間保守の翻訳)+ 生成 portal([0141](0141-portal-operations.md))。AI エージェントは英語 canonical を読み、`*.ja.md` は読まない
 - **移行は v1.0.0 の境界で行う**。**v1.0.0 未満の間は日本語を canonical のまま living 運用**する(AGENTS.md「出力は日本語」と整合)。英語 canonical 化(既存日本語 ADR の英訳 canonical + `docs/ja/` mirror への再編)は、ADR 不可変化と**同じ v1 境界**でまとめて行う
-- **v1.0.0 未満の日本語 canonical は、サフィックス無しのパス(`README.md` 等)に置き `*.ja.md` を作らない**。canonical は常にサフィックス無しのパスであり、`*.ja.md` は翻訳 mirror の名前空間だからである。v1.0.0 でサフィックス無し側を英語へ書き換え、日本語を `*.ja.md` へ移す。**リポジトリ内に英語ドキュメントが既に存在することを、他ドキュメントを英語で新設する根拠にしない**(`SKILL.md` は Claude Code が frontmatter を英語で解釈するツール要件による例外 — [0154](0154-claude-skills-operations.md))
+- **v1.0.0 未満の日本語 canonical は、サフィックス無しのパス(`README.md` 等)に置き `*.ja.md` を作らない**。canonical は常にサフィックス無しのパスであり、`*.ja.md` は翻訳 mirror の名前空間だからである。v1.0.0 でサフィックス無し側を英語へ書き換え、日本語を `*.ja.md` へ移す。**リポジトリ内に英語ドキュメントが既に存在することを、他ドキュメントを英語で新設する根拠にしない**。例外は 2 つだけで、どちらも別の ADR が理由を持つ: `SKILL.md`(Claude Code が frontmatter を英語で解釈するツール要件 — [0154](0154-claude-skills-operations.md))と `AGENTS.md`(エージェントの理解精度 — [0152](0152-agents-md-policy.md))。**この 2 つは v1.0.0 未満でも兄弟の `*.ja.md` を持つ** —— 上の禁止は「日本語 canonical の隣に mirror を作るな」であり、canonical が英語である側には掛からない。読めない規約は守らせられないので、対訳は在るほうが正しい
 - 移行は **`canonicalize-doc` スキル**(EN/JA ペアの生成・同期。`*.ja.md` 命名 + `docs/ja/` 並行ツリー)で実施する。翻訳追従責務 = **canonical を先に更新し翻訳が追従、canonical が常に権威**。知識を探すのも判定を当てるのも書き換えるのも canonical に対して行い、mirror を inline で直さない
+- **`.github/workflows/**` のコメントは英語で書く**(日本語規則の例外)。ワークフローは公開 boilerplate のうち**外から最も読まれる部分**である —— 上流のバグ報告へ貼られ、テンプレートから作った側が最初に手を入れる場所であり、外の読み手が判断に使うハードニングの根拠(SHA ピン / 最小 permissions / fail-closed。[0153](0153-ci-configuration.md))を載せている。加えて英語しか出さない道具の出力(`actionlint` / `shellcheck`)と直に並ぶ。`.github/` のそれ以外(issue / PR テンプレート・`settings/`)は日本語規則に従う
 - AGENTS.md Language Rules の「Documentation」はこの方針(方向は EN・v1.0.0 未満は日本語 living・移行は v1)に従う
 
 ### 2. ADR タクソノミー(4 分類)
@@ -65,6 +66,7 @@ boilerplate のドキュメントは、日本語の読者と、英語の frontma
 2. 本 ADR の「v1.0.0 までの暫定運用」節と、AGENTS.md の「Temporary Operating Rules until v1.0.0」節を削除する
 3. `.claude/settings.json` の `permissions.deny` に Accepted ADR 本文(`Edit(docs/adr/*-*.md)` / `Write(docs/adr/*-*.md)`)を足す。編集許可の最終形と復元手順は [0152](0152-agents-md-policy.md) が持ち、同じ変更で行う
 4. 決定 1 の canonical 言語の移行(EN canonical + `*.ja.md` mirror)を同じ境界で行う
+5. `docs/plan/**` を削除する —— この状態を生んだ計画であって、状態そのものではない。計画は v1.0.0 より前に閉じ、もっと早く閉じることもある。決めたことはその時点で ADR に在り、残るのは git が既に持つ履歴である
 
 以後の変更は supersede だけになる —— 新 ADR を起票し、旧 ADR は Status 行を `Superseded by NNNN` へ書き換える。
 

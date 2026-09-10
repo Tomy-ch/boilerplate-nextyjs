@@ -27,7 +27,7 @@
 本スキルは**起動直後に必ず `AskUserQuestion` を呼ぶ**。引数や直近メッセージにバージョンらしき文字列があっても、
 黙って採用して進めない(設定ミス防止のため明示確認が必須)。
 
-1. `mise.toml` の `[tools]` 下 `node = "X.Y.Z"` を読み現行版を把握。
+1. `mise.toml` の `[tools]` 下 `"core:node" = "X.Y.Z"` を読み現行版を把握。**backend の接頭辞は鍵の一部**であり（ADR 0003 が全エントリに要求）、裸の `node =` で探すと見つからない。
 2. **必ず** `AskUserQuestion` を呼ぶ:
    - 質問:「アップグレード先の Node.js バージョンを指定してください(例 `26.0.0`)。」
    - 現行版(`mise.toml [tools] node` の値)を文脈として含める。
@@ -70,8 +70,8 @@ AGENTS.md「例外: スキル実行」により、通常の AI 変更スコー�
 
 ```toml
 [tools]
-node = "<TARGET_VERSION>"
-pnpm = "…"   # 変更なし
+"core:node" = "<TARGET_VERSION>"
+"aqua:pnpm/pnpm" = "…"   # 変更なし
 ```
 
 `mise.toml` が単一の正。本リポジトリで Node の版を持つファイルは他に無く(Dockerfile も無い ──
@@ -126,7 +126,7 @@ pnpm build            # next build ── 新ランタイムで成功必須
 - [ ] `mise.toml [tools] node` を `<TARGET_VERSION>` に更新
 - [ ] `make install-tools`(ユーザ作業)で更新、`node --version` 一致
 - [ ] `pnpm install` 実行、`pnpm-lock.yaml` diff 確認
-- [ ] `pnpm lint` + `pnpm build` グリーン
+- [ ] `pnpm lint` + `make test-full` + `make scripts-test` + `pnpm build` が新ランタイムでグリーン
 - [ ] `@types/node` メジャー整合は別 PR として記録(ここでは行わない)
 
 ## 注意

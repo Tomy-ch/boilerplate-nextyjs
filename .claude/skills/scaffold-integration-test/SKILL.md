@@ -2,7 +2,14 @@
 name: scaffold-integration-test
 usage-class: situational
 description: >-
-  Write the HTTP-boundary integration test for one seam in this repository — an `adapters` API client or a Route Handler — driven by the contract-generated MSW handlers rather than a hand-written stub. Use it when a new client function lands under the `adapters` layer, when a Route Handler is added under `src/app/`, when a regenerated contract (`make gen-api`) changes a wire type and the boundary needs a test that would have caught the drift, or when someone asks 「この API クライアントの結合テストを書いて」「契約どおりに動くか確かめるテストが欲しい」「route handler の境界をテストして」. ADR 0090 scopes integration tests to the HTTP boundary only — inside is mocked, and what is asserted is the **shape and type** at the seam, not the business value, which unit tests already own; this skill holds that line rather than drifting into end-to-end. It hardcodes no handler API: `mocks/handlers.ts` and `mocks/node.ts` (the generated handler set and the server already wired into `vitest.setup.ts`), the subject's generated wire types under `src/adapters/gen/**`, the nearest `test-requirement` frontmatter, sibling `*.contract.test.ts` files as the structural template, and ADR 0090 / 0091 are all read at runtime. Derives one case per response the contract declares — success shape, each declared error status, and the normalization the adapter performs on the way out — and mocks configuration through `vi.mock("@/config/environment")` with `vi.hoisted` so the seam reads a fixed base URL. Strictly read-only on the subject. Do NOT use it for pure logic with no HTTP boundary (`scaffold-test`), to review existing tests (`test-review`), to add or edit MSW handlers (they are generated from the contract — never hand-written), or to write browser end-to-end tests (Playwright, ADR 0090's e2e row).
+  Write the HTTP-boundary integration test for one seam — an `adapters` API client or a Route Handler — driven
+  by the contract-generated MSW handlers rather than a hand-written stub. Use it when a new client function
+  lands under `adapters`, when a Route Handler is added under `src/app/`, when a regenerated contract (`make
+  api-gen`) changes a wire type, or on 「この API クライアントの結合テストを書いて」「契約どおりに動くか確かめるテストが欲しい」「route handler
+  の境界をテストして」. ADR 0090 scopes these to the boundary only: what is asserted is the shape and type at the seam,
+  not the business value, which unit tests own. Read-only on the subject. Do NOT use it for pure logic with no
+  HTTP boundary (`scaffold-test`), to review existing tests (`test-review`), to hand-write MSW handlers (they
+  are generated), or for browser end-to-end tests.
 argument-hint: '[path/to/subject.ts]'
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
@@ -18,7 +25,7 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 
 - A new API client function landed under `src/adapters/server/**` (or the client-side counterpart once ADR 0024's split lands on disk).
 - A Route Handler (`route.ts`) was added under `src/app/`.
-- `make gen-api` regenerated a wire type and the seam needs a test that would have caught the drift.
+- `make api-gen` regenerated a wire type and the seam needs a test that would have caught the drift.
 - An existing seam is covered only by unit tests that stub `fetch` by hand, and the boundary itself
   has never been driven through the generated handlers.
 
@@ -27,8 +34,8 @@ A Japanese reference translation of this skill is available at `SKILL.ja.md` in 
 - **Pure logic with no HTTP boundary** — `scaffold-test`. A retry policy or a payload normalizer is a
   unit, even though it lives under `adapters`.
 - **Reviewing tests that exist** — `test-review`.
-- **Adding or editing MSW handlers** — they are generated from the contract (`mocks/handlers.ts` is
-  `getGoBoilerplateAPIMock()`). Hand-writing one lets the mock and the contract drift apart, which is
+- **Adding or editing MSW handlers** — they are generated from the contract, and `mocks/handlers.ts`
+  only wires them (`stableHandlers`). Hand-writing one lets the mock and the contract drift apart, which is
   exactly the failure the generated set exists to prevent. If a handler is missing, the contract is
   what needs regenerating.
 - **Browser end-to-end** — that is Playwright, a different row of ADR 0090's table.
@@ -41,7 +48,8 @@ Read **at runtime**; nothing about the conventions is frozen into this file.
 | --- | --- |
 | [ADR 0090](../../../docs/adr/0090-testing-strategy.md) | integration = HTTP boundary only / inside mocked / shape and type asserted; structure and naming |
 | [ADR 0091](../../../docs/adr/0091-test-verification-methods.md) | Verification methods, including where async RSC tests sit |
-| `mocks/handlers.ts` / `mocks/node.ts` | The generated handler set and the server `vitest.setup.ts` already starts — the test does not boot its own |
+| `mocks/handlers.ts` / `mocks/node.ts` | The generated handler set and the wiring around it |
+| [`vitest.setup.msw.ts`](../../../vitest.setup.msw.ts) | The server the test imports rather than boots, and `serveJson` for the cases that assign a response |
 | `src/adapters/gen/**` | The wire types and zod schemas the seam validates against |
 | Sibling `*.contract.test.ts` | The established local shape — file naming, config mocking, assertion style |
 | The nearest `README.md` frontmatter (`test-requirement`) | Confirms the subject is an `integration` seam at all |
@@ -69,8 +77,10 @@ a seam, that is a documentation gap — report it and continue.
 ## Step 1. Read the inputs
 
 1. ADR 0090 and ADR 0091.
-2. `mocks/handlers.ts` and `mocks/node.ts` — learn what the generated set covers and that
-   `vitest.setup.ts` already starts the server with `onUnhandledRequest: "bypass"`.
+2. `mocks/handlers.ts`, `mocks/node.ts`, and `vitest.setup.msw.ts` — learn what the generated set
+   covers, and that the interception is started by **`vitest.setup.msw.ts`**, which the test file
+   imports. It runs with `onUnhandledRequest: "error"`, so a request the generated set does not cover
+   fails the test rather than escaping to the network.
 3. The subject source in full — which endpoints it calls, what it validates, what it normalizes.
 4. The generated types the subject imports from `src/adapters/gen/**`.
 5. A sibling `*.contract.test.ts` as the structural template.
@@ -105,12 +115,16 @@ Apply what Step 1 read. As the conventions stand today that means:
 
 - **The outermost `describe` is the exported symbol's own name**; viewpoints divided by
   `// ----- 正常系 -----` / `// ----- 異常系 -----`; Japanese `it` strings.
-- **Do not start an MSW server.** `vitest.setup.ts` already runs `mockServer.listen()` and resets
-  handlers after each test. Override a handler for one case with `mockServer.use(...)` and let the
-  per-test reset undo it.
+- **Do not start an MSW server.** Importing `vitest.setup.msw.ts` starts it and resets the handlers
+  after each test. Assign a response for one case with its `serveJson(url, body)` helper, which also
+  returns the requests it received, and let the per-test reset undo it.
+- **Prefer the generated handler's own response.** Assign a body only for the cases that look at the
+  adapter's own mapping — relying on the generated draw makes the test move whenever the mock's value
+  ranges change.
 - **Mock configuration, not the network.** The seam needs a fixed base URL, so mock
-  `@/config/environment` with `vi.hoisted` + `vi.mock` the way the sibling contract test does, and
-  import the subject **after** the mock so the hoisting order holds.
+  `@/config/environment` with `vi.hoisted` + `vi.mock` against `PARSED_ENVIRONMENT` from
+  `@/config/environment.fixture`, the way the sibling contract test does, and import the subject
+  **after** the mock so the hoisting order holds.
 - **Never hand-roll a `fetch` stub.** If the generated handlers do not cover the endpoint, the
   contract is what is missing.
 - **Do not assert on log output or spans** unless the seam's contract is the telemetry itself.

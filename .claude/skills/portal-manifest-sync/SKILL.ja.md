@@ -6,7 +6,7 @@
 [`docs/portal/manifest.yaml`](../../../docs/portal/manifest.yaml)（[ADR 0141](../../../docs/adr/0141-portal-operations.md)）を、
 ディスク上の実在する README と、それを読む生成スクリプトの双方に突き合わせて監査します。
 
-このスキルの日本語参考訳は同じディレクトリの `SKILL.ja.md` にあります（スキルとしては読み込まれません。参考用）。
+canonical は同じディレクトリの `SKILL.md`（英語）です。規約の正はそちらで、この訳は参考です。
 
 ## 使うとき
 
@@ -114,7 +114,7 @@ git ls-files '*README*.md'
 
 ## Step 4. 未キュレーション集合を絞り、分類する
 
-順に適用します。以下の「形」は変わりうる規約なので、いずれも仮定せず木から導き直します。
+順に適用します。以下の規約は変わりうるので、形を仮定せず、それぞれ**所有する文書から基準を読み**ます。
 
 ### 4a. 部品リファレンス
 
@@ -239,7 +239,8 @@ manifest の差分を見せて終わります。このスキルはコミット�
 - ❌ どのクラスであれ候補を一括追加すること —— manifest はキュレーション済みで、追加はユーザの判断
 - ❌ 未登録 README を「直すべき drift」として扱うこと
 - ❌ `readme-review` の基準をここへ複製すること —— 実行時に読む
-- ❌ section 一覧・`dst` の命名・component README の形を焼き込むこと —— いずれも木から導く
+- ❌ section 一覧・`dst` の命名を焼き込むこと —— いずれも manifest から導く
+- ❌ component README の形をここで導き直すこと —— 定義は `readme-review` の N1 が所有しており、2 つ目の導出を持つと、入った扉によって同じファイルの分類が変わる
 - ❌ `portal:guides` / `portal:docs` が既に決めていることを再実装すること
 - ❌ YAML 全体を書き直すこと（manifest のコメントが落ちる）
 - ❌ subgroup を持つ section へ、guide id を subgroup へ置かずに追加すること
@@ -256,7 +257,7 @@ manifest の差分を見せて終わります。このスキルはコミット�
 - [ ] 生成スクリプトを両方回し、その出力を仮定せず読んだ
 - [ ] subgroup を持つ全 section について配置を検査した
 - [ ] ディスク列挙に `git ls-files` を使い、`docs/**` と `.claude/**` を除外した
-- [ ] 絞り込みの前に component README の形を木から導き直した
+- [ ] component リファレンスの判定を `readme-review` の N1 のまま当てた（導き直していない）
 - [ ] `readme-review` の基準を実行時に読み、ファイルごとに根拠付きで適用した
 - [ ] feature slice を `docs/templates/feature-readme.md` に対して採点した（焼き込んだ一覧ではなく）
 - [ ] section と `dst` を manifest から導いた（創作していない）

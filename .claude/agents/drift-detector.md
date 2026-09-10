@@ -1,6 +1,14 @@
 ---
 name: drift-detector
-description: Read-only drift detector for ONE layer (or for the prose corpus) — the worker form of `back-prop`. Surfaces four kinds of drift between what a document declares and what the tree actually does: (A) a README states something the code no longer does, (B) the code repeats a pattern at three or more sites that the README never documents, (C) a skill's body restates a rule a README already owns, and (E) business vocabulary has leaked out of `docs/spec/` into a layer README (E1) or into an ADR / `docs/rules.md` (E2, report-only). The canonical detection criteria live in `.claude/skills/back-prop/prompts/detect-drift.md` — this agent reads and applies that file verbatim (single source of truth shared with the skill body), adapting only how inputs arrive. Invoked once per in-scope layer by the `back-prop` skill, all in one message so the layers run concurrently. STRICTLY read-only (Read / Grep / Glob only) — it never edits, never calls `AskUserQuestion`, and never proposes a write itself; the integrator runs the approval loop and performs every write. Default model `sonnet`.
+description: >-
+  Read-only drift detector for ONE layer (or for the prose corpus) — the worker form of `back-prop`. Surfaces
+  four kinds of drift between what a document declares and what the tree actually does: a README states
+  something the code no longer does; the code repeats a pattern at three or more sites the README never
+  documents; a skill's body restates a rule a README already owns; business vocabulary has leaked out of
+  `docs/spec/`. The canonical criteria live in `.claude/skills/back-prop/prompts/detect-drift.md` and are
+  applied verbatim. Invoked once per in-scope layer by `back-prop`, all in one message so the layers run
+  concurrently. STRICTLY read-only — it never edits and never proposes a write itself; the integrator runs the
+  approval loop and performs every write. Default model `sonnet`.
 tools: Read, Grep, Glob
 model: sonnet
 ---

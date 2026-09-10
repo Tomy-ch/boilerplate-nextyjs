@@ -1,14 +1,22 @@
 ---
 name: repo-ops
 usage-class: situational
-description: Operational runbook for this repository's recurring, easy-to-trip-on gotchas around the mise-managed toolchain, the pnpm lockfile, the Makefile setup targets, the scratch directories, and the lefthook git hooks. Read-only knowledge skill — it tells you the exact command to run; it does not silently mutate state. It is SYMPTOM-driven and answers only from its own index: a symptom that is not listed is routed to `how-to` (a goal, which can conclude that no procedure exists) or `repo-truth` (the current state), because this runbook deliberately cannot conclude an absence and its silence must not read as an answer. This is deliberately a SPARSE STARTER for the Next.js boilerplate: it carries only the gotchas that genuinely exist today (mise / pnpm / make DRY_RUN / scratch paths / lefthook hooks), and grows as new operational traps are discovered (in contrast to the go-boilerplate original, whose items were mostly Docker / sqlc / DB-runner specific and do not apply here — ADR 0011 no-docker). Triggers: "make install-tools が mise not found で落ちる", "DRY_RUN はどのターゲットで効くのか", "setup-repo を試しに実行したい", "pnpm install --frozen-lockfile が落ちる", "mise.toml を変えた後の反映", "pnpm のスクリプトが ERR_PNPM_IGNORED_BUILDS で落ちる", "pnpm-workspace.yaml に覚えのない allowBuilds が付いている", "スクラッチ出力をどこに置くか", "commit が commitlint に弾かれる", "hook が command not found で落ちる", "mise 自身の版を上げたい", "mise を上げたら CI の digest 照合で落ちた".
+description: >-
+  Operational runbook for this repository's recurring, easy-to-trip-on gotchas around the mise-managed
+  toolchain, the pnpm lockfile, the Makefile setup targets, the scratch directories, and the lefthook git
+  hooks. Read-only — it tells you the exact command to run and mutates nothing. It is SYMPTOM-driven and
+  answers only from its own index: a symptom that is not listed is routed to `how-to` (a goal, which can
+  conclude that no procedure exists) or `repo-truth` (the current state), because this runbook cannot conclude
+  an absence and its silence must not read as an answer. Triggers: 「make install-tools が mise not found
+  で落ちる」「pnpm install --frozen-lockfile が落ちる」「pnpm-workspace.yaml に覚えのない allowBuilds」「commit が commitlint
+  に弾かれる」「hook が command not found で落ちる」.
 ---
 
 # Repo Ops Runbook
 
 Concrete recovery + procedure steps for the operational gotchas that recur in this repo. This is a
 **lookup table, not a workflow**: find the symptom, run the fix. When a step is destructive or touches a
-root file, say so to the user first per `CLAUDE.md`.
+root file, say so to the user first per `AGENTS.md`.
 
 > **Scope note.** This runbook is intentionally sparse: only the traps that genuinely exist here are
 > listed. This repository is a presentation layer with no Docker tool-runner and no DB
@@ -162,19 +170,20 @@ explicit user instruction; per [0004](../../../docs/adr/0004-library-management.
 ## 5. biome: `pnpm lint` vs `pnpm fix` (ADR 0002)
 
 biome is the only formatter, and carries every lint check it can express. Prettier is not used.
-ESLint holds exactly the checks biome cannot express — today the layer-boundary import check
-(`eslint-plugin-boundaries`) and the `next/link` rule — and nothing else (ADR 0002, capability-based
-split). Entry points:
+ESLint holds exactly the checks biome cannot express and nothing else (ADR 0002, capability-based
+split). Read `eslint.config.ts` for the current set rather than a list here; today it is the layer
+boundaries (`boundaries/*`), the React Hooks rules, the type-assertion ban, and this repository's own
+`project-rules/*`. Entry points:
 
 ```bash
 pnpm fix       # biome check --fix : auto-fix what can be fixed
 pnpm lint      # biome check       : report remaining errors (fix these by hand)
 pnpm format    # biome format --write : formatting only
-pnpm lint:ci   # biome (full profile) + ESLint boundaries + architecture cross-check
+pnpm lint:ci   # pnpm lint + ESLint + architecture cross-check
 ```
 
-`pnpm lint:ci` is the gate the hook and CI run, and it is three stages in series: biome with
-`biome.ci.jsonc` and `--error-on-warnings`, then `pnpm lint:eslint`, then `pnpm check:architecture`
+`pnpm lint:ci` is the gate the hook and CI run, and it is three stages in series: `pnpm lint`
+(biome, one config), then `pnpm lint:eslint`, then `pnpm check:architecture`
 (the layer READMEs' `imports-allowed` frontmatter against `architecture.ts`, which is the single
 source of the dependency matrix). A failure names its own stage — read which one before assuming
 formatting.
@@ -218,7 +227,7 @@ in it or every hook fails with `command not found`.
 
 | Stage | Entry point | What it checks |
 | --- | --- | --- |
-| pre-commit | `pnpm lint:ci`; `pnpm lint:md` when `*.md` is staged; `make actionlint` when a workflow is staged | biome full profile + ESLint layer boundaries + `architecture.ts` cross-check (§5); markdownlint + mermaid syntax + `.claude/**` semantics (`skill-lint`); workflow syntax + `run:` shell |
+| pre-commit | `pnpm lint:ci`; `pnpm lint:md` when `*.md` is staged; `make actionlint` when a workflow is staged | biome + ESLint + `architecture.ts` cross-check (§5); markdownlint + mermaid syntax + `.claude/**` semantics (`skill-lint`); workflow syntax + `run:` shell |
 | commit-msg | `make commitlint` | the subject against ADR 0150 |
 | pre-push | `make test-full`; `pnpm typecheck`; `make secret-scan` | Vitest cache 無効 + カバレッジしきい値; `tsc --noEmit`; secrets in the range being pushed (**fail-closed**) |
 
@@ -322,7 +331,7 @@ does not touch mise itself.
 
 - ✅ Read-only knowledge: surface the exact command; run it only when the user asked you to perform the
   operation.
-- ✅ Warn before destructive steps (tag/branch deletion in §3) per `CLAUDE.md`.
+- ✅ Warn before destructive steps (tag/branch deletion in §3) per `AGENTS.md`.
 - ✅ Confirm with the user before editing root files (`biome.json` in §5, `package.json` in §4) —
   they are outside the default AI Modification Scope. §2's `git restore pnpm-workspace.yaml` is the
   exception: it discards an unrequested machine edit rather than making one.

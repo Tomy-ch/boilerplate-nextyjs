@@ -12,14 +12,14 @@
 
 - `src/adapters/server/**` に新しい API クライアント関数が着地した（ADR 0024 の分割が実体化すればクライアント側も同様）
 - `src/app/` 配下に Route Handler（`route.ts`）を足した
-- `make gen-api` で契約を再生成して wire 型が変わり、その drift を捕まえられるテストが継ぎ目に要る
+- `make api-gen` で契約を再生成して wire 型が変わり、その drift を捕まえられるテストが継ぎ目に要る
 - 既存の継ぎ目が `fetch` を手書き stub する unit テストだけでカバーされており、境界そのものは生成ハンドラで一度も動かされていない
 
 ## このスキルを使わない場面
 
 - **HTTP 境界を持たない純粋ロジック** — `scaffold-test`。retry ポリシーやペイロード整形は、`adapters` に居ても unit である
 - **既にあるテストの評価** — `test-review`
-- **MSW ハンドラの追加・編集** — ハンドラは契約から生成される（`mocks/handlers.ts` は `getGoBoilerplateAPIMock()`）。手書きすると mock と契約が別々に動き始め、それこそが生成物で防いでいる failure である。ハンドラが無いなら、再生成すべきは契約の側
+- **MSW ハンドラの追加・編集** — ハンドラは契約から生成され、`mocks/handlers.ts` はそれを配線するだけ（`stableHandlers`）。手書きすると mock と契約が別々に動き始め、それこそが生成物で防いでいる failure である。ハンドラが無いなら、再生成すべきは契約の側
 - **ブラウザの end-to-end** — Playwright であり、ADR 0090 の表の別の行
 
 ## このスキルが読むもの・書くもの
@@ -30,7 +30,8 @@
 | --- | --- |
 | [ADR 0090](../../../docs/adr/0090-testing-strategy.md) | integration = HTTP 境界のみ / 内側は mock / 形と型をアサート。構造と命名 |
 | [ADR 0091](../../../docs/adr/0091-test-verification-methods.md) | 検証方法。非同期 RSC テストの置き場を含む |
-| `mocks/handlers.ts` / `mocks/node.ts` | 生成ハンドラ一式と、`vitest.setup.ts` が既に起動しているサーバ。テストは自前で起動しない |
+| `mocks/handlers.ts` / `mocks/node.ts` | 生成ハンドラ一式と、その周りの配線 |
+| [`vitest.setup.msw.ts`](../../../vitest.setup.msw.ts) | テストが起動せず import するサーバと、応答を割り当てるケース用の `serveJson` |
 | `src/adapters/gen/**` | 継ぎ目が検証に使う wire 型と zod スキーマ |
 | sibling の `*.contract.test.ts` | その場所で確立している形。ファイル命名、config の mock、アサーションの書き方 |
 | 最も近い `README.md` の frontmatter（`test-requirement`） | 対象がそもそも `integration` の継ぎ目かの確認 |
@@ -49,7 +50,7 @@
 ## 手順 1. 入力を読む
 
 1. ADR 0090 と ADR 0091
-2. `mocks/handlers.ts` と `mocks/node.ts` —— 生成一式が何をカバーするか、`vitest.setup.ts` が `onUnhandledRequest: "bypass"` で既にサーバを起動していることを把握する
+2. `mocks/handlers.ts` / `mocks/node.ts` / `vitest.setup.msw.ts` —— 生成一式が何をカバーするかと、interception を起動しているのが **`vitest.setup.msw.ts`**（テストファイルが import する側）であることを把握する。`onUnhandledRequest: "error"` で走るので、生成一式が覆っていない宛先への要求は網へ出ずにテストが落ちる
 3. 対象のソースを最後まで —— どのエンドポイントを呼び、何を検証し、何を正規化するか
 4. 対象が `src/adapters/gen/**` から import している生成型
 5. 構造テンプレートとしての sibling `*.contract.test.ts`
@@ -74,7 +75,8 @@
 手順 1 で読んだものを適用する。現時点の規約では次を指す。
 
 - **最外の `describe` は対象 export の名前**。観点は `// ----- 正常系 -----` / `// ----- 異常系 -----` で区切る。`it` 文字列は日本語
-- **MSW サーバを起動しない。** `vitest.setup.ts` が既に `mockServer.listen()` を呼び、テストごとにハンドラを reset している。1 ケースだけ差し替えるなら `mockServer.use(...)` を使い、後始末はテストごとの reset に任せる
+- **MSW サーバを起動しない。** `vitest.setup.msw.ts` を import した時点で起動し、テストごとにハンドラを reset する。1 ケースだけ応答を割り当てるなら、受け取った要求も返す `serveJson(url, body)` を使い、後始末はテストごとの reset に任せる
+- **既定は生成ハンドラの応答に任せる。** 応答を割り当てるのは、写しの分岐そのものを見るケースだけにする —— 生成の抽選に頼ると、モックの値域を変えるたびにテストが動く
 - **mock するのはネットワークではなく設定。** 継ぎ目には固定のベース URL が要るので、sibling の契約テストと同じく `vi.hoisted` + `vi.mock` で `@/config/environment` を mock し、hoisting の順序が保たれるよう対象は mock の**後**で import する
 - **`fetch` の手書き stub を作らない。** 生成ハンドラがそのエンドポイントを覆っていないなら、欠けているのは契約である
 - **ログや span をアサートしない。** 継ぎ目の契約がテレメトリ自体である場合を除く

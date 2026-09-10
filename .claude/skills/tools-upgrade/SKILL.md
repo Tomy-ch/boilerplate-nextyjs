@@ -1,7 +1,14 @@
 ---
 name: tools-upgrade
 usage-class: lifecycle
-description: Audit `mise.toml` `[tools]` entries against upstream latest versions, with a configurable supply-chain quarantine. For each tool the latest release is fetched from its backend (GitHub Releases for `aqua:` / `go:` tagged modules, npm registry for `npm:`, PyPI for `pipx:`, language download manifests for `go` / `node` / `python`). Releases newer than `min_age_days` are reported as informational only — never applied automatically — to avoid pulling in newly-published malicious versions before upstream has time to detect and revoke them. Confirms `min_age_days` and the per-tool update set via `AskUserQuestion`, rewrites approved entries in `mise.toml` atomically, reinstalls the toolchain with `make install-tools`, and verifies with `pnpm install` + `pnpm lint:ci` + `pnpm build`. Use this skill on a routine cadence (monthly / quarterly) or after a security advisory.
+description: >-
+  Audit `mise.toml` `[tools]` entries against upstream latest versions, with a configurable supply-chain
+  quarantine. The latest release is fetched from each tool's own backend. Releases newer than `min_age_days`
+  are reported as informational only and never applied automatically, so a newly published malicious version
+  cannot be pulled in before upstream has time to detect and revoke it. Confirms the window and the per-tool
+  update set, rewrites approved entries atomically, reinstalls with `make install-tools`, and verifies with
+  `pnpm install` + `pnpm lint:ci` + `pnpm build`. Use it on a routine cadence or after a security advisory.
+  Sibling of `actions-pin`, which covers the pinned GitHub Actions rather than `mise.toml`.
 ---
 
 # Tool Version Upgrade
@@ -58,7 +65,7 @@ Do NOT fetch any upstream API or read `mise.toml` until the window table is conf
 
 ## AI Modification Scope
 
-Per the "Exception: Skill Execution" clause in `CLAUDE.md`, the following paths are permitted to be modified while this skill is running:
+Per the "Exception: Skill Execution" clause in `AGENTS.md`, the following paths are permitted to be modified while this skill is running:
 
 - `mise.toml` (the `[tools]` table — write only entries the user explicitly approved)
 
@@ -116,19 +123,19 @@ Print a Japanese-language summary grouped by class. Example:
 ツールバージョン監査結果（窓: backend 別 / ADR 0110 1.1）
 
 ✅ 更新候補（backend の窓を満たした / supply-chain quarantine 通過）:
-  - golangci-lint: 2.12.2 → 2.13.0 （公開 2026-05-18, 17 日前）
-  - sqlc: 1.31.1 → 1.32.0 （公開 2026-04-29, 36 日前）
+  - actionlint: 1.7.11 → 1.7.12 （公開 2026-05-18, 17 日前）
+  - gitleaks: 8.29.0 → 8.30.1 （公開 2026-04-29, 36 日前）
 
 ⚠️ supply-chain quarantine（backend の窓の内側、通知のみ）:
-  - air: 1.65.3 → 1.66.0 （公開 2026-06-02, 2 日前）
+  - trivy: 0.72.0 → 0.73.0 （公開 2026-06-02, 2 日前）
 
 ✓ 既に最新:
-  - oapi-codegen 2.7.0
-  - lefthook 2.1.8
+  - shellcheck 0.11.0
+  - zizmor 1.29.0
   ... (省略可)
 
 ❌ 取得失敗:
-  - pipx:sqlfluff: PyPI への接続失敗
+  - pipx:graphifyy: PyPI への接続失敗
 ```
 
 A `pending` release is a candidate for `supply-chain-triage`: it scores the version on direct evidence over four axes so the window can be discharged by evidence rather than only by waiting. **Report the band; never adopt on the strength of a low score** — that decision is the user's ([0110](../../../docs/adr/0110-security-operations.md) §1.2).
@@ -146,7 +153,7 @@ The user may deselect individual entries (e.g., if a specific bump is known-brok
 For each approved tool:
 
 - Locate the exact line in `mise.toml`
-- Replace the version literal only — preserve the original key (`aqua:owner/repo` / `go:path/to/module` / short name) and the original `v`-prefix convention if any
+- Replace the version literal only — **preserve the key exactly, backend prefix included** (`aqua:owner/repo` / `pipx:package` / `core:node`), along with the original `v`-prefix convention if any. Rewriting a key to a bare name is the failure Step 1 refuses to resolve
 - Do not reorder keys, do not touch unrelated keys, do not touch the `[settings]` table
 
 After computing all approved changes, write `mise.toml` **once** (atomic single-pass write). Read the file → apply all replacements in memory → write.

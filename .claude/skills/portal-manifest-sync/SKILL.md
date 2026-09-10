@@ -2,22 +2,14 @@
 name: portal-manifest-sync
 usage-class: situational
 description: >-
-  Audit `docs/portal/manifest.yaml` against the READMEs that actually exist, and against the two
-  generators that consume it (`pnpm portal:guides` / `pnpm portal:docs`). The manifest is a curated
-  reading list, not a mirror of the disk, so an unregistered README is a candidate awaiting human
-  judgment — never drift to be auto-fixed. Use this skill when a README moved or was deleted and the
-  portal build now fails on a stale `src`; when an entry was added but does not appear in the
-  sidebar; before cutting a release, to confirm the portal still builds; or as a periodic hygiene
-  pass over what the portal exposes. Japanese triggers apply: 「portal の manifest を同期して」
-  「manifest の drift を見て」「portal に載っていない README を洗い出して」「portal のビルドが src で落ちる」.
-  It surfaces four things the generators cannot: entries whose section is missing from `meta.groups`,
-  entries that silently fall into the `Other` subgroup, per-component reference READMEs that belong
-  to Storybook rather than the portal, and the curation candidates that remain after those are
-  filtered out. It edits `docs/portal/manifest.yaml` and nothing else — never `docs/portal/guides/**`
-  (generated), never the source READMEs, and it never commits. The manual-worthiness criteria are NOT
-  defined here: `readme-review` owns them and this skill reads them at runtime. Do NOT use it to
-  generate the portal (that is `pnpm portal:site`), to bulk-add unregistered READMEs, to rewrite a
-  README (`sync-readme`), or to deep-dive a single README (`readme-review`).
+  Audit `docs/portal/manifest.yaml` against the READMEs that actually exist and the two generators that
+  consume it. The manifest is a curated reading list, not a mirror of the disk, so an unregistered README is a
+  candidate awaiting human judgment — never drift to be auto-fixed. Use it when a README moved or was deleted
+  and the portal build fails on a stale `src`; when an entry was added but does not appear in the sidebar; or
+  as a periodic pass over what the portal exposes — 「portal の manifest を同期して」「manifest の drift を見て」「portal
+  に載っていない README を洗い出して」「portal のビルドが src で落ちる」. It edits the manifest and nothing else. Do NOT use it to
+  generate the portal (`pnpm portal:site`), to bulk-add unregistered READMEs, to rewrite a README
+  (`sync-readme`), or to judge one (`readme-review`).
 argument-hint: '[--dry-run]'
 allowed-tools: Bash, Read, Edit, Glob, Grep, AskUserQuestion
 ---
@@ -142,8 +134,8 @@ The remainder is the candidate universe. Subtract the registered `src` set to ge
 
 ## Step 4. Filter and classify the uncurated set
 
-Apply the filters in order. Each one has to be re-derived from the tree rather than assumed, because
-the shapes below are conventions that can change.
+Apply the filters in order. Each one reads its criterion from the document that owns it rather than
+assuming a shape, because the conventions below can change.
 
 ### 4a. Per-component reference
 
@@ -271,8 +263,9 @@ Protected even during this run:
 - ❌ Bulk-add candidates from any class — the manifest is curated, and adding is the user's call
 - ❌ Frame an unregistered README as drift to fix
 - ❌ Duplicate `readme-review`'s criteria here — read them at runtime
-- ❌ Hardcode the section list, the `dst` naming, or the component-README shape — derive each from
-  the tree
+- ❌ Hardcode the section list or the `dst` naming — derive each from the manifest
+- ❌ Re-derive the component-README shape here — `readme-review`'s N1 owns it, and a second
+  derivation makes the same file classify differently depending on which skill was entered through
 - ❌ Re-implement what `portal:guides` / `portal:docs` already decide
 - ❌ Re-serialize the whole YAML, which drops the manifest's comments
 - ❌ Add an entry to a subgrouped section without placing its guide id in a subgroup
@@ -289,7 +282,7 @@ Protected even during this run:
 - [ ] Both generators were run and their output was read, not assumed
 - [ ] Subgroup placement was checked for every subgrouped section
 - [ ] Disk enumeration used `git ls-files` and excluded `docs/**` and `.claude/**`
-- [ ] The component-README shape was re-derived from the tree before filtering on it
+- [ ] The component-README class was decided by `readme-review`'s N1 as written there, not re-derived
 - [ ] `readme-review`'s criteria were read at runtime and applied per file, with a rationale each
 - [ ] Feature slices were graded against `docs/templates/feature-readme.md`, not a hardcoded list
 - [ ] Section and `dst` were derived from the manifest, not invented

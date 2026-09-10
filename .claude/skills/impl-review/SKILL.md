@@ -1,7 +1,15 @@
 ---
 name: impl-review
 usage-class: frequent
-description: Local adversarial, low-bias code review of THE CHANGE ITSELF, run by subagents on a DIFFERENT model than the implementer. Mirrors `/code-review`'s finder → verify shape but keeps everything local and adds a runtime build + request stage that mocked component tests structurally cannot reach. Its subject is the implementation and nothing else: it carries no test lens and no comment lens, and it invokes no other skill — the tests belong to `/test-review` and the comment stock to `/comment-sweep`, peers asked for and run beside this one under the Review Phase Protocol in `AGENTS.md`, never chained from inside it (a review skill that offers to run the next one makes the three subjects stop being independently answerable, and lets a drift in one skill's question silently drop the others from every flow that went through it). Confirms scope and reviewer model via one `AskUserQuestion` (changed files vs branch-vs-base diff vs specific paths; fable / sonnet / opus / haiku, default auto = a model ≠ the implementer), fans out `adversarial-reviewer` subagents — one per lens (correctness / security / architecture / cohesion / runtime-gap, where `cohesion` flags a unit holding several reasons to change — the within-module counterpart to `architecture`, which owns cross-kernel placement — and requires each finding to name two distinct reasons so it cannot decay into taste) — then verifies each finding with an independent `review-verifier` subagent (CONFIRMED / PLAUSIBLE / REFUTED), runs `pnpm build` plus a curl stage for touched request-time seams, and synthesizes a single Japanese report whose mandatory `未監査の観点:` line records that the tests and the comments were not looked at here, so a one-subject review can never read as a full one. Read-only on source throughout — every lens reports and the user fixes. By default the surviving CONFIRMED / PLAUSIBLE findings are posted to the branch's PR as inline review comments anchored to each finding's line (opt out with `--no-comment`). Use before commit / PR to get an independent second opinion the implementer's own model would not surface. Flag: `--no-comment` (skip PR posting).
+description: >-
+  Local adversarial, low-bias review of THE CHANGE ITSELF, run by subagents on a model that is not the
+  implementer's, each finding then re-derived by an independent skeptic. Adds a runtime build and request
+  stage that mocked component tests cannot reach, and posts surviving findings to the branch's PR as inline
+  comments. Use it before a commit or PR for a second opinion the implementer's own model would not surface,
+  and after a multi-kernel change whose RSC / Client boundary or request path no test covers. Subject: the
+  implementation only — `/test-review` and `/comment-sweep` are peers under the Review Phase Protocol in
+  `AGENTS.md`, never chained from inside it. Do NOT use it for formatting (`pnpm lint:ci`), for applying fixes
+  (read-only on source), or for the tests and comments.
 ---
 
 # Local Review

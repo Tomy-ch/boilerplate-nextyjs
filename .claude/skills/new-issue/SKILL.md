@@ -2,7 +2,14 @@
 name: new-issue
 usage-class: situational
 description: >-
-  Turn a question about a possible change into a GitHub issue whose premises have been verified against the actual implementation — or into the finding that it should not be an issue at all. Use whenever the user wonders aloud whether something is feasible, reports behavior they think is wrong, proposes a refactor, or asks 「これ issue にしといて」「これって直せる？」「こういう機能入れられる？」. The value is not drafting prose: it is tracing the path end to end before asserting anything, refusing to guess when information is missing, and writing the body so each factual claim is individually falsifiable later. Five blockers stop a draft from being filed — asserting runtime behavior without observing it, citing implementation without checking it is current, comparing options with no measured basis, claiming an impact radius without exhausting the search, and not having searched existing issues. The body follows the field set this repository's own issue templates require, because a form-filed issue and a `--body-file` one must carry the same fields and only the latter goes unchecked; on top of that it adds a premises section recording where each claim was verified, and a 論点 section carrying options with a reasoned recommendation. Filing is gated behind "should this be an issue at all" — an existing issue that only needs a comment, or a fix small enough to just make, is not a new issue. Do NOT use it to review a diff (`impl-review` / `test-review` / `comment-sweep`), to compare options nobody has chosen between yet (`research` first), or to write an ADR.
+  Turn a question about a possible change into a GitHub issue whose premises have been verified against the
+  actual implementation — or into the finding that it should not be an issue at all. Use whenever someone
+  wonders aloud whether something is feasible, reports behavior they think is wrong, proposes a refactor, or
+  asks 「これ issue にしといて」「これって直せる？」「こういう機能入れられる？」. It traces the path end to end before asserting anything and
+  writes each factual claim so it stays individually falsifiable. Filing is gated behind "should this be an
+  issue at all" — an existing issue that only needs a comment, or a fix small enough to just make, is not a
+  new issue. Do NOT use it to review a diff, to compare options nobody has chosen between yet (`research`
+  first), or to write an ADR.
 argument-hint: '[question or description] [--verify=observed|static] [--output=file|draft]'
 ---
 

@@ -2,7 +2,14 @@
 name: supply-chain-triage
 usage-class: safety
 description: >-
-  Gather direct supply-chain evidence about ONE artifact version that a cooldown window has caught, and score how likely it is to be a compromised publish (0–12 over four evidence axes) so a human can decide adopt-now vs wait from evidence rather than from a day count alone. Use this whenever a version is held, deferred, or classified pending by `tools-upgrade`, `actions-pin`, or `images-pin`; whenever `make tools-cooldown-check` blocks a `mise.toml` pin and someone must judge whether waiting is protective or merely inconvenient; whenever a Dependabot security update wants to skip the window; whenever the user asks 「このバージョン安全？」「なぜ検疫されている、取っていいのか」; and before any deliberate window override. It reads the artifact — the registry tarball, the Actions commit range, the image config — and never executes it, answers the four questions the security ADR records (did the publisher change, does the artifact match its source, what actually changed, did new dependencies appear), reports an axis as unanswerable rather than as a pass when the evidence cannot be obtained, and is strictly report-only: it never edits a lockfile, a pin, `package.json`, `pnpm-workspace.yaml`, or `mise.toml`, never lowers a window, and never applies an upgrade — the calling skill or the user makes that call. Do NOT use it to perform the upgrade itself (`tools-upgrade` / `actions-pin` / `images-pin` / a Dependabot PR), or as a malware scanner for first-party code (`impl-review` and the SAST gates).
+  Gather direct evidence about ONE artifact version that a cooldown window has caught, and score how likely it
+  is to be a compromised publish, so a human can decide adopt-now vs wait from evidence rather than a day
+  count. Use it whenever a version is held or deferred by `tools-upgrade` / `actions-pin` / `images-pin`;
+  whenever `make tools-cooldown-check` blocks a pin; whenever a Dependabot security update wants to skip the
+  window; before any deliberate override; and on 「このバージョン安全？」「なぜ検疫されている、取っていいのか」. It reports an axis as
+  unanswerable rather than as a pass when the evidence cannot be obtained. Strictly report-only — it never
+  edits a lockfile or a pin, lowers a window, or applies an upgrade. Do NOT use it to perform the upgrade, or
+  as a malware scanner for first-party code.
 argument-hint: '[<ecosystem>:<name>@<candidate-version>] [baseline=<version>] [days=<N>]'
 ---
 

@@ -2,7 +2,14 @@
 name: test-review
 usage-class: frequent
 description: >-
-  Independent quality review of this repository's test files (`*.test.ts` / `*.test.tsx`), with an adversarial finder + skeptical verifier two-stage pipeline. Defaults to `git diff` HEAD-vs-working tree to surface the changed test files; alternative scopes (branch-vs-base, specific paths) selectable via `AskUserQuestion`. Hardcodes no rules — reads ADR 0090 (testing strategy: export-name `describe`, 正常系 / 異常系 comment separators, table-driven ban, one-test-per-subject, skip discipline, layer responsibilities), ADR 0091 (verification methods: async RSC placement, a11y automated checks), the kernel README's `test-requirement` frontmatter, and the subject source file at runtime as the source of truth, so the reviewer stays in sync as conventions evolve (README > Code > SKILL priority). Fans out five `adversarial-reviewer` subagents on `sonnet` by default (so reviewer ≠ an Opus implementer) — one per lens: (1) structural compliance (the outermost `describe` is the exported symbol's own name and viewpoints are divided by `// ----- 正常系 -----` / `// ----- 異常系 -----` comment separators rather than nested `describe`s, which side a case sits on follows whether the subject itself fails, Japanese case names, every case named individually (`it.each` / `it.for` with a name template is fine; a hand-rolled `for` / `forEach` around a bare `it` is not), nested `describe` only for a shared-setup context, `it.skip` only for what survives extracting the blocking side effect into a mockable module and never with a "covered elsewhere" reason, `it.todo` only when it names its resolving issue / phase, MSW at the HTTP boundary rather than hand-written fetch stubs, co-location — deferring the four name-level shapes the `one-to-one` gate already fails on); (2) viewpoint coverage (the layer's `test-requirement` and the ADRs' per-layer duties are actually exercised, with four adjudication rules when the declaration and the tests disagree); (3) semantic quality (weak assertions, over-mocking, snapshot-as-assertion, time pinning leaks, plus the Testing Library guiding principles for component targets — query priority, `user-event` over `fireEvent`, wait-not-sleep, semantic matchers); (4) branch × meaning completeness (code-origin: reads the subject source and builds a per-function two-axis matrix — Axis A 分岐網羅 every branch has a covering case, Axis B 意味網羅 each covered branch asserts its distinctive outcome rather than merely executing); (5) subject symbol completeness (code-origin: builds the subject's exported-symbol table and flags every symbol with no test at all). Lenses 4 and 5 are the code-origin finders; 1–3 are test-file / ADR-driven. Each surviving finding is verified by an independent `review-verifier` subagent that classifies CONFIRMED / PLAUSIBLE / REFUTED, defaulting to skepticism. Synthesizes a single Japanese report grouped by lens with per-finding severity (修正必須 / 補完推奨 / 再考 / 追加検討). Reporting is read-only, but the semantic gaps it finds are not left as a report: Step 5 adds the missing cases to the working tree after one `AskUserQuestion` confirmation, because this repository's tests are written by AI and a gap that is only reported gets reproduced. Use this whenever the user asks to review tests, check test quality or coverage viewpoints, or asks 「テストをレビューして」「テストの観点が足りているか見て」「このテストは意味があるか」. It is the sole owner of the test subject — no other review skill carries a test lens — and it is invoked in its own right beside `/impl-review` (the change) and `/comment-sweep` (the comment stock), never from inside them. Do NOT use it to review implementation code (`impl-review`) or to run the tests (`make test-full`).
+  Independent quality review of this repository's test files, run by adversarial subagents on a model that is
+  not the implementer's, with each finding re-derived by an independent skeptic. Use it whenever tests should
+  be judged rather than run: after tests are written for a new symbol or screen, when coverage is green but
+  the viewpoints look thin, and on 「テストをレビューして」「テストの観点が足りているか見て」「このテストは意味があるか」. It hardcodes no rules — ADR
+  0090 / 0091, the nearest README's `test-requirement`, and the subject source are read at runtime. Sole owner
+  of the test subject, invoked in its own right beside `/impl-review` (the change) and `/comment-sweep` (the
+  comment stock), never from inside them. Do NOT use it to review implementation code (`impl-review`) or to
+  run the tests (`make test-full`).
 ---
 
 # Test Review
@@ -43,14 +50,15 @@ The rule sources are the ADRs, `docs/testing-conventions.md`, and the kernel REA
 | Sibling test files in the same directory | Established local patterns (fixture style, helper signatures, MSW wiring) |
 | The subject source file | Required by the two code-origin lenses |
 
-**Do not import rules from the go-boilerplate original.** Where a Go convention has no counterpart
-here — `t.Parallel()`, the `require` vs `assert` split, generated `*_mock.go` — it does not apply.
-Vitest runs files in parallel by default and has a single `expect`; the mock boundary is MSW.
+**Do not carry over a testing convention from another language's culture.** A rule that exists to
+work around a different runner does not apply here: Vitest runs files in parallel by default (so
+there is no per-test opt-in to demand), it has a single `expect` (so there is no fatal / non-fatal
+assertion split to enforce), and the mock boundary is MSW rather than generated stub types.
 
 **Where the rule sources are silent, say so rather than inventing a rule.** `docs/testing-conventions.md`
 carries the semantic-quality standard, so Lens 3 applies *it* rather than a general principle — but
 where it does not reach, report the gap in 補遺 instead of smuggling in a rule as if it were repository
-policy (`AGENTS.md`, "Pending Decisions": do not introduce conventions on your own).
+policy (`docs/rules.md`, *作業とエージェント*: do not introduce conventions on your own where nothing derives them).
 
 ## Writes
 
@@ -325,7 +333,8 @@ reporter. This skill never chains onward.
 - ❌ Running the tests (`make test-full` is a separate, heavier gate — `repo-ops` §7).
 - ❌ Trusting finder output without verification, unless the caller passed `skip_verifier: true`.
 - ❌ Hardcoding the rule list — ADR 0090 / 0091 and the kernel READMEs are read at runtime.
-- ❌ Importing Go-only conventions (`t.Parallel()`, `require` vs `assert`, generated mocks).
+- ❌ Importing a convention that exists to work around a different runner (a per-test parallel
+  opt-in, a fatal / non-fatal assertion split, generated stub-type mocks).
 - ❌ Inventing a convention where the rule sources are silent — report the gap instead.
 - ✅ Skepticism by default in the verifier.
 - ✅ Reviewer model defaults to `sonnet`; the orchestrator may override to keep reviewer ≠ implementer.

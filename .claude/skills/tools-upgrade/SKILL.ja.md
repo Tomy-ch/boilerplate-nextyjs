@@ -52,7 +52,7 @@
 
 ## AI Modification Scope について
 
-`CLAUDE.md` の "Exception: Skill Execution" 節に基づき、スキル実行中に以下のパスへの変更が許可される。
+`AGENTS.md` の "Exception: Skill Execution" 節に基づき、スキル実行中に以下のパスへの変更が許可される。
 
 - `mise.toml`（`[tools]` table のみ、ユーザーが承認したエントリだけを書き換え）
 
@@ -110,19 +110,19 @@ GitHub Releases 系は `gh api` を優先する（`GITHUB_TOKEN` 経由で認証
 ツールバージョン監査結果（窓: backend 別 / ADR 0110 1.1）
 
 ✅ 更新候補（backend の窓を満たした / supply-chain quarantine 通過）:
-  - golangci-lint: 2.12.2 → 2.13.0 （公開 2026-05-18, 17 日前）
-  - sqlc: 1.31.1 → 1.32.0 （公開 2026-04-29, 36 日前）
+  - actionlint: 1.7.11 → 1.7.12 （公開 2026-05-18, 17 日前）
+  - gitleaks: 8.29.0 → 8.30.1 （公開 2026-04-29, 36 日前）
 
 ⚠️ supply-chain quarantine（backend の窓の内側、通知のみ）:
-  - air: 1.65.3 → 1.66.0 （公開 2026-06-02, 2 日前）
+  - trivy: 0.72.0 → 0.73.0 （公開 2026-06-02, 2 日前）
 
 ✓ 既に最新:
-  - oapi-codegen 2.7.0
-  - lefthook 2.1.8
+  - shellcheck 0.11.0
+  - zizmor 1.29.0
   ... (省略可)
 
 ❌ 取得失敗:
-  - pipx:sqlfluff: PyPI への接続失敗
+  - pipx:graphifyy: PyPI への接続失敗
 ```
 
 `pending` の版は `supply-chain-triage` の対象である —— 4 つの軸で直接証拠を採点し、**待つことでしか解除できなかった窓を証拠で解除できる**ようにする。**帯を報告するだけで、低いスコアを根拠に採用しない** —— その判断は user のものである（[0110](../../../docs/adr/0110-security-operations.md) §1.2）。
@@ -140,7 +140,7 @@ GitHub Releases 系は `gh api` を優先する（`GITHUB_TOKEN` 経由で認証
 承認された各ツールについて:
 
 - `mise.toml` 内の該当行を特定する
-- バージョンリテラルだけを置換する。key（`aqua:owner/repo` / `go:path/to/module` / 短い名前）と、もとが `v` prefix を使っていた場合はその慣習を保持する
+- バージョンリテラルだけを置換する。**key は backend 接頭辞ごとそのまま保つ**（`aqua:owner/repo` / `pipx:package` / `core:node`）。もとが `v` prefix を使っていた場合はその慣習も保持する。裸の名前へ書き換えるのは、Step 1 が解決を拒む状態そのものである
 - key の並び順を変えない、無関係な key を触らない、`[settings]` table も触らない
 
 全承認分の置換を memory 上で計算したあと、`mise.toml` を **1 回だけ書き出す**（atomic single-pass）。

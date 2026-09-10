@@ -1,7 +1,14 @@
 ---
 name: commit
 usage-class: frequent
-description: Analyze the current working-tree changes (staged + unstaged), group them into appropriately-scoped commits with the project's prefix convention (Feat / Fix / Refactor / Perf / Docs / Test / Build / CI / Chore / Style / Revert), and execute each commit in Japanese after user approval. Pre-flight also checks whether the current branch's PR is already merged and, if so, recommends cutting a fresh branch from the base before committing. Commits are made with `git commit --no-verify` to skip lefthook during the split; after all commits succeed, the command formats only the Markdown it wrote and reports which gates were left to CI, which is the authority on them (AGENTS.md: do not pre-run the gates). Respects CLAUDE.md's git rules (no direct commits to protected branches, no force-push, no auto-push after PR amend, Co-Authored-By footer, HEREDOC commit messages).
+description: >-
+  Analyze the current working-tree changes (staged and unstaged), group them into appropriately-scoped commits
+  with the project's prefix convention (Feat / Fix / Refactor / Perf / Docs / Test / Build / CI / Chore /
+  Style / Revert), and execute each commit in Japanese after user approval. Pre-flight checks whether the
+  current branch's PR is already merged and, if so, recommends cutting a fresh branch from the base first.
+  Commits are made with `--no-verify` so lefthook does not run once per split commit; afterwards it formats
+  only the Markdown it wrote and reports which gates were left to CI, which is the authority on them. Respects
+  the git rules: no direct commits to protected branches, no force-push, no auto-push after a PR amend.
 argument-hint: [--dry-run] [--scope=staged|all]
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(git reset:*), Bash(git fetch:*), Bash(git switch:*), Bash(gh pr view:*), Bash(pnpm fix:*), Bash(pnpm lint:*), Bash(pnpm lint:md:*), Bash(pnpm typecheck:*), Read, AskUserQuestion
 ---
@@ -10,9 +17,9 @@ allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git a
 
 You have been invoked via `/commit`. Argument string: `$ARGUMENTS`
 
-This command analyzes uncommitted changes in the working tree and produces one or more git commits with appropriate granularity and the project's prefix convention. All commit messages are in Japanese, per `CLAUDE.md`.
+This command analyzes uncommitted changes in the working tree and produces one or more git commits with appropriate granularity and the project's prefix convention. All commit messages are in Japanese, per `AGENTS.md`.
 
-This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` (currently `pnpm lint:ci` / `pnpm lint:md`) do not fire N times during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
+This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` do not fire once per commit during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
 
 ## Step 0. Auto-format
 
@@ -165,17 +172,16 @@ Build a list of proposed commits with appropriate granularity. Each item:
 
 ### Lefthook notice
 
-Along with the grouping proposal, display the lefthook commands that will be **skipped** during the commit phase and **left to CI**. Read them dynamically from `.lefthook.yaml` (the list is configuration, not hardcoded). Example output matching the config as it currently stands:
+Along with the grouping proposal, display the lefthook commands that will be **skipped** during the commit phase and **left to CI**. Read them dynamically from `.lefthook.yaml` — **the list is configuration and is not reproduced here**, because a copy goes stale the first time a command is added. The shape:
 
 ```txt
 This command will run `git commit --no-verify` on every commit.
 The following lefthook pre-commit commands are SKIPPED here and left to CI,
 which is the authority on whether they pass:
-  - lint     (pnpm lint:ci)
-  - md-lint  (pnpm lint:md)   ※ glob: *.md
+  - <name>  (<run>)   ※ glob: <glob があれば>
 ```
 
-`pre-push` commands (currently `pnpm typecheck`) are **not** part of this gate — they stay on the push path, which this command never triggers.
+`pre-push` commands are **not** part of this gate — they stay on the push path, which this command never triggers.
 
 ### Confirmation
 
@@ -210,8 +216,8 @@ EOF
 
 - **Title**: `<Prefix>: <Japanese title>`, aim for 50 characters or fewer.
 - **Body**: Optional. If present, leave one blank line after the title and wrap around 72 characters. Prefer "why" over "what".
-- **Language**: Japanese (per the output rule in `CLAUDE.md`).
-- **`Co-Authored-By` footer**: Required, in the form `Co-Authored-By: <running model name> <noreply@anthropic.com>` — e.g. `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`. Use the identifier of the model actually producing the commit, as given by the environment / `CLAUDE.md`. Do not copy a model name hardcoded in this document: it goes stale at every model release, and a wrong name misattributes the commit.
+- **Language**: Japanese (per the output rule in `AGENTS.md`).
+- **`Co-Authored-By` footer**: Required, in the form `Co-Authored-By: <running model name> <noreply@anthropic.com>` — e.g. `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`. Use the identifier of the model actually producing the commit, as given by the environment. Do not copy a model name hardcoded in this document: it goes stale at every model release, and a wrong name misattributes the commit.
 - **`Refs:` footer (review-applied commits only)**: when a commit applies a finding from `full-apply` / `impl-review` / `code-review`, add a `Refs: tmp/reviews/mod_*.md (<severity>)` line in the footer so the commit links to the finding. Omit it for ordinary commits.
 - **HEREDOC**: Required (keeps the title + blank line + body + footer layout intact).
 - **`--no-verify`**: Required for every commit produced by this command — the command-scoped carve-out the introduction states, with Step 6 as the single verification pass.
@@ -283,7 +289,7 @@ the user decides whether to stack a fix-up commit.
 
 ## Step 7. Push Policy and Final Reminder
 
-- **Do not auto-push** (per `CLAUDE.md` git rules).
+- **Do not auto-push** (per `AGENTS.md` git rules).
 - After Step 6 finishes, report to the user:
 
   ```txt
@@ -295,7 +301,7 @@ the user decides whether to stack a fix-up commit.
   When Step 6's formatting changed a tracked file, say so and name the files — the committed state
   was not formatted, and the user decides whether to stack a fix-up commit.
 
-- When working on an existing PR branch, follow `CLAUDE.md` and ask before pushing:
+- When working on an existing PR branch, follow `AGENTS.md` and ask before pushing:
   「変更はローカルにコミット済みです。これらの変更をプルリクエストにプッシュしますか？」
 
 ## Constraints (Summary)
@@ -315,8 +321,12 @@ the user decides whether to stack a fix-up commit.
 - ✅ Capture `ORIGINAL_HEAD` at Step 1 for safe rollback
 - ✅ At Step 1, detect a current branch whose PR is already merged (`gh pr view`) and recommend cutting a fresh branch from the base before committing (degrade gracefully when `gh` is unavailable)
 - ✅ On failure, propose `git reset --mixed <ORIGINAL_HEAD>` via `AskUserQuestion`
-- ✅ Step 6 runs each lefthook-defined command + `pnpm fix` directly (never `lefthook run pre-commit`)
-- ❌ Do NOT invoke `lefthook run pre-commit` (see the introduction)
+<!-- boilerplate-only:replace-begin -->
+- ✅ Step 6 formats only what this run wrote and reports which gates were deferred to CI
+<!-- boilerplate-only:replace-with -->
+<!-- = - ✅ Step 6 runs each lefthook-defined command + `pnpm fix` directly (never `lefthook run pre-commit`) -->
+<!-- = - ❌ Do NOT invoke `lefthook run pre-commit` (see the introduction) -->
+<!-- boilerplate-only:replace-end -->
 
 ## Checklist
 

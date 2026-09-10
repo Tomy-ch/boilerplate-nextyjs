@@ -2,7 +2,14 @@
 name: question
 usage-class: situational
 description: >-
-  The front door for any question about this repository whose intended reading is not obvious. It answers nothing itself: it resolves what the asker actually meant along three axes — which world (the industry outside / this repository as it stands / the diff in this window), which intent (a symptom / an operation / knowledge / an undecided choice), which subject (implementation / tests / comments / docs / vocabulary / operations) — confirms that reading with the human whenever an axis genuinely splits, and hands the question to whoever owns the answer. Use it when a question could reasonably be taken more than one way: a bare 「今のこれってどうなの？」 turns on which *now* is meant and lands in a different skill for each reading; 「テストどう？」 splits across `test-review` and `repo-truth`; 「これ大丈夫？」 splits across nearly everything. Also use it when the asker does not know which skill exists for what, or explicitly asks where a question should go. The reason it asks rather than guesses is that the ambiguity lives in the asker's intent, not in the code — no amount of reading settles it, and a confident answer to the wrong reading costs more than a question because it looks like an answer. Destinations are read from the installed skills' frontmatter at runtime, never hardcoded, so the routing cannot drift as skills are added or renamed; a reading that lands on the diff in this window goes to the Review Phase Protocol in `AGENTS.md`, which prices the three review skills per skill, rather than to any one of them. Do NOT use it when the reading is already unambiguous — go straight to the owning skill (`repo-truth` for repository facts, `repo-ops` for a symptom, `how-to` for an operation, `research` for an open choice) — and never use it to produce an answer, a procedure, a comparison, or a review of its own.
+  The front door for any question about this repository whose intended reading is not obvious. It answers
+  nothing itself: it resolves what the asker meant along three axes — which world, which intent, which subject
+  — confirms that reading whenever an axis genuinely splits, and hands the question to whoever owns the
+  answer. Use it when a question could be taken more than one way: 「今のこれってどうなの？」 turns on which *now* is
+  meant; 「テストどう？」 splits across `test-review` and `repo-truth`; 「これ大丈夫？」 splits across nearly everything. Also
+  use it when the asker does not know which skill exists for what. Do NOT use it when the reading is already
+  unambiguous — go to the owning skill (`repo-truth` / `repo-ops` / `how-to` / `research`) — and never to
+  produce an answer, a procedure, or a review of its own.
 argument-hint: '[question] [--to=<skill>] [--explain]'
 ---
 

@@ -10,7 +10,7 @@ Accepted
 
 [0045](0045-fonts-and-images.md)(フォント・画像)は動的 OG 画像(`ImageResponse` / `opengraph-image`)と `public/` の favicon を**画像アセットの生成手段として**扱う。head 要素・クローラ制御・canonical・構造化データを含む**メタデータの体系は別軸**であり、本 ADR が持つ。
 
-実装前に `node_modules/next/dist/docs/` を確認した結果、以下は Next.js 16 の第一級のファイル規約 / API として実在する(AGENTS.md「This is NOT the Next.js you know」):
+実装前に `node_modules/next/dist/docs/` を確認した結果、以下は Next.js 16 の第一級のファイル規約 / API として実在する(AGENTS.md「Canonical Documentation」):
 
 - **Metadata API**: route セグメントで静的 `metadata` export または動的 `generateMetadata` を宣言すると、Next.js が `<head>` 要素を自動生成する
 - **ファイルベース metadata**: `app/` 直下の `sitemap.(xml|ts)` / `robots.(txt|ts)` / `icon.*` / `apple-icon.*` / `manifest.*` / `opengraph-image.*` 等。特殊 Route Handler として既定でキャッシュされる(request-time API / dynamic config 使用時を除く)
@@ -23,7 +23,7 @@ Accepted
 
 - head メタデータ(title / description / OpenGraph / Twitter / robots meta 等)は **App Router の Metadata API** で宣言する。**`<head>` の手書き・`next/head` は使わない**
   - 静的に決まるものは **静的 `metadata` export**、リクエスト / パラメータ依存のものは **`generateMetadata`** を使い分ける
-- ルート([`src/app/layout.tsx`](0027-directory-structure.md))に **`metadataBase` と `title.template`(サイト共通のタイトル雛形)の既定土台**を置く。各セグメントはそこからの差分だけを宣言する(重複定義を避ける)
+- ルート(`src/app/layout.tsx`。配置は [0027](0027-directory-structure.md))に **`metadataBase` と `title.template`(サイト共通のタイトル雛形)の既定土台**を置く。各セグメントはそこからの差分だけを宣言する(重複定義を避ける)
 - **絶対 URL の出所は config(`SITE_PUBLIC_ORIGIN`)の 1 つに限り、要求の `Host` から採らない。** canonical / sitemap / OG 画像の絶対 URL はすべてこの origin に経路を足して組み立てる。配信面(CDN / ロードバランサ)を挟むと要求が名乗る host は公開名と一致しなくなり、`Host` から採ると他人を指す canonical を配ることになる
 - 具体的なタイトル文言・description・OG 画像割当は**用途依存**のため、雛形の枠のみ boilerplate 本体で持ち、値は作った側 / feature 実装で確定する
 

@@ -46,7 +46,7 @@ portal は canonical ドキュメントの生成ビューである。何を載�
 
 ### 6. 実装状況
 
-- **Pages の有効化と、`github-pages` environment の deployment branch policy への配信元ブランチの許可は `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ**。許可が無いと `docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない —— 配信元は workflow の push トリガと 1 箇所で揃える必要があり、人手の手順に置くと落ちても気付けない
+- **Pages の有効化と、`github-pages` environment の deployment branch policy への配信元ブランチの許可は `make pages-delivery-apply` が持ち、`make setup-repo` が呼ぶ**。許可が無いと `docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない —— 配信元は workflow の push トリガと 1 箇所で揃える必要があり、人手の手順に置くと落ちても気付けない
 - drift の機械検出は生成スクリプトが持ち(`portal:guides` は stale で非 0、`portal:docs` は構造の警告を出す)、`portal-manifest-sync` はそれを読み取ったうえで、生成側が黙って飲み込む配置(`Other` へ落ちる登録)と curation 候補の分類を担う
 
 ## 禁止事項

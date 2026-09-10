@@ -35,15 +35,15 @@ Accepted
 
 | 段階 | 目的 | 想定処理 | 速度目標 |
 | --- | --- | --- | --- |
-| pre-commit | 「壊れた diff を commit に乗せない」 | 静的検査 — lint 完全版 (`pnpm lint:ci` = biome の完全プロファイル + ESLint 境界検査。[0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm lint:md` = markdownlint + mermaid 構文 + `.claude/**` の意味検査) / ワークフロー・composite action 定義の検査とピンの突合 ([0153](0153-ci-configuration.md)) / 生成物の版の突合 ([0072](0072-api-type-generation.md)) — と、キャッシュ付きのテスト (`make test-cached`)。各検査は対象ファイルが staged のときのみ走る | < 5 秒 |
+| pre-commit | 「壊れた diff を commit に乗せない」 | 静的検査 — lint (`pnpm lint:ci` = biome + ESLint 境界検査 + 境界宣言の突合。[0002](0002-formatter-linter.md)) / Markdown 検査 (`pnpm lint:md` = markdownlint + mermaid 構文 + `.claude/**` の意味検査) / ワークフロー・composite action 定義の検査とピンの突合 ([0153](0153-ci-configuration.md)) / 生成物の版の突合 ([0072](0072-api-type-generation.md)) — と、キャッシュ付きのテスト (`make test-cached`)。各検査は対象ファイルが staged のときのみ走る | < 5 秒 |
 | commit-msg | 「規約外のコミットメッセージを積ませない」 | commitlint ([0150](0150-git-workflow.md) の prefix 11 種を検証) | < 5 秒 |
 | pre-push | 「壊れた push・秘密を含む push を上げない」 | 型チェック (`pnpm typecheck` = `tsc --noEmit`) / キャッシュ無しの完全テスト (`make test-full`) / 秘密スキャン (`make secret-scan` = push 予定コミット範囲) | < 30 秒 |
 | post-checkout / post-merge | 「基準画像の実体を、指し先から取り残さない」 | サブモジュールの同期 (`make baseline-sync`)。移動と pull のたび | < 1 秒 |
 | post-commit | 「実装が形になった瞬間を、後から言えるようにする」 | 開発の窓への打刻 ([0161](0161-development-window-as-feedback-unit.md))。追跡外の `tmp/` へ 1 行書くだけ | < 0.1 秒 |
 | (CI) | 権威ある検査 | lint / 型 / test / build / e2e 等 | 制約なし |
 
-- pre-commit で走らせる biome は、エディタ保存時の簡易版ではなく **完全版** (`pnpm lint:ci`)。保存時は軽量・commit 時は厳格という二段構え（プロファイル分割の詳細は [0002](0002-formatter-linter.md)）
-- biome は Rust 実装で高速なため、完全版（`noImportCycles` の複数ファイル走査を含む）でも本リポジトリ規模では sub-second に収まり、速度目標を満たす
+- **biome の設定は 1 枚で、保存時も pre-commit も CI も同じ規則が掛かる**（[0002](0002-formatter-linter.md)）。プロファイルを分けないので、hook が「保存時には出なかった指摘」で落ちることがない
+- biome は Rust 実装で速く、`noImportCycles`（複数ファイル走査）を含む全ファイル走査でも実測 3 秒前後に収まり、速度目標を満たす
 - pre-push の commands は `parallel: true` で並列実行する。秘密スキャンは型チェックと独立しており、直列化すると速度目標を割るため
 - **飽和したホストでは、CI が同じコマンドを持つゲートを CI へ委ねる**。`make load-status` が帯を出し、pre-push の各 command は `gate-*` ターゲット越しに走る(実体は `scripts/load-band/`)。委ねるのは型チェックとテストで、秘密スキャンは帯に関わらず必ず走る(push は不可逆で、CI に対応ワークフローが無い)
   - **帯は実測の使用率(load average / CPU 数)で決める**。飽和したホストではゲートの**失敗自体が信用できなくなる**ため — カバレッジの中間ファイルの取り合いのように、変更とは無関係な理由で落ちる経路が開く。信用できない判定を出すより、権威である CI へ渡すほうが速く、答えも正しい
@@ -99,7 +99,7 @@ hook の失敗が変更の証拠になるのは、その失敗を**変更が引�
 
 - **別のセッションのファイル**。型チェックと完全テストはコミット範囲ではなく作業ツリー全体を読むため、別の窓が編集中の未コミットファイルが、それを含まない push のゲートを落とす
 - **出力先を共有する 2 つの実行**。テストの実行が重なると、互いの中間ファイルを消し合って落ちる。コードには何も問題が無い
-- **ベースブランチが既に落ちている**。ベースを checkout して同じゲートを回せば確かめられる
+- **ベースブランチが既に落ちている**。ベースへ `git switch` して同じゲートを回せば確かめられる
 
 この 3 つでは `--no-verify` が正しく、原因は別に直す。ゲートを満たすために変更の形を変えると、壊していないゲートのために変更が悪くなる。ただし 2 つの条件が付く。
 
@@ -185,7 +185,7 @@ pre-push:
 
 ## 関連 ADR
 
-- [0002-formatter-linter.md](0002-formatter-linter.md) — `pnpm lint:ci` で呼ばれる biome 完全版 (`biome.ci.jsonc`) と簡易版のプロファイル分割
+- [0002-formatter-linter.md](0002-formatter-linter.md) — `pnpm lint:ci` が直列に回す 3 段と、biome の設定を 1 枚に保つ決定
 - [0004-library-management.md](0004-library-management.md) — lefthook を devDependency として exact pin する根拠
 - [0110-security-operations.md](0110-security-operations.md) — pre-push で走る秘密スキャンの内容、および脆弱性スキャンを hook に載せない判断
 - [0150-git-workflow.md](0150-git-workflow.md) — hook 通過後の commit / PR / リリース運用フロー

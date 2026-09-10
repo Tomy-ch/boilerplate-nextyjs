@@ -202,6 +202,10 @@ PR タイトルも日本語で書き、関連 issue / ADR を本文末尾に記�
 3. merge 後、同じ修正を `develop` にも反映する PR を作る (cherry-pick または同等の変更)
 4. 必要に応じて `staging` にも反映し、3 環境間の差分を解消する
 
+## 他リポジトリへのリンク
+
+**[0159-1](0159-1-cross-repository-references.md) が持つ。** 既定は `redirect.github.com` を通すこと、素のリンクは留保であること、使う判断が例外なく人間のものであること —— いずれも本 ADR の射程（git の操作手順）ではなく、エージェントが書いた文字列が GitHub へ届く場所すべてに掛かる。
+
 ## 禁止事項
 
 - ❌ 保護ブランチ (`production` / `staging` / `develop` / `release/**` / `hotfix/**`) への直接 push

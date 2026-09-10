@@ -21,6 +21,11 @@ test-cached:
 # 「1 台も届いていない」としか言えなくなる。追跡しない置き場は tmp に揃える。
 TEST_BLOB_DIR := tmp/test-blob
 
+# 合流した結果を構造で書き出す先。報告は失敗だけを出すので、失敗行を語彙で拾う要約器ではなく
+# vitest 自身が分けた出口（`status` / `failureMessages`）を読む（ADR 0157）。組み立ては
+# `scripts/test-report`。
+TEST_REPORT_JSON := tmp/test-report.json
+
 .PHONY: test-shard ## 分割の 1 台ぶんを走らせ、blob を書き出す (SHARD=<i>/<n>)
 test-shard:
 	@test -n "$(SHARD)" || { echo "❌ SHARD=<i>/<n> を渡してください。例: make test-shard SHARD=1/4"; exit 1; }
@@ -36,4 +41,5 @@ test-shards-verify:
 
 .PHONY: test-merge ## 分割の blob を合流させ、カバレッジのしきい値を検証する
 test-merge:
-	@pnpm exec vitest run --mergeReports=$(TEST_BLOB_DIR) --coverage
+	@pnpm exec vitest run --mergeReports=$(TEST_BLOB_DIR) --coverage \
+		--reporter=default --reporter=json --outputFile=$(TEST_REPORT_JSON)

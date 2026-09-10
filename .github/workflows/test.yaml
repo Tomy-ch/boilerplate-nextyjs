@@ -197,13 +197,21 @@ jobs:
 
           exit 0
 
-      # The TAIL, not the head. Vitest prints each failure's diff and then the run summary,
-      # so a body truncated from the front drops exactly the part that says what broke —
-      # and the coverage table, which is what a threshold failure is about, is last of all.
-      - name: Cut the comment body down to the failures
+      # Vitest's own JSON report, not a text filter. A summariser that picks failure lines
+      # out of the log classifies by vocabulary, and the reason a test failed can land in
+      # the "passed" pile and disappear (ADR 0157). `status` and `failureMessages` are the
+      # split the runner already made, so nothing is decided here by matching words.
+      #
+      # The tail is still cut, but only as the fallback the report falls back to: a
+      # coverage-threshold failure fails the run without failing a test, and the table that
+      # carries that verdict is last of all.
+      - name: Build the comment body from the failures alone
         if: always() && steps.test.outputs.status != ''
         shell: bash
-        run: tail -n 400 /tmp/test.log > /tmp/test-comment.log
+        run: |
+          tail -n 400 /tmp/test.log > /tmp/test-tail.log
+          pnpm exec tsx scripts/test-report \
+            tmp/test-report.json /tmp/test-tail.log /tmp/test-comment.log
 
       - name: Report test coverage
         if: always()
@@ -222,7 +230,7 @@ jobs:
           status: ${{ steps.test.outputs.status }}
           title: ${{ steps.test.outputs.title }}
           body-file: /tmp/test-comment.log
-          details-summary: 'Vitest log (末尾 400 行)'
+          details-summary: 'Vitest の失敗（全件）'
 
       # Two conditions, because they fail for different reasons. The merge speaks for the
       # tests and the threshold; `needs` speaks for a machine that never got that far — a

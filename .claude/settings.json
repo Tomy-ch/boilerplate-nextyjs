@@ -134,6 +134,11 @@
       "Bash(graphify explain *)",
       "Bash(graphify diagnose *)",
       "Bash(graphify update *)",
+      "Bash(rtk git diff *)",
+      "Bash(rtk git status *)",
+      "Bash(rtk git log *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk find *)",
       "Bash(agent-browser snapshot)",
       "Bash(agent-browser back)",
       "Bash(agent-browser forward)",
@@ -170,6 +175,12 @@
       "Bash(make closed-loop-send-dry)",
       "Bash(make closed-loop-weekly)",
       "Bash(make closed-loop-weekly *)",
+      "Bash(make clean-ai-logs)",
+      "Bash(make ai-install-tools)",
+      "Bash(make ai-base-merge)",
+      "Bash(make ai-base-merge *)",
+      "Bash(make ai-closed-loop-weekly)",
+      "Bash(make ai-closed-loop-weekly *)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
       "Bash(make gh-login *)",
@@ -180,6 +191,9 @@
       "Bash(docker compose config *)"
     ],
     "deny": [
+      "Bash(rtk log *)",
+      "Bash(rtk read *)",
+      "Bash(rtk init *)",
       "Bash(agent-browser chat*)",
       "Bash(agent-browser mcp*)",
       "Bash(agent-browser connect *)",
@@ -192,26 +206,22 @@
       "Bash(pnpm exec chrome-devtools start --browserUrl*)",
       "Bash(pnpm exec chrome-devtools start --wsEndpoint*)",
       "Bash(rm -rf *)",
-      "Bash(rm -fr *)",
       "Bash(sudo *)",
       "Bash(git push --force*)",
       "Bash(git reset --hard*)",
       "Bash(git rebase *)",
       "Bash(git checkout *)",
       "Bash(git switch -f *)",
-      "Bash(git switch -f)",
-      "Bash(git switch -C *)",
       "Bash(git switch --force *)",
-      "Bash(git switch --force)",
+      "Bash(git switch -C *)",
       "Bash(git switch --discard-changes *)",
-      "Bash(git switch --discard-changes)",
       "Bash(git switch production)",
       "Bash(git switch develop)",
       "Bash(git switch staging)",
       "Bash(git switch release/*)",
       "Bash(git switch hotfix/*)",
-      "Bash(git branch -D *)",
       "Bash(git branch -d *)",
+      "Bash(git branch -D *)",
       "Bash(git stash drop *)",
       "Bash(git stash clear *)",
       "Bash(git stash pop *)",
@@ -227,9 +237,9 @@
       "Bash(pnpm dlx *)",
       "Bash(mise trust *)",
       "Bash(make setup-repo *)",
-      "Bash(make apply-branch-protection *)",
-      "Bash(make delete-all-labels *)",
-      "Bash(make create-default-labels *)",
+      "Bash(make branch-protection-apply *)",
+      "Bash(make labels-delete-all *)",
+      "Bash(make labels-create-default *)",
       "Bash(make branch-major *)",
       "Bash(make branch-minor *)",
       "Bash(make branch-patch *)",
@@ -299,6 +309,15 @@
           {
             "type": "command",
             "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" --hook || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -f \"$CLAUDE_PROJECT_DIR/scripts/command-guard/index.ts\" && node --no-warnings \"$CLAUDE_PROJECT_DIR/scripts/command-guard/index.ts\" --hook"
           }
         ]
       }

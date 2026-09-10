@@ -11,6 +11,9 @@
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
+    // Node の型ストリップで直接実行するスクリプト（`scripts/command-guard`）が `.ts` を綴るため。
+    // 型を落とすだけの実行系は import 先を実ファイルで解決するので、拡張子を省けない。
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",

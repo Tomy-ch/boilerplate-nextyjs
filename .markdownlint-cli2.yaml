@@ -1,5 +1,10 @@
-# markdownlint-cli2 の対象範囲（globs / ignores）を定義する。
-# ルール本体（MD013/MD033/MD041=false 等）は .markdownlint.yaml を自動マージして解決する。
+# markdownlint-cli2 の設定はこの 1 ファイルが持つ —— ルール本体（config）と対象範囲（globs / ignores）。
+# `config` に書いた内容は、独立した .markdownlint.* があるときと同じ解決結果になる。
+config:
+  MD013: false
+  MD033: false
+  MD041: false
+
 globs:
   - "**/*.md"
 

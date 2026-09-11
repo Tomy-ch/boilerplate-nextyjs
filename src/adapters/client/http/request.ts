@@ -18,10 +18,16 @@ import { ErrorKind, type ErrorKind as ErrorKindType } from "@/errors/error-kind"
  * **`401` を内部の失敗へ畳みません。** 認証の内側にある口は、読み進めている最中に session が
  * 切れることがあります。畳むと画面に出せるのは読み直す操作だけで、押しても同じ経路を辿るので
  * 永久に直りません。分類が分かれていれば、呼び出し側は入り直しを促せます。
+ *
+ * **`403` と `404` も同じ理由で分けます。** 張り直しを繰り返す購読は、同じ経路を辿るだけの失敗
+ * （権限が無い・対象が無い）とそうでない失敗を見分けられないと止まりません。畳むと、直らない
+ * 相手へ張り直し続けます。
  */
 const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
   400: ErrorKind.INVALID_ARGUMENT,
   401: ErrorKind.UNAUTHENTICATED,
+  403: ErrorKind.PERMISSION_DENIED,
+  404: ErrorKind.NOT_FOUND,
   414: ErrorKind.URI_TOO_LONG,
 };
 

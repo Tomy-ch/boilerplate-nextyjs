@@ -23,13 +23,14 @@
 - 画像は `POST /v1/products/images`(multipart)でアップロードし、backend が発行したオブジェクトキー(`products/{uuid}.{ext}`)を保存する。配信元は Garage の公開エンドポイントで、`next/image` の `remotePatterns` へ allowlist 登録する。**ワイルドカードは使わない**
 - 商品説明(description)は **リッチテキスト**(TipTap で作成)。表示側は必ず sanitizer を通す(生の `dangerouslySetInnerHTML` 直接使用は禁止。[実装規約「セキュリティ」](../rules.md)の「`dangerouslySetInnerHTML` は原則禁止する」)
 - ページネーションは基本 **cursor 方式**。無限スクロール(増分取得)の画面とページ送り相当の画面が混在するので、画面ごとの実装パターンに注意
-- Idempotency-Key が必要な書き込みは購入作成(U6)のみ。二重送信防止として実装すること
+- Idempotency-Key が必要な書き込みは購入作成(U6)と問い合わせの投稿・回答(U13 / A10)である。どちらも自然キーを持たず、応答が届かなかっただけの再送が 2 件目になるため、二重送信防止として実装すること
+- **長寿命接続(SSE)はブラウザが backend へ直接開く**。取得の中継とは経路が別で、`EventSource` は任意のヘッダを載せられないため、資格情報は BFF が発券する短命 ticket を query に載せる。整列・重複排除・張り直し・打ち切りの判断は `adapters/client/stream` が持ち、画面は受け取った event を畳み込むだけにする([ADR 0074](../adr/0074-runtime-communication-seam.md))
 
 ---
 
-## 1. 画面一覧(24)
+## 1. 画面一覧(27)
 
-### ユーザー側(12)
+### ユーザー側(13)
 
 | # | 画面 | 使用 API | ざっくり仕様 | フロント実装上の注意 |
 | --- | --- | --- | --- | --- |
@@ -45,8 +46,9 @@
 | U10 | 登録(オンボーディング) | `GET /v1/prefectures` / `GET /v1/addresses?postalCode=` / `POST /v1/users` | 初回ログイン後の追加情報登録(住所等) | 明示オンボーディングとして実装する。`POST /v1/users` には `Idempotency-Key` を設定し、郵便番号補完が `isFallback=true` なら全項目を手入力する |
 | U11 | マイページ | `GET /v1/users/me` / `GET /v1/users/me/purchases/summary` | プロフィール確認・購入サマリ表示・退会導線 | 退会は確認モーダル必須(不可逆操作) |
 | U12 | ユーザー更新 | `GET /v1/users/me` / `GET /v1/prefectures` / `PUT /v1/users/{userId}` | プロフィール編集 | U11 とは独立ルート。**CollectAll**(RSC 内 `Promise.all` での並置合成)の実例 |
+| U13 | お問い合わせ | `GET /v1/inquiries/me/messages` / `POST /v1/inquiries/me/messages` / `POST /v1/inquiries/me/stream-ticket` / `GET /v1/streams/{destination}` | サポートとのやり取り。利用者ごとに 1 件で、最初の投稿が問い合わせを作る | **届いた 1 通が取り直しを待たずに出る唯一の画面**。初期表示は RSC が履歴を取り、その応答が返す `streamCursor` を購読の開始位置に渡す。購読はブラウザが backend の SSE へ直接繋ぎ、資格情報は BFF が発券する短命 ticket を query に載せる。送信は Server Action + `Idempotency-Key` で、届いた 1 通は購読ではなく取り直した正本に現れる。`APP_API_MODE=mock` では購読先が無いため動かない |
 
-### admin 側(8)
+### admin 側(10)
 
 | # | 画面 | 使用 API | ざっくり仕様 | フロント実装上の注意 |
 | --- | --- | --- | --- | --- |
@@ -58,6 +60,8 @@
 | A6 | 商品作成 | `POST /v1/products` / `GET /v1/products/categories` / `GET /v1/products/statuses` / `POST /v1/products/images` | 新規商品登録フォーム | description は TipTap。**画像はアップロード UI**。`price` は USD の decimal 文字列、画像 upload の `imagePath` を作成 API へ渡す |
 | A7 | 商品編集 | `GET /v1/products/{productId}` / `PATCH /v1/products/{productId}` / `POST /v1/products/images` | 既存商品の編集フォーム | 読み込んだ `version` を必ず送る。409 時は「他の人が更新済み」の再読み込み導線を表示する。在庫数はここでは編集不可(A3 の担当) |
 | A8 | 発送 | `GET /v1/purchases/shippable` / `PATCH /v1/purchases/{purchaseCode}/ship` / `GET /v1/purchases`(`statusCodes=8` + `includeOtherUsers=true`) / `PATCH /v1/purchases/{purchaseCode}/deliver` | 支払い済み・未発送の注文を、まとめて発送してよい便ごとに並べて発送する。発送済みの注文はその下に並べ、1 件ずつ配達済みにする | 便の分け方も並び順も契約が決めるので画面は並べ直さない。発送は購入 1 件ずつなので、まとめる操作は同じ送信に注文を並べて送る。途中まで通った送信を失敗にせず、通った件数と通らなかった件数を両方出す。確認は挟まない(流れ作業のため)。配達の確認はまとめる軸を持たず常に 1 件 —— 届いたかどうかは注文ごとに分かれる |
+| A9 | 問い合わせ一覧 | `GET /v1/inquiries`(`after` / `first`) / `POST /v1/inquiries/feed/stream-ticket` / `GET /v1/streams/{destination}` | 届いた問い合わせを更新の新しい順に並べる。本文は含まない | 更新フィードを購読し、届いた時点で一覧を取り直す。**届いた内容で行を書き換えない** —— フィードが運ぶのは「どの問い合わせがどこまで進んだか」だけで、並び順の基準も他の列も入っていない。ページ送りは cursor で、戻る先は URL が覚える |
+| A10 | 問い合わせの対応 | `GET /v1/inquiries/{inquiryId}/messages` / `POST /v1/inquiries/{inquiryId}/messages` / `POST /v1/inquiries/feed/stream-ticket` | 1 件のやり取りを読み、回答する | **会話そのものを購読できない** —— 契約が持つ購読の口は「自分の問い合わせ」と「更新フィード」の 2 つで、運営が任意の 1 件を直接購読する口が無い。フィードが開いている 1 件の更新を伝えたときに正本を取り直す。右へ寄るのは運営の発言で、利用者側とは「自分」が入れ替わる。誰の問い合わせかは履歴が返さないため、一覧の行と突き合わせる |
 
 ### 輸入元に無い画面(4)
 
@@ -107,6 +111,22 @@
 | `PATCH /v1/purchases/{purchaseCode}/ship` | 要 admin | 発送(A8) | — | 更新後ステータス | 400, 401, 403, 404, 409 |
 | `PATCH /v1/purchases/{purchaseCode}/deliver` | 要 admin | 配達完了 | — | 更新後ステータス | 400, 401, 403, 404, 409 |
 | `GET /v1/purchases/shippable` | 要 admin | まとめ発送の組(A8) | limit | `groups[]`（購入者ごとの組） | 400, 401, 403 |
+
+### 問い合わせ
+
+| Method / Path | 認証 | 用途 | 主なリクエスト | 主なレスポンス項目 | 主なエラー |
+| --- | --- | --- | --- | --- | --- |
+| `GET /v1/inquiries/me/messages` | 要 | 自分の履歴(U13) | afterSequence, first | messages[], streamCursor, nextAfterSequence | 400, 401 |
+| `POST /v1/inquiries/me/messages` | 要 | 自分の投稿(U13) | body, Idempotency-Key(ヘッダ) | 追加された 1 通 | 400, 401, 409, 422 |
+| `POST /v1/inquiries/me/stream-ticket` | 要 | 購読の発券(U13) | — | ticket, streamId, expiresAt | 400, 401, 404(まだ問い合わせが無い) |
+| `GET /v1/inquiries` | 要 admin | 一覧(A9、cursor) | after, first | items[], nextCursor | 400, 401, 403 |
+| `GET /v1/inquiries/{inquiryId}/messages` | 要 admin | 任意の履歴(A10) | afterSequence, first | 自分の履歴と同じ形 | 400, 401, 403, 404 |
+| `POST /v1/inquiries/{inquiryId}/messages` | 要 admin | 回答(A10) | body, Idempotency-Key(ヘッダ) | 追加された 1 通 | 400, 401, 403, 404, 422 |
+| `POST /v1/inquiries/feed/stream-ticket` | 要 admin | 更新フィードの発券(A9 / A10) | — | ticket, streamId, expiresAt | 400, 401, 403 |
+| `GET /v1/streams/{destination}` | ticket(query) | 購読そのもの(U13 / A9 / A10) | after(開始位置) | SSE。business event と `event: control`、15 秒の heartbeat | 400, 401, 410(保持期間外), 503 |
+
+**ticket は生値がこの応答にしか現れない。** URL に載るため、文言・ログ・span の属性へ載せない。
+発券から 5 分は新しい接続に再利用でき、確立した接続は最大接続時間で区切られる。
 
 ### 集計・在庫
 
@@ -160,7 +180,6 @@ Go API の OpenAPI には存在しない。BFF の Route Handler が次の mock 
 ## 4. 除外事項(フロントで作らなくてよいもの)
 
 - 決済 SDK 本体・PSP 連携(pay 操作は Go 側の状態遷移のみで完結。擬似決済)
-- リアルタイム機能(SSE / WebSocket)
 - 推薦・パーソナライズ機能
 - 商品説明以外のリッチテキスト編集画面
 - 時系列チャート(数値カードと、ステータス別内訳の横棒までとする)

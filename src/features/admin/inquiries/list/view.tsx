@@ -27,7 +27,7 @@ export const AdminInquiryListView = withScreenSpan(
   ({ children }: AdminInquiryListViewProps) => {
     return (
       <div className="space-y-6">
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <AdminInquiryFeedWatch />
         </div>
         {children}

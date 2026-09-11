@@ -119,7 +119,7 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex justify-end">
+      <div className="flex justify-center">
         <ConnectionStatus
           status={toConnectionStatus(streamState, {
             online,

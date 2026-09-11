@@ -12,8 +12,7 @@ name: Storybook Build
 # bundling failure there reads as "the comparison could not run", which sends the
 # reader to the wrong place. This job answers the narrower question on its own.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

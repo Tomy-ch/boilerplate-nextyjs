@@ -9,8 +9,7 @@ name: Strip Verify
 # working: a marker whose pair was lost, a stripped section that takes a heading another
 # document links to, or a manifest entry gone stale would all stay green until someone
 # actually created a repository from the template and ran it. The unit tests beside the
-# manifest never run the strip, so
-# they cannot see the tree it leaves behind.
+# manifest never run the strip, so they cannot see the tree it leaves behind.
 #
 # The checkout is disposable, so the job deliberately deletes tracked files and never
 # pushes anything back.
@@ -19,8 +18,7 @@ name: Strip Verify
 # add the guard step `purge-verify.yaml` carries: the strip is mandatory, so every
 # repository created from this template would fail it on every PR forever.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -211,11 +209,10 @@ jobs:
       - name: Lint markdown of the stripped tree
         run: pnpm lint:md
 
-      # The one class of breakage the language checks above cannot see: an entry that
-      # no workflow references any more. A workflow the strip deletes takes its pins
-      # with it, and `check` is fail-closed on an unreferenced entry — so a missed
-      # prune first turns red in the stripped repository, not here. This is where it
-      # should turn red instead.
+      # The one class of breakage the language checks above cannot see: a workflow the strip
+      # deletes takes its pins with it, and `check` is fail-closed on an entry nothing
+      # references any more. Without this step a missed prune turns red only in the stripped
+      # repository.
       - name: Verify the action pins of the stripped tree
         run: make actions-pin-check
 
@@ -234,12 +231,7 @@ jobs:
           pattern: strip-test-blob-*
           merge-multiple: true
 
-      # **A missing blob is not a coverage shortfall.** A shard that died before writing
-      # one leaves the merge measuring less than the whole suite, and the threshold would
-      # then report unreached lines for code whose tests never ran. The expected count is
-      # read out of the file names, so the denominator is the one the shards actually ran
-      # with rather than a second number written here (the reasoning is `test.yaml`'s, and
-      # the judgement itself is `scripts/lib/shard-completeness.ts`).
+      # **A missing blob is not a coverage shortfall** — the reasoning is `test.yaml`'s.
       - name: Fail if a machine did not report
         shell: bash
         run: make test-shards-verify

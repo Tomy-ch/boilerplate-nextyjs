@@ -3,8 +3,7 @@ name: Typecheck
 # tsc --noEmit — the same command the pre-push hook runs (hooks mirror
 # CI). biome does not type-check, so this is the only job that reads the type graph.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

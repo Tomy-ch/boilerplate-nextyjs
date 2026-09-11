@@ -10,8 +10,7 @@ name: shadcn Drift
 # a schedule instead: failing a PR for it would block work for a reason the author cannot fix.
 # For the same reason `upstream` must never become a required status check.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on every PR is in
-# README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

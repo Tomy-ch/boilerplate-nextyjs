@@ -25,52 +25,16 @@ name: E2E
 # Baselines are never written here. Producing them is a deliberate human act, the same
 # as for the story-level images (vrt/README.md).
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md. The job always starts and reports its context; only the
-# expensive steps stand down.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR. The
+# job always starts and reports its context; only the expensive steps stand down.
 #
-# ## Why this does not run on every pull request
+# ## Deferred, and what still runs anyway
 #
-# This is the cheapest of the deferred checks — about four and a half minutes on this
-# repository's own sample — so it is deferred for a weaker reason than `a11y.yaml` and
-# `lighthouse.yaml`: not because the cost is unreasonable on its own, but because four
-# checks each landing under five minutes still add up to a pull request that waits.
-#
-# The trade is worth naming, because it is the sharpest of the three. A hydration
-# mismatch compiles, type-checks, and shows up nowhere but a real browser — this job is
-# the only thing in the repository that sees one. Deferring means such a defect can land
-# and be found on the merge rather than before it.
-#
-# Two things keep that bounded. The cadence includes every push into `release/**`, so the
-# finding arrives one merge later and still names a single pull request rather than a
-# day's worth of them. And `run-e2e` is there for the diff that should not wait — a change
-# to the proxy, to the journey declaration or to the mocked responses, which
-# `deferred-checks.yaml` names on the pull request rather than leaving anyone to notice.
-#
-# ## What still runs on a pull request
-#
-# Waiting one merge is the wrong trade for three shapes of change, so the job starts on every
-# pull request, decides in about a minute, and drives the journeys when the diff earns it:
-#
-#   * The shell moved (`src/app/**/layout.tsx`) — every screen renders through it.
-#   * The foundation CSS moved — one declaration moves how every screen wraps and sticks.
-#   * The screen declaration moved — a screen may have been added that has no baseline yet.
-#
-# **The reason this job cannot simply wait, unlike `lighthouse.yaml`, is the repair path.**
-# Retaking a baseline is bounded by what the comparison reported, and the comparison only
-# reports on a pull request (`baseline/README.md`). A screen-shaped diff that was not compared
-# before the merge therefore leaves a red release branch with no pull request left to name the
-# images — the fix costs a second one. That asymmetry, not detection latency, draws the line.
-#
-# **Everything else stays a label.** Mocked responses and journey declarations move screens too,
-# but their author is looking at screens while writing them; the three above are structural and
-# do not read as screen work in the diff. Widening this list turns a deferred check into one
-# that runs on nearly every pull request, which is the thing being avoided.
-#
-# The cost is named rather than hidden: a pull request that ends up standing down now pays for
-# the toolchain (about a minute) to answer the question. `deferred-checks.yaml` stays silent
-# about `run-e2e` on a diff these three already run — nobody is told to ask for a run that has
-# already started.
+# The expensive steps stand down on an ordinary pull request. The cadence, the diff shapes
+# that run it without a label, and why the line is drawn there are in README.md
+# § 先送りにする検査. What is specific to this job: it is the cheapest of the three, and
+# deferring it is what lets a hydration mismatch — visible nowhere else — land on the merge
+# rather than before it.
 
 on:
   pull_request:
@@ -148,12 +112,10 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          # The base ref has to be resolvable for the `force` diff below; the default shallow
-          # checkout leaves it a bad object and the decision would silently see no changes.
-          #
-          # The condition is inverted on purpose. `<cond> && 0 || 1` always yields 1, because
-          # GitHub's pseudo-ternary falls through to the `||` side whenever the value before it
-          # is falsy — and `0` is. So the branch that has to carry `0` is the one after `||`.
+          # The base ref has to be resolvable for the `force` diff below; a shallow checkout
+          # leaves it a bad object and the decision would silently see no changes. **The
+          # condition is inverted on purpose** — GitHub's pseudo-ternary falls through to the
+          # `||` side whenever the value before it is falsy, and `0` is, so `0` goes after `||`.
           fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Decide whether this event has to drive the journeys now
@@ -286,9 +248,8 @@ jobs:
             local report="$2"
             shift 2
 
-            # Streamed through `tee` rather than tailed at the end: a run that is cancelled
-            # or hits the job timeout never reaches the tail, so the slow case — the one
-            # worth diagnosing — would leave no log at all.
+            # Streamed for the same reason as `vrt.yaml`: a cancelled or timed-out run must
+            # still leave a log behind.
             "$@" 2>&1 | tee "/tmp/e2e-${name}.log"
             local code=${PIPESTATUS[0]}
 
@@ -413,10 +374,8 @@ jobs:
       # Read back by `baseline-retake.yaml` to bound what the label may retake. Kept
       # separate from the diff bundle so the retake path downloads only the report.
       #
-      # `warn`, not `error`: this step fires on any failure, and a run that failed while
-      # building or booting the app never started Playwright, so there is no report to
-      # upload. Failing here would add a red step whose cause is the one already reported,
-      # and the retake path already treats a missing report as "no screen was reported".
+      # `warn`, not `error`: a run that failed while building or booting never started
+      # Playwright, and the retake path already reads a missing report as "nothing reported".
       - name: Upload the machine-readable report
         if: always() && steps.e2e.outputs.status == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -502,8 +461,7 @@ jobs:
         if: always() && steps.gate.outputs.run == 'true' && steps.e2e.outputs.status != 'success'
         run: exit 1
 
-  # Holds no secret beyond `GITHUB_TOKEN`, so the body it publishes cannot carry one
-  #.
+  # Holds no secret beyond `GITHUB_TOKEN`, so the body it publishes cannot carry one.
   e2e-comment:
     if: always() && github.event_name == 'pull_request'
     needs: e2e

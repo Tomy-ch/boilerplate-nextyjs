@@ -39,8 +39,7 @@ name: Actions Lint
 # — is the automation we are about to execute correct — and splitting them would add
 # further required checks for one concern.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

@@ -4,25 +4,23 @@ name: Baseline Retake
 # branch's submodule pointer onto the result. That push re-runs the comparisons,
 # which then pass.
 #
-# Both kinds of baseline are retaken together — one store, one push, one approval
-# label. Why that follows from the store's shape is in docs/design/vrt.md. How each
-# is bounded differs:
+# Stories and screens are retaken together — one store, one push, one approval label — and
+# both obey one invariant: the set that was reported is the set that may be retaken.
+# `make vrt-update` reads the VRT run's report, `make e2e-update` the E2E run's report for
+# this commit.
 #
-#   * Stories (`make vrt-update`) — bounded to what the VRT run reported, so a story
-#     that never appeared in the pull-request comment cannot enter the baselines here.
-#   * Screens (`make e2e-update`) — bounded the same way, from the E2E run's report for
-#     this commit. Both kinds therefore obey one invariant: the set that was reported is
-#     the set that may be retaken.
+# The label is NOT an approval (accepting the pixels is `baseline-approval.yaml`'s separate
+# label) and NOT a trigger (it is read when a comparison run completes, so it may be applied
+# at any time). It is spent only when the pointer moves; every other outcome leaves it on.
+# All of that follows from the store's shape, which docs/design/vrt.md owns; what the
+# asymmetry means for the person applying the label is in vrt/README.md.
 #
-# The label is NOT an approval and NOT a trigger. It develops the pixels into a
-# reviewable image diff, and accepting them is a separate label required by
-# `baseline-approval.yaml`; it is read when a comparison run completes, so it may be applied
-# at any time, pull-request creation included. Both properties are in
-# docs/design/vrt.md.
-#
-# The label is spent only when the pointer moves; every other outcome leaves it on.
-# Both halves of that asymmetry are in docs/design/vrt.md, and what it means for the
-# person applying the label is in vrt/README.md.
+# **Every `gh pr comment` body in this file is a literal written here.** This job posts with
+# `gh` rather than `upsert-pr-comment`, so `make actions-comment-secret-lint` — which finds its
+# subjects by walking to that action — does not see it, and this is the one job where holding a
+# secret and commenting on a pull request meet. The rule still binds (README § PR コメント): do
+# not interpolate tool output or anything else a pull request can influence, because the masking
+# that covers the runner's log does not cover a string handed to `--body`.
 #
 # Fork pull requests cannot be served, and under `workflow_run` refusing them is a
 # security requirement rather than a limitation: this trigger runs in the context of
@@ -89,28 +87,13 @@ jobs:
             mcr.microsoft.com:443
             *.data.mcr.microsoft.com:443
 
-      # The REST calls below run on an app installation token rather than `GITHUB_TOKEN`.
-      # `GITHUB_TOKEN` is capped at 1,000 requests per hour per repository, shared across
-      # every workflow and every open pull request; an installation token carries 5,000.
-      # This job fires on every VRT and E2E completion and makes about ten calls each time,
-      # so it is the first consumer to exhaust the shared cap on a busy day — a failure
-      # unrelated to the change under test.
+      # Minted rather than using `GITHUB_TOKEN` for its rate limit, and allowed to fail so the
+      # retake falls back to it (README § PR コメント). This job is the first consumer to
+      # exhaust the shared cap, making about ten calls on every VRT and E2E completion.
       #
-      # The permissions are the union of what the steps below need and nothing else:
-      # reading the pull request and its check runs, and taking the label off once the
-      # pointer has moved. Pushing is a separate mint inside `setup-baselines`, narrowed
-      # to what pushing needs.
-      #
-      # A repository created from this template that has not registered the app falls back
-      # to `GITHUB_TOKEN`. The retake still works there; it just draws on the smaller budget.
-      #
-      # **The mint is allowed to fail.** Asking for a permission the installation has not
-      # granted 422s, and without this that would take the whole job down — worse than the
-      # rate limit it is here to avoid. Failing leaves the output empty, so every call below
-      # falls back to `GITHUB_TOKEN` and the retake proceeds on the smaller budget. The
-      # `setup-baselines` call further down narrows `pull-requests` by route for the same
-      # reason; this one cannot, because the calls that need write run before the route is
-      # known.
+      # The permissions are the union of what the steps below need and nothing else. The
+      # `setup-baselines` call further down narrows `pull-requests` by route; this one cannot,
+      # because the calls that need write run before the route is known.
       - name: Mint a token for the API calls
         id: api-token
         if: env.BASELINE_APP_ID != ''
@@ -163,17 +146,6 @@ jobs:
             echo "labelled=$(jq -r '[.labels[].name] | index("baseline-retake") != null' <<<"$pr")"
           } >> "$GITHUB_OUTPUT"
 
-      # **This job posts to the pull request with `gh pr comment`, not `upsert-pr-comment`,
-      # so `make actions-comment-secret-lint` does not see it.** That check finds its
-      # subjects by walking to the action; a job that calls `gh` directly is not among
-      # them. This job holds an app token, which makes it the one place where "holds a
-      # secret" and "comments on a pull request" meet outside the check's view.
-      #
-      # The rule still binds, and it is the rule that is authoritative here — the check is
-      # a regression guard (README § PR コメント). **Every body below is a literal written
-      # in this file.** Do not interpolate tool output, a step output carrying log text, or
-      # anything else a pull request can influence: the masking that covers the runner's log
-      # does not cover a string handed to `--body`.
       # Before any checkout: this trigger holds a writable token even for a fork.
       - name: Refuse fork pull requests
         if: >-
@@ -494,8 +466,7 @@ jobs:
           # What comes out of the report flows straight into make's argument, the commit
           # message and the pull-request comment. It originates in the story catalogue
           # committed to this repository, so it should never leave the accepted set — if it
-          # does, the report's shape changed, and this refuses rather than pass it on
-          #.
+          # does, the report's shape changed, and this refuses rather than pass it on.
           if printf '%s' "$ids" | LC_ALL=C grep -q '[^A-Za-z0-9/._,-]'; then
             echo '❌ 報告の story id が許可した文字集合を外れています。'
             exit 1
@@ -722,21 +693,15 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       # One label, one retake: removed only once the pointer has been placed AND every reported
-      # kind was covered. Anything else leaves it on, so the retake resumes by itself once
-      # the cause is gone. The second condition is what keeps a run that moved the pointer
-      # for the stories alone from spending the label while E2E is still deciding whether
-      # the screens moved — the screens would then never be retaken for this branch.
+      # kind was covered — otherwise a run that moved the pointer for the stories alone would
+      # spend the label while E2E is still deciding whether the screens moved. Anything else
+      # leaves it on, so the retake resumes by itself once the cause is gone. On the
+      # pull-request route the pointer is proposed rather than landed; the label is spent all
+      # the same, or every later run would replace the pull request under review.
       #
-      # On the pull-request route the pointer is proposed rather than landed; the label is
-      # spent all the same, or every later run would replace the pull request under review.
-      #
-      # `baseline-approve` is NOT touched here. Whether an acceptance still holds is decided
-      # by `baseline-approval.yaml` comparing its timestamp against the pointer's commit, so
-      # removing the label changes no verdict — a stale acceptance is refused either way.
-      # What it does change is the noise: `baseline-approval` runs on `unlabeled`, so dropping
-      # the label starts a run whose only purpose is to report a state the next run would
-      # report anyway, and it reads to the person who applied it as though their
-      # acceptance had been revoked by someone else.
+      # `baseline-approve` is NOT touched here. Removing it would change no verdict —
+      # `baseline-approval.yaml` refuses a stale acceptance either way — but it runs on
+      # `unlabeled`, so it would add a pointless run and read as a revoked acceptance.
       - name: Remove the label
         if: >-
           always() && steps.mode.outputs.mode == 'reported' &&

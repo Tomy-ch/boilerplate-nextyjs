@@ -4,8 +4,7 @@ name: Lint
 # declaration cross-check — the same command the pre-commit hook runs
 # (hooks mirror CI). The hook is the fast first stop; this job is the authority.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -48,11 +47,6 @@ jobs:
         with:
           persist-credentials: false
 
-      # The mise CLI's own version is the one version number pinned in a workflow:
-      # mise.toml declares what mise resolves, not mise itself, so there is nowhere
-      # else to put it. Left unpinned it floats to whatever released today, which is
-      # the resolver for every other tool. It is restated in each workflow — a bump
-      # has to touch all of them.
       - name: Setup mise and the pinned tools
         uses: ./.github/actions/setup-mise
         with:
@@ -80,8 +74,6 @@ jobs:
 
           exit 0
 
-      # A PR from a fork gets a read-only token, so posting is allowed to fail
-      # without taking the verdict with it.
       - name: Comment lint result on PR
         if: github.event_name == 'pull_request'
         continue-on-error: true

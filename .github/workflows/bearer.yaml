@@ -24,8 +24,7 @@ name: Bearer Scan
 # involves no secret. Silencing such a rule would be a rule-wide disable, which
 # the suppression rules forbid, so those stay visible instead.
 #
-# Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
-# in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -72,9 +71,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # What cannot change this scan's answer. The list is the deny side on purpose: anything
-      # not named here still runs, so a missing entry costs one needless run while a wrong
-      # entry would leave a scanner reporting on nothing (see the note in the action).
+      # What cannot change this scan's answer — this job's own claim, not a shared default.
       # Bearer reads `src` alone (bearer.mk), so the catalog, the baselines and the
       # generated docs site cannot move its answer.
       - name: Decide whether the diff can reach this scan

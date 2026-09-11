@@ -17,43 +17,13 @@ name: Lighthouse
 # a number does not; what has to be fixed for a number is the browser version, and the
 # `@playwright/test` entry in `pnpm-lock.yaml` fixes that on every machine.
 #
-# ## Why this does not run on pull requests
+# ## Deferred, and what still runs anyway
 #
-# The measurement is serial by necessity — running several screens at once has them compete
-# for the same CPU, and Lighthouse's simulated throttling scales with the CPU time it
-# observes, so the parallelism would land in the numbers the budget then judges. The cost is
-# therefore `screens x runs` — minutes of measurement against a build that takes one — and
-# neither factor can be cut without giving something up: fewer runs loses the median that
-# absorbs runner variance, and fewer screens gives up the reason the list is read from the
-# declaration in the first place.
-#
-# So the cadence moves instead of the coverage. A merge is judged after it lands rather than
-# before, which delays detection by one merge and costs no pull request any waiting. Every
-# screen is still measured, still three times, still against the same budget.
-#
-# `cancel-in-progress` is on, so a burst of merges leaves only the newest tree measured —
-# that is the tree that matters. The nightly run is what guarantees at least one complete
-# measurement a day when merges keep superseding each other.
-#
-# ## What still runs on a pull request
-#
-# Waiting one merge is the wrong trade for two shapes of change, so the job starts on every
-# pull request, decides in about a minute, and measures only when the diff earns it:
-#
-#   * The screen declaration moved — a screen may have been added that has never been
-#     measured at all, so there is no earlier number for the release run to compare against.
-#   * A layout moved — every screen renders through it.
-#
-# Both are structural, which is why neither needs a number to justify it. They are this job's
-# own and sit ALONGSIDE the events `check-trigger` shares with the other deferred checks —
-# here rather than there because they answer a question only this job has: a screen added on
-# this branch has no earlier number for the release run to compare against, so deferring it
-# defers the comparison too, not just the detection.
-#
-# **Anything that merely warrants a label belongs to `deferred-checks.yaml`, not here.** It
-# reads the diff once for all three checks and leaves one comment, and it stays silent about
-# `run-lighthouse` on a diff these two reasons already measure — so nobody is told to ask for
-# a measurement that is already running.
+# The measurement does not run on an ordinary pull request. The cost that forces that, the
+# cadence that replaces it, and the two diff shapes that measure without a label are in
+# README.md § 先送りにする検査 and the Lighthouse row of the workflow table. What is specific
+# here: a screen added on this branch has no earlier number for the release run to compare
+# against, so deferring it defers the comparison and not only the detection.
 #
 # The job reports a context on every pull request either way, which is what would let it
 # become a required check later; it is deliberately not one today, because the budget is not
@@ -75,30 +45,24 @@ on:
     - cron: '0 18 * * *'
   workflow_dispatch:
 
-# ## Why the measurement is split across machines
+# ## How the measurement is split across machines
 #
-# The cost is linear in the number of screens and each screen is measured three times over,
-# so the only way to shorten the wall clock is to add machines. `lighthouse-shard` is that
-# fan-out; `lighthouse` collects what came back.
+# `lighthouse-shard` is the fan-out and `lighthouse` collects what came back (README.md,
+# 「並列度に台数を書かない」, owns when a matrix may divide work at all). Four properties are
+# this job's own:
 #
-# **Never inside one machine.** What is being measured is CPU-bound (TBT, LCP), so putting
-# two measurements on one runner has them take each other's CPU — the numbers stop meaning
-# anything against the budget, and they stop meaning it differently on every run. The split
-# is across machines, not within one.
+# **Never inside one machine.** What is measured is CPU-bound (TBT, LCP), so two measurements
+# on one runner take each other's CPU and the numbers stop meaning anything against the budget.
 #
-# **Only a pull request is split.** The protected-branch and daily runs are measured on one
-# machine as before: nobody is waiting on them, and every extra machine repeats the fixed
-# cost (setup, dependency install, build). The width is the matrix's own declaration and the
-# denominator is read back from `strategy.job-total`, so there is one number, not two.
+# **Only a pull request is split.** Nobody is waiting on the protected-branch and daily runs,
+# and every extra machine repeats the fixed cost.
 #
 # **The decision to measure is asked once, in `plan`.** Asking it per shard would be four
-# answers to one question, and — because standing down is the common case — it would make
-# the cheap path four times as expensive to make the rare path faster.
+# answers to one question, and standing down is the common case.
 #
 # **The budget is judged by the collecting job.** A shard measures only the screens it was
-# given, and the check for "the budget declares a screen that no longer exists" can only be
-# answered by something that saw all of them. The shards write their measurements out; the
-# merge reads every one before judging.
+# given, so "the budget declares a screen that no longer exists" can only be answered by
+# something that saw all of them.
 
 # Select the CI environment file (env/.env.ci), which is the one that puts the API in mock
 # mode. Without a mocked API the screens would need a backend, and a slow response over
@@ -166,12 +130,10 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          # The base ref has to be resolvable for the `trigger` diff; the default shallow
-          # checkout leaves it a bad object and the decision would silently see no changes.
-          #
-          # The condition is inverted on purpose. `<cond> && 0 || 1` always yields 1, because
-          # GitHub's pseudo-ternary falls through to the `||` side whenever the value before it
-          # is falsy — and `0` is. So the branch that has to carry `0` is the one after `||`.
+          # The base ref has to be resolvable for the `trigger` diff; a shallow checkout
+          # leaves it a bad object and the decision would silently see no changes. **The
+          # condition is inverted on purpose** — GitHub's pseudo-ternary falls through to the
+          # `||` side whenever the value before it is falsy, and `0` is, so `0` goes after `||`.
           fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Setup mise and the pinned tools
@@ -294,21 +256,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Streamed through `tee` rather than tailed at the end: a run that is cancelled
-          # or hits the job timeout never reaches the tail, so the slow case — the one
-          # worth diagnosing — would leave no log at all.
+          # Streamed for the same reason as `vrt.yaml`: a cancelled or timed-out run must
+          # still leave a log behind.
           #
           # This machine does not judge. It measured a subset, so it cannot answer whether
           # the budget names a screen that no longer exists; the collecting job does that
           # once, over everything that came back.
           make lighthouse LIGHTHOUSE_SHARD="${SHARD_INDEX}/${SHARD_TOTAL}" 2>&1 \
             | tee /tmp/lighthouse-full.log
-
-      # Only the table, and only when there is one. The cells are screen names — which
-      # `resolveScreens` has already constrained to a set that cannot make markup — and
-      # numbers this job computed, so it renders rather than sitting in a code block. When
-      # the measurement died before printing a table there is nothing sanitized to show, so
-      # the comment says that instead of pasting raw log into a rendered body.
 
       # `if: always()` so a machine that failed still hands over what it recorded. The
       # collecting job counts what arrived: a hole surfaces as a missing machine rather than
@@ -441,6 +396,10 @@ jobs:
             echo 'has-table=false' >> "$GITHUB_OUTPUT"
           fi
 
+      # `body-sanitized` follows the table's presence. The cells are screen names —
+      # `resolveScreens` constrains them to a set that cannot make markup — and numbers this
+      # job computed, so a table renders. When the measurement died before printing one there
+      # is nothing sanitized to show, and the fallback sentence goes in a code block instead.
       - name: Comment the measurement on PR
         if: ${{ !cancelled() && steps.table.outcome == 'success' }}
         continue-on-error: true
@@ -470,10 +429,9 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # The table is what says which screen moved, and it is left to render as markdown:
-          # its cells are screen names the declaration fixes and numbers this job computed
-          #. The measurement
-          # may never have produced a table at all — the browser can fail to install — so
-          # every fallback ends in something printable.
+          # its cells are screen names the declaration fixes and numbers this job computed.
+          # The measurement may never have produced a table at all — the browser can fail to
+          # install — so every fallback ends in something printable.
           # `|| true` is what makes the fallbacks below reachable: under `-e`, a `sed` against
           # a log that was never written takes the step with it.
           #

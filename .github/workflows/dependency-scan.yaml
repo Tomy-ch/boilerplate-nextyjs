@@ -17,8 +17,7 @@ name: Dependency Scan
 # A gate built on that teaches people to bypass it. Promotion is where someone has
 # the standing to accept the risk, so that is where the strict job sits.
 #
-# Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
-# in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -73,10 +72,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # A dependency scanner reads the lockfile; no source change can alter what it finds.
-      # This is the one place an allow-list is admissible (see the note in the action), and it
-      # is admissible only because the weekly schedule above still scans the whole tree — a
-      # mistake in this list defers a scan by at most a week rather than removing it.
+      # A dependency scanner reads the lockfile, and the weekly schedule above still scans the
+      # whole tree — the two halves `only` requires (see the note in the action).
       - name: Decide whether the diff can reach the dependency graph
         id: scope
         uses: ./.github/actions/diff-scope
@@ -294,8 +291,7 @@ jobs:
     # filter on the trigger. A filter that excludes a pull request starts no run at
     # all, and a required context that is never reported is not read as "not
     # applicable" — the merge waits for something that will never arrive. A job the
-    # condition skips reports `skipped`, which a required check counts as success
-    #.
+    # condition skips reports `skipped`, which a required check counts as success.
     if: ${{ github.event_name != 'pull_request' || contains(fromJSON('["production", "staging", "develop"]'), github.base_ref) || startsWith(github.base_ref, 'release/') || startsWith(github.base_ref, 'hotfix/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

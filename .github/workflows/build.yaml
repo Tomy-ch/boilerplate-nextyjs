@@ -10,8 +10,7 @@ name: Build
 # the build, which the delivery boundary does not promise. Adding a second build to catch that would
 # cost another ten minutes for a comparison a manifest already answers.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

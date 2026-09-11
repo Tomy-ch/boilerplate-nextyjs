@@ -12,8 +12,7 @@ name: Lockfile Drift
 # own). Nothing surfaces that locally, so an unreviewed supply-chain-relevant edit
 # would otherwise ride along in whichever PR happened to run install first.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

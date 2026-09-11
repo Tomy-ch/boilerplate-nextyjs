@@ -5,7 +5,7 @@ import { type KeyboardEvent, useState } from "react";
 import { Button } from "@/components/design-system/action/button/button";
 import { Label } from "@/components/design-system/form/label/label";
 import { Textarea } from "@/components/design-system/form/textarea/textarea";
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/server/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
 import type { InquiryMessageActionState } from "../../../actions";

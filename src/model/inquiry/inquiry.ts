@@ -46,7 +46,7 @@ export const INQUIRY_AUTHOR_KIND = {
  * 契約が載せるのは種別だけで、主体の識別子は含みません。誰が答えたかは画面が扱える情報では
  * ないため、運営の発言はすべて同じ送り手として並びます。
  */
-export type InquiryAuthorKind = (typeof INQUIRY_AUTHOR_KIND)[keyof typeof INQUIRY_AUTHOR_KIND];
+type InquiryAuthorKind = (typeof INQUIRY_AUTHOR_KIND)[keyof typeof INQUIRY_AUTHOR_KIND];
 
 /**
  * 問い合わせのメッセージ 1 通。

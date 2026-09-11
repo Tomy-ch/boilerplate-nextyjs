@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { safeParse } from "zod/v4/core";
 
 import {
+  INQUIRY_BODY_MAX_LENGTH,
   inquiryConversationEventSchema,
   inquiryFeedEventSchema,
   toInquiryMessage,
@@ -103,5 +104,11 @@ describe("toUpdatedInquiryId", () => {
     const parsed = safeParse(inquiryFeedEventSchema, FEED_EVENT);
 
     expect(parsed.success && toUpdatedInquiryId(parsed.data)).toBe(FEED_EVENT.payload.inquiryId);
+  });
+});
+
+describe("INQUIRY_BODY_MAX_LENGTH", () => {
+  it("契約が定めた上限を公開する", () => {
+    expect(INQUIRY_BODY_MAX_LENGTH).toBe(4_000);
   });
 });

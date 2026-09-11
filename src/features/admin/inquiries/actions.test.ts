@@ -11,10 +11,7 @@ const { postInquiryReply, revalidatePath } = vi.hoisted(() => ({
 }));
 
 vi.mock("next/cache", () => ({ revalidatePath }));
-vi.mock("@/adapters/server/api/inquiries", () => ({
-  postInquiryReply,
-  INQUIRY_BODY_MAX_LENGTH: 4_000,
-}));
+vi.mock("@/adapters/server/api/inquiries", () => ({ postInquiryReply }));
 
 import { replyInquiryAction } from "./actions";
 import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "./parse-reply-form";

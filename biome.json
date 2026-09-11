@@ -223,6 +223,16 @@
       }
     },
     {
+      "includes": ["mocks/**", "scripts/**", "tokens/**"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "useLiteralKeys": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": [
         "baseline/lib/**",
         "vrt/**",

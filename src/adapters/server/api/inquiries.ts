@@ -19,7 +19,6 @@ import {
   PostInquiriesDetailMessagesResponse,
   PostInquiriesMeMessagesResponse,
 } from "../../gen/api/endpoints.zod";
-import { postInquiriesMeMessagesBodyBodyMax } from "../../gen/api/limits";
 import type { InquiryMessagePostRequest } from "../../gen/api/model";
 import { getAccessToken } from "../auth/session";
 import { createHttpClient, type UserScopedHttpClient } from "../http/request";
@@ -29,15 +28,6 @@ const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key";
 const MY_MESSAGES_PATH = "/v1/inquiries/me/messages";
 
 const INQUIRIES_PATH = "/v1/inquiries";
-
-/**
- * 本文の文字数の上限。
- *
- * @remarks
- * 画面が入力欄へ出す上限をここから引きます。契約由来の値を features 側で書き直すと、上限が
- * 動いたときに画面だけが古い数を見せます。
- */
-export const INQUIRY_BODY_MAX_LENGTH = postInquiriesMeMessagesBodyBodyMax;
 
 type WireHistory = z.infer<typeof GetInquiriesMeMessagesResponse>;
 type WireMessage = WireHistory["messages"][number];

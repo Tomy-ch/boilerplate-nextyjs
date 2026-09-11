@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/server/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
 /** 本文を載せるフォーム項目の名前。 */

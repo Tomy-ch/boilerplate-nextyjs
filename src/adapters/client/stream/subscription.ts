@@ -39,7 +39,7 @@ export const STREAM_STOP_REASON = {
 } as const;
 
 /** {@link StreamState} が持つ打ち切りの理由。 */
-export type StreamStopReason = (typeof STREAM_STOP_REASON)[keyof typeof STREAM_STOP_REASON];
+type StreamStopReason = (typeof STREAM_STOP_REASON)[keyof typeof STREAM_STOP_REASON];
 
 /** 発券が返した、購読を開くための口。 */
 export type StreamConnection = {
@@ -57,7 +57,7 @@ export type StreamSourceHandlers = {
 };
 
 /** 開いている接続 1 本。 */
-export type StreamSource = {
+type StreamSource = {
   readonly close: () => void;
 };
 

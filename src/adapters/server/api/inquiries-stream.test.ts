@@ -16,14 +16,14 @@ vi.mock("../auth/session", () => ({ getAccessToken }));
 
 import { issueInquiryFeedStreamConnection, issueMyInquiryStreamConnection } from "./inquiries-stream";
 
-const TOKEN = "2LOUdXuXEQ7Yg2nJRAgDA9yQbLyjGvoITuwDse3u9Z0";
+const TOKEN = "test-access-token";
 
 const MY_TICKET_URL = `${PARSED_ENVIRONMENT.APP_API_BASE_URL}/v1/inquiries/me/stream-ticket`;
 
 const FEED_TICKET_URL = `${PARSED_ENVIRONMENT.APP_API_BASE_URL}/v1/inquiries/feed/stream-ticket`;
 
 const wireTicket = {
-  ticket: "0oXk1c5t8Yb1yq3aB7pQwR2sT4uV6wX8",
+  ticket: "test-stream-ticket",
   streamId: "0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60",
   expiresAt: "2026-09-01T12:39:56Z",
 };

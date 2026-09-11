@@ -10,7 +10,7 @@ import { streamCursorSchema } from "./cursor";
  * event の種別ごとに呼び出し側が宣言します（{@link openStream} の `schema`）。ここが確かめるのは
  * 「封筒として読めるか」までです。
  */
-export const streamEnvelopeSchema = z.object({
+const streamEnvelopeSchema = z.object({
   eventId: z.string(),
   streamId: z.string(),
   sequence: streamCursorSchema,
@@ -45,7 +45,7 @@ export const CONTROL_ACTION = {
  * 対して理由が増えても client の振る舞いは変わりません。理由で分岐すると、増えた理由を
  * 知らない client が既定の枝へ落ち、どちらへ倒れるかが宣言から読めなくなります。
  */
-export const controlEventSchema = z.object({
+const controlEventSchema = z.object({
   action: z.enum([
     CONTROL_ACTION.reconnect,
     CONTROL_ACTION.retryLater,

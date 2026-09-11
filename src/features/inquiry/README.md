@@ -75,7 +75,7 @@ coverage-exclusions:
 
 | カーネル | 用途 |
 | --- | --- |
-| `adapters` | 履歴の取得と送信、購読（`client/stream`）と event の検証（`client/api/inquiries`） |
+| `adapters` | 履歴の取得と送信、購読（`client/stream`）と event の検証・本文の上限（`client/api/inquiries`） |
 | `model` | 表示モデル（`InquiryMessage` / `InquiryHistory`）、正本と受信分の畳み込み、`ActionState`、冪等キー |
 | `components` | 会話の面（`Message` / `Bubble` / `Marker` / `MessageScroller`）と受信の状態 |
 | `capabilities` | 回線の有無（`use-online-status`） |

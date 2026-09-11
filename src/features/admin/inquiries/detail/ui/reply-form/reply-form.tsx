@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/server/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
 import { Button } from "@/components/design-system/action/button/button";
 import { Label } from "@/components/design-system/form/label/label";
 import { Textarea } from "@/components/design-system/form/textarea/textarea";

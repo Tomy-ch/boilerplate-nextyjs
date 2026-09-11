@@ -18,13 +18,12 @@ import { toInquiryId } from "@/model/inquiry/inquiry";
 import {
   getInquiryHistory,
   getMyInquiryHistory,
-  INQUIRY_BODY_MAX_LENGTH,
   listInquiries,
   postInquiryReply,
   postMyInquiryMessage,
 } from "./inquiries";
 
-const TOKEN = "2LOUdXuXEQ7Yg2nJRAgDA9yQbLyjGvoITuwDse3u9Z0";
+const TOKEN = "test-access-token";
 
 const INQUIRY_ID = toInquiryId("0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60");
 
@@ -253,11 +252,5 @@ describe("postInquiryReply", () => {
     await postInquiryReply(INQUIRY_ID, "回答", "key-2");
 
     expect(requests[0]?.headers.get("Idempotency-Key")).toBe("key-2");
-  });
-});
-
-describe("INQUIRY_BODY_MAX_LENGTH", () => {
-  it("契約が定めた上限を公開する", () => {
-    expect(INQUIRY_BODY_MAX_LENGTH).toBe(4_000);
   });
 });

@@ -17,7 +17,7 @@ export const ADMIT_RESULT = {
 } as const;
 
 /** {@link OrderingWindow.admit} の結果。 */
-export type AdmitResult = (typeof ADMIT_RESULT)[keyof typeof ADMIT_RESULT];
+type AdmitResult = (typeof ADMIT_RESULT)[keyof typeof ADMIT_RESULT];
 
 /**
  * 到達順の乱れを直す窓。

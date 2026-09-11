@@ -42,12 +42,15 @@ coverage-exclusions:
 | `/admin/products/new` | [`screen`](../../../docs/spec/route/admin/products/new/page.screen.md) / [`function`](../../../docs/spec/route/admin/products/new/page.function.md) |
 | `/admin/products/[id]/edit` | [`screen`](<../../../docs/spec/route/admin/products/[id]/edit/page.screen.md>) / [`function`](<../../../docs/spec/route/admin/products/[id]/edit/page.function.md>) |
 | `/admin/products/[id]/stock` | [`screen`](<../../../docs/spec/route/admin/products/[id]/stock/page.screen.md>) / [`function`](<../../../docs/spec/route/admin/products/[id]/stock/page.function.md>) |
+| `/admin/inquiries` | [`screen`](../../../docs/spec/route/admin/inquiries/page.screen.md) / [`function`](../../../docs/spec/route/admin/inquiries/page.function.md) |
+| `/admin/inquiries/[inquiryId]` | [`screen`](<../../../docs/spec/route/admin/inquiries/[inquiryId]/page.screen.md>) / [`function`](<../../../docs/spec/route/admin/inquiries/[inquiryId]/page.function.md>) |
 | `/admin/shipments` | [`screen`](../../../docs/spec/route/admin/shipments/page.screen.md) / [`function`](../../../docs/spec/route/admin/shipments/page.function.md) |
 | `/admin/users` | [`screen`](../../../docs/spec/route/admin/users/page.screen.md) / [`function`](../../../docs/spec/route/admin/users/page.function.md) |
 
-**`/admin/shipments` の契約・状態・Action は [shipments/README.md](shipments/README.md) が持ちます。**
+**`/admin/shipments` の契約・状態・Action は [shipments/README.md](shipments/README.md) が、
+`/admin/inquiries` の分は [inquiries/README.md](inquiries/README.md) が持ちます。**
 route の地図はここが持ちますが、その画面の中身は自分の README を持つ側の担当です。以下の表に
-発送の行が無いのはそのためです。
+発送と問い合わせの行が無いのはそのためです。
 
 この slice の画面が通す operationId。**変更する側はこの feature が呼びません** —— Server Action が
 app 層にあるためで、理由は「Action 戻り値契約」に書いてあります。
@@ -195,6 +198,7 @@ app 層にあるためで、理由は「Action 戻り値契約」に書いてあ
 | `users/ui/skeleton/` | 表の待機表示 |
 | `ui/error-state/` | 取得に失敗したときの表示。`/admin` の error 境界が使う。境界は 1 枚なので画面を名指ししない |
 | `shipments/` | 発送の画面。**自分の README を持つ**（[README](shipments/README.md)） |
+| `inquiries/` | 問い合わせの一覧と対応。**自分の README を持つ**（[README](inquiries/README.md)） |
 
 **`feature` の宣言が掛かるのは、画面の単位で組み上げたものです**。`page-content.tsx` / `view.tsx` /
 `*-section.tsx` が対象で、部品が揃って初めて成立する振る舞いを負います。**`ui/` の単一部品は
@@ -287,7 +291,7 @@ header も失われた素の画面になります。
 
 ## 関連する ADR
 
-**`shipments/` は自分の [README](shipments/README.md) に自分の分を持ちます。** ここに挙げるのは
+**`shipments/` と `inquiries/` は自分の README に自分の分を持ちます。** ここに挙げるのは
 この slice 全体（分析・商品・利用者と、それらが共有する部品）が依存しているものです。
 
 - [0021](../../../docs/adr/0021-frontend-responsibility.md) — 層の責務と import 境界。カーネルへ上げてよいものの線

@@ -43,6 +43,7 @@ slice に固有の線引きと、契約・仕様・デザインへの索引で�
 | `checkout/` | 確定の手前。カートと届け先を突き合わせ、1 回だけ送る | [README](checkout/README.md) |
 | `purchases/` | 確定したものの履歴と 1 件の詳細、そこからの状態遷移 | [README](purchases/README.md) |
 | `account/` | 自分の記録。登録・編集・退会と、自分向けの集計 | [README](account/README.md) |
+| `inquiry/` | サポートとのやり取り。届いた 1 通が取り直しを待たずに並ぶ | [README](inquiry/README.md) |
 | `admin/` | 役割を持つ主体だけが入る運用面 | [README](admin/README.md) |
 | `site-info/` | 取得を持たない静的な面 | [README](site-info/README.md) |
 <!-- sample:end -->

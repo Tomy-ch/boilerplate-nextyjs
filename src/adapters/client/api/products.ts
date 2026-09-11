@@ -80,11 +80,9 @@ export async function fetchProductCount(
   query: URLSearchParams,
   signal?: AbortSignal,
 ): Promise<number> {
-  const { count } = await request(
-    `/api/products/count?${query.toString()}`,
-    ProductCountPayload,
-    { signal },
-  );
+  const { count } = await request(`/api/products/count?${query.toString()}`, ProductCountPayload, {
+    signal,
+  });
 
   return count;
 }

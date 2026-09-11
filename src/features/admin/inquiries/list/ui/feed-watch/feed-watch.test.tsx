@@ -62,7 +62,9 @@ describe("AdminInquiryFeedWatch", () => {
   it("更新が届いたら一覧を取り直す", () => {
     render(<AdminInquiryFeedWatch />);
 
-    act(() => lastOptions().onEvents([feedEvent(toInquiryId("0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60"))]));
+    act(() =>
+      lastOptions().onEvents([feedEvent(toInquiryId("0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60"))]),
+    );
 
     expect(refresh).toHaveBeenCalledOnce();
   });

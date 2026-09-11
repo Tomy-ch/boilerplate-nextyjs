@@ -404,14 +404,15 @@ describe("openStream", () => {
     expect(stream.sources).toHaveLength(2);
   });
 
-  it("待ってからの再接続の指示で、示された目安を待つ", async () => {
+  it("待ってからの再接続の指示で、示された目安を散らして待つ", async () => {
     const stream = harness();
 
     await settle();
     stream.latest()?.handlers.onOpen();
     stream.latest()?.handlers.onControl(control("RETRY_LATER", 4_000));
 
-    expect(stream.delays()).toEqual([4_000]);
+    // 目安にも散らしを掛ける。同じ値が全 client へ配られるため、そのまま待つと山が崩れない。
+    expect(stream.delays()).toEqual([3_000]);
   });
 
   it("読めない制御指示を無視する", async () => {

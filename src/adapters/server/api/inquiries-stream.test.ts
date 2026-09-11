@@ -14,7 +14,10 @@ const { getAccessToken, getEnvironment } = vi.hoisted(() => ({
 vi.mock("@/config/environment", () => ({ getEnvironment }));
 vi.mock("../auth/session", () => ({ getAccessToken }));
 
-import { issueInquiryFeedStreamConnection, issueMyInquiryStreamConnection } from "./inquiries-stream";
+import {
+  issueInquiryFeedStreamConnection,
+  issueMyInquiryStreamConnection,
+} from "./inquiries-stream";
 
 const TOKEN = "test-access-token";
 

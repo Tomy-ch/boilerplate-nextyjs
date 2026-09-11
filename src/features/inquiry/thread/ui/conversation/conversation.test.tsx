@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InquiryConversationEvent } from "@/adapters/client/api/inquiries";
 import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
 import { INQUIRY_AUTHOR_KIND, type InquiryMessage } from "@/model/inquiry/inquiry";
@@ -48,6 +48,24 @@ function eventFor(sequence: number, body: string): InquiryConversationEvent {
     },
   };
 }
+
+/**
+ * jsdom は scroll の口を持たない。追従の器がその口を呼ぶため、呼べる形にだけしておく。
+ *
+ * @remarks
+ * 追従そのものは器の側のテストが確かめます。ここで確かめるのは畳み込みと購読なので、
+ * 動きは再現せず、呼べることだけを用意します。
+ */
+beforeAll(() => {
+  Object.defineProperty(Element.prototype, "scrollTo", {
+    configurable: true,
+    value: () => undefined,
+  });
+});
+
+afterAll(() => {
+  Reflect.deleteProperty(Element.prototype, "scrollTo");
+});
 
 beforeEach(() => {
   vi.clearAllMocks();

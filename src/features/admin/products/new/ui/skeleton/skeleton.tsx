@@ -5,11 +5,11 @@ import { withPartSpan } from "@/observability/render-span";
 const PLACEHOLDER_FIELDS = 4;
 
 /**
- * 商品を作る画面の待機表示。
+ * 進捗・入力欄の並び・段を行き来する操作を、実際と同じ高さで出す待機表示。
  *
  * @remarks
- * 進捗・入力欄の並び・段を行き来する操作を、実際と同じ高さで出します。編集の待機表示を流用すると、
- * 先頭に出る枠が観点の切り替えの形になり、段階に分けて進む画面だと伝わりません。
+ * 編集の待機表示を流用すると、先頭に出る枠が観点の切り替えの形になり、段階に分けて進む画面だと
+ * 伝わりません。
  */
 export const AdminProductCreateSkeleton = withPartSpan(
   "features/admin/products/new/ui/skeleton/skeleton",

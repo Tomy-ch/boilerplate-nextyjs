@@ -31,11 +31,10 @@ type ProfileFormProps = {
 };
 
 /**
- * プロフィール編集フォーム。
+ * 検証も補完も持たず、並びだけを持つプロフィール編集フォーム。
  *
  * @remarks
- * この部品が持つのは**並びだけ**です。検証といつ誤りを見せるかは `useProfileFields`、住所の
- * 補完は `useAddressField` が持ちます。
+ * 検証といつ誤りを見せるかは `useProfileFields`、住所の補完は `useAddressField` が持ちます。
  *
  * 送信は `<form action>` に委ねます。react-hook-form が持つのは入力中の検証だけで、送信機構は
  * 置き換えません。JavaScript が動かない環境でも form はそのまま送信され、server 側が同じ

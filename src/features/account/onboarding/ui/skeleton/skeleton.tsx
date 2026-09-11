@@ -3,11 +3,10 @@ import { withPartSpan } from "@/observability/render-span";
 import { BASICS_FIELDS, STEP_IDS } from "../../steps";
 
 /**
- * 登録の待機表示。
+ * 最初の段階だけを象る、登録の待機表示。
  *
  * @remarks
- * 最初の段階だけを象ります。段階に分けた入力は一度に 1 つしか現れないので、全項目ぶんの枠を
- * 置くと待機のほうが長くなります。
+ * 段階に分けた入力は一度に 1 つしか現れないので、全項目ぶんの枠を置くと待機のほうが長くなります。
  */
 export const OnboardingSkeleton = withPartSpan(
   "features/account/onboarding/ui/skeleton/skeleton",

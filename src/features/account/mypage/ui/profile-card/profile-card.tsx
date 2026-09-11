@@ -36,11 +36,10 @@ function formatAddress(profile: UserProfile): string {
 }
 
 /**
- * 自分の登録情報の表示。
+ * 編集する対象と同じ場所に導線を置く、自分の登録情報のカード。
  *
  * @remarks
- * 編集への導線をこのカードが持つのは、編集する対象がここに出ている情報そのものだからです。
- * 画面の下端にまとめると、何を変えに行くのかが操作の位置から読み取れなくなります。
+ * 導線を画面の下端にまとめると、何を変えに行くのかが操作の位置から読み取れなくなります。
  */
 export const ProfileCard = withPartSpan(
   "features/account/mypage/ui/profile-card/profile-card",

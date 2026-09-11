@@ -14,11 +14,11 @@ export type AdminUserListViewProps = {
 };
 
 /**
- * 管理側の利用者一覧の画面。
+ * 取得を持たず、絞り込みの器と一覧の置き場所だけを組む管理側の利用者一覧。
  *
  * @remarks
- * 取得を持ちません。一覧本体は `children` として受け取り、取り直す範囲は
- * [`AdminUserResults`](./results.tsx) が持ちます。
+ * 一覧本体は `children` として受け取り、取り直す範囲は [`AdminUserResults`](./results.tsx) が
+ * 持ちます。
  *
  * 絞り込みを `FilterBar` にまとめます。landmark になるため、支援技術から絞り込みへ直接移動
  * できます。

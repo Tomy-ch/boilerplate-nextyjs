@@ -7,11 +7,10 @@ const PLACEHOLDER_ROWS = 5;
 const ROWS = Array.from({ length: PLACEHOLDER_ROWS }, (_, index) => index);
 
 /**
- * 購入履歴の待機表示。
+ * 実際に並ぶ行と同じ高さ・同じ区切りで枠だけを出す、購入履歴の待機表示。
  *
  * @remarks
- * 実際に並ぶ行と同じ高さ・同じ区切りで枠だけを出します。スピナー 1 つで代用すると、描画された
- * 瞬間に位置が動き、読み始めた場所を見失います。
+ * スピナー 1 つで代用すると、描画された瞬間に位置が動き、読み始めた場所を見失います。
  */
 export const PurchaseHistorySkeleton = withPartSpan(
   "features/purchases/history/ui/skeleton/skeleton",

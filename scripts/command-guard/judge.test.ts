@@ -90,6 +90,12 @@ describe("unwrap", () => {
   it("包みでないものを変えない", () => {
     expect(unwrap("pnpm lint")).toBe("pnpm lint");
   });
+
+  it("深さの上限を超えた包みは、剥がしかけで返す", () => {
+    const nested = `${"rtk run ".repeat(9)}rm -rf /`;
+
+    expect(unwrap(nested)).toBe("rtk run rm -rf /");
+  });
 });
 
 describe("stripQuoted", () => {

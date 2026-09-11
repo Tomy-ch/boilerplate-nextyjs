@@ -15,11 +15,10 @@ const FAILING = "ERROR";
 const UNREADABLE = "?";
 
 /**
- * ゲートの判定。
+ * ゲートの判定。読めなければ `UNKNOWN` を返し、合格へは寄せない。
  *
  * @remarks
- * 読めなければ `UNKNOWN` を返します。**それを合格へ寄せません** —— 誰も定めていない判定は
- * 合格ではなく、`OK` 以外をどう扱うかは呼び出し側が決めます。
+ * 誰も定めていない判定は合格ではなく、`OK` 以外をどう扱うかは呼び出し側が決めます。
  */
 export function readGateStatus(payload: unknown): string {
   return textOf(fieldOf(fieldOf(payload, "projectStatus"), "status"), "UNKNOWN");

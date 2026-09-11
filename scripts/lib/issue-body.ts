@@ -116,7 +116,7 @@ function assertFenced(text: string): void {
 
     // CommonMark: 閉じられるのは、同じ記号で開いたものと同じ長さ以上のフェンスだけ。
     // 数の偶奇だけを見ると、`````` で開いて ``` が 2 本並んだだけの壊れた本文も通る。
-    if (fence.startsWith(open[0] ?? "") && fence.length >= open.length) open = undefined;
+    if (fence.startsWith(open.charAt(0)) && fence.length >= open.length) open = undefined;
   }
 
   if (open !== undefined) {

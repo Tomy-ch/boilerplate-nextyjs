@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveLiterals, judge, parseShape, stripQuoted, unwrap } from "./judge.ts";
+import { deriveLiterals, judge, parseShape, stripQuoted, unwrap } from "./judge";
 
 const DENY = [
   "Bash(make tag-patch *)",

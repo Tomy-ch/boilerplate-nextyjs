@@ -258,9 +258,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Streamed through `tee` rather than tailed at the end: a run that is cancelled
-          # or hits the job timeout never reaches the tail, so the slow case — the one
-          # worth diagnosing — would leave no log at all.
+          # Streamed for the same reason as `vrt.yaml`: a cancelled or timed-out run must
+          # still leave a log behind.
           #
           # This machine does not judge. It measured a subset, so it cannot answer whether
           # the budget names a screen that no longer exists; the collecting job does that

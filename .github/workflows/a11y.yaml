@@ -159,11 +159,8 @@ jobs:
           # about this project, and a standard runner has four cores on a public repository
           # but two on a private one — which is what a repository created from this template
           # gets.
-          # Stream through `tee` rather than redirecting to a file and tailing at the end.
-          # A run that is cancelled or hits the job timeout never reaches the tail, so the
-          # exact case worth diagnosing — the slow one — is the case that leaves no log at
-          # all. Streaming also gets every line stamped with the runner's clock, which is
-          # what tells apart a slow Storybook build, a slow image pull and a slow run.
+          # Streamed for the same reason as `vrt.yaml`: a cancelled or timed-out run must
+          # still leave a log behind, stamped with the runner's clock.
           make a11y VRT_ARGS=--workers=100% 2>&1 | tee /tmp/a11y-full.log
           code=${PIPESTATUS[0]}
 

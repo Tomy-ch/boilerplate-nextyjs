@@ -250,9 +250,8 @@ jobs:
             local report="$2"
             shift 2
 
-            # Streamed through `tee` rather than tailed at the end: a run that is cancelled
-            # or hits the job timeout never reaches the tail, so the slow case — the one
-            # worth diagnosing — would leave no log at all.
+            # Streamed for the same reason as `vrt.yaml`: a cancelled or timed-out run must
+            # still leave a log behind.
             "$@" 2>&1 | tee "/tmp/e2e-${name}.log"
             local code=${PIPESTATUS[0]}
 

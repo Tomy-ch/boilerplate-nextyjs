@@ -148,12 +148,6 @@ jobs:
       # The toolchain is installed AFTER the scan on purpose. `sonar.sources` is the whole
       # tree, so an already-populated node_modules is a directory walk the scanner pays for
       # before its own exclusion discards it.
-      #
-      # The mise CLI's own version is the one version number pinned in a workflow:
-      # mise.toml declares what mise resolves, not mise itself, so there is nowhere
-      # else to put it. Left unpinned it floats to whatever released today, which is
-      # the resolver for every other tool. It is restated in each workflow — a bump
-      # has to touch all of them.
       - name: Setup mise and the pinned tools
         uses: ./.github/actions/setup-mise
         with:

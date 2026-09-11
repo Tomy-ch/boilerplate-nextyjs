@@ -122,11 +122,8 @@ jobs:
       fail-fast: false
       matrix:
         # **The only declaration of how many machines the stories are split across.** The
-        # denominator each machine passes to `--shard` is read back from `strategy.job-total`,
-        # so there is no second number to keep in step with this one. Writing it twice would
-        # let the two drift, and the drift is silent: with a denominator of 5 and four entries
-        # here, nothing computes the fifth bucket, so those stories are never compared and the
-        # required check still reports green.
+        # denominator is read back from `strategy.job-total`, so there is no second number to
+        # keep in step with this one (the reasoning is `test.yaml`'s).
         #
         # Four is where the curve flattens. The fixed cost per machine (setup, Storybook build,
         # image pull) is roughly 80s against a comparison of roughly 380s, so a fifth machine

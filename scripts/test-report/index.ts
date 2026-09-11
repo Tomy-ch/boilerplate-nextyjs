@@ -1,15 +1,15 @@
-// Vitest の JSON レポートから、失敗だけの報告本文を書き出す入口。
+// テスト実行系の JSON レポート（Vitest / Playwright）から、失敗だけの報告本文を書き出す入口。
 //
 // 組み立ては [format.ts](format.ts) が持つ。ここが担うのは読み書きと終了コードだけである。
 //
 //   pnpm exec tsx scripts/test-report <report.json> <tail.log> <出力先>
 //
-// **読めなかったら黙って空にしない。** JSON が無い・壊れているのは「失敗が無い」ではなく「何が起きたか
+// **読めなかったら黙って空にしない。** JSON が無い・壊れている・形が違うのは「失敗が無い」ではなく「何が起きたか
 // 分からない」であり、そのまま緑の報告へ倒すと壊れた瞬間から永久に通る
 // （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。理由を本文に書いて、末尾のログを添える。
 import fs from "node:fs";
 
-import { formatReport, type VitestReport } from "./format";
+import { codeBlock, formatReport, summarise } from "./format";
 
 const [, , reportPath, tailPath, outputPath] = process.argv;
 
@@ -32,31 +32,38 @@ const body = ((): string => {
     raw = fs.readFileSync(reportPath, "utf8");
   } catch {
     return [
-      `**Vitest の JSON レポート（\`${reportPath}\`）がありません。**`,
+      `**JSON レポート（\`${reportPath}\`）がありません。**`,
       "失敗が無かったのか、レポートを書く前に落ちたのかを、この報告からは決められません。",
       "末尾のログを添えます。",
       "",
-      "```text",
-      tailLog.trim(),
-      "```",
+      ...codeBlock(tailLog.trim()),
     ].join("\n");
   }
 
-  let report: VitestReport;
+  let parsed: unknown;
   try {
-    report = JSON.parse(raw) as VitestReport;
+    parsed = JSON.parse(raw);
   } catch {
     return [
-      "**Vitest の JSON レポートを読めませんでした（壊れた JSON）。**",
+      "**JSON レポートを読めませんでした（壊れた JSON）。**",
       "末尾のログを添えます。",
       "",
-      "```text",
-      tailLog.trim(),
-      "```",
+      ...codeBlock(tailLog.trim()),
     ].join("\n");
   }
 
-  return formatReport(report, tailLog);
+  const summary = summarise(parsed);
+  if (!summary) {
+    return [
+      "**JSON レポートの形を見分けられませんでした**（Vitest でも Playwright でもない）。",
+      "失敗が無かったのか、別の実行系が書いたのかを、この報告からは決められません。",
+      "末尾のログを添えます。",
+      "",
+      ...codeBlock(tailLog.trim()),
+    ].join("\n");
+  }
+
+  return formatReport(summary, tailLog);
 })();
 
 fs.writeFileSync(outputPath, `${body}\n`);

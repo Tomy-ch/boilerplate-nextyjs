@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 import type { AttachmentState } from "@/components/app-starter/attachment/attachment.definition";
 
 /**
- * 選択中のファイル 1 件。
+ * 表示に必要な値だけを運ぶ、選択中のファイル 1 件。
  *
  * @remarks
- * 表示に必要な値だけを運ぶ。送信経路・保存先・業務上の意味は持たない。名前と説明は整形済みの
- * 文言として受け取り、この component は書式を決めない。
+ * 送信経路・保存先・業務上の意味は持たない。名前と説明は整形済みの文言として受け取り、書式は
+ * 決めない。
  */
 export type UploadPreviewItem = {
   /** 一覧の中で一意な識別子。操作の callback へそのまま渡る。 */

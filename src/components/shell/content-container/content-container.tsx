@@ -24,7 +24,6 @@ import { cn } from "@/components/cn";
  * </main>
  * ```
  *
- *
  * @see Storybook `Layout/ContentContainer`
  */
 export function ContentContainer({ className, ...props }: ComponentProps<"div">) {

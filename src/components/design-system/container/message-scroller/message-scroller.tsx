@@ -255,12 +255,10 @@ export function MessageScrollerViewport({
 }
 
 /**
- * 一覧の中身を縦に並べる領域。
+ * `log` として公開し、追加された分だけを読み上げる、中身を縦に並べる領域。
  *
  * @remarks
- * `log` として公開し、追加された分だけを読み上げる。既存項目の変更や削除は通知しないため、
- * 内容を書き換える用途には使わない。
- *
+ * 既存項目の変更や削除は通知しないため、内容を書き換える用途には使わない。
  *
  * @see Storybook `Container/MessageScroller`
  */
@@ -294,11 +292,10 @@ export type MessageScrollerButtonProps = ComponentProps<typeof Button> & {
 };
 
 /**
- * 末尾へ戻すための操作。
+ * 末尾にいる間は render しない、末尾へ戻すための操作。
  *
  * @remarks
- * 末尾にいる間は render しない。見えないまま focus だけ残ると、keyboard 利用者が行き先の
- * 判らない操作へ到達してしまう。
+ * 見えないまま focus だけ残ると、keyboard 利用者が行き先の判らない操作へ到達してしまう。
  *
  * 既定では下向きの装飾アイコンと読み上げ用の文言だけを持つ。文言を変える場合は `children` に
  * 渡す。

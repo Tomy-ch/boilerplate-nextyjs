@@ -20,7 +20,6 @@ import {
  * 間隔だけを持つ。1 件のメッセージの中で本文を複数の吹き出しに分ける場合に使う。送信者・時刻・
  * avatar を伴うメッセージ単位のまとまりは `MessageGroup` が担う。
  *
- *
  * @see Storybook `Display/Bubble`
  */
 function BubbleGroup({ className, ...props }: ComponentProps<"div">) {

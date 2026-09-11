@@ -28,7 +28,6 @@ import { cn } from "@/components/cn";
  * </PageHeader>
  * ```
  *
- *
  * @see Storybook `Layout/PageHeader`
  */
 export function PageHeader({ className, ...props }: ComponentProps<"header">) {
@@ -47,7 +46,6 @@ export function PageHeader({ className, ...props }: ComponentProps<"header">) {
  * @remarks
  * `h1` として描画する。ページに 1 つだけ置く。見出し階層の起点になるため、装飾目的で
  * 使わない。
- *
  *
  * @see Storybook `Layout/PageHeader`
  */
@@ -70,7 +68,6 @@ export function PageHeaderTitle({ className, ...props }: ComponentProps<"h1">) {
  * @remarks
  * そのページで何ができるかを短く述べる。操作の手順や注意書きは本文へ置く。
  *
- *
  * @see Storybook `Layout/PageHeader`
  */
 export function PageHeaderDescription({ className, ...props }: ComponentProps<"p">) {
@@ -91,7 +88,6 @@ export function PageHeaderDescription({ className, ...props }: ComponentProps<"p
  *
  * 狭い画面ではタイトルの下へ回り込む。操作が増えるほど回り込んだときの縦の占有が増えるため、
  * 数は絞り、副次的なものは `DropdownMenu` へまとめる。
- *
  *
  * @see Storybook `Layout/PageHeader`
  */

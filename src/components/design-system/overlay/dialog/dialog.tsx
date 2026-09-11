@@ -163,7 +163,6 @@ function DialogContent({
 /**
  * title と説明をまとめる領域。
  *
- *
  * @see Storybook `Overlay/Dialog`
  */
 function DialogHeader({ className, ...props }: ComponentProps<"div">) {
@@ -182,7 +181,6 @@ function DialogHeader({ className, ...props }: ComponentProps<"div">) {
  * @remarks
  * 配置だけを担い、操作そのものは持たない。閉じる操作は `DialogClose` を `Button` へ合成して
  * 呼び出し元が置く。
- *
  *
  * @see Storybook `Overlay/Dialog`
  */

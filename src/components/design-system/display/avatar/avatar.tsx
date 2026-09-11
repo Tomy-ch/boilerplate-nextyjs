@@ -98,7 +98,6 @@ function AvatarFallback({ className, ...props }: ComponentProps<typeof AvatarPri
  * 在席状態や種別など、ごく短い補助情報だけに使う。色や点だけでは意味が伝わらないため、状態を
  * 伝える必要がある場合は `sr-only` の文言を子に置くか、隣接する文言で補う。
  *
- *
  * @see Storybook `Display/Avatar`
  */
 function AvatarBadge({ className, ...props }: ComponentProps<"span">) {
@@ -124,7 +123,6 @@ function AvatarBadge({ className, ...props }: ComponentProps<"span">) {
  * 並べる人数が多い場合は、表示する数を呼び出し元が決めて `AvatarGroupCount` で残数を示す。
  * 何人ぶんを表示するかの判断はこの部品では持たない。
  *
- *
  * @see Storybook `Display/Avatar`
  */
 function AvatarGroup({ className, ...props }: ComponentProps<"div">) {
@@ -145,7 +143,6 @@ function AvatarGroup({ className, ...props }: ComponentProps<"div">) {
  *
  * @remarks
  * 大きさは `AvatarGroup` 内の avatar の `size` に追従する。残数の計算と文言は呼び出し元が渡す。
- *
  *
  * @see Storybook `Display/Avatar`
  */

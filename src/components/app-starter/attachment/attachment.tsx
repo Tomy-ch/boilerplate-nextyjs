@@ -155,7 +155,6 @@ export function AttachmentMedia({
 /**
  * 名前と補足を縦に並べる領域。
  *
- *
  * @see Storybook `Display/Attachment`
  */
 export function AttachmentContent({ className, ...props }: ComponentProps<"div">) {
@@ -178,7 +177,6 @@ export function AttachmentContent({ className, ...props }: ComponentProps<"div">
  * 枠に収まらない場合は末尾を省略する。省略された名前だけでは判別できないため、全体を示す
  * 必要がある場合は呼び出し元が `title` 属性などを添える。
  *
- *
  * @see Storybook `Display/Attachment`
  */
 export function AttachmentTitle({ className, ...props }: ComponentProps<"span">) {
@@ -196,7 +194,6 @@ export function AttachmentTitle({ className, ...props }: ComponentProps<"span">)
  *
  * @remarks
  * 進行中や失敗であることはここのテキストで示す（{@link Attachment} の `state` は見た目にしか出ない）。
- *
  *
  * @see Storybook `Display/Attachment`
  */
@@ -219,7 +216,6 @@ export function AttachmentDescription({ className, ...props }: ComponentProps<"s
  *
  * @remarks
  * `vertical` では枠の右上へ重ねて置く。
- *
  *
  * @see Storybook `Display/Attachment`
  */
@@ -310,10 +306,10 @@ export type AttachmentGroupProps = ComponentProps<"section"> & {
 };
 
 /**
- * 複数の添付を横に並べる領域。
+ * 件数・並び順・上限を持たず、複数の添付を横に並べるだけの領域。
  *
  * @remarks
- * 収まらない場合は横スクロールし、添付の先頭で止まる。件数・並び順・上限は持たない。
+ * 収まらない場合は横スクロールし、添付の先頭で止まる。
  *
  * スクロールは `ScrollArea` が引き受けるため、keyboard だけでも横へ送れる。添付そのものが
  * focus を持つ構成では `tabIndex={-1}` を渡し、領域自体の tab stop を外す。

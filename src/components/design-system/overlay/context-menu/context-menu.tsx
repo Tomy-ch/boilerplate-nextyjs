@@ -404,7 +404,6 @@ function ContextMenuSeparator({
  * 表示だけを担い、キーの割り当ては行わない。実際の shortcut は呼び出し元が別途実装する。
  * 割り当てていない表記を置くと、押しても何も起きない案内になる。
  *
- *
  * @see Storybook `Overlay/ContextMenu`
  */
 function ContextMenuShortcut({ className, ...props }: ComponentProps<"span">) {

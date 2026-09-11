@@ -44,7 +44,6 @@ export function FilterBar({ className, label = "絞り込み", ...props }: Filte
  * @remarks
  * 幅の広い要素（検索欄）を先に置くと、狭い画面で操作が折り返しても押しやすい並びになる。
  *
- *
  * @see Storybook `Navigation/FilterBar`
  */
 export function FilterBarControls({ className, ...props }: ComponentProps<"div">) {

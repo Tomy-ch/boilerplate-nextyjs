@@ -18,7 +18,6 @@ import { KeyboardShortcutKeys } from "./keyboard-shortcut-keys";
  * </KeyboardShortcutList>
  * ```
  *
- *
  * @see Storybook `Display/KeyboardShortcut`
  */
 export function KeyboardShortcutList({ className, ...props }: ComponentProps<"dl">) {

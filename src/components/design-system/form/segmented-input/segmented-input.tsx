@@ -182,12 +182,11 @@ export function SegmentedInputSlot({ className, index, mask, ...props }: Segment
 }
 
 /**
- * 区画と区画の間に置く区切り。
+ * 入力に関与せず、支援技術からは隠す、桁のまとまりを目で分けるだけの区切り。
  *
  * @remarks
- * 桁のまとまりを目で分けるための装飾で、入力には関与しない。**支援技術からは隠す。** 入力の値は
- * 実体の `input` が伝えるため、この記号に意味は無い。`separator` role は focus と値を持つ widget を
- * 表すので当てない。
+ * 入力の値は実体の `input` が伝えるため、この記号に意味は無い。`separator` role は focus と値を
+ * 持つ widget を表すので当てない。
  *
  * @see Storybook `Form/SegmentedInput`
  */

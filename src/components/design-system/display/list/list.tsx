@@ -173,7 +173,6 @@ function ListItemMedia({
 /**
  * 見出しと説明をまとめる領域。
  *
- *
  * @see Storybook `Display/List`
  */
 function ListItemContent({ className, ...props }: ComponentProps<"div">) {
@@ -192,7 +191,6 @@ function ListItemContent({ className, ...props }: ComponentProps<"div">) {
 /**
  * 行の主題。
  *
- *
  * @see Storybook `Display/List`
  */
 function ListItemTitle({ className, ...props }: ComponentProps<"div">) {
@@ -210,7 +208,6 @@ function ListItemTitle({ className, ...props }: ComponentProps<"div">) {
  *
  * @remarks
  * 2 行で切り詰める。全文を見せる必要がある場合は `className` で上書きする。
- *
  *
  * @see Storybook `Display/List`
  */
@@ -231,7 +228,6 @@ function ListItemDescription({ className, ...props }: ComponentProps<"p">) {
 /**
  * 行の末尾に置く補助操作の領域。
  *
- *
  * @see Storybook `Display/List`
  */
 function ListItemActions({ className, ...props }: ComponentProps<"div">) {
@@ -247,7 +243,6 @@ function ListItemActions({ className, ...props }: ComponentProps<"div">) {
 /**
  * 行の上へ添える補足の一行。
  *
- *
  * @see Storybook `Display/List`
  */
 function ListItemHeader({ className, ...props }: ComponentProps<"div">) {
@@ -262,7 +257,6 @@ function ListItemHeader({ className, ...props }: ComponentProps<"div">) {
 
 /**
  * 行の下へ添える補足の一行。
- *
  *
  * @see Storybook `Display/List`
  */
@@ -282,7 +276,6 @@ function ListItemFooter({ className, ...props }: ComponentProps<"div">) {
  * @remarks
  * `ul` の直下に置けるよう `li` として render し、読み上げ対象から外す。区切りは装飾であり、
  * 一覧の構造は `ul` と `li` が伝える。
- *
  *
  * @see Storybook `Display/List`
  */

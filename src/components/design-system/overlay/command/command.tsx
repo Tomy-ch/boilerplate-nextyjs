@@ -281,7 +281,6 @@ function CommandItem({ className, ...props }: ComponentProps<typeof CommandPrimi
  * @remarks
  * 表示だけを担い、キー入力は購読しない。shortcut を実際に効かせる処理は feature 側に置く。
  *
- *
  * @see Storybook `Overlay/Command`
  */
 function CommandShortcut({ className, ...props }: ComponentProps<"span">) {

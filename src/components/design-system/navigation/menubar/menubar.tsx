@@ -370,7 +370,6 @@ function MenubarSeparator({
  * </MenubarShortcut>
  * ```
  *
- *
  * @see Storybook `Navigation/Menubar`
  */
 function MenubarShortcut({ className, ...props }: ComponentProps<"kbd">) {

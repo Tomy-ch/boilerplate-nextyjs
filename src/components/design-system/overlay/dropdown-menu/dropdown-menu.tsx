@@ -310,7 +310,6 @@ function DropdownMenuSeparator({
  * </DropdownMenuShortcut>
  * ```
  *
- *
  * @see Storybook `Overlay/DropdownMenu`
  */
 function DropdownMenuShortcut({ className, ...props }: ComponentProps<"kbd">) {

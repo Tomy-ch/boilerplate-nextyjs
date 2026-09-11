@@ -23,11 +23,11 @@ export const ACTION_BAR_POSITION: Readonly<{
 export type ActionBarPosition = (typeof ACTION_BAR_POSITION)[keyof typeof ACTION_BAR_POSITION];
 
 /**
- * 位置ごとの見た目。
+ * 位置ごとの見た目。重なる位置では背景を必ず不透明にする。
  *
  * @remarks
- * `sticky` / `fixed` は内容の上へ重なるため、背景は必ず不透明にする。`bg-muted` のような面の色では
- * なく `bg-background` を使い、上辺の border だけで本文と切り分ける。
+ * `sticky` / `fixed` は内容の上へ重なる。`bg-muted` のような面の色ではなく `bg-background` を
+ * 使い、上辺の border だけで本文と切り分ける。
  *
  * `fixed` の `z-40` は overlay（`z-50`）より下、本文の中の重なりより上に置くための値である。下端の
  * 余白は iOS のホームバーを避けるため safe area と比較して大きいほうを採る。

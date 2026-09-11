@@ -1,13 +1,11 @@
 # 依存更新。
 #
-# cooldown は、版が公開されてから更新 PR を出すまでの待機日数。悪意ある版が公開されてから上流が
-# 検知・撤回するまでの時間を待つための検疫で、窓の長さは blast radius ではなく上流の検知
-# レイテンシに比例させる。セキュリティ更新はこれを飛ばして即時 PR になる（Dependabot 自身の
-# 挙動であり、ここで設定するものではない）。
+# cooldown は、版が公開されてから更新 PR を出すまでの待機日数。窓の長さの導き方は検疫の規約が
+# 持つ（0110 1.1）。セキュリティ更新はこれを飛ばして即時 PR になる —— Dependabot 自身の挙動で、
+# ここで設定するものではない。
 #
-# docker エコシステムは持たない。監査対象の Dockerfile がそもそも無い。
-# mise.toml の pin も Dependabot の対象外で、同じ検疫を tools-upgrade スキルの min_age_days が
-# 手作業側に適用する（0110 1.1）。
+# docker エコシステムは持たない（監査対象の Dockerfile が無い）。mise.toml の pin も対象外で、
+# 同じ検疫は tools-upgrade スキルの min_age_days が手作業側に適用する。
 version: 2
 updates:
   # ---- npm ----

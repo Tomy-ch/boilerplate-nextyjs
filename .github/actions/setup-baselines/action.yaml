@@ -49,11 +49,10 @@ runs:
     # on exactly those two. Naming the store here instead would duplicate the wiring
     # that `.gitmodules` already owns.
     #
-    # The same App also serves the workflows that make ordinary REST calls, because
-    # `GITHUB_TOKEN` is capped at 1,000 requests per hour per repository and the retake
-    # exceeds it. One App rather than two: this key already carries `contents: write` on
-    # both repositories, so the `pull-requests` / `issues` write those callers add is close
-    # to a subset of what a holder of the key can already do.
+    # One App rather than two, even though the same App also serves the workflows that make
+    # ordinary REST calls (workflows/README.md § PR コメント): this key already carries
+    # `contents: write` on both repositories, so the `pull-requests` / `issues` write those
+    # callers add is close to a subset of what a holder of the key can already do.
     #
     # The permissions are named, though, so the token carries only what the baselines
     # need rather than everything the installation grants. `contents: write` covers both

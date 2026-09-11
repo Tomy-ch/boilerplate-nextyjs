@@ -1,9 +1,8 @@
 # runner から外へ出てよい宛先（SSOT）。
 # `make egress-apply` で workflow へ反映し、`make egress-check` で突合する。
 #
-# ここに無い宛先へ出ようとした実行は落ちる（`egress-policy: block`）。**取りこぼすと CI が
-# 止まる**ので、足す根拠は推測ではなく実測に置く —— harden-runner が `audit` で記録した
-# `domain resolved:` 行が、ジョブログにそのまま残っている。
+# ここに無い宛先へ出ようとした実行は落ちる（`egress-policy: block`）。足す根拠は実測に置く ——
+# harden-runner が `audit` で記録した `domain resolved:` 行を、ジョブログから引く。
 #
 #   gh api "repos/<owner>/<repo>/actions/runs/<RUN_ID>/jobs" --jq '.jobs[].id'
 #   gh api "repos/<owner>/<repo>/actions/jobs/<JOB_ID>/logs" \

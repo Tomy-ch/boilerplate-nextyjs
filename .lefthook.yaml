@@ -11,13 +11,9 @@ pre-commit:
   parallel: true
   commands:
     lint:
-      # biome (`pnpm lint`) に続けて ESLint と境界の突合まで回す。biome だけの `pnpm lint` が
-      # 通ってもここは落ちうる —— 差は規則ではなく、続く 2 段の道具にある。
+      # `pnpm lint`（biome だけ）が通ってもここは落ちうる。続く ESLint と境界の突合がある。
       run: pnpm lint:ci
     md-lint:
-      # Markdown の体裁 (markdownlint-cli2)、mermaid 図の構文、`.claude/**` の意味
-      # (skill-lint = frontmatter / 対訳ペアの構造 / 参照の実在性) を検証する。
-      # biome は Markdown を見ないため、この三段で md の壊れを CI 前に止める。
       # Makefile 側も glob に入れるのは、skill-lint が make ターゲット一覧を検査入力に取るため
       # (ターゲットを消すだけのコミットでスキル本文の参照が腐る)。
       glob:
@@ -26,8 +22,7 @@ pre-commit:
         - ".makefiles/**/*.mk"
       run: pnpm lint:md
     test-cached:
-      # pre-commit は Vitest のキャッシュを使い、CI のカバレッジ付き完全実行よりも
-      # 速くフィードバックする。対象の TypeScript・設定・依存定義が変わるときだけ起動する。
+      # キャッシュ付き。対象の TypeScript・設定・依存定義が変わるときだけ起動する。
       glob:
         - "**/*.{ts,tsx}"
         - "package.json"
@@ -35,34 +30,27 @@ pre-commit:
         - "pnpm-workspace.yaml"
       run: make test-cached
     scripts-test-cached:
-      # 補助スクリプトは別 suite なので別コマンドで回す。1:1 ゲートは
-      # src / docs-viewer / tokens / mocks も走査するため、発火条件は scripts/ に絞らない。
+      # 1:1 ゲートは src / docs-viewer / tokens / mocks も走査するため、glob を scripts/ に絞らない。
       glob:
         - "**/*.{ts,tsx}"
         - "vitest.scripts.config.ts"
       run: make scripts-test-cached
     actionlint:
-      # ワークフロー定義の構文と run: ステップのシェルを検査する。
-      # 検査が及ぶのは workflows だけだが、composite action の変更も呼び出し側の
-      # 入力整合を壊すため発火対象に含める (及ぶ範囲と限界は make 側が正)。
-      # 対象が無いコミットでは発火しない。
+      # 検査が及ぶのは workflows だけだが、composite action の変更も呼び出し側の入力整合を
+      # 壊すため発火対象に含める。
       glob:
         - ".github/workflows/*.{yml,yaml}"
         - ".github/actions/**/*.{yml,yaml}"
       run: make actionlint
     actions-shellcheck:
-      # composite action の run: シェルを検査する。actionlint が届かない範囲を
-      # 埋めるため、上の actionlint とは別コマンドとして持つ。
-      # 検査ツール自身も glob に入れるのは、抽出が壊れれば「検査対象があるのに 0 件で緑」
-      # になりうるため (ツール側の突き合わせで落とすが、発火自体は手元で確かめさせる)。
+      # 検査ツール自身も glob に入れるのは、抽出が壊れれば「検査対象があるのに 0 件で緑」に
+      # なりうるため。
       glob:
         - ".github/actions/**/*.{yml,yaml}"
         - "scripts/actions-shellcheck/*.ts"
         - "scripts/lib/*.ts"
       run: make actions-shellcheck
     actions-zizmor:
-      # Actions 定義そのものの静的解析。上の 2 つが届かない観点を埋めるため、
-      # 別コマンドとして持つ (何が届かないかは make 側が正)。
       # 抑止の宣言も発火対象に含める。設定が変われば所見の集合が変わる。
       glob:
         - ".github/workflows/*.{yml,yaml}"
@@ -70,16 +58,10 @@ pre-commit:
         - ".github/zizmor.yml"
       run: make actions-zizmor
     shellcheck:
-      # 単体のシェルスクリプトを検査する。ここに居るのは、依存の導入前に走る
-      # 必要があってシェルで書くしかないもの。TypeScript ではないので
-      # 1:1 ゲートもカバレッジも掛からず、.github の外に居るので actionlint も届かない。
-      # 静的検査だけが唯一の網になる。
+      # 追跡下の単体シェル。TypeScript でも .github の中でもないので、他のどの網にも掛からない。
       glob: "**/*.sh"
       run: make shellcheck
     actions-comment-secret-lint:
-      # PR コメントを投稿するジョブに secret が渡っていないかを検査する。
-      # 規約 (検査ログをそのまま公開コメントへ複製するため本文を作るジョブに secret を
-      # 渡さない) は actionlint では表現できないため、別コマンドとして持つ。
       # 投稿ジョブの同定に action 定義の参照を辿るので、workflow だけでなく
       # .github/actions/** と共有モジュールの変更でも発火させる。
       glob:
@@ -89,19 +71,15 @@ pre-commit:
         - "scripts/lib/*.ts"
       run: make actions-comment-secret-lint
     actions-required-check-lint:
-      # 必須ステータスチェックに登録した context が全 PR で報告されるかを検査する。
-      # 報告されない context は必須チェック待ちのまま永久にマージできず、壊れたことに気づくのは
-      # 変更を入れた PR ではなく次に上がってきた PR になる。判定に要るのは workflow 定義と
-      # ruleset の宣言の 2 つで、どちらの変更でも発火させる。
+      # 判定に要るのは workflow 定義と ruleset の宣言の 2 つで、どちらの変更でも発火させる。
       glob:
         - ".github/workflows/*.{yml,yaml}"
         - ".github/settings/branch-protection.json"
         - "scripts/required-check-lint/*.ts"
       run: make actions-required-check-lint
     api-gen-check:
-      # 取得した契約と生成物の版が揃っているかを検査する。CI は再生成して差分を
-      # 見るが、hook では生成せず版の突合だけを行う。生成は数秒かかるうえ、契約を取得した
-      # まま生成し忘れた状態はこの突合で捕まる。
+      # CI は再生成して差分を見るが、hook は版の突合だけ。生成に数秒かかるのに対し、
+      # 契約を取得したまま生成し忘れた状態はこの突合で捕まる。
       glob:
         - "openapi/**"
         - "src/adapters/gen/**"
@@ -109,21 +87,17 @@ pre-commit:
         - "orval.config.ts"
       run: make api-gen-check
     actions-pin-check:
-      # uses: がロックファイル通りに SHA 固定されているかを検査する。
-      # 検査はネットワークに出ないため hook の速度目標に収まる。
+      # 下の egress-check / images-pin-check と合わせて、いずれもネットワークに出ないため
+      # hook の速度目標に収まる。
       # glob を .github/** と広く取るのは、workflow 定義・composite action 定義・
       # ロックファイルの 3 か所いずれの変更でも発火させる必要があるため。
       glob: ".github/**"
       run: make actions-pin-check
     egress-check:
-      # harden-runner の許可リストが宣言どおりかを検査する。
-      # actions-pin-check と同じくネットワークに出ないため hook の速度目標に収まる。
       # workflow 定義と宣言のどちらの変更でも発火させる。
       glob: ".github/**"
       run: make egress-check
     images-pin-check:
-      # container image の参照がロックファイル通りに digest 固定されているかを検査する。
-      # actions-pin-check と同じくネットワークに出ないため hook の速度目標に収まる。
       # compose 定義・Dockerfile・ロックファイルのいずれの変更でも発火させる。
       # .github/** を含めるのは、workflow / composite action の `uses: docker://` も
       # この機構が digest 固定するため。
@@ -162,7 +136,6 @@ post-merge:
 commit-msg:
   commands:
     commitlint:
-      # コミット規約 の prefix 11 種を検証する。規約外の prefix はここで落ちる。
       # {1} はクォートされずに展開されるため、パスに空白を含む clone でも壊れないよう囲む。
       run: make commitlint COMMIT_MSG_FILE="{1}"
 
@@ -170,11 +143,8 @@ pre-push:
   parallel: true
   commands:
     test-full:
-      # pre-push は Vitest のキャッシュを使わず、CI のカバレッジ付き完全実行と同じ挙動で
-      # 検査する。対象の TypeScript・設定・依存定義が変わるときだけ起動する。
-      #
-      # gate-* 越しに走らせる。帯が ci-first のときだけ CI へ委ねる。
-      # 現在の判定は `make load-status` で確認できる。
+      # キャッシュ無し。CI の完全実行と同じ挙動で、対象が変わるときだけ起動する。
+      # gate-* 越しなので、帯が ci-first のときだけ CI へ委ねる（`make load-status`）。
       glob:
         - "**/*.{ts,tsx}"
         - "package.json"
@@ -182,7 +152,6 @@ pre-push:
         - "pnpm-workspace.yaml"
       run: make gate-test-full
     scripts-test:
-      # 補助スクリプトの suite も CI (scripts-check) と同じ完全実行で回す。
       glob:
         - "**/*.{ts,tsx}"
         - "vitest.scripts.config.ts"
@@ -190,6 +159,5 @@ pre-push:
     typecheck:
       run: make gate-typecheck
     secret-scan:
-      # push 予定のコミット範囲に秘密が含まれていれば fail-closed で止める。
-      # 依存脆弱性スキャン (make trivy-fs) をここに置かないのは、報告のみで落とさない検査だからである。
+      # 依存脆弱性スキャン (make trivy-fs) をここに置かないのは、報告のみで落とさない検査だから。
       run: make secret-scan

@@ -8,15 +8,50 @@
 // 分からない」であり、そのまま緑の報告へ倒すと壊れた瞬間から永久に通る
 // （[README](../README.md)）。理由を本文に書いて、末尾のログを添える。
 import fs from "node:fs";
+import path from "node:path";
 
 import { codeBlock, formatReport, type Summary, summarise } from "./format";
 
-const [, , reportPath, tailPath, outputPath] = process.argv;
+/** 触ってよい場所。作業ツリーと、実行系が中間物を置く場所に限る。 */
+const ALLOWED_ROOTS = [process.cwd(), "/tmp", "/private/tmp"] as const;
 
-if (!reportPath || !tailPath || !outputPath) {
+/** 書き出し先としてだけ許す、ファイルでない綴り。 */
+const ALLOWED_SINKS = ["/dev/stdout", "/dev/stderr", "/dev/null"] as const;
+
+/**
+ * 引数で渡された道を、触ってよい場所の内側に限る。
+ *
+ * @remarks
+ * ここは CI の recipe からも手元からも呼ばれ、**引数をそのまま `fs` へ渡していた**。呼ぶ側を
+ * 間違えれば作業ツリーの外を読み書きできてしまうので、入口で閉じる。区切りまで見るので、
+ * `/tmp` の隣（`/tmpfoo`）は内側にならない。
+ */
+function resolveInside(candidate: string, sinks: readonly string[] = []): string {
+  const resolved = path.resolve(candidate);
+  if (sinks.includes(resolved)) return resolved;
+
+  const inside = ALLOWED_ROOTS.some(
+    (root) =>
+      resolved === path.resolve(root) || resolved.startsWith(`${path.resolve(root)}${path.sep}`),
+  );
+  if (!inside) {
+    process.stderr.write(`触ってよい場所の外を指しています: ${candidate}\n`);
+    process.exit(2);
+  }
+
+  return resolved;
+}
+
+const [, , reportArg, tailArg, outputArg] = process.argv;
+
+if (!reportArg || !tailArg || !outputArg) {
   process.stderr.write("使い方: tsx scripts/test-report <report.json> <tail.log> <出力先>\n");
   process.exit(2);
 }
+
+const reportPath = resolveInside(reportArg);
+const tailPath = resolveInside(tailArg);
+const outputPath = resolveInside(outputArg, ALLOWED_SINKS);
 
 const tailLog = ((): string => {
   try {

@@ -154,16 +154,18 @@ export function codeBlock(text: string, limit = BLOCK_BUDGET): readonly string[]
 export function collectVitestFailures(report: VitestReport): readonly Failure[] {
   const failures: Failure[] = [];
 
-  for (const file of report.testResults ?? []) {
+  for (const file of asArray<NonNullable<VitestReport["testResults"]>[number]>(
+    report.testResults,
+  )) {
     const name = file.name ?? "(不明なファイル)";
-    const cases = file.assertionResults ?? [];
+    const cases = asArray<NonNullable<typeof file.assertionResults>[number]>(file.assertionResults);
 
     for (const testCase of cases) {
       if (testCase.status !== "failed") continue;
       failures.push({
         file: name,
         name: testCase.fullName ?? "(不明なケース)",
-        message: (testCase.failureMessages ?? []).join("\n").trim() || NO_REASON,
+        message: asArray<string>(testCase.failureMessages).join("\n").trim() || NO_REASON,
       });
     }
 
@@ -217,7 +219,8 @@ export function collectPlaywrightFailures(
     }
   }
 
-  for (const error of report.errors ?? []) {
+  // **配列でない値を反復させない。** 文字列を渡されると 1 文字につき 1 件の偽の失敗を組む。
+  for (const error of asArray<{ message?: string }>(report.errors)) {
     failures.push({
       file: "(spec の外)",
       name: "(実行系の失敗)",

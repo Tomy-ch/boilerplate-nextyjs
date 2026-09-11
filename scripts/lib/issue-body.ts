@@ -103,8 +103,23 @@ export function drawModelProse(text: string): string {
  * 「呼ぶ側がそう言った」ではなく「この口を通った」という意味になります。
  */
 function assertFenced(text: string): void {
-  const fences = text.match(/^ {0,3}(`{3,}|~{3,})/gm) ?? [];
-  if (fences.length % 2 !== 0) {
+  let open: string | undefined;
+
+  for (const line of text.split("\n")) {
+    const fence = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+    if (fence === undefined) continue;
+
+    if (open === undefined) {
+      open = fence;
+      continue;
+    }
+
+    // CommonMark: 閉じられるのは、同じ記号で開いたものと同じ長さ以上のフェンスだけ。
+    // 数の偶奇だけを見ると、`````` で開いて ``` が 2 本並んだだけの壊れた本文も通る。
+    if (fence[0] === open[0] && fence.length >= open.length) open = undefined;
+  }
+
+  if (open !== undefined) {
     throw new Error(
       "authored の本文に閉じていないコードフェンスがあります。道具の文言は中身より長いフェンスで囲むか、tool-output で渡してください。",
     );

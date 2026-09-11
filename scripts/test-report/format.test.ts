@@ -14,7 +14,7 @@ import {
 } from "./format";
 
 /** 見分けられなかったら本文を組む前に落とす。テスト側で `!` を書かないため。 */
-function summaryOf(report: unknown): Summary {
+function summariseOf(report: unknown): Summary {
   const summary = summarise(JSON.stringify(report));
   if (!summary) throw new Error("レポートの形を見分けられませんでした");
   return summary;
@@ -107,16 +107,36 @@ describe("collectVitestFailures", () => {
   it("空のレポートで落ちない", () => {
     expect(collectVitestFailures({})).toEqual([]);
   });
+
+  it("testResults が配列でなければ 0 件として読む", () => {
+    expect(collectVitestFailures({ testResults: {} as never })).toEqual([]);
+  });
+
+  it("failureMessages が配列でなければ理由なしとして残す", () => {
+    const report: VitestReport = {
+      testResults: [
+        {
+          name: "/repo/d.test.ts",
+          status: "failed",
+          assertionResults: [
+            { fullName: "d", status: "failed", failureMessages: "壊れた" as never },
+          ],
+        },
+      ],
+    };
+
+    expect(collectVitestFailures(report)[0]?.message).toBe("(理由の記録なし)");
+  });
 });
 
 describe("formatReport", () => {
   // ----- 正常系 -----
   it("全件通ったことを件数つきで述べる", () => {
-    expect(formatReport(summaryOf(PASSING), "tail")).toBe("全 3 件のテストが通りました。");
+    expect(formatReport(summariseOf(PASSING), "tail")).toBe("全 3 件のテストが通りました。");
   });
 
   it("失敗の全件と、母数に対する件数を述べる", () => {
-    const body = formatReport(summaryOf(FAILING), "tail");
+    const body = formatReport(summariseOf(FAILING), "tail");
 
     expect(body).toContain("全 3 件中 **1 件が失敗**");
     expect(body).toContain("以下がその全件です");
@@ -125,14 +145,14 @@ describe("formatReport", () => {
   });
 
   it("通ったケースを本文へ出さない", () => {
-    expect(formatReport(summaryOf(FAILING), "tail")).not.toContain("a > ok");
+    expect(formatReport(summariseOf(FAILING), "tail")).not.toContain("a > ok");
   });
 
   // ----- 異常系 -----
   it("テストが落ちていないのに実行が失敗したら、判定を持つログを添える", () => {
     const report: VitestReport = { numTotalTests: 3, success: false, testResults: [] };
     const body = formatReport(
-      summaryOf(report),
+      summariseOf(report),
       "ERROR: Coverage for lines (99%) does not meet threshold",
     );
 
@@ -154,7 +174,8 @@ describe("formatReport", () => {
     expect(body).toContain("本文の長さの上限に達したため");
     expect(body).toContain("JSON レポート");
     expect(body).not.toContain("以下がその全件です");
-    expect(body.length).toBeLessThan(6_000);
+    // 上限そのものに紐づける。固定値と比べると、budget を無視した実装でも通り続ける。
+    expect(body.length).toBeLessThan(2_000 * 1.5);
   });
 
   it("1 件も載らない本文にはしない", () => {
@@ -301,6 +322,11 @@ describe("collectPlaywrightFailures", () => {
   it("spec が 1 件も無くても落ちない", () => {
     expect(collectPlaywrightFailures([], {})).toEqual([]);
   });
+
+  it("errors が配列でなければ 0 件として読み、偽の失敗を組まない", () => {
+    // 文字列を反復させると 1 文字につき 1 件の失敗を捏造する。
+    expect(collectPlaywrightFailures([], { errors: "oops" as never })).toEqual([]);
+  });
 });
 
 describe("summarise", () => {
@@ -335,6 +361,39 @@ describe("summarise", () => {
     const summary = summarise(JSON.stringify({ stats: { unexpected: 1 }, suites: [] }));
 
     expect(summary?.failedWithoutTestFailure).toBe(true);
+  });
+
+  it("到達しなかったファイル分の失敗で、母数が失敗件数を下回らない", () => {
+    // この下限が無いと「全 0 件中 2 件が失敗」という自分に矛盾した見出しになる。
+    const report: VitestReport = {
+      numTotalTests: 0,
+      testResults: [
+        { name: "/repo/a.test.ts", status: "failed", message: "boom", assertionResults: [] },
+        { name: "/repo/b.test.ts", status: "failed", message: "boom", assertionResults: [] },
+      ],
+    };
+
+    expect(summariseOf(report).total).toBe(2);
+  });
+
+  it("Playwright 側でも母数が失敗件数を下回らない", () => {
+    const report = {
+      stats: { expected: 0, unexpected: 0, flaky: 0, skipped: 0 },
+      suites: [
+        {
+          file: "a.spec.ts",
+          specs: [
+            { title: "落ちる", file: "a.spec.ts", tests: [{ status: "unexpected", results: [] }] },
+          ],
+        },
+      ],
+    };
+
+    expect(summariseOf(report).total).toBe(1);
+  });
+
+  it("トップレベルがオブジェクトでない JSON を判定できないとする", () => {
+    expect(summarise("42")).toBeUndefined();
   });
 
   it("success を持たない Vitest のレポートをテスト以外の失敗にしない", () => {
@@ -373,12 +432,11 @@ describe("codeBlock", () => {
 });
 
 describe("codeSpan", () => {
-  // ----- 正常系 -----
+  // 失敗も拒否も持たない変換なので、正常系だけで軸を取る（ADR 0090「契約の内側で成功なら正常系」）。
   it("1 行のコードスパンにする", () => {
     expect(codeSpan("a > b")).toBe("`a > b`");
   });
 
-  // ----- 異常系 -----
   it("改行を潰して見出しから溢れさせない", () => {
     expect(codeSpan("先頭\n\n## 偽の見出し")).toBe("`先頭 ## 偽の見出し`");
   });
@@ -389,5 +447,12 @@ describe("codeSpan", () => {
 
   it("空の値でも空のスパンにしない", () => {
     expect(codeSpan("   ")).toBe("`(空)`");
+  });
+
+  it("mention と他スレッドへの生リンクをコードスパンの中へ閉じる", () => {
+    // コードスパンの中は記法として読まれないので、通知も逆参照も起きない。
+    expect(codeSpan("@someone https://github.com/o/r/issues/1")).toBe(
+      "`@someone https://github.com/o/r/issues/1`",
+    );
   });
 });

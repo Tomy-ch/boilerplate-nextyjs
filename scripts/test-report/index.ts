@@ -13,10 +13,14 @@ import path from "node:path";
 import { codeBlock, formatReport, type Summary, summarise } from "./format";
 
 /** 触ってよい場所。作業ツリーと、実行系が中間物を置く場所に限る。 */
-const ALLOWED_ROOTS = [process.cwd(), "/tmp", "/private/tmp"] as const;
+const ALLOWED_ROOTS: readonly string[] = [
+  path.resolve(process.cwd()),
+  path.resolve("/tmp"),
+  path.resolve("/private/tmp"),
+];
 
 /** 書き出し先としてだけ許す、ファイルでない綴り。 */
-const ALLOWED_SINKS = ["/dev/stdout", "/dev/stderr", "/dev/null"] as const;
+const ALLOWED_SINKS: readonly string[] = ["/dev/stdout", "/dev/stderr", "/dev/null"];
 
 /**
  * 引数で渡された道を、触ってよい場所の内側に限る。
@@ -28,18 +32,17 @@ const ALLOWED_SINKS = ["/dev/stdout", "/dev/stderr", "/dev/null"] as const;
  */
 function resolveInside(candidate: string, sinks: readonly string[] = []): string {
   const resolved = path.resolve(candidate);
-  if (sinks.includes(resolved)) return resolved;
 
-  const inside = ALLOWED_ROOTS.some(
-    (root) =>
-      resolved === path.resolve(root) || resolved.startsWith(`${path.resolve(root)}${path.sep}`),
-  );
-  if (!inside) {
-    process.stderr.write(`触ってよい場所の外を指しています: ${candidate}\n`);
-    process.exit(2);
+  for (const sink of sinks) {
+    if (resolved === sink) return sink;
   }
 
-  return resolved;
+  for (const root of ALLOWED_ROOTS) {
+    if (resolved === root) return root;
+    if (resolved.startsWith(`${root}${path.sep}`)) return resolved;
+  }
+
+  throw new Error(`触ってよい場所の外を指しています: ${candidate}`);
 }
 
 const [, , reportArg, tailArg, outputArg] = process.argv;

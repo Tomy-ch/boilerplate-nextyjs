@@ -95,4 +95,21 @@ describe("drawModelProse", () => {
       "https://github.com/o/r/commit/abc1234",
     );
   });
+  it("閉じていないフェンスを持つ authored を弾く", () => {
+    expect(() =>
+      composeIssueBody({
+        evidence: { kind: "authored", text: "### 見出し\n\n```text\n道具の出力" },
+        note: "n",
+      }),
+    ).toThrow(/閉じていないコードフェンス/);
+  });
+
+  it("閉じたフェンスを持つ authored を通す", () => {
+    const body = composeIssueBody({
+      evidence: { kind: "authored", text: "### 見出し\n\n```text\n道具の出力\n```" },
+      note: "n",
+    });
+
+    expect(body).toContain("### 見出し");
+  });
 });

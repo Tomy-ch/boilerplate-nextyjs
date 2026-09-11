@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import { parseSpecs } from "../lib/playwright-report";
+
 import {
   codeBlock,
+  codeSpan,
   collectPlaywrightFailures,
   collectVitestFailures,
   formatReport,
-  type PlaywrightReport,
   type Summary,
   summarise,
   type VitestReport,
@@ -13,7 +15,7 @@ import {
 
 /** 見分けられなかったら本文を組む前に落とす。テスト側で `!` を書かないため。 */
 function summaryOf(report: unknown): Summary {
-  const summary = summarise(report);
+  const summary = summarise(JSON.stringify(report));
   if (!summary) throw new Error("レポートの形を見分けられませんでした");
   return summary;
 }
@@ -160,13 +162,13 @@ describe("formatReport", () => {
   });
 });
 
-const PW_FAILING: PlaywrightReport = {
+const PW_FAILING = {
   stats: { expected: 2, unexpected: 1, flaky: 0, skipped: 0 },
   suites: [
     {
       title: "a.spec.ts",
       file: "e2e/journeys/a.spec.ts",
-      specs: [{ title: "通る経路", ok: true, tests: [] }],
+      specs: [{ title: "通る経路", ok: true, tests: [{ status: "expected", results: [] }] }],
       suites: [
         {
           title: "入れ子の suite",
@@ -177,6 +179,7 @@ const PW_FAILING: PlaywrightReport = {
               ok: false,
               tests: [
                 {
+                  status: "unexpected",
                   results: [
                     { status: "failed", error: { message: "Timed out waiting for locator" } },
                   ],
@@ -190,10 +193,15 @@ const PW_FAILING: PlaywrightReport = {
   ],
 };
 
+/** レポートの実物と同じく、文字列から spec を取り出して渡す。 */
+function specsOf(report: unknown) {
+  return parseSpecs(JSON.stringify(report));
+}
+
 describe("collectPlaywrightFailures", () => {
   // ----- 正常系 -----
-  it("入れ子の suite を降りて、ok が偽の spec だけを拾う", () => {
-    expect(collectPlaywrightFailures(PW_FAILING)).toEqual([
+  it("入れ子の suite を降りて、落ちた test だけを拾う", () => {
+    expect(collectPlaywrightFailures(specsOf(PW_FAILING), PW_FAILING)).toEqual([
       {
         file: "e2e/journeys/a.spec.ts",
         name: "落ちる経路",
@@ -202,38 +210,48 @@ describe("collectPlaywrightFailures", () => {
     ]);
   });
 
-  it("spec の外で落ちたものを errors から拾う", () => {
-    const report: PlaywrightReport = { errors: [{ message: "config を読めませんでした" }] };
+  it("再試行で通った flaky も落ちたものとして拾う", () => {
+    const report = {
+      suites: [
+        {
+          file: "a.spec.ts",
+          specs: [
+            {
+              title: "揺れる経路",
+              file: "a.spec.ts",
+              // Playwright は flaky な spec を ok: true にする。ここで足切りすると取りこぼす。
+              ok: true,
+              tests: [
+                {
+                  status: "flaky",
+                  results: [{ status: "failed", error: { message: "1 度目に落ちた" } }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
 
-    expect(collectPlaywrightFailures(report)).toEqual([
-      { file: "(spec の外)", name: "(実行系の失敗)", message: "config を読めませんでした" },
+    expect(collectPlaywrightFailures(specsOf(report), report)).toEqual([
+      { file: "a.spec.ts", name: "揺れる経路", message: "1 度目に落ちた" },
     ]);
   });
 
-  // ----- 異常系 -----
-  it("通った spec しかなければ空にする", () => {
-    const report: PlaywrightReport = { suites: [{ specs: [{ title: "ok", ok: true }] }] };
-
-    expect(collectPlaywrightFailures(report)).toEqual([]);
-  });
-
-  it("空のレポートで落ちない", () => {
-    expect(collectPlaywrightFailures({})).toEqual([]);
-  });
-
   it("results[].errors から複数の文言を拾い、重複を畳む", () => {
-    const report: PlaywrightReport = {
+    const report = {
       suites: [
         {
+          file: "a.spec.ts",
           specs: [
             {
               title: "落ちる",
-              ok: false,
+              file: "a.spec.ts",
               tests: [
                 {
+                  status: "unexpected",
                   results: [
                     {
-                      status: "failed",
                       error: { message: "同じ文言" },
                       errors: [{ message: "同じ文言" }, { message: "別の文言" }],
                     },
@@ -246,66 +264,81 @@ describe("collectPlaywrightFailures", () => {
       ],
     };
 
-    expect(collectPlaywrightFailures(report)[0]?.message).toBe("同じ文言\n別の文言");
+    expect(collectPlaywrightFailures(specsOf(report), report)[0]?.message).toBe(
+      "同じ文言\n別の文言",
+    );
+  });
+
+  it("spec の外で落ちたものを errors から拾う", () => {
+    const report = { suites: [], errors: [{ message: "config を読めませんでした" }] };
+
+    expect(collectPlaywrightFailures(specsOf(report), report)).toEqual([
+      { file: "(spec の外)", name: "(実行系の失敗)", message: "config を読めませんでした" },
+    ]);
+  });
+
+  // ----- 異常系 -----
+  it("通った spec しかなければ空にする", () => {
+    const report = {
+      suites: [{ specs: [{ title: "ok", tests: [{ status: "expected", results: [] }] }] }],
+    };
+
+    expect(collectPlaywrightFailures(specsOf(report), report)).toEqual([]);
   });
 
   it("欠けだらけの spec でも落とさず、欠けた場所を名指しする", () => {
-    const report: PlaywrightReport = {
-      suites: [{ specs: [{ ok: false }] }],
+    const report = {
+      suites: [{ specs: [{ tests: [{ status: "unexpected" }] }] }],
       errors: [{}],
     };
 
-    expect(collectPlaywrightFailures(report)).toEqual([
+    expect(collectPlaywrightFailures(specsOf(report), report)).toEqual([
       { file: "(不明なファイル)", name: "(不明なケース)", message: "(理由の記録なし)" },
       { file: "(spec の外)", name: "(実行系の失敗)", message: "(理由の記録なし)" },
     ]);
   });
 
-  it("文言を持たない result を理由なしとして残す", () => {
-    const report: PlaywrightReport = {
-      suites: [{ file: "a.spec.ts", specs: [{ title: "落ちる", ok: false, tests: [{}] }] }],
-    };
-
-    expect(collectPlaywrightFailures(report)[0]?.message).toBe("(理由の記録なし)");
+  it("spec が 1 件も無くても落ちない", () => {
+    expect(collectPlaywrightFailures([], {})).toEqual([]);
   });
 });
 
 describe("summarise", () => {
   // ----- 正常系 -----
   it("Vitest のレポートを見分ける", () => {
-    expect(summarise(PASSING)?.total).toBe(3);
+    expect(summarise(JSON.stringify(PASSING))?.total).toBe(3);
   });
 
   it("Playwright のレポートを見分け、母数を stats から足す", () => {
-    expect(summarise(PW_FAILING)?.total).toBe(3);
-    expect(summarise(PW_FAILING)?.failures).toHaveLength(1);
+    expect(summarise(JSON.stringify(PW_FAILING))?.total).toBe(3);
+    expect(summarise(JSON.stringify(PW_FAILING))?.failures).toHaveLength(1);
   });
 
   // ----- 異常系 -----
   it("どちらでもない形は判定できないとして undefined を返す", () => {
-    expect(summarise({ hello: "world" })).toBeUndefined();
+    expect(summarise(JSON.stringify({ hello: "world" }))).toBeUndefined();
   });
 
   it("オブジェクトでないものを渡されても落ちない", () => {
     expect(summarise("not json")).toBeUndefined();
-    expect(summarise(null)).toBeUndefined();
+    expect(summarise("null")).toBeUndefined();
   });
 
   it("stats を持たない Playwright のレポートを母数 0 で通す", () => {
-    const summary = summarise({ suites: [] });
+    const summary = summarise(JSON.stringify({ suites: [] }));
 
     expect(summary?.total).toBe(0);
     expect(summary?.failedWithoutTestFailure).toBe(false);
   });
 
   it("spec が 1 件も落ちていないのに unexpected があるものを、テスト以外の失敗とする", () => {
-    const summary = summarise({ stats: { unexpected: 1 }, suites: [] });
+    const summary = summarise(JSON.stringify({ stats: { unexpected: 1 }, suites: [] }));
 
     expect(summary?.failedWithoutTestFailure).toBe(true);
   });
 
   it("success を持たない Vitest のレポートをテスト以外の失敗にしない", () => {
-    expect(summarise({ testResults: [] })?.failedWithoutTestFailure).toBe(false);
+    expect(summarise(JSON.stringify({ testResults: [] }))?.failedWithoutTestFailure).toBe(false);
   });
 });
 
@@ -336,5 +369,25 @@ describe("codeBlock", () => {
 
     expect(body).toContain("50 文字あり、先頭 10 文字");
     expect(body.startsWith("x".repeat(10))).toBe(true);
+  });
+});
+
+describe("codeSpan", () => {
+  // ----- 正常系 -----
+  it("1 行のコードスパンにする", () => {
+    expect(codeSpan("a > b")).toBe("`a > b`");
+  });
+
+  // ----- 異常系 -----
+  it("改行を潰して見出しから溢れさせない", () => {
+    expect(codeSpan("先頭\n\n## 偽の見出し")).toBe("`先頭 ## 偽の見出し`");
+  });
+
+  it("中身より長いバッククォートで囲む", () => {
+    expect(codeSpan("``` 閉じる ```")).toBe("```` ``` 閉じる ``` ````");
+  });
+
+  it("空の値でも空のスパンにしない", () => {
+    expect(codeSpan("   ")).toBe("`(空)`");
   });
 });

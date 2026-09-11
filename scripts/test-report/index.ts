@@ -9,7 +9,7 @@
 // （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。理由を本文に書いて、末尾のログを添える。
 import fs from "node:fs";
 
-import { codeBlock, formatReport, summarise } from "./format";
+import { codeBlock, formatReport, type Summary, summarise } from "./format";
 
 const [, , reportPath, tailPath, outputPath] = process.argv;
 
@@ -40,19 +40,19 @@ const body = ((): string => {
     ].join("\n");
   }
 
-  let parsed: unknown;
+  let summary: Summary | undefined;
   try {
-    parsed = JSON.parse(raw);
+    summary = summarise(raw);
   } catch {
     return [
-      "**JSON レポートを読めませんでした（壊れた JSON）。**",
+      "**JSON レポートを読めませんでした（形が期待と違います）。**",
+      "失敗が無かったのか、レポートの形が変わったのかを、この報告からは決められません。",
       "末尾のログを添えます。",
       "",
       ...codeBlock(tailLog.trim()),
     ].join("\n");
   }
 
-  const summary = summarise(parsed);
   if (!summary) {
     return [
       "**JSON レポートの形を見分けられませんでした**（Vitest でも Playwright でもない）。",

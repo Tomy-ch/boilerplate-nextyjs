@@ -8,6 +8,15 @@
 // **何件のうち何件を出したかを必ず書く。** 出力を見た人が「これで全部か」を判断できないと、部分読みと
 // 同じことになる。
 
+import {
+  asArray,
+  isFailed,
+  type JSONResult,
+  type JSONSpec,
+  type JSONTest,
+  parseSpecs,
+} from "../lib/playwright-report";
+
 /** 失敗 1 件。どのファイルのどのケースが、何を言って落ちたか。 */
 export type Failure = {
   readonly file: string;
@@ -40,27 +49,18 @@ export type VitestReport = {
   }[];
 };
 
-/** Playwright の JSON レポートのうち、報告に要る部分だけ。入れ子を辿るためだけの形なので外へ出さない。 */
-type PlaywrightSuite = {
-  readonly title?: string;
-  readonly file?: string;
-  readonly suites?: readonly PlaywrightSuite[];
-  readonly specs?: readonly {
-    readonly title?: string;
-    readonly file?: string;
-    readonly ok?: boolean;
-    readonly tests?: readonly {
-      readonly results?: readonly {
-        readonly status?: string;
-        readonly error?: { readonly message?: string };
-        readonly errors?: readonly { readonly message?: string }[];
-      }[];
-    }[];
-  }[];
-};
-
+/**
+ * Playwright のレポートのうち、spec の一覧以外に読むもの。
+ *
+ * @remarks
+ * **spec の辿り方と「落ちた」の判定は [lib/playwright-report](../lib/playwright-report.ts) が持ちます。**
+ * 同じ形を読むのは story 単位（`scripts/vrt`）と画面単位（`scripts/e2e`）で先例があり、ここが
+ * 3 人目です。写すと判定が割れます —— 実際、spec の `ok` で足切りすると **flaky（再試行で通ったが
+ * 1 度落ちた）を取りこぼします**（[0159](../../docs/adr/0159-script-structure.md)）。
+ */
 export type PlaywrightReport = {
-  readonly suites?: readonly PlaywrightSuite[];
+  /** spec の一覧はここでは読まない。`parseSpecs` が持つ。 */
+  readonly suites?: unknown;
   readonly errors?: readonly { readonly message?: string }[];
   readonly stats?: {
     readonly expected?: number;
@@ -108,6 +108,23 @@ const BLOCK_BUDGET = 8_000;
 function clamp(text: string, limit: number): string {
   if (text.length <= limit) return text;
   return `${text.slice(0, limit)}\n\n... (この文言は ${text.length} 文字あり、先頭 ${limit} 文字だけを載せています。全文は JSON レポートにあります)`;
+}
+
+/**
+ * 道具が吐いた文字列を、1 行のコードスパンにする。
+ *
+ * @remarks
+ * **見出しとファイル名も素通しにしません。** ケース名（`it` の説明文・story 名）とファイル名は
+ * 失敗の文言と同じく**このリポジトリが書いたものではなく**、PR を出した側が決めます。素で
+ * `### ${name}` に入れると、`@利用者` の通知と偽の見出し・偽のリンクが CI の名義で公開の面に
+ * 載り、取り消せません。改行を潰して 1 行にし、中身より長いバッククォートで囲みます。
+ */
+export function codeSpan(text: string): string {
+  const flat = decolour(text).replace(/\s+/g, " ").trim() || "(空)";
+  const longest = Math.max(0, ...[...flat.matchAll(/`+/g)].map((run) => run[0].length));
+  const fence = "`".repeat(longest + 1);
+  const pad = flat.startsWith("`") || flat.endsWith("`") ? " " : "";
+  return `${fence}${pad}${flat}${pad}${fence}`;
 }
 
 /**
@@ -167,37 +184,38 @@ export function collectVitestFailures(report: VitestReport): readonly Failure[] 
  * Playwright のレポートから失敗を全件取り出す。
  *
  * @remarks
- * suite は入れ子になるので再帰で歩きます。**`ok` が偽の spec を拾う**ので、retry で最終的に通ったものは
- * 含みません。spec の外で落ちたもの（config の読み込み失敗など）は `errors` が持つので、そちらも足します。
+ * **落ちたかの判定は `isFailed` に委ねます** —— `unexpected` と `flaky` の 2 つが落ちた側で、
+ * spec の `ok` で見ると flaky が通ったことになります。spec の外で落ちたもの（config の読み込み
+ * 失敗など）は `errors` が持つので、そちらも足します。
  */
-export function collectPlaywrightFailures(report: PlaywrightReport): readonly Failure[] {
+export function collectPlaywrightFailures(
+  specs: readonly JSONSpec[],
+  report: PlaywrightReport,
+): readonly Failure[] {
   const failures: Failure[] = [];
 
-  const walk = (suite: PlaywrightSuite, inheritedFile: string): void => {
-    const file = suite.file ?? inheritedFile;
+  for (const spec of specs) {
+    for (const test of asArray<JSONTest>(spec.tests)) {
+      if (!isFailed(test)) continue;
 
-    for (const spec of suite.specs ?? []) {
-      if (spec.ok !== false) continue;
-      const messages = (spec.tests ?? [])
-        .flatMap((test) => test.results ?? [])
-        .filter((result) => result.status !== "passed")
+      const messages = asArray<JSONResult>(test.results)
         .flatMap((result) => [
-          result.error?.message ?? "",
-          ...(result.errors ?? []).map((error) => error.message ?? ""),
+          typeof (result.error as { message?: unknown })?.message === "string"
+            ? String((result.error as { message: string }).message)
+            : "",
+          ...asArray<{ message?: unknown }>(result.errors).map((error) =>
+            typeof error.message === "string" ? error.message : "",
+          ),
         ])
         .filter(Boolean);
 
       failures.push({
-        file: spec.file ?? file,
-        name: spec.title ?? "(不明なケース)",
+        file: typeof spec.file === "string" ? spec.file : "(不明なファイル)",
+        name: typeof spec.title === "string" ? spec.title : "(不明なケース)",
         message: [...new Set(messages)].join("\n").trim() || NO_REASON,
       });
     }
-
-    for (const child of suite.suites ?? []) walk(child, file);
-  };
-
-  for (const suite of report.suites ?? []) walk(suite, suite.file ?? "(不明なファイル)");
+  }
 
   for (const error of report.errors ?? []) {
     failures.push({
@@ -216,28 +234,40 @@ export function collectPlaywrightFailures(report: PlaywrightReport): readonly Fa
  * @remarks
  * 見分けは**その実行系にしか無いキーの有無**で行い、内容の語彙は読みません。どちらでもないものは
  * `undefined` を返し、呼び出し側が「判定できない」と報告します —— 0 件の成功へ倒しません。
+ *
+ * **母数は実際に報告する失敗を下回らせません。** ケースへ到達せずに落ちたファイルは
+ * `numTotalTests` に寄与しないので、素で書くと「全 0 件中 2 件が失敗」という自分に矛盾した
+ * 見出しになります。
+ *
+ * @param raw - JSON レポートの中身そのもの
  */
-export function summarise(report: unknown): Summary | undefined {
-  if (typeof report !== "object" || report === null) return undefined;
+export function summarise(raw: string): Summary | undefined {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+  if (typeof parsed !== "object" || parsed === null) return undefined;
 
-  if ("testResults" in report) {
-    const vitest = report as VitestReport;
+  if ("testResults" in parsed) {
+    const vitest = parsed as VitestReport;
     const failures = collectVitestFailures(vitest);
     return {
-      total: vitest.numTotalTests ?? 0,
+      total: Math.max(vitest.numTotalTests ?? 0, failures.length),
       failures,
       failedWithoutTestFailure: failures.length === 0 && vitest.success === false,
     };
   }
 
-  if ("stats" in report || "suites" in report) {
-    const playwright = report as PlaywrightReport;
+  if ("stats" in parsed || "suites" in parsed) {
+    const playwright = parsed as PlaywrightReport;
     const stats = playwright.stats ?? {};
     const total =
       (stats.expected ?? 0) + (stats.unexpected ?? 0) + (stats.flaky ?? 0) + (stats.skipped ?? 0);
-    const failures = collectPlaywrightFailures(playwright);
+    const failures = collectPlaywrightFailures(parseSpecs(raw), playwright);
     return {
-      total,
+      total: Math.max(total, failures.length),
       failures,
       failedWithoutTestFailure: failures.length === 0 && (stats.unexpected ?? 0) > 0,
     };
@@ -297,9 +327,9 @@ export function formatReport(summary: Summary, tailLog: string, budget = BODY_BU
 
   for (const failure of failures) {
     const block = [
-      `### ${failure.name}`,
+      `### ${codeSpan(failure.name)}`,
       "",
-      `\`${failure.file}\``,
+      codeSpan(failure.file),
       "",
       ...codeBlock(failure.message),
       "",

@@ -7,7 +7,6 @@ coverage-exclusions:
   - "src/features/admin/products/products.fixture.ts"
   - "src/features/admin/products/list/list.fixture.ts"
   - "src/features/admin/users/users.fixture.ts"
-  - "src/features/admin/inquiries/inquiries.fixture.ts"
 ---
 
 # admin

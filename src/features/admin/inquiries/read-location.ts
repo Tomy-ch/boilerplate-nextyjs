@@ -8,7 +8,7 @@ import { type AdminInquiryListLocation, CURSOR_KEY, TRAIL_KEY } from "./query";
  * URL を読む側。**組む側（[`query.ts`](query.ts)）と分けてある。**
  *
  * @remarks
- * 分ける理由は商品一覧（[`../../products/list/read-location.ts`](../../products/list/read-location.ts)）と
+ * 分ける理由は商品一覧（[`../products/list/read-location.ts`](../products/list/read-location.ts)）と
  * 同じで、読む地点と組む地点が別の束に載るためです。
  */
 

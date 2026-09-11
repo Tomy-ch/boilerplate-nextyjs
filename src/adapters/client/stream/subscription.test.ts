@@ -138,6 +138,51 @@ async function settle(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+/** ブラウザの `EventSource` の代わり。組み立てと登録された listener だけを覚える。 */
+class FakeEventSource {
+  static instances: FakeEventSource[] = [];
+
+  readonly listeners = new Map<string, ((event: Event) => void)[]>();
+
+  closed = false;
+
+  readonly url: string;
+
+  constructor(url: string) {
+    this.url = url;
+    FakeEventSource.instances.push(this);
+  }
+
+  addEventListener(type: string, listener: (event: Event) => void): void {
+    this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
+  }
+
+  close(): void {
+    this.closed = true;
+  }
+
+  emit(type: string, event: Event): void {
+    for (const listener of this.listeners.get(type) ?? []) {
+      listener(event);
+    }
+  }
+}
+
+/** 発券の中継が返す応答。 */
+function ticketResponse(): Response {
+  return new Response(JSON.stringify({ url: STREAM_URL, expiresAt: "2100-01-01T00:00:00.000Z" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  FakeEventSource.instances = [];
+});
+
 describe("openStream", () => {
   // ----- 接続 -----
   it("開始位置を載せて繋ぐ", async () => {
@@ -539,54 +584,8 @@ describe("openStream", () => {
 
     expect(stream.sources).toHaveLength(1);
   });
-});
 
-/** ブラウザの `EventSource` の代わり。組み立てと登録された listener だけを覚える。 */
-class FakeEventSource {
-  static instances: FakeEventSource[] = [];
-
-  readonly listeners = new Map<string, ((event: Event) => void)[]>();
-
-  closed = false;
-
-  readonly url: string;
-
-  constructor(url: string) {
-    this.url = url;
-    FakeEventSource.instances.push(this);
-  }
-
-  addEventListener(type: string, listener: (event: Event) => void): void {
-    this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
-  }
-
-  close(): void {
-    this.closed = true;
-  }
-
-  emit(type: string, event: Event): void {
-    for (const listener of this.listeners.get(type) ?? []) {
-      listener(event);
-    }
-  }
-}
-
-/** 発券の中継が返す応答。 */
-function ticketResponse(): Response {
-  return new Response(JSON.stringify({ url: STREAM_URL, expiresAt: "2100-01-01T00:00:00.000Z" }), {
-    status: 200,
-    headers: { "content-type": "application/json" },
-  });
-}
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-  vi.useRealTimers();
-  vi.restoreAllMocks();
-  FakeEventSource.instances = [];
-});
-
-describe("openStream（既定の道具）", () => {
+  // ----- 既定の道具（差し替えずに動かす経路） -----
   /** 道具を差し替えずに購読を開く。ブラウザ側の既定がそのまま動く。 */
   function openWithBrowserDefaults(
     onEvents: (events: readonly ParsedEvent[]) => void = () => undefined,

@@ -10,7 +10,7 @@
 状態遷移（close / reopen）も担当も持たない（契約が持たない）。
 
 やり取りの中身はバックエンドが持つ。この画面は並べ方と言い方だけを決める
-（[0070](../../../../adr/0070-backend-role-separation.md)）。
+（[0070](../../../../../adr/0070-backend-role-separation.md)）。
 
 ## 取得
 
@@ -25,7 +25,7 @@
 
 ## 購読
 
-**ブラウザがバックエンドの stream へ直接繋ぐ**（[0074](../../../../adr/0074-runtime-communication-seam.md)）。
+**ブラウザがバックエンドの stream へ直接繋ぐ**（[0074](../../../../../adr/0074-runtime-communication-seam.md)）。
 
 | 段 | 何が起きるか |
 | --- | --- |
@@ -47,7 +47,7 @@
 ## 送信
 
 `POST /v1/inquiries/me/messages` を Server Action の往復で送る
-（[0061](../../../../adr/0061-form-mutation-ux.md)）。
+（[0061](../../../../../adr/0061-form-mutation-ux.md)）。
 
 - **本文だけを送る。** 送り手の種別はサーバが決める
 - **冪等キーを必ず付ける。** メッセージは自然キーを持たないため、応答が届かなかっただけの再送が

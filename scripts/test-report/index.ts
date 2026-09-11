@@ -6,7 +6,7 @@
 //
 // **読めなかったら黙って空にしない。** JSON が無い・壊れている・形が違うのは「失敗が無い」ではなく「何が起きたか
 // 分からない」であり、そのまま緑の報告へ倒すと壊れた瞬間から永久に通る
-// （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。理由を本文に書いて、末尾のログを添える。
+// （[README](../README.md)）。理由を本文に書いて、末尾のログを添える。
 import fs from "node:fs";
 
 import { codeBlock, formatReport, type Summary, summarise } from "./format";

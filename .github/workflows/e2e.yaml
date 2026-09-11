@@ -278,7 +278,7 @@ jobs:
           # Each stage keeps its own log and its own JSON report, and only the failing ones
           # are reported. The report is what the body reads: Playwright already separated the
           # specs that failed from the ones that passed, so nothing here has to re-derive that
-          # from log text (`scripts/test-report`, ADR 0157). The log tail is passed alongside
+          # from log text (`scripts/test-report`). The log tail is passed alongside
           # it and is used only where the report cannot decide — a stage that died before
           # writing one.
           stage() {

@@ -1,12 +1,11 @@
 {
-  // この道具だけ Node の型ストリップで直接実行する（`tsx` を挟むと hook の起動が丸ごと待ち時間に
-  // なる。ADR 0159 の「hook から呼ばれ、常に即答することが要件のもの」）。その実行系は import 先を
-  // 実ファイルで解決するので `.ts` を綴る必要があり、それを許す設定はここに閉じる。
-  // root へ置くと orval がそれを読み、生成物まで拡張子付きの import を吐く。
+  // `allowImportingTsExtensions` を root へ動かさないこと。orval がそれを読み、生成物まで
+  // 拡張子付きの import を吐く。ここが要るのは、この道具だけ Node の型ストリップで直接
+  // 実行するため（[README](../README.md)）。
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    // 親を離れると既定の typeRoots の起点も動く。Node の型はここで名指しする。
+    // 親を離れると既定の typeRoots の起点も動く。
     "types": ["node"]
   },
   // `exclude` も継承されるので上書きする。親はこのディレクトリを除いている。

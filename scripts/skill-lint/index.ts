@@ -677,7 +677,7 @@ for (const file of agentFiles) {
   checkFrontmatter(rel, readFile(rel), file.replace(/\.md$/, ""));
 }
 
-// `AGENTS.md` も対訳を持つ。canonical を英語で持つ文書はスキル定義とこれだけで（ADR 0152「本文言語」）、
+// `AGENTS.md` も対訳を持つ。canonical を英語で持つ文書はスキル定義とこれだけで（[README](../README.md)）、
 // 対訳が canonical から遅れたことを検出する機構は、このペア検査のほかに無い。
 checkTranslationPair("AGENTS.md", "AGENTS.ja.md");
 

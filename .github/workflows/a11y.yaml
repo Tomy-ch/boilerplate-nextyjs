@@ -256,7 +256,7 @@ jobs:
           # The evidence is the JSON report Playwright wrote, not the tail of the log: it
           # already separates the stories that failed from the ones that passed, and it
           # carries how many of how many — which the last 80 lines cannot say
-          # (`scripts/test-report`, ADR 0157). The tail is passed alongside and is used only
+          # (`scripts/test-report`). The tail is passed alongside and is used only
           # where the report cannot decide — a run that died before writing one.
           #
           # Handed over as `authored`: the body is this repository's prose, and axe's own text

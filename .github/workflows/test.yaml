@@ -181,7 +181,7 @@ jobs:
       # The body is built by `make test-failures`, so the wiring lives in one place and a
       # local `make test-failures` prints exactly what the comment will say. What it reads is
       # vitest's own JSON report — `status` and `failureMessages`, the split the runner already
-      # made — never a text filter that classifies by vocabulary (ADR 0157).
+      # made — never a text filter that classifies by vocabulary.
       #
       # Do not read `tmp/test-report.json` here or anywhere else. It records passing cases too,
       # with full paths, and measures 785KB against the 690B of the plain text output.

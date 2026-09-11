@@ -42,7 +42,7 @@ export type IssueEvidence =
    *
    * 代わりに、公開の面で**取り消せない 2 つ**だけを潰します —— mention と、他スレッドを
    * 指す生のリンクです。どちらも上流へ通知や逆参照を残し、本文を後から直しても取り消せません
-   * （`AGENTS.md`「Cross-Repository Links」）。見た目が崩れるだけの記法は潰しません。
+   * （他リポジトリへの参照の規律は [README](../README.md) が持つ）。見た目が崩れるだけの記法は潰しません。
    */
   | { readonly kind: "model-prose"; readonly text: string };
 

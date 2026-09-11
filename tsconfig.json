@@ -36,10 +36,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  // `scripts/command-guard` はここが見ない。Node の型ストリップで直接実行するために import 先へ
-  // `.ts` を綴る必要があり、それを許す `allowImportingTsExtensions` をここへ置くと
-  // **生成物まで拡張子付きの import を吐く**（orval がこの設定を読む。実測で 88 ファイルが動いた）。
-  // 1 つのスクリプトの実行方式を、リポジトリ全体の出力へ漏らさない。検査は
-  // `scripts/command-guard/tsconfig.json` が引き受ける。
+  // `scripts/command-guard` を外すのは、そこが要る `allowImportingTsExtensions` をここへ置くと
+  // orval が読んで生成物まで拡張子付きの import を吐くため。検査は同ディレクトリの tsconfig が持つ。
   "exclude": ["node_modules", "tmp", "scripts/command-guard"]
 }

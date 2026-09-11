@@ -11,7 +11,7 @@
 // - **包み** —— `bash -c` / `rtk run` / `make ai-` は中身を実行するので、包みを剥がして判定する
 
 /**
- * 区切りの直後はコマンド位置になる。`(` と backtick は散文に多すぎるので採らない。
+ * 区切りの直後はコマンド位置になる。単体の `(` だけは散文に多すぎるので採らない。
  *
  * @remarks
  * 単独の `&` も区切りである（`cmd1 & cmd2` は cmd1 を背後へ回して cmd2 を続ける）。`&&` と
@@ -55,7 +55,7 @@ export type CommandShape = {
  * **ここが返す配列が、塞ぐ対象の母集合そのものです。** キーの綴りを 1 文字間違えても型検査は
  * `unknown` 経由で通り、例外も出ず、黙って空が返ります —— そうなると `judge` がどれだけ正しくても
  * 何も塞ぎません。入口へ置くと検査の母数から外れるので、判定はここに置きます
- * （[0159](../../docs/adr/0159-script-structure.md)）。
+ * （[README](../README.md)）。
  *
  * @param settings - `.claude/settings.json` を読んだもの
  */
@@ -207,8 +207,7 @@ export function unwrap(segment: string): string {
  *
  * @remarks
  * このリポジトリはコマンド行で文書を書くので（heredoc の中の散文、`echo` の引数）、引用の中まで
- * 見ると文書に危険なコマンド名を書いた瞬間に止まります。**誤爆した拒否は迂回の動機になり、迂回
- * されたゲートは無いのと同じです。**
+ * 見ると文書に危険なコマンド名を書いた瞬間に誤って止まります。
  */
 export function stripQuoted(commandLine: string): string {
   return stripQuotes(stripHeredoc(commandLine));
@@ -294,7 +293,6 @@ export function judge(commandLine: string, literals: readonly Literal[]): string
       // 語の途中で終わる綴り（`git switch release/`）は、直後に必ず続きが来るので境界を求めない。
       if (!literal.openEnded && rest !== "" && !/^[\s;&|)<>]/.test(rest)) continue;
 
-      // 宣言が `*` を挟んで並べた断片は、この順で全部現れることを求める。
       if (!containsInOrder(rest, literal.fragments)) continue;
 
       if (want.shortFlags.size === 0 && want.longFlags.length === 0) return literal.source;

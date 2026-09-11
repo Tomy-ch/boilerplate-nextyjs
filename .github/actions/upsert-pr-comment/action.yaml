@@ -33,7 +33,8 @@ inputs:
     description: >-
       Set to "true" only when nothing in body-file can produce markup or mentions. There are
       two ways to earn that, and both are the caller's to guarantee: every value was filtered
-      to a character set that cannot (ADR 0153 §5), or every unaltered value sits inside a
+      to a character set that cannot (the sanitizing rule in ../../workflows/README.md), or every
+      unaltered value sits inside a
       fence longer than any backtick run it contains — the same sizing this action applies
       below, which is what `scripts/test-report` does to a failure message. The body is then
       rendered as Markdown instead of fenced, so a table reads as a table and a heading reads

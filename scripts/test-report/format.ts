@@ -1,7 +1,7 @@
 // テスト実行系の JSON レポートから、失敗だけを取り出して報告の本文へ組む。
 //
 // **語彙で選り分けない。** 失敗行を文字列で拾う要約器は、分類が語彙に依存するぶん失敗の理由そのものを
-// 通過行として捨てうる（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。ここが読むのは
+// 通過行として捨てうる（[README](../README.md)）。ここが読むのは
 // 実行系が自分で分けた出口（vitest の `status` / `failureMessages`、Playwright の `ok` / `error`）なので、
 // 選別は実行系が行っている。
 //
@@ -54,9 +54,9 @@ export type VitestReport = {
  *
  * @remarks
  * **spec の辿り方と「落ちた」の判定は [lib/playwright-report](../lib/playwright-report.ts) が持ちます。**
- * 同じ形を読むのは story 単位（`scripts/vrt`）と画面単位（`scripts/e2e`）で先例があり、ここが
- * 3 人目です。写すと判定が割れます —— 実際、spec の `ok` で足切りすると **flaky（再試行で通ったが
- * 1 度落ちた）を取りこぼします**（[0159](../../docs/adr/0159-script-structure.md)）。
+ * 同じ形を読む先例が既にあり（`scripts/vrt` と `scripts/e2e`）、ここで判定を書き直すと先例と
+ * 割れます —— spec の `ok` だけで足切りすると **flaky（再試行で通ったが 1 度落ちた）を
+ * 取りこぼします**。
  */
 export type PlaywrightReport = {
   /** spec の一覧はここでは読まない。`parseSpecs` が持つ。 */
@@ -79,7 +79,7 @@ const NO_REASON = "(理由の記録なし)";
  * Playwright は `error.message` に SGR のエスケープを埋めたまま JSON へ書きます。端末なら色に
  * なりますが、コメントや issue の本文では `[2m` という字面で出て、失敗の文言に混ざります。
  *
- * **落とすのは制御文字だけで、テストの文言は 1 文字も落としません**（[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。
+ * **落とすのは制御文字だけで、テストの文言は 1 文字も落としません。**
  */
 // biome-ignore lint/suspicious/noControlCharactersInRegex: 落とす対象そのものが制御文字である。
 const ANSI = /\u001B\[[0-9;]*m/g;
@@ -102,7 +102,7 @@ const BLOCK_BUDGET = 8_000;
  *
  * @remarks
  * **落としたことと落とした量を本文に残します。** 黙って切ると、読み手には短い失敗と区別が付きません
- * （[0157](../../docs/adr/0157-inspection-declaration-discipline.md)）。全文は artifact のレポートに
+ * （[README](../README.md)）。全文は artifact のレポートに
  * あります。
  */
 function clamp(text: string, limit: number): string {
@@ -117,7 +117,7 @@ function clamp(text: string, limit: number): string {
  * **見出しとファイル名も素通しにしません。** ケース名（`it` の説明文・story 名）とファイル名は
  * 失敗の文言と同じく**このリポジトリが書いたものではなく**、PR を出した側が決めます。素で
  * `### ${name}` に入れると、`@利用者` の通知と偽の見出し・偽のリンクが CI の名義で公開の面に
- * 載り、取り消せません。改行を潰して 1 行にし、中身より長いバッククォートで囲みます。
+ * 載り、取り消せません。
  */
 export function codeSpan(text: string): string {
   const flat = decolour(text).replace(/\s+/g, " ").trim() || "(空)";
@@ -287,8 +287,8 @@ export function summarise(raw: string): Summary | undefined {
  * 65,536 字で拒む —— **後者は切られるのではなく issue が立ちません**。切る側に任せると、フェンスの
  * 途中で切れて残りが記法として描かれもします。
  *
- * 1,474 story を数える面で全数が一度に落ちる形は実在し（`docs/design/vrt.md` の「限界」）、失敗
- * 1 件あたりの本文は実測 2.1〜2.4 KB なので、上限が無ければ本文は MB の桁へ届きます。
+ * 全 story が一度に落ちる形は実在するので（[docs/design/vrt.md](../../docs/design/vrt.md) の
+ * 「限界」）、上限が無ければ本文は際限なく伸びます。
  */
 const BODY_BUDGET = 40_000;
 
@@ -301,7 +301,7 @@ const BODY_BUDGET = 40_000;
  * 構造化された値だけで決まり、ログの語彙を読みません。
  *
  * **上限に達したら、落とした件数と残りの在処を本文へ書きます。** 黙って行を落とすのが
- * [0157](../../docs/adr/0157-inspection-declaration-discipline.md) の禁じる濾過であって、長さに
+ * [README](../README.md) の禁じる濾過であって、長さに
  * 上限があること自体ではありません。母数と失敗の総数は必ず先頭に出るので、載せた件数がその一部で
  * あることは本文だけで分かります。
  *

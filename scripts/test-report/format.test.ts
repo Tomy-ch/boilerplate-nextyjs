@@ -18,6 +18,19 @@ function summaryOf(report: unknown): Summary {
   return summary;
 }
 
+/** 上限の検査で使う、同じ大きさの失敗を任意件数持つ要約。 */
+function manyFailures(count: number): Summary {
+  return {
+    total: count,
+    failures: Array.from({ length: count }, (_, index) => ({
+      file: `/repo/${index}.test.ts`,
+      name: `ケース ${index}`,
+      message: "y".repeat(500),
+    })),
+    failedWithoutTestFailure: false,
+  };
+}
+
 const PASSING: VitestReport = {
   numTotalTests: 3,
   success: true,
@@ -123,6 +136,27 @@ describe("formatReport", () => {
 
     expect(body).toContain("実行はテスト以外の理由で失敗しています");
     expect(body).toContain("does not meet threshold");
+  });
+
+  it("上限に収まるなら全件を出し、全件だと述べる", () => {
+    const body = formatReport(manyFailures(3), "tail");
+
+    expect(body).toContain("以下がその全件です");
+    expect(body).toContain("ケース 2");
+  });
+
+  it("上限を超えたら、載せた件数と落とした件数と在処を述べる", () => {
+    const body = formatReport(manyFailures(100), "tail", 2_000);
+
+    expect(body).toContain("全 100 件中 **100 件が失敗**");
+    expect(body).toContain("本文の長さの上限に達したため");
+    expect(body).toContain("JSON レポート");
+    expect(body).not.toContain("以下がその全件です");
+    expect(body.length).toBeLessThan(6_000);
+  });
+
+  it("1 件も載らない本文にはしない", () => {
+    expect(formatReport(manyFailures(100), "tail", 1)).toContain("ケース 0");
   });
 });
 
@@ -237,40 +271,5 @@ describe("codeBlock", () => {
 
     expect(body).toContain("50 文字あり、先頭 10 文字");
     expect(body.startsWith("x".repeat(10))).toBe(true);
-  });
-});
-
-describe("formatReport の長さの上限", () => {
-  const many = (count: number): Summary => ({
-    total: count,
-    failures: Array.from({ length: count }, (_, index) => ({
-      file: `/repo/${index}.test.ts`,
-      name: `ケース ${index}`,
-      message: "y".repeat(500),
-    })),
-    failedWithoutTestFailure: false,
-  });
-
-  // ----- 正常系 -----
-  it("上限に収まるなら全件を出し、全件だと述べる", () => {
-    const body = formatReport(many(3), "tail");
-
-    expect(body).toContain("以下がその全件です");
-    expect(body).toContain("ケース 2");
-  });
-
-  // ----- 異常系 -----
-  it("上限を超えたら、載せた件数と落とした件数と在処を述べる", () => {
-    const body = formatReport(many(100), "tail", 2_000);
-
-    expect(body).toContain("全 100 件中 **100 件が失敗**");
-    expect(body).toContain("本文の長さの上限に達したため");
-    expect(body).toContain("JSON レポート");
-    expect(body).not.toContain("以下がその全件です");
-    expect(body.length).toBeLessThan(6_000);
-  });
-
-  it("1 件も載らない本文にはしない", () => {
-    expect(formatReport(many(100), "tail", 1)).toContain("ケース 0");
   });
 });

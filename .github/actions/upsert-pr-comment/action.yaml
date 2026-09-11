@@ -31,12 +31,15 @@ inputs:
     required: false
     default: "false"
     description: >-
-      Set to "true" only when the caller has already filtered every value in body-file to a
-      character set that cannot produce markup or mentions (ADR 0153 §5). The body is then
-      rendered as Markdown instead of fenced, so a table reads as a table. Leave it at the
-      default for anything that passes tool output through unaltered — a linter or a compiler
-      echoes source lines, and in a public repository those are the pull request author's to
-      write.
+      Set to "true" only when nothing in body-file can produce markup or mentions. There are
+      two ways to earn that, and both are the caller's to guarantee: every value was filtered
+      to a character set that cannot (ADR 0153 §5), or every unaltered value sits inside a
+      fence longer than any backtick run it contains — the same sizing this action applies
+      below, which is what `scripts/test-report` does to a failure message. The body is then
+      rendered as Markdown instead of fenced, so a table reads as a table and a heading reads
+      as a heading. Leave it at the default for anything that hands tool output straight
+      through — a linter or a compiler echoes source lines, and in a public repository those
+      are the pull request author's to write.
   notes-file:
     required: false
     default: ""

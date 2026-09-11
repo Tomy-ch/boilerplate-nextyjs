@@ -1,15 +1,16 @@
-# markdownlint-cli2 の対象範囲（globs / ignores）を定義する。
-# ルール本体（MD013/MD033/MD041=false 等）は .markdownlint.yaml を自動マージして解決する。
+# ルール本体も対象範囲もこのファイルが持つ。別立ての .markdownlint.* を作らない。
+config:
+  MD013: false
+  MD033: false
+  MD041: false
+
 globs:
   - "**/*.md"
 
 # mermaid-lint の除外（scripts/lib/markdown-files.ts の EXCLUDE_DIRS / EXCLUDE_PREFIXES）と一致させる。
 # 突合は scripts/markdown-exclusions.gate.test.ts が行うので、片方だけを直すと落ちる。
 # skill-lint は走査の目的が別（リポジトリ全エントリを索引して参照を解決する）なので、一致は求めない。
-# 保護対象であることは除外の理由にならない（保護は「誰が編集してよいか」の話で、linter が読んでよいかとは
-# 無関係）。除外してよいのは、このリポジトリのソースではない領域だけ — 依存・git の管理領域・別ブランチの
-# 作業ツリー・ツールの生成物。markdownlint-cli2 は既定で .gitignore を読まないため、ここに書かない限り
-# 対象に入る。
+# markdownlint-cli2 は既定で .gitignore を読まないため、ここに書かない限り対象に入る。
 ignores:
   - "**/node_modules/**"
   - "**/.git/**"

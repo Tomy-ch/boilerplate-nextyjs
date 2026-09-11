@@ -60,6 +60,7 @@ coverage-exclusions:
 | ファイル | 役割 |
 | --- | --- |
 | `actions.ts` | 回答の Server Action |
+| `form-names.ts` | 回答の送信が持つ項目の名前。**検証を持たない** |
 | `parse-reply-form.ts` | 送信された内容から回答先・本文・冪等キーを取り出す |
 | `connection-status.ts` | フィードの状態と回線の有無を、画面へ出す 1 語へ写す |
 | `query.ts` | ページ送りの URL を組む側 |

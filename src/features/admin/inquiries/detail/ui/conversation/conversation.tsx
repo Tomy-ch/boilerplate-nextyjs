@@ -25,7 +25,7 @@ import type { InquiryHistory, InquiryId } from "@/model/inquiry/inquiry";
 
 import { replyInquiryAction } from "../../../actions";
 import { toFeedConnectionStatus } from "../../../connection-status";
-import { REPLY_BODY_FIELD } from "../../../parse-reply-form";
+import { REPLY_BODY_FIELD } from "../../../form-names";
 import { type AdminInquiryDraft, AdminInquiryMessageList } from "../message-list/message-list";
 import { AdminInquiryReplyForm } from "../reply-form/reply-form";
 

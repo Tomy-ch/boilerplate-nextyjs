@@ -1,10 +1,9 @@
 import { z } from "zod";
 
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiry-limits";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
-/** 本文を載せるフォーム項目の名前。 */
-export const INQUIRY_BODY_FIELD = "body";
+import { INQUIRY_BODY_FIELD } from "./form-names";
 
 /** 送信の内容を解いた結果。読めなかった項目は、そのまま項目の文言になる。 */
 export type InquiryMessageFormResult =

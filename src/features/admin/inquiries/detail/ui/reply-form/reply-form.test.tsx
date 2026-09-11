@@ -8,7 +8,7 @@ import { axe } from "vitest-axe";
 import { failedActionState, idleActionState, succeededActionState } from "@/model/action-state";
 import { toInquiryId } from "@/model/inquiry/inquiry";
 
-import { REPLY_BODY_FIELD } from "../../../parse-reply-form";
+import { REPLY_BODY_FIELD } from "../../../form-names";
 import { AdminInquiryReplyForm } from "./reply-form";
 
 const KEY = "00000000-0000-4000-8000-000000000001";

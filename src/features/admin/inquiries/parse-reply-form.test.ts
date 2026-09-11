@@ -2,11 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
-import {
-  parseAdminInquiryReplyForm,
-  REPLY_BODY_FIELD,
-  REPLY_INQUIRY_ID_FIELD,
-} from "./parse-reply-form";
+import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "./form-names";
+import { parseAdminInquiryReplyForm } from "./parse-reply-form";
 
 const KEY = "00000000-0000-4000-8000-000000000001";
 

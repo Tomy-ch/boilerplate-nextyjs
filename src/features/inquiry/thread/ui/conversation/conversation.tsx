@@ -26,7 +26,7 @@ import type { InquiryHistory, InquiryMessage } from "@/model/inquiry/inquiry";
 
 import { sendInquiryMessageAction } from "../../../actions";
 import { toConnectionStatus } from "../../../connection-status";
-import { INQUIRY_BODY_FIELD } from "../../../parse-message-form";
+import { INQUIRY_BODY_FIELD } from "../../../form-names";
 import { InquiryComposer } from "../composer/composer";
 import { type InquiryDraft, InquiryMessageList } from "../message-list/message-list";
 

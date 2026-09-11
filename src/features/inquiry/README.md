@@ -60,6 +60,7 @@ coverage-exclusions:
 | ファイル | 役割 |
 | --- | --- |
 | `actions.ts` | 送信の Server Action |
+| `form-names.ts` | 送信が持つ項目の名前。**検証を持たない** —— 入力欄が要るのは綴りだけ |
 | `parse-message-form.ts` | 送信された内容から本文と冪等キーを取り出す |
 | `connection-status.ts` | 購読の状態と回線の有無を、画面へ出す 1 語へ写す |
 | `facade/paths/` | この feature が持つルート。**他の feature が指す口** |
@@ -75,7 +76,7 @@ coverage-exclusions:
 
 | カーネル | 用途 |
 | --- | --- |
-| `adapters` | 履歴の取得と送信、購読（`client/stream`）と event の検証・本文の上限（`client/api/inquiries`） |
+| `adapters` | 履歴の取得と送信、購読（`client/stream`）、event の検証（`client/api/inquiries`）、本文の上限（`client/api/inquiry-limits`） |
 | `model` | 表示モデル（`InquiryMessage` / `InquiryHistory`）、正本と受信分の畳み込み、`ActionState`、冪等キー |
 | `components` | 会話の面（`Message` / `Bubble` / `Marker` / `MessageScroller`）と受信の状態 |
 | `capabilities` | 回線の有無（`use-online-status`） |

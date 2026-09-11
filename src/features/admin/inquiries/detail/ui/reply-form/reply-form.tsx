@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, useCallback, useState } from "react";
 
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiry-limits";
 import { Button } from "@/components/design-system/action/button/button";
 import { Label } from "@/components/design-system/form/label/label";
 import { Textarea } from "@/components/design-system/form/textarea/textarea";
@@ -10,7 +10,7 @@ import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 import type { InquiryId } from "@/model/inquiry/inquiry";
 
 import type { AdminInquiryReplyActionState } from "../../../actions";
-import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "../../../parse-reply-form";
+import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "../../../form-names";
 
 /** `AdminInquiryReplyForm` の props。 */
 export type AdminInquiryReplyFormProps = {

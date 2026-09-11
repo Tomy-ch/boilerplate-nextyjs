@@ -1,14 +1,14 @@
 "use client";
 
 import { type ChangeEvent, type KeyboardEvent, useCallback, useState } from "react";
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiry-limits";
 import { Button } from "@/components/design-system/action/button/button";
 import { Label } from "@/components/design-system/form/label/label";
 import { Textarea } from "@/components/design-system/form/textarea/textarea";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
 import type { InquiryMessageActionState } from "../../../actions";
-import { INQUIRY_BODY_FIELD } from "../../../parse-message-form";
+import { INQUIRY_BODY_FIELD } from "../../../form-names";
 
 /** `InquiryComposer` の props。 */
 export type InquiryComposerProps = {

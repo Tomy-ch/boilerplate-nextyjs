@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { failedActionState, idleActionState } from "@/model/action-state";
 
-import { INQUIRY_BODY_FIELD } from "../../../parse-message-form";
+import { INQUIRY_BODY_FIELD } from "../../../form-names";
 import { InquiryComposer } from "./composer";
 
 const IDEMPOTENCY_KEY = "00000000-0000-4000-8000-000000000001";

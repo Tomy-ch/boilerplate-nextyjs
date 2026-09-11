@@ -14,7 +14,7 @@ vi.mock("next/cache", () => ({ revalidatePath }));
 vi.mock("@/adapters/server/api/inquiries", () => ({ postMyInquiryMessage }));
 
 import { sendInquiryMessageAction } from "./actions";
-import { INQUIRY_BODY_FIELD } from "./parse-message-form";
+import { INQUIRY_BODY_FIELD } from "./form-names";
 
 const KEY = "00000000-0000-4000-8000-000000000001";
 

@@ -11,7 +11,8 @@ import {
 } from "@/model/action-state";
 
 import { INQUIRY_PATH } from "./facade/paths/paths";
-import { INQUIRY_BODY_FIELD, parseInquiryMessageForm } from "./parse-message-form";
+import { INQUIRY_BODY_FIELD } from "./form-names";
+import { parseInquiryMessageForm } from "./parse-message-form";
 
 /**
  * 送信が画面へ返す結果。

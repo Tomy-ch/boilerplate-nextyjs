@@ -1,14 +1,10 @@
 import { z } from "zod";
 
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiry-limits";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 import { type InquiryId, toInquiryId } from "@/model/inquiry/inquiry";
 
-/** 本文を載せるフォーム項目の名前。 */
-export const REPLY_BODY_FIELD = "body";
-
-/** 回答先を載せるフォーム項目の名前。 */
-export const REPLY_INQUIRY_ID_FIELD = "inquiryId";
+import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "./form-names";
 
 /** 送信の内容を解いた結果。 */
 export type AdminInquiryReplyFormResult =

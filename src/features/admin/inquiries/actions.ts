@@ -11,7 +11,8 @@ import {
 } from "@/model/action-state";
 
 import { adminInquiryDetailPath } from "../paths";
-import { parseAdminInquiryReplyForm, REPLY_BODY_FIELD } from "./parse-reply-form";
+import { REPLY_BODY_FIELD } from "./form-names";
+import { parseAdminInquiryReplyForm } from "./parse-reply-form";
 
 /** 回答が画面へ返す結果。成功しても返す値は無く、送った 1 通は取り直した正本に現れる。 */
 export type AdminInquiryReplyActionState = ActionState<void, typeof REPLY_BODY_FIELD>;

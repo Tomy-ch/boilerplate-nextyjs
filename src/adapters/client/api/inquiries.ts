@@ -7,18 +7,6 @@ import {
   inquiryIdSchema,
 } from "@/model/inquiry/inquiry";
 
-import { postInquiriesMeMessagesBodyBodyMax } from "../../gen/api/limits";
-
-/**
- * 本文の文字数の上限。
- *
- * @remarks
- * **画面から届く側に置きます。** 送信欄と入力の検証がこの値を読み、どちらもブラウザへ配られる
- * 束に載ります。取得の口（`adapters/server`）から引くと、定数 1 つのために server 専用の
- * モジュールが束へ引き込まれます。
- */
-export const INQUIRY_BODY_MAX_LENGTH = postInquiriesMeMessagesBodyBodyMax;
-
 /** 自分の問い合わせを購読する口を発券する中継。 */
 export const INQUIRY_STREAM_TICKET_PATH = "/api/inquiries/me/stream-ticket";
 

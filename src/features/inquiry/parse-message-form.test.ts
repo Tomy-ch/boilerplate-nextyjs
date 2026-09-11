@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
-import { INQUIRY_BODY_FIELD, parseInquiryMessageForm } from "./parse-message-form";
+import { INQUIRY_BODY_FIELD } from "./form-names";
+import { parseInquiryMessageForm } from "./parse-message-form";
 
 const KEY = "00000000-0000-4000-8000-000000000001";
 

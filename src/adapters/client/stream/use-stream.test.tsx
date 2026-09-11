@@ -33,17 +33,19 @@ function Probe({
   enabled = true,
   cursor = 3,
   onEvents = ignoreEvents,
+  onResync = ignoreEvents,
 }: {
   enabled?: boolean;
   cursor?: number;
   onEvents?: (events: readonly Event[]) => void;
+  onResync?: () => void;
 }) {
   const { state, resume: resumeAt } = useStream<Event>({
     ticketPath: "/api/inquiries/me/stream-ticket",
     initialCursor: toStreamCursor(cursor),
     schema,
     onEvents,
-    onResync: ignoreEvents,
+    onResync,
     enabled,
   });
 
@@ -56,6 +58,19 @@ function Probe({
       {state.kind}
     </button>
   );
+}
+
+/** 購読する条件を指定しない呼び出し。既定で購読が始まる。 */
+function DefaultProbe() {
+  const { state } = useStream<Event>({
+    ticketPath: "/api/inquiries/me/stream-ticket",
+    initialCursor: toStreamCursor(1),
+    schema,
+    onEvents: ignoreEvents,
+    onResync: ignoreEvents,
+  });
+
+  return <p>{state.kind}</p>;
 }
 
 beforeEach(() => {
@@ -74,6 +89,12 @@ describe("useStream", () => {
     render(<Probe cursor={5} />);
 
     expect(opened?.cursor).toBe("5");
+  });
+
+  it("条件を指定しなければ購読する", () => {
+    render(<DefaultProbe />);
+
+    expect(openStream).toHaveBeenCalledOnce();
   });
 
   it("購読する条件が揃うまで開かない", () => {
@@ -104,6 +125,18 @@ describe("useStream", () => {
 
     rerender(<Probe onEvents={second} />);
     act(() => opened?.onEvents([{ type: "message.created" }]));
+
+    expect(first).not.toHaveBeenCalled();
+    expect(second).toHaveBeenCalledOnce();
+  });
+
+  it("取り直しの求めを、最新の受け取り手へ渡す", () => {
+    const first = vi.fn();
+    const second = vi.fn();
+    const { rerender } = render(<Probe onResync={first} />);
+
+    rerender(<Probe onResync={second} />);
+    act(() => opened?.onResync());
 
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledOnce();

@@ -442,6 +442,9 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   }
 
   async function start(): Promise<void> {
+    /* istanbul ignore next -- 仕掛ける側が既に同じ 3 つを見ており（張り直しは仕掛ける前、可視性の
+       登録は閉じるときに外す）、ここへ来る呼び出しは現状の経路に無い。残すのは、始める側が
+       止まっていることを自分で確かめない形にしないため。 */
     if (closed || halted || awaitingResync) {
       return;
     }

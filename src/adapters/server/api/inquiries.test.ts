@@ -81,6 +81,24 @@ describe("getMyInquiryHistory", () => {
     await expect(getMyInquiryHistory()).resolves.toMatchObject({ streamCursor: 12 });
   });
 
+  it("続きがあるページは、次の開始位置を伴う", async () => {
+    serveJson(MY_MESSAGES_URL, { ...wireHistory, nextAfterSequence: 20 });
+
+    await expect(getMyInquiryHistory()).resolves.toMatchObject({ nextAfterSequence: 20 });
+  });
+
+  it("契約が項目ごと省いた応答も、同じ形へ写す", async () => {
+    // `inquiryId` / `nextAfterSequence` は nullable であり、載らないこともある。
+    serveJson(MY_MESSAGES_URL, { messages: [], streamCursor: 0 });
+
+    await expect(getMyInquiryHistory()).resolves.toEqual({
+      inquiryId: null,
+      messages: [],
+      nextAfterSequence: null,
+      streamCursor: 0,
+    });
+  });
+
   it("まだ問い合わせを持たない主体には、空の履歴を返す", async () => {
     serveJson(MY_MESSAGES_URL, {
       inquiryId: null,

@@ -1,4 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment jsdom
+
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod/mini";
 
 import { createAppError } from "@/errors/app-error";
@@ -177,6 +179,20 @@ describe("openStream", () => {
     stream.runTimers();
 
     expect(stream.received.at(0)?.map((event) => event.payload.id)).toEqual(["m1", "m2"]);
+  });
+
+  it("取り直しで窓を捨てた後に窓が閉じても、上へは何も流れない", async () => {
+    const stream = harness({ cursor: 5 });
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    // 窓へ 1 件入れて閉じる時刻を仕掛けたあと、遅れて届いた event で取り直しへ入る。
+    stream.latest()?.handlers.onEvent(envelope(6));
+    stream.latest()?.handlers.onEvent(envelope(3));
+    stream.subscription.resume(toStreamCursor(9));
+    stream.runTimers();
+
+    expect(stream.received).toEqual([]);
   });
 
   it("契約に無い種別の event を上へ流さない", async () => {
@@ -474,6 +490,45 @@ describe("openStream", () => {
     expect(stream.states).toHaveLength(statesAfterClose);
   });
 
+  it("閉じた後に届いた遅延では、取り直しを求めない", async () => {
+    const stream = harness({ cursor: 5 });
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+
+    const source = stream.latest();
+
+    stream.subscription.close();
+    source?.handlers.onEvent(envelope(3));
+
+    expect(stream.resyncs()).toBe(0);
+  });
+
+  it("閉じた後に接続が落ちても、張り直しを仕掛けない", async () => {
+    const stream = harness();
+
+    await settle();
+
+    const source = stream.latest();
+
+    stream.subscription.close();
+    source?.handlers.onError();
+
+    expect(stream.delays()).toEqual([]);
+  });
+
+  it("打ち切った後は、待機が明けても繋ぎにいかない", async () => {
+    const stream = harness({
+      connection: () => Promise.reject(createAppError(ErrorKind.PERMISSION_DENIED)),
+    });
+
+    await settle();
+    stream.runTimers();
+    await settle();
+
+    expect(stream.sources).toHaveLength(0);
+  });
+
   it("閉じた後の再開を受け付けない", async () => {
     const stream = harness();
 
@@ -483,5 +538,211 @@ describe("openStream", () => {
     await settle();
 
     expect(stream.sources).toHaveLength(1);
+  });
+});
+
+/** ブラウザの `EventSource` の代わり。組み立てと登録された listener だけを覚える。 */
+class FakeEventSource {
+  static instances: FakeEventSource[] = [];
+
+  readonly listeners = new Map<string, ((event: Event) => void)[]>();
+
+  closed = false;
+
+  constructor(readonly url: string) {
+    FakeEventSource.instances.push(this);
+  }
+
+  addEventListener(type: string, listener: (event: Event) => void): void {
+    this.listeners.set(type, [...(this.listeners.get(type) ?? []), listener]);
+  }
+
+  close(): void {
+    this.closed = true;
+  }
+
+  emit(type: string, event: Event): void {
+    for (const listener of this.listeners.get(type) ?? []) {
+      listener(event);
+    }
+  }
+}
+
+/** 発券の中継が返す応答。 */
+function ticketResponse(): Response {
+  return new Response(JSON.stringify({ url: STREAM_URL, expiresAt: "2100-01-01T00:00:00.000Z" }), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  FakeEventSource.instances = [];
+});
+
+describe("openStream（既定の道具）", () => {
+  /** 道具を差し替えずに購読を開く。ブラウザ側の既定がそのまま動く。 */
+  function openWithBrowserDefaults(onEvents: (events: readonly Event[]) => void = () => undefined) {
+    return openStream<Event>({
+      ticketPath: TICKET_PATH,
+      cursor: toStreamCursor(4),
+      schema,
+      onEvents,
+      onState: () => undefined,
+      onResync: () => undefined,
+    });
+  }
+
+  it("発券の中継を POST で叩き、返った URL へ開始位置を載せて繋ぐ", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+
+    vi.stubGlobal("fetch", fetchImpl);
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const subscription = openWithBrowserDefaults();
+
+    await settle();
+
+    expect(fetchImpl.mock.calls[0]?.[0]).toBe(TICKET_PATH);
+    expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
+    expect(FakeEventSource.instances[0]?.url).toContain("after=4");
+
+    subscription.close();
+  });
+
+  it("届いた本文を整列して上へ流す", async () => {
+    vi.stubGlobal("fetch", async () => ticketResponse());
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const received: Event[][] = [];
+    const subscription = openWithBrowserDefaults((events) => received.push([...events]));
+
+    await settle();
+
+    const source = FakeEventSource.instances[0];
+
+    source?.emit("open", new Event("open"));
+    source?.emit("message", new MessageEvent("message", { data: envelope(5) }));
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    expect(received.at(0)).toHaveLength(1);
+
+    subscription.close();
+  });
+
+  it("本文を持たない event を上へ流さない", async () => {
+    vi.stubGlobal("fetch", async () => ticketResponse());
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const received: Event[][] = [];
+    const subscription = openWithBrowserDefaults((events) => received.push([...events]));
+
+    await settle();
+
+    const source = FakeEventSource.instances[0];
+
+    source?.emit("open", new Event("open"));
+    source?.emit("message", new Event("message"));
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    expect(received).toEqual([]);
+
+    subscription.close();
+  });
+
+  it("制御指示を読み、打ち切りの指示で自分から閉じる", async () => {
+    vi.stubGlobal("fetch", async () => ticketResponse());
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const subscription = openWithBrowserDefaults();
+
+    await settle();
+
+    const source = FakeEventSource.instances[0];
+
+    source?.emit("open", new Event("open"));
+    source?.emit("control", new MessageEvent("control", { data: control("STOP") }));
+
+    expect(source?.closed).toBe(true);
+
+    subscription.close();
+  });
+
+  it("接続が落ちたら、その接続を閉じて張り直しへ移る", async () => {
+    vi.stubGlobal("fetch", async () => ticketResponse());
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const subscription = openWithBrowserDefaults();
+
+    await settle();
+
+    const source = FakeEventSource.instances[0];
+
+    source?.emit("error", new Event("error"));
+
+    expect(source?.closed).toBe(true);
+
+    subscription.close();
+  });
+
+  it("画面が見えていないあいだは繋がず、見えたら繋ぐ", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+
+    vi.stubGlobal("fetch", fetchImpl);
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+    const subscription = openWithBrowserDefaults();
+
+    await settle();
+
+    expect(fetchImpl).not.toHaveBeenCalled();
+
+    hidden.mockReturnValue(false);
+    document.dispatchEvent(new Event("visibilitychange"));
+    await settle();
+
+    expect(fetchImpl).toHaveBeenCalledOnce();
+
+    subscription.close();
+  });
+
+  it("見えないまま通知が来ても繋ぎにいかない", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+
+    vi.stubGlobal("fetch", fetchImpl);
+    vi.stubGlobal("EventSource", FakeEventSource);
+    vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+
+    const subscription = openWithBrowserDefaults();
+
+    await settle();
+    document.dispatchEvent(new Event("visibilitychange"));
+    await settle();
+
+    expect(fetchImpl).not.toHaveBeenCalled();
+
+    subscription.close();
+  });
+
+  it("閉じた後は、待機も可視性の登録も残さない", async () => {
+    vi.stubGlobal("fetch", async () => ticketResponse());
+    vi.stubGlobal("EventSource", FakeEventSource);
+
+    const removeEventListener = vi.spyOn(document, "removeEventListener");
+    const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+    const subscription = openWithBrowserDefaults();
+
+    await settle();
+    subscription.close();
+    hidden.mockReturnValue(false);
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    expect(removeEventListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
   });
 });

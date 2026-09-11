@@ -52,6 +52,10 @@ const COLUMNS: readonly StaticDataTableColumn<InquirySummary>[] = [
   },
 ];
 
+function rowKey(item: InquirySummary): string {
+  return item.id;
+}
+
 /** `AdminInquiryTable` の props。 */
 export type AdminInquiryTableProps = {
   /** 並べる問い合わせ。更新の新しい順で受け取る。 */
@@ -77,7 +81,7 @@ export const AdminInquiryTable = withPartSpan(
       <StaticDataTable
         columns={COLUMNS}
         emptyMessage="問い合わせはまだありません。"
-        getRowKey={(item) => item.id}
+        getRowKey={rowKey}
         label="問い合わせの一覧"
         pagination={pagination}
         rowClassName="relative cursor-pointer"

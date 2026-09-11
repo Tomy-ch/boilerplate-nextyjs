@@ -45,7 +45,12 @@ describe("InquiryMessageList", () => {
   });
 
   it("送信中の 1 通を末尾に置き、送信中であることを添える", () => {
-    render(<InquiryMessageList days={DAYS} pending={["追跡番号を教えてください。"]} />);
+    render(
+      <InquiryMessageList
+        days={DAYS}
+        pending={[{ id: "draft-1", body: "追跡番号を教えてください。" }]}
+      />,
+    );
 
     const rows = screen.getAllByText(/追跡番号を教えてください。/);
 
@@ -60,7 +65,15 @@ describe("InquiryMessageList", () => {
   });
 
   it("同じ本文を続けて送っても、それぞれ並ぶ", () => {
-    render(<InquiryMessageList days={[]} pending={["確認します", "確認します"]} />);
+    render(
+      <InquiryMessageList
+        days={[]}
+        pending={[
+          { id: "draft-1", body: "確認します" },
+          { id: "draft-2", body: "確認します" },
+        ]}
+      />,
+    );
 
     expect(screen.getAllByText("確認します")).toHaveLength(2);
   });
@@ -87,7 +100,7 @@ describe("InquiryMessageList", () => {
 
   it("a11y 自動検査に違反しない", async () => {
     const { container } = render(
-      <InquiryMessageList days={DAYS} pending={["送信中の本文"]} />,
+      <InquiryMessageList days={DAYS} pending={[{ id: "draft-1", body: "送信中の本文" }]} />,
     );
 
     expect((await axe(container)).violations).toEqual([]);

@@ -7,18 +7,21 @@ import { ErrorKind } from "@/errors/error-kind";
 import { toStreamCursor } from "./cursor";
 import {
   openStream,
+  STREAM_STOP_REASON,
   type StreamConnection,
   type StreamDeps,
   type StreamSourceHandlers,
   type StreamState,
-  STREAM_STOP_REASON,
 } from "./subscription";
 
 const TICKET_PATH = "/api/inquiries/me/stream-ticket";
 
 const STREAM_URL = "https://api.example.test/v1/streams/s1?ticket=raw";
 
-const schema = z.object({ type: z.literal("message.created"), payload: z.object({ id: z.string() }) });
+const schema = z.object({
+  type: z.literal("message.created"),
+  payload: z.object({ id: z.string() }),
+});
 
 type Event = z.infer<typeof schema>;
 
@@ -39,11 +42,13 @@ function control(action: string, retryAfterMs?: number): string {
 }
 
 /** 時計・乱数・待機・接続を手元で進められる購読を組み立てる。 */
-function harness(options: {
-  readonly cursor?: number | null;
-  readonly connection?: () => Promise<StreamConnection>;
-  readonly hidden?: boolean;
-} = {}) {
+function harness(
+  options: {
+    readonly cursor?: number | null;
+    readonly connection?: () => Promise<StreamConnection>;
+    readonly hidden?: boolean;
+  } = {},
+) {
   const timers = new Map<number, { readonly run: () => void; readonly delayMs: number }>();
   const sources: { url: string; handlers: StreamSourceHandlers; closed: boolean }[] = [];
   const states: StreamState[] = [];
@@ -86,10 +91,9 @@ function harness(options: {
         nextTimerId += 1;
         timers.set(id, { run, delayMs });
 
-        return id;
-      },
-      clearTimer: (id) => {
-        timers.delete(id);
+        return () => {
+          timers.delete(id);
+        };
       },
       random: () => 0.5,
       now: () => 0,

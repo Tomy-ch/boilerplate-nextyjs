@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { InquiryFeedEvent } from "@/adapters/client/api/inquiries";
 import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
+import type { InquiryId } from "@/model/inquiry/inquiry";
+
 const { useStream, refresh, useOnlineStatus, replyInquiryAction } = vi.hoisted(() => ({
   useStream: vi.fn(),
   refresh: vi.fn(),
@@ -17,7 +19,11 @@ vi.mock("@/capabilities/use-online-status", () => ({ useOnlineStatus }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 vi.mock("../../../actions", () => ({ replyInquiryAction }));
 
-import { ADMIN_INQUIRY_HISTORY, ADMIN_INQUIRY_ID, OTHER_INQUIRY_ID } from "../../../inquiries.fixture";
+import {
+  ADMIN_INQUIRY_HISTORY,
+  ADMIN_INQUIRY_ID,
+  OTHER_INQUIRY_ID,
+} from "../../../inquiries.fixture";
 import { AdminInquiryConversation } from "./conversation";
 
 let opened: UseStreamOptions<InquiryFeedEvent> | null = null;
@@ -30,7 +36,7 @@ function lastOptions(): UseStreamOptions<InquiryFeedEvent> {
   return opened;
 }
 
-function feedEvent(inquiryId: string): InquiryFeedEvent {
+function feedEvent(inquiryId: InquiryId): InquiryFeedEvent {
   return {
     type: "inquiry.thread.updated.v1",
     payload: {
@@ -55,13 +61,17 @@ beforeEach(() => {
 
 describe("AdminInquiryConversation", () => {
   it("取得した正本を並べる", () => {
-    render(<AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />,
+    );
 
     expect(screen.getByText(ADMIN_INQUIRY_HISTORY.messages[0]?.body ?? "")).toBeVisible();
   });
 
   it("開いている問い合わせが動いたら、正本を取り直す", () => {
-    render(<AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />,
+    );
 
     act(() => lastOptions().onEvents([feedEvent(ADMIN_INQUIRY_ID)]));
 
@@ -69,7 +79,9 @@ describe("AdminInquiryConversation", () => {
   });
 
   it("別の問い合わせの更新では取り直さない", () => {
-    render(<AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />,
+    );
 
     act(() => lastOptions().onEvents([feedEvent(OTHER_INQUIRY_ID)]));
 
@@ -77,7 +89,9 @@ describe("AdminInquiryConversation", () => {
   });
 
   it("取り直しを求められたときも取り直す", () => {
-    render(<AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />,
+    );
 
     act(() => lastOptions().onResync());
 
@@ -85,13 +99,17 @@ describe("AdminInquiryConversation", () => {
   });
 
   it("回答欄を出す", () => {
-    render(<AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />,
+    );
 
     expect(screen.getByLabelText("回答")).toBeInTheDocument();
   });
 
   it("受信の状態を出す", () => {
-    render(<AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryConversation history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />,
+    );
 
     expect(screen.getByRole("status")).toHaveAttribute("data-status", "receiving");
   });

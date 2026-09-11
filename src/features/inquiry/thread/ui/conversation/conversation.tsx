@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useOptimistic, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useOptimistic, useRef, useState } from "react";
 
 import {
   INQUIRY_STREAM_TICKET_PATH,
@@ -10,6 +10,7 @@ import {
 } from "@/adapters/client/api/inquiries";
 import { toStreamCursor } from "@/adapters/client/stream/cursor";
 import { useStream } from "@/adapters/client/stream/use-stream";
+import { useOnlineStatus } from "@/capabilities/use-online-status";
 import { ConnectionStatus } from "@/components/app-starter/connection-status/connection-status";
 import { FormFeedback } from "@/components/app-starter/form-feedback/form-feedback";
 import {
@@ -18,27 +19,22 @@ import {
   MessageScrollerContent,
   MessageScrollerViewport,
 } from "@/components/design-system/container/message-scroller/message-scroller";
-import { useOnlineStatus } from "@/capabilities/use-online-status";
 import { idleActionState } from "@/model/action-state";
-import {
-  mergeMessages,
-  pruneApplied,
-  toConversationDays,
-} from "@/model/inquiry/conversation";
-import type { InquiryHistory, InquiryMessage } from "@/model/inquiry/inquiry";
 import { newIdempotencyKey } from "@/model/idempotency-key";
+import { mergeMessages, pruneApplied, toConversationDays } from "@/model/inquiry/conversation";
+import type { InquiryHistory, InquiryMessage } from "@/model/inquiry/inquiry";
 
 import { sendInquiryMessageAction } from "../../../actions";
 import { toConnectionStatus } from "../../../connection-status";
 import { INQUIRY_BODY_FIELD } from "../../../parse-message-form";
 import { InquiryComposer } from "../composer/composer";
-import { InquiryMessageList } from "../message-list/message-list";
+import { type InquiryDraft, InquiryMessageList } from "../message-list/message-list";
 
 /** 受け取ったものがまだ 1 件も無い状態。描画のたびに新しい配列を作らない。 */
 const NO_MESSAGES: readonly InquiryMessage[] = [];
 
 /** 送信中のものがまだ 1 件も無い状態。 */
-const NO_PENDING: readonly string[] = [];
+const NO_PENDING: readonly InquiryDraft[] = [];
 
 const VIEWPORT_LABEL = "サポートとのやり取り";
 
@@ -73,9 +69,9 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
 
   const [appended, setAppended] = useState<readonly InquiryMessage[]>(NO_MESSAGES);
   const [state, formAction, pending] = useActionState(sendInquiryMessageAction, idleActionState());
-  const [sending, addSending] = useOptimistic<readonly string[], string>(
+  const [sending, addSending] = useOptimistic<readonly InquiryDraft[], InquiryDraft>(
     NO_PENDING,
-    (current, body) => [...current, body],
+    (current, draft) => [...current, draft],
   );
   const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
   const [seenState, setSeenState] = useState(state);
@@ -115,6 +111,14 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
     resume(toStreamCursor(history.streamCursor));
   }, [history.streamCursor, resume]);
 
+  const send = useCallback(
+    (formData: FormData) => {
+      addSending({ id: idempotencyKey, body: String(formData.get(INQUIRY_BODY_FIELD) ?? "") });
+      formAction(formData);
+    },
+    [addSending, formAction, idempotencyKey],
+  );
+
   const messages = mergeMessages(history.messages, appended);
 
   return (
@@ -146,10 +150,7 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
       ) : null}
 
       <InquiryComposer
-        action={(formData) => {
-          addSending(String(formData.get(INQUIRY_BODY_FIELD) ?? ""));
-          formAction(formData);
-        }}
+        action={send}
         idempotencyKey={idempotencyKey}
         pending={pending}
         state={state}

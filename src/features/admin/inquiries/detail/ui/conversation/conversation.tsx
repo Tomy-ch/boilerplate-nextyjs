@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useOptimistic, useState } from "react";
+import { useActionState, useCallback, useOptimistic, useState } from "react";
 
 import {
   INQUIRY_FEED_STREAM_TICKET_PATH,
@@ -26,11 +26,11 @@ import type { InquiryHistory, InquiryId } from "@/model/inquiry/inquiry";
 import { replyInquiryAction } from "../../../actions";
 import { toFeedConnectionStatus } from "../../../connection-status";
 import { REPLY_BODY_FIELD } from "../../../parse-reply-form";
-import { AdminInquiryMessageList } from "../message-list/message-list";
+import { type AdminInquiryDraft, AdminInquiryMessageList } from "../message-list/message-list";
 import { AdminInquiryReplyForm } from "../reply-form/reply-form";
 
 /** 送信中のものがまだ 1 件も無い状態。描画のたびに新しい配列を作らない。 */
-const NO_PENDING: readonly string[] = [];
+const NO_PENDING: readonly AdminInquiryDraft[] = [];
 
 const VIEWPORT_LABEL = "利用者とのやり取り";
 
@@ -60,9 +60,9 @@ export function AdminInquiryConversation({ history, inquiryId }: AdminInquiryCon
   const online = useOnlineStatus();
 
   const [state, formAction, pending] = useActionState(replyInquiryAction, idleActionState());
-  const [sending, addSending] = useOptimistic<readonly string[], string>(
+  const [sending, addSending] = useOptimistic<readonly AdminInquiryDraft[], AdminInquiryDraft>(
     NO_PENDING,
-    (current, body) => [...current, body],
+    (current, draft) => [...current, draft],
   );
   const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
   const [seenState, setSeenState] = useState(state);
@@ -75,6 +75,14 @@ export function AdminInquiryConversation({ history, inquiryId }: AdminInquiryCon
       setIdempotencyKey(newIdempotencyKey());
     }
   }
+
+  const reply = useCallback(
+    (formData: FormData) => {
+      addSending({ id: idempotencyKey, body: String(formData.get(REPLY_BODY_FIELD) ?? "") });
+      formAction(formData);
+    },
+    [addSending, formAction, idempotencyKey],
+  );
 
   const { state: streamState } = useStream({
     ticketPath: INQUIRY_FEED_STREAM_TICKET_PATH,
@@ -113,10 +121,7 @@ export function AdminInquiryConversation({ history, inquiryId }: AdminInquiryCon
       ) : null}
 
       <AdminInquiryReplyForm
-        action={(formData) => {
-          addSending(String(formData.get(REPLY_BODY_FIELD) ?? ""));
-          formAction(formData);
-        }}
+        action={reply}
         idempotencyKey={idempotencyKey}
         inquiryId={inquiryId}
         pending={pending}

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, render, screen } from "@testing-library/react";
+import { useCallback } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod/mini";
 
@@ -23,10 +24,15 @@ type Event = z.infer<typeof schema>;
 
 let opened: OpenStreamOptions<Event> | undefined;
 
+/** 受け取り手の既定。描画のたびに別の関数を渡さないため、module の側に持つ。 */
+function ignoreEvents(): void {
+  // 受け取らない。
+}
+
 function Probe({
   enabled = true,
   cursor = 3,
-  onEvents = () => undefined,
+  onEvents = ignoreEvents,
 }: {
   enabled?: boolean;
   cursor?: number;
@@ -37,12 +43,16 @@ function Probe({
     initialCursor: toStreamCursor(cursor),
     schema,
     onEvents,
-    onResync: () => undefined,
+    onResync: ignoreEvents,
     enabled,
   });
 
+  const resumeAtNine = useCallback(() => {
+    resumeAt(toStreamCursor(9));
+  }, [resumeAt]);
+
   return (
-    <button onClick={() => resumeAt(toStreamCursor(9))} type="button">
+    <button onClick={resumeAtNine} type="button">
       {state.kind}
     </button>
   );
@@ -73,9 +83,9 @@ describe("useStream", () => {
   });
 
   it("描画し直しても購読を張り直さない", () => {
-    const { rerender } = render(<Probe onEvents={() => undefined} />);
+    const { rerender } = render(<Probe onEvents={ignoreEvents} />);
 
-    rerender(<Probe onEvents={() => undefined} />);
+    rerender(<Probe onEvents={ignoreEvents} />);
 
     expect(openStream).toHaveBeenCalledTimes(1);
   });

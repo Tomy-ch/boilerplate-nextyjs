@@ -35,9 +35,9 @@ describe("toConnectionStatus", () => {
   });
 
   it("購読していない間は、回線の有無より先に伝える", () => {
-    expect(
-      toConnectionStatus({ kind: "connecting" }, { online: false, subscribing: false }),
-    ).toBe(CONNECTION_STATUS.SUSPENDED);
+    expect(toConnectionStatus({ kind: "connecting" }, { online: false, subscribing: false })).toBe(
+      CONNECTION_STATUS.SUSPENDED,
+    );
   });
 
   it("session が切れた打ち切りを、入り直せる状態として伝える", () => {

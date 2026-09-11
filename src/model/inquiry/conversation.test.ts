@@ -39,7 +39,10 @@ describe("mergeMessages", () => {
 
 describe("pruneApplied", () => {
   it("正本に入った位置までを落とす", () => {
-    const appended = [messageAt(2, "2026-09-01T02:00:00.000Z"), messageAt(3, "2026-09-01T03:00:00.000Z")];
+    const appended = [
+      messageAt(2, "2026-09-01T02:00:00.000Z"),
+      messageAt(3, "2026-09-01T03:00:00.000Z"),
+    ];
 
     expect(pruneApplied(appended, 2).map((message) => message.sequence)).toEqual([3]);
   });

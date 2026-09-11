@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildSecurityHeaders, type SecurityHeaderInputs } from "./security-headers";
 
 const production: SecurityHeaderInputs = {
+  apiOrigin: "https://api.example.com",
   mediaOrigin: "https://media.example.com",
   authIssuer: "https://idp.example.com/realms/shop",
   servesOverTls: true,
@@ -11,6 +12,7 @@ const production: SecurityHeaderInputs = {
 };
 
 const local: SecurityHeaderInputs = {
+  apiOrigin: "http://localhost:8081",
   mediaOrigin: "http://media.example.test:9000",
   authIssuer: "http://localhost:2010/default",
   servesOverTls: false,

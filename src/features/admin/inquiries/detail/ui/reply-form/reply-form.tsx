@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 
 import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
 import { Button } from "@/components/design-system/action/button/button";
@@ -60,8 +60,12 @@ export function AdminInquiryReplyForm({
     }
   }
 
-  const bodyErrors =
-    state.status === "error" ? (state.fieldErrors?.[REPLY_BODY_FIELD] ?? []) : [];
+  const bodyErrors = state.status === "error" ? (state.fieldErrors?.[REPLY_BODY_FIELD] ?? []) : [];
+  const submitLabel = pending ? SENDING_LABEL : SUBMIT_LABEL;
+
+  const keepDraft = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
+    setDraft(event.target.value);
+  }, []);
 
   return (
     <form action={action} className="flex flex-col gap-2">
@@ -75,7 +79,7 @@ export function AdminInquiryReplyForm({
         id={REPLY_BODY_FIELD}
         maxLength={INQUIRY_BODY_MAX_LENGTH}
         name={REPLY_BODY_FIELD}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={keepDraft}
         placeholder={PLACEHOLDER}
         rows={4}
         value={draft}
@@ -89,7 +93,7 @@ export function AdminInquiryReplyForm({
 
       <div className="flex justify-end">
         <Button disabled={pending || draft.trim() === ""} type="submit">
-          {pending ? SENDING_LABEL : SUBMIT_LABEL}
+          {submitLabel}
         </Button>
       </div>
     </form>

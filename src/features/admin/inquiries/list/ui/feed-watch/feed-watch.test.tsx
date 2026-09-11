@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { InquiryFeedEvent } from "@/adapters/client/api/inquiries";
 import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
+import { type InquiryId, toInquiryId } from "@/model/inquiry/inquiry";
 
 const { useStream, refresh, useOnlineStatus } = vi.hoisted(() => ({
   useStream: vi.fn(),
@@ -28,7 +29,7 @@ function lastOptions(): UseStreamOptions<InquiryFeedEvent> {
   return opened;
 }
 
-function feedEvent(inquiryId: string): InquiryFeedEvent {
+function feedEvent(inquiryId: InquiryId): InquiryFeedEvent {
   return {
     type: "inquiry.thread.updated.v1",
     payload: {
@@ -61,7 +62,7 @@ describe("AdminInquiryFeedWatch", () => {
   it("更新が届いたら一覧を取り直す", () => {
     render(<AdminInquiryFeedWatch />);
 
-    act(() => lastOptions().onEvents([feedEvent("0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60")]));
+    act(() => lastOptions().onEvents([feedEvent(toInquiryId("0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60"))]));
 
     expect(refresh).toHaveBeenCalledOnce();
   });

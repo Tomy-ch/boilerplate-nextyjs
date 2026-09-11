@@ -71,8 +71,14 @@ type StreamSource = {
 export type StreamDeps = {
   readonly requestConnection: (path: string) => Promise<StreamConnection>;
   readonly createSource: (url: string, handlers: StreamSourceHandlers) => StreamSource;
-  readonly setTimer: (handler: () => void, delayMs: number) => number;
-  readonly clearTimer: (id: number) => void;
+  /**
+   * 待機を 1 つ仕掛け、**取り消す手段を返す**。
+   *
+   * @remarks
+   * 識別子ではなく閉包を返すのは、待機の識別子の型が実行場所で変わるためです（ブラウザは数値、
+   * Node は object）。取り消し方を仕掛けた側が持てば、呼ぶ側はどちらの形も知らずに済みます。
+   */
+  readonly setTimer: (handler: () => void, delayMs: number) => () => void;
   readonly random: () => number;
   readonly now: () => number;
   /** 画面が見えていないか。見えていない間は張り直さない。 */
@@ -185,9 +191,12 @@ function browserDeps(): StreamDeps {
   return {
     requestConnection,
     createSource,
-    setTimer: (handler, delayMs) => globalThis.setTimeout(handler, delayMs),
-    clearTimer: (id) => {
-      globalThis.clearTimeout(id);
+    setTimer: (handler, delayMs) => {
+      const id = globalThis.setTimeout(handler, delayMs);
+
+      return () => {
+        globalThis.clearTimeout(id);
+      };
     },
     random: Math.random,
     now: Date.now,
@@ -246,8 +255,8 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   let connection: StreamConnection | null = null;
   let source: StreamSource | null = null;
   let attempt = 0;
-  let reconnectTimer: number | null = null;
-  let flushTimer: number | null = null;
+  let cancelReconnect: (() => void) | null = null;
+  let cancelFlush: (() => void) | null = null;
   let releaseVisibility: (() => void) | null = null;
   let awaitingResync = false;
   let halted = false;
@@ -265,10 +274,8 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   }
 
   function clearReconnect(): void {
-    if (reconnectTimer !== null) {
-      deps.clearTimer(reconnectTimer);
-      reconnectTimer = null;
-    }
+    cancelReconnect?.();
+    cancelReconnect = null;
   }
 
   function stop(reason: StreamStopReason): void {
@@ -300,12 +307,12 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   }
 
   function scheduleFlush(): void {
-    if (flushTimer !== null) {
+    if (cancelFlush !== null) {
       return;
     }
 
-    flushTimer = deps.setTimer(() => {
-      flushTimer = null;
+    cancelFlush = deps.setTimer(() => {
+      cancelFlush = null;
       flush();
     }, WINDOW_MS);
   }
@@ -332,8 +339,8 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
     const delay = nextDelayMs(attempt, deps.random, hintMs);
 
     attempt += 1;
-    reconnectTimer = deps.setTimer(() => {
-      reconnectTimer = null;
+    cancelReconnect = deps.setTimer(() => {
+      cancelReconnect = null;
       void start();
     }, delay);
   }
@@ -474,11 +481,8 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
     close() {
       closed = true;
       clearReconnect();
-
-      if (flushTimer !== null) {
-        deps.clearTimer(flushTimer);
-        flushTimer = null;
-      }
+      cancelFlush?.();
+      cancelFlush = null;
 
       releaseVisibility?.();
       releaseVisibility = null;

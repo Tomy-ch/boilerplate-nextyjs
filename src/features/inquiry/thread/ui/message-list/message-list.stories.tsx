@@ -31,7 +31,7 @@ export const Default: Story = {};
 
 /** 送信中の 1 通が末尾に並ぶ。 */
 export const Sending: Story = {
-  args: { pending: ["追跡番号を教えてください。"] },
+  args: { pending: [{ id: "draft-1", body: "追跡番号を教えてください。" }] },
 };
 
 /** 長い本文と、区切りの無い連続文字列。 */

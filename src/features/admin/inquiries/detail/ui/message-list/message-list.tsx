@@ -35,8 +35,14 @@ const SENDING_LABEL = "送信中";
 export type AdminInquiryMessageListProps = {
   /** 日付で区切った、確定しているやり取り。 */
   days: readonly ConversationDay[];
-  /** まだ応答が返っていない回答の本文。 */
-  pending: readonly string[];
+  /** まだ応答が返っていない回答。識別子を伴う理由は利用者側と同じ。 */
+  pending: readonly AdminInquiryDraft[];
+};
+
+/** まだ応答が返っていない回答 1 件。 */
+export type AdminInquiryDraft = {
+  readonly id: string;
+  readonly body: string;
 };
 
 function AdminInquiryMessageRow({ message }: { message: InquiryMessage }) {
@@ -83,13 +89,13 @@ export const AdminInquiryMessageList = withPartSpan(
 
         {pending.length === 0 ? null : (
           <MessageGroup>
-            {pending.map((body, index) => (
-              <Message align={MESSAGE_ALIGN.END} key={`${index}-${body}`}>
+            {pending.map((draft) => (
+              <Message align={MESSAGE_ALIGN.END} key={draft.id}>
                 <MessageContent>
                   <MessageHeader>{AUTHOR_LABEL[INQUIRY_AUTHOR_KIND.operator]}</MessageHeader>
                   <Bubble variant={BUBBLE_VARIANT.DEFAULT}>
                     <BubbleContent className="whitespace-pre-wrap break-words opacity-70">
-                      {body}
+                      {draft.body}
                     </BubbleContent>
                   </Bubble>
                   <MessageFooter>{SENDING_LABEL}</MessageFooter>

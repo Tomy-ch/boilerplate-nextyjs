@@ -223,16 +223,6 @@
       }
     },
     {
-      "includes": ["mocks/references.ts", "scripts/**", "tokens/**"],
-      "linter": {
-        "rules": {
-          "complexity": {
-            "useLiteralKeys": "off"
-          }
-        }
-      }
-    },
-    {
       "includes": [
         "baseline/lib/**",
         "vrt/**",

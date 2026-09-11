@@ -34,7 +34,12 @@ describe("AdminInquiryMessageList", () => {
   });
 
   it("送信中の回答を末尾に置く", () => {
-    render(<AdminInquiryMessageList days={DAYS} pending={["確認しております。"]} />);
+    render(
+      <AdminInquiryMessageList
+        days={DAYS}
+        pending={[{ id: "draft-1", body: "確認しております。" }]}
+      />,
+    );
 
     expect(screen.getByText("確認しております。")).toBeVisible();
     expect(screen.getByText("送信中")).toBeVisible();

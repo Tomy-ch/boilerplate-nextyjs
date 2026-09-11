@@ -27,7 +27,9 @@ export async function AdminInquiryResults({ location }: AdminInquiryResultsProps
       pagination={
         <CursorPagination
           aria-label="問い合わせ一覧のページ送り"
-          nextHref={page.nextCursor === null ? undefined : toNextPageHref(location, page.nextCursor)}
+          nextHref={
+            page.nextCursor === null ? undefined : toNextPageHref(location, page.nextCursor)
+          }
           previousHref={toPreviousPageHref(location)}
         />
       }

@@ -2,18 +2,19 @@
 
 import { act, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
 import type { InquiryConversationEvent } from "@/adapters/client/api/inquiries";
+import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
 import { INQUIRY_AUTHOR_KIND, type InquiryMessage } from "@/model/inquiry/inquiry";
 
-const { useStream, resume, refresh, useOnlineStatus, sendInquiryMessageAction } = vi.hoisted(() => ({
-  useStream: vi.fn(),
-  resume: vi.fn(),
-  refresh: vi.fn(),
-  useOnlineStatus: vi.fn(() => true),
-  sendInquiryMessageAction: vi.fn(),
-}));
+const { useStream, resume, refresh, useOnlineStatus, sendInquiryMessageAction } = vi.hoisted(
+  () => ({
+    useStream: vi.fn(),
+    resume: vi.fn(),
+    refresh: vi.fn(),
+    useOnlineStatus: vi.fn(() => true),
+    sendInquiryMessageAction: vi.fn(),
+  }),
+);
 
 vi.mock("@/adapters/client/stream/use-stream", () => ({ useStream }));
 vi.mock("@/capabilities/use-online-status", () => ({ useOnlineStatus }));

@@ -1,11 +1,10 @@
 "use client";
 
-import { type KeyboardEvent, useState } from "react";
-
+import { type ChangeEvent, type KeyboardEvent, useCallback, useState } from "react";
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
 import { Button } from "@/components/design-system/action/button/button";
 import { Label } from "@/components/design-system/form/label/label";
 import { Textarea } from "@/components/design-system/form/textarea/textarea";
-import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiries";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
 import type { InquiryMessageActionState } from "../../../actions";
@@ -32,12 +31,7 @@ const SUBMIT_LABEL = "送信";
 const SENDING_LABEL = "送信中";
 
 /** 送信欄。書きかけはここが持ち、成立したときだけ片付ける。 */
-export function InquiryComposer({
-  action,
-  state,
-  idempotencyKey,
-  pending,
-}: InquiryComposerProps) {
+export function InquiryComposer({ action, state, idempotencyKey, pending }: InquiryComposerProps) {
   const [draft, setDraft] = useState("");
   const [seenState, setSeenState] = useState(state);
 
@@ -50,14 +44,23 @@ export function InquiryComposer({
     }
   }
 
-  const bodyErrors = state.status === "error" ? (state.fieldErrors?.[INQUIRY_BODY_FIELD] ?? []) : [];
+  const bodyErrors =
+    state.status === "error" ? (state.fieldErrors?.[INQUIRY_BODY_FIELD] ?? []) : [];
   const empty = draft.trim() === "";
+  const submitLabel = pending ? SENDING_LABEL : SUBMIT_LABEL;
 
-  function submitOnModifierEnter(event: KeyboardEvent<HTMLTextAreaElement>): void {
-    if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !empty) {
-      event.currentTarget.form?.requestSubmit();
-    }
-  }
+  const keepDraft = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
+    setDraft(event.target.value);
+  }, []);
+
+  const submitOnModifierEnter = useCallback(
+    (event: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !empty) {
+        event.currentTarget.form?.requestSubmit();
+      }
+    },
+    [empty],
+  );
 
   return (
     <form action={action} className="flex flex-col gap-2">
@@ -72,7 +75,7 @@ export function InquiryComposer({
         id={INQUIRY_BODY_FIELD}
         maxLength={INQUIRY_BODY_MAX_LENGTH}
         name={INQUIRY_BODY_FIELD}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={keepDraft}
         onKeyDown={submitOnModifierEnter}
         placeholder={PLACEHOLDER}
         rows={3}
@@ -87,7 +90,7 @@ export function InquiryComposer({
 
       <div className="flex justify-end">
         <Button disabled={pending || empty} type="submit">
-          {pending ? SENDING_LABEL : SUBMIT_LABEL}
+          {submitLabel}
         </Button>
       </div>
     </form>

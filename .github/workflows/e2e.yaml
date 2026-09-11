@@ -275,12 +275,16 @@ jobs:
           : > /tmp/e2e-full.log
           : > /tmp/e2e-failed.log
 
-          # Each stage keeps its own log, and only the failing ones are excerpted. One
-          # shared excerpt would carry the markers but not the evidence: a pixel failure
-          # followed by two green stages pushes the pixels out of the last 80 lines.
+          # Each stage keeps its own log and its own JSON report, and only the failing ones
+          # are reported. The report is what the body reads: Playwright already separated the
+          # specs that failed from the ones that passed, so nothing here has to re-derive that
+          # from log text (`scripts/test-report`, ADR 0157). The log tail is passed alongside
+          # it and is used only where the report cannot decide — a stage that died before
+          # writing one.
           stage() {
             local name="$1"
-            shift
+            local report="$2"
+            shift 2
 
             # Streamed through `tee` rather than tailed at the end: a run that is cancelled
             # or hits the job timeout never reaches the tail, so the slow case — the one
@@ -292,16 +296,24 @@ jobs:
 
             if [ "${code}" -ne 0 ]; then
               status=failure
-              tail -n 80 "/tmp/e2e-${name}.log" >> /tmp/e2e-failed.log
+              tail -n 200 "/tmp/e2e-${name}.log" > "/tmp/e2e-${name}.tail"
+              printf '## %s\n\n' "${name}" >> /tmp/e2e-failed.log
+              pnpm exec tsx scripts/test-report \
+                "${report}" "/tmp/e2e-${name}.tail" "/tmp/e2e-${name}.md"
+              cat "/tmp/e2e-${name}.md" >> /tmp/e2e-failed.log
             fi
           }
 
           # A port each: `make e2e` kills the `pnpm start` wrapper but the `next start` child
           # it spawned can outlive it and keep :3100 bound (issue #465). Sharing the port
           # makes the next stage fail before it drives anything.
-          stage journeys make e2e
-          stage maintenance make e2e-maintenance E2E_PORT=3101
-          stage metadata make e2e-metadata E2E_PORT=3103
+          #
+          # The report paths are the `json` reporter's `outputFile` in each stage's config.
+          # They differ per stage on purpose: one shared path would leave the last stage's
+          # report standing in for all three.
+          stage journeys tmp/e2e/report.json make e2e
+          stage maintenance tmp/e2e/maintenance-report.json make e2e-maintenance E2E_PORT=3101
+          stage metadata tmp/e2e/metadata-report.json make e2e-metadata E2E_PORT=3103
 
           echo "status=${status}" >> "$GITHUB_OUTPUT"
 
@@ -545,5 +557,9 @@ jobs:
           status: ${{ needs.e2e.outputs.status }}
           title: ${{ needs.e2e.outputs.title }}
           body-file: /tmp/e2e-comment/e2e.log
+          # Every failing stage writes its half through `scripts/test-report`, which fences
+          # each unaltered value to its own content — the second way the input's contract can
+          # be met. The stand-down and success bodies are workflow-authored prose.
+          body-sanitized: 'true'
           notes-file: /tmp/e2e-comment/e2e-notes.md
-          details-summary: 'E2E の実行ログ'
+          details-summary: 'E2E の失敗（全件）'

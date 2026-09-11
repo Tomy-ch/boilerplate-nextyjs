@@ -253,10 +253,21 @@ jobs:
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          # The evidence is axe's own text — rule ids and help prose this repository does not
-          # author — so it is handed over as `tool-output` (how each kind is rendered is
-          # `scripts/lib/issue-body.ts`).
-          tail -n 80 /tmp/a11y-full.log > /tmp/a11y-evidence.txt 2>/dev/null || : > /tmp/a11y-evidence.txt
+          # The evidence is the JSON report Playwright wrote, not the tail of the log: it
+          # already separates the stories that failed from the ones that passed, and it
+          # carries how many of how many — which the last 80 lines cannot say
+          # (`scripts/test-report`, ADR 0157). The tail is passed alongside and is used only
+          # where the report cannot decide — a run that died before writing one.
+          #
+          # Handed over as `authored`: the body is this repository's prose, and axe's own text
+          # — rule ids and help prose this repository does not author — sits inside a fence
+          # sized to its own content, so it cannot become markup.
+          tail -n 200 /tmp/a11y-full.log > /tmp/a11y-full.tail 2>/dev/null || : > /tmp/a11y-full.tail
+          pnpm exec tsx scripts/test-report \
+            tmp/vrt/report.json /tmp/a11y-full.tail /tmp/a11y-evidence.txt ||
+            cat <<'FALLBACK' > /tmp/a11y-evidence.txt
+          （違反の一覧を組み立てられませんでした。実行ログと `a11y-report` artifact を見てください。）
+          FALLBACK
 
           cat <<'NOTE' > /tmp/a11y-note.md
           `a11y-report` artifact に、story ごとの違反が入っています。
@@ -274,7 +285,7 @@ jobs:
           # "PR の外で落ちたら、issue にする").
           pnpm exec tsx scripts/ci-report issue-body \
             --heading '違反の詳細:' \
-            --kind tool-output \
+            --kind authored \
             --evidence /tmp/a11y-evidence.txt \
             --run-url "${RUN_URL}" \
             --note /tmp/a11y-note.md > /tmp/a11y-guard.md ||

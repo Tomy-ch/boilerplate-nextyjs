@@ -178,14 +178,21 @@ jobs:
         shell: bash
         run: make test-shards-verify
 
+      # The body is built by `make test-failures`, so the wiring lives in one place and a
+      # local `make test-failures` prints exactly what the comment will say. What it reads is
+      # vitest's own JSON report — `status` and `failureMessages`, the split the runner already
+      # made — never a text filter that classifies by vocabulary (ADR 0157).
+      #
+      # Do not read `tmp/test-report.json` here or anywhere else. It records passing cases too,
+      # with full paths, and measures 785KB against the 690B of the plain text output.
       - name: Merge the runs and check coverage
         id: test
         shell: bash
         run: |
           set +e
 
-          make test-merge 2>&1 | tee /tmp/test.log
-          code=${PIPESTATUS[0]}
+          make test-failures TEST_RUN=test-merge > /tmp/test-comment.log 2>&1
+          code=$?
 
           if [ "${code}" -eq 0 ]; then
             echo "status=success" >> "$GITHUB_OUTPUT"
@@ -196,22 +203,6 @@ jobs:
           fi
 
           exit 0
-
-      # Vitest's own JSON report, not a text filter. A summariser that picks failure lines
-      # out of the log classifies by vocabulary, and the reason a test failed can land in
-      # the "passed" pile and disappear (ADR 0157). `status` and `failureMessages` are the
-      # split the runner already made, so nothing is decided here by matching words.
-      #
-      # The tail is still cut, but only as the fallback the report falls back to: a
-      # coverage-threshold failure fails the run without failing a test, and the table that
-      # carries that verdict is last of all.
-      - name: Build the comment body from the failures alone
-        if: always() && steps.test.outputs.status != ''
-        shell: bash
-        run: |
-          tail -n 400 /tmp/test.log > /tmp/test-tail.log
-          pnpm exec tsx scripts/test-report \
-            tmp/test-report.json /tmp/test-tail.log /tmp/test-comment.log
 
       - name: Report test coverage
         if: always()
@@ -230,6 +221,11 @@ jobs:
           status: ${{ steps.test.outputs.status }}
           title: ${{ steps.test.outputs.title }}
           body-file: /tmp/test-comment.log
+          # `make test-failures` writes the body through `scripts/test-report`, which puts
+          # every unaltered value inside a fence sized to its own content. That is the second
+          # way the input's contract can be met, and it is what lets the counts and the
+          # per-case headings read as markup instead of as literal characters.
+          body-sanitized: 'true'
           details-summary: 'Vitest の失敗（全件）'
 
       # Two conditions, because they fail for different reasons. The merge speaks for the

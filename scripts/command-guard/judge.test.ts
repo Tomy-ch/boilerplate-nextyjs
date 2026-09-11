@@ -18,14 +18,27 @@ const LITERALS = deriveLiterals(DENY);
 describe("deriveLiterals", () => {
   // ----- 正常系 -----
   it("`Bash(...)` から `*` の手前までを綴りとして取り出す", () => {
-    expect(deriveLiterals(["Bash(make tag-patch *)", "Bash(graphify install*)"])).toEqual([
-      "graphify install",
-      "make tag-patch",
-    ]);
+    expect(deriveLiterals(["Bash(make tag-patch *)"])[0]).toMatchObject({
+      source: "make tag-patch",
+      head: "make tag-patch",
+      fragments: [],
+    });
   });
 
-  it("重複した綴りを 1 つに畳む", () => {
-    expect(deriveLiterals(["Bash(rm -rf *)", "Bash(rm -rf)"])).toEqual(["rm -rf"]);
+  it("`*` の前が空白でない宣言を、区切りを求めない前方一致にする", () => {
+    expect(deriveLiterals(["Bash(git switch release/*)"])[0]?.openEnded).toBe(true);
+    expect(deriveLiterals(["Bash(make tag-patch *)"])[0]?.openEnded).toBe(false);
+  });
+
+  it("`*` を挟んだ断片を順序つきで持つ", () => {
+    expect(deriveLiterals(["Bash(gh api *DELETE*)"])[0]).toMatchObject({
+      head: "gh api",
+      fragments: ["DELETE"],
+    });
+  });
+
+  it("重複した宣言を 1 つに畳む", () => {
+    expect(deriveLiterals(["Bash(rm -rf *)", "Bash(rm -rf *)"])).toHaveLength(1);
   });
 
   // ----- 異常系 -----
@@ -185,5 +198,56 @@ describe("judge", () => {
 
   it("宣言が空なら何も止めない", () => {
     expect(judge("rm -rf /", [])).toBeUndefined();
+  });
+
+  // ----- 正常系: 前方一致も素朴な分割も届かない位置 -----
+  it("`sh -c` の中身が後ろへ繋がっていても捕まえる", () => {
+    expect(judge('sh -c "rm -rf /" && echo done', LITERALS)).toBe("rm -rf");
+  });
+
+  it("`sh -c` の後ろに引数が続いても捕まえる", () => {
+    expect(judge('bash -c "rm -rf /" extra', LITERALS)).toBe("rm -rf");
+  });
+
+  it("単独の `&` の後ろに現れても捕まえる", () => {
+    expect(judge("echo hi & rm -rf /", LITERALS)).toBe("rm -rf");
+  });
+
+  it("空白を挟まない redirection の手前でも捕まえる", () => {
+    expect(judge("make tag-patch>out.txt", LITERALS)).toBe("make tag-patch");
+  });
+
+  it("backtick とプロセス置換の中でも捕まえる", () => {
+    expect(judge("echo `rm -rf /`", LITERALS)).toBe("rm -rf");
+    expect(judge("diff <(rm -rf /) /dev/null", LITERALS)).toBe("rm -rf");
+  });
+
+  it("`eval` の引用の中でも捕まえる", () => {
+    expect(judge('eval "rm -rf /"', LITERALS)).toBe("rm -rf");
+  });
+
+  it("語の途中で終わる綴りを、区切りを求めずに捕まえる", () => {
+    const prefixed = deriveLiterals(["Bash(git switch release/*)"]);
+
+    expect(judge("git switch release/v1.0.0", prefixed)).toBe("git switch release/");
+  });
+
+  it("`*` を挟んだ宣言を、断片が揃ったときだけ捕まえる", () => {
+    const partial = deriveLiterals(["Bash(gh api *DELETE*)"]);
+
+    expect(judge("gh api repos/x/y -X DELETE", partial)).toBe("gh api");
+  });
+
+  // ----- 異常系: 誤爆してはならないもの（続き） -----
+  it("`*` を挟んだ宣言で、断片を持たない呼び出しを通す", () => {
+    const partial = deriveLiterals(["Bash(gh api *DELETE*)"]);
+
+    expect(judge("gh api repos/x/y", partial)).toBeUndefined();
+  });
+
+  it("語の途中で終わる綴りが、別の語を巻き込まない", () => {
+    const prefixed = deriveLiterals(["Bash(git switch release/*)"]);
+
+    expect(judge("git switch feature/x", prefixed)).toBeUndefined();
   });
 });

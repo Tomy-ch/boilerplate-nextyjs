@@ -10,8 +10,15 @@
 //   引数なしが通常の呼び方である
 // - **包み** —— `bash -c` / `rtk run` / `make ai-` は中身を実行するので、包みを剥がして判定する
 
-/** 区切りの直後はコマンド位置になる。`(` と backtick は散文に多すぎるので採らない。 */
-const SEPARATOR = /(?:\|\||&&|[;|\n]|\$\()/g;
+/**
+ * 区切りの直後はコマンド位置になる。`(` と backtick は散文に多すぎるので採らない。
+ *
+ * @remarks
+ * 単独の `&` も区切りである（`cmd1 & cmd2` は cmd1 を背後へ回して cmd2 を続ける）。`&&` と
+ * 二重に当たらないよう前後を見る。backtick とプロセス置換 `<(` / `>(` も、`$(` と同じく
+ * **直後がコマンド位置**になる —— `$(` だけを塞ぐと同じ概念の別綴りが素通りする。
+ */
+const SEPARATOR = /(?:\|\||&&|(?<!&)&(?!&)|[;|\n`]|\$\(|[<>]\()/g;
 
 /** 束ねられた短 flag（`-rf`）。長 flag と、`-` 単体は含まない。 */
 const SHORT_FLAG = /^-[^-\s]+$/;
@@ -29,7 +36,7 @@ const WRAPPERS: readonly (readonly [RegExp, string])[] = [
 ];
 
 /** `sh -c <引用>` は引用の中身がそのままコマンド行なので、引用を落とす前に剥がす。 */
-const SHELL_C = /^(?:ba)?sh\s+-c\s+(["'])([\s\S]*)\1\s*$/;
+const SHELL_C = /^(?:(?:ba)?sh|eval)\s+(?:-c\s+)?(["'])([\s\S]*?)\1/;
 
 /** 宣言とコマンド行を、同じ形（先頭の語 + 求める flag）へ割った結果。 */
 export type CommandShape = {
@@ -41,25 +48,65 @@ export type CommandShape = {
   readonly longFlags: readonly string[];
 };
 
+/** 1 つの deny 宣言から取り出した、照合に要るものすべて。 */
+export type Literal = {
+  /** 宣言の綴り。報告にそのまま出る。 */
+  readonly source: string;
+  /** コマンド位置で前方一致させる先頭部分。 */
+  readonly head: string;
+  /**
+   * 先頭部分の後ろに、この順で現れることを求める断片。
+   *
+   * @remarks
+   * `Bash(gh api *DELETE*)` のように `*` が途中にもある宣言は、**先頭だけを見ると `gh api` を
+   * まるごと塞ぎます**。`allow` が `Bash(gh api *)` を許している以上それは誤拒否で、誤爆した拒否は
+   * 迂回の動機になります。断片を全部求めることで、宣言が塞ぐつもりだったものだけが当たります。
+   */
+  readonly fragments: readonly string[];
+  /**
+   * 直後に区切りを求めず、そのまま前方一致させるか。
+   *
+   * @remarks
+   * `Bash(git switch release/*)` の `*` は語の途中に立つので、綴りは `git switch release/` で
+   * 終わり、**直後には必ず語の続きが来ます**。ここで区切りを求めると `git switch release/v1.0.0` が
+   * 一度も当たりません。`Bash(make tag-patch *)` のように `*` の前が空白のものは、逆に区切りを
+   * 求めないと `make tag-patch-dry` まで巻き込みます。
+   */
+  readonly openEnded: boolean;
+};
+
 /**
- * `permissions.deny` の宣言から、コマンド位置で照合する綴りを取り出す。
+ * `permissions.deny` の宣言から、コマンド位置で照合するものを取り出す。
  *
  * @remarks
- * `Bash(...)` 以外（`Edit(...)` など）は Bash の判定に関係しないので落とします。`*` の手前までを
- * 綴りとするので、`Bash(rm -rf *)` も `Bash(graphify install*)` も同じ扱いになります。
+ * `Bash(...)` 以外（`Edit(...)` など）は Bash の判定に関係しないので落とします。
  */
-export function deriveLiterals(denyEntries: readonly string[]): readonly string[] {
-  const literals = new Set<string>();
+export function deriveLiterals(denyEntries: readonly string[]): readonly Literal[] {
+  const seen = new Map<string, Literal>();
 
   for (const entry of denyEntries) {
     const matched = /^Bash\((.*)\)$/.exec(entry);
     if (!matched) continue;
 
-    const literal = (matched[1] ?? "").split("*")[0]?.trim();
-    if (literal) literals.add(literal);
+    const body = matched[1] ?? "";
+    const parts = body.split("*");
+    const head = (parts[0] ?? "").trim();
+    if (!head) continue;
+
+    const fragments = parts
+      .slice(1)
+      .map((fragment) => fragment.trim())
+      .filter(Boolean);
+
+    seen.set(`${head}\u0000${fragments.join("\u0000")}`, {
+      source: head,
+      head,
+      fragments,
+      openEnded: !/\s$/.test(parts[0] ?? ""),
+    });
   }
 
-  return [...literals].sort();
+  return [...seen.values()].sort((a, b) => a.head.localeCompare(b.head));
 }
 
 /**
@@ -117,10 +164,66 @@ export function unwrap(segment: string): string {
  * されたゲートは無いのと同じです。**
  */
 export function stripQuoted(commandLine: string): string {
-  return commandLine
-    .replace(HEREDOC_BODY, " ")
-    .replace(/'[^']*'/g, " ")
-    .replace(/"(?:[^"\\]|\\.)*"/g, " ");
+  return stripQuotes(stripHeredoc(commandLine));
+}
+
+/**
+ * heredoc の本体だけを落とす。
+ *
+ * @remarks
+ * 本体は改行をまたぐので、**区切りで割る前に**落とします。割ったあとでは `\n` が既に境界に
+ * なっていて、散文の 1 行 1 行がコマンド行として現れます。
+ */
+function stripHeredoc(commandLine: string): string {
+  return commandLine.replace(HEREDOC_BODY, " ");
+}
+
+/**
+ * 引用の中身だけを落とす。
+ *
+ * @remarks
+ * **包みを剥がしたあとの 1 区間に対して掛けます。** `sh -c "..."` の引用は散文ではなくコマンド行
+ * そのものなので、剥がす前に掛けると中身ごと消えます。
+ */
+function stripQuotes(segment: string): string {
+  return segment.replace(/'[^']*'/g, " ").replace(/"(?:[^"\\]|\\.)*"/g, " ");
+}
+
+/** 包みを剥がすたびに中身がまたコマンド行になるので、その深さの上限。 */
+const NEST_LIMIT = 4;
+
+/**
+ * コマンド行を、コマンド位置に立つ区間の一覧へ割る。
+ *
+ * @remarks
+ * 順序が要です。**区切りで割り、区間ごとに包みを剥がし、剥がせたものは中身をもう一度割ります。**
+ * 包みの中身はコマンド行なので、そこにも区切りが在ります。引用を落とすのは剥がし終えた区間に
+ * 対してだけで、`sh -c "..."` の引用を散文として消してしまわないようにしています。
+ */
+function splitSegments(line: string, depth: number): readonly string[] {
+  if (depth > NEST_LIMIT) return [];
+
+  const out: string[] = [];
+  for (const raw of line.split(SEPARATOR)) {
+    const trimmed = raw.replace(/^[\s&]+/, "").trim();
+    if (!trimmed) continue;
+
+    const unwrapped = unwrap(trimmed);
+    if (unwrapped !== trimmed) out.push(...splitSegments(unwrapped, depth + 1));
+    out.push(stripQuotes(unwrapped));
+  }
+  return out;
+}
+
+/** 断片が、この順で残りの中に全部現れるか。断片が無ければ真。 */
+function containsInOrder(rest: string, fragments: readonly string[]): boolean {
+  let cursor = 0;
+  for (const fragment of fragments) {
+    const at = rest.indexOf(fragment, cursor);
+    if (at < 0) return false;
+    cursor = at + fragment.length;
+  }
+  return true;
 }
 
 /**
@@ -129,11 +232,9 @@ export function stripQuoted(commandLine: string): string {
  * @remarks
  * 直後が行末か区切りであることを求めるので、`make tag-patch-dry` は `make tag-patch` で止まりません。
  */
-export function judge(commandLine: string, literals: readonly string[]): string | undefined {
-  const shapes = literals.map((literal) => ({ literal, want: parseShape(literal) }));
-  const segments = stripQuoted(unwrap(commandLine))
-    .split(SEPARATOR)
-    .map((part) => unwrap(part.replace(/^[\s&]+/, "")));
+export function judge(commandLine: string, literals: readonly Literal[]): string | undefined {
+  const shapes = literals.map((literal) => ({ literal, want: parseShape(literal.head) }));
+  const segments = splitSegments(stripHeredoc(commandLine), 0);
 
   for (const segment of segments) {
     if (!segment) continue;
@@ -143,9 +244,14 @@ export function judge(commandLine: string, literals: readonly string[]): string 
       if (!segment.startsWith(want.head)) continue;
 
       const rest = segment.slice(want.head.length);
-      if (rest !== "" && !/^[\s;&|)]/.test(rest)) continue;
+      // `>` / `<` は前に空白が要らないので境界に含める（`make tag-patch>out.txt`）。
+      // 語の途中で終わる綴り（`git switch release/`）は、直後に必ず続きが来るので境界を求めない。
+      if (!literal.openEnded && rest !== "" && !/^[\s;&|)<>]/.test(rest)) continue;
 
-      if (want.shortFlags.size === 0 && want.longFlags.length === 0) return literal;
+      // 宣言が `*` を挟んで並べた断片は、この順で全部現れることを求める。
+      if (!containsInOrder(rest, literal.fragments)) continue;
+
+      if (want.shortFlags.size === 0 && want.longFlags.length === 0) return literal.source;
 
       const shortSatisfied = [...want.shortFlags].every((character) =>
         got.shortFlags.has(character),
@@ -153,7 +259,7 @@ export function judge(commandLine: string, literals: readonly string[]): string 
       const longSatisfied = want.longFlags.every((wanted) =>
         got.longFlags.some((present) => present.startsWith(wanted)),
       );
-      if (shortSatisfied && longSatisfied) return literal;
+      if (shortSatisfied && longSatisfied) return literal.source;
     }
   }
 

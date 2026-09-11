@@ -61,7 +61,7 @@ const [, , mode, ...rest] = process.argv;
 const literals = deriveLiterals(readDenyEntries());
 
 if (mode === "--list") {
-  for (const literal of literals) process.stdout.write(`${literal}\n`);
+  for (const literal of literals) process.stdout.write(`${literal.source}\n`);
 } else if (mode === "--hook") {
   let raw = "";
   process.stdin.setEncoding("utf8");

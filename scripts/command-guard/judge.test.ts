@@ -7,6 +7,7 @@ import {
   parseShape,
   readCommandLine,
   stripQuoted,
+  UNDECIDABLE,
   unwrap,
 } from "./judge";
 
@@ -116,7 +117,6 @@ describe("unwrap", () => {
   });
 
   it("包みの入れ子が上限を超えても落ちない", () => {
-    // splitSegments は包みを剥がすたびに中身をもう一度割る。その再帰の上限。
     const deep = `${'sh -c "'.repeat(8)}rm -rf /${'"'.repeat(8)}`;
 
     expect(() => judge(deep, LITERALS)).not.toThrow();
@@ -308,6 +308,17 @@ describe("judge", () => {
     const prefixed = deriveLiterals(["Bash(git switch release/*)"]);
 
     expect(judge("git switch feature/x", prefixed)).toBeUndefined();
+  });
+
+  it("剥がし切れないほど深い包みを、通さずに判定できないとして返す", () => {
+    // 空へ倒すと「塞ぐ対象が無い」と読め、深く包むだけでガードを抜けられる。
+    const deep = `${"rtk run ".repeat(41)}rm -rf /`;
+
+    expect(judge(deep, LITERALS)).toBe(UNDECIDABLE);
+  });
+
+  it("剥がし切れる深さの包みは、中身で判定する", () => {
+    expect(judge(`${"rtk run ".repeat(20)}rm -rf /`, LITERALS)).toBe("rm -rf");
   });
 
   it("断片が逆順なら当てない", () => {

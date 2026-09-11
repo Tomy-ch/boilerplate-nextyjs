@@ -108,6 +108,24 @@ describe("collectVitestFailures", () => {
     expect(collectVitestFailures({})).toEqual([]);
   });
 
+  it("名前を持たないケースを、欠けた場所を名指しして残す", () => {
+    const report: VitestReport = {
+      testResults: [
+        { name: "/repo/e.test.ts", status: "failed", assertionResults: [{ status: "failed" }] },
+      ],
+    };
+
+    expect(collectVitestFailures(report)[0]?.name).toBe("(不明なケース)");
+  });
+
+  it("名前も文言も持たないファイルの失敗を残す", () => {
+    const report: VitestReport = { testResults: [{ status: "failed", assertionResults: [] }] };
+
+    expect(collectVitestFailures(report)).toEqual([
+      { file: "(不明なファイル)", name: "(ケースへ到達せず)", message: "(理由の記録なし)" },
+    ]);
+  });
+
   it("testResults が配列でなければ 0 件として読む", () => {
     expect(collectVitestFailures({ testResults: {} as never })).toEqual([]);
   });
@@ -317,6 +335,54 @@ describe("collectPlaywrightFailures", () => {
       { file: "(不明なファイル)", name: "(不明なケース)", message: "(理由の記録なし)" },
       { file: "(spec の外)", name: "(実行系の失敗)", message: "(理由の記録なし)" },
     ]);
+  });
+
+  it("error も errors も持たない result を理由なしとして残す", () => {
+    const report = {
+      suites: [
+        {
+          file: "a.spec.ts",
+          specs: [
+            {
+              title: "落ちる",
+              file: "a.spec.ts",
+              tests: [{ status: "unexpected", results: [{ status: "failed" }] }],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(collectPlaywrightFailures(specsOf(report), report)[0]?.message).toBe("(理由の記録なし)");
+  });
+
+  it("文言が文字列でない error を落とし、生きた文言だけ残す", () => {
+    const report = {
+      suites: [
+        {
+          file: "a.spec.ts",
+          specs: [
+            {
+              title: "落ちる",
+              file: "a.spec.ts",
+              tests: [
+                {
+                  status: "unexpected",
+                  results: [
+                    {
+                      error: { message: 1 },
+                      errors: [{ message: null }, { message: "生きた文言" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(collectPlaywrightFailures(specsOf(report), report)[0]?.message).toBe("生きた文言");
   });
 
   it("spec が 1 件も無くても落ちない", () => {

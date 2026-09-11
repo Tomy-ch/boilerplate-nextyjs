@@ -23,8 +23,14 @@ const SEPARATOR = /(?:\|\||&&|(?<!&)&(?!&)|[;|\n`]|\$\(|[<>]\()/g;
 /** 束ねられた短 flag（`-rf`）。長 flag と、`-` 単体は含まない。 */
 const SHORT_FLAG = /^-[^-\s]+$/;
 
-/** heredoc の本体。散文をコマンド行で書くので、ここを見ると文書の中身で誤爆する。 */
-const HEREDOC_BODY = /<<-?\s*(["']?)([A-Za-z_][A-Za-z0-9_]*)\1[\s\S]*?^\2$/gm;
+/**
+ * heredoc の本体。散文をコマンド行で書くので、ここを見ると文書の中身で誤爆する。
+ *
+ * @remarks
+ * 本体は `[^]` の否定でなく行単位で数える。`[\s\S]*?` と行頭固定の組み合わせは、閉じ綴りが
+ * 現れない入力で後戻りが指数的に増える。
+ */
+const HEREDOC_BODY = /<<-?[ \t]*(["']?)([A-Za-z_]\w*)\1\n(?:(?!\2$)[^\n]*\n)*\2$/gm;
 
 /** 中身をそのまま実行する包みと、剥がしたあとに残す綴り。 */
 const WRAPPERS: readonly (readonly [RegExp, string])[] = [
@@ -32,7 +38,7 @@ const WRAPPERS: readonly (readonly [RegExp, string])[] = [
   [/^make\s+ai-/, "make "],
   [/^rtk\s+(?:run|summary|smart)\s+/, ""],
   [/^(?:nohup|time)\s+/, ""],
-  [/^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)+/, ""],
+  [/^env\s+(?:[A-Za-z_]\w*=\S*\s+)+/, ""],
 ];
 
 /** `sh -c <引用>` は引用の中身がそのままコマンド行なので、引用を落とす前に剥がす。 */
@@ -238,6 +244,9 @@ function stripQuotes(segment: string): string {
 /** 包みを剥がすたびに中身がまたコマンド行になるので、その深さの上限。 */
 const NEST_LIMIT = 4;
 
+/** 剥がし切れなかったときに返す綴り。塞いだ操作の名前ではないので、報告でそれと分かる形にする。 */
+export const UNDECIDABLE = "(包みが深すぎて判定できません)";
+
 /**
  * コマンド行を、コマンド位置に立つ区間の一覧へ割る。
  *
@@ -246,8 +255,10 @@ const NEST_LIMIT = 4;
  * 包みの中身はコマンド行なので、そこにも区切りが在ります。引用を落とすのは剥がし終えた区間に
  * 対してだけで、`sh -c "..."` の引用を散文として消してしまわないようにしています。
  */
-function splitSegments(line: string, depth: number): readonly string[] {
-  if (depth > NEST_LIMIT) return [];
+function splitSegments(line: string, depth: number): readonly string[] | undefined {
+  // **剥がし切れなかったら空へ倒さない。** 落とすと「塞ぐ対象が無い」と読めるが、実際は
+  // 「判定できなかった」であり、深く包むだけでガードを抜けられることになる。
+  if (depth > NEST_LIMIT) return undefined;
 
   const out: string[] = [];
   for (const raw of line.split(SEPARATOR)) {
@@ -255,7 +266,11 @@ function splitSegments(line: string, depth: number): readonly string[] {
     if (!trimmed) continue;
 
     const unwrapped = unwrap(trimmed);
-    if (unwrapped !== trimmed) out.push(...splitSegments(unwrapped, depth + 1));
+    if (unwrapped !== trimmed) {
+      const inner = splitSegments(unwrapped, depth + 1);
+      if (inner === undefined) return undefined;
+      out.push(...inner);
+    }
     out.push(stripQuotes(unwrapped));
   }
   return out;
@@ -278,33 +293,42 @@ function containsInOrder(rest: string, fragments: readonly string[]): boolean {
  * @remarks
  * 直後が行末か区切りであることを求めるので、`make tag-patch-dry` は `make tag-patch` で止まりません。
  */
+/** 綴りの直後が、語の切れ目になっているか。`>` / `<` は前に空白が要らないので含める。 */
+function endsAtBoundary(rest: string): boolean {
+  return rest === "" || /^[\s;&|)<>]/.test(rest);
+}
+
+/** 求める flag が、この区間の flag に揃っているか。 */
+function flagsSatisfied(want: CommandShape, got: CommandShape): boolean {
+  const shortOk = [...want.shortFlags].every((character) => got.shortFlags.has(character));
+  const longOk = want.longFlags.every((wanted) =>
+    got.longFlags.some((present) => present.startsWith(wanted)),
+  );
+  return shortOk && longOk;
+}
+
+/** 1 区間が 1 つの宣言に当たるか。 */
+function hits(segment: string, got: CommandShape, literal: Literal, want: CommandShape): boolean {
+  if (!segment.startsWith(want.head)) return false;
+
+  const rest = segment.slice(want.head.length);
+  // 語の途中で終わる綴り（`git switch release/`）は、直後に必ず続きが来るので境界を求めない。
+  if (!literal.openEnded && !endsAtBoundary(rest)) return false;
+  if (!containsInOrder(rest, literal.fragments)) return false;
+
+  if (want.shortFlags.size === 0 && want.longFlags.length === 0) return true;
+  return flagsSatisfied(want, got);
+}
+
 export function judge(commandLine: string, literals: readonly Literal[]): string | undefined {
   const shapes = literals.map((literal) => ({ literal, want: parseShape(literal.head) }));
   const segments = splitSegments(stripHeredoc(commandLine), 0);
+  if (segments === undefined) return UNDECIDABLE;
 
   for (const segment of segments) {
     const got = parseShape(segment);
-
-    for (const { literal, want } of shapes) {
-      if (!segment.startsWith(want.head)) continue;
-
-      const rest = segment.slice(want.head.length);
-      // `>` / `<` は前に空白が要らないので境界に含める（`make tag-patch>out.txt`）。
-      // 語の途中で終わる綴り（`git switch release/`）は、直後に必ず続きが来るので境界を求めない。
-      if (!literal.openEnded && rest !== "" && !/^[\s;&|)<>]/.test(rest)) continue;
-
-      if (!containsInOrder(rest, literal.fragments)) continue;
-
-      if (want.shortFlags.size === 0 && want.longFlags.length === 0) return literal.source;
-
-      const shortSatisfied = [...want.shortFlags].every((character) =>
-        got.shortFlags.has(character),
-      );
-      const longSatisfied = want.longFlags.every((wanted) =>
-        got.longFlags.some((present) => present.startsWith(wanted)),
-      );
-      if (shortSatisfied && longSatisfied) return literal.source;
-    }
+    const hit = shapes.find(({ literal, want }) => hits(segment, got, literal, want));
+    if (hit) return hit.literal.source;
   }
 
   return undefined;

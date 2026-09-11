@@ -64,7 +64,6 @@ function SelectNative({ className, size = "default", ...props }: SelectNativePro
  *
  * 面の色は OS が描画する popup に合わせるため、`className` で背景色を上書きしない。
  *
- * @param props - native `option` 属性。
  * @see Storybook `Form/SelectNative`
  */
 function SelectNativeOption({ className, ...props }: ComponentProps<"option">) {
@@ -83,7 +82,6 @@ function SelectNativeOption({ className, ...props }: ComponentProps<"option">) {
  * @remarks
  * 区分の名前は native の `label` 属性が伝えるため、必ず指定する。区分そのものは選べない。
  *
- * @param props - native `optgroup` 属性。
  * @see Storybook `Form/SelectNative`
  */
 function SelectNativeOptGroup({ className, ...props }: ComponentProps<"optgroup">) {

@@ -36,7 +36,6 @@ export function TabsNative({ className, ...props }: ComponentProps<"nav">) {
  * @remarks
  * 項目数を支援技術へ伝えるため `ul` として並べる。子には `TabsNativeLink` だけを置く。
  *
- * @param props - native `ul` 属性。
  * @see Storybook `Navigation/TabsNative`
  */
 export function TabsNativeList({ className, ...props }: ComponentProps<"ul">) {

@@ -13,7 +13,6 @@ import { optionValue } from "./option-value";
 
 const SCREEN_OPTION = "--screen";
 
-/** feature を置く画面。 */
 export type FeaturePlacement = {
   /** kebab-case の画面名。`features/<name>/<screen>/` の `<screen>`。 */
   readonly screen: string;

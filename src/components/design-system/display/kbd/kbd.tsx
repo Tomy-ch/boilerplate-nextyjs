@@ -22,7 +22,6 @@ import { cn } from "@/components/cn";
  * </KbdGroup>
  * ```
  *
- * @param props - native `kbd` 属性。
  *
  * @see Storybook `Display/Kbd`
  */
@@ -48,7 +47,6 @@ function Kbd({ className, ...props }: ComponentProps<"kbd">) {
  * `kbd` を入れ子にするのは HTML 仕様が示す組み合わせの表し方で、外側が「一つの入力」、内側の
  * 各 `Kbd` が「個々のキー」を表す。区切り記号を挟む場合は子として置く。
  *
- * @param props - native `kbd` 属性。
  *
  * @see Storybook `Display/Kbd`
  */

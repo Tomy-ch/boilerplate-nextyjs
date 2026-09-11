@@ -32,7 +32,6 @@ const REVIEW_TARGET = {
 
 /** {@link composeReviewCommand} が受け取るもの。 */
 export type ReviewCommandInput = {
-  /** 開く対象の種類。 */
   readonly kind: ReviewKind;
   /** 対象の id をカンマで並べたもの。 */
   readonly ids: string;

@@ -17,7 +17,6 @@ export const SPEC_ROOT = "docs/spec/route";
  */
 const ROUTE_ENTRIES: ReadonlySet<string> = new Set(["page.tsx", "page.dev.tsx", "layout.tsx"]);
 
-/** `src/app` の接頭辞。 */
 const APP_PREFIX = "src/app/";
 
 /**

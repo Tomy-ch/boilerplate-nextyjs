@@ -24,7 +24,6 @@ import { cn } from "@/components/cn";
  * </main>
  * ```
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Layout/ContentContainer`
  */

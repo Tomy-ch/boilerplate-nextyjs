@@ -261,7 +261,6 @@ export function MessageScrollerViewport({
  * `log` として公開し、追加された分だけを読み上げる。既存項目の変更や削除は通知しないため、
  * 内容を書き換える用途には使わない。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Container/MessageScroller`
  */

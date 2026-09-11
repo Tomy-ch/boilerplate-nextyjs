@@ -310,7 +310,6 @@ function DropdownMenuSeparator({
  * </DropdownMenuShortcut>
  * ```
  *
- * @param props - native `kbd` 属性。
  *
  * @see Storybook `Overlay/DropdownMenu`
  */

@@ -14,7 +14,6 @@ export type MakefileSource = {
   content: string;
 };
 
-/** 組み立てた一覧。 */
 export type TargetListing = {
   /** そのまま出力する一覧の行。 */
   lines: string[];
@@ -31,7 +30,6 @@ const UNDOCUMENTED_PHONY_PATTERN = /^\.PHONY:(?!.*##)/;
 
 const TARGET_COLUMN_WIDTH = 24;
 
-/** 一覧の見出し。 */
 export const LISTING_HEADER = [
   "📦 Makeターゲット一覧",
   "-------------------------------------------",

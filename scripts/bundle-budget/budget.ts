@@ -29,7 +29,6 @@ const budgetSchema = z.object({
   }),
 });
 
-/** 予算の宣言。 */
 export type Budget = z.infer<typeof budgetSchema>;
 
 /** route 1 つぶんの計測結果。すべて gzip した byte。 */

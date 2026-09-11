@@ -18,7 +18,6 @@ import { KeyboardShortcutKeys } from "./keyboard-shortcut-keys";
  * </KeyboardShortcutList>
  * ```
  *
- * @param props - native `dl` 属性。
  *
  * @see Storybook `Display/KeyboardShortcut`
  */

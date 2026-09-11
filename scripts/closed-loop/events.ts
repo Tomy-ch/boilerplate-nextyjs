@@ -8,7 +8,6 @@
 // なぜ記録を読むのか、どこまでを読んでよいのかは
 // [README](../README.md) が挙げる決定が持つ。
 
-/** 出来事の種類。 */
 type EventKind = "prompt" | "assistant" | "tool_use" | "tool_result" | "interrupt" | "command";
 
 /** 記録から取り出した出来事 1 つ。 */

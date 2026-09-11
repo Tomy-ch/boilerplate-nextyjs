@@ -8,7 +8,6 @@
 /** ローカルゲートの帯。 */
 type LoadBand = "full" | "low" | "ci-first";
 
-/** 帯の解決結果。 */
 export type BandResolution = {
   readonly band: LoadBand;
   /** 1 窓あたりに割り当てる CPU 数。1 を下回らない。 */

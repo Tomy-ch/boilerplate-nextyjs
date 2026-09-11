@@ -172,7 +172,6 @@ function DrawerContent({
  * @remarks
  * `top` / `bottom` では小さい viewport で中央寄せになり、`md` 以上で左寄せへ戻る。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Overlay/Drawer`
  */
@@ -196,7 +195,6 @@ function DrawerHeader({ className, ...props }: ComponentProps<"div">) {
  * 配置だけを担い、操作そのものは持たない。閉じる操作は `DrawerClose` を `Button` へ合成して
  * 呼び出し元が置く。`mt-auto` により、内容が短いときは drawer の下端へ寄る。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Overlay/Drawer`
  */

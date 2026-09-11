@@ -1,4 +1,3 @@
-/** 版の進め方。 */
 export type BumpType = "patch" | "minor" | "major";
 
 const BUMP_TYPES: readonly BumpType[] = ["patch", "minor", "major"];

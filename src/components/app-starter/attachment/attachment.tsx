@@ -155,7 +155,6 @@ export function AttachmentMedia({
 /**
  * 名前と補足を縦に並べる領域。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Display/Attachment`
  */
@@ -179,7 +178,6 @@ export function AttachmentContent({ className, ...props }: ComponentProps<"div">
  * 枠に収まらない場合は末尾を省略する。省略された名前だけでは判別できないため、全体を示す
  * 必要がある場合は呼び出し元が `title` 属性などを添える。
  *
- * @param props - native `span` 属性。
  *
  * @see Storybook `Display/Attachment`
  */
@@ -199,7 +197,6 @@ export function AttachmentTitle({ className, ...props }: ComponentProps<"span">)
  * @remarks
  * 進行中や失敗であることはここのテキストで示す（{@link Attachment} の `state` は見た目にしか出ない）。
  *
- * @param props - native `span` 属性。
  *
  * @see Storybook `Display/Attachment`
  */
@@ -223,7 +220,6 @@ export function AttachmentDescription({ className, ...props }: ComponentProps<"s
  * @remarks
  * `vertical` では枠の右上へ重ねて置く。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Display/Attachment`
  */

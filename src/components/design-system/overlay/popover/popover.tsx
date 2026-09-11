@@ -106,7 +106,6 @@ function PopoverAnchor({ ...props }: ComponentProps<typeof PopoverPrimitive.Anch
 /**
  * popover の見出しと説明をまとめる領域。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Overlay/Popover`
  */
@@ -128,7 +127,6 @@ function PopoverHeader({ className, ...props }: ComponentProps<"div">) {
  * 与え、`PopoverContent` の `aria-labelledby` から参照する。文書構造上の見出しが必要な場合は
  * 呼び出し元で heading 要素を子として渡す。
  *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Overlay/Popover`
  */
@@ -143,7 +141,6 @@ function PopoverTitle({ className, ...props }: ComponentProps<"div">) {
  * `PopoverContent` の説明として使う場合は `id` を与え、`PopoverContent` の
  * `aria-describedby` から参照する。
  *
- * @param props - native `p` 属性。
  *
  * @see Storybook `Overlay/Popover`
  */

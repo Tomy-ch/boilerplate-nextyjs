@@ -6,7 +6,6 @@
 
 import { isSubstantive, markAt, type WindowMarks } from "./phases.js";
 
-/** 送出済みの 1 件。 */
 export type SentEntry = {
   readonly windowId: string;
   readonly issue: number;

@@ -9,9 +9,7 @@
 
 /** 判定の材料。action 定義から読み取った 3 つの値。 */
 export type MisePin = {
-  /** `MISE_VERSION` の値。 */
   version: string | null;
-  /** `MISE_SHA256` の値。 */
   digest: string | null;
   /** キャッシュの `key:` の値。 */
   cacheKey: string | null;

@@ -370,7 +370,6 @@ function MenubarSeparator({
  * </MenubarShortcut>
  * ```
  *
- * @param props - native `kbd` 属性。
  *
  * @see Storybook `Navigation/Menubar`
  */

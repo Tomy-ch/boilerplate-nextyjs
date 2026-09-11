@@ -40,14 +40,19 @@ export const SAMPLE_PATHS: readonly string[] = [
   "src/features/account",
   "src/features/site-info",
   "src/features/admin",
+  "src/features/inquiry",
   // 題材の取得を中継する BFF。`src/app/api` ごとではなく題材の口だけを挙げる。
   // 認証の口（`src/app/api/auth`）は同じ場所にあるコア残留である。
   "src/app/api/products",
   "src/app/api/addresses",
   "src/app/api/purchases",
+  // 購読の発券を中継する口。購読の機構（`src/adapters/client/stream`）はコア残留だが、
+  // 何を購読するかは題材が決めるので、この中継は題材側である。
+  "src/app/api/inquiries",
   // 題材に固有のカーネルモジュール
   "src/model/cart",
   "src/model/dashboard",
+  "src/model/inquiry",
   "src/model/product",
   "src/model/purchase",
   "src/model/user",

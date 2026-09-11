@@ -6,7 +6,6 @@ type SarifRun = { results?: unknown };
 /** 抑止されたかどうかを判定するのに要る形だけを持つ結果。 */
 type SarifResult = { suppressions?: unknown };
 
-/** 読み込んだ SARIF。 */
 type SarifLog = { runs?: unknown };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

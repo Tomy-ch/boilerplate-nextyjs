@@ -45,11 +45,10 @@ function collapsedStyle(index: number, topAnchored: boolean, total: number): CSS
 }
 
 /**
- * 通知を積む領域。
+ * 配置・積み方・領域への到達手段を持つ、通知を積む領域。
  *
  * @remarks
- * 配置・積み方・領域への到達手段を持つ。通知一件の描画と計時は `ToastItem` の責務で、
- * queue の保持は Provider の責務である。
+ * 通知一件の描画と計時は `ToastItem` の責務で、queue の保持は Provider の責務である。
  *
  * 通知が複数あるとき、既定では重ねて畳み、hover または領域内へ focus が入ったときだけ
  * 展開する。全部を常に開いておきたい場合は `expand` を指定する。

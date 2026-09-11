@@ -242,7 +242,6 @@ export type InputGroupTextProps = ComponentProps<"span">;
  * @remarks
  * 入力欄の名前にはならない（{@link InputGroup}）。子にアイコンを置いた場合は既定の大きさへ揃える。
  *
- * @param props - native `span` 属性。
  * @see Storybook `Form/InputGroup`
  */
 export function InputGroupText({ className, ...props }: InputGroupTextProps) {
@@ -272,7 +271,6 @@ export type InputGroupInputProps = ComponentProps<"input">;
  * @remarks
  * 名前の与え方は {@link InputGroup} が持つ。
  *
- * @param props - native `input` 属性。
  * @see Storybook `Form/InputGroup`
  */
 export function InputGroupInput({ className, ...props }: InputGroupInputProps) {
@@ -305,7 +303,6 @@ export type InputGroupTextareaProps = ComponentProps<"textarea">;
  * @remarks
  * 名前の与え方は {@link InputGroup} が持つ。
  *
- * @param props - native `textarea` 属性。
  * @see Storybook `Form/InputGroup`
  */
 export function InputGroupTextarea({ className, ...props }: InputGroupTextareaProps) {

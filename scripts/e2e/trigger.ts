@@ -23,7 +23,6 @@ import { matchesPathRule, type PathRule } from "../lib/path-rule";
 /** 差分に対する判定。 */
 export type Trigger =
   | {
-      /** 待たずに回す。 */
       readonly kind: "force";
       /** なぜ回すのか。人が読む。 */
       readonly reasons: readonly string[];

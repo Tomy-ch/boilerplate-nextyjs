@@ -41,7 +41,6 @@ export function labelsToKinds(labels: readonly string[]): readonly FindingKind[]
     .filter((name): name is FindingKind => known.has(name));
 }
 
-/** 順位付けの重み。 */
 export type Weights = {
   readonly frequency: number;
   readonly impact: number;
@@ -68,7 +67,6 @@ export const DEFAULT_WEIGHTS: Weights = {
 export type Cluster = {
   readonly key: string;
   readonly issues: readonly number[];
-  /** 件数 */
   readonly frequency: number;
   /** 影響。道具の失敗の合計を代理指標とする */
   readonly impact: number;

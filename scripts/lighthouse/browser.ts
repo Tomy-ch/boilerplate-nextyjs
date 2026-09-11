@@ -7,11 +7,9 @@ import { join } from "node:path";
 export type BrowserCookie = {
   /** 効かせる宛先。ポートは含めない。 */
   readonly domain: string;
-  /** 名前。 */
   readonly name: string;
   /** 効かせる経路。 */
   readonly path: string;
-  /** 値。 */
   readonly value: string;
 };
 

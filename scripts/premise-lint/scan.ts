@@ -11,9 +11,7 @@ import { PREMISE_SHAPES } from "./vocabulary.js";
 /** 見つけた前提 1 件。 */
 export type Premise = {
   readonly file: string;
-  /** 前提の形の名前 */
   readonly shape: string;
-  /** なぜ前提なのか */
   readonly why: string;
   /** 当たった綴り */
   readonly phrase: string;

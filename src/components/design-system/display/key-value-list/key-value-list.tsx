@@ -25,8 +25,6 @@ import { cn } from "@/components/cn";
  * </KeyValueList>
  * ```
  *
- * @param props - native `dl` 属性。
- *
  * @see Storybook `Display/KeyValueList`
  */
 export function KeyValueList({ className, ...props }: ComponentProps<"dl">) {
@@ -45,8 +43,6 @@ export function KeyValueList({ className, ...props }: ComponentProps<"dl">) {
  * @remarks
  * 狭い幅では label を上、value を下に積み、`sm` 以上で横に並べる。`dl` の直下に `div` を置くのは
  * HTML が認める組で、一対を一つの grid 行として扱うために必要になる。
- *
- * @param props - native `div` 属性。
  *
  * @see Storybook `Display/KeyValueList`
  */
@@ -67,12 +63,10 @@ export function KeyValueItem({ className, ...props }: ComponentProps<"div">) {
 }
 
 /**
- * 項目名。
+ * 値そのものではなく、値が何であるかを示す短い語を置く項目名。
  *
  * @remarks
- * 値そのものではなく、値が何であるかを示す短い語を置く。補足が要る場合は value 側へ書く。
- *
- * @param props - native `dt` 属性。
+ * 補足が要る場合は value 側へ書く。
  *
  * @see Storybook `Display/KeyValueList`
  */
@@ -83,13 +77,11 @@ export function KeyValueLabel({ className, ...props }: ComponentProps<"dt">) {
 }
 
 /**
- * 項目の値。
+ * 長い値を折り返して見せる項目の値。
  *
  * @remarks
- * 長い値は折り返す。改行を含む値をそのまま見せる場合は、呼び出し元が `className` で
+ * 改行を含む値をそのまま見せる場合は、呼び出し元が `className` で
  * `whitespace-pre-line` を指定する。値が無い場合は `KeyValueEmpty` を置く。
- *
- * @param props - native `dd` 属性。
  *
  * @see Storybook `Display/KeyValueList`
  */

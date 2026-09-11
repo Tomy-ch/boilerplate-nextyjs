@@ -16,9 +16,7 @@ export type UnresolvedAsset = {
   readonly file: string;
   /** そのファイルの中での行番号（1 始まり）。 */
   readonly line: number;
-  /** 書かれていた URL。 */
   readonly url: string;
-  /** 解決しない理由。 */
   readonly reason: AssetFailure;
 };
 

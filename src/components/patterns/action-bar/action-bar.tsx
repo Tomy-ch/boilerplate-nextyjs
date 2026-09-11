@@ -17,10 +17,10 @@ export type ActionBarProps = Omit<ComponentProps<"div">, "children"> & {
 };
 
 /**
- * 操作をまとめて置く領域。
+ * 位置と重なり順だけを持ち、中身が何であるかを知らない操作の器。
  *
  * @remarks
- * 位置と重なり順だけを持ち、中身が何であるかを知りません。下端に固定する見た目は
+ * 下端に固定する見た目は
  * [`action-bar.definition.ts`](action-bar.definition.ts) が単独で宣言しており、呼び出し側が
  * class を組み立て直す必要はありません。同じ見た目を各画面で綴ると、重なり順や safe area の
  * 余白がそのつど抜けます。

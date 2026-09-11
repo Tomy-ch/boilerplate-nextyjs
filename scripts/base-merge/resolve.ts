@@ -7,7 +7,6 @@ const PROTECTED_BRANCHES: ReadonlySet<string> = new Set(["production", "staging"
 /** 保護されたブランチ族の接頭辞。`release/v1.2.3` / `hotfix/1234-...` を族ごと弾く。 */
 const PROTECTED_PREFIXES = ["release/", "hotfix/"] as const;
 
-/** 引数の綴り。 */
 const BASE_FLAG = "--base=";
 const DRY_RUN_FLAG = "--dry-run";
 

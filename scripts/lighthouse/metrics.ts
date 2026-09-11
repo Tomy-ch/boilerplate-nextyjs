@@ -57,13 +57,12 @@ export function readMetrics(lhr: unknown): MetricValues {
 }
 
 /**
- * 中央値を返す。
+ * 中央値を返す。偶数個のときは小さい側を採る。
  *
  * @throws 値が 1 つも無い場合。
  *
  * @remarks
- * **偶数個のときは小さい側を採ります。** 2 つの平均を採ると、どの試行にも存在しない値が予算の
- * 判定へ現れます。
+ * 2 つの平均を採ると、どの試行にも存在しない値が予算の判定へ現れます。
  *
  * 平均ではなく中央値である理由は `performance-budget.yaml` の `runs.reason` が持ちます。
  */
@@ -79,14 +78,14 @@ export function median(values: readonly number[]): number {
 }
 
 /**
- * 試行をまとめる。
+ * 試行をまとめる。中央値は指標ごとに独立して採る。
  *
  * @param runs - 同じ画面を繰り返し計測した結果。
  * @returns 指標ごとの中央値。
  *
  * @remarks
- * 中央値は**指標ごとに独立して**採ります。結果の組を 1 つ選ぶ形にすると、選ぶ基準にした指標
- * 以外は「たまたまその試行だった値」になります。
+ * 結果の組を 1 つ選ぶ形にすると、選ぶ基準にした指標以外は「たまたまその試行だった値」に
+ * なります。
  */
 export function aggregate(runs: readonly MetricValues[]): MetricValues {
   const of = (key: MetricKey): number => median(runs.map((run) => run[key]));

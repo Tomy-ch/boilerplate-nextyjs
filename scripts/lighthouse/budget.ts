@@ -23,7 +23,6 @@ export const METRIC_KEYS = ["lcpMs", "clsScore", "tbtMs"] as const;
 /** 判定する指標の名前。 */
 export type MetricKey = (typeof METRIC_KEYS)[number];
 
-/** 指標ごとの値。 */
 export type MetricValues = Readonly<Record<MetricKey, number>>;
 
 const limitSchema = z.object({
@@ -52,7 +51,6 @@ const lighthouseSchema = z.object({
 
 const fileSchema = z.object({ lighthouse: lighthouseSchema });
 
-/** 予算の宣言。 */
 export type Budget = z.infer<typeof lighthouseSchema>;
 
 /** 画面 1 つぶんの計測結果。 */

@@ -33,7 +33,6 @@ export function Pagination({ className, ...props }: ComponentProps<"nav">) {
  * 部品からは判らない。折り返さないと、はみ出した分がページごと横へあふれ、他の内容まで横送り
  * しないと読めなくなる。
  *
- * @param props - native `ul` 属性。
  * @see Storybook `Navigation/Pagination`
  */
 export function PaginationContent({ className, ...props }: ComponentProps<"ul">) {
@@ -53,7 +52,6 @@ export function PaginationContent({ className, ...props }: ComponentProps<"ul">)
  * 中に {@link PaginationLink}、{@link PaginationPrevious}、{@link PaginationNext}、
  * {@link PaginationEllipsis} のいずれか一つを置く。
  *
- * @param props - native `li` 属性。
  * @see Storybook `Navigation/Pagination`
  */
 export function PaginationItem(props: ComponentProps<"li">) {
@@ -210,7 +208,6 @@ export function PaginationNext({
  * 記号自体は装飾として支援技術から隠し、「省略されたページ」という文字列だけを読み上げる。
  * 操作を持たないため、省略した範囲へ移動する手段は前後のページ番号が担う。
  *
- * @param props - native `span` 属性。
  * @see Storybook `Navigation/Pagination`
  */
 export function PaginationEllipsis({ className, ...props }: ComponentProps<"span">) {

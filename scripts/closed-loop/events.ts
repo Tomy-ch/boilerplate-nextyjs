@@ -8,7 +8,6 @@
 // なぜ記録を読むのか、どこまでを読んでよいのかは
 // [README](../README.md) が挙げる決定が持つ。
 
-/** 出来事の種類。 */
 type EventKind = "prompt" | "assistant" | "tool_use" | "tool_result" | "interrupt" | "command";
 
 /** 記録から取り出した出来事 1 つ。 */
@@ -204,12 +203,11 @@ export function parseTranscript(lines: readonly string[]): readonly Event[] {
 }
 
 /**
- * 解釈できなかった行の数。
+ * 解釈できなかった行の数。飛ばした行を黙って落とさないために数える。
  *
  * @remarks
- * **飛ばした行を黙って落とさない。**記録の形が変わったのか、書き込みの途中だったのかは
- * ここでは決まりませんが、**数えられなかった量は報告に出す**必要があります
- * 。
+ * 記録の形が変わったのか、書き込みの途中だったのかはここでは決まりませんが、数えられなかった
+ * 量は報告に出す必要があります。
  */
 export function countUnparsable(lines: readonly string[]): number {
   return lines.filter((line) => {

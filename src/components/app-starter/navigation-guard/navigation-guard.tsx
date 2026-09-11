@@ -84,7 +84,6 @@ function resolveGuardedHref(anchor: HTMLAnchorElement): string | undefined {
  * </NavigationGuard>
  * ```
  *
- *
  * @see Storybook `Navigation/NavigationGuard`
  */
 export function NavigationGuard({

@@ -127,7 +127,6 @@ export function SegmentedInput({
  * 桁の枠は隣と接して描かれ、区画の両端だけが丸くなる。`3` 桁ずつなど、読み上げやすい単位で
  * {@link SegmentedInputSlot} を包む。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Form/SegmentedInput`
  */
 export function SegmentedInputGroup({ className, ...props }: ComponentProps<"div">) {
@@ -183,14 +182,12 @@ export function SegmentedInputSlot({ className, index, mask, ...props }: Segment
 }
 
 /**
- * 区画と区画の間に置く区切り。
+ * 入力に関与せず、支援技術からは隠す、桁のまとまりを目で分けるだけの区切り。
  *
  * @remarks
- * 桁のまとまりを目で分けるための装飾で、入力には関与しない。**支援技術からは隠す。** 入力の値は
- * 実体の `input` が伝えるため、この記号に意味は無い。`separator` role は focus と値を持つ widget を
- * 表すので当てない。
+ * 入力の値は実体の `input` が伝えるため、この記号に意味は無い。`separator` role は focus と値を
+ * 持つ widget を表すので当てない。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Form/SegmentedInput`
  */
 export function SegmentedInputSeparator(props: ComponentProps<"div">) {

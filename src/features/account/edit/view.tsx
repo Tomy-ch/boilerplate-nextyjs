@@ -17,10 +17,9 @@ type ProfileEditViewProps = {
 };
 
 /**
- * プロフィール編集の表示。
+ * global nav から 1 手で戻れない階層にあるため、パンくずで祖先への戻りを持つプロフィール編集の器。
  *
  * @remarks
- * パンくずを置くのは、この画面が global nav から 1 手で戻れない祖先を持つためです。
  * nav が直接指すのはマイページまでで、ここはその下の階層にあります。
  */
 export const ProfileEditView = withScreenSpan(

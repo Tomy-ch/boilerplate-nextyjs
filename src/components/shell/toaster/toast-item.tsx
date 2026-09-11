@@ -37,11 +37,11 @@ function swipeDirection(position: ToastPosition): { horizontal: number; vertical
 const NO_DRAG = { x: 0, y: 0 };
 
 /**
- * 通知一件の表示。
+ * 残り時間の計測と、払いのけて閉じる操作を持つ通知 1 件。
  *
  * @remarks
- * 残り時間の計測と、払いのけて閉じる操作をここで持つ。積み方と配置は領域側の責務であり、
- * この component は自分が置かれた向き（`position`）を、払いのける向きの決定にだけ使う。
+ * 積み方と配置は領域側の責務であり、この component は自分が置かれた向き（`position`）を、
+ * 払いのける向きの決定にだけ使う。
  *
  * @param props.toast - 表示する通知。
  * @param props.onDismiss - 閉じたときに `id` を渡す callback。自動で閉じた場合も呼ばれる。

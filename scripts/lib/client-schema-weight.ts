@@ -12,7 +12,6 @@ export type SourceModule = {
 export type HeavyImport = {
   /** 引いている module。 */
   readonly path: string;
-  /** 引いている先。 */
   readonly specifier: string;
   /** どの根から辿り着いたか。読む人が経路を追える。 */
   readonly from: string;

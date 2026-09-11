@@ -11,7 +11,6 @@ export type IssueBody = {
   readonly number: number;
   /** issue のタイトル。実装タスクかどうかの判定に使う。 */
   readonly title: string;
-  /** issue の本文。 */
   readonly body: string;
 };
 

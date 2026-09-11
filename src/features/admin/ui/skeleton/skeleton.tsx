@@ -5,11 +5,10 @@ import { withPartSpan } from "@/observability/render-span";
 const CARD_COUNT = 4;
 
 /**
- * 集計の待機表示。
+ * カードの枠と、その下に続く帯の高さを出す、集計の待機表示。
  *
  * @remarks
- * カードの枠と、その下に続く帯の高さを出します。スピナー 1 つで代用すると、描画された瞬間に
- * 高さが変わり、下に置いたものの位置が動きます。
+ * スピナー 1 つで代用すると、描画された瞬間に高さが変わり、下に置いたものの位置が動きます。
  */
 export const AdminSummarySkeleton = withPartSpan("features/admin/ui/skeleton/skeleton", () => {
   return (

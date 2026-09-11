@@ -26,7 +26,6 @@ const IMAGE_ROW_LIMIT = 20;
 export type RetakeOutcomeInput = {
   /** ポインタが指す commit。 */
   readonly sha: string;
-  /** 撮り直した枚数。 */
   readonly count: string;
   /** 撮り直した対象の名前。 */
   readonly ids: string;

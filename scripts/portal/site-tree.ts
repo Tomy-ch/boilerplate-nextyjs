@@ -9,7 +9,6 @@ export type SiteTreeLayout = {
   viewerDist: string;
   /** Storybook の出力。無ければ `/storybook/` を作らない。 */
   storybookDist: string;
-  /** 組み立て先。 */
   siteRoot: string;
 };
 

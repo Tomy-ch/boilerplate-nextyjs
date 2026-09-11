@@ -15,7 +15,6 @@ import type { Change } from "../lib/numstat";
 /** 差分に対する判定。 */
 export type Trigger =
   | {
-      /** 待たずに測る。 */
       readonly kind: "force";
       /** なぜ測るのか。人が読む。 */
       readonly reasons: readonly string[];

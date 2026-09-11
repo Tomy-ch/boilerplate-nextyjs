@@ -112,7 +112,6 @@ export type ButtonGroupTextProps = ComponentProps<"div"> & {
  * </ButtonGroupText>
  * ```
  *
- * @param props - native `div` 属性。
  * @param props.asChild - 子要素へ見た目と props を合成するか。
  * @see Storybook `Action/ButtonGroup`
  */

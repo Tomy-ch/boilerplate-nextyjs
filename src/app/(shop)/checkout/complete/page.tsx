@@ -35,9 +35,7 @@ async function CheckoutCompleteContent({
 }
 
 /**
- * 購入完了。
- *
- * @remarks
+ * 購入完了。取得を待たず、殻と待機表示だけを先に配る route segment。
  */
 export default function CheckoutCompletePage({
   searchParams,

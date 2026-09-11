@@ -26,11 +26,11 @@ export type AdminProductStockViewProps = {
 };
 
 /**
- * 在庫を補充する画面。
+ * 打っている途中の値を持たず、送信の結果だけを見る在庫補充の器。
  *
  * @remarks
- * **打っている途中の値を持ちません。**向きも量も欄の側（[`StockAmountFields`](./ui/amount-fields/amount-fields.tsx)）
- * が持ち、送信には欄の `name` で載ります。この器が見るのは送信の結果だけです。
+ * 向きも量も欄の側（[`StockAmountFields`](./ui/amount-fields/amount-fields.tsx)）が持ち、送信には
+ * 欄の `name` で載ります。
  *
  * 画面が何を約束するか（在庫だけを動かす / 誤りの出し方 / `409` にだけ読み込み直す導線を添える）は
  * [機能要件](../../../../../docs/spec/route/admin/products/[id]/stock/page.function.md)と[画面要件](../../../../../docs/spec/route/admin/products/[id]/stock/page.screen.md)。

@@ -340,6 +340,7 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | --- | --- | --- |
 | `make test-cached` | Vitest を cache 利用で実行します。 | pre-commit 用の高速フィードバック。coverage gate は実行しません。 |
 | `make test-full` | Vitest を cache 無効・coverage 付きで実行します。 | pre-push / CI 用。Statements / Branches / Functions / Lines の各 100% を下回ると失敗します。 |
+| `make test-failures [TEST_RUN=<target>]` | テストを走らせ、**落ちたケースだけ**を出力します。通過したケースは 1 行も出ません。 | 読むのは vitest の JSON レポート（`status` / `failureMessages`）で、失敗行を語彙で拾う要約器ではありません（[0157](../docs/adr/0157-inspection-declaration-discipline.md)）。全通過なら 1 行、失敗ならその全件が件数つきで出ます。カバレッジの閾値割れは JSON に載らないため、テストが 0 件落ちているのに失敗しているときだけ末尾のログを添えます。`TEST_RUN` は走らせる先で、既定は `test-full`、CI の合流側は `test-merge`。**`tmp/test-report.json` を直接読まないこと** —— 通過したケースも全件書くので、実測で素のテキスト出力の 1,100 倍（690B に対して 785KB）あります。 |
 | `make scripts-test-cached` | 補助スクリプト（`scripts/**`）の suite を cache 利用で実行します。 | pre-commit 用。export と describe の 1:1 ゲートを含みます。 |
 | `make scripts-test` | 補助スクリプトの suite を cache 無効・coverage 付きで実行します。 | pre-push / CI（`scripts-check`）用。アプリ本体の suite と分けるのは、`scripts/` に居るのが検査機構そのもので、落ちた理由を取り違えないためです（[0090](../docs/adr/0090-testing-strategy.md)）。 |
 | `make test-shard SHARD=<i>/<n>` | 分割の 1 台ぶんを走らせ、blob を書き出します。 | 割るのは PR の待ち時間のためだけです。**各台は閾値を持ちません** —— 割った実行が見るのは自分に割り当てられたファイルだけで、他の台が覆う行は未到達として数えられます。判定は合流させた側が行います。 |

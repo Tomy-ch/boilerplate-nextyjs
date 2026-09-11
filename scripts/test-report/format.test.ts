@@ -220,6 +220,54 @@ describe("collectPlaywrightFailures", () => {
   it("空のレポートで落ちない", () => {
     expect(collectPlaywrightFailures({})).toEqual([]);
   });
+
+  it("results[].errors から複数の文言を拾い、重複を畳む", () => {
+    const report: PlaywrightReport = {
+      suites: [
+        {
+          specs: [
+            {
+              title: "落ちる",
+              ok: false,
+              tests: [
+                {
+                  results: [
+                    {
+                      status: "failed",
+                      error: { message: "同じ文言" },
+                      errors: [{ message: "同じ文言" }, { message: "別の文言" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(collectPlaywrightFailures(report)[0]?.message).toBe("同じ文言\n別の文言");
+  });
+
+  it("欠けだらけの spec でも落とさず、欠けた場所を名指しする", () => {
+    const report: PlaywrightReport = {
+      suites: [{ specs: [{ ok: false }] }],
+      errors: [{}],
+    };
+
+    expect(collectPlaywrightFailures(report)).toEqual([
+      { file: "(不明なファイル)", name: "(不明なケース)", message: "(理由の記録なし)" },
+      { file: "(spec の外)", name: "(実行系の失敗)", message: "(理由の記録なし)" },
+    ]);
+  });
+
+  it("文言を持たない result を理由なしとして残す", () => {
+    const report: PlaywrightReport = {
+      suites: [{ file: "a.spec.ts", specs: [{ title: "落ちる", ok: false, tests: [{}] }] }],
+    };
+
+    expect(collectPlaywrightFailures(report)[0]?.message).toBe("(理由の記録なし)");
+  });
 });
 
 describe("summarise", () => {
@@ -241,6 +289,23 @@ describe("summarise", () => {
   it("オブジェクトでないものを渡されても落ちない", () => {
     expect(summarise("not json")).toBeUndefined();
     expect(summarise(null)).toBeUndefined();
+  });
+
+  it("stats を持たない Playwright のレポートを母数 0 で通す", () => {
+    const summary = summarise({ suites: [] });
+
+    expect(summary?.total).toBe(0);
+    expect(summary?.failedWithoutTestFailure).toBe(false);
+  });
+
+  it("spec が 1 件も落ちていないのに unexpected があるものを、テスト以外の失敗とする", () => {
+    const summary = summarise({ stats: { unexpected: 1 }, suites: [] });
+
+    expect(summary?.failedWithoutTestFailure).toBe(true);
+  });
+
+  it("success を持たない Vitest のレポートをテスト以外の失敗にしない", () => {
+    expect(summarise({ testResults: [] })?.failedWithoutTestFailure).toBe(false);
   });
 });
 

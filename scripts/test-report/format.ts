@@ -40,8 +40,8 @@ export type VitestReport = {
   }[];
 };
 
-/** Playwright の JSON レポートのうち、報告に要る部分だけ。 */
-export type PlaywrightSuite = {
+/** Playwright の JSON レポートのうち、報告に要る部分だけ。入れ子を辿るためだけの形なので外へ出さない。 */
+type PlaywrightSuite = {
   readonly title?: string;
   readonly file?: string;
   readonly suites?: readonly PlaywrightSuite[];

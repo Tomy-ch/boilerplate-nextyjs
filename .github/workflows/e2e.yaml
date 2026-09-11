@@ -88,7 +88,7 @@ jobs:
 
     steps:
       - name: Harden the runner
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -109,7 +109,7 @@ jobs:
             *.data.mcr.microsoft.com:443
 
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           # The base ref has to be resolvable for the `force` diff below; a shallow checkout
@@ -364,7 +364,7 @@ jobs:
       # the assertion text, which cannot be judged for a visual difference.
       - name: Upload the report and traces
         if: always() && steps.e2e.outputs.status == 'failure'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-diff
           path: tmp/e2e
@@ -378,7 +378,7 @@ jobs:
       # Playwright, and the retake path already reads a missing report as "nothing reported".
       - name: Upload the machine-readable report
         if: always() && steps.e2e.outputs.status == 'failure'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-report
           path: tmp/e2e/report.json
@@ -389,7 +389,7 @@ jobs:
       # because the body is a file whose size is not bounded by the output limit.
       - name: Hand the comment body to the commenting job
         if: always() && github.event_name == 'pull_request' && (steps.e2e.outputs.status != '' || steps.standdown.outcome == 'success')
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-comment
           path: /tmp/e2e-comment/
@@ -472,7 +472,7 @@ jobs:
 
     steps:
       - name: Harden the runner
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -493,7 +493,7 @@ jobs:
             *.data.mcr.microsoft.com:443
 
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

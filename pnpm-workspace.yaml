@@ -48,6 +48,14 @@ overrides:
   # GHSA-pmgw-qhcx-hj4c (high): !!omap の解決が入力長に対して二次で伸びる。
   # cosmiconfig の宣言は ^4.1.0 で 4.3.1 はその内側。cosmiconfig が 4.3.1 以上を要求したら撤去する。
   "js-yaml@>=4 <4.3.1": ">=4.3.1 <5"
+  # markdownlint-cli2 の推移的依存。設定ファイル（TOML）の解析器で、読ませるのはリポジトリが
+  # 持つ資材に限る。配信物には入らず、lint の実行時にしか走らない。
+  # GHSA-7w5x-hrqm-74c2 (high, 8.2): 1.7.0 だけが対象で、1.7.1 で塞がれた。
+  # **ここは「上流の宣言範囲の内側」から外れる。** markdownlint-cli2 の宣言は範囲ではなく
+  # `1.7.0` の完全固定で、最新の 0.23.2 でも同じなので、内側に留まると塞げない。組み合わせの
+  # 検証は `pnpm lint:md` が markdown を触る変更ごとに実際に回すことで代える。
+  # markdownlint-cli2 が 1.7.1 以上を宣言したら撤去する。
+  "smol-toml@1.7.0": ">=1.7.1 <1.8"
   # markdownlint-cli2 の推移的依存。
   # GHSA-jvvh-6pj7-4vhr (high): flow collection の解析時間が入力長に対して指数で伸びる。
   # markdownlint-cli2 は既に 5.2.2 を宣言しており、こちらの lockfile だけが 5.2.1 で止まっている。

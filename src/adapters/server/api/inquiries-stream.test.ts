@@ -6,9 +6,18 @@ import { ErrorKind } from "@/errors/error-kind";
 
 import { serveStatus, serveWrite } from "../../../../vitest.setup.msw";
 
+/**
+ * 購読は mock で表せないため、発券は `live` の配備でしか成立しない。
+ *
+ * @remarks
+ * 既定を `live` にして、断る側の判定は module を読み直して確かめる（接続先の設定は 1 度だけ
+ * 組み立てられ、同じ module のまま切り替えられない）。
+ */
+const LIVE_ENVIRONMENT = { ...PARSED_ENVIRONMENT, APP_API_MODE: "live" } as const;
+
 const { getAccessToken, getEnvironment } = vi.hoisted(() => ({
   getAccessToken: vi.fn(async (): Promise<string | null> => null),
-  getEnvironment: vi.fn(() => PARSED_ENVIRONMENT),
+  getEnvironment: vi.fn(),
 }));
 
 vi.mock("@/config/environment", () => ({ getEnvironment }));
@@ -34,6 +43,7 @@ const wireTicket = {
 beforeEach(() => {
   vi.clearAllMocks();
   getAccessToken.mockResolvedValue(TOKEN);
+  getEnvironment.mockReturnValue(LIVE_ENVIRONMENT);
 });
 
 describe("issueMyInquiryStreamConnection", () => {
@@ -100,5 +110,48 @@ describe("issueInquiryFeedStreamConnection", () => {
     await expect(
       issueInquiryFeedStreamConnection().catch((error) => findAppError(error)?.kind),
     ).resolves.toBe(ErrorKind.PERMISSION_DENIED);
+  });
+});
+
+describe("購読を表せない配備", () => {
+  /**
+   * mock の配備として module を読み直す。
+   *
+   * @remarks
+   * 分類を読む側も一緒に読み直します。読み直した木が作るエラーは、前の木の判定関数からは
+   * 同じ印に見えません。
+   */
+  async function loadUnderMock() {
+    vi.resetModules();
+    getEnvironment.mockReturnValue(PARSED_ENVIRONMENT);
+
+    const [module, errors] = await Promise.all([
+      import("./inquiries-stream"),
+      import("@/errors/app-error"),
+    ]);
+
+    return { ...module, kindOf: (error: unknown) => errors.findAppError(error)?.kind };
+  }
+
+  // ----- 異常系 -----
+  it("mock では自分の問い合わせの発券を断る", async () => {
+    const { issueMyInquiryStreamConnection: issueUnderMock, kindOf } = await loadUnderMock();
+
+    await expect(issueUnderMock().catch(kindOf)).resolves.toBe(ErrorKind.NOT_FOUND);
+  });
+
+  it("mock ではフィードの発券も断る", async () => {
+    const { issueInquiryFeedStreamConnection: issueUnderMock, kindOf } = await loadUnderMock();
+
+    await expect(issueUnderMock().catch(kindOf)).resolves.toBe(ErrorKind.NOT_FOUND);
+  });
+
+  it("mock では発券の口を叩かない", async () => {
+    const requests = serveWrite("post", MY_TICKET_URL, wireTicket);
+    const { issueMyInquiryStreamConnection: issueUnderMock } = await loadUnderMock();
+
+    await issueUnderMock().catch(() => undefined);
+
+    expect(requests).toHaveLength(0);
   });
 });

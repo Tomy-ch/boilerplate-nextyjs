@@ -10,6 +10,8 @@ vi.mock("./view", () => ({
   AdminInquiryDetailView: ({ inquiryId }: { inquiryId: string }) => <p>{inquiryId}</p>,
 }));
 
+import { idleActionState } from "@/model/action-state";
+
 import { ADMIN_INQUIRY_HISTORY, ADMIN_INQUIRY_ID } from "../inquiries.fixture";
 import { AdminInquiryDetailPageContent } from "./page-content";
 
@@ -20,7 +22,12 @@ beforeEach(() => {
 
 describe("AdminInquiryDetailPageContent", () => {
   it("動的セグメントが指す問い合わせを取る", async () => {
-    render(await AdminInquiryDetailPageContent({ inquiryId: ADMIN_INQUIRY_ID }));
+    render(
+      await AdminInquiryDetailPageContent({
+        inquiryId: ADMIN_INQUIRY_ID,
+        replyAction: async () => idleActionState<void, "body">(),
+      }),
+    );
 
     expect(getInquiryHistory).toHaveBeenCalledWith(ADMIN_INQUIRY_ID);
     expect(screen.getByText(ADMIN_INQUIRY_ID)).toBeVisible();

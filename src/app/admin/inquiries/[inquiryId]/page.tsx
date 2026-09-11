@@ -6,6 +6,8 @@ import { AdminInquiryDetailPageContent } from "@/features/admin/inquiries/detail
 import { AdminInquiryDetailSkeleton } from "@/features/admin/inquiries/detail/ui/skeleton/skeleton";
 import { toInquiryId } from "@/model/inquiry/inquiry";
 
+import { replyInquiryAction } from "../actions";
+
 export const metadata: Metadata = {
   title: "問い合わせの対応",
   robots: { index: false, follow: false },
@@ -21,7 +23,12 @@ export const metadata: Metadata = {
 async function AdminInquiryDetailContent({ params }: { params: Promise<{ inquiryId: string }> }) {
   const { inquiryId } = await params;
 
-  return <AdminInquiryDetailPageContent inquiryId={toInquiryId(inquiryId)} />;
+  return (
+    <AdminInquiryDetailPageContent
+      inquiryId={toInquiryId(inquiryId)}
+      replyAction={replyInquiryAction}
+    />
+  );
 }
 
 /**

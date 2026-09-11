@@ -41,7 +41,7 @@ function Probe({
   onResync?: () => void;
 }) {
   const { state, resume: resumeAt } = useStream<Event>({
-    ticketPath: "/api/inquiries/me/stream-ticket",
+    ticketPath: "/api/resource/stream-ticket",
     initialCursor: toStreamCursor(cursor),
     schema,
     onEvents,
@@ -63,7 +63,7 @@ function Probe({
 /** 購読する条件を指定しない呼び出し。既定で購読が始まる。 */
 function DefaultProbe() {
   const { state } = useStream<Event>({
-    ticketPath: "/api/inquiries/me/stream-ticket",
+    ticketPath: "/api/resource/stream-ticket",
     initialCursor: toStreamCursor(1),
     schema,
     onEvents: ignoreEvents,

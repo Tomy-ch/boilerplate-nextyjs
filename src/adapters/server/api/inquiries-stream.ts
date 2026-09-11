@@ -2,6 +2,8 @@ import "server-only";
 
 import { getApiConfig } from "@/config/api/api.server";
 import { getHttpConfig } from "@/config/http/http.server";
+import { createAppError } from "@/errors/app-error";
+import { ErrorKind } from "@/errors/error-kind";
 
 import {
   PostInquiriesFeedStreamTicketResponse,
@@ -53,6 +55,25 @@ function getClient(): UserScopedHttpClient {
   return client;
 }
 
+/**
+ * 購読を表せない配備では、発券そのものを断る。
+ *
+ * @remarks
+ * **契約から生成したモックは SSE を表せません**（`mocks/README.md`）。それでも発券の口は契約に
+ * あるため、モックは「本物らしい」応答を返します。**発券だけが成功すると、ブラウザは実在しない
+ * 接続先へ張り直しを繰り返します** —— 画面は静止せず、失敗した要求がブラウザの記録に積まれます。
+ *
+ * 購読する対象が無いことにして、画面を待機の姿で止めます。分類を `not-found` にするのは、
+ * 「まだ問い合わせを持たない主体」と同じ扱いで足りるからです。
+ */
+function assertSubscribable(): void {
+  if (getApiConfig().mode === "mock") {
+    throw createAppError(ErrorKind.NOT_FOUND, {
+      cause: new Error("モードが mock のため購読の口を発券しません"),
+    });
+  }
+}
+
 /** 発券の応答から、そのまま開ける URL を組む。 */
 function toConnection(ticket: string, streamId: string, expiresAt: string): StreamConnection {
   const url = new URL(
@@ -75,6 +96,8 @@ function toConnection(ticket: string, streamId: string, expiresAt: string): Stre
  * これに当たり、履歴の取得が成功することとは両立します。
  */
 export async function issueMyInquiryStreamConnection(): Promise<StreamConnection> {
+  assertSubscribable();
+
   const wire = await getClient().request({
     path: MY_TICKET_PATH,
     method: "POST",
@@ -86,6 +109,8 @@ export async function issueMyInquiryStreamConnection(): Promise<StreamConnection
 
 /** 問い合わせの更新フィードを購読する口を発券する（運営）。運ぶのは行の更新だけで、本文は含まない。 */
 export async function issueInquiryFeedStreamConnection(): Promise<StreamConnection> {
+  assertSubscribable();
+
   const wire = await getClient().request({
     path: FEED_TICKET_PATH,
     method: "POST",

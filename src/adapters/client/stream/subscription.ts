@@ -257,6 +257,19 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   let attempt = 0;
   let cancelReconnect: (() => void) | null = null;
   let cancelFlush: (() => void) | null = null;
+
+  /**
+   * いま有効な接続の世代。
+   *
+   * @remarks
+   * **捨てた接続からの通知を無視するために要ります。** `close()` を呼んでも、ブラウザが既に
+   * 積んだ通知は届き得ます。世代を見ないと、捨てたはずの接続の `error` が、いま生きている
+   * 接続を閉じます。
+   */
+  let generation = 0;
+
+  /** 発券か接続が進行中か。`await` を挟む区間へ 2 本目を入れないための印。 */
+  let starting = false;
   let releaseVisibility: (() => void) | null = null;
   let awaitingResync = false;
   let halted = false;
@@ -379,17 +392,32 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   }
 
   function connect(target: StreamConnection): void {
+    closeSource();
+
+    generation += 1;
+
+    const mine = generation;
+    const current = (): boolean => mine === generation && !closed;
+
     let opened = false;
 
     emit({ kind: "connecting" });
 
     source = deps.createSource(withCursor(target.url, anchored ? window.cursor() : null), {
       onOpen: () => {
+        if (!current()) {
+          return;
+        }
+
         opened = true;
         attempt = 0;
         emit({ kind: "open" });
       },
       onEvent: (data) => {
+        if (!current()) {
+          return;
+        }
+
         const envelope = parseEnvelope(data);
 
         if (envelope === null) {
@@ -405,9 +433,17 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
         scheduleFlush();
       },
       onControl: (data) => {
+        if (!current()) {
+          return;
+        }
+
         handleControl(parseControl(data));
       },
       onError: () => {
+        if (!current()) {
+          return;
+        }
+
         closeSource();
 
         if (!opened) {
@@ -441,11 +477,16 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
     }
   }
 
+  /**
+   * 購読を張る。
+   *
+   * @remarks
+   * **同時に 2 本走らせません。** 発券は `await` を挟むので、その間に張り直しや再開が重なると、
+   * 解決した数だけ接続が開き、先に開いたものが誰にも閉じられなくなります。始まっている間は
+   * 後から来た求めを落とし、位置の更新（`resume`）だけを先に効かせます。
+   */
   async function start(): Promise<void> {
-    /* istanbul ignore next -- 仕掛ける側が既に同じ 3 つを見ており（張り直しは仕掛ける前、可視性の
-       登録は閉じるときに外す）、ここへ来る呼び出しは現状の経路に無い。残すのは、始める側が
-       止まっていることを自分で確かめない形にしないため。 */
-    if (closed || halted || awaitingResync) {
+    if (closed || halted || awaitingResync || starting) {
       return;
     }
 
@@ -455,15 +496,21 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
       return;
     }
 
-    if (connection === null || connection.expiresAt <= deps.now()) {
-      connection = await issue();
-    }
+    starting = true;
 
-    if (connection === null || closed || halted || awaitingResync) {
-      return;
-    }
+    try {
+      if (connection === null || connection.expiresAt <= deps.now()) {
+        connection = await issue();
+      }
 
-    connect(connection);
+      if (connection === null || closed || halted || awaitingResync) {
+        return;
+      }
+
+      connect(connection);
+    } finally {
+      starting = false;
+    }
   }
 
   void start();
@@ -474,6 +521,10 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
         return;
       }
 
+      // 開いているものは捨てる。位置が変わった以上、いま繋がっている接続は別の位置から
+      // 配られており、そのまま残すと 2 本になる。
+      clearReconnect();
+      closeSource();
       awaitingResync = false;
       halted = false;
       attempt = 0;

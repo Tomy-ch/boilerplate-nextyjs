@@ -46,7 +46,7 @@
 | U10 | 登録(オンボーディング) | `GET /v1/prefectures` / `GET /v1/addresses?postalCode=` / `POST /v1/users` | 初回ログイン後の追加情報登録(住所等) | 明示オンボーディングとして実装する。`POST /v1/users` には `Idempotency-Key` を設定し、郵便番号補完が `isFallback=true` なら全項目を手入力する |
 | U11 | マイページ | `GET /v1/users/me` / `GET /v1/users/me/purchases/summary` | プロフィール確認・購入サマリ表示・退会導線 | 退会は確認モーダル必須(不可逆操作) |
 | U12 | ユーザー更新 | `GET /v1/users/me` / `GET /v1/prefectures` / `PUT /v1/users/{userId}` | プロフィール編集 | U11 とは独立ルート。**CollectAll**(RSC 内 `Promise.all` での並置合成)の実例 |
-| U13 | お問い合わせ | `GET /v1/inquiries/me/messages` / `POST /v1/inquiries/me/messages` / `POST /v1/inquiries/me/stream-ticket` / `GET /v1/streams/{destination}` | サポートとのやり取り。利用者ごとに 1 件で、最初の投稿が問い合わせを作る | **届いた 1 通が取り直しを待たずに出る唯一の画面**。初期表示は RSC が履歴を取り、その応答が返す `streamCursor` を購読の開始位置に渡す。購読はブラウザが backend の SSE へ直接繋ぎ、資格情報は BFF が発券する短命 ticket を query に載せる。送信は Server Action + `Idempotency-Key` で、届いた 1 通は購読ではなく取り直した正本に現れる。`APP_API_MODE=mock` では購読先が無いため動かない |
+| U13 | お問い合わせ | `GET /v1/inquiries/me/messages` / `POST /v1/inquiries/me/messages` / `POST /v1/inquiries/me/stream-ticket` / `GET /v1/streams/{destination}` | サポートとのやり取り。利用者ごとに 1 件で、最初の投稿が問い合わせを作る | **届いた 1 通が取り直しを待たずに出る唯一の画面**。初期表示は RSC が履歴を取り、その応答が返す `streamCursor` を購読の開始位置に渡す。購読はブラウザが backend の SSE へ直接繋ぎ、資格情報は BFF が発券する短命 ticket を query に載せる。送信は Server Action + `Idempotency-Key` で、届いた 1 通は購読ではなく取り直した正本に現れる。`APP_API_MODE=mock` では発券の取得口が発券を断り、購読を持たない姿で止まる（表示と送信は動く） |
 
 ### admin 側(10)
 

@@ -4,9 +4,9 @@ import { CONTROL_ACTION, parseControl, parseEnvelope } from "./envelope";
 
 const ENVELOPE = {
   eventId: "123e4567-e89b-12d3-a456-426614174000",
-  streamId: "inquiry-thread",
+  streamId: "stream-a",
   sequence: "3",
-  type: "inquiry.message.created.v1",
+  type: "resource.created.v1",
   occurredAt: "2026-09-01T12:00:00Z",
   schemaVersion: 1,
   payload: { messageId: "m1" },

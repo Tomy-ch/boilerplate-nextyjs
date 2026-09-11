@@ -7,24 +7,48 @@ vi.mock("./ui/conversation/conversation", () => ({
   AdminInquiryConversation: () => <p>やり取り</p>,
 }));
 
+import { idleActionState } from "@/model/action-state";
+
 import { ADMIN_INQUIRY_HISTORY, ADMIN_INQUIRY_ID } from "../inquiries.fixture";
+
+/** 送信先。この段は素通しするだけなので、押しても何も起きない形で渡す。 */
+const replyAction = async () => idleActionState<void, "body">();
+
 import { AdminInquiryDetailView } from "./view";
 
 describe("AdminInquiryDetailView", () => {
   it("やり取りを画面の本体として出す", () => {
-    render(<AdminInquiryDetailView history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryDetailView
+        history={ADMIN_INQUIRY_HISTORY}
+        inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
+      />,
+    );
 
     expect(screen.getByText("やり取り")).toBeVisible();
   });
 
   it("一覧と突き合わせられるよう、問い合わせの識別子を出す", () => {
-    render(<AdminInquiryDetailView history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryDetailView
+        history={ADMIN_INQUIRY_HISTORY}
+        inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
+      />,
+    );
 
     expect(screen.getByText(ADMIN_INQUIRY_ID)).toBeVisible();
   });
 
   it("やり取りの始まりを出す", () => {
-    render(<AdminInquiryDetailView history={ADMIN_INQUIRY_HISTORY} inquiryId={ADMIN_INQUIRY_ID} />);
+    render(
+      <AdminInquiryDetailView
+        history={ADMIN_INQUIRY_HISTORY}
+        inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
+      />,
+    );
 
     expect(screen.getByText("開始")).toBeVisible();
   });
@@ -34,6 +58,7 @@ describe("AdminInquiryDetailView", () => {
       <AdminInquiryDetailView
         history={{ ...ADMIN_INQUIRY_HISTORY, messages: [] }}
         inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
       />,
     );
 

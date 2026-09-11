@@ -8,6 +8,7 @@ import { formatDateTime } from "@/model/datetime";
 import type { InquiryHistory, InquiryId } from "@/model/inquiry/inquiry";
 import { withScreenSpan } from "@/observability/render-span";
 
+import type { AdminInquiryReplyAction } from "../form-state";
 import { AdminInquiryConversation } from "./ui/conversation/conversation";
 
 /** `AdminInquiryDetailView` の props。 */
@@ -16,6 +17,8 @@ export type AdminInquiryDetailViewProps = {
   inquiryId: InquiryId;
   /** 取得した正本。 */
   history: InquiryHistory;
+  /** 回答の送信先。route が渡す。 */
+  replyAction: AdminInquiryReplyAction;
 };
 
 /**
@@ -31,7 +34,7 @@ export type AdminInquiryDetailViewProps = {
  */
 export const AdminInquiryDetailView = withScreenSpan(
   "features/admin/inquiries/detail/view",
-  ({ history, inquiryId }: AdminInquiryDetailViewProps) => {
+  ({ history, inquiryId, replyAction }: AdminInquiryDetailViewProps) => {
     const first = history.messages.at(0);
 
     return (
@@ -49,7 +52,11 @@ export const AdminInquiryDetailView = withScreenSpan(
           </KeyValueItem>
         </KeyValueList>
 
-        <AdminInquiryConversation history={history} inquiryId={inquiryId} />
+        <AdminInquiryConversation
+          history={history}
+          inquiryId={inquiryId}
+          replyAction={replyAction}
+        />
       </div>
     );
   },

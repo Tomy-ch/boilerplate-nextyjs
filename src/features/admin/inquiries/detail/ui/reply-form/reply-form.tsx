@@ -9,8 +9,8 @@ import { Textarea } from "@/components/design-system/form/textarea/textarea";
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 import type { InquiryId } from "@/model/inquiry/inquiry";
 
-import type { AdminInquiryReplyActionState } from "../../../actions";
 import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "../../../form-names";
+import type { AdminInquiryReplyState } from "../../../form-state";
 
 /** `AdminInquiryReplyForm` の props。 */
 export type AdminInquiryReplyFormProps = {
@@ -19,7 +19,7 @@ export type AdminInquiryReplyFormProps = {
   /** 送信の受け口。 */
   action: (formData: FormData) => void;
   /** 直前の送信の結果。 */
-  state: AdminInquiryReplyActionState;
+  state: AdminInquiryReplyState;
   /** この送信に載せる冪等キー。成立するまで同じ値を使う。 */
   idempotencyKey: string;
   /** 送信中か。 */

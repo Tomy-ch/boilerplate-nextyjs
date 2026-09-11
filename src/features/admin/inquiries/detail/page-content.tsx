@@ -2,12 +2,15 @@ import { getInquiryHistory } from "@/adapters/server/api/inquiries";
 import type { InquiryId } from "@/model/inquiry/inquiry";
 import { withScreenSpan } from "@/observability/render-span";
 
+import type { AdminInquiryReplyAction } from "../form-state";
 import { AdminInquiryDetailView } from "./view";
 
 /** `AdminInquiryDetailPageContent` の props。 */
 export type AdminInquiryDetailPageContentProps = {
   /** route の動的セグメントが指す問い合わせ。 */
   inquiryId: InquiryId;
+  /** 回答の送信先。route が渡す。 */
+  replyAction: AdminInquiryReplyAction;
 };
 
 /**
@@ -18,9 +21,11 @@ export type AdminInquiryDetailPageContentProps = {
  */
 export const AdminInquiryDetailPageContent = withScreenSpan(
   "features/admin/inquiries/detail/page-content",
-  async ({ inquiryId }: AdminInquiryDetailPageContentProps) => {
+  async ({ inquiryId, replyAction }: AdminInquiryDetailPageContentProps) => {
     const history = await getInquiryHistory(inquiryId);
 
-    return <AdminInquiryDetailView history={history} inquiryId={inquiryId} />;
+    return (
+      <AdminInquiryDetailView history={history} inquiryId={inquiryId} replyAction={replyAction} />
+    );
   },
 );

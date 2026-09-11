@@ -23,9 +23,9 @@ import { newIdempotencyKey } from "@/model/idempotency-key";
 import { toConversationDays } from "@/model/inquiry/conversation";
 import type { InquiryHistory, InquiryId } from "@/model/inquiry/inquiry";
 
-import { replyInquiryAction } from "../../../actions";
 import { toFeedConnectionStatus } from "../../../connection-status";
 import { REPLY_BODY_FIELD } from "../../../form-names";
+import type { AdminInquiryReplyAction } from "../../../form-state";
 import { type AdminInquiryDraft, AdminInquiryMessageList } from "../message-list/message-list";
 import { AdminInquiryReplyForm } from "../reply-form/reply-form";
 
@@ -42,6 +42,8 @@ export type AdminInquiryConversationProps = {
   inquiryId: InquiryId;
   /** 取得した正本。 */
   history: InquiryHistory;
+  /** 回答の送信先。route が渡す。 */
+  replyAction: AdminInquiryReplyAction;
 };
 
 /**
@@ -55,11 +57,15 @@ export type AdminInquiryConversationProps = {
  * したがって新しい 1 通は、届いた本文ではなく取り直した正本として現れます。フィードが運ぶのは
  * 本文を含まない更新の事実だけなので、これは遠回りではなく唯一の経路です。
  */
-export function AdminInquiryConversation({ history, inquiryId }: AdminInquiryConversationProps) {
+export function AdminInquiryConversation({
+  history,
+  inquiryId,
+  replyAction,
+}: AdminInquiryConversationProps) {
   const router = useRouter();
   const online = useOnlineStatus();
 
-  const [state, formAction, pending] = useActionState(replyInquiryAction, idleActionState());
+  const [state, formAction, pending] = useActionState(replyAction, idleActionState());
   const [sending, addSending] = useOptimistic<readonly AdminInquiryDraft[], AdminInquiryDraft>(
     NO_PENDING,
     (current, draft) => [...current, draft],

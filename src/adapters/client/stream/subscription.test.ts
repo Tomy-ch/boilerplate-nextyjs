@@ -16,7 +16,7 @@ import {
   type StreamState,
 } from "./subscription";
 
-const TICKET_PATH = "/api/inquiries/me/stream-ticket";
+const TICKET_PATH = "/api/resource/stream-ticket";
 
 const STREAM_URL = "https://api.example.test/v1/streams/s1?ticket=raw";
 

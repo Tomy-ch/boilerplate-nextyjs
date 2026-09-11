@@ -6,6 +6,7 @@ import { Button } from "@/components/design-system/action/button/button";
 import { AdminShell } from "@/components/shell/admin-shell/admin-shell";
 import type { AdminShellNavGroup } from "@/components/shell/admin-shell/admin-shell.definition";
 import { ContentContainer } from "@/components/shell/content-container/content-container";
+import { idleActionState } from "@/model/action-state";
 
 import {
   ADMIN_DASHBOARD_PATH,
@@ -64,7 +65,11 @@ const meta = {
     },
   },
   decorators: [withPageFrame],
-  args: { history: ADMIN_INQUIRY_HISTORY, inquiryId: ADMIN_INQUIRY_ID },
+  args: {
+    history: ADMIN_INQUIRY_HISTORY,
+    inquiryId: ADMIN_INQUIRY_ID,
+    replyAction: async () => idleActionState<void, "body">(),
+  },
 } satisfies Meta<typeof AdminInquiryDetailView>;
 
 export default meta;

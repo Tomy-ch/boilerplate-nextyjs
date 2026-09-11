@@ -7,9 +7,9 @@ import { ADMIT_RESULT, createOrderingWindow } from "./ordering";
 function envelopeAt(sequence: number): StreamEnvelope {
   return {
     eventId: `e${sequence}`,
-    streamId: "inquiry-thread",
+    streamId: "stream-a",
     sequence: toStreamCursor(sequence),
-    type: "inquiry.message.created.v1",
+    type: "resource.created.v1",
     occurredAt: "2026-09-01T12:00:00Z",
     schemaVersion: 1,
     payload: {},

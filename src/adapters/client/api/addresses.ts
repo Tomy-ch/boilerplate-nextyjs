@@ -45,7 +45,7 @@ export async function fetchAddresses(
     return await request(
       `/api/addresses?postalCode=${encodeURIComponent(postalCode)}`,
       AddressLookupPayload,
-      signal,
+      { signal },
     );
   } catch {
     return NOT_FOUND;

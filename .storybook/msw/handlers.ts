@@ -81,6 +81,12 @@ export const handlers: readonly RequestHandler[] = [
   http.get("/api/purchases", () =>
     HttpResponse.json({ items: NEXT_PURCHASE_PAGE, nextCursor: null }),
   ),
+  // カタログは購読先を持たない。**発券を成功させない**のは、返した URL へ実際に繋ぎに行き、
+  // 繋がらないたびに張り直すためで、story が静止しなくなる（基準画像も撮れない）。購読する
+  // 対象が無いときと同じ応答を返し、画面は待機の姿で止まる。
+  http.post(/\/api\/inquiries\/(me|feed)\/stream-ticket$/, () =>
+    HttpResponse.json({ message: "購読する対象がありません。" }, { status: 404 }),
+  ),
 ];
 // sample:replace-with
 // = export const handlers: readonly RequestHandler[] = [];

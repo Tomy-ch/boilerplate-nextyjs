@@ -44,5 +44,5 @@ export async function fetchPurchaseHistoryPage(
   query: URLSearchParams,
   signal?: AbortSignal,
 ): Promise<PurchaseHistoryPage> {
-  return request(`/api/purchases?${query.toString()}`, PurchaseHistoryPagePayload, signal);
+  return request(`/api/purchases?${query.toString()}`, PurchaseHistoryPagePayload, { signal });
 }

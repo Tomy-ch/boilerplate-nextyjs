@@ -9,6 +9,7 @@ import type { AdminShellNavGroup } from "@/components/shell/admin-shell/admin-sh
 import {
   ADMIN_ANALYTICS_PATH,
   ADMIN_DASHBOARD_PATH,
+  ADMIN_INQUIRY_LIST_PATH,
   ADMIN_PRODUCT_LIST_PATH,
   ADMIN_SHIPMENT_QUEUE_PATH,
   ADMIN_USER_LIST_PATH,
@@ -35,7 +36,13 @@ const NAV_GROUPS: readonly AdminShellNavGroup[] = [
   },
   { label: "商品", items: [{ href: ADMIN_PRODUCT_LIST_PATH, label: "商品一覧管理" }] },
   { label: "注文", items: [{ href: ADMIN_SHIPMENT_QUEUE_PATH, label: "発送" }] },
-  { label: "利用者", items: [{ href: ADMIN_USER_LIST_PATH, label: "利用者一覧" }] },
+  {
+    label: "利用者",
+    items: [
+      { href: ADMIN_USER_LIST_PATH, label: "利用者一覧" },
+      { href: ADMIN_INQUIRY_LIST_PATH, label: "問い合わせ一覧" },
+    ],
+  },
 ];
 
 /**

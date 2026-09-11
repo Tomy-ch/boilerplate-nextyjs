@@ -63,7 +63,7 @@ export async function fetchProductListPage(
   query: URLSearchParams,
   signal?: AbortSignal,
 ): Promise<CursorPage<ProductListItem>> {
-  return request(`/api/products?${query.toString()}`, ProductListPagePayload, signal);
+  return request(`/api/products?${query.toString()}`, ProductListPagePayload, { signal });
 }
 
 /**
@@ -83,7 +83,7 @@ export async function fetchProductCount(
   const { count } = await request(
     `/api/products/count?${query.toString()}`,
     ProductCountPayload,
-    signal,
+    { signal },
   );
 
   return count;

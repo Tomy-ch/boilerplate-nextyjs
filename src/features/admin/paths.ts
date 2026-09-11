@@ -1,3 +1,4 @@
+import type { InquiryId } from "@/model/inquiry/inquiry";
 import type { ProductId } from "@/model/product/product";
 
 /**
@@ -24,6 +25,9 @@ export const ADMIN_SHIPMENT_QUEUE_PATH = "/admin/shipments";
 /** 利用者を一覧で見る画面のパス。 */
 export const ADMIN_USER_LIST_PATH = "/admin/users";
 
+/** 問い合わせを一覧で見る画面のパス。 */
+export const ADMIN_INQUIRY_LIST_PATH = "/admin/inquiries";
+
 /** 商品を作る画面のパス。 */
 export const ADMIN_PRODUCT_NEW_PATH = `${ADMIN_PRODUCT_LIST_PATH}/new`;
 
@@ -49,4 +53,9 @@ export function adminProductStockPath(id: ProductId): string {
  */
 export function productDetailPath(id: ProductId): string {
   return `/products/${encodeURIComponent(id)}`;
+}
+
+/** 問い合わせ 1 件のやり取りを見る画面のパス。 */
+export function adminInquiryDetailPath(id: InquiryId): string {
+  return `${ADMIN_INQUIRY_LIST_PATH}/${encodeURIComponent(id)}`;
 }

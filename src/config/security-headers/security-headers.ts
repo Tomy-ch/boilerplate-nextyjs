@@ -10,6 +10,14 @@ export type SecurityHeaderInputs = {
   readonly mediaOrigin: string;
   /** 認可要求の送り先（`AUTH_ISSUER`）。`form-action` に載せる。 */
   readonly authIssuer: string;
+  /**
+   * バックエンドの接続先（`APP_API_BASE_URL`）。`connect-src` に載せる。
+   *
+   * @remarks
+   * ブラウザがバックエンドへ直接開く長寿命接続（購読）の宛先です。取得は同一オリジンの
+   * Route Handler が中継するため `'self'` で足りますが、購読はブラウザが自分で開きます。
+   */
+  readonly apiOrigin: string;
   /** 自分が https で配信されているか。HSTS と `upgrade-insecure-requests` を出す条件。 */
   readonly servesOverTls: boolean;
   /** 開発サーバーか。React が eval を要求する。 */
@@ -90,6 +98,8 @@ const STRICT_TRANSPORT_SECURITY = "max-age=31536000";
  *
  * - `img-src` の配信元は ENV から組み立てます。ここへ直接書くと、環境変数と設定の 2 か所が別々に
  *   動きます。`blob:` はアップロード前の preview（`URL.createObjectURL`）が使います
+ * - `connect-src` にバックエンドの origin を含めます。購読（長寿命接続）だけはブラウザが直接
+ *   開くためで、取得の中継しか無ければ `'self'` で足ります
  * - `form-action` に IdP の origin を含めます。ログインは form の送信で始まり、その応答が IdP へ
  *   リダイレクトします。Chromium は form の送信先だけでなく、その先のリダイレクト先にも
  *   `form-action` を適用するため、`'self'` だけだと認可要求が止まります
@@ -99,6 +109,7 @@ const STRICT_TRANSPORT_SECURITY = "max-age=31536000";
  *   `http://localhost` の副資源まで https へ書き換えられて取得できなくなります
  */
 function buildContentSecurityPolicy({
+  apiOrigin,
   mediaOrigin,
   authIssuer,
   servesOverTls,
@@ -120,7 +131,7 @@ function buildContentSecurityPolicy({
     ["style-src", ["'self'", "'unsafe-inline'"]],
     ["img-src", ["'self'", "blob:", new URL(mediaOrigin).origin, ...tagManagerCollect]],
     ["font-src", ["'self'"]],
-    ["connect-src", ["'self'", ...tagManagerCollect]],
+    ["connect-src", ["'self'", new URL(apiOrigin).origin, ...tagManagerCollect]],
     ["object-src", ["'none'"]],
     ["base-uri", ["'self'"]],
     ["form-action", ["'self'", new URL(authIssuer).origin]],

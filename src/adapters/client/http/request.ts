@@ -25,6 +25,20 @@ const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
   414: ErrorKind.URI_TOO_LONG,
 };
 
+/** 呼び出し 1 件の指定。既定は打ち切りも持たない GET。 */
+export type RequestOptions = {
+  /** 条件が変わった、または画面を離れたときに取得を打ち切る合図。 */
+  readonly signal?: AbortSignal;
+  /**
+   * HTTP メソッド。既定は `GET`。
+   *
+   * @remarks
+   * **本文を載せる口を持ちません。** ブラウザから状態を作る操作は Server Action が持つため、
+   * この口を通るのは取得と、購読を開くための発券のように**引数を持たない要求**だけです。
+   */
+  readonly method?: "GET" | "POST";
+};
+
 /**
  * 同一オリジンの BFF を叩き、応答を検証して返す。
  *
@@ -42,16 +56,20 @@ const KIND_BY_STATUS: Readonly<Partial<Record<number, ErrorKindType>>> = {
  * @param schema - 応答の検証スキーマ。**流儀は問わない** —— `zod` と `zod/mini` は同じ core の型を
  *   共有するため、ここは core の口だけを見る。共有層が片方の流儀を要求すると、呼び出し側の移行が
  *   この 1 箇所のために止まる
- * @param signal - 条件が変わった、または画面を離れたときに取得を打ち切る
+ * @param options - 打ち切りの合図と、取得以外の要求で使う method
  */
 export async function request<T>(
   path: string,
   schema: $ZodType<T>,
-  signal?: AbortSignal,
+  options: RequestOptions = {},
 ): Promise<T> {
   assertRequestTargetWithinBudget(path, MAX_URL_BYTES);
 
-  const response = await fetch(path, { headers: { accept: "application/json" }, signal });
+  const response = await fetch(path, {
+    method: options.method ?? "GET",
+    headers: { accept: "application/json" },
+    signal: options.signal,
+  });
 
   if (!response.ok) {
     throw createAppError(KIND_BY_STATUS[response.status] ?? ErrorKind.INTERNAL);

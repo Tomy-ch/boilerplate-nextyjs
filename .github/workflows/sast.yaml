@@ -27,8 +27,7 @@ name: SAST
 # over the extracted rules. The licence reason and the extraction constraints are owned by
 # `README.md` § "SAST のルールをレジストリから引かない".
 #
-# Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
-# in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -78,9 +77,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # What cannot change this scan's answer. The list is the deny side on purpose: anything
-      # not named here still runs, so a missing entry costs one needless run while a wrong
-      # entry would leave a scanner reporting on nothing (see the note in the action).
+      # What cannot change this scan's answer — this job's own claim, not a shared default.
       # `public/**` is assets; opengrep's target list in opengrep.mk never opens them.
       - name: Decide whether the diff can reach this scan
         id: scope

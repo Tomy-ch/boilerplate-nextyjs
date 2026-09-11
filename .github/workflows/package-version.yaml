@@ -8,8 +8,7 @@ name: Package Version
 # The tree it reads is `refs/pull/N/merge`, so what it checks is the version that will
 # actually land on the release branch.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -100,8 +99,6 @@ jobs:
 
           exit 0
 
-      # A PR from a fork gets a read-only token, so posting is allowed to fail
-      # without taking the verdict with it.
       - name: Comment package version result on PR
         if: github.event_name == 'pull_request'
         continue-on-error: true

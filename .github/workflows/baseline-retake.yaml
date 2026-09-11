@@ -4,25 +4,16 @@ name: Baseline Retake
 # branch's submodule pointer onto the result. That push re-runs the comparisons,
 # which then pass.
 #
-# Both kinds of baseline are retaken together — one store, one push, one approval
-# label. Why that follows from the store's shape is in docs/design/vrt.md. How each
-# is bounded differs:
+# Stories and screens are retaken together — one store, one push, one approval label — and
+# both obey one invariant: the set that was reported is the set that may be retaken.
+# `make vrt-update` reads the VRT run's report, `make e2e-update` the E2E run's report for
+# this commit.
 #
-#   * Stories (`make vrt-update`) — bounded to what the VRT run reported, so a story
-#     that never appeared in the pull-request comment cannot enter the baselines here.
-#   * Screens (`make e2e-update`) — bounded the same way, from the E2E run's report for
-#     this commit. Both kinds therefore obey one invariant: the set that was reported is
-#     the set that may be retaken.
-#
-# The label is NOT an approval and NOT a trigger. It develops the pixels into a
-# reviewable image diff, and accepting them is a separate label required by
-# `baseline-approval.yaml`; it is read when a comparison run completes, so it may be applied
-# at any time, pull-request creation included. Both properties are in
-# docs/design/vrt.md.
-#
-# The label is spent only when the pointer moves; every other outcome leaves it on.
-# Both halves of that asymmetry are in docs/design/vrt.md, and what it means for the
-# person applying the label is in vrt/README.md.
+# The label is NOT an approval (accepting the pixels is `baseline-approval.yaml`'s separate
+# label) and NOT a trigger (it is read when a comparison run completes, so it may be applied
+# at any time). It is spent only when the pointer moves; every other outcome leaves it on.
+# All of that follows from the store's shape, which docs/design/vrt.md owns; what the
+# asymmetry means for the person applying the label is in vrt/README.md.
 #
 # Fork pull requests cannot be served, and under `workflow_run` refusing them is a
 # security requirement rather than a limitation: this trigger runs in the context of
@@ -89,28 +80,13 @@ jobs:
             mcr.microsoft.com:443
             *.data.mcr.microsoft.com:443
 
-      # The REST calls below run on an app installation token rather than `GITHUB_TOKEN`.
-      # `GITHUB_TOKEN` is capped at 1,000 requests per hour per repository, shared across
-      # every workflow and every open pull request; an installation token carries 5,000.
-      # This job fires on every VRT and E2E completion and makes about ten calls each time,
-      # so it is the first consumer to exhaust the shared cap on a busy day — a failure
-      # unrelated to the change under test.
+      # Minted rather than using `GITHUB_TOKEN` for its rate limit, and allowed to fail so the
+      # retake falls back to it (README § PR コメント). This job is the first consumer to
+      # exhaust the shared cap, making about ten calls on every VRT and E2E completion.
       #
-      # The permissions are the union of what the steps below need and nothing else:
-      # reading the pull request and its check runs, and taking the label off once the
-      # pointer has moved. Pushing is a separate mint inside `setup-baselines`, narrowed
-      # to what pushing needs.
-      #
-      # A repository created from this template that has not registered the app falls back
-      # to `GITHUB_TOKEN`. The retake still works there; it just draws on the smaller budget.
-      #
-      # **The mint is allowed to fail.** Asking for a permission the installation has not
-      # granted 422s, and without this that would take the whole job down — worse than the
-      # rate limit it is here to avoid. Failing leaves the output empty, so every call below
-      # falls back to `GITHUB_TOKEN` and the retake proceeds on the smaller budget. The
-      # `setup-baselines` call further down narrows `pull-requests` by route for the same
-      # reason; this one cannot, because the calls that need write run before the route is
-      # known.
+      # The permissions are the union of what the steps below need and nothing else. The
+      # `setup-baselines` call further down narrows `pull-requests` by route; this one cannot,
+      # because the calls that need write run before the route is known.
       - name: Mint a token for the API calls
         id: api-token
         if: env.BASELINE_APP_ID != ''
@@ -494,8 +470,7 @@ jobs:
           # What comes out of the report flows straight into make's argument, the commit
           # message and the pull-request comment. It originates in the story catalogue
           # committed to this repository, so it should never leave the accepted set — if it
-          # does, the report's shape changed, and this refuses rather than pass it on
-          #.
+          # does, the report's shape changed, and this refuses rather than pass it on.
           if printf '%s' "$ids" | LC_ALL=C grep -q '[^A-Za-z0-9/._,-]'; then
             echo '❌ 報告の story id が許可した文字集合を外れています。'
             exit 1

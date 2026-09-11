@@ -13,8 +13,7 @@ name: Dead Code
 # repository" is the expected steady state there and is not a finding; everything else is
 # internal and is.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on every PR
-# is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

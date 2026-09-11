@@ -15,8 +15,7 @@ name: DAST
 # that shrink it.
 #
 # The entries are IGNORE rather than removed, and ZAP still prints every ignored rule
-# with its URLs in the summary. That is severity lowered, not a finding hidden
-#.
+# with its URLs in the summary. That is severity lowered, not a finding hidden.
 #
 # `zaproxy/action-baseline` is deliberately not used. Its `docker_name` input takes a
 # tag, not a digest, and this repository pins every container image by digest and
@@ -24,8 +23,7 @@ name: DAST
 # scan's reach. Running the image through the same compose file the VRT container uses
 # keeps the pin inside a mechanism that verifies it.
 #
-# Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is
-# in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -84,9 +82,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # What cannot change this scan's answer. The list is the deny side on purpose: anything
-      # not named here still runs, so a missing entry costs one needless run while a wrong
-      # entry would leave a scanner reporting on nothing (see the note in the action).
+      # What cannot change this scan's answer — this job's own claim, not a shared default.
       # DAST reads the delivered response. The catalog, the baselines and the test files
       # are not part of what `next build` serves; CSS and tokens are served but cannot
       # change a header or a status code, which is all this scan reads.

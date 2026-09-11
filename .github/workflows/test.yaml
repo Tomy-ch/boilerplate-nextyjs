@@ -21,8 +21,7 @@ name: Test
 # is what makes the 100% gate mean the same thing it meant on one machine — measured on
 # the full suite, the merged totals equal the single-machine totals exactly.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

@@ -4,8 +4,7 @@ name: Lint
 # declaration cross-check — the same command the pre-commit hook runs
 # (hooks mirror CI). The hook is the fast first stop; this job is the authority.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -80,8 +79,6 @@ jobs:
 
           exit 0
 
-      # A PR from a fork gets a read-only token, so posting is allowed to fail
-      # without taking the verdict with it.
       - name: Comment lint result on PR
         if: github.event_name == 'pull_request'
         continue-on-error: true

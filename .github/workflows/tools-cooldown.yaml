@@ -23,8 +23,7 @@ name: Tools Cooldown
 # of the check, so unlike `actions-pin` it cannot be an offline comparison.
 # Not a required check: the job stands down for a diff that does not touch `mise.toml`.
 #
-# Deliberately unfiltered by `paths`; the reason every workflow runs on every PR is in
-# README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:
@@ -58,9 +57,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # The subject is `mise.toml`, not the tree: no source change alters a pin's publish
-      # date. Admissible as an allow-list only because the weekly audit above reads every
-      # pin — a mistake here defers a check by a week, it does not remove it.
+      # The subject is `mise.toml`, not the tree, and the weekly audit above reads every pin
+      # — the two halves `only` requires (see the note in the action).
       - name: Decide whether the diff can reach the pins
         id: scope
         uses: ./.github/actions/diff-scope

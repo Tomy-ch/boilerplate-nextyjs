@@ -29,11 +29,11 @@ name: VisualRegressionTest
 # holding a secret must not also produce a comment body, because secret masking does
 # not survive a `tee` to a file.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md. `vrt-scope` always starts and asks `diff-scope` whether the
-# diff can reach a picture, so the context is reported even when the expensive steps stand
-# down. That gate and the input hash `make vrt` computes are two different layers of the
-# same question — which layer decides what is in `vrt/README.md`.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
+# `vrt-scope` always starts and asks `diff-scope` whether the diff can reach a picture, so the
+# context is reported even when the expensive steps stand down. That gate and the input hash
+# `make vrt` computes are two different layers of the same question — which layer decides what
+# is in `vrt/README.md`.
 
 on:
   pull_request:

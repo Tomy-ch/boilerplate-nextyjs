@@ -10,9 +10,9 @@ name: Scripts Check
 # like a repository with no violations. Splitting the job means a red mark here reads as
 # "the machinery broke", never as "the app regressed".
 #
-# Deliberately unfiltered by `paths`. The 1:1 gate walks `src/`, `docs-viewer/`, `tokens/`
-# and `mocks/` as well, so a change anywhere can produce a violation here; the reason every
-# CI Checks workflow runs on every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR. The
+# 1:1 gate walks `src/`, `docs-viewer/`, `tokens/` and `mocks/` as well, so a change anywhere
+# can produce a violation here.
 
 on:
   pull_request:

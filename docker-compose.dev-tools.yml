@@ -23,11 +23,8 @@ services:
     ipc: host
     init: true
     entrypoint: []
-    # 画面を通した検証（`make e2e`）はホストで起動したアプリへ当てる。`node_modules` は実行した
-    # OS と CPU 向けに解決されるため、macOS で入れた木のままコンテナ内で `next start` を起動すると
-    # linux 向けのネイティブモジュールが無く、その場で取りに行って失敗する。ブラウザとフォントを
-    # 固定するのがこのイメージの役目であり、アプリの実行環境を固定するのは役目ではない。
-    #
+    # アプリはホストで起動し、コンテナから見に行く（`node_modules` は入れた OS と CPU 向けに
+    # 解決されるため、コンテナ内で `next start` は起動できない）。
     # Docker Desktop はこの名前を自分で解決するが、Linux では明示しないと引けない。
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -39,9 +36,8 @@ services:
   # 走っているアプリへ HTTP を撃つ検査（`make dast`）。ここだけが**ファイルではなく応答**を読む。
   #
   # 公式の `zaproxy/action-*` を使わないのは、あの action が受け取る `docker_name` が tag であって
-  # digest ではないため。このリポジトリは container image を digest で固定し `make images-pin-check`
-  # で突合する）が、action の input はその走査対象に入らない。
-  # 固定したつもりで誰も検査していないピンが 1 つ増えるより、上の browser_runner と同じ形に揃える。
+  # digest ではなく、`make images-pin-check` の走査対象に入らないため。固定したつもりで誰も
+  # 検査していないピンを 1 つ増やすより、上の browser_runner と同じ形に揃える。
   zap:
     image: ghcr.io/zaproxy/zaproxy:stable@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef
     platform: linux/amd64

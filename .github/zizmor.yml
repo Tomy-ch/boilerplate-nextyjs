@@ -1,8 +1,6 @@
 # zizmor の設定。`make actions-zizmor`（pre-commit / Actions Lint）が読む。
 #
-# 抑止の様式 —— `ignore` をまず使い、ファイルで絞れない audit だけ severity を引き下げること、
-# 引き下げには撤回条件を書くこと —— は抑止の運用規約が正。ここに書くのは各エントリの理由、
-# つまり「このファイルのこの所見をなぜ許すか」だけである。
+# 抑止の様式は抑止の運用規約が正。ここに書くのは各エントリの理由だけである。
 
 rules:
   # `.github/actions/setup-baselines` が App token を `repositories:` ではなく `owner:` で絞る。
@@ -27,19 +25,11 @@ rules:
     ignore:
       - baseline-retake.yaml
 
-  # `vrt-guard.yaml` が保護ブランチへの push で pnpm の store を復元するのを、zizmor は成果物の
-  # 配信と読む。ここでは何も配信していない。ジョブがするのは画像の比較だけで、cache は lockfile の
-  # ハッシュを鍵にした依存の置き場であり、ブランチに閉じている。
-  #
-  # `lighthouse.yaml` も同じ形である。復元するのは pnpm の store と Playwright のブラウザで、
-  # どちらも lockfile のハッシュを鍵にした依存の置き場でしかない。加えて、この workflow だけは
-  # pull request でも起動するが、cache の読み出しは自分のブランチと既定ブランチに限られるため、
-  # PR が書いた entry を保護ブランチの実行が拾うことはない。
-  #
-  # `a11y.yaml` / `e2e.yaml` は同じ理由でここに並ぶ。どちらも先送りにした検査で、全数は保護
-  # ブランチへの push と日次が持つ —— その push が加わったことで、PR だけで回っていた頃には
-  # 立たなかったこの指摘が立つようになった。復元するのは pnpm の store と Next.js の build cache
-  # で、いずれも lockfile とソースのハッシュを鍵にした置き場である。
+  # 4 本とも保護ブランチへの push で cache を復元するのを、zizmor は成果物の配信と読む。
+  # ここでは何も配信していない —— 復元するのは pnpm の store、Playwright のブラウザ、Next.js の
+  # build cache で、いずれも lockfile とソースのハッシュを鍵にした依存の置き場である。
+  # `lighthouse.yaml` は PR でも起動するが、cache の読み出しは自分のブランチと既定ブランチに
+  # 限られるため、PR が書いた entry を保護ブランチの実行が拾うことはない。
   #
   # **`vrt` の検査済み入力の記録はこの判断の外にある。** あれは依存ではなく「この木を検査した」
   # という実行の履歴で、偽の一致は比較を省く向きに倒れる。鍵に run_id を使い、書くのは検査が

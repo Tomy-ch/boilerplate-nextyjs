@@ -19,14 +19,11 @@ description: Decide whether an expensive check has to run on this event, or can 
 # is that no ordinary pull request waits on a check whose result almost never changes the
 # decision to merge.
 #
-# ## Why this does not gate the job from `on:`
-#
-# Because a required status check that never reports blocks its pull request forever. The job
-# has to start and report its context on every pull request; only the expensive steps stand
-# down. workflows/README.md ("`paths:` フィルタを使わない") has the full reasoning, and
-# `diff-scope` is the same shape applied to a different question — which is why the two
-# compose: this action asks whether the cadence can wait, `diff-scope` asks whether the diff
-# can reach anything at all, and a step runs when both say yes.
+# The job still starts and reports its context on every pull request; only the expensive steps
+# stand down (workflows/README.md, "`paths:` フィルタを使わない"). `diff-scope` is the same shape
+# applied to a different question, which is why the two compose: this action asks whether the
+# cadence can wait, `diff-scope` whether the diff can reach anything at all, and a step runs when
+# both say yes.
 
 inputs:
   label:

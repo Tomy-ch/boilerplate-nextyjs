@@ -7,12 +7,12 @@ import { AdminShell } from "@/components/shell/admin-shell/admin-shell";
 import type { AdminShellNavGroup } from "@/components/shell/admin-shell/admin-shell.definition";
 import { ContentContainer } from "@/components/shell/content-container/content-container";
 
-import { HISTORY, INQUIRY_ID } from "../../../inquiry/inquiry.fixture";
 import {
   ADMIN_DASHBOARD_PATH,
   ADMIN_INQUIRY_LIST_PATH,
   ADMIN_PRODUCT_LIST_PATH,
 } from "../../paths";
+import { ADMIN_INQUIRY_HISTORY, ADMIN_INQUIRY_ID } from "../inquiries.fixture";
 import { InquiryBreadcrumbTrail } from "../ui/breadcrumb-trail/breadcrumb-trail";
 import { AdminInquiryDetailView } from "./view";
 
@@ -64,7 +64,7 @@ const meta = {
     },
   },
   decorators: [withPageFrame],
-  args: { history: HISTORY, inquiryId: INQUIRY_ID },
+  args: { history: ADMIN_INQUIRY_HISTORY, inquiryId: ADMIN_INQUIRY_ID },
 } satisfies Meta<typeof AdminInquiryDetailView>;
 
 export default meta;

@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveLiterals, judge, parseShape, stripQuoted, unwrap } from "./judge";
+import {
+  deriveLiterals,
+  extractDenyEntries,
+  judge,
+  parseShape,
+  readCommandLine,
+  stripQuoted,
+  unwrap,
+} from "./judge";
 
 const DENY = [
   "Bash(make tag-patch *)",
@@ -49,6 +57,18 @@ describe("deriveLiterals", () => {
   it("綴りが空になる宣言を落とす", () => {
     expect(deriveLiterals(["Bash(*)"])).toEqual([]);
   });
+
+  it("閉じ括弧を持たない宣言を落とす", () => {
+    expect(deriveLiterals(["Bash(rm -rf"])).toEqual([]);
+  });
+
+  it("`*` を持たない宣言を、断片なしの完全一致にする", () => {
+    expect(deriveLiterals(["Bash(sudo)"])[0]).toMatchObject({
+      head: "sudo",
+      fragments: [],
+      openEnded: true,
+    });
+  });
 });
 
 describe("parseShape", () => {
@@ -93,6 +113,13 @@ describe("unwrap", () => {
 
   it("重なった包みを剥がし切る", () => {
     expect(unwrap("rtk run make ai-tag-patch")).toBe("make tag-patch");
+  });
+
+  it("包みの入れ子が上限を超えても落ちない", () => {
+    // splitSegments は包みを剥がすたびに中身をもう一度割る。その再帰の上限。
+    const deep = `${'sh -c "'.repeat(8)}rm -rf /${'"'.repeat(8)}`;
+
+    expect(() => judge(deep, LITERALS)).not.toThrow();
   });
 
   it("環境変数の前置きを落とす", () => {
@@ -166,6 +193,72 @@ describe("judge", () => {
     expect(judge("git push --force-with-lease", LITERALS)).toBe("git push --force");
   });
 
+  it("`sh -c` の中身が後ろへ繋がっていても捕まえる", () => {
+    expect(judge('sh -c "rm -rf /" && echo done', LITERALS)).toBe("rm -rf");
+  });
+
+  it("`sh -c` の後ろに引数が続いても捕まえる", () => {
+    expect(judge('bash -c "rm -rf /" extra', LITERALS)).toBe("rm -rf");
+  });
+
+  it("単独の `&` の後ろに現れても捕まえる", () => {
+    expect(judge("echo hi & rm -rf /", LITERALS)).toBe("rm -rf");
+  });
+
+  it("空白を挟まない redirection の手前でも捕まえる", () => {
+    expect(judge("make tag-patch>out.txt", LITERALS)).toBe("make tag-patch");
+  });
+
+  it("backtick の中でも捕まえる", () => {
+    expect(judge("echo `rm -rf /`", LITERALS)).toBe("rm -rf");
+  });
+
+  it("プロセス置換の中でも捕まえる", () => {
+    expect(judge("diff <(rm -rf /) /dev/null", LITERALS)).toBe("rm -rf");
+  });
+
+  it("セミコロンの後ろに現れても捕まえる", () => {
+    expect(judge("echo hi; rm -rf /", LITERALS)).toBe("rm -rf");
+  });
+
+  it("`||` の後ろに現れても捕まえる", () => {
+    expect(judge("false || rm -rf /", LITERALS)).toBe("rm -rf");
+  });
+
+  it("パイプの後ろに現れても捕まえる", () => {
+    expect(judge("echo x | rm -rf /", LITERALS)).toBe("rm -rf");
+  });
+
+  it("改行の後ろに現れても捕まえる", () => {
+    expect(judge("echo hi\nrm -rf /", LITERALS)).toBe("rm -rf");
+  });
+
+  it("コマンド置換の中でも捕まえる（$ 形式）", () => {
+    expect(judge("x=$(rm -rf /)", LITERALS)).toBe("rm -rf");
+  });
+
+  it("断片を順序つきで求める", () => {
+    const ordered = deriveLiterals(["Bash(gh api *DELETE*users*)"]);
+
+    expect(judge("gh api -X DELETE /users", ordered)).toBe("gh api");
+  });
+
+  it("`eval` の引用の中でも捕まえる", () => {
+    expect(judge('eval "rm -rf /"', LITERALS)).toBe("rm -rf");
+  });
+
+  it("語の途中で終わる綴りを、区切りを求めずに捕まえる", () => {
+    const prefixed = deriveLiterals(["Bash(git switch release/*)"]);
+
+    expect(judge("git switch release/v1.0.0", prefixed)).toBe("git switch release/");
+  });
+
+  it("`*` を挟んだ宣言を、断片が揃ったときだけ捕まえる", () => {
+    const partial = deriveLiterals(["Bash(gh api *DELETE*)"]);
+
+    expect(judge("gh api repos/x/y -X DELETE", partial)).toBe("gh api");
+  });
+
   // ----- 異常系: 止めてはならないもの -----
   it("求める短 flag が揃わなければ通す", () => {
     expect(judge("rm -i dist", LITERALS)).toBeUndefined();
@@ -178,6 +271,11 @@ describe("judge", () => {
 
   it("綴りが前方一致するだけの別 target を通す", () => {
     expect(judge("make tag-patch-dry", LITERALS)).toBeUndefined();
+  });
+
+  it("綴りが語の途中に埋め込まれているだけのものを通す", () => {
+    // 隣（`-dry`）だけでは先頭の固定を落とした実装を捕まえられない（scripts/README.md）。
+    expect(judge("xmake tag-patch", LITERALS)).toBeUndefined();
   });
 
   it("引用の中の綴りで止めない", () => {
@@ -200,45 +298,6 @@ describe("judge", () => {
     expect(judge("rm -rf /", [])).toBeUndefined();
   });
 
-  // ----- 正常系: 前方一致も素朴な分割も届かない位置 -----
-  it("`sh -c` の中身が後ろへ繋がっていても捕まえる", () => {
-    expect(judge('sh -c "rm -rf /" && echo done', LITERALS)).toBe("rm -rf");
-  });
-
-  it("`sh -c` の後ろに引数が続いても捕まえる", () => {
-    expect(judge('bash -c "rm -rf /" extra', LITERALS)).toBe("rm -rf");
-  });
-
-  it("単独の `&` の後ろに現れても捕まえる", () => {
-    expect(judge("echo hi & rm -rf /", LITERALS)).toBe("rm -rf");
-  });
-
-  it("空白を挟まない redirection の手前でも捕まえる", () => {
-    expect(judge("make tag-patch>out.txt", LITERALS)).toBe("make tag-patch");
-  });
-
-  it("backtick とプロセス置換の中でも捕まえる", () => {
-    expect(judge("echo `rm -rf /`", LITERALS)).toBe("rm -rf");
-    expect(judge("diff <(rm -rf /) /dev/null", LITERALS)).toBe("rm -rf");
-  });
-
-  it("`eval` の引用の中でも捕まえる", () => {
-    expect(judge('eval "rm -rf /"', LITERALS)).toBe("rm -rf");
-  });
-
-  it("語の途中で終わる綴りを、区切りを求めずに捕まえる", () => {
-    const prefixed = deriveLiterals(["Bash(git switch release/*)"]);
-
-    expect(judge("git switch release/v1.0.0", prefixed)).toBe("git switch release/");
-  });
-
-  it("`*` を挟んだ宣言を、断片が揃ったときだけ捕まえる", () => {
-    const partial = deriveLiterals(["Bash(gh api *DELETE*)"]);
-
-    expect(judge("gh api repos/x/y -X DELETE", partial)).toBe("gh api");
-  });
-
-  // ----- 異常系: 誤爆してはならないもの（続き） -----
   it("`*` を挟んだ宣言で、断片を持たない呼び出しを通す", () => {
     const partial = deriveLiterals(["Bash(gh api *DELETE*)"]);
 
@@ -249,5 +308,59 @@ describe("judge", () => {
     const prefixed = deriveLiterals(["Bash(git switch release/*)"]);
 
     expect(judge("git switch feature/x", prefixed)).toBeUndefined();
+  });
+
+  it("断片が逆順なら当てない", () => {
+    // 順序に意味がある。順序を無視する実装へ壊すと、宣言が意図より広く効く。
+    const ordered = deriveLiterals(["Bash(gh api *DELETE*users*)"]);
+
+    expect(judge("gh api /users -X DELETE", ordered)).toBeUndefined();
+  });
+});
+
+describe("extractDenyEntries", () => {
+  // ----- 正常系 -----
+  it("permissions.deny の文字列をそのまま取り出す", () => {
+    expect(extractDenyEntries({ permissions: { deny: ["Bash(rm -rf *)"] } })).toEqual([
+      "Bash(rm -rf *)",
+    ]);
+  });
+
+  // ----- 異常系 -----
+  it("permissions を持たない設定を空にする", () => {
+    expect(extractDenyEntries({})).toEqual([]);
+    expect(extractDenyEntries(null)).toEqual([]);
+  });
+
+  it("deny が配列でなければ空にする", () => {
+    expect(extractDenyEntries({ permissions: { deny: "Bash(rm -rf *)" } })).toEqual([]);
+  });
+
+  it("文字列でない宣言を落とす", () => {
+    expect(extractDenyEntries({ permissions: { deny: ["Bash(sudo)", 1, null] } })).toEqual([
+      "Bash(sudo)",
+    ]);
+  });
+});
+
+describe("readCommandLine", () => {
+  // ----- 正常系 -----
+  it("tool_input.command を取り出す", () => {
+    expect(readCommandLine(JSON.stringify({ tool_input: { command: "pnpm lint" } }))).toBe(
+      "pnpm lint",
+    );
+  });
+
+  // ----- 異常系 -----
+  it("JSON として壊れていれば空にする", () => {
+    expect(readCommandLine("{壊れた")).toBe("");
+  });
+
+  it("tool_input を持たないペイロードを空にする", () => {
+    expect(readCommandLine(JSON.stringify({ tool_name: "Bash" }))).toBe("");
+  });
+
+  it("command が文字列でなければ空にする", () => {
+    expect(readCommandLine(JSON.stringify({ tool_input: { command: ["pnpm", "lint"] } }))).toBe("");
   });
 });

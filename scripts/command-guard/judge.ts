@@ -48,6 +48,46 @@ export type CommandShape = {
   readonly longFlags: readonly string[];
 };
 
+/**
+ * `permissions.deny` の宣言の一覧を、設定の中身から取り出す。
+ *
+ * @remarks
+ * **ここが返す配列が、塞ぐ対象の母集合そのものです。** キーの綴りを 1 文字間違えても型検査は
+ * `unknown` 経由で通り、例外も出ず、黙って空が返ります —— そうなると `judge` がどれだけ正しくても
+ * 何も塞ぎません。入口へ置くと検査の母数から外れるので、判定はここに置きます
+ * （[0159](../../docs/adr/0159-script-structure.md)）。
+ *
+ * @param settings - `.claude/settings.json` を読んだもの
+ */
+export function extractDenyEntries(settings: unknown): readonly string[] {
+  const entries = (settings as { permissions?: { deny?: unknown } })?.permissions?.deny;
+  if (!Array.isArray(entries)) return [];
+
+  return entries.filter((entry): entry is string => typeof entry === "string");
+}
+
+/**
+ * PreToolUse のペイロードから、これから走るコマンド行を取り出す。
+ *
+ * @remarks
+ * **取り出せなければ空を返し、呼び出し側が通します。** ペイロードの形が変わったときに止めると、
+ * あらゆる Bash が止まります。ただし空を返すことは「塞ぐ対象が無い」ではなく「分からない」なので、
+ * ここが黙って空を返し続ける壊れ方を検査で殺しておきます。
+ *
+ * @param raw - フックが標準入力へ渡してきた JSON
+ */
+export function readCommandLine(raw: string): string {
+  let payload: unknown;
+  try {
+    payload = JSON.parse(raw);
+  } catch {
+    return "";
+  }
+
+  const command = (payload as { tool_input?: { command?: unknown } })?.tool_input?.command;
+  return typeof command === "string" ? command : "";
+}
+
 /** 1 つの deny 宣言から取り出した、照合に要るものすべて。 */
 export type Literal = {
   /** 宣言の綴り。報告にそのまま出る。 */
@@ -82,27 +122,34 @@ export type Literal = {
  * `Bash(...)` 以外（`Edit(...)` など）は Bash の判定に関係しないので落とします。
  */
 export function deriveLiterals(denyEntries: readonly string[]): readonly Literal[] {
+  const PREFIX = "Bash(";
   const seen = new Map<string, Literal>();
 
   for (const entry of denyEntries) {
-    const matched = /^Bash\((.*)\)$/.exec(entry);
-    if (!matched) continue;
+    // 綴りを取るのに添字を使わない。`matched[1] ?? ""` の右側は到達しない分岐で、
+    // 「起きないこと」を検査で示せないまま母数に残る。
+    if (!entry.startsWith(PREFIX) || !entry.endsWith(")")) continue;
 
-    const body = matched[1] ?? "";
-    const parts = body.split("*");
-    const head = (parts[0] ?? "").trim();
+    const body = entry.slice(PREFIX.length, -1);
+    const starAt = body.indexOf("*");
+    const beforeStar = starAt < 0 ? body : body.slice(0, starAt);
+    const head = beforeStar.trim();
     if (!head) continue;
 
-    const fragments = parts
-      .slice(1)
-      .map((fragment) => fragment.trim())
-      .filter(Boolean);
+    const fragments =
+      starAt < 0
+        ? []
+        : body
+            .slice(starAt + 1)
+            .split("*")
+            .map((fragment) => fragment.trim())
+            .filter(Boolean);
 
     seen.set(`${head}\u0000${fragments.join("\u0000")}`, {
       source: head,
       head,
       fragments,
-      openEnded: !/\s$/.test(parts[0] ?? ""),
+      openEnded: !/\s$/.test(beforeStar),
     });
   }
 
@@ -237,7 +284,6 @@ export function judge(commandLine: string, literals: readonly Literal[]): string
   const segments = splitSegments(stripHeredoc(commandLine), 0);
 
   for (const segment of segments) {
-    if (!segment) continue;
     const got = parseShape(segment);
 
     for (const { literal, want } of shapes) {

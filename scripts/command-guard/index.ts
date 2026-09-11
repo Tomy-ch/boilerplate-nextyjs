@@ -14,7 +14,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { deriveLiterals, judge } from "./judge.ts";
+import { deriveLiterals, extractDenyEntries, judge, readCommandLine } from "./judge.ts";
 
 /** Claude Code がフックへ渡すリポジトリルート。直に呼ばれたときは cwd へ落ちる。 */
 const PROJECT_DIR_ENV = "CLAUDE_PROJECT_DIR";
@@ -25,27 +25,12 @@ const SETTINGS = path.join(
   "settings.json",
 );
 
-/** `permissions.deny` を読む。読めなければ空にして通す。 */
+/** 設定を読む。読めなければ空にして通す。形の絞り込みは [judge.ts](judge.ts) が持つ。 */
 function readDenyEntries(): readonly string[] {
   try {
-    const parsed: unknown = JSON.parse(fs.readFileSync(SETTINGS, "utf8"));
-    const entries = (parsed as { permissions?: { deny?: unknown } })?.permissions?.deny;
-    return Array.isArray(entries)
-      ? entries.filter((entry): entry is string => typeof entry === "string")
-      : [];
+    return extractDenyEntries(JSON.parse(fs.readFileSync(SETTINGS, "utf8")));
   } catch {
     return [];
-  }
-}
-
-/** PreToolUse のペイロードから、これから走るコマンド行を取り出す。 */
-function readCommandLine(raw: string): string {
-  try {
-    const payload: unknown = JSON.parse(raw);
-    const command = (payload as { tool_input?: { command?: unknown } })?.tool_input?.command;
-    return typeof command === "string" ? command : "";
-  } catch {
-    return "";
   }
 }
 

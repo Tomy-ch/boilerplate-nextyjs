@@ -123,6 +123,11 @@ coverage-exclusions:
 - **誰の問い合わせかを出せません。** 契約が返すやり取りは送り手の種別しか持たず、利用者の識別子は
   一覧の行だけが持ちます
 
+## 画面を通した検証から外れています
+
+理由と撤去条件は利用者側（[`../../inquiry/README.md`](../../inquiry/README.md)）と同じで、宣言は
+`e2e/lib/screens.ts` が持ちます。
+
 ## 関連する ADR
 
 - [0074](../../../../docs/adr/0074-runtime-communication-seam.md) — 購読 seam の契約

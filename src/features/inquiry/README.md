@@ -121,6 +121,12 @@ coverage-exclusions:
 - **見出しを置きません。** 画面の高さをやり取りと送信欄で使い切るためで、この画面が何かは
   global nav とタブのタイトルが示します
 
+## 画面を通した検証から外れています
+
+`APP_API_MODE=mock` では購読先が無く、張り直しが止まりません。巡回・撮影（`e2e` / VRT）の対象から
+外してあり、理由と撤去条件は `e2e/lib/screens.ts` の宣言が持ちます。**見た目の確認は story が担い**、
+機構の正しさは `adapters/client/stream` の単体テストが担います。
+
 ## 関連する ADR
 
 - [0074](../../../docs/adr/0074-runtime-communication-seam.md) — 購読 seam の契約（transport / 認証 / 順序 / 再接続）

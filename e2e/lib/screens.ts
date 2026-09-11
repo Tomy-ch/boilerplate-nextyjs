@@ -139,6 +139,15 @@ export const SCREENS: readonly ScreenDeclaration[] = [
   { route: "/mypage", name: "mypage", path: "/mypage", signedIn: "user" },
   { route: "/mypage/edit", name: "profile-edit", path: "/mypage/edit", signedIn: "user" },
   {
+    route: "/mypage/inquiry",
+    skip:
+      "購読先が無いため、開いても静止しない。`APP_API_MODE=mock` が使う生成モックは SSE を" +
+      "表せず（[mocks/README.md](../../mocks/README.md)）、購読は張り直しを繰り返す。" +
+      "受信の状態が変わり続けるので同じ絵にならず、繋がらない接続はブラウザの記録にも残る。" +
+      "撤去条件は、モックが購読を表せるようになったとき、または CI が実バックエンドへ" +
+      "繋げるようになったとき",
+  },
+  {
     route: "/onboarding",
     skip:
       "開く手段が無い。認証は済んでいるが利用者の記録がまだ無い主体だけが入れる画面で、" +
@@ -184,6 +193,24 @@ export const SCREENS: readonly ScreenDeclaration[] = [
     signedIn: "admin",
   },
   { route: "/admin/users", name: "admin-users", path: "/admin/users", signedIn: "admin" },
+  {
+    route: "/admin/inquiries",
+    skip:
+      "購読先が無いため、開いても静止しない。`APP_API_MODE=mock` が使う生成モックは SSE を" +
+      "表せず（[mocks/README.md](../../mocks/README.md)）、購読は張り直しを繰り返す。" +
+      "受信の状態が変わり続けるので同じ絵にならず、繋がらない接続はブラウザの記録にも残る。" +
+      "撤去条件は、モックが購読を表せるようになったとき、または CI が実バックエンドへ" +
+      "繋げるようになったとき",
+  },
+  {
+    route: "/admin/inquiries/[inquiryId]",
+    skip:
+      "購読先が無いため、開いても静止しない。`APP_API_MODE=mock` が使う生成モックは SSE を" +
+      "表せず（[mocks/README.md](../../mocks/README.md)）、購読は張り直しを繰り返す。" +
+      "受信の状態が変わり続けるので同じ絵にならず、繋がらない接続はブラウザの記録にも残る。" +
+      "撤去条件は、モックが購読を表せるようになったとき、または CI が実バックエンドへ" +
+      "繋げるようになったとき",
+  },
   // sample:end
   { route: "/login", name: "login", path: "/login" },
   // `APP_MAINTENANCE_MODE` を立てずに撮れる（判定は入口が持つ。理由は

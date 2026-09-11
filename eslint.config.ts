@@ -71,7 +71,7 @@ const PROCESS_ACCESS_SELECTOR = {
  * @remarks
  * `EventSource` / `WebSocket` は import を持たない global なので、層の依存表（boundaries）には
  * 掛からない。整列・重複排除・張り直しを持たない購読が画面ごとに生まれるのを止めるのは、この
- * 選択子だけである（ADR 0074）。
+ * 選択子だけである。
  *
  * 見るのは組み立てだけで、型としての参照は落とさない —— 型は接続を開かない。
  */

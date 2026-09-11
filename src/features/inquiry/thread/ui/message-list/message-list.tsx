@@ -69,13 +69,9 @@ function InquiryMessageRow({ message }: { message: InquiryMessage }) {
  *
  * @remarks
  * 取得も購読も持ちません。**並べ替えも重複の除去もここでは行わず**、確定した並びを受け取って
- * 描くだけにします。
+ * 描くだけにします。送信中の 1 通は、確定したものと同じ向き・同じ面で末尾に置きます。
  *
- * 日付の区切りを挟むのは、時刻だけを見せているためです。同じ時刻の発言が別の日にあり得る以上、
- * 区切りが無いと 1 通ずつに日付を添えることになります。
- *
- * 送信中の 1 通は、確定したものと同じ向き・同じ面で末尾に置きます。届いた瞬間に位置も見た目も
- * 変わらないため、送った本人の目には行が入れ替わったようには見えません。
+ * 日付の区切りと向きが何を約束するかは、同 feature の [README](../../../README.md)。
  */
 export const InquiryMessageList = withPartSpan(
   "features/inquiry/thread/ui/message-list/message-list",

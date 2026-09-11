@@ -5,9 +5,8 @@ import { toCaughtErrorResponse } from "@/adapters/server/http/error-response";
  * 自分の問い合わせを購読する口の発券。
  *
  * @remarks
- * ブラウザは Access Token を持たないため、backend の発券口を通せるのはこの中継だけです
- * （`docs/design/realtime-delivery.md`）。ここが持つのは分類を HTTP へ写すことだけで、
- * 取得も検証も `adapters/server` が済ませています。
+ * ブラウザは Access Token を持たないため、backend の発券口を通せるのはこの中継だけです。
+ * ここが持つのは分類を HTTP へ写すことだけで、取得も検証も `adapters/server` が済ませています。
  *
  * **`GET` を置きません。** 発券は ticket という状態を作る操作で、契約も `POST` だけを受けます。
  *

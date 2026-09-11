@@ -127,12 +127,9 @@ jobs:
           exit 0
 
       # A second pass for code scanning, over the same `opengrep.mk` variables as the gate
-      # (the header owns why the two must not describe different scans).
-      #
-      # `continue-on-error` here, unlike in `bearer.yaml`, because this job's output is
-      # the GATE — the verdict is already decided and reported by the step above. Code
-      # scanning is where the detail goes, not where the answer lives, so losing it
-      # costs navigability rather than the check itself.
+      # (the header owns why the two must not describe different scans). `continue-on-error`
+      # unlike `bearer.yaml`: the verdict is already decided by the step above, so losing the
+      # SARIF costs navigability rather than the check.
       - name: Write the SARIF
         if: always() && steps.scope.outputs.relevant == 'true' && steps.sast.outputs.status != ''
         continue-on-error: true

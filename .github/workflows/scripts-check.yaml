@@ -66,12 +66,9 @@ jobs:
       - name: Run the scripts suite with coverage
         run: make scripts-test
 
-      # A dry run, over the real tree, of the replacement made when a repository is created
-      # from the template. The unit tests pin the mechanism against fixtures, but nothing
-      # else reads the markers that live in the sources: an unbalanced `portal:replace-*`
-      # pair throws, and without this step it would only throw for whoever creates a
-      # repository from the template and runs the tool.
-      # Writes nothing — `--dry-run` reports the plan and stops.
+      # The unit tests pin the mechanism against fixtures; nothing else reads the markers
+      # that live in the sources. Without this step an unbalanced `portal:replace-*` pair
+      # would only throw for whoever creates a repository from the template.
       - name: Preview the repository-reference replacement
         run: >
           pnpm exec tsx scripts/setup/replace-repository-reference

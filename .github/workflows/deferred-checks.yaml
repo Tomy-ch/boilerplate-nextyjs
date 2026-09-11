@@ -66,11 +66,9 @@ jobs:
           # a small change.
           fetch-depth: 0
 
-      # Asked without labels on purpose. A label forces one check, not three, and the script
-      # below drops that one from what it names — so answering "already forced" here would
-      # silence the other two along with it. What is left for this step is the part that is
-      # all-or-nothing: a promotion pull request runs everything, and there is nothing to ask
-      # for on one.
+      # Asked without labels on purpose: a label forces one check, not three, and answering
+      # "already forced" here would silence the other two. What is left for this step is the
+      # all-or-nothing part — a promotion pull request runs everything.
       - name: Decide whether the checks are still deferred on this pull request
         id: cadence
         uses: ./.github/actions/check-trigger

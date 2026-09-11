@@ -47,15 +47,12 @@ jobs:
       matrix:
         # **The only declaration of how many machines the suite is split across.** The
         # denominator each machine passes to `--shard` is read back from `strategy.job-total`,
-        # so there is no second number to keep in step with this one. Writing it twice would
-        # let the two drift, and the drift is silent: with a denominator of 5 and four entries
-        # here, nothing runs the fifth bucket, so those tests never execute — and the merge
-        # would then fail the coverage threshold for a reason that names the wrong cause.
+        # so writing it twice would let the two drift silently: with a denominator of 5 and
+        # four entries here, the fifth bucket never runs and the merge blames coverage.
         #
-        # Four is where the curve flattens. The fixed cost per machine (setup, dependency
-        # install) is roughly 30s against a run of roughly 100s, so a fifth machine buys
-        # seconds while every machine is billed to whoever created their repository from this
-        # template.
+        # Four is where the curve flattens — roughly 30s of fixed cost per machine against a
+        # run of roughly 100s, and every machine is billed to whoever created their repository
+        # from this template.
         shard: [1, 2, 3, 4]
 
     steps:
@@ -164,15 +161,8 @@ jobs:
       # **A missing blob is not a coverage shortfall.** A shard that died before writing one
       # leaves the merge measuring less than the whole suite, and the threshold would then
       # report unreached lines for code whose tests never ran. Naming the count first means
-      # the report says which machine went missing instead of blaming the code.
-      #
-      # The expected count is read out of the file names rather than declared here: each blob
-      # carries the denominator the shards actually ran with, so writing `4` in this job would
-      # be the second number the matrix comment warns about, and the one that goes stale.
-      #
-      # The judgement itself is `scripts/lib/shard-completeness.ts`, which the sharded
-      # Lighthouse run calls too; `scripts/test-shards/blob.ts` holds the spelling that
-      # `.makefiles/testing/test.mk` writes. Neither is re-derived here.
+      # the report says which machine went missing instead of blaming the code. The count
+      # comes out of the blob file names, never from a number written here.
       - name: Fail if a machine did not report
         shell: bash
         run: make test-shards-verify

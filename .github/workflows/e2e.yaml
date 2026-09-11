@@ -112,12 +112,10 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          # The base ref has to be resolvable for the `force` diff below; the default shallow
-          # checkout leaves it a bad object and the decision would silently see no changes.
-          #
-          # The condition is inverted on purpose. `<cond> && 0 || 1` always yields 1, because
-          # GitHub's pseudo-ternary falls through to the `||` side whenever the value before it
-          # is falsy — and `0` is. So the branch that has to carry `0` is the one after `||`.
+          # The base ref has to be resolvable for the `force` diff below; a shallow checkout
+          # leaves it a bad object and the decision would silently see no changes. **The
+          # condition is inverted on purpose** — GitHub's pseudo-ternary falls through to the
+          # `||` side whenever the value before it is falsy, and `0` is, so `0` goes after `||`.
           fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Decide whether this event has to drive the journeys now
@@ -376,10 +374,8 @@ jobs:
       # Read back by `baseline-retake.yaml` to bound what the label may retake. Kept
       # separate from the diff bundle so the retake path downloads only the report.
       #
-      # `warn`, not `error`: this step fires on any failure, and a run that failed while
-      # building or booting the app never started Playwright, so there is no report to
-      # upload. Failing here would add a red step whose cause is the one already reported,
-      # and the retake path already treats a missing report as "no screen was reported".
+      # `warn`, not `error`: a run that failed while building or booting never started
+      # Playwright, and the retake path already reads a missing report as "nothing reported".
       - name: Upload the machine-readable report
         if: always() && steps.e2e.outputs.status == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -125,10 +125,8 @@ jobs:
         # denominator is read back from `strategy.job-total`, so there is no second number to
         # keep in step with this one (the reasoning is `test.yaml`'s).
         #
-        # Four is where the curve flattens. The fixed cost per machine (setup, Storybook build,
-        # image pull) is roughly 80s against a comparison of roughly 380s, so a fifth machine
-        # buys seconds while every machine is billed to whoever created their repository from
-        # this template.
+        # Four is where the curve flattens — roughly 80s of fixed cost per machine against a
+        # comparison of roughly 380s.
         shard: [1, 2, 3, 4]
 
     steps:

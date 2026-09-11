@@ -15,6 +15,13 @@ name: Baseline Retake
 # All of that follows from the store's shape, which docs/design/vrt.md owns; what the
 # asymmetry means for the person applying the label is in vrt/README.md.
 #
+# **Every `gh pr comment` body in this file is a literal written here.** This job posts with
+# `gh` rather than `upsert-pr-comment`, so `make actions-comment-secret-lint` — which finds its
+# subjects by walking to that action — does not see it, and this is the one job where holding a
+# secret and commenting on a pull request meet. The rule still binds (README § PR コメント): do
+# not interpolate tool output or anything else a pull request can influence, because the masking
+# that covers the runner's log does not cover a string handed to `--body`.
+#
 # Fork pull requests cannot be served, and under `workflow_run` refusing them is a
 # security requirement rather than a limitation: this trigger runs in the context of
 # the base repository and would hand a fork's head a token with `contents: write`.
@@ -139,17 +146,6 @@ jobs:
             echo "labelled=$(jq -r '[.labels[].name] | index("baseline-retake") != null' <<<"$pr")"
           } >> "$GITHUB_OUTPUT"
 
-      # **This job posts to the pull request with `gh pr comment`, not `upsert-pr-comment`,
-      # so `make actions-comment-secret-lint` does not see it.** That check finds its
-      # subjects by walking to the action; a job that calls `gh` directly is not among
-      # them. This job holds an app token, which makes it the one place where "holds a
-      # secret" and "comments on a pull request" meet outside the check's view.
-      #
-      # The rule still binds, and it is the rule that is authoritative here — the check is
-      # a regression guard (README § PR コメント). **Every body below is a literal written
-      # in this file.** Do not interpolate tool output, a step output carrying log text, or
-      # anything else a pull request can influence: the masking that covers the runner's log
-      # does not cover a string handed to `--body`.
       # Before any checkout: this trigger holds a writable token even for a fork.
       - name: Refuse fork pull requests
         if: >-
@@ -697,21 +693,15 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       # One label, one retake: removed only once the pointer has been placed AND every reported
-      # kind was covered. Anything else leaves it on, so the retake resumes by itself once
-      # the cause is gone. The second condition is what keeps a run that moved the pointer
-      # for the stories alone from spending the label while E2E is still deciding whether
-      # the screens moved — the screens would then never be retaken for this branch.
+      # kind was covered — otherwise a run that moved the pointer for the stories alone would
+      # spend the label while E2E is still deciding whether the screens moved. Anything else
+      # leaves it on, so the retake resumes by itself once the cause is gone. On the
+      # pull-request route the pointer is proposed rather than landed; the label is spent all
+      # the same, or every later run would replace the pull request under review.
       #
-      # On the pull-request route the pointer is proposed rather than landed; the label is
-      # spent all the same, or every later run would replace the pull request under review.
-      #
-      # `baseline-approve` is NOT touched here. Whether an acceptance still holds is decided
-      # by `baseline-approval.yaml` comparing its timestamp against the pointer's commit, so
-      # removing the label changes no verdict — a stale acceptance is refused either way.
-      # What it does change is the noise: `baseline-approval` runs on `unlabeled`, so dropping
-      # the label starts a run whose only purpose is to report a state the next run would
-      # report anyway, and it reads to the person who applied it as though their
-      # acceptance had been revoked by someone else.
+      # `baseline-approve` is NOT touched here. Removing it would change no verdict —
+      # `baseline-approval.yaml` refuses a stale acceptance either way — but it runs on
+      # `unlabeled`, so it would add a pointless run and read as a revoked acceptance.
       - name: Remove the label
         if: >-
           always() && steps.mode.outputs.mode == 'reported' &&

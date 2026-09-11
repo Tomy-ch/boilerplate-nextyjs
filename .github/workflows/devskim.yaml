@@ -106,16 +106,12 @@ jobs:
           dotnet tool install --global Microsoft.CST.DevSkim.CLI --version "${DEVSKIM_VERSION}"
           echo "${HOME}/.dotnet/tools" >> "${GITHUB_PATH}"
 
-      # Generated and vendored files are excluded because a finding there is not
-      # actionable — the fix belongs upstream in the contract or the generator.
-      # `--base-path` keeps the SARIF locations repository-relative.
+      # Generated and vendored files are excluded because a finding there is not actionable
+      # — the fix belongs upstream. `--base-path` keeps the SARIF locations repo-relative.
       #
-      # TEST FILES ARE EXCLUDED, and that is a considered exclusion rather than a
-      # convenience. A regex secret-detector reads a fixture SHA, a fake bearer token
-      # and a `http://localhost` target as findings, and in a test file every one of
-      # those is the normal case. The layer that watches test files for a REAL
-      # secret is gitleaks, which scans them and is fail-closed; leaving DevSkim on
-      # them would only bury the surfaces where its verdict means something.
+      # TEST FILES ARE EXCLUDED deliberately: a fixture SHA, a fake bearer token and a
+      # `http://localhost` target are the normal case there, and gitleaks already watches
+      # those files for a real secret, fail-closed.
       #
       # Excluded by path, never by rule id. A rule id switched off globally would take
       # the same detection down on the files this scanner exists for.

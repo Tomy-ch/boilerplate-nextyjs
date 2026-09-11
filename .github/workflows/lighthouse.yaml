@@ -130,12 +130,10 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          # The base ref has to be resolvable for the `trigger` diff; the default shallow
-          # checkout leaves it a bad object and the decision would silently see no changes.
-          #
-          # The condition is inverted on purpose. `<cond> && 0 || 1` always yields 1, because
-          # GitHub's pseudo-ternary falls through to the `||` side whenever the value before it
-          # is falsy — and `0` is. So the branch that has to carry `0` is the one after `||`.
+          # The base ref has to be resolvable for the `trigger` diff; a shallow checkout
+          # leaves it a bad object and the decision would silently see no changes. **The
+          # condition is inverted on purpose** — GitHub's pseudo-ternary falls through to the
+          # `||` side whenever the value before it is falsy, and `0` is, so `0` goes after `||`.
           fetch-depth: ${{ github.event_name != 'pull_request' && 1 || 0 }}
 
       - name: Setup mise and the pinned tools

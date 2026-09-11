@@ -60,12 +60,8 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/setup-deps
 
-      # The branch name reaches the tool as an environment variable and never as a shell
-      # word. A branch name may contain `"` and `;` — `git check-ref-format` allows both —
-      # and Make expands its own variables into the recipe line before the shell sees it,
-      # so passing one as `REF=...` would let a branch name break out of the quoting and
-      # run arbitrary commands in this job. Whoever can create a branch would then be able
-      # to run code under this job's `GITHUB_TOKEN`.
+      # The branch name reaches the tool as an environment variable, never as `REF=...` on a
+      # make recipe line — a branch name may carry `"` and `;`.
       #
       # `github.base_ref` rather than `GITHUB_REF_NAME`: on a pull request the latter is
       # `<number>/merge`, which names no version, so the check would skip on every PR and

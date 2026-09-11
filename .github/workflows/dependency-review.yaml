@@ -21,14 +21,11 @@ name: Dependency Review
 # moves — an override, a workspace field, an action pin all do — and the action simply
 # reports no change when the graph did not move.
 #
-# GITHUB'S DEPENDENCY GRAPH MUST BE ENABLED. Without it the action does not degrade —
-# it fails with "Dependency review is not supported on this repository", and no change
-# to the code can fix that. It is a one-time repository setting, listed in
-# `docs/get-started/setup-repository.md` §3 beside Pages and the required checks.
-#
-# Left failing rather than skipped on purpose. A gate that quietly stands down when
-# the thing it reads is switched off is indistinguishable from one that found nothing,
-# and this is the only layer that sees what a pull request ADDED.
+# GITHUB'S DEPENDENCY GRAPH MUST BE ENABLED — a one-time repository setting listed in
+# `docs/get-started/setup-repository.md` §3. Without it the action fails rather than standing
+# down, which is deliberate: a gate that quietly skips when the thing it reads is switched off
+# is indistinguishable from one that found nothing, and this is the only layer that sees what a
+# pull request ADDED.
 
 on:
   pull_request:

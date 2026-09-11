@@ -223,7 +223,7 @@
       }
     },
     {
-      "includes": ["mocks/**", "scripts/**", "tokens/**"],
+      "includes": ["mocks/references.ts", "scripts/**", "tokens/**"],
       "linter": {
         "rules": {
           "complexity": {

@@ -5,7 +5,7 @@ import { failedActionState, idleActionState } from "@/model/action-state";
 import { INQUIRY_BODY_FIELD } from "../../../parse-message-form";
 import { InquiryComposer } from "./composer";
 
-const IDEMPOTENCY_KEY = "0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a99";
+const IDEMPOTENCY_KEY = "00000000-0000-4000-8000-000000000001";
 
 const meta = {
   title: "Features/Inquiry/Thread/Composer",

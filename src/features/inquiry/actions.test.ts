@@ -16,7 +16,7 @@ vi.mock("@/adapters/server/api/inquiries", () => ({ postMyInquiryMessage }));
 import { sendInquiryMessageAction } from "./actions";
 import { INQUIRY_BODY_FIELD } from "./parse-message-form";
 
-const KEY = "0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a99";
+const KEY = "00000000-0000-4000-8000-000000000001";
 
 function formOf(body: string, key = KEY): FormData {
   const formData = new FormData();

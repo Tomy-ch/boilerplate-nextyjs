@@ -8,7 +8,7 @@ import {
   REPLY_INQUIRY_ID_FIELD,
 } from "./parse-reply-form";
 
-const KEY = "0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a99";
+const KEY = "00000000-0000-4000-8000-000000000001";
 
 const INQUIRY_ID = "0198a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a60";
 

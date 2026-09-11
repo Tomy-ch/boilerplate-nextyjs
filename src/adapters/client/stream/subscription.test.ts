@@ -25,7 +25,7 @@ const schema = z.object({
   payload: z.object({ id: z.string() }),
 });
 
-type Event = z.infer<typeof schema>;
+type ParsedEvent = z.infer<typeof schema>;
 
 function envelope(sequence: number, type = "message.created"): string {
   return JSON.stringify({
@@ -54,7 +54,7 @@ function harness(
   const timers = new Map<number, { readonly run: () => void; readonly delayMs: number }>();
   const sources: { url: string; handlers: StreamSourceHandlers; closed: boolean }[] = [];
   const states: StreamState[] = [];
-  const received: Event[][] = [];
+  const received: ParsedEvent[][] = [];
 
   let nextTimerId = 1;
   let hidden = options.hidden ?? false;
@@ -65,7 +65,7 @@ function harness(
     options.connection ?? (async () => ({ url: STREAM_URL, expiresAt: 10_000 })),
   );
 
-  const subscription = openStream<Event>({
+  const subscription = openStream<ParsedEvent>({
     ticketPath: TICKET_PATH,
     cursor: options.cursor === null ? null : toStreamCursor(options.cursor ?? 0),
     schema,
@@ -549,7 +549,10 @@ class FakeEventSource {
 
   closed = false;
 
-  constructor(readonly url: string) {
+  readonly url: string;
+
+  constructor(url: string) {
+    this.url = url;
     FakeEventSource.instances.push(this);
   }
 
@@ -585,8 +588,10 @@ afterEach(() => {
 
 describe("openStream（既定の道具）", () => {
   /** 道具を差し替えずに購読を開く。ブラウザ側の既定がそのまま動く。 */
-  function openWithBrowserDefaults(onEvents: (events: readonly Event[]) => void = () => undefined) {
-    return openStream<Event>({
+  function openWithBrowserDefaults(
+    onEvents: (events: readonly ParsedEvent[]) => void = () => undefined,
+  ) {
+    return openStream<ParsedEvent>({
       ticketPath: TICKET_PATH,
       cursor: toStreamCursor(4),
       schema,
@@ -617,7 +622,7 @@ describe("openStream（既定の道具）", () => {
     vi.stubGlobal("fetch", async () => ticketResponse());
     vi.stubGlobal("EventSource", FakeEventSource);
 
-    const received: Event[][] = [];
+    const received: ParsedEvent[][] = [];
     const subscription = openWithBrowserDefaults((events) => received.push([...events]));
 
     await settle();
@@ -638,7 +643,7 @@ describe("openStream（既定の道具）", () => {
     vi.stubGlobal("fetch", async () => ticketResponse());
     vi.stubGlobal("EventSource", FakeEventSource);
 
-    const received: Event[][] = [];
+    const received: ParsedEvent[][] = [];
     const subscription = openWithBrowserDefaults((events) => received.push([...events]));
 
     await settle();

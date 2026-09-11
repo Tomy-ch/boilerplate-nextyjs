@@ -1,4 +1,4 @@
-# 取り込む契約の座標。`make fetch-api` がこの宣言に従って取得する。
+# 取り込む契約の座標。`make api-fetch` がこの宣言に従って取得する。
 #
 # name / repo / path / ref は人が宣言する。sha / fetchedAt は取得時にスクリプトが
 # 書き戻すため手で編集しない。取得物は `openapi/<name>.gen.yaml` に落ちる。

@@ -1,7 +1,15 @@
 ---
 name: readme-review
 usage-class: situational
-description: Review a single canonical README and judge whether it has "manual-worthy" characteristics for inclusion in the portal manifest curated per ADR 0141. The evaluation criteria are derived from patterns observed in currently-registered manifest entries (役割と境界 / 設計判断 / 規約 / 実行機序 / 索引 / 運用 / substantive prose), and exclude the two shapes that are deliberately not portal content: the per-component reference READMEs Storybook and TSDoc already carry, and feature slices graded by their own required-section check. Produces a scorecard with strengths, gaps, concrete improvement suggestions, and a final classification (manual-worthy / borderline / not-yet-manual-grade / out-of-scope-for-portal). Read-only by default; never edits the README or the manifest. For a README under `src/features/`, it additionally grades the required sections a feature README must carry (route + contract, state-to-story map, kernel dependencies, Server Action contract, test viewpoints), reading that list from `docs/templates/feature-readme.md` at runtime and resolving every story id, operationId, spec link and Action name the README asserts; a missing or thin required section caps the verdict at `borderline`. When the result is manual-worthy, the skill suggests chaining into `portal-manifest-sync` (curation flow) as the natural next step; it does not perform the addition itself.
+description: >-
+  Review a single canonical README and judge whether it is manual-worthy for the portal manifest curated per
+  ADR 0141. Produces a scorecard and a verdict (manual-worthy / borderline / not-yet-manual-grade /
+  out-of-scope-for-portal). The criteria are derived at runtime from the currently-registered entries, and
+  exclude the two shapes deliberately not portal content: the per-component reference READMEs Storybook and
+  TSDoc already carry, and feature slices graded by their own required-section check. For a README under
+  `src/features/` it also grades the required sections and resolves every story id, operationId, spec link and
+  Action name it asserts. Read-only — it never edits the README or the manifest, and suggests
+  `portal-manifest-sync` when the verdict is manual-worthy.
 ---
 
 # Readme Review
@@ -35,16 +43,17 @@ This skill remains the canonical place to invoke for **deep-dive single-file ana
 
 The evaluation pattern is not hardcoded from theory — it was read off the entries currently in
 `docs/portal/manifest.yaml`, which are the only worked examples of "this belongs in the manual" that
-this repository has. What those 16 entries have in common:
+this repository has. Measured over the 19 currently registered entries (prose counted as non-space
+characters, excluding code blocks, tables and headings), they have this in common:
 
 - The headings are Japanese, and most of them state a claim rather than name a category —
   「値の分類は取得の口が宣言する」「なぜ別パッケージなのか」「面と文字で明度を分ける」
-- Top H2 frequencies: 運用 (12), 受け入れないもの (10), 受け入れるもの (10), 構成 (4),
-  テストの責務 (2), モジュール (2), 実行機序 (2)
-- 15/16 use tables; **0/16 use a Mermaid diagram**, so a diagram is a bonus here, not an expectation
-- Prose length: median 1462 characters, min 399, max 15737 (measured in characters, not words — the
-  prose is Japanese)
-- 6.7 H2 headings on average
+- Top H2 frequencies: 関連する ADR (14), 運用 (12), 受け入れるもの (10), 受け入れないもの (10),
+  構成 (7), テストの責務 (5), モジュール (2)
+- 18/19 use tables; **0/19 use a Mermaid diagram**, so a diagram is a bonus here, not an expectation
+- Prose length: median 5442 characters, min 822, max 21771 — which is why P7's floor sits at 800: it
+  is the registered minimum, not a round number
+- 8.6 H2 headings on average
 
 Re-derive these numbers when the manifest changes materially; ADR
 [0141](../../../docs/adr/0141-portal-operations.md) makes the registered set the reference for what

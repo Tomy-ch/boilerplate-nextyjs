@@ -25,7 +25,9 @@ export default defineConfig({
   fullyParallel: true,
   timeout: 60_000,
   retries: 0,
-  reporter: [["list"]],
+  // 失敗の報告は JSON を読む（scripts/test-report）。ログの末尾を切り出すと、
+  // 何件のうち何件が落ちたかが本文から消える。
+  reporter: [["list"], ["json", { outputFile: "tmp/e2e/metadata-report.json" }]],
   use: {
     baseURL: BASE_URL,
     timezoneId: "Asia/Tokyo",

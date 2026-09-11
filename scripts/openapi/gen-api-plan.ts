@@ -1,4 +1,4 @@
-// 取得済みの契約から型 / zod / MSW ハンドラを作り直す判定（make gen-api の本体）。
+// 取得済みの契約から型 / zod / MSW ハンドラを作り直す判定（make api-gen の本体）。
 //
 // **消すのではなく退避してから生成する。** 生成が途中で失敗したとき、消した後だと生成物の無い
 // 作業ツリーだけが残る。退避なら書き戻せる。lockfile のずれ・契約の不正・抽出の失敗のどれで
@@ -15,7 +15,7 @@
  *
  * **末尾の `api` は契約の名前で、`openapi/sources.yaml` の `name` と揃えます。** 同じ綴りが
  * `orval.config.ts` にも入っており、**片方だけ動かしても型検査も lint も通ってしまいます**。
- * ずれは `make gen-api-check` が「生成物がありません」として遅れて知らせます。
+ * ずれは `make api-gen-check` が「生成物がありません」として遅れて知らせます。
  */
 const GEN_API_OUTPUTS: readonly string[] = ["src/adapters/gen/api", "mocks/api"];
 

@@ -8,7 +8,7 @@ Accepted
 
 ## 背景
 
-本リポジトリは **Next.js 16** を採用しており、**Middleware は Next.js 16 で「Proxy」にリネーム**された(ファイル規約 = `proxy.ts`。`middleware.ts` は deprecated。移行 codemod `middleware-to-proxy` あり)。実装前に `node_modules/next/dist/docs/` を確認した結果、以下を前提とする(AGENTS.md「This is NOT the Next.js you know」):
+本リポジトリは **Next.js 16** を採用しており、**Middleware は Next.js 16 で「Proxy」にリネーム**された(ファイル規約 = `proxy.ts`。`middleware.ts` は deprecated。移行 codemod `middleware-to-proxy` あり)。実装前に `node_modules/next/dist/docs/` を確認した結果、以下を前提とする(AGENTS.md「Canonical Documentation」):
 
 - `proxy.ts` はリクエスト完了前にサーバで走り、rewrite / redirect / ヘッダ・cookie 変更 / 直接応答ができる
 - **Next.js 公式は「Proxy は last resort。他に手段がなければ使う」**と明示。**セッション管理・完全な認可には使わず**、`optimistic checks`(権限ベースのリダイレクト等)に限る

@@ -259,8 +259,8 @@ members と並び順は、ゲートが黙っていても押さえる価値があ
 - **`it` の文字列は日本語**で、振る舞い**と**分岐の条件を述べる。
 - **1 つの `it` に 1 ケース。** `it.each` / `it.for` は、各ケースを識別する名前テンプレートを伴うなら
   よい。素の `it` を手書きの `for` / `forEach` で囲むのは不可。
-- **層が所有する境界で mock する**: HTTP は MSW（`mocks/` の共有ハンドラ。`vitest.setup.ts` で配線
-  済み —— `fetch` の stub を手書きしない）、モジュール境界は `vi.mock`、設定は `vi.stubEnv`。
+- **層が所有する境界で mock する**: HTTP は MSW —— `mocks/` の生成ハンドラを、必要なテストファイルが `vitest.setup.msw.ts` を import して起動する（`vitest.setup.ts` はサーバを立てない。`fetch` に番人を据え、mock の無い要求を落とす）。`fetch` のスタブを手書きしない。module 境界は `vi.mock`、設定は `vi.stubEnv`。
+
 - **component には `// @vitest-environment jsdom`** をファイル先頭に置き、ADR 0091 が要求する `axe` の
   検証を入れる。
 - **利用者が要素へ辿り着くのと同じ引き方をする**: まず accessible name つきの `getByRole`、次に

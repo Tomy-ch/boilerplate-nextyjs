@@ -1,7 +1,13 @@
 ---
 name: node-upgrade
 usage-class: lifecycle
-description: Upgrade the Node.js version used by this project. `mise.toml` `[tools] node` is the single source of truth (ADR 0003); this skill confirms the target version with the user via AskUserQuestion, reviews the release notes / breaking changes for that Node line, edits `mise.toml`, has the user run `make install-tools` (mise install), then rebuilds the lockfile and verifies with `pnpm install` + `pnpm lint` + `pnpm build`. Unlike go-boilerplate's go-upgrade there is no `sync-versions` propagation / Dockerfile / go.mod to update (ADR 0011 no-docker), and no CI node-version to sync yet (BACKLOG B9 pending). A `@types/node` major realignment is intentionally NOT bundled here — it is a separate PR per ADR 0004 (major updates in isolation). Use this for a deliberate Node version move; for a routine bulk audit of all mise tools (node + pnpm + …) with supply-chain quarantine, use `tools-upgrade` instead.
+description: >-
+  Upgrade the Node.js version this project runs on. `mise.toml` `[tools] node` is the single source of truth
+  (ADR 0003): the skill confirms the target version, reviews the release notes and breaking changes for that
+  line, edits `mise.toml`, has the user run `make install-tools`, then rebuilds the lockfile and verifies with
+  `pnpm install` + `pnpm lint` + `pnpm build`. A `@types/node` major realignment is deliberately not bundled
+  here — majors move in their own PR (ADR 0004). Use it for a deliberate Node version move. For a routine
+  audit of every mise-managed tool with the supply-chain quarantine, use `tools-upgrade` instead.
 argument-hint: [<target-version>]
 allowed-tools: Read, Edit, Bash, AskUserQuestion
 ---
@@ -42,7 +48,9 @@ adopt it silently and proceed (explicit confirmation prevents misconfiguration).
 
 Procedure:
 
-1. Read the `node = "X.Y.Z"` entry under `[tools]` in `mise.toml` to determine the current version.
+1. Read the `"core:node" = "X.Y.Z"` entry under `[tools]` in `mise.toml` to determine the current
+   version. **The backend prefix is part of the key** — every entry declares one (ADR 0003), so a
+   search for a bare `node =` finds nothing.
 2. **Always** invoke `AskUserQuestion`:
    - Question: "Specify the target Node.js version to upgrade to (e.g., `26.0.0`)."
    - Include the current version (the value of `[tools] node` in `mise.toml`) as context.
@@ -90,9 +98,12 @@ Edit `mise.toml` and set the `node` entry under `[tools]`:
 
 ```toml
 [tools]
-node = "<TARGET_VERSION>"
-pnpm = "…"   # unchanged
+"core:node" = "<TARGET_VERSION>"
+"aqua:pnpm/pnpm" = "…"   # unchanged
 ```
+
+Keep the backend prefix. Dropping it lets the registry pick the default backend, which can change the
+source the runtime comes from without the pin moving (ADR 0003).
 
 `mise.toml` is the single source of truth; no other file in this repository carries the Node version
 (no Dockerfile — [0011](../../../docs/adr/0011-no-docker.md)), so there is no propagation step.
@@ -151,7 +162,7 @@ the app.
 - [ ] `mise.toml` `[tools] node` updated to `<TARGET_VERSION>`
 - [ ] Local Node updated via `make install-tools` (user task); `node --version` matches
 - [ ] `pnpm install` run; `pnpm-lock.yaml` diff reviewed
-- [ ] `pnpm lint` + `pnpm build` green
+- [ ] `pnpm lint` + `make test-full` + `make scripts-test` + `pnpm build` green on the new runtime
 - [ ] `@types/node` major realignment noted as a separate PR (not done here)
 
 ## Notes

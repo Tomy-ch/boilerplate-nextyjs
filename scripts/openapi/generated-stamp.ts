@@ -2,7 +2,7 @@
 import type { OpenApiSource } from "./sources-manifest";
 
 // orval が生成物のヘッダへ書き出す契約の版。契約の info.version をそのまま写すため、
-// make fetch-api が焼いた short SHA がここに現れる。
+// make api-fetch が焼いた short SHA がここに現れる。
 const SPEC_VERSION_PATTERN = /OpenAPI spec version:\s*(\S+)/;
 const SHORT_SHA_LENGTH = 7;
 const MISSING_VERSION = "";

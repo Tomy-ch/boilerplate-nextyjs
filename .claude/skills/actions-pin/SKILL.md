@@ -1,7 +1,15 @@
 ---
 name: actions-pin
 usage-class: lifecycle
-description: Audit and upgrade the SHA-pinned GitHub Actions referenced by `.github/workflows/**` and `.github/actions/**`, with a supply-chain quarantine and an automatic step-back to the previous aged version. Default is minor-only (stay within the current majors); pass `major` to also bump major versions; pass a bare number or `days=N` to set the exclusion window (`ACTIONS_PIN_MIN_AGE_DAYS`, default 14). The version source of truth is the trailing tag comment on each `uses: owner/repo@<sha> # <tag>` line; `.github/actions-pin.toml` is the resolved tag→SHA lockfile, driven by `make actions-pin-resolve` / `actions-pin-apply` / `actions-pin-check` (backed by `scripts/actions-pin/`). For each target major the skill prefers the moving major tag when its latest is aged, else steps back to the newest exact version older than the exclusion window, else holds — so a freshly published (possibly compromised) release is never adopted. `resolve` itself fails closed when a tag declared immutable (any comment tag but a bare major number) resolves to a different SHA: a re-pointed tag is a security event, not a refresh, and the intended-update escape hatch is `ACTIONS_PIN_ALLOW_MOVED`. Verifies with `make actions-pin-check` + `make actionlint`. Major bumps additionally verify `with:` input compatibility and are held (not auto-applied) on a breaking change. Sibling of `tools-upgrade` (which covers `mise.toml`, not Actions). Use on a routine cadence or after an Actions security advisory.
+description: >-
+  Audit and upgrade the SHA-pinned GitHub Actions referenced by `.github/workflows/**` and
+  `.github/actions/**`, with a supply-chain quarantine and an automatic step-back to the previous aged
+  version, so a freshly published (possibly compromised) release is never adopted. Default is minor-only; pass
+  `major` to also bump majors, or `days=N` to set the exclusion window. The version source of truth is the
+  trailing tag comment on each `uses:` line; `.github/actions-pin.toml` is the resolved lockfile. A tag
+  declared immutable that resolves to a different SHA is treated as a security event and fails closed. Use it
+  on a routine cadence or after an Actions security advisory. Sibling of `tools-upgrade`, which covers
+  `mise.toml` rather than Actions.
 argument-hint: "[major] [days=<N>]"
 allowed-tools: Read, Edit, Bash, Glob, Grep, AskUserQuestion
 ---

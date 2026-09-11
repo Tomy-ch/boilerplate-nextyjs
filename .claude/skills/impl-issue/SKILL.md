@@ -2,7 +2,14 @@
 name: impl-issue
 usage-class: frequent
 description: >-
-  Drive a GitHub issue from environment setup to a merged PR as a semi-automatic pipeline whose stopping points are enumerated rather than judged. Use whenever the user hands over an issue URL or number to be worked end-to-end (「この issue やって」「wt 上で対応して」「着手して PR まで」「#123 お願い」), or asks to resume such a run. It owns three things — progress orchestration, reconciling the approved plan against what was actually built, and mechanically detecting the moments needing a human call — and no implementation judgment: the work is delegated to `commit` / `submit-pr` / `resolve-merge` and to the three peer review skills `impl-review` / `test-review` / `comment-sweep`, and a screen-shaped issue is handed to `new-feature` rather than reimplemented here. It sets up an isolated worktree, builds a written plan in three stages whose necessity derives from one invariant — the plan is seen by a model that is not the implementer's — and holds it for approval before coding, then watches five mechanical trip-wires so drift becomes visible instead of silent. The plan's approval covers the whole run, and the skill carries a closed list of the five places it may stop. A scope mode settled up front decides whether the run ends at a merge, at the PR (the 「pr作って」 shape), or at a local commit, and whatever an earlier ending leaves undone is named rather than left silent. Every call it records is appended to a run record file as it happens, so a long run outliving its own context still produces a complete closing comment and can be resumed. Before merging it harvests the general form of what was fixed into the documents that survive a sample purge, because the fix itself lives only in code that may be discarded. Do NOT use it for a change with no issue behind it (`commit` + `submit-pr`), for reviewing an existing diff (`impl-review` / `test-review` / `comment-sweep`), or for authoring skills (`manage-skill`).
+  Drive a GitHub issue from environment setup to a merged PR as a semi-automatic pipeline whose stopping
+  points are enumerated rather than judged. Use whenever an issue URL or number is handed over to be worked
+  end-to-end — 「この issue やって」「wt 上で対応して」「着手して PR まで」「#123 お願い」 — or when such a run is resumed. It
+  orchestrates and holds a written plan for approval; the work itself is delegated to `commit` / `submit-pr` /
+  `resolve-merge`, to the peer review skills, and to `new-feature` for a screen-shaped issue. A scope mode
+  settled up front decides whether the run ends at a merge, at the PR (the 「pr作って」 shape), or at a local
+  commit. Do NOT use it for a change with no issue behind it (`commit` + `submit-pr`), for reviewing an
+  existing diff, or for authoring skills (`manage-skill`).
 argument-hint: '<issue-url-or-number> [--scope=merge|pr|commit] [--review-mode=all|harmful|issues] [--issue-mode=fix-here|search|file] [--flow=record-on-tripwire|halt-on-tripwire] [--derive=ask|derive] [--plan=full|draft-review|single]'
 ---
 

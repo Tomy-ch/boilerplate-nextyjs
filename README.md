@@ -7,6 +7,11 @@
 ツールチェーン、lint / format、git hook、セキュリティスキャン、ドキュメント運用は配線済みで、規約は
 暗黙知にせずすべて ADR として明文化しています。
 
+採用しているのは **Next.js 16 / React 19** です。API・規約・ファイル構成は少し前の Next.js と食い違い、
+とくに描画モデルは古い前提がそのまま誤りになります（`"use client"` はバンドル境界であって「クライアント
+で描画せよ」ではありません）。用語と、それが招く誤りの一覧は [docs/design/rendering.md](docs/design/rendering.md)
+にあります。
+
 > この README は意図的に最小限です。正はそれが規定する対象の隣にあり、各トピックはそれを所有する
 > ドキュメントへのリンクに委ねています（[ドキュメントマップ](#ドキュメントマップ)を参照）。このページは
 > 入口にすぎません。
@@ -96,8 +101,11 @@ make help                       # 全 make ターゲットとその説明
 ここを起点に、目的のトピックを所有するリンクを辿ってください。
 
 - [docs/get-started/](docs/get-started/) — テンプレートから作成して動かすまでの手順（順序と、人手が要る箇所）
-- [AGENTS.md](AGENTS.md) — AI コーディングエージェント向けの運用ルールと、リポジトリ規約の要約
-- [docs/adr/](docs/adr/) — アーキテクチャ決定記録（ADR）。本リポジトリの規約はすべてここにある
+- [AGENTS.md](AGENTS.md) — AI コーディングエージェント向けの運用ルール。規約そのものは持たず、どの文書が何を所有するかを指します（日本語訳は [AGENTS.ja.md](AGENTS.ja.md)）
+- [docs/adr/README.md](docs/adr/README.md) — アーキテクチャ決定記録（ADR）の台帳。1 行要約つきの全件一覧はここだけにあります
 - [docs/adr/BACKLOG.md](docs/adr/BACKLOG.md) — 未決の決定領域
+- [docs/rules.md](docs/rules.md) — すべての変更を縛る実装規約（層境界 / データ分類 / フォーム / コメント / 作業の進め方）
+- [docs/design/](docs/design/README.md) — 個別のケースをどう決めるかの基準（描画 / データ取得 / 認証 / 可観測性ほか）
+- [docs/testing-conventions.md](docs/testing-conventions.md) — テストの規約
 - [.makefiles/README.md](.makefiles/README.md) — 全 `make` ターゲット
 - [.claude/README.md](.claude/README.md) — Claude Code 向けの設定資産（スキル / エージェント / 権限境界 / 外部スキル）

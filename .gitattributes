@@ -1,7 +1,7 @@
-# 取り込んだ上流の契約。make fetch-api が書き出す生成物であり、差分レビューの対象にしない。
+# 取り込んだ上流の契約。make api-fetch が書き出す生成物であり、差分レビューの対象にしない。
 openapi/*.gen.yaml linguist-generated=true
 
-# 契約から生成する wire 型 / zod スキーマ / MSW ハンドラ。make gen-api が書き出す。
+# 契約から生成する wire 型 / zod スキーマ / MSW ハンドラ。make api-gen が書き出す。
 src/adapters/gen/** linguist-generated=true
 mocks/*/** linguist-generated=true
 

@@ -17,7 +17,7 @@ Accepted
 ### 1. job 分割 = 1 関心事 = 1 ワークフロー
 
 - ワークフローは関心事ごとに分ける。分けるのは runner を分けるためでもある —— 1 つの job が別の job の runner の後ろに座らない。本リポの CI job:
-  - **lint**(`pnpm lint:ci` = biome full profile)/ **md-lint**(`pnpm lint:md` = markdownlint + mermaid 構文 + `.claude/**` の意味検査 (`skill-lint`)。biome が Markdown を見ないため独立)/ **typecheck**(`pnpm typecheck` = tsc)/ **build**(`next build`。[0030](0030-environment-variable-management.md) のビルド時 env 全量検証と、**成果物からしか答えられない突合**を含む —— 現在は描画モードの宣言との照合([0040](0040-routing-rendering-strategy.md))。突合のために build をもう 1 本増やすと、manifest 1 つで答えられる問いに 10 分を足すことになる。相乗りしてよいのは、この job が `paths` で絞られず**必ず走る**ためで、差分で立ち止まる job(`bundle-budget`)へ載せると検査が黙る日が生まれる)/ **test**(vitest)/ **e2e**(playwright)
+  - **lint**(`pnpm lint:ci` = biome + ESLint + 境界の突合)/ **md-lint**(`pnpm lint:md` = markdownlint + mermaid 構文 + `.claude/**` の意味検査 (`skill-lint`)。biome が Markdown を見ないため独立)/ **typecheck**(`pnpm typecheck` = tsc)/ **build**(`next build`。[0030](0030-environment-variable-management.md) のビルド時 env 全量検証と、**成果物からしか答えられない突合**を含む —— 現在は描画モードの宣言との照合([0040](0040-routing-rendering-strategy.md))。突合のために build をもう 1 本増やすと、manifest 1 つで答えられる問いに 10 分を足すことになる。相乗りしてよいのは、この job が `paths` で絞られず**必ず走る**ためで、差分で立ち止まる job(`bundle-budget`)へ載せると検査が黙る日が生まれる)/ **test**(vitest)/ **e2e**(playwright)
   - **ロックファイル drift**: `pnpm install --frozen-lockfile` が通ること(`package.json` との一致)に加え、install が追跡ファイルを書き換えないこと(pnpm が `pnpm-workspace.yaml` へビルド承認キーを自走で書き足す)を `git diff` で検査する
   - **境界検査**: ESLint boundaries は `lint:ci` に直列で載る([0002](0002-formatter-linter.md) / [0021](0021-frontend-responsibility.md))
   - **ワークフロー定義の lint**: `.github/workflows/**` 自体を **actionlint** で検査する(`make actionlint`)。`run:` ステップのシェルは actionlint が **shellcheck** を呼び出して検査するため、両バイナリを `mise.toml` で版固定し、検査結果を実行環境に依存させない([0003](0003-version-manager.md))。両者は同一の `[tools]` から同一の activate で PATH に載るため、`make actionlint` のガードは actionlint の存在確認だけを持ち、shellcheck 個別のガードは置かない(撤回条件 W9)。下記 4 の hooks mirror CI に従いローカルと CI の両方で走らせる。SHA ピン検査(下記 3)とは別関心として分ける
@@ -60,6 +60,7 @@ Accepted
 
 - **PR の外で落ちた失敗は issue にする**。赤いチェックを読む場所が無いため、持ち主のいる形へ変える。**title ごとに 1 本**で、2 度目は同じ issue へコメントする(既に旗の立った条件でもう一度落ちたのは同じ 1 つの未解決の事実)。探して立てる側は `.github/actions/upsert-issue` 1 箇所が持ち、呼ぶ側は本文と title だけを渡す —— PR コメント側の `upsert-pr-comment` と同じ分担で、**本文を無害化する責務は呼ぶ側**に残る(下記)
 - **検査ログ**は即 fail させず結果を capture → **PR コメントを upsert**(HTML マーカーで既存コメント検出 → update / create)→ 最後に fail-closed(`exit 1`)とする。**coverage** は Vitest 実行後に octocov が LCOV を構造化して PR に報告し、その後に gate の失敗を返す。テストの失敗内容も検査ログとして扱い、同じ機構で投稿する —— octocov が報告するのは coverage だけで、どのテストが落ちたかは言わない
+- **ログの量は、読み手がエージェントである前提で設計する**: 失敗した実行のログは人だけでなくエージェントも読む。エージェントは全文をコンテキストへ載せるため、**通過しか言っていない行の量がそのまま診断の費用になる**。実測では Test ワークフローの全ログ 1.6MB のうち 46% が `gh` の付ける行接頭辞、27% がカバレッジ表で、失敗の手掛かりはその外側にある。よって **1 ファイル 1 行の全件表を出す reporter を CI で使わない** —— カバレッジは閾値を割ったファイルだけを出す形にし（`skipFull`）、判定を持たない分割の台では表そのものを出さない。同じ理由で、**コメント本文を行数で切る前に、切られる側に判定が残らないことを確かめる** —— 全件表が数千行あると、末尾から切り出した本文は表の尾だけになり、失敗の差分が 1 行も入らない
 - **緑のときはコメントを作らない。ただし既存のコメントは緑でも更新する**: 呼び出し側が判定を `status` で渡し、`success` のときだけ**新規作成**を抑止する。全 job が毎回投稿すると PR の会話が「PASS」で埋まり、その中の 1 件の FAIL が読み手に届かない —— 通知の価値は件数ではなく信号対雑音比で決まる。更新まで止めないのは、FAIL → PASS で直したときに古い赤が残るためで、これは「緑のときは何もしない」では達成できない。**報告専用のスキャナだけは判定の意味が違う** —— 検出で落ちない設計なので job の成否をそのまま渡すと、脆弱性を見つけた実行が `success` としてコメントを抑止する。「走ったか」ではなく「見つけたか」を渡す
 - **本文ファイルが無いことは、投稿ステップの失敗ではなく job の打ち切りとして扱う**: 打ち切られた job は本文を書くステップまで到達しない。ここで投稿ステップを落とすと PR には何も残らず、**コメントの不在は「検査が緑だった」と見分けが付かない**。専用の見出しで投稿し、原因は名乗らない(timeout と手前の失敗を区別できるのは実行ログだけである)。この打ち切りコメントだけは、後から来た成功が上書きではなく**削除**する —— 打ち切りは判定を記録していないため、後の成功はそれを上書きするのではなく答えることになる
 - **本文の組み立ては PR 提出者の入力として扱う**: 検査ログには linter やコンパイラがソース行をそのまま出力するため、本リポジトリが public である以上その中身は PR 提出者が制御できる。これを前提に次を固定する
@@ -92,7 +93,7 @@ Accepted
 
 ## 補足
 
-- required check の登録先は branch ruleset の宣言(`.github/settings/branch-protection.json`)であり、宣言と実体の突合は上記 1 の lint が持つ。portal 配信([0141](0141-portal-operations.md))の配信先の設定は `make apply-pages-delivery` が持つ
+- required check の登録先は branch ruleset の宣言(`.github/settings/branch-protection.json`)であり、宣言と実体の突合は上記 1 の lint が持つ。portal 配信([0141](0141-portal-operations.md))の配信先の設定は `make pages-delivery-apply` が持つ
 
 ## 関連 ADR
 

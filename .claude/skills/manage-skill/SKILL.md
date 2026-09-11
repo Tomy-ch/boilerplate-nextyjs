@@ -2,7 +2,14 @@
 name: manage-skill
 usage-class: situational
 description: >-
-  Create, update, evaluate, and optimize skills under this repository's `.claude/skills/`, wrapping Anthropic's official `skill-creator` methodology and layering this repo's own conventions on top (ADR 0154 / 0155 placement, naming, frontmatter and body structure; English-canonical `SKILL.md` plus a mandatory `SKILL.ja.md` translation pair per ADR 0140; read-only sonnet subagents; eval artifacts kept under the gitignored `tmp/`). This is the single entry point for ANY change to a skill under `.claude/skills/`; ALWAYS use it before hand-editing a `SKILL.md` or `SKILL.ja.md`. Use this WHENEVER the user wants to create / update / modify / change / edit / fix / improve / refactor / rename / extend / adjust / tune a skill — its steps, `description`, frontmatter, or behavior — or to author a `/<name>` command, turn a repeated workflow into a skill, tune a skill's triggering description, or run evals on a skill, even if they never say "skill-creator". Japanese triggers apply too, e.g. 「スキルを作りたい」「スキルを更新して」「このスキルの手順 / description / 挙動を変えて」. Do NOT use it for canonical docs under `docs/**` or READMEs (`sync-readme` / `canonicalize-doc` / `readme-review` own those), for subagent definitions alone under `.claude/agents/`, or for other AI tools' configs (`.cursor/`, `.gemini/`, `.github/copilot-instructions.md`).
+  Create, update, evaluate, and optimize skills under `.claude/skills/`, wrapping Anthropic's official
+  `skill-creator` methodology and layering this repository's conventions on top (ADR 0154 / 0155 structure,
+  English-canonical `SKILL.md` with a mandatory `SKILL.ja.md` pair, eval artifacts under the gitignored
+  `tmp/`). This is the single entry point for ANY change to a skill; ALWAYS use it before hand-editing a
+  `SKILL.md` or `SKILL.ja.md`. Use it whenever someone wants to create / update / fix / refactor / rename /
+  extend / tune a skill — its steps, `description`, frontmatter, or behavior — or to author a `/<name>`
+  command: 「スキルを作りたい」「スキルを更新して」「このスキルの手順 / description / 挙動を変えて」. Do NOT use it for canonical docs or READMEs,
+  for a subagent definition alone, or for other AI tools' configs.
 argument-hint: '[skill-name] [--new|--update|--optimize]'
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill
 ---
@@ -124,8 +131,8 @@ The current members of each family are the coverage table of that ADR — read i
 than a list kept here.
 
 If the proposed skill would establish a new convention, pattern, or library in an area `BACKLOG.md`
-still leaves undecided, **stop and defer the ADR decision to the user** (`AGENTS.md`, "Pending
-Decisions"). Do not let a skill become the place a convention gets decided implicitly.
+still leaves undecided, **stop and defer the ADR decision to the user** (`docs/rules.md`,
+*作業とエージェント*). Do not let a skill become the place a convention gets decided implicitly.
 
 Prefer extending an existing skill over adding a near-duplicate. Granularity is
 "one invocation = one operation" (ADR 0154).
@@ -143,7 +150,7 @@ ignores them does not fit this repo.
   when needed. Keep `SKILL.md` under ~500 lines and push detail into `references/` with pointers.
 - Bundled **scripts** are TypeScript run through `pnpm exec tsx`, matching `scripts/*.ts` and
   `scripts/bootstrap-plugins`. The one exception is a headless driver that must run standalone before
-  dependencies are installed (`full-verify/run.sh` is the existing case) — shell is allowed there.
+  dependencies are installed (`full-verify/scripts/run.sh` is the existing case) — shell is allowed there.
 
 ### Frontmatter (ADR 0154)
 

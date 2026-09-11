@@ -25,8 +25,11 @@ export type IssueEvidence =
    * このリポジトリが組んだもの。画面ごとの表など。
    *
    * @remarks
-   * そのまま描きます。升目に入るのは宣言が固定した名前とこのリポジトリが計算した数だけで、
-   * 記法にはなりません。表であることに意味があるので、字下げして殺しません。
+   * そのまま描きます。表であることや見出しであることに意味があるので、字下げして殺しません。
+   *
+   * **道具の文言が素のまま入っていないことは、ここが機械で確かめます**（{@link assertFenced}）。
+   * 呼ぶ側の申告に委ねると、フェンスの掛け忘れは型検査にも lint にも現れず、`--kind authored` を
+   * 選んだ面が 1 つ増えた日に黙って素通りします。囲めない値を渡すなら `tool-output` です。
    */
   | { readonly kind: "authored"; readonly text: string }
   /**
@@ -39,7 +42,7 @@ export type IssueEvidence =
    *
    * 代わりに、公開の面で**取り消せない 2 つ**だけを潰します —— mention と、他スレッドを
    * 指す生のリンクです。どちらも上流へ通知や逆参照を残し、本文を後から直しても取り消せません
-   * （`AGENTS.md`「Cross-Repository Links」）。見た目が崩れるだけの記法は潰しません。
+   * （他リポジトリへの参照の規律は [README](../README.md) が持つ）。見た目が崩れるだけの記法は潰しません。
    */
   | { readonly kind: "model-prose"; readonly text: string };
 
@@ -91,6 +94,38 @@ export function drawModelProse(text: string): string {
     .replace(THREAD_URL, "https://redirect.github.com/$1");
 }
 
+/**
+ * `authored` が本当に安全な形かを確かめる。
+ *
+ * @remarks
+ * 見るのは**閉じ損なったフェンスが無いか**の 1 点です。開いたフェンスが閉じられないまま終わると、
+ * そこから先は道具の文言が生の markdown として描かれます。ここが弾けば、`authored` は
+ * 「呼ぶ側がそう言った」ではなく「この口を通った」という意味になります。
+ */
+function assertFenced(text: string): void {
+  let open: string | undefined;
+
+  for (const line of text.split("\n")) {
+    const fence = /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+    if (fence === undefined) continue;
+
+    if (open === undefined) {
+      open = fence;
+      continue;
+    }
+
+    // CommonMark: 閉じられるのは、同じ記号で開いたものと同じ長さ以上のフェンスだけ。
+    // 数の偶奇だけを見ると、`````` で開いて ``` が 2 本並んだだけの壊れた本文も通る。
+    if (fence.startsWith(open.charAt(0)) && fence.length >= open.length) open = undefined;
+  }
+
+  if (open !== undefined) {
+    throw new Error(
+      "authored の本文に閉じていないコードフェンスがあります。道具の文言は中身より長いフェンスで囲むか、tool-output で渡してください。",
+    );
+  }
+}
+
 /** 出どころごとの描き方。呼ぶ側は出どころを渡すだけで、選び方はここが持つ。 */
 function drawEvidence(evidence: IssueEvidence): string {
   switch (evidence.kind) {
@@ -102,6 +137,7 @@ function drawEvidence(evidence: IssueEvidence): string {
     case "model-prose":
       return drawModelProse(evidence.text);
     default:
+      assertFenced(evidence.text);
       return evidence.text;
   }
 }

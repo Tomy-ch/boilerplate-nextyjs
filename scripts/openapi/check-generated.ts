@@ -33,7 +33,7 @@ if (drift.length > 0) {
     console.error(`  - ${message}`);
   }
 
-  console.error("  make gen-api を実行してください。");
+  console.error("  make api-gen を実行してください。");
   process.exit(1);
 }
 

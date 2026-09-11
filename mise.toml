@@ -31,6 +31,8 @@ pipx.uvx = true
 "aqua:astral-sh/uv" = "0.11.27"
 # `graphify`（y 1 つ）は PyPI の空き名。綴りは必ず graphifyy
 "pipx:graphifyy" = "0.9.25"
+# シェル出力の圧縮。効く範囲と使ってはいけない mode は .claude/README.md
+"aqua:rtk-ai/rtk" = "0.45.0"
 
 # 画面の実測（AI アシスタント向け）
 "aqua:vercel-labs/agent-browser" = "0.34.0"

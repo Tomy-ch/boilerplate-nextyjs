@@ -19,7 +19,7 @@ export const handlers = stableHandlers(generated, REFERENCE_PATCHES);
 // =  * 契約から生成した MSW ハンドラ一式。
 // =  *
 // =  * @remarks
-// =  * 空なのは契約をまだ置いていないためです。`make gen-api` が生成物を出したら、それを
+// =  * 空なのは契約をまだ置いていないためです。`make api-gen` が生成物を出したら、それを
 // =  * [stable-responses](stable-responses.ts) へ渡す 1 行をここへ書きます（[README](README.md)）。
 // =  */
 // = export const handlers: never[] = [];

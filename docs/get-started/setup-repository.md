@@ -231,8 +231,8 @@ count=<動いた枚数>
 `openapi/sources.yaml` に自分のバックエンドの契約の座標を書き、生成し直す。
 
 ```bash
-make fetch-api
-make gen-api
+make api-fetch
+make api-gen
 ```
 
 ## 8. 認証済みの画面を手元で見る

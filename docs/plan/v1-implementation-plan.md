@@ -957,7 +957,7 @@ test-requirement: unit
 - **対象 ADR**: [0072](../adr/0072-api-type-generation.md) / [0070](../adr/0070-backend-role-separation.md)
 - **主な変更先**:
   - `openapi/sources.yaml` — 契約の宣言。複数契約に対応可能な形にしておく
-  - `.makefiles/tools/gen-api.mk` — `gh` をラップした `make fetch-api`
+  - `.makefiles/tools/gen-api.mk` — `gh` をラップした `make api-fetch`
   - `scripts/openapi/` — CLI エントリと純粋関数(既存の `scripts/actions-pin/` / `scripts/portal/` と同じ粒度)
 
 ```yaml
@@ -984,7 +984,7 @@ sources:
 - **本体 API の契約は 1 本で足りる(実測で確定)**: go 側の本体契約は `openapi/openapi.gen.yaml` の 1 本のみ。**admin と一般が同居しており、tags でも `security` でも scope でも区別できない**ため、機械的に 2 本へ割ることはできない。`name` は `api` の 1 ユニットとする
 - **認証は別契約として並べる**: mock OIDC Provider は本体とは別サービスであり、本体契約に認証エンドポイントは存在しない(`screens.md` §0)。`name: auth` として `sources.yaml` に並べ、契約ごとに blob SHA を独立してスタンプする
 - **ref はコミット SHA で固定する**: tag `v2.1.0` に `/v1/products` は存在せず(12 paths)、商品 API は未タグの `release/v2.2.0`(31 paths)にしかない。上流の進展の取り込みは `ref` の書き換えとして明示的に行う
-- **完了条件**: `make fetch-api` で全契約が取得され、blob SHA が `sources.yaml` にスタンプされる。private repo でも `gh` の認証で通る
+- **完了条件**: `make api-fetch` で全契約が取得され、blob SHA が `sources.yaml` にスタンプされる。private repo でも `gh` の認証で通る
 - **依存**: P3-3
 
 ### P4-2: orval による型 + zod 生成
@@ -995,7 +995,7 @@ sources:
   - `orval.config.ts` — 契約ごとに型 + zod スキーマ + MSW ハンドラを生成
   - `src/adapters/gen/<契約名>/` — **do-not-edit**。`.gitattributes` で linguist-generated 指定
   - `mocks/` — MSW ハンドラ。**P4-4 ではなくここで生成する**(orval の 1 回の実行で型 / zod / mock を出せば生成物間の不整合が起きず、drift ゲートも 1 本で済む)。P4-4 には配線と mock 時の画像戦略が残る
-  - `.makefiles/tools/gen-api.mk` — `make gen-api` / `make gen-api-check`
+  - `.makefiles/tools/gen-api.mk` — `make api-gen` / `make api-gen-check`
   - `.github/workflows/gen-drift.yaml`
 - **drift ゲートの観点は 2 つ**(**再取得はしない**):
   1. **生成物が手動で変更されていないか** — 取得済み契約から再生成して差分を検出
@@ -1003,7 +1003,7 @@ sources:
 - **クライアント生成から除外するもの**: `/_internal/types/error-response`(`ErrorResponse` 型を生成させるためだけの擬似エンドポイント)/ `/metrics`(BasicAuth)/ `/health` 系。orval の `filters` は tag 単位で効き、契約側の tag がこれらのパスと 1 対 1 に対応する。除外しても `ErrorResponse` は各 operation の異常系レスポンスから参照されるため生成される
 - **生成された HTTP client は採用しない**: orval は client の出力先を必須とするが、resilience は P4-3 の手書き wrapper が所有する。生成 client は `mocks/` 側へ置き、本番が参照する `src/adapters/gen/` には wire 型と zod だけを置く
 - **生成物は linter の対象外にする**: 整形のみ掛ける。生成器の出力作風で CI が止まると、直す手段が生成器へのパッチしか無くなる
-- **完了条件**: `make gen-api` で `src/adapters/gen/<契約名>/` が再生成される。上記 2 観点の drift ゲートが CI で fail する
+- **完了条件**: `make api-gen` で `src/adapters/gen/<契約名>/` が再生成される。上記 2 観点の drift ゲートが CI で fail する
 - **依存**: P4-1
 
 ### P4-3: adapters — fetch wrapper
@@ -1625,7 +1625,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
 
 - **安全策**: `assertWithinRoot`(`..` / 絶対パス / ROOT 自体を指す manifest ミスを検出)を移植する。`DRY_RUN` はプレビュー(空でない値はすべてプレビュー扱い)
 - **P4-4 からの申し送り — 画像の配信元を爆破後に切り替える**: サンプル在時の mock モードは **API だけを MSW で差し替え、画像は実配信(Garage の公開エンドポイント)から取得する**。バックエンドと同じ compose に居る別コンテナが配信しており、実物が取れる間はプレースホルダで代用する理由が無いためである。サンプルを破棄すると Garage も go-boilerplate も前提から外れるので、**`env/*` の `MEDIA_ORIGIN` を `sample:replace-*` で中立なプレースホルダへ切り替える**(§3.2 の「爆破後 = テンプレートから作った側の実ストレージ / CDN」)。**取得経路そのものは動かさない** —— 爆破後のツリーに画像を取る画面は 1 つも残らず、MSW にプレースホルダを配らせると `mocks/` が手書きのハンドラを持つことになるためである。上の設計判断 1（`sample:replace-begin` / `replace-with` / `replace-end`）が効く箇所であり、`next.config.ts` の `images.remotePatterns` と CSP の `img-src` はどちらも検証済み ENV から組み立てているので、切り替えは env の 1 行で足りる
-- **BUILD_STEPS**: `gen-api → fix → lint:ci → typecheck → build → test`
+- **BUILD_STEPS**: `api-gen → fix → lint:ci → typecheck → build → test`
 - **完了条件**: `DRY_RUN=1 make setup-remove-sample` がプレビューを出す。実行後に `verify` が過不足なしと判定する
 - **依存**: P5-16
 
@@ -1640,7 +1640,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
     マーカーと例示は同じ形なので、増えたことを「ベースラインを更新するか、リテラルとして宣言するか」の
     判断にする(移植 IM-55)
   - `scripts/setup/lib/sample-manifest.mjs` — **P6-4 の `e2e/` など Phase 6 で追加された破棄対象を追記**(P7-1 は Phase 5 分しか集約していないため)
-- **設計**: 使い捨てチェックアウトで `purge → gen-api → fix → lint:ci → typecheck → build → test` を回す。go 側の `verify` は作った側で一度きり自爆する設計のため、**boilerplate 自身の腐敗防止にはこの CI ジョブが必要**
+- **設計**: 使い捨てチェックアウトで `purge → api-gen → fix → lint:ci → typecheck → build → test` を回す。go 側の `verify` は作った側で一度きり自爆する設計のため、**boilerplate 自身の腐敗防止にはこの CI ジョブが必要**
 - **カバレッジ**: 爆破でサンプルのテストが消えるため、purge スクリプトが `vitest.config.ts` の閾値・除外も書き換える
 - **完了条件**: 爆破後の CI が緑。爆破後の `src/` にドメインを持つコードが残っていない
 - **依存**: P7-1, P6-4
@@ -1669,7 +1669,7 @@ go-boilerplate の `scripts/setup/` を移植する。マーカー除去ロジ�
   - `.claude/skills/readme-review/` — manual-worthy 判定から `portal-manifest-sync` への導線を接続
 - **主な変更先(追記)**: `.makefiles/github/setting/pages-delivery.mk` — Pages の有効化と配信元ブランチの許可
 - **完了条件**: GitHub Pages で portal が公開され、`deploy-docs.yaml` の `docs-deploy` が `production` への push で成功する。`portal-manifest-sync` が manifest の drift を検出する
-- **注**: 足りなかったのは Pages の有効化ではなく**配信先の許可**である。`github-pages` environment の deployment branch policy が配信元ブランチを許可していないと、`docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない。`docs-build` は緑のままなので気付けない。**人手の手順ではなく `make apply-pages-delivery` が持ち、`make setup-repo` が呼ぶ**
+- **注**: 足りなかったのは Pages の有効化ではなく**配信先の許可**である。`github-pages` environment の deployment branch policy が配信元ブランチを許可していないと、`docs-deploy` は job としては起動するが step を 1 つも実行せずに落ち、ログに理由が出ない。`docs-build` は緑のままなので気付けない。**人手の手順ではなく `make pages-delivery-apply` が持ち、`make setup-repo` が呼ぶ**
 - **URL 整合**: setup が書き込む portal URL（既定の GitHub Pages project site または導入先指定の custom domain）で、Typeset の Storybook 例から公開 portal へ到達できる
 - **依存**: P5-16
 

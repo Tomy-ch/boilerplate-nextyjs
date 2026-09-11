@@ -78,7 +78,7 @@ setup-repo:
 
 	@git fetch --prune
 	@ORIGINAL_BRANCH=$$(git branch --show-current); \
-	git checkout production; \
+	git switch production; \
 	if echo $$ORIGINAL_BRANCH | grep -q "release/"; then \
 		git branch -D $$ORIGINAL_BRANCH; \
 		git push origin --delete $$ORIGINAL_BRANCH || true; \
@@ -86,16 +86,16 @@ setup-repo:
 	@echo "✅ デフォルトブランチの設定を終了します。"
 
 	@echo "🔧 ルールセットの適用を開始します..."
-	@make apply-branch-protection
+	@make branch-protection-apply
 	@echo "✅ ルールセットの適用を終了します。"
 
 	@echo "🔧 Pages の配信設定を開始します..."
-	@make apply-pages-delivery
+	@make pages-delivery-apply
 	@echo "✅ Pages の配信設定を終了します。"
 
 	@echo "🔧 ラベルの初期化を開始します..."
-	@make delete-all-labels
-	@make create-default-labels
+	@make labels-delete-all
+	@make labels-create-default
 	@echo "✅ ラベルの初期化を終了します。"
 
 	@echo "🔧 リリースノートの初期化を開始します..."
@@ -108,7 +108,7 @@ setup-repo:
 	@echo "✅ リリースノートの初期化を終了します。"
 
 	@git remote remove upstream || true
-	@echo "✅ Initialization complete. Default branch: production"
+	@echo "✅ 初期化が完了しました。デフォルトブランチは production です。"
 
 setup-replace-license-copyright:
 	@if [ -z "$$COPYRIGHT_HOLDER" ]; then \

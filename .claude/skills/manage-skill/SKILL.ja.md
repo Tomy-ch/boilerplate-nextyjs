@@ -75,7 +75,7 @@ bootstrap が失敗した場合（ネットワーク不通 / `claude` CLI 不在
 
 各系統の現在の構成員は、その ADR のカバー範囲テーブルが持つ。ここに一覧を置かず、今回の実行で読む。
 
-提案されたスキルが、`BACKLOG.md` でまだ未決の領域に新しい規約・パターン・ライブラリを持ち込むことになる場合は、**そこで止めて ADR の判断をユーザへ委ねる**（`AGENTS.md`「Pending Decisions」）。スキルを、規約が暗黙に決まる場所にしてはならない。
+提案されたスキルが、`BACKLOG.md` でまだ未決の領域に新しい規約・パターン・ライブラリを持ち込むことになる場合は、**そこで止めて ADR の判断をユーザへ委ねる**（`docs/rules.md`「作業とエージェント」）。スキルを、規約が暗黙に決まる場所にしてはならない。
 
 近い役割の重複を作るくらいなら、既存スキルの拡張を優先する。粒度は「1 起動 = 1 オペレーション」（ADR 0154）。
 
@@ -87,7 +87,7 @@ bootstrap が失敗した場合（ネットワーク不通 / `claude` CLI 不在
 
 - `.claude/skills/<slug>/SKILL.md`。`<slug>` は kebab-case の動詞ベースで、frontmatter の `name` およびディレクトリ名と一致させる。slug に空白・大文字・日本語を含めない。
 - 同梱リソース（`scripts/` / `references/` / `prompts/` / `assets/`）は必要なとき公式の構成に従う。`SKILL.md` は 500 行程度までに収め、詳細は `references/` へ逃がして明示的に参照する。
-- 同梱**スクリプト**は `pnpm exec tsx` から実行する TypeScript とする（`scripts/*.ts` と同じ形）。例外は、依存インストール前に単体で動くことを要件とする headless 駆動系（既存では `full-verify/run.sh`）のみで、そこではシェルを許す。
+- 同梱**スクリプト**は `pnpm exec tsx` から実行する TypeScript とする（`scripts/*.ts` と同じ形）。例外は、依存インストール前に単体で動くことを要件とする headless 駆動系（既存では `full-verify/scripts/run.sh`）のみで、そこではシェルを許す。
 
 ### frontmatter（ADR 0154）
 

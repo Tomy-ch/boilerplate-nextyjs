@@ -21,7 +21,7 @@
 ## 本リポジトリでの注意
 
 本リポジトリのアーキテクチャ(採用パターン / 層責務 / ディレクトリ構造 / 命名)は `docs/adr/` の Accepted ADR が
-決めている(`AGENTS.md`「Accepted Rules (ADRs)」の索引)。本スキルはそれらと `AGENTS.md` を基準に動く: 綺麗さの問題と、
+決めている(`docs/adr/README.md` の索引)。本スキルはそれらと `AGENTS.md` を基準に動く: 綺麗さの問題と、
 ADR が宣言した意図への違反を指摘する。[`docs/adr/BACKLOG.md`](../../../docs/adr/BACKLOG.md) がまだ空けている領域は
 判定用の規約を捏造せず「検証不能(基準保留)」として記録する。
 

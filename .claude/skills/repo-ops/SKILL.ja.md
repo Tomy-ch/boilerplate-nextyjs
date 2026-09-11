@@ -4,7 +4,7 @@
 
 本リポジトリで繰り返し踏みがちな運用上の落とし穴に対する、具体的な復旧・手順ステップ集。これは
 **ワークフローではなくルックアップ表**: 症状を見つけて対処を打つ。破壊的またはルートファイルに触れるステップは
-`CLAUDE.md` に従い先にユーザへ伝える。
+`AGENTS.md` に従い先にユーザへ伝える。
 
 > **スコープ注記。** この runbook は意図的に薄く、実在する落とし穴だけを載せる。本リポジトリは Docker
 > ツールランナーも DB も持たない表示層なので([0011](../../../docs/adr/0011-no-docker.md))、その種の項目は
@@ -152,18 +152,19 @@ git add package.json pnpm-lock.yaml
 ## 5. biome: `pnpm lint` vs `pnpm fix`(ADR 0002)
 
 フォーマッタは biome 単独で、biome が表現できる lint 検査はすべて biome が持つ。Prettier は不採用。ESLint が
-持つのは biome で表現できない検査だけで、現時点では層境界の import 検査(`eslint-plugin-boundaries`)と
-`next/link` のルールに限られる(ADR 0002 の能力ベース分割)。入口は次のとおり:
+持つのは biome で表現できない検査だけである(ADR 0002 の能力ベース分割)。現行の集合はここに写さず
+`eslint.config.ts` を読む —— いまは層境界(`boundaries/*`)、React Hooks の規則、型アサーションの禁止、
+このリポジトリ自身の `project-rules/*` である。入口は次のとおり:
 
 ```bash
 pnpm fix       # biome check --fix : 自動修正可能なものを直す
 pnpm lint      # biome check       : 残エラーを報告(手で直す)
 pnpm format    # biome format --write : フォーマットのみ
-pnpm lint:ci   # biome(完全版)+ ESLint 境界検査 + architecture 突合
+pnpm lint:ci   # pnpm lint + ESLint + architecture 突合
 ```
 
-`pnpm lint:ci` は hook と CI が回すゲートで、3 段の直列である。`biome.ci.jsonc` + `--error-on-warnings` の
-biome、`pnpm lint:eslint`、`pnpm check:architecture`(層 README の `imports-allowed` frontmatter と、依存
+`pnpm lint:ci` は hook と CI が回すゲートで、3 段の直列である。`pnpm lint`(biome、設定は 1 枚)、
+`pnpm lint:eslint`、`pnpm check:architecture`(層 README の `imports-allowed` frontmatter と、依存
 マトリクスの単一の正である `architecture.ts` の突合)。失敗はどの段かを名乗るので、整形の問題と決めつける前に
 読む。
 
@@ -206,7 +207,7 @@ worktree にも継承されるが、**`node_modules` は継承されない** ─
 
 | 段階 | 入口 | 検査内容 |
 | --- | --- | --- |
-| pre-commit | `pnpm lint:ci`、`*.md` が staged なら `pnpm lint:md`、workflow が staged なら `make actionlint` | biome 完全版 + ESLint 層境界 + `architecture.ts` 突合(§5) / markdownlint + mermaid 構文 + `.claude/**` の意味検査(`skill-lint`) / workflow 構文 + `run:` のシェル |
+| pre-commit | `pnpm lint:ci`、`*.md` が staged なら `pnpm lint:md`、workflow が staged なら `make actionlint` | biome + ESLint + `architecture.ts` 突合(§5) / markdownlint + mermaid 構文 + `.claude/**` の意味検査(`skill-lint`) / workflow 構文 + `run:` のシェル |
 | commit-msg | `make commitlint` | subject を ADR 0150 に照らす |
 | pre-push | `pnpm typecheck`、`make secret-scan` | `tsc --noEmit` / push 範囲の秘密(**fail-closed**) |
 
@@ -294,7 +295,7 @@ make actions-mise-pin-lint
 ## 制約
 
 - ✅ read-only ナレッジ: 正確なコマンドを提示。実行はユーザが操作を頼んだ時のみ。
-- ✅ 破壊的ステップ(§3 のタグ/ブランチ削除)は `CLAUDE.md` に従い事前警告。
+- ✅ 破壊的ステップ(§3 のタグ/ブランチ削除)は `AGENTS.md` に従い事前警告。
 - ✅ ルートファイル編集(§5 `biome.json`、§4 `package.json`)は事前にユーザ確認 ── 既定の
   AI 変更スコープ外。§2 の `git restore pnpm-workspace.yaml` は例外 ── 頼んでいない機械的な変更を
   作るのではなく捨てる操作だから。

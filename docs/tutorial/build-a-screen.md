@@ -221,8 +221,8 @@ sources:
 `ref` はコミット SHA で固定する。`sha` / `fetchedAt` は取得時に書き戻されるので書かない。
 
 ```bash
-make fetch-api      # sources.yaml の座標から取得し、openapi/api.gen.yaml へ置く
-make gen-api        # 型 / zod / MSW ハンドラを生成する
+make api-fetch      # sources.yaml の座標から取得し、openapi/api.gen.yaml へ置く
+make api-gen        # 型 / zod / MSW ハンドラを生成する
 ```
 
 **現れるもの（生成物。編集しない）:**
@@ -254,7 +254,7 @@ make gen-api        # 型 / zod / MSW ハンドラを生成する
 **確認:**
 
 ```bash
-make gen-api-check                 # 契約と生成物の版が揃っている
+make api-gen-check                 # 契約と生成物の版が揃っている
 ls src/adapters/gen/api mocks/api  # 生成物が出ている
 ```
 
@@ -2228,7 +2228,7 @@ git commit   # `/commit` skill があれば、それが prefix と分割を決�
 | Step | 層 | 書いたもの | 押さえたこと | 確認 |
 | --- | --- | --- | --- | --- |
 | 0 | — | `make setup-remove-sample` | 残る側と消える側の線 | 破棄の連鎖が緑 |
-| 1 | 契約 / 生成 | `openapi/sources.yaml` + `make gen-api` | 生成物は編集しない。契約を直して再生成 | `make gen-api-check` |
+| 1 | 契約 / 生成 | `openapi/sources.yaml` + `make api-gen` | 生成物は編集しない。契約を直して再生成 | `make api-gen-check` |
 | 2 | `model` | `note.ts` / `note-schema.ts` | `Date` と brand。表示検証は `zod/mini` | `pnpm exec vitest run src/model/note` |
 | 3 | `adapters/server` | `api/notes.ts` | `scope` は口の性質。wire 型はここから出ない | `pnpm exec vitest run …/notes.test.ts` |
 | 4 | `features` | `list/` / `detail/` / `paths.ts` / `load-note.ts` | `page-content` と `view` の分離。span の名前 | `pnpm check:architecture` |

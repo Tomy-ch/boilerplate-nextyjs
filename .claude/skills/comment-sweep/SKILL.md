@@ -2,7 +2,14 @@
 name: comment-sweep
 usage-class: frequent
 description: >-
-  Sweep the accumulated stock of source-code comments in a chosen scope and decide whether each comment's content **belongs where it sits** — the jurisdiction question no other reviewer in this repository asks — and, reading each file's comments as one body, which single site owns a Why that has been written in several of them. It is the sole owner of the comment subject: no review skill carries a comment lens, and this one runs over accumulated code with the two verdicts a diff-scoped reader cannot reach — **移設** (relocate a design rationale out of the comment and into the ADR or the layer README that owns it, leaving only the operative residue plus a one-line reference, while refusing the two classic misroutes: a library's specific behavior stays in the code, and business knowledge goes to the feature's own README, never to an ADR) and **集約** (a set-valued verdict for duplication, fragmentation, and aggregate over-explanation inside one file: one site keeps the content, the rest shrink to a pointer, approved as a single indivisible decision). Use it whenever comments feel bloated, verbose, or essay-like even though every line is individually true; whenever the same reason appears at several declarations and no one place is authoritative; when a doc comment has grown into a design argument or a rejected-alternative discussion; when the same rationale appears in both an ADR and the code that follows it; for a periodic hygiene sweep of a kernel, a feature, or `scripts/`; before a release or before a repository is created from this template, where accumulated commentary would burden downstream readers; and when someone asks 「コメントが長すぎる」「コメントを整理して」「この Why はコードに置くべきか」「根拠を ADR に移したい」. It reads the comment standard at runtime — `docs/rules.md` 「コメントと文書」 and the two tests in `docs/README.md`, plus `AGENTS.md` for language — and hardcodes no policy. It then applies the result in one of three modes, picked in Step 0 or fixed by a flag — 確認して適用 (default; approval per verdict group, then write), 自動適用 (`--apply`; writes 削除 / 書換 / high-confidence 集約 with no approval prompt and withholds every 移設 that needs a document write, because creating an ADR is a call `AGENTS.md` reserves for a prior user instruction and a no-question mode has no way to ask it), and 報告のみ (`--report-only`; renders every finding in full and writes nothing) — performing the code **and** destination-document writes itself, so a relocated rationale never loses its home. It is invoked in its own right, never from inside another review skill: `/impl-review` (the change) and `/test-review` (the tests) are its peers under the Review Phase Protocol in `AGENTS.md`, asked for separately and never delegating to one another. Do NOT use it to judge README / docs prose quality (`doc-reviewer`), to fix README↔code structural drift (`sync-readme` / `back-prop`), or to review implementation or tests (`impl-review` / `test-review`).
+  Sweep the accumulated stock of source-code comments in a scope and decide whether each comment belongs where
+  it sits, and which single site owns a Why written in several of them. Use it when comments feel bloated or
+  essay-like though each line is true; when the same reason sits at several declarations with no authoritative
+  one; when a doc comment has grown into a design argument; when a rationale appears in both an ADR and the
+  code under it; as a periodic sweep of a kernel or `scripts/`; and on 「コメントが長すぎる」「コメントを整理して」「この Why
+  はコードに置くべきか」「根拠を ADR に移したい」. Sole owner of the comment subject, invoked in its own right beside
+  `/impl-review` and `/test-review`. Do NOT use it for docs prose (`doc-reviewer`), README↔code drift
+  (`sync-readme` / `back-prop`), or implementation and tests.
 argument-hint: '[path or kernel to sweep] [--apply | --report-only]'
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
@@ -99,7 +106,7 @@ copy of it.
 | --- | --- |
 | `docs/rules.md` 「コメントと文書」 | **The comment standard** — what a comment is and is not, and the named misroutes |
 | `docs/README.md` 「2 つのテスト」 | The 前提の所在 test and the 管轄 test that the verdicts below apply |
-| `AGENTS.md` | Language Rules (comments are Japanese) and Code Style |
+| `AGENTS.md` | Language Rules (comments are Japanese) |
 | `.claude/agents/comment-reviewer.md` | The reviewer that applies the standard to one comment; the same lens this skill's pass 1 uses |
 | `docs/adr/` | The candidate destinations, and what each ADR already says |
 | The layer / feature `README.md` above the swept path | The other candidate destination, and its declared responsibilities |
@@ -356,11 +363,16 @@ Guards that hold regardless of approval or mode:
 Run this only when something was written. 報告のみ has nothing to verify; 自動適用 needs it most,
 because nobody read the edits one at a time.
 
+**Format only what this run wrote, and leave the gates to the hooks and CI** (`AGENTS.md`, *Do not
+pre-run the gates* — CI is the authority):
+
 ```sh
-pnpm fix
-pnpm lint:ci
-pnpm lint:md
+pnpm exec biome check --fix <the source files you touched>
+pnpm exec markdownlint-cli2 --no-globs --fix <the documents you touched>
 ```
+
+`--no-globs` is load-bearing — without it the configured `globs` are *added* to your arguments and
+the whole tree is rewritten.
 
 Then re-read the diff of the touched files and confirm only comments and documents changed. Behavior
 must be untouched; if `git diff` shows a statement changed, that is a defect in this run.
@@ -427,6 +439,6 @@ separately, decided separately, and never delegating to one another.
 - [ ] Each 集約 carried its shape, every member, the owning site with evidence, the consolidated
       wording, each pointer, and a 確度
 - [ ] After a 集約, the whole file re-read top to bottom
-- [ ] `pnpm fix` / `pnpm lint:ci` / `pnpm lint:md` run when something was written
+- [ ] Only the touched files formatted when something was written; no gate run
 - [ ] Diff confirmed to change only comments and documents
 - [ ] What was not swept stated explicitly

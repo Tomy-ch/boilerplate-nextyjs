@@ -1,0 +1,74 @@
+#!/usr/bin/env node
+// 塞いだコマンドが、宣言の前方一致では届かない位置に現れたときに止める入口。
+//
+// 判定は [judge.ts](judge.ts) が持つ。ここが担うのは標準入力の受け取りと終了コードだけである。
+//
+// **`tsx` を経由しない。** これは Bash の呼び出しごとに走るので、起動が丸ごと待ち時間になる。実測で
+// `tsx` の起動は無視できず、Node の型ストリップは十分に速い（[README](../README.md)）。
+// 呼び出し側は `node scripts/command-guard` で綴る。
+//
+// **判定できないときは通す。** `node_modules` が無い・設定が読めない・ペイロードが壊れている、の
+// いずれも「塞ぐ対象が分からない」であって「塞ぐ対象が無い」ではない。ここで止めると、環境が整う前の
+// あらゆる Bash が止まる。前方一致の宣言は `permissions.deny` 側が引き続き効いているので、素通しには
+// ならない。
+import fs from "node:fs";
+import path from "node:path";
+
+import { deriveLiterals, extractDenyEntries, judge, readCommandLine } from "./judge.ts";
+
+/** Claude Code がフックへ渡すリポジトリルート。直に呼ばれたときは cwd へ落ちる。 */
+const PROJECT_DIR_ENV = "CLAUDE_PROJECT_DIR";
+
+const SETTINGS = path.join(
+  process.env[PROJECT_DIR_ENV] ?? process.cwd(),
+  ".claude",
+  "settings.json",
+);
+
+/** 設定を読む。読めなければ空にして通す。形の絞り込みは [judge.ts](judge.ts) が持つ。 */
+function readDenyEntries(): readonly string[] {
+  try {
+    return extractDenyEntries(JSON.parse(fs.readFileSync(SETTINGS, "utf8")));
+  } catch {
+    return [];
+  }
+}
+
+function refuse(literal: string): never {
+  process.stderr.write(
+    `${literal} は permissions.deny が塞いでいる操作です。宣言の前方一致が届かない位置に現れたため、ここで止めました。\n` +
+      "別のインタプリタや包みへ迂回させず、必要なら利用者へ渡してください。\n",
+  );
+  process.exit(2);
+}
+
+const [, , mode, ...rest] = process.argv;
+const literals = deriveLiterals(readDenyEntries());
+
+if (mode === "--list") {
+  for (const literal of literals) process.stdout.write(`${literal.source}\n`);
+} else if (mode === "--hook") {
+  let raw = "";
+  process.stdin.setEncoding("utf8");
+  process.stdin.on("data", (chunk) => {
+    raw += chunk;
+  });
+  process.stdin.on("end", () => {
+    const commandLine = readCommandLine(raw);
+    if (!commandLine) process.exit(0);
+
+    const hit = judge(commandLine, literals);
+    if (hit) refuse(hit);
+    process.exit(0);
+  });
+} else if (rest.length > 0 || mode) {
+  const hit = judge([mode, ...rest].join(" "), literals);
+  process.stdout.write(hit ? `拒否: ${hit}\n` : "通過\n");
+  process.exit(hit ? 1 : 0);
+} else {
+  process.stderr.write(
+    "使い方: node scripts/command-guard <command>... | --hook | --list\n" +
+      "塞ぐ対象は .claude/settings.json の permissions.deny が持つ。ここは持たない。\n",
+  );
+  process.exit(2);
+}

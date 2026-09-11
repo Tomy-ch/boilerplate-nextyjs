@@ -1,7 +1,14 @@
 ---
 name: adr-scan
 usage-class: lifecycle
-description: PROVISIONAL / one-off. Read-only full-repository scan that discovers ADR-worthy architectural decisions across the whole repo and maps each to the BACKLOG frame-ID taxonomy (Tier 0–6 / G,T,R,A,B,C,D). Unlike the go-boilerplate original (which migrated a flat decisions.md into docs/adr/), this repo already has a formal docs/adr/ set + BACKLOG.md board — so the job here is DISCOVERY of decisions that exist de-facto (in AGENTS.md, config files, src/ structure, .github/, code comments) but are NOT yet tracked as a BACKLOG frame, classifying each as decision (frame-worthy) / exclusion (frame-worthy negative decision) / rule (stays in AGENTS.md) / inventory (living reference), and proposing which Tier / frame ID it belongs to (existing or new). Read-only: produces a candidate inventory only; writes no docs/adr files and does not edit BACKLOG.md. Delete or archive once the discovered gaps are folded into BACKLOG.md.
+description: >-
+  PROVISIONAL / one-off. Read-only full-repository scan that discovers decisions this repository already makes
+  in fact — in `AGENTS.md`, the config files, the `src/` structure, `.github/`, and code comments — but does
+  not yet track as a frame in `docs/adr/BACKLOG.md`. Classifies each as decision (frame-worthy) / exclusion
+  (frame-worthy negative decision) / rule (stays in `docs/rules.md`) / inventory (living reference), and proposes
+  which Tier and frame ID it belongs to. Use it when the ADR board should be checked for gaps rather than when
+  a single decision needs writing. Read-only: it produces a candidate inventory, writes no ADR file, and does
+  not edit `BACKLOG.md`. Delete or archive it once the discovered gaps are folded into the board.
 ---
 
 # adr-scan (provisional)
@@ -11,14 +18,15 @@ untracked* — deciding whether each deserves a slot on `docs/adr/BACKLOG.md`. R
 **candidate inventory** only. It never writes `docs/adr/**`, never edits `BACKLOG.md`, never edits
 source. Remove or archive it once the discovered gaps have been reconciled into the BACKLOG.
 
-## Why this exists here (differs from the go-boilerplate original)
+## Why the job here is discovery, not migration
 
-The go-boilerplate version migrated a flat `docs/decisions.md` into a formal `docs/adr/` set. **This <!-- skill-lint-ignore -->
-repo is already past that**: it has a formal ADR set (`docs/adr/<NNNN>-*.md`, numbered in topical decade-bands)
+This repository already has a formal ADR set (`docs/adr/<NNNN>-*.md`, numbered in topical decade-bands)
 and a live board (`docs/adr/BACKLOG.md`) that tracks every decision area across Tiers 0–6 with
-frame IDs (`G` / `T` / `R` / `A` / `B` / `C` / `D`) and a 選定済み / 実装済み status pair.
+frame IDs (`G` / `T` / `R` / `A` / `B` / `C` / `D`) and a 選定済み / 実装済み status pair. **Collecting
+scattered decisions into a set is therefore already done**, and a scan that re-does it finds only what
+the board already holds.
 
-So the useful job here is **gap discovery**: find decisions that are being made *de facto* — encoded in
+What the board cannot show is what it never received. So the useful job is **gap discovery**: find decisions that are being made *de facto* — encoded in
 `AGENTS.md`, config files, the `src/` layout, `.github/`, or code comments — but are **not represented
 by any BACKLOG frame** (or are represented but mis-tiered / mis-classified). The output feeds the
 BACKLOG運用ルール flow: *新しい意思決定領域に気付いたら該当 Tier への追加 → 内容合意 → ADR 化*.
@@ -32,7 +40,9 @@ Each candidate is exactly one of:
   decision; the BACKLOG "明示的に boilerplate では決めない (out of scope)" section is the home for some
   of these).
 - **rule** — a day-to-day constraint/consequence (e.g. "use the `@/*` alias", "commit prefixes"). Stays
-  in `AGENTS.md`; may *reference* an ADR but is not itself a new decision area.
+  in [`docs/rules.md`](../../../docs/rules.md), never in `AGENTS.md`
+  ([0140](../../../docs/adr/0140-documentation-operations.md) 決定 3); may *reference* an ADR but is not
+  itself a new decision area.
 - **inventory** — a catalog that drifts with code (dependency list, script list). Stays in a living
   reference doc / README, never an ADR.
 
@@ -47,7 +57,7 @@ below. Then the orchestrator dedups against the existing BACKLOG frames.
 1. **Existing ADR + board** — `docs/adr/*.md` + `docs/adr/BACKLOG.md`. Build the baseline set of
    *already-tracked* frames (so discoveries can be diffed against it). Note any ADR whose Status or
    BACKLOG status pair looks inconsistent with reality.
-2. **AGENTS.md** — the "Pending Decisions" section (the undecided areas it points at live in
+2. **AGENTS.md** — the *Where You May Stop* stopping-point table (the undecided areas it points at live in
    BACKLOG — confirm each maps to a frame), the "AI Modification Scope" / "Protected Documentation" /
    "Git Rules" / "Language Rules" sections. Separate genuine decisions from rules.
 3. **Config & tooling (latent decisions)** — `package.json` (deps, scripts, `packageManager`),
@@ -80,12 +90,12 @@ Aggregate into:
   frame ID. *This is the primary deliverable.*
 - **(B) Tracked-but-drifted** — frames whose BACKLOG status pair (選定済み / 実装済み) or Tier looks wrong
   vs the observed reality.
-- **(C) Stays-a-rule list** — belongs in AGENTS.md, not a new frame.
+- **(C) Stays-a-rule list** — belongs in `docs/rules.md` ([0140](../../../docs/adr/0140-documentation-operations.md) 決定 3), not a new frame and not `AGENTS.md`.
 - **(D) Stays-inventory list** — belongs in a living reference, never an ADR.
 
 The orchestrator presents these to the user as *candidates only*. Folding any of them into
 `BACKLOG.md` (or filing an ADR) is a **separate, user-approved step** — this skill does not perform it
-(BACKLOG.md is AI-editable per CLAUDE.md, but the 運用ルール requires 内容合意 before a frame is added).
+(`BACKLOG.md` is AI-editable per `AGENTS.md`, but the 運用ルール requires 内容合意 before a frame is added).
 
 ## Constraints
 

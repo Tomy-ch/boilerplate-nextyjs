@@ -17,7 +17,7 @@ Accepted
 
 これらは各 ADR の関心の副産物として断片化しており、「保護ページをどう書くか」を問う読み手は 4 本を横断せねばならず **局所推論が崩れている**。本 ADR はこの断片を **Next.js 文書化パターン**として 1 本に束ね、認証 seam の推論起点を一本化する。
 
-**裏取り元**: `node_modules/next/dist/docs/01-app/02-guides/authentication.md`(実装前確認。「This is NOT the Next.js you know」— Next.js 16)。同ガイドの Authorization 節は (1) httpOnly session cookie に最小 payload を格納、(2) 認可を 2 層(optimistic checks with Proxy〈optional〉+ Data Access Layer の `verifySession()` を React `cache()` で memo 化した確定認可)、(3) DTO で必要データのみ返す、を推奨形として文書化している。
+**裏取り元**: `node_modules/next/dist/docs/01-app/02-guides/authentication.md`(実装前確認。Next.js 16 —— [AGENTS.md](../../AGENTS.md)「Canonical Documentation」が実装前の確認を要求している)。同ガイドの Authorization 節は (1) httpOnly session cookie に最小 payload を格納、(2) 認可を 2 層(optimistic checks with Proxy〈optional〉+ Data Access Layer の `verifySession()` を React `cache()` で memo 化した確定認可)、(3) DTO で必要データのみ返す、を推奨形として文書化している。
 
 **0070 の中立との整合**: 0070 が守る中立は **プロバイダ中立**であって **seam の形の中立ではない**。Next.js 自身が httpOnly cookie を標準推奨している以上、それに乗るのは特定方式の先取りではなく **プラットフォーム標準準拠**([0010](0010-standards-and-non-lockin.md) §1)であり、0070 の「特定の認証・セッションモデルを本体に前提として組み込まない」とは衝突しない。本 ADR が固定するのは seam の形(座標)のみで、プロバイダ・session 実装詳細(stateless vs DB / 暗号化方式)は作った側に委ねる。
 

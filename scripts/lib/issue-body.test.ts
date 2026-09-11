@@ -4,6 +4,15 @@ import { composeIssueBody, drawModelProse } from "./issue-body";
 
 describe("composeIssueBody", () => {
   // ----- 正常系 -----
+  it("閉じたフェンスを持つ authored を通す", () => {
+    const body = composeIssueBody({
+      evidence: { kind: "authored", text: "### 見出し\n\n```text\n道具の出力\n```" },
+      note: "n",
+    });
+
+    expect(body).toBe("### 見出し\n\n```text\n道具の出力\n```\n\nn\n");
+  });
+
   it("見出し・証拠・実行の URL・案内をこの順に空行で区切って並べる", () => {
     expect(
       composeIssueBody({
@@ -63,6 +72,31 @@ describe("composeIssueBody", () => {
       }),
     ).toBe("## 摩擦\n\n`@octocat` が指摘した\n\n案内\n");
   });
+
+  // ----- 異常系 -----
+  it("開いたフェンスより短いフェンスでは閉じたことにしない", () => {
+    expect(() =>
+      composeIssueBody({
+        evidence: { kind: "authored", text: "````text\n``` 中身 ```\n" },
+        note: "n",
+      }),
+    ).toThrow(/閉じていないコードフェンス/);
+  });
+
+  it("記号の違うフェンスでは閉じたことにしない", () => {
+    expect(() =>
+      composeIssueBody({ evidence: { kind: "authored", text: "```text\n中身\n~~~" }, note: "n" }),
+    ).toThrow(/閉じていないコードフェンス/);
+  });
+
+  it("閉じていないフェンスを持つ authored を弾く", () => {
+    expect(() =>
+      composeIssueBody({
+        evidence: { kind: "authored", text: "### 見出し\n\n```text\n道具の出力" },
+        note: "n",
+      }),
+    ).toThrow(/閉じていないコードフェンス/);
+  });
 });
 
 describe("drawModelProse", () => {
@@ -75,6 +109,12 @@ describe("drawModelProse", () => {
 
   it("mention をコードスパンへ入れて、名前は読めるまま通知だけ殺す", () => {
     expect(drawModelProse("@octocat と @some-user へ")).toBe("`@octocat` と `@some-user` へ");
+  });
+
+  it("PR への生のリンクも redirect.github.com へ寄せる", () => {
+    expect(drawModelProse("https://github.com/vercel/next.js/pull/1 を見る")).toBe(
+      "https://redirect.github.com/vercel/next.js/pull/1 を見る",
+    );
   });
 
   it("他スレッドへの生のリンクを redirect.github.com へ寄せる", () => {

@@ -2,7 +2,14 @@
 name: resolve-merge
 usage-class: situational
 description: >-
-  Land a merge correctly by classifying every conflicted path into a resolution class and applying the mechanical resolution each class already has — regenerate generated artifacts from their source of truth rather than picking a side, re-resolve pin lockfiles through their resolvers, union append-only registries, retake baseline images rather than choosing one — then hand back only what genuinely needs a human. Use it whenever a merge reports conflicts, and equally whenever one reports none: several committed artifacts here are derived rather than authored and go stale from the other side's changes without ever conflicting textually, which is why this skill is named for the merge and not for the conflicts. Most conflict markers in this repository land in files nobody should be hand-editing at all — the generated API types and mock handlers, the bundled contract, `pnpm-lock.yaml`, the pin lockfiles, the marker baseline, the baseline-image gitlink — and choosing a side in one of those produces a file that looks resolved, passes review, and no longer reproduces from its generator. Takes the base from the pull request's own `baseRefName` and merges rather than rebases, via `make base-merge`. It ends in exactly one of two states: anything non-mechanical left means it stops there with the markers intact, commits nothing and offers nothing, because a merge commit carrying conflict markers is a broken tree that reads as resolved; a fully clean integration means it asks whether to commit and push rather than assuming, since a branch can take a release line in without that merge being ready to leave the machine. Do NOT use it to resolve a semantic conflict in implementation code — that is a human's judgment and it hands those back untouched — to rebase or squash anything, to decide which of two colliding registry keys wins, or to sync a branch nobody asked to sync.
+  Land a merge correctly by classifying every conflicted path into a resolution class and applying the
+  mechanical resolution each class already has — regenerate generated artifacts from their source of truth,
+  re-resolve pin lockfiles through their resolvers, union append-only registries, retake baseline images —
+  then hand back only what genuinely needs a human. Use it whenever a merge reports conflicts, and equally
+  whenever one reports none: several committed artifacts here are derived rather than authored and go stale
+  from the other side without ever conflicting textually, which is why it is named for the merge and not the
+  conflicts. Do NOT use it to resolve a semantic conflict in implementation code, to rebase or squash, or to
+  sync a branch nobody asked to sync.
 argument-hint: '[--base=<ref>] [--class=<csv>] [--dry-run]'
 ---
 
@@ -92,7 +99,7 @@ git diff --name-only --diff-filter=U
 
 | Class | Paths | Resolution |
 | --- | --- | --- |
-| Generated — contract | `openapi/api.gen.yaml`, `src/adapters/gen/**`, `mocks/api/**` | Discard both sides. Settle `openapi/sources.yaml` first if it conflicted, then `make gen-api` <!-- skill-lint-ignore --> |
+| Generated — contract | `openapi/api.gen.yaml`, `src/adapters/gen/**`, `mocks/api/**` | Discard both sides. Settle `openapi/sources.yaml` first if it conflicted, then `make api-gen` <!-- skill-lint-ignore --> |
 | Generated — design tokens | the build output under `tokens/` | Settle `tokens/primitives.json` and the theme inputs, then `pnpm gen:tokens` |
 | Dependency lockfile | `pnpm-lock.yaml` | Never pick lines. Settle `package.json` first, then `pnpm install` |
 | Pin lockfile | `.github/actions-pin.toml`, `docker/images-pin.toml` | Never pick lines. `make actions-pin-resolve` + `make actions-pin-apply`; `make images-pin-resolve` + `make images-pin-apply` |
@@ -110,7 +117,7 @@ mechanically "resolving" a semantic one is a silent wrong merge.
 ## Step 3 — Apply, class by class
 
 Resolve in dependency order, because several classes feed each other: the contract source before
-`gen-api`, `package.json` before `pnpm install`, the marked files before the marker baseline, the
+`api-gen`, `package.json` before `pnpm install`, the marked files before the marker baseline, the
 token inputs before the token build.
 
 For every generated class the move is the same and it is worth stating plainly: **do not merge the
@@ -130,7 +137,7 @@ and doubly so mid-merge: it stages a submodule pointer you did not decide.
 Run this whether or not Step 2 found anything, and **say that you did**:
 
 ```bash
-make gen-api                                       # 契約から生成したもの
+make api-gen                                       # 契約から生成したもの
 pnpm gen:tokens                                    # デザイントークンの生成物
 pnpm exec tsx scripts/marker-baseline              # 差分が出たら --write で数え直す
 ```

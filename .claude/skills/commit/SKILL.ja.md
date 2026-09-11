@@ -6,7 +6,7 @@
 
 このスキルは `/commit` から起動される。引数文字列は `$ARGUMENTS`。
 
-このコマンドは作業ツリーの未コミット変更を分析し、適切な粒度とプロジェクトの prefix 規約に沿った 1 つ以上の git コミットを作る。コミットメッセージはすべて日本語（`CLAUDE.md` に従う）。
+このコマンドは作業ツリーの未コミット変更を分析し、適切な粒度とプロジェクトの prefix 規約に沿った 1 つ以上の git コミットを作る。コミットメッセージはすべて日本語（`AGENTS.md` に従う）。
 
 このコマンドは全コミットで意図的に lefthook を迂回する（`git commit --no-verify`）。複数コミットへ分割する際に `.lefthook.yaml` の pre-commit 検査（現状は `pnpm lint:ci` / `pnpm lint:md`）が N 回発火しないようにするため。あとから回すこともしない。`AGENTS.md` の *Do not pre-run the gates* がゲートを hook と CI に置き、**判定は CI が正**としているためである。Step 6 はこの実行が書いたものだけを整形し、どのゲートを CI へ預けたかを報告する。
 
@@ -167,11 +167,10 @@ git diff --name-only
 This command will run `git commit --no-verify` on every commit.
 The following lefthook pre-commit commands are SKIPPED here and left to CI,
 which is the authority on whether they pass:
-  - lint     (pnpm lint:ci)
-  - md-lint  (pnpm lint:md)   ※ glob: *.md
+  - <name>  (<run>)   ※ glob: <glob があれば>
 ```
 
-`pre-push` のコマンド（現状は `pnpm typecheck`）はこのゲートに**含まない**。それらは push 経路に留まり、このコマンドは push を起動しない。
+`pre-push` のコマンドはこのゲートに**含まない**。それらは push 経路に留まり、このコマンドは push を起動しない。
 
 ### 確認
 
@@ -206,8 +205,8 @@ EOF
 
 - **タイトル**: `<Prefix>: <日本語タイトル>`。50 文字以内を目安にする。
 - **本文**: 任意。書く場合はタイトルの後に空行を 1 行入れ、72 文字程度で折り返す。「何を」より「なぜ」を優先する。
-- **言語**: 日本語（`CLAUDE.md` の出力規約に従う）。
-- **`Co-Authored-By` フッタ**: 必須。形式は `Co-Authored-By: <実行中のモデル名> <noreply@anthropic.com>` — 例: `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`。実際にコミットを生成しているモデルの識別子を、環境 / `CLAUDE.md` の記載どおりに使う。本ドキュメントにハードコードされたモデル名を写さないこと — モデルのリリースごとに古くなり、誤った名前はコミットの帰属を誤らせる。
+- **言語**: 日本語（`AGENTS.md` の出力規約に従う）。
+- **`Co-Authored-By` フッタ**: 必須。形式は `Co-Authored-By: <実行中のモデル名> <noreply@anthropic.com>` — 例: `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`。実際にコミットを生成しているモデルの識別子を、環境が示すとおりに使う。本ドキュメントにハードコードされたモデル名を写さないこと — モデルのリリースごとに古くなり、誤った名前はコミットの帰属を誤らせる。
 - **`Refs:` footer（レビュー適用コミットのみ）**: `full-apply` / `impl-review` / `code-review` の指摘を適用したコミットには、`Refs: tmp/reviews/mod_*.md (<severity>)` の行を footer へ足し、コミットからfinding へ辿れるようにする。通常のコミットには付けない。
 - **HEREDOC**: 必須（タイトル + 空行 + 本文 + フッタの体裁を保つ）。
 - **`--no-verify`**: このコマンドが作る全コミットで必須 — 冒頭で述べたコマンド限定の例外であり、検証は Step 6 の 1 回のパスで行う。
@@ -277,7 +276,7 @@ EOF
 
 ## Step 7. push 方針と最終リマインド
 
-- **自動 push しない**（`CLAUDE.md` の git 規約に従う）。
+- **自動 push しない**（`AGENTS.md` の git 規約に従う）。
 - Step 6 が終わったらユーザへ報告する:
 
   ```txt
@@ -289,7 +288,7 @@ EOF
   Step 6 の整形が追跡下のファイルを変えたなら、そう述べてファイル名を挙げる —— コミットした状態が
   整形されていなかったということで、追加のコミットを積むかは user が決める。
 
-- 既存 PR ブランチで作業している場合は `CLAUDE.md` に従い、push 前に確認する:
+- 既存 PR ブランチで作業している場合は `AGENTS.md` に従い、push 前に確認する:
   「変更はローカルにコミット済みです。これらの変更をプルリクエストにプッシュしますか？」
 
 ## 制約（まとめ）
@@ -309,7 +308,11 @@ EOF
 - ✅ Step 1 で安全なロールバックのため `ORIGINAL_HEAD` を捕捉する
 - ✅ Step 1 で現ブランチの PR がマージ済みかを検出し（`gh pr view`）、コミット前に base から新ブランチを切ることを推奨する（`gh` が使えない場合は穏当に縮退する）
 - ✅ 失敗時は `AskUserQuestion` で `git reset --mixed <ORIGINAL_HEAD>` を提案する
-- ✅ Step 6 は lefthook 定義の各コマンド + `pnpm fix` を直接実行する（`lefthook run pre-commit` は使わない）
+<!-- boilerplate-only:replace-begin -->
+- ✅ Step 6 はこの実行が書いたものだけを整形し、CI へ委ねたゲートを報告する
+<!-- boilerplate-only:replace-with -->
+<!-- = - ✅ Step 6 は lefthook 定義の各コマンド + `pnpm fix` を直接実行する（`lefthook run pre-commit` は使わない） -->
+<!-- boilerplate-only:replace-end -->
 - ❌ `lefthook run pre-commit` を呼ばない（冒頭参照）
 
 ## チェックリスト
@@ -328,6 +331,6 @@ EOF
 - [ ] 各コミットが `--no-verify` を使い、HEREDOC で渡された
 - [ ] `git add` がファイルを明示している（`-A` / `.` を使っていない）
 - [ ] 生成物がソース変更と同居している
-- [ ] Step 6 の検証が lefthook 定義の各コマンドと `pnpm fix` を実行した（または明示的にスキップされた）
+- [ ] Step 6 がこの実行の書いたものだけを整形し、CI へ委ねたゲートを報告した
 - [ ] 検証結果（OK / FAIL / no changes）をユーザへ提示した
 - [ ] 自動 push を行っていない

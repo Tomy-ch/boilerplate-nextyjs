@@ -178,14 +178,21 @@ jobs:
         shell: bash
         run: make test-shards-verify
 
+      # The body is built by `make test-failures`, so the wiring lives in one place and a
+      # local `make test-failures` prints exactly what the comment will say. What it reads is
+      # vitest's own JSON report — `status` and `failureMessages`, the split the runner already
+      # made — never a text filter that classifies by vocabulary.
+      #
+      # Do not read `tmp/test-report.json` here or anywhere else. It records passing cases too,
+      # with full paths, and measures 785KB against the 690B of the plain text output.
       - name: Merge the runs and check coverage
         id: test
         shell: bash
         run: |
           set +e
 
-          make test-merge 2>&1 | tee /tmp/test.log
-          code=${PIPESTATUS[0]}
+          make test-failures TEST_RUN=test-merge > /tmp/test-comment.log 2>&1
+          code=$?
 
           if [ "${code}" -eq 0 ]; then
             echo "status=success" >> "$GITHUB_OUTPUT"
@@ -196,14 +203,6 @@ jobs:
           fi
 
           exit 0
-
-      # The TAIL, not the head. Vitest prints each failure's diff and then the run summary,
-      # so a body truncated from the front drops exactly the part that says what broke —
-      # and the coverage table, which is what a threshold failure is about, is last of all.
-      - name: Cut the comment body down to the failures
-        if: always() && steps.test.outputs.status != ''
-        shell: bash
-        run: tail -n 400 /tmp/test.log > /tmp/test-comment.log
 
       - name: Report test coverage
         if: always()
@@ -222,7 +221,12 @@ jobs:
           status: ${{ steps.test.outputs.status }}
           title: ${{ steps.test.outputs.title }}
           body-file: /tmp/test-comment.log
-          details-summary: 'Vitest log (末尾 400 行)'
+          # `make test-failures` writes the body through `scripts/test-report`, which puts
+          # every unaltered value inside a fence sized to its own content. That is the second
+          # way the input's contract can be met, and it is what lets the counts and the
+          # per-case headings read as markup instead of as literal characters.
+          body-sanitized: 'true'
+          details-summary: 'Vitest の失敗（全件）'
 
       # Two conditions, because they fail for different reasons. The merge speaks for the
       # tests and the threshold; `needs` speaks for a machine that never got that far — a

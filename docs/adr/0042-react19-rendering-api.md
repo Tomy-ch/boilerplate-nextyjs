@@ -10,7 +10,7 @@ Accepted
 
 [0040](0040-routing-rendering-strategy.md) は「Server / Client 境界を **どこに置くか**(WHERE)」を定めるルーティング ADR であり、「境界の内側で React API を **どう書くか**(HOW)」は射程外である。本 ADR がその HOW を持つ。
 
-本リポジトリは **React 19.2 / Next.js 16** を採用しており([0011](0011-no-docker.md) / App Router de facto の帰結)、この領域は AI エージェントの訓練データと乖離が大きい([AGENTS.md](../../AGENTS.md)「This is NOT the Next.js you know」)。規約が無いと、新旧パターン(`forwardRef` / 手書き `memo` / `useCallback` と、ref as prop / React Compiler)が実装者ごとに混在する。本 ADR はレンダリング関連 React API の使用規約を成文化する。
+本リポジトリは **React 19.2 / Next.js 16** を採用しており([0011](0011-no-docker.md) / App Router de facto の帰結)、この領域は AI エージェントの訓練データと乖離が大きい([`docs/design/rendering.md`](../design/rendering.md) が用語と誤りを持つ)。規約が無いと、新旧パターン(`forwardRef` / 手書き `memo` / `useCallback` と、ref as prop / React Compiler)が実装者ごとに混在する。本 ADR はレンダリング関連 React API の使用規約を成文化する。
 
 裏取り元(実装前確認・[0010](0010-standards-and-non-lockin.md) §1 の「乗る」先): `node_modules/react`(v19.2.4)/ `node_modules/next/dist/docs/01-app/03-api-reference/05-config/01-next-config-js/reactCompiler.md` / 同 `01-getting-started/06-fetching-data.md`(`use()` の Promise / Context 解決例)。
 

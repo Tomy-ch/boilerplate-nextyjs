@@ -4,7 +4,7 @@
 
 衝突した各パスを、そのクラスが既に持っている解決へ振り分けてマージを着地させ、残りを人へ返す。
 
-日本語参考訳はこのディレクトリの `SKILL.ja.md`（人間の参照用。スキルとしては読み込まれない）。
+canonical はこのディレクトリの `SKILL.md`（英語）。規約の正はそちらで、この訳は参考である。
 
 ## 使うとき
 
@@ -82,7 +82,7 @@ git diff --name-only --diff-filter=U
 
 | クラス | パス | 解決 |
 | --- | --- | --- |
-| 生成物 —— 契約 | `openapi/api.gen.yaml`, `src/adapters/gen/**`, `mocks/api/**` | 両側を捨てる。`openapi/sources.yaml` が衝突していれば先に解決し、`make gen-api` <!-- skill-lint-ignore --> |
+| 生成物 —— 契約 | `openapi/api.gen.yaml`, `src/adapters/gen/**`, `mocks/api/**` | 両側を捨てる。`openapi/sources.yaml` が衝突していれば先に解決し、`make api-gen` <!-- skill-lint-ignore --> |
 | 生成物 —— デザイントークン | `tokens/` 配下のビルド出力 | `tokens/primitives.json` とテーマの入力を先に解決し、`pnpm gen:tokens` |
 | 依存の lockfile | `pnpm-lock.yaml` | 行を選ばない。`package.json` を先に解決してから `pnpm install` |
 | pin の lockfile | `.github/actions-pin.toml`, `docker/images-pin.toml` | 行を選ばない。`make actions-pin-resolve` + `make actions-pin-apply`、`make images-pin-resolve` + `make images-pin-apply` |
@@ -99,7 +99,7 @@ git diff --name-only --diff-filter=U
 
 ## Step 3 —— クラスごとに当てる
 
-**依存の順に解決する。**いくつかのクラスは互いに供給し合う —— 契約の出典が `gen-api` より先、
+**依存の順に解決する。**いくつかのクラスは互いに供給し合う —— 契約の出典が `api-gen` より先、
 `package.json` が `pnpm install` より先、マーカーを持つファイルがマーカーの基準より先、
 トークンの入力がトークンのビルドより先。
 
@@ -120,7 +120,7 @@ pin の lockfile では、項目を突き合わせるのではなく **resolver 
 Step 2 が何を見つけたかに関わらず回し、**回したことを述べる。**
 
 ```bash
-make gen-api                                       # 契約から生成したもの
+make api-gen                                       # 契約から生成したもの
 pnpm gen:tokens                                    # デザイントークンの生成物
 pnpm exec tsx scripts/marker-baseline              # 差分が出たら --write で数え直す
 ```

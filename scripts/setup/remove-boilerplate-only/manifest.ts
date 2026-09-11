@@ -29,7 +29,10 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   // 打刻そのものは追跡外の tmp/ に落ちるので、消すのは機構の側だけでよい。
   ".agents/closed-loop",
   "scripts/closed-loop",
-  ".makefiles/agents",
+  // ディレクトリごとではなくファイル 1 枚。隣の `quiet.mk`（`make ai-<target>`）は配る側に固有の
+  // 機構ではないので残り、`Makefile` の include も印を持たない。ディレクトリごと消すと、その
+  // include が解決できなくなってすべての target が落ちる。
+  ".makefiles/agents/closed-loop.mk",
   ".github/workflows/closed-loop-weekly.yaml",
   // 剥がしそのものを検証する CI。理由は冒頭の @remarks が持つ。
   ".github/workflows/strip-verify.yaml",

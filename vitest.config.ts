@@ -97,6 +97,10 @@ export default defineConfig({
         ".storybook/**/*.stories.{ts,tsx}",
         ...EXCLUDED_FROM_CHECKS,
       ],
+      // `lcov` が `.octocov.yaml` の読む `coverage/lcov.info` を書く。html も同じ reporter が出す。
+      // `text` は 100% のファイルを伏せる。全量を出すと閾値割れの数行が数千行の後ろに沈む。
+      // 分割の 1 台は判定を持たないので、その表は誰も読まない。
+      reporter: isShard ? ["json"] : [["text", { skipFull: true }], "lcov"],
       thresholds: isShard ? undefined : COVERAGE_THRESHOLDS,
     },
   },

@@ -36,5 +36,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "tmp"]
+  // `scripts/command-guard` を外すのは、そこが要る `allowImportingTsExtensions` をここへ置くと
+  // orval が読んで生成物まで拡張子付きの import を吐くため。検査は同ディレクトリの tsconfig が持つ。
+  "exclude": ["node_modules", "tmp", "scripts/command-guard"]
 }

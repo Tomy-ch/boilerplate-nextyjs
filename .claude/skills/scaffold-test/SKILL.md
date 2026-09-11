@@ -2,7 +2,14 @@
 name: scaffold-test
 usage-class: situational
 description: >-
-  Write the Vitest test files for existing symbols in this repository — one symbol or a whole screen's worth at once — the counterpart to `test-review`, which only judges tests that already exist. Use it whenever a callable export has no test and the 1:1 gate is about to fail (`missing-test-file` / `missing-describe`), when a screen has just been implemented and its twenty-odd modules need their tests placed together, when a new function / component / hook / Server Action lands and its test still has to be written, when coverage falls below the 100 % gate and the uncovered branches need cases, or when someone asks 「テストを書いて」「このコンポーネントのテストを足して」「カバレッジが足りないので埋めて」. It hardcodes no viewpoints and no conventions: ADR 0090 (structure, naming, skip discipline, per-layer duties), ADR 0091 (async RSC placement, a11y automated checks), the nearest ancestor README's `test-requirement` frontmatter, the 1:1 gate itself (the authority on what is deliberately out of scope, including the `RUNTIME_ONLY_MODULES` globs that exclude `src/app/**/page.tsx`), sibling tests in the same directory, and the subject source are all read at runtime, so the generated test tracks the conventions as they evolve rather than freezing a copy. Derives the case set from the subject's own branches — every conditional, thrown error kind, boundary pair and null/undefined guard — and asserts each branch's distinctive outcome rather than merely executing it, because a repository with a 100 % coverage gate gets no information from coverage alone. Emits Japanese `it` names, the export-name `describe` the 1:1 gate requires, and comment separators on whichever axis ADR 0090 assigns to that kind of subject (`正常系` / `異常系` for a value, display states for rendering). Strictly read-only on the subject: it never edits, renames, or "makes testable" the implementation — when a symbol cannot be verified without changing it, that is reported as a finding for the user to decide. Do NOT use it to review or critique existing tests (`test-review`), to write HTTP-boundary integration tests for an adapter client or Route Handler (`scaffold-integration-test`), to run the suite (`make test-full`), or to fix a failing test whose subject changed (that is ordinary work on the change that broke it).
+  Write the Vitest test files for existing symbols in this repository — the counterpart to `test-review`,
+  which only judges tests that already exist. Use it when a callable export has no test and the 1:1 gate is
+  about to fail (`missing-test-file` / `missing-describe`), when a screen has just been implemented and its
+  modules need their tests placed together, when coverage falls below the 100 % gate, or on
+  「テストを書いて」「このコンポーネントのテストを足して」「カバレッジが足りないので埋めて」. It hardcodes no viewpoints: ADR 0090 / 0091, the nearest
+  README's `test-requirement`, the 1:1 gate, sibling tests, and the subject source are read at runtime.
+  Read-only on the subject. Do NOT use it to critique existing tests (`test-review`), to write HTTP-boundary
+  tests (`scaffold-integration-test`), or to run the suite.
 argument-hint: '[path/to/subject.ts[:symbol] | path/to/dir/ | (省略で未テストを一括解決)]'
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
@@ -279,9 +286,10 @@ Apply what Step 1 read. As the conventions stand today that means:
 - **`it` strings are Japanese**, stating the behavior *and* the branch condition.
 - **One case per `it`.** `it.each` / `it.for` is fine when it carries a name template that identifies
   each case; a hand-rolled `for` / `forEach` around a bare `it` is not.
-- **Mock at the boundary the layer owns**: MSW for HTTP (the shared handlers under `mocks/`, already
-  wired in `vitest.setup.ts` — do not hand-roll a `fetch` stub), `vi.mock` for a module boundary,
-  `vi.stubEnv` for configuration.
+- **Mock at the boundary the layer owns**: MSW for HTTP — the generated handlers under `mocks/`, started
+  by importing `vitest.setup.msw.ts` in the test file that needs them (`vitest.setup.ts` starts no
+  server; it guards `fetch` so an unmocked request fails loudly). Do not hand-roll a `fetch` stub.
+  `vi.mock` for a module boundary, `vi.stubEnv` for configuration.
 - **Components need `// @vitest-environment jsdom`** at the top of the file, and the `axe` assertion
   ADR 0091 requires.
 - **Query the way a user reaches the element**: `getByRole` with an accessible name first, then

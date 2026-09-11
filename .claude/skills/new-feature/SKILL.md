@@ -2,7 +2,14 @@
 name: new-feature
 usage-class: situational
 description: >-
-  End-to-end driver that takes one screen from a direction to a reviewed, spec-backed, tested feature slice, chaining the rails this repository already ships instead of inventing a parallel path — `docs/playbook.md` (where things go), `pnpm gen` (placement / naming / boundaries), `docs/templates/feature-readme.md` (the spec sections a feature README must carry), `mocks/` (implement against the contract without a backend), and `docs/spec/route/**` (what the screen promises). It follows the repository's screen-implementation order — direction → story → review → split → spec → tests — because tests written before the look is settled get rewritten, and it reads that order from `docs/playbook.md` at runtime rather than hardcoding it. Use it whenever a NEW screen or feature slice is being added and you want the whole path built consistently: 「画面を追加したい」「feature を新しく作りたい」「新しい画面を一から作って」「new-feature」, or when a direction exists and the placement, README sections, spec, and tests all still have to be produced. Do NOT use it to modify an existing feature (edit it directly), to add anything under `src/components/**`, `src/adapters/**`, `src/model/**`, `src/stores/**`, or `src/capabilities/**` — those are kernels, so run `pnpm gen <kind> <name>` directly and skip the story-first order, which exists only where a screen's look is being settled, to write tests for code that already exists (`scaffold-test`), or to review anything (`impl-review` / `test-review` / `comment-sweep` are peers under the Review Phase Protocol and this skill never invokes them). Halts on a failing phase and never auto-rollbacks; the user stays the author-of-record for the direction, the look, and the promises.
+  End-to-end driver that takes one screen from a direction to a reviewed, spec-backed, tested feature slice,
+  chaining the rails this repository already ships instead of inventing a parallel path. It follows the
+  screen-implementation order direction → story → review → split → spec → tests, read from `docs/playbook.md`
+  at runtime, because tests written before the look is settled get rewritten. Use it whenever a NEW screen or
+  feature slice is added and the whole path should be built consistently: 「画面を追加したい」「feature
+  を新しく作りたい」「新しい画面を一から作って」. Do NOT use it to modify an existing feature, to add anything under a kernel
+  (`components` / `adapters` / `model` / `stores` / `capabilities` — run `pnpm gen` directly), to write tests
+  for existing code (`scaffold-test`), or to review anything.
 ---
 
 # New Feature

@@ -1,6 +1,14 @@
 ---
 name: spec-validator
-description: Read-only spec validator for ONE route — the worker form of `verify-spec`. Reads a route's screen and functional requirements together with the implementation they map to, and surfaces four findings: a promise the implementation does not keep, a statement filed in the wrong one of the two documents, a screen restating what a layout above it already promises, and content the spec deliberately does not carry. The canonical criteria live in `.claude/skills/verify-spec/prompts/validate-spec.md` — this agent reads and applies that file verbatim (single source of truth shared with the skill body), adapting only how inputs arrive. It never re-derives the existence check: whether every route has a spec, and whether a spec outlived its route, is settled by a gate, and re-doing it here would be the same check with worse tools. Invoked once per route by the `verify-spec` skill, all in one message so the routes run concurrently. STRICTLY read-only (Read / Grep / Glob only) — it never edits and never calls `AskUserQuestion`; the orchestrator aggregates and the human decides which side moves. Default model `sonnet`.
+description: >-
+  Read-only spec validator for ONE route — the worker form of `verify-spec`. Reads a route's screen and
+  functional requirements together with the implementation they map to, and surfaces four findings: a promise
+  the implementation does not keep, a statement filed in the wrong one of the two documents, a screen
+  restating what a layout above it already promises, and content the spec deliberately does not carry. The
+  canonical criteria live in `.claude/skills/verify-spec/prompts/validate-spec.md` and are applied verbatim.
+  It never re-derives the existence check — a gate settles that. Invoked once per route by `verify-spec`, all
+  in one message so the routes run concurrently. STRICTLY read-only; the orchestrator aggregates and the human
+  decides. Default model `sonnet`.
 tools: Read, Grep, Glob
 model: sonnet
 ---

@@ -2,7 +2,14 @@
 name: how-to
 usage-class: situational
 description: >-
-  Find the sanctioned way to carry out an operational goal in this repository and hand it back as a runnable procedure — prerequisites, the exact commands, how to tell it worked, how to undo it, and what is destructive about it. Use whenever someone wants to DO something and does not know the blessed route: 「この検証はどのコマンド？」「リリースはどうやる」「基準画像を撮り直したい」「サンプルを消すには」「環境変数を足すには」「ベースを取り込みたい」. It is goal-driven, which is what separates it from `repo-ops` — that one is symptom-driven, answers "this broke, here is the fix" from a curated index, and deliberately cannot conclude that a procedure is missing. Here the first move is routing: when a skill already owns the procedure it says so and stops, because re-deriving a procedure a skill owns is how two divergent versions of it start existing. Otherwise it assembles the procedure from the make target registry, `package.json` scripts, `.lefthook.yaml`, `.github/workflows/` and `docs/get-started/`, citing where each step came from. It never invents a command to close a gap: an absent procedure is reported as UNDEFINED with the frontier that was searched, or as 確認できず when the indexes were not exhausted, because a plausible-looking command reads exactly like a documented one and the next person runs it. Read-only by default — it surfaces the command and warns before anything destructive, and runs it only when explicitly asked. Do NOT use it for a symptom or a failing gate (`repo-ops`), to explain how something works rather than how to do it (`repo-truth`), to compare undecided options (`research`), or to carry out a code change.
+  Find the sanctioned way to carry out an operational goal in this repository and hand it back as a runnable
+  procedure — prerequisites, the exact commands, how to tell it worked, how to undo it, and what is
+  destructive about it. Use whenever someone wants to DO something and does not know the blessed route:
+  「この検証はどのコマンド？」「リリースはどうやる」「基準画像を撮り直したい」「サンプルを消すには」「環境変数を足すには」「ベースを取り込みたい」. Goal-driven, which separates it
+  from `repo-ops` (symptom-driven). It never invents a command to close a gap: an absent procedure is reported
+  as UNDEFINED with the frontier searched. Read-only by default. Do NOT use it for a symptom or a failing gate
+  (`repo-ops`), to explain how something works (`repo-truth`), to compare undecided options (`research`), or
+  to carry out a code change.
 argument-hint: '[goal] [--mode=lookup|run] [--dry-run]'
 ---
 

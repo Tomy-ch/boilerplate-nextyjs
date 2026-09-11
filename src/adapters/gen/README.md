@@ -5,7 +5,7 @@ coverage-exclusions:
 
 # 契約からの生成物
 
-`openapi/` に取り込んだ契約から `make gen-api` が生成する wire 型と zod スキーマの置き場です
+`openapi/` に取り込んだ契約から `make api-gen` が生成する wire 型と zod スキーマの置き場です
 ([0072](../../../docs/adr/0072-api-type-generation.md))。**手で編集しません。** 編集しても次の生成で失われ、
 CI の drift ゲートが差分を検出して落ちます。
 
@@ -41,6 +41,6 @@ CI の drift ゲートが差分を検出して落ちます。
 ## 再生成
 
 ```bash
-make gen-api        # 契約から生成し、整形まで行う
-make gen-api-check  # 契約と生成物の版が揃っているかだけを検証する
+make api-gen        # 契約から生成し、整形まで行う
+make api-gen-check  # 契約と生成物の版が揃っているかだけを検証する
 ```

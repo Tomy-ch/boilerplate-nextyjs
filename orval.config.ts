@@ -219,8 +219,8 @@ const NUMBER_RANGE_MOCK_PROPERTIES = {
 
 // 取得物と生成物の置き場。**綴りの `api` は `openapi/sources.yaml` の `name` と揃える**
 // （同じ綴りが `scripts/openapi/gen-api-plan.ts` の `GEN_API_OUTPUTS` にも入る）。ここだけ
-// 動かしても型検査も lint も通り、`make gen-api-check` が「生成物がありません」という別の顔で
-// 落ちる —— そこが指す `make gen-api` を何度回しても直らない。
+// 動かしても型検査も lint も通り、`make api-gen-check` が「生成物がありません」という別の顔で
+// 落ちる —— そこが指す `make api-gen` を何度回しても直らない。
 const apiInput = {
   target: "./openapi/api.gen.yaml",
   filters: { mode: "exclude" as const, tags: NON_CLIENT_TAGS },
@@ -231,7 +231,7 @@ export default defineConfig({
   // (target) を必須とする一方、outbound の resilience は adapters の手書き wrapper が所有する
   // ため、生成された client は使わない。
   // 本番が参照する場所へ置くと「どちらで呼ぶのか」が生成物の側から曖昧になる。
-  // 孤児の始末は orval の clean ではなく `make gen-api` が持つ。あちらは生成の直前に置き場を
+  // 孤児の始末は orval の clean ではなく `make api-gen` が持つ。あちらは生成の直前に置き場を
   // まるごと消すので、mode や target の置き方に依らず「契約に無いものは残らない」が成り立つ。
   // project ごとの clean だと、単一ファイルへ出す zod 側には付けられない —— その target の
   // ディレクトリが契約ごとの共有階層 (`src/adapters/gen/<契約名>/`) で、同階層の model/ ごと

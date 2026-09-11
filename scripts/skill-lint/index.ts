@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-// `.claude/**` のスキル / エージェント定義を意味的に検査する lint スクリプト。
+// エージェントへの指示面 —— `.claude/**` のスキル / エージェント定義と、その頂点に在る `AGENTS.md`
+// —— を意味的に検査する lint スクリプト。
 // markdownlint は体裁しか見ないため、「書いてある内容が実態と合っているか」は誰も検査していない。
 // スキル定義はエージェントの挙動を決める指示書であり、腐った参照はそのまま誤った手順の実行につながる。
 //
@@ -151,6 +152,18 @@ function buildEntryIndex(): string[] {
  */
 const USAGE_CLASSES = new Set(["frequent", "situational", "lifecycle", "automatic", "safety"]);
 
+/**
+ * `description` に許す文字数の上限。
+ *
+ * @remarks
+ * **本文と違い、`description` は起動していないスキルのぶんまで毎ターン読み込まれます。**
+ * 全スキルと全エージェント定義のぶんが常に前置きとして載るため、1 件の冗長さが
+ * リポジトリ全体の固定費になります。
+ * 上限は「いつ呼ぶか / いつ呼ばないか / 何で引くか」を書ける量として置いたもので、
+ * 手順・判断基準・設計論は本文が持ちます —— そちらは起動したときだけ読まれます。
+ */
+const DESCRIPTION_MAX_CHARS = 800;
+
 // name / description の必須検査と配置名（ディレクトリ名 / ファイル名）との一致検査。
 // `requireUsageClass` はスキルにだけ立てる（エージェント定義は利用の型を持たない）。
 function checkFrontmatter(
@@ -169,6 +182,15 @@ function checkFrontmatter(
     if (!keys.has(required) || keys.get(required) === "") {
       report(rel, 1, "frontmatter", `frontmatter に \`${required}\` がありません（または空です）`);
     }
+  }
+  const description = keys.get("description");
+  if (description !== undefined && description.length > DESCRIPTION_MAX_CHARS) {
+    report(
+      rel,
+      1,
+      "description-length",
+      `\`description\` が ${description.length} 文字で上限 ${DESCRIPTION_MAX_CHARS} を超えています（手順・判断基準・設計論は本文へ移す）`,
+    );
   }
   const name = keys.get("name");
   if (name !== undefined && name !== "" && name !== expectedName) {
@@ -369,7 +391,7 @@ const entryIndex = buildEntryIndex();
 const rootEntries = new Set(fs.readdirSync(REPO_ROOT).filter((name) => !PATH_ROOT_DENY.has(name)));
 const basenameIndex = new Set(entryIndex.map((entry) => path.basename(entry)));
 
-// ディレクトリを伴わない設定ファイル名（`mise.toml` / `biome.ci.jsonc`）の実在性を判定する。
+// ディレクトリを伴わない設定ファイル名（`mise.toml` / `biome.json`）の実在性を判定する。
 // 設定ファイルはリポジトリ内で名前が一意に定まるため、配置を書かずに名前だけで参照されることが多く、
 // SSOT が移動・改名しても本文だけが古い名前で残りやすい。
 const CONFIG_FILE_RE = /^[.\w][\w.-]*\.(ya?ml|toml|jsonc?)$/;
@@ -654,6 +676,10 @@ for (const file of agentFiles) {
   const rel = path.join(AGENTS_DIR, file);
   checkFrontmatter(rel, readFile(rel), file.replace(/\.md$/, ""));
 }
+
+// `AGENTS.md` も対訳を持つ。canonical を英語で持つ文書はスキル定義とこれだけで（[README](../README.md)）、
+// 対訳が canonical から遅れたことを検出する機構は、このペア検査のほかに無い。
+checkTranslationPair("AGENTS.md", "AGENTS.ja.md");
 
 const markdownFiles = collectClaudeMarkdown();
 for (const rel of markdownFiles) checkReferences(rel);

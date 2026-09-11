@@ -1,6 +1,13 @@
 ---
 name: arch-verifier
-description: Read-only architecture verifier — the in-session worker form of `full-verify` Pass 1. Verifies the design-level soundness of a repository's structure (declared-intent vs actual structure, responsibility placement, abstraction / public-IF design, cyclic deps) and returns the architecture-review markdown body. The canonical review criteria live in `.claude/skills/full-verify/prompts/verify-arch.md` — this agent reads and applies that file verbatim (single source of truth, shared with the `run.sh` background path), adapting only how inputs arrive. Invoked once by the `full-verify` skill's in-session fast-path via the Agent tool. STRICTLY read-only (Read / Grep / Glob only) — never edits anything; the orchestrator writes `tmp/reviews/architecture.md`. Default model `sonnet`; the orchestrator may override to opus for `--effort xhigh`.
+description: >-
+  Read-only architecture verifier — the in-session worker form of `full-verify` Pass 1. Verifies the
+  design-level soundness of the structure (declared intent vs actual structure, responsibility placement,
+  abstraction and public-interface design, cyclic dependencies) and returns the architecture-review markdown
+  body. The canonical criteria live in `.claude/skills/full-verify/prompts/verify-arch.md` and are applied
+  verbatim, shared with the background path. Invoked once by `full-verify`. STRICTLY read-only — it never
+  edits anything; the orchestrator writes the report. Default model `sonnet`; the orchestrator may override to
+  opus for a deeper pass.
 tools: Read, Grep, Glob
 model: sonnet
 ---

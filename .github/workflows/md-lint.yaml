@@ -5,8 +5,7 @@ name: Markdown Lint
 # biome does not read Markdown, so nothing else in CI would catch a broken document, an
 # unrenderable diagram, or a skill instructing an agent to run a target that no longer exists.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

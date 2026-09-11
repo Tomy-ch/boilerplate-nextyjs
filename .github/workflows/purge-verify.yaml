@@ -31,8 +31,7 @@ name: Purge Verify
 # resolves every path literal in `e2e/**/*.spec.ts` against the routes that actually exist
 # under `src/app`, and it runs as part of `pnpm test:scripts` below — on the purged tree.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

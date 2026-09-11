@@ -15,8 +15,7 @@ name: Images Pin
 # same files but never the same lines — a `docker://` step is a registry
 # reference, which `actions-pin` cannot resolve through `git ls-remote`.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

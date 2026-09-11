@@ -10,9 +10,7 @@ name: Component Classes
 # src/components in the output. It is hermetic and caused by the change under review, so it gates
 # pull requests.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on every PR is in
-# README.md. A filtered workflow reports no context on the pull requests it skips, and a required
-# context that is never reported blocks the merge forever.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

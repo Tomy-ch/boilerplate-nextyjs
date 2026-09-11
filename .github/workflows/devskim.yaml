@@ -3,8 +3,7 @@ name: DevSkim Scan
 # DevSkim is a regex linter with no language front-end, so it reads every file in the
 # tree with one rule set. That is the whole reason it is here: opengrep goes deeper
 # but only reaches the languages it parses, so a weak cipher name
-# or a hardcoded credential in a file neither opens is currently seen by nothing
-#.
+# or a hardcoded credential in a file neither opens is currently seen by nothing.
 #
 # The overlap with opengrep is real and accepted. What is NOT overlapped is the set of
 # files opengrep never opens — YAML that is not a workflow, JSON, plain text, the
@@ -83,9 +82,7 @@ jobs:
         with:
           persist-credentials: false
 
-      # What cannot change this scan's answer. The list is the deny side on purpose: anything
-      # not named here still runs, so a missing entry costs one needless run while a wrong
-      # entry would leave a scanner reporting on nothing (see the note in the action).
+      # What cannot change this scan's answer — this job's own claim, not a shared default.
       # DevSkim's value is the files the other scanners never parse, so the list stays
       # short — only prose and agent configuration come off.
       - name: Decide whether the diff can reach this scan
@@ -109,20 +106,15 @@ jobs:
           dotnet tool install --global Microsoft.CST.DevSkim.CLI --version "${DEVSKIM_VERSION}"
           echo "${HOME}/.dotnet/tools" >> "${GITHUB_PATH}"
 
-      # Generated and vendored files are excluded because a finding there is not
-      # actionable — the fix belongs upstream in the contract or the generator.
-      # `--base-path` keeps the SARIF locations repository-relative.
+      # Generated and vendored files are excluded because a finding there is not actionable
+      # — the fix belongs upstream. `--base-path` keeps the SARIF locations repo-relative.
       #
-      # TEST FILES ARE EXCLUDED, and that is a considered exclusion rather than a
-      # convenience. A regex secret-detector reads a fixture SHA, a fake bearer token
-      # and a `http://localhost` target as findings, and in a test file every one of
-      # those is the normal case. The layer that watches test files for a REAL
-      # secret is gitleaks, which scans them and is fail-closed; leaving DevSkim on
-      # them would only bury the surfaces where its verdict means something.
+      # TEST FILES ARE EXCLUDED deliberately: a fixture SHA, a fake bearer token and a
+      # `http://localhost` target are the normal case there, and gitleaks already watches
+      # those files for a real secret, fail-closed.
       #
       # Excluded by path, never by rule id. A rule id switched off globally would take
-      # the same detection down on the files this scanner exists for
-      #.
+      # the same detection down on the files this scanner exists for.
       - name: Run the DevSkim scan
         if: steps.scope.outputs.relevant == 'true'
         shell: bash

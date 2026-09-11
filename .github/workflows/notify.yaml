@@ -207,9 +207,7 @@ jobs:
             echo "> Notification was not delivered: secret \`SLACK_WEBHOOK_URL\` is unset." >> "${GITHUB_STEP_SUMMARY}"
           fi
 
-      # ---------------------------------------------------------------------------
       # Backend-specific — part 2 of the split declared in the header.
-      # ---------------------------------------------------------------------------
       - name: Send to Slack
         if: ${{ steps.backend.outputs.configured == 'true' }}
         shell: bash

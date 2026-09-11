@@ -11,8 +11,7 @@ name: Smoke
 # run's Next.js cache rather than cold — the two run concurrently, so it is not this
 # PR's Build job it inherits from.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR.
 
 on:
   pull_request:

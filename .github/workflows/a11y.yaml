@@ -16,23 +16,16 @@ name: Accessibility
 #
 # No baseline images are needed, so the submodule is not fetched.
 #
-# Deliberately unfiltered by `paths`; the reason every CI Checks workflow runs on
-# every PR is in README.md. The job always starts and then asks two questions before it
-# spends anything, so the context is reported even when the expensive steps stand down.
+# No `paths:` filter, deliberately — README.md says why every workflow runs on every PR. The
+# job always starts and then asks two questions before it spends anything, so the context is
+# reported even when the expensive steps stand down.
 #
-# ## Why this does not run on every pull request
+# ## Deferred, and the three layers below it
 #
-# The cost is `stories x seconds`: the per-story work dominates, so it grows with the
-# catalogue, and only a small share of the runs finds a violation. Paying the whole
-# catalogue on every push to change the merge decision that rarely is the wrong trade.
-#
-# So the cadence moves instead of the coverage, exactly as `lighthouse.yaml` does. Every
-# story is still checked, in both themes, against the same rules — on every merge into a
-# protected branch and once a night. What a pull request gives up is one merge of detection
-# latency, and `check-trigger` lists the four events that buy it back.
-#
-# Both questions have to say yes, and a third layer sits below them — the input hash
-# `make a11y` computes. What each layer decides is in `vrt/README.md`.
+# The expensive steps stand down on an ordinary pull request; the cadence that replaces them
+# is README.md § 先送りにする検査. Both questions this job asks have to say yes, and a third
+# layer sits below them — the input hash `make a11y` computes. What each layer decides is in
+# `vrt/README.md`.
 
 on:
   pull_request:
@@ -166,11 +159,8 @@ jobs:
           # about this project, and a standard runner has four cores on a public repository
           # but two on a private one — which is what a repository created from this template
           # gets.
-          # Stream through `tee` rather than redirecting to a file and tailing at the end.
-          # A run that is cancelled or hits the job timeout never reaches the tail, so the
-          # exact case worth diagnosing — the slow one — is the case that leaves no log at
-          # all. Streaming also gets every line stamped with the runner's clock, which is
-          # what tells apart a slow Storybook build, a slow image pull and a slow run.
+          # Streamed for the same reason as `vrt.yaml`: a cancelled or timed-out run must
+          # still leave a log behind, stamped with the runner's clock.
           make a11y VRT_ARGS=--workers=100% 2>&1 | tee /tmp/a11y-full.log
           code=${PIPESTATUS[0]}
 

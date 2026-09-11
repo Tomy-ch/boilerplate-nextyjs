@@ -25,8 +25,8 @@ name: Bundle Budget
 # rather than reporting a failure that belongs to the base branch.
 #
 # The job always starts and then asks `diff-scope` whether the diff can reach the bundle, so
-# the required context is reported even when the expensive steps stand down. A `paths:` filter
-# would not report it at all and would block the pull request forever (README.md).
+# the required context is reported even when the expensive steps stand down. No `paths:`
+# filter, deliberately — README.md says why.
 
 on:
   pull_request:

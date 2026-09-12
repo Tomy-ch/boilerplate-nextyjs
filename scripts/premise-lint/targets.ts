@@ -48,15 +48,7 @@ export const SCANNED_PATHS: readonly string[] = [
  * コメントを持てる形式だけです。`.json` はコメントを持てないので入れません —— 入れると、値に
  * 現れた綴りを前提として報告することになります。
  */
-export const SCANNED_EXTENSIONS: readonly string[] = [
-  ".md",
-  ".ts",
-  ".tsx",
-  ".mk",
-  ".sh",
-  ".yaml",
-  ".yml",
-];
+const SCANNED_EXTENSIONS: readonly string[] = [".md", ".ts", ".tsx", ".mk", ".sh", ".yaml", ".yml"];
 
 /**
  * 走査から外すパスと、その理由。

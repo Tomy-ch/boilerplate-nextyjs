@@ -5,11 +5,12 @@
 // 選べるが、boilerplate 限定の散文はテンプレートから作った時点で前提が失効するので選択の余地が無い。
 
 import path from "node:path";
-
+import { dropOrphanedPins } from "../lib/actions-pin.js";
+import { dropOrphanedEndpoints } from "../lib/egress-declaration.js";
 import { listFilesRecursive, removeTarget, toRelativePath, updateFile } from "../lib/file-utils.js";
 import { stripMarkers } from "../lib/markers.js";
 import { exitWithUsage, parseCommonFlags, ROOT_DIR } from "../lib/runtime.js";
-import { dropOrphanedEndpoints, ORPHANED_WORKFLOWS } from "./egress.js";
+import { ORPHANED_WORKFLOWS } from "./egress.js";
 import {
   ACTIONS_PIN_LOCK_FILE,
   BINARY_EXTENSIONS,
@@ -19,7 +20,7 @@ import {
   EXCLUDED_PATH_PREFIXES,
   SELF_DESTRUCT_PATHS,
 } from "./manifest.js";
-import { dropOrphanedPins, ORPHANED_ACTIONS } from "./pins.js";
+import { ORPHANED_ACTIONS } from "./pins.js";
 import { isStripTarget } from "./strip-target.js";
 
 function printUsage(): void {

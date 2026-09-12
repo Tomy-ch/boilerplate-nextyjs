@@ -2,6 +2,7 @@
 .PHONY: setup-repo ## リポジトリの初期化
 .PHONY: setup-replace-license-copyright ## LICENSEの著作権表示を更新
 .PHONY: setup-replace-repository-reference ## リポジトリ参照とプロジェクト名をテンプレートから作った側へ置換
+.PHONY: setup-remove-licensed-scanners ## 資格情報を要するスキャナを撤去
 # boilerplate-only:begin
 .PHONY: setup-remove-boilerplate-only ## boilerplate 限定の記述を剥がす
 # boilerplate-only:end
@@ -129,6 +130,17 @@ setup-replace-repository-reference:
 		--repository "$$REPOSITORY" \
 		$${PORTAL_URL:+--portal-url "$$PORTAL_URL"} \
 		$(SETUP_DRY_RUN_FLAG)
+
+# 資格情報を要するスキャナ（CodeQL / SonarQube Cloud / Dependency Review）の撤去。
+#
+# 剥がしと違い、**これは選択である**。3 つが要求するのはライセンス・ベンダーのトークン・
+# Dependency graph の有効化で、どれも設定の判断であってコードの判断ではない。決めるまでの間に
+# 壊れるものは無い —— 必要なものが無ければ各 workflow は自分を飛ばして緑を返す。
+#
+# スクリプトは製品ごとに別のコミットへ分ける。後からライセンスを得たら git revert 1 回で戻せる
+# ので、作業ツリーはクリーンである必要がある。
+setup-remove-licensed-scanners:
+	@pnpm exec tsx scripts/setup/remove-licensed-scanners $(SETUP_DRY_RUN_FLAG) $(if $(SCANNER),--only $(SCANNER),)
 
 # boilerplate-only:begin
 # boilerplate 限定の記述（この template を配る側にしか意味を持たない規則・注記）を剥がす。

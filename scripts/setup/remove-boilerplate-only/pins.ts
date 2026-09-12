@@ -1,5 +1,5 @@
 /**
- * 剥がしで参照が消える action pin の除去。
+ * 剥がしで参照が消える action pin。判定は [lib](../lib/actions-pin.ts) が持つ。
  *
  * @remarks
  * `.github/actions-pin.toml` は「どの workflow も参照しないエントリ」で
@@ -23,17 +23,3 @@
  * ここへ書く場所を探さずに済むためです。
  */
 export const ORPHANED_ACTIONS: readonly string[] = [];
-
-/**
- * 孤児になる pin の行を落とす。
- *
- * @param text - `.github/actions-pin.toml` の中身。
- * @param actions - 落とす action の名前。
- * @returns 書き戻す中身。落とす行が無ければ元のまま。
- */
-export function dropOrphanedPins(text: string, actions: readonly string[]): string {
-  const lines = text.split("\n");
-  const kept = lines.filter((line) => !actions.some((action) => line.startsWith(`"${action}@`)));
-
-  return kept.length === lines.length ? text : kept.join("\n");
-}

@@ -26,12 +26,15 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   "scripts/setup/remove-boilerplate-only",
   // 剥がしそのものを検証する CI。理由は冒頭の @remarks が持つ。
   ".github/workflows/strip-verify.yaml",
+  // 上流でしか成り立たない記述を 1 本に集めた文書。残る側にはその指し先しか置かず、指し先は
+  // 行ごと消えるので、本体はここで消す以外に消える道が無い。
+  "docs/get-started/boilerplate-only-conventions.md",
   // マーカー行数のベースライン。守っているのはマーカーを**書く側**で、書く場面は上流にしかない。
   // 剥がしが済んだツリーにはもう見張る対象が居らず、残せば永久に緑のままの検査が増えるだけになる。
   // サンプル破棄（`scripts/setup/remove-sample`）は、これが先に走った場合に備えて、引き直しを
   // 存在の確認で囲んである。
   "scripts/marker-baseline",
-  // この状態を生んだ計画であって、状態そのものではない。[0140](docs/adr/0140-documentation-operations.md)
+  // この状態を生んだ計画であって、状態そのものではない。[0140](../../../docs/adr/0140-documentation-operations.md)
   // は v1.0.0 で削除すると決めており、それより前に複製された木へ渡す理由も無い。
   "docs/plan",
   // 上の計画の PR 1 行を issue 1 件へ写すための雛形。計画が消えれば指す先が無い。

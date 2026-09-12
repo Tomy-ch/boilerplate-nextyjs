@@ -54,7 +54,7 @@ Accepted
 - **置き場は兄弟**であって `docs/ja/` ではない。[0140](0140-documentation-operations.md) の並行ツリーは `docs/**` の話で、`AGENTS.md` はその外に在る。canonical を英語で持つ文書は `SKILL.md` とこれだけであり、対訳も `SKILL.ja.md` と同じ置き方をする
 - **追従の向きは canonical が先**である。知識を探すのも判定を当てるのも書き換えるのも `AGENTS.md` に対して行い、対訳を inline で直さない
 - **ペアの見出し構造は `scripts/skill-lint` が 1:1 で検査する**。宣言だけでは対訳の遅れを検出できない([0144](0144-decision-enforcement-pairing.md))。訳文が同じことを言っているかは機械では判定できないので、そこは未検査として skill-lint 自身が名指しする
-- **`BEGIN-END` マーカーは対訳へ持ち込まない**。あれは Next.js が `AGENTS.md` へ生成する範囲の境界であり（下記「BEGIN-END マーカー」）、対訳へは何も生成されない。一方、`boilerplate-only` の指し先の行（下記の同名の節）は両側が同じ位置に持つ —— 片側だけが剥がれると、複製されたリポジトリで英語と日本語が違うことを言う
+- **`BEGIN-END` マーカーは対訳へ持ち込まない**。あれは Next.js が `AGENTS.md` へ生成する範囲の境界であり（下記「BEGIN-END マーカー」）、対訳へは何も生成されない
 
 ## 構成 (節構造)
 
@@ -98,6 +98,9 @@ Accepted
 
 **残る側に置いてよいのは指し先だけ**で、`boilerplate-only:line` を持つ自己完結した 1 行にする。行
 ごと消えるので、前後の文に手が掛からない。**節の本文を囲んで残す形は採らない。**
+
+**対訳のある文書では、指し先の行を両側が同じ位置に持つ。** 片側だけが剥がれると、複製された
+リポジトリで英語と日本語が違うことを言う。
 
 マーカーの形は `sample` 族と同一で、`boilerplate-only:begin` / `:end` / `:line` /
 `:replace-begin` / `:replace-with` / `:replace-end` を持つ。機構は `scripts/setup/lib/markers.ts`

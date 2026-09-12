@@ -49,6 +49,7 @@
   "scripts/lib/untested-modules.ts": 15,
   "scripts/premise-lint/scan.test.ts": 12,
   "scripts/premise-lint/scan.ts": 6,
+  "scripts/premise-lint/targets.ts": 3,
   "scripts/setup/lib/markers.test.ts": 11,
   "src/adapters/README.md": 5,
   "src/adapters/server/auth/resolver.test.ts": 3,

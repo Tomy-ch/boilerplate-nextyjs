@@ -1,8 +1,10 @@
 // どの文書を見るかの宣言。走査そのものは入口([index.ts](index.ts))が持つ。
+// boilerplate-only:begin
 //
 // 見るのは**残る側**である。前提を書いてよいのは前提と一緒に捨てられる文書だけで、それは
 // `docs/get-started/` と、そこが集めた [boilerplate 限定の規約](../../docs/get-started/boilerplate-only-conventions.md)
 // である（[`docs/rules.md`](../../docs/rules.md)）。
+// boilerplate-only:end
 
 /**
  * 走査するパス（リポジトリルート相対）。ディレクトリなら配下を再帰で見る。
@@ -76,7 +78,7 @@ export const EXCLUDED_PATHS: Readonly<Record<string, string>> = {
   ".github/release": "リリースノート。`make setup-repo` が初期化で消す",
   ".claude/worktrees": "別ブランチの作業ツリー。このリポジトリのソースではない",
   "scripts/marker-baseline": "マーカーの形を入力として持つ区画",
-  "scripts/setup/remove-boilerplate-only": "剥がしの道具そのもの。剥がしと一緒に消える",
+  "scripts/setup/remove-boilerplate-only": "剥がしの道具そのもの。剥がしと一緒に消える", // boilerplate-only:line
   "scripts/setup/remove-sample": "破棄の道具そのもの。破棄と一緒に消える",
   "scripts/setup/lib/markers.test.ts": "マーカーの形を入力として持つ",
   "scripts/premise-lint": "前提の綴りを入力として持つ検査そのもの",

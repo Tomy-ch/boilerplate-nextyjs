@@ -2,8 +2,7 @@
 
 // 残る文書に、その文書より先に失効する前提が書かれていないかを検査する入口。
 //
-// 規約は [`docs/rules.md`](../../docs/rules.md)「コメントと文書」が持ち、そこに**この検査へ移す**
-// と書いてある —— それまでは純化パスの通過が肩代わりしており、あの機構は台帳が埋まると消える。
+// 規約は [`docs/rules.md`](../../docs/rules.md)「コメントと文書」が持つ。
 import fs from "node:fs";
 import path from "node:path";
 
@@ -78,9 +77,7 @@ function main(): void {
 
   console.error(`✘ premise-lint: ${premises.length} 件の前提`);
   report(premises);
-  console.error(
-    "\n  前提を書いてよいのは、前提と一緒に捨てられる文書（README.md / docs/get-started/）だけ。",
-  );
+  console.error("\n  前提を書いてよいのは、前提と一緒に捨てられる文書（docs/get-started/）だけ。");
   console.error("  残る文書では、決定として書き直すか、剥がしのマーカーで囲う。");
   console.error(`\n  ${note}`);
   process.exit(1);

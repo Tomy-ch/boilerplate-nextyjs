@@ -28,7 +28,7 @@ type Failure = {
 };
 
 // 依存ロード（環境セットアップ）。ここで失敗した場合は mermaid 図の文法問題ではなく
-// 「環境未整備」なので、生のスタックトレースではなく原因と対処を明示して exit 2
+// 「依存が揃っていない」なので、生のスタックトレースではなく原因と対処を明示して exit 2
 // （lint 失敗の exit 1 と区別）で落とす。
 async function loadMermaid(): Promise<MermaidApi> {
   try {

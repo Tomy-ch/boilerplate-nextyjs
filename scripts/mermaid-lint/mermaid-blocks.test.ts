@@ -55,23 +55,23 @@ describe("extractMermaidBlocks", () => {
 
 describe("isDependencyMissing", () => {
   // ----- 正常系 -----
-  it("モジュール解決の失敗コードを依存未整備として扱う", () => {
+  it("モジュール解決の失敗コードを依存の欠落として扱う", () => {
     const error = Object.assign(new Error("失敗"), { code: "ERR_MODULE_NOT_FOUND" });
 
     expect(isDependencyMissing(error)).toBe(true);
   });
 
-  it("文言から依存未整備を読み取る", () => {
+  it("文言から依存の欠落を読み取る", () => {
     expect(isDependencyMissing(new Error("Cannot find package 'mermaid'"))).toBe(true);
     expect(isDependencyMissing(new Error("cannot find module 'linkedom'"))).toBe(true);
   });
 
   // ----- 異常系 -----
-  it("それ以外の失敗は依存未整備として扱わない", () => {
+  it("それ以外の失敗は依存の欠落として扱わない", () => {
     expect(isDependencyMissing(new Error("想定外"))).toBe(false);
   });
 
-  it("null と undefined は依存未整備として扱わない", () => {
+  it("null と undefined は依存の欠落として扱わない", () => {
     expect(isDependencyMissing(null)).toBe(false);
     expect(isDependencyMissing(undefined)).toBe(false);
   });

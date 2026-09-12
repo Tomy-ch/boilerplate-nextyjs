@@ -25,7 +25,7 @@ export type PremiseShape = {
 export const PREMISE_SHAPES: readonly PremiseShape[] = [
   {
     name: "同梱サンプルの現存",
-    why: "サンプルは破棄されて渡るので、作った側では最初から在りません",
+    why: "サンプルは破棄されて渡るので、複製された側では最初から在りません",
     phrases: [
       "同梱のサンプル",
       "同梱されたサンプル",
@@ -37,7 +37,7 @@ export const PREMISE_SHAPES: readonly PremiseShape[] = [
   },
   {
     name: "整備が途中であること",
-    why: "作った側が受け取るのは完成した 1 つの状態で、こちらの作業の進み方は見えません",
+    why: "受け取るのは完成した 1 つの状態で、そこへ至る作業の進み方は見えません",
     phrases: [
       "未整備",
       "整備中",
@@ -47,6 +47,21 @@ export const PREMISE_SHAPES: readonly PremiseShape[] = [
       "後続のリリース",
       "今後追加",
       "仮置き",
+    ],
+  },
+  {
+    name: "配る側の視点",
+    why: "テンプレートから作った時点で、読み手自身がその「作った側」になります。三人称で指す記述はそこで宛先を失います",
+    phrases: [
+      "作った側",
+      "配る側",
+      "テンプレートから作った",
+      "テンプレートから作られた",
+      "ボイラープレート",
+      "本 boilerplate",
+      "この boilerplate",
+      "boilerplate 本体",
+      "boilerplate 限定",
     ],
   },
 ];

@@ -215,7 +215,7 @@ EOF
 ### Commit message rules
 
 - **Title**: `<Prefix>: <Japanese title>`, aim for 50 characters or fewer.
-- **Body**: Optional. If present, leave one blank line after the title and wrap around 72 characters. Prefer "why" over "what".
+- **Body**: Optional. If present, leave one blank line after the title and wrap around 72 characters. Prefer "why" over "what". **What the body carries is the change's background, never the run's footsteps** — 「前は壊れていた」/「〜を直した」 is already in the diff, and when it points at a state this same pull request produced, that fact never happened as far as the base is concerned. Write the post-change present tense: what stands now, and why it takes that shape (`docs/rules.md`, *作業とエージェント* / [0150](../../../docs/adr/0150-git-workflow.md)).
 - **Language**: Japanese (per the output rule in `AGENTS.md`).
 - **`Co-Authored-By` footer**: Required, in the form `Co-Authored-By: <running model name> <noreply@anthropic.com>` — e.g. `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`. Use the identifier of the model actually producing the commit, as given by the environment. Do not copy a model name hardcoded in this document: it goes stale at every model release, and a wrong name misattributes the commit.
 - **`Refs:` footer (review-applied commits only)**: when a commit applies a finding from `full-apply` / `impl-review` / `code-review`, add a `Refs: tmp/reviews/mod_*.md (<severity>)` line in the footer so the commit links to the finding. Omit it for ordinary commits.

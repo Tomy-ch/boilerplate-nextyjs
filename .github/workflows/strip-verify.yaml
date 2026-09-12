@@ -121,6 +121,13 @@ jobs:
 
   strip-verify:
     needs: strip-verify-shard
+    # Runs whatever the shards did, because the shards report through their blob alone (the
+    # note on their suite step). Without this the collector is skipped on a failing shard and
+    # the test that broke is never replayed — a reader gets `Error 1` and nothing else.
+    #
+    # Not a bare `always()`: this context is not required, so a cancelled run has nothing it
+    # owes the pull request (`test.yaml` states the other side).
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

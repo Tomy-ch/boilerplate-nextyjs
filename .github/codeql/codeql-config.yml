@@ -1,16 +1,15 @@
 name: 'CodeQL config'
 
-# security-extended trades a higher false-positive rate for recall. Declared here
-# rather than on the init step so the suite is stated in one place.
+# security-extended は誤検出の増加と引き換えに再現率を取る。init のステップではなくここで
+# 宣言するのは、走らせる suite を 1 箇所で言うため。
 queries:
   - uses: security-extended
 
 paths-ignore:
-  # Dependencies. Their own advisories are the dependency scan's subject, not SAST's.
+  # 依存。その脆弱性は依存スキャンの subject であって SAST のものではない。
   - '**/node_modules'
-  # Generated from the API contract. Nobody edits them, so a finding here
-  # is not actionable — it belongs upstream in the contract or the generator.
+  # API 契約からの生成物。書き手が居ないので、ここの所見は直せない —— 直す先は契約か生成器である。
   - src/adapters/gen
   - mocks/api
-  # Build output of the docs viewer; its TypeScript sources are analyzed instead.
+  # ドキュメントビューアーのビルド出力。解析するのは TypeScript のソースの側。
   - '**/dist'

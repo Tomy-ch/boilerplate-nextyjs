@@ -177,7 +177,7 @@ When in doubt, defer. Deferral is not a demerit; leaving a reason is the value.
 
 ## Step 5. Verify
 
-**Do not pre-run the gates** (`AGENTS.md` § Do not pre-run the gates): the pre-commit / pre-push hooks
+**Do not pre-run the gates** (`docs/playbook.md`「ゲートを先回りして回さない」): the pre-commit / pre-push hooks
 and CI run the lint profile, the coverage-gated test suite, and the type check, and CI is the
 authority. Running `pnpm lint` / `pnpm build` / `make test-full` by hand before committing spends the
 time twice and, on a loaded host, produces failures that have nothing to do with the fix.

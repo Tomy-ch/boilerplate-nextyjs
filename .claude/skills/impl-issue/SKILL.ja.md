@@ -166,7 +166,7 @@ PR で終わる実行は、他のモードが統べる段へそもそも届か�
 | `ask` *(既定)* | 表に出して待つ。その問いで実行が止まる |
 | `derive` | まず ADR・`docs/rules.md`・層の README を読み、それらが開いたままにしている分は、デファクトスタンダード（RFC / 仕様 / プラットフォーム自身の定義）から決めて、導出を記録する |
 
-**`derive` は好みを許可しない。** `AGENTS.md` の *What to Recommend* が権威をちょうど 2 つ —— デファクト
+**`derive` は好みを許可しない。** [0010](../../../docs/adr/0010-standards-and-non-lockin.md) が権威をちょうど 2 つ —— デファクト
 スタンダードと、このリポジトリのアーキテクチャが導出する形 —— と名指しており、このモードが委譲する
 のはその 2 つだけである。どちらでも答えられない問いは導出できないので、モードに関わらず人へ戻る。
 導出はすべて、依拠した一節とともに run record へ書く。読み手が作業を繰り返さずに反対できるように。
@@ -378,17 +378,6 @@ ADR [0155](../../../docs/adr/0155-claude-skills-development.md) を見よ。
 
 ## Step 4 —— 5 つの trip-wire を見ながら実装する
 
-<!-- boilerplate-only:begin -->
-計画が承認され実装が始まる —— 決めることと作ることの境界であり、これを知っているのは本スキルだけ
-である。打刻して、このリポジトリ自身のフィードバックループが各段の実時間を後から言えるようにする
-（ADR [0161](../../../docs/adr/0161-development-window-as-feedback-unit.md)）。
-
-```sh
-.agents/closed-loop/marks.sh planApprovedAt 2>/dev/null || true
-.agents/closed-loop/marks.sh implStartedAt 2>/dev/null || true
-```
-<!-- boilerplate-only:end -->
-
 承認された計画に従う。引き金は意図して機械的である —— 判断が重大だったと**気づく**ことをあなたに
 頼るのが、まさに逸脱が報告されない仕組みだからである。
 
@@ -425,7 +414,7 @@ ADR [0155](../../../docs/adr/0155-claude-skills-development.md) を見よ。
 
 ## Step 6 —— ゲートは hook と CI のものである
 
-**ゲートを先回りして回さない。** `AGENTS.md` も `docs/playbook.md` も、権威を hook と CI に置いている。
+**ゲートを先回りして回さない。** `docs/playbook.md` が権威を hook と CI に置いている。
 同じ検査を手で回しても結果はより正しくならず、混んだ機械では二重実行そのものが、変更と無関係な失敗の
 源になる。commit し、push し、判定を読む。
 
@@ -525,14 +514,6 @@ gh pr checks <n>
 ```sh
 gh pr merge <n> --merge
 ```
-
-<!-- boilerplate-only:begin -->
-打刻する —— ここで行う merge は、ループが `gh` を見に戻るまで他の誰にも観測されない。
-
-```sh
-.agents/closed-loop/marks.sh mergedAt 2>/dev/null || true
-```
-<!-- boilerplate-only:end -->
 
 ## Step 9 —— 締める
 

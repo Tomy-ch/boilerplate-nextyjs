@@ -189,7 +189,7 @@ keeps behind a human gate unconditionally.
 | `ask` *(default)* | Surface it and wait. The run stops on the question |
 | `derive` | Read the ADRs, `docs/rules.md`, and the layer READMEs first; for what they leave open, decide from the de-facto standard (RFC / specification / the platform's own definition) and record the derivation |
 
-**`derive` does not authorize preference.** `AGENTS.md`, *What to Recommend* names exactly two
+**`derive` does not authorize preference.** [0010](../../../docs/adr/0010-standards-and-non-lockin.md) names exactly two
 authorities — a de-facto standard, and the shape this repository's architecture derives — and this
 mode delegates only those. A question that neither answers is not derivable, and it goes back to the
 user however the mode is set. Every derivation is written to the run record with the clause it rested
@@ -405,17 +405,6 @@ Present the plan and **wait for approval. Do not implement before it.** That app
 
 ## Step 4 — Implement, watching five trip-wires
 
-<!-- boilerplate-only:begin -->
-The plan is approved and implementation begins — the boundary between deciding and building, which
-only this skill knows. Stamp it, so this repository's own feedback loop can later say how long each
-phase actually took (ADR [0161](../../../docs/adr/0161-development-window-as-feedback-unit.md)):
-
-```sh
-.agents/closed-loop/marks.sh planApprovedAt 2>/dev/null || true
-.agents/closed-loop/marks.sh implStartedAt 2>/dev/null || true
-```
-<!-- boilerplate-only:end -->
-
 Follow the approved plan. These triggers are deliberately mechanical — relying on you to *notice* that
 a decision was significant is exactly how drift goes unreported.
 
@@ -453,7 +442,7 @@ nothing drifted, say so in one line and move on.
 
 ## Step 6 — Gates belong to the hook and to CI
 
-**Do not pre-run the gates.** `AGENTS.md` and `docs/playbook.md` both put the authority in the hook and
+**Do not pre-run the gates.** `docs/playbook.md` puts the authority in the hook and
 in CI, and running the same check by hand does not make its result more true — on a loaded machine the
 duplicate run is itself a source of failures unrelated to the change. Commit, push, and read the verdict.
 
@@ -557,14 +546,6 @@ Then merge:
 ```sh
 gh pr merge <n> --merge
 ```
-
-<!-- boilerplate-only:begin -->
-Stamp it — a merge performed here is observed by nobody else until the loop goes back to `gh` for it:
-
-```sh
-.agents/closed-loop/marks.sh mergedAt 2>/dev/null || true
-```
-<!-- boilerplate-only:end -->
 
 ## Step 9 — Close out
 

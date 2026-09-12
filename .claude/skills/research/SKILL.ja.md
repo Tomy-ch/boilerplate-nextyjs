@@ -36,7 +36,7 @@ canonical はこのディレクトリの `SKILL.md`（英語）。規約の正�
 **軸を先に固定することだけが防御**であり、それは**どの案を挙げるより前**に起きなければならない。
 
 **コストが答えを選ぶ。**「30 ファイル触ることになる」が、いつのまにか決め手の論拠になる。
-`AGENTS.md` の *What to Recommend* は、ここでは**品質と一貫性がそこへ到達するコストに優る**こと、
+[0010](../../../docs/adr/0010-standards-and-non-lockin.md) は、**品質と一貫性がそこへ到達するコストに優る**こと、
 そしてコストは「人が方向を保ったまま範囲を断れるように」述べるものだと明言している。
 **コストを述べることは必須で、コストに選ばせることは違う。**
 
@@ -141,7 +141,7 @@ graphify affected <symbol>                             # その前例に何が�
 | --- | --- |
 | デファクトへの適合 / 非ロックイン | [0010](../../../docs/adr/0010-standards-and-non-lockin.md) |
 | 採用アーキテクチャからの導出 | [0020](../../../docs/adr/0020-adopted-architecture.md) / [0021](../../../docs/adr/0021-frontend-responsibility.md) / `architecture.ts` |
-| テンプレート適用時の状態としての純粋さ | `AGENTS.md` § What to Recommend |
+| いまの状態としての純粋さ | [0010](../../../docs/adr/0010-standards-and-non-lockin.md) §3 |
 | 依存を足す問いなら、選定基準 | [0004](../../../docs/adr/0004-library-management.md) と [`.github/pull_request_template.md`](../../../.github/pull_request_template.md) の依存欄 |
 
 CI のゲートについての問いはアーキテクチャの軸で決まらない。ライブラリを足す問いはほとんど最後の行で

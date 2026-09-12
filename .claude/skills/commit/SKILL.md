@@ -19,7 +19,7 @@ You have been invoked via `/commit`. Argument string: `$ARGUMENTS`
 
 This command analyzes uncommitted changes in the working tree and produces one or more git commits with appropriate granularity and the project's prefix convention. All commit messages are in Japanese, per `AGENTS.md`.
 
-This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` do not fire once per commit during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
+This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` do not fire once per commit during multi-commit splits. They are not run afterwards either: `docs/playbook.md`'s *ゲートを先回りして回さない* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
 
 ## Step 0. Auto-format
 
@@ -243,7 +243,7 @@ If `git add` or `git commit` fails for any group (file-path typo, mid-operation 
 ## Step 6. Verification
 
 <!-- boilerplate-only:replace-begin -->
-**Do not run the gates here.** `AGENTS.md`'s *Do not pre-run the gates* is explicit that the hooks and
+**Do not run the gates here.** `docs/playbook.md`'s *ゲートを先回りして回さない* is explicit that the hooks and
 CI run them and that **CI is the authority**; running `pnpm lint:ci` / `pnpm lint:md` over the whole
 repository after committing does not make the verdict more true, and on a loaded host the duplicate
 run is itself a source of failures that have nothing to do with the change. `make load-status` prints

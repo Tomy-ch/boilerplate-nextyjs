@@ -67,7 +67,6 @@ semantic findings point at. The reviewer subagents stay read-only; the orchestra
 
 ## Step 0. Resolve Scope
 
-Stamp the boundary this run crosses before anything else: `.agents/closed-loop/marks.sh reviewStartedAt`. <!-- boilerplate-only:line -->
 
 `AskUserQuestion`:
 

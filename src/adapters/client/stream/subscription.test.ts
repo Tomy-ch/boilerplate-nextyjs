@@ -343,6 +343,34 @@ describe("openStream", () => {
     expect(stream.latest()?.closed).toBe(true);
   });
 
+  it("位置を持たない購読は、取り直しの合図を出した後も自分で張り直す", async () => {
+    const stream = harness({ cursor: null });
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onControl(control("RESYNC"));
+    stream.runTimers();
+    await settle();
+
+    expect(stream.resyncs()).toBe(1);
+    expect(stream.sources).toHaveLength(2);
+  });
+
+  it("位置を持たない購読は、張り直しに掴んでいた位置を持ち越さない", async () => {
+    const stream = harness({ cursor: null });
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onEvent(envelope(7));
+    stream.runTimers();
+    stream.latest()?.handlers.onControl(control("RESYNC"));
+    stream.runTimers();
+    await settle();
+
+    expect(stream.sources).toHaveLength(2);
+    expect(stream.latest()?.url).toBe(STREAM_URL);
+  });
+
   it("取り直しを待つあいだに重ねて遅れが届いても、求めるのは 1 度だけ", async () => {
     const stream = harness({ cursor: 5 });
 

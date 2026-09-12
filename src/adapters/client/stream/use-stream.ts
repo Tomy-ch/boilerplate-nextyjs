@@ -26,7 +26,13 @@ export type UseStreamOptions<T> = {
   readonly schema: $ZodType<T>;
   /** 整列済みの event を受け取る。最新の関数がそのまま呼ばれる。 */
   readonly onEvents: (events: readonly T[]) => void;
-  /** 正本を取り直す。取り直した位置を {@link UseStreamResult.resume} へ渡す。 */
+  /**
+   * 正本を取り直す。取り直した位置を {@link UseStreamResult.resume} へ渡す。
+   *
+   * @remarks
+   * **{@link UseStreamOptions.initialCursor} が `null` の購読では渡す位置がありません。**
+   * 取り直しを合図した購読は、そのまま発券が束ねた位置から張り直します。
+   */
   readonly onResync: () => void;
   /** 購読する条件が揃っているか。揃うまで接続しない。 */
   readonly enabled?: boolean;

@@ -160,6 +160,23 @@ describe("InquiryConversation", () => {
     expect(screen.getAllByText(settled.body)).toHaveLength(1);
   });
 
+  it("取り直した正本の位置が変わらなくても、購読を再開する", () => {
+    const { rerender } = render(<InquiryConversation history={HISTORY} />);
+
+    act(() => lastOptions().onResync());
+    rerender(<InquiryConversation history={{ ...HISTORY }} />);
+
+    expect(resume).toHaveBeenCalledWith(String(HISTORY.streamCursor));
+  });
+
+  it("求めていない取り直しでは、位置が同じまま購読を張り直さない", () => {
+    const { rerender } = render(<InquiryConversation history={HISTORY} />);
+
+    rerender(<InquiryConversation history={{ ...HISTORY }} />);
+
+    expect(resume).not.toHaveBeenCalled();
+  });
+
   it("最初の描画では購読を張り直さない", () => {
     render(<InquiryConversation history={HISTORY} />);
 

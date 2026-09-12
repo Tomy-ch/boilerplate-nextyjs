@@ -118,6 +118,9 @@ export type OpenStreamOptions<T> = {
    * @remarks
    * 窓を越えて遅れた event を見つけたときと、サーバがそう指示したときに呼びます。取り直した
    * 位置を {@link StreamSubscription.resume} へ渡すまで、購読は張り直しません。
+   *
+   * **{@link OpenStreamOptions.cursor} が `null` の購読は待ちません。** 取り直しても位置は
+   * 返ってこないため、掴んでいた位置を捨てて発券が束ねた位置から自分で張り直します。
    */
   readonly onResync: () => void;
   readonly deps?: Partial<StreamDeps>;
@@ -249,8 +252,17 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
   const deps = { ...browserDeps(), ...options.deps };
   const window = createOrderingWindow(options.cursor ?? STREAM_ORIGIN);
 
+  /**
+   * 取り直す位置を持つ購読か。
+   *
+   * @remarks
+   * 位置を返さない口では、取り直しを求めても再開の位置が返ってきません。待ち続ける相手が
+   * 居ないため、この区別が無いと購読は取り直しの合図を出したところで止まります。
+   */
+  const positioned = options.cursor !== null;
+
   // 開始位置を渡して繋ぐかどうか。1 件でも受け取れば、以降は自分が流した位置から張り直す。
-  let anchored = options.cursor !== null;
+  let anchored = positioned;
 
   let connection: StreamConnection | null = null;
   let source: StreamSource | null = null;
@@ -335,9 +347,19 @@ export function openStream<T>(options: OpenStreamOptions<T>): StreamSubscription
       return;
     }
 
-    awaitingResync = true;
     clearReconnect();
     closeSource();
+
+    if (!positioned) {
+      anchored = false;
+      window.resume(STREAM_ORIGIN);
+      scheduleReconnect();
+      options.onResync();
+
+      return;
+    }
+
+    awaitingResync = true;
     emit({ kind: "reconnecting" });
     options.onResync();
   }

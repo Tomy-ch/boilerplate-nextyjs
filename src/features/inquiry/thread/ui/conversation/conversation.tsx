@@ -75,6 +75,7 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
   );
   const [idempotencyKey, setIdempotencyKey] = useState(newIdempotencyKey);
   const [seenState, setSeenState] = useState(state);
+  const retaking = useRef(false);
 
   // 成立した送信は、次の 1 通と同じ鍵で飛ばない。通らなかった送信を送り直す間は同じ鍵のままに
   // して、応答が届かなかっただけの送信が 2 通にならないようにする。
@@ -95,6 +96,7 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
       setAppended((current) => [...current, ...events.map(toInquiryMessage)]);
     },
     onResync: () => {
+      retaking.current = true;
       router.refresh();
     },
   });
@@ -102,14 +104,17 @@ export function InquiryConversation({ history }: InquiryConversationProps) {
   const applied = useRef(history.streamCursor);
 
   useEffect(() => {
-    if (applied.current === history.streamCursor) {
+    // 求めた取り直しは、位置が動かない正本で返ることがある。位置の変化だけを合図にすると、
+    // その往復では誰も再開を告げず、購読は張り直しを待ったまま止まる。
+    if (!retaking.current && applied.current === history.streamCursor) {
       return;
     }
 
+    retaking.current = false;
     applied.current = history.streamCursor;
     setAppended((current) => pruneApplied(current, history.streamCursor));
     resume(toStreamCursor(history.streamCursor));
-  }, [history.streamCursor, resume]);
+  }, [history, resume]);
 
   const send = useCallback(
     (formData: FormData) => {

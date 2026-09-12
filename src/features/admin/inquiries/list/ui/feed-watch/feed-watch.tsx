@@ -23,7 +23,8 @@ import { toFeedConnectionStatus } from "../../../connection-status";
  *
  * **開始位置を渡しません。** 一覧の取得はフィードの位置を返さないため、購読は発券が束ねた位置
  * から始まります。繋ぎ直しの前後で取りこぼした更新は次の更新で取り返され、取り返される前に
- * 見えているのは 1 回ぶん古い一覧です。
+ * 見えているのは 1 回ぶん古い一覧です。取り直しを求められたときに再開の位置を返さないのも
+ * 同じ理由で、購読はそれを見込んで自分で張り直します。
  */
 export const AdminInquiryFeedWatch = withPartSpan(
   "features/admin/inquiries/list/ui/feed-watch/feed-watch",

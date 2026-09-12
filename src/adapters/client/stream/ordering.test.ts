@@ -65,6 +65,18 @@ describe("createOrderingWindow", () => {
     expect(window.cursor()).toBe("7");
   });
 
+  it("流す前の窓は、溜まっているものが在ると名乗る", () => {
+    const window = createOrderingWindow(toStreamCursor(0));
+
+    window.admit(envelopeAt(1));
+
+    expect(window.pending()).toBe(true);
+
+    window.drain();
+
+    expect(window.pending()).toBe(false);
+  });
+
   it("既に流した位置は、窓へ入れず遅延として返す", () => {
     const window = createOrderingWindow(toStreamCursor(0));
 

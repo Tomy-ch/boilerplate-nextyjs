@@ -2,6 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 
 const { listInquiries } = vi.hoisted(() => ({ listInquiries: vi.fn() }));
 
@@ -51,5 +52,11 @@ describe("AdminInquiryResults", () => {
     render(await AdminInquiryResults({ location: FIRST_PAGE }));
 
     expect(screen.queryByRole("link", { name: "前へ" })).not.toBeInTheDocument();
+  });
+
+  it("a11y 自動検査に違反しない", async () => {
+    const { container } = render(await AdminInquiryResults({ location: FIRST_PAGE }));
+
+    expect((await axe(container)).violations).toEqual([]);
   });
 });

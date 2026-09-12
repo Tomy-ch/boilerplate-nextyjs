@@ -20,10 +20,23 @@ describe("InquiryThreadSkeleton", () => {
 
   it("宣言した数の枠を並べ、送信欄のぶんを加える", () => {
     const { container } = render(<InquiryThreadSkeleton />);
+    const frames = [...container.querySelectorAll('[data-slot="skeleton"]')];
 
-    expect(container.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(
-      PLACEHOLDER_MESSAGES + 1,
+    expect(frames).toHaveLength(PLACEHOLDER_MESSAGES + 1);
+    // 数だけでは、やり取りの枠を 1 つ増やして送信欄を作り忘れても通る。
+    expect(frames.at(-1)).toHaveClass("h-24");
+  });
+
+  it("やり取りの枠を左右へ交互に寄せる", () => {
+    const { container } = render(<InquiryThreadSkeleton />);
+    const frames = [...container.querySelectorAll('[data-slot="skeleton"]')].slice(
+      0,
+      PLACEHOLDER_MESSAGES,
     );
+
+    for (const [index, frame] of frames.entries()) {
+      expect(frame.classList.contains("self-end")).toBe(index % 2 === 1);
+    }
   });
 
   it("読み上げへ何も伝えない", () => {

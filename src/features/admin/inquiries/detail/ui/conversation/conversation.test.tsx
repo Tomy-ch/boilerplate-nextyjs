@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
 
 import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 
 import type { InquiryFeedEvent } from "@/adapters/client/api/inquiries";
 import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
-import { idleActionState } from "@/model/action-state";
+import { failedActionState, idleActionState, succeededActionState } from "@/model/action-state";
 import type { InquiryId } from "@/model/inquiry/inquiry";
 
 const { useStream, refresh, useOnlineStatus } = vi.hoisted(() => ({
@@ -156,5 +158,59 @@ describe("AdminInquiryConversation", () => {
     );
 
     expect(screen.getByRole("status")).toHaveAttribute("data-status", "receiving");
+  });
+
+  it("a11y 自動検査に違反しない", async () => {
+    const { container } = render(
+      <AdminInquiryConversation
+        history={ADMIN_INQUIRY_HISTORY}
+        inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
+      />,
+    );
+
+    expect((await axe(container)).violations).toEqual([]);
+  });
+
+  it("項目に紐づかない失敗を、回答欄の隣で知らせる", async () => {
+    const user = userEvent.setup();
+
+    replyAction.mockResolvedValue(
+      failedActionState({ formError: "しばらくしてからお試しください。" }),
+    );
+    render(
+      <AdminInquiryConversation
+        history={ADMIN_INQUIRY_HISTORY}
+        inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
+      />,
+    );
+    await user.type(screen.getByLabelText("回答"), "承知しました。");
+    await user.click(screen.getByRole("button", { name: "回答する" }));
+
+    expect(await screen.findByText("回答を送信できませんでした")).toBeVisible();
+    expect(screen.getByText("しばらくしてからお試しください。")).toBeVisible();
+  });
+
+  it("回答が成立したら、次の 1 通は別の鍵で飛ばす", async () => {
+    const user = userEvent.setup();
+
+    replyAction.mockResolvedValue(succeededActionState(undefined));
+
+    const { container } = render(
+      <AdminInquiryConversation
+        history={ADMIN_INQUIRY_HISTORY}
+        inquiryId={ADMIN_INQUIRY_ID}
+        replyAction={replyAction}
+      />,
+    );
+    const keyOf = () =>
+      container.querySelector<HTMLInputElement>('input[name="idempotencyKey"]')?.value ?? "";
+    const before = keyOf();
+
+    await user.type(screen.getByLabelText("回答"), "承知しました。");
+    await user.click(screen.getByRole("button", { name: "回答する" }));
+
+    expect(keyOf()).not.toBe(before);
   });
 });

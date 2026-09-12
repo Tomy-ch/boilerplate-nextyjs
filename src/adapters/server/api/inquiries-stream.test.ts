@@ -46,6 +46,25 @@ beforeEach(() => {
   getEnvironment.mockReturnValue(LIVE_ENVIRONMENT);
 });
 
+/**
+ * mock の配備として module を読み直す。
+ *
+ * @remarks
+ * 分類を読む側も一緒に読み直します。読み直した木が作るエラーは、前の木の判定関数からは
+ * 同じ印に見えません。
+ */
+async function loadUnderMock() {
+  vi.resetModules();
+  getEnvironment.mockReturnValue(PARSED_ENVIRONMENT);
+
+  const [module, errors] = await Promise.all([
+    import("./inquiries-stream"),
+    import("@/errors/app-error"),
+  ]);
+
+  return { ...module, kindOf: (error: unknown) => errors.findAppError(error)?.kind };
+}
+
 describe("issueMyInquiryStreamConnection", () => {
   // ----- 正常系 -----
   it("ticket を組み込んだ、そのまま開ける URL を返す", async () => {
@@ -91,6 +110,21 @@ describe("issueMyInquiryStreamConnection", () => {
       issueMyInquiryStreamConnection().catch((error) => findAppError(error)?.kind),
     ).resolves.toBe(ErrorKind.UNAUTHENTICATED);
   });
+
+  it("mock の配備では発券を断る", async () => {
+    const { issueMyInquiryStreamConnection: issueUnderMock, kindOf } = await loadUnderMock();
+
+    await expect(issueUnderMock().catch(kindOf)).resolves.toBe(ErrorKind.NOT_FOUND);
+  });
+
+  it("mock の配備では発券の口を叩かない", async () => {
+    const requests = serveWrite("post", MY_TICKET_URL, wireTicket);
+    const { issueMyInquiryStreamConnection: issueUnderMock } = await loadUnderMock();
+
+    await issueUnderMock().catch(() => undefined);
+
+    expect(requests).toHaveLength(0);
+  });
 });
 
 describe("issueInquiryFeedStreamConnection", () => {
@@ -111,47 +145,18 @@ describe("issueInquiryFeedStreamConnection", () => {
       issueInquiryFeedStreamConnection().catch((error) => findAppError(error)?.kind),
     ).resolves.toBe(ErrorKind.PERMISSION_DENIED);
   });
-});
 
-describe("購読を表せない配備", () => {
-  /**
-   * mock の配備として module を読み直す。
-   *
-   * @remarks
-   * 分類を読む側も一緒に読み直します。読み直した木が作るエラーは、前の木の判定関数からは
-   * 同じ印に見えません。
-   */
-  async function loadUnderMock() {
-    vi.resetModules();
-    getEnvironment.mockReturnValue(PARSED_ENVIRONMENT);
+  it("session が切れた発券を unauthenticated として返す", async () => {
+    serveStatus("post", FEED_TICKET_URL, 401);
 
-    const [module, errors] = await Promise.all([
-      import("./inquiries-stream"),
-      import("@/errors/app-error"),
-    ]);
-
-    return { ...module, kindOf: (error: unknown) => errors.findAppError(error)?.kind };
-  }
-
-  // ----- 異常系 -----
-  it("mock では自分の問い合わせの発券を断る", async () => {
-    const { issueMyInquiryStreamConnection: issueUnderMock, kindOf } = await loadUnderMock();
-
-    await expect(issueUnderMock().catch(kindOf)).resolves.toBe(ErrorKind.NOT_FOUND);
+    await expect(
+      issueInquiryFeedStreamConnection().catch((error) => findAppError(error)?.kind),
+    ).resolves.toBe(ErrorKind.UNAUTHENTICATED);
   });
 
-  it("mock ではフィードの発券も断る", async () => {
+  it("mock の配備では発券を断る", async () => {
     const { issueInquiryFeedStreamConnection: issueUnderMock, kindOf } = await loadUnderMock();
 
     await expect(issueUnderMock().catch(kindOf)).resolves.toBe(ErrorKind.NOT_FOUND);
-  });
-
-  it("mock では発券の口を叩かない", async () => {
-    const requests = serveWrite("post", MY_TICKET_URL, wireTicket);
-    const { issueMyInquiryStreamConnection: issueUnderMock } = await loadUnderMock();
-
-    await issueUnderMock().catch(() => undefined);
-
-    expect(requests).toHaveLength(0);
   });
 });

@@ -25,7 +25,7 @@ function renderComposer(overrides: Partial<Parameters<typeof InquiryComposer>[0]
 }
 
 describe("InquiryComposer", () => {
-  // ----- 入力 -----
+  // ----- まだ書いていないとき -----
   it("本文の入力欄に名前を与える", () => {
     renderComposer();
 
@@ -44,7 +44,6 @@ describe("InquiryComposer", () => {
     expect(container.querySelector('input[name="idempotencyKey"]')).toHaveValue(KEY);
   });
 
-  // ----- 送信の可否 -----
   it("空のままでは送信できない", () => {
     renderComposer();
 
@@ -59,6 +58,31 @@ describe("InquiryComposer", () => {
     expect(screen.getByRole("button", { name: "送信" })).toBeDisabled();
   });
 
+  it("空のままでは修飾キーつきの Enter でも送らない", async () => {
+    renderComposer();
+
+    const textarea = screen.getByLabelText("お問い合わせ内容");
+    const submit = vi.fn((event: SubmitEvent) => event.preventDefault());
+
+    textarea.closest("form")?.addEventListener("submit", submit);
+    await userEvent.type(textarea, "{Meta>}{Enter}{/Meta}");
+
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  it("項目エラーが無ければ、入力欄に不正の印を付けない", () => {
+    renderComposer();
+
+    expect(screen.getByLabelText("お問い合わせ内容")).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("a11y 自動検査に違反しない", async () => {
+    const { container } = renderComposer();
+
+    expect((await axe(container)).violations).toEqual([]);
+  });
+
+  // ----- 書きかけがあるとき -----
   it("本文があれば送信できる", async () => {
     renderComposer();
 
@@ -67,13 +91,39 @@ describe("InquiryComposer", () => {
     expect(screen.getByRole("button", { name: "送信" })).toBeEnabled();
   });
 
+  it("修飾キーつきの Enter で送信する", async () => {
+    renderComposer();
+
+    const textarea = screen.getByLabelText("お問い合わせ内容");
+    const submit = vi.fn((event: SubmitEvent) => event.preventDefault());
+
+    textarea.closest("form")?.addEventListener("submit", submit);
+    await userEvent.type(textarea, "本文");
+    await userEvent.type(textarea, "{Meta>}{Enter}{/Meta}");
+
+    expect(submit).toHaveBeenCalledOnce();
+  });
+
+  it("修飾キーの無い Enter では送らない", async () => {
+    renderComposer();
+
+    const textarea = screen.getByLabelText("お問い合わせ内容");
+    const submit = vi.fn((event: SubmitEvent) => event.preventDefault());
+
+    textarea.closest("form")?.addEventListener("submit", submit);
+    await userEvent.type(textarea, "本文{Enter}");
+
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  // ----- 送っているとき -----
   it("送信中は二重に送れない", () => {
     renderComposer({ pending: true });
 
     expect(screen.getByRole("button", { name: "送信中" })).toBeDisabled();
   });
 
-  // ----- 書きかけ -----
+  // ----- 送り終えたとき -----
   it("成立したら書きかけを片付ける", () => {
     const { rerender } = renderComposer();
     const textarea = screen.getByLabelText("お問い合わせ内容");
@@ -90,6 +140,7 @@ describe("InquiryComposer", () => {
     expect(textarea).toHaveValue("");
   });
 
+  // ----- 送れなかったとき -----
   it("通らなかった送信では書きかけを残す", async () => {
     const { rerender } = renderComposer();
     const textarea = screen.getByLabelText("お問い合わせ内容");
@@ -105,9 +156,10 @@ describe("InquiryComposer", () => {
     );
 
     expect(textarea).toHaveValue("打ち直したくない本文");
+    // 項目に紐づかない失敗なので、入力欄そのものへ不正の印は付かない。
+    expect(textarea).not.toHaveAttribute("aria-invalid");
   });
 
-  // ----- 失敗 -----
   it("本文の項目エラーを入力欄へ紐づける", () => {
     renderComposer({
       state: failedActionState<void, typeof INQUIRY_BODY_FIELD>({
@@ -119,55 +171,5 @@ describe("InquiryComposer", () => {
 
     expect(textarea).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByText("本文を入力してください。")).toBeVisible();
-  });
-
-  it("項目エラーが無ければ、入力欄に不正の印を付けない", () => {
-    renderComposer();
-
-    expect(screen.getByLabelText("お問い合わせ内容")).not.toHaveAttribute("aria-invalid");
-  });
-
-  // ----- 鍵の操作 -----
-  it("修飾キーつきの Enter で送信する", async () => {
-    renderComposer();
-
-    const textarea = screen.getByLabelText("お問い合わせ内容");
-    const submit = vi.fn((event: SubmitEvent) => event.preventDefault());
-
-    textarea.closest("form")?.addEventListener("submit", submit);
-    await userEvent.type(textarea, "本文");
-    await userEvent.type(textarea, "{Meta>}{Enter}{/Meta}");
-
-    expect(submit).toHaveBeenCalledOnce();
-  });
-
-  it("空のままでは修飾キーつきの Enter でも送らない", async () => {
-    renderComposer();
-
-    const textarea = screen.getByLabelText("お問い合わせ内容");
-    const submit = vi.fn((event: SubmitEvent) => event.preventDefault());
-
-    textarea.closest("form")?.addEventListener("submit", submit);
-    await userEvent.type(textarea, "{Meta>}{Enter}{/Meta}");
-
-    expect(submit).not.toHaveBeenCalled();
-  });
-
-  it("修飾キーの無い Enter では送らない", async () => {
-    renderComposer();
-
-    const textarea = screen.getByLabelText("お問い合わせ内容");
-    const submit = vi.fn((event: SubmitEvent) => event.preventDefault());
-
-    textarea.closest("form")?.addEventListener("submit", submit);
-    await userEvent.type(textarea, "本文{Enter}");
-
-    expect(submit).not.toHaveBeenCalled();
-  });
-
-  it("a11y 自動検査に違反しない", async () => {
-    const { container } = renderComposer();
-
-    expect((await axe(container)).violations).toEqual([]);
   });
 });

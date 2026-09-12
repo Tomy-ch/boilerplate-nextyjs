@@ -2,6 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { axe } from "vitest-axe";
 
 import { AdminInquiryDetailBreadcrumbContent } from "./breadcrumb-content";
 
@@ -19,5 +20,11 @@ describe("AdminInquiryDetailBreadcrumbContent", () => {
     render(<AdminInquiryDetailBreadcrumbContent />);
 
     expect(screen.getByText("対応")).toBeVisible();
+  });
+
+  it("a11y 自動検査に違反しない", async () => {
+    const { container } = render(<AdminInquiryDetailBreadcrumbContent />);
+
+    expect((await axe(container)).violations).toEqual([]);
   });
 });

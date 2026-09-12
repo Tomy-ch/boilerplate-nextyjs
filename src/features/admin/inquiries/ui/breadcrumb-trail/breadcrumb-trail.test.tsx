@@ -16,10 +16,14 @@ describe("InquiryBreadcrumbTrail", () => {
     );
   });
 
-  it("受け取った段を順に並べる", () => {
-    render(<InquiryBreadcrumbTrail trail={["対応"]} />);
+  it("受け取った段を、渡された順に並べる", () => {
+    const { container } = render(<InquiryBreadcrumbTrail trail={["対応", "履歴"]} />);
+    const labels = [...container.querySelectorAll("li")]
+      .map((item) => item.textContent?.trim() ?? "")
+      .filter((label) => label !== "");
 
-    expect(screen.getByText("対応")).toBeVisible();
+    // 1 段だけでは「並べる」かどうかが出ない。順序が反転しても通ってしまう。
+    expect(labels).toEqual(["問い合わせ管理", "対応", "履歴"]);
   });
 
   it("一覧より下の段は戻り先を持たない", () => {

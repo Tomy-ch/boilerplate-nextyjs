@@ -13,6 +13,7 @@ const ENVELOPE = {
 };
 
 describe("parseEnvelope", () => {
+  // ----- 正常系 -----
   it("封筒として読める event を返す", () => {
     expect(parseEnvelope(JSON.stringify(ENVELOPE))).toMatchObject({ sequence: "3" });
   });
@@ -20,9 +21,10 @@ describe("parseEnvelope", () => {
   it("本文の形は見ない", () => {
     const parsed = parseEnvelope(JSON.stringify({ ...ENVELOPE, payload: { unknown: true } }));
 
-    expect(parsed).not.toBeNull();
+    expect(parsed?.payload).toEqual({ unknown: true });
   });
 
+  // ----- 異常系 -----
   it("位置が契約の形を外れた event を落とす", () => {
     expect(parseEnvelope(JSON.stringify({ ...ENVELOPE, sequence: 3 }))).toBeNull();
   });
@@ -33,6 +35,7 @@ describe("parseEnvelope", () => {
 });
 
 describe("parseControl", () => {
+  // ----- 正常系 -----
   it("制御指示を返す", () => {
     const control = JSON.stringify({ action: "STOP", reason: "AUTHORIZATION_REVOKED" });
 
@@ -52,13 +55,14 @@ describe("parseControl", () => {
     expect(parseControl(control)).toMatchObject({ retryAfterMs: 5_000 });
   });
 
-  it("契約に無い動作を落とす", () => {
-    expect(parseControl(JSON.stringify({ action: "SLEEP", reason: "X" }))).toBeNull();
-  });
-
   it("理由の綴りは契約に縛らない", () => {
     const control = JSON.stringify({ action: "RECONNECT", reason: "SOMETHING_NEW" });
 
     expect(parseControl(control)).toMatchObject({ reason: "SOMETHING_NEW" });
+  });
+
+  // ----- 異常系 -----
+  it("契約に無い動作を落とす", () => {
+    expect(parseControl(JSON.stringify({ action: "SLEEP", reason: "X" }))).toBeNull();
   });
 });

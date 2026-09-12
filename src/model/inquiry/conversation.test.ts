@@ -70,7 +70,7 @@ describe("toConversationDays", () => {
     const days = toConversationDays([messageAt(1, "2026-08-31T15:30:00.000Z")]);
 
     expect(days).toHaveLength(1);
-    expect(days[0]?.day).toContain("2026");
+    expect(days[0]?.day).toBe("2026/09/01");
   });
 
   it("空の並びからは、区切りを作らない", () => {

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useCallback } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod/mini";
@@ -84,7 +85,6 @@ beforeEach(() => {
 });
 
 describe("useStream", () => {
-  // ----- 購読の寿命 -----
   it("開始位置を渡して購読を開く", () => {
     render(<Probe cursor={5} />);
 
@@ -103,6 +103,14 @@ describe("useStream", () => {
     expect(openStream).not.toHaveBeenCalled();
   });
 
+  it("条件が揃った時点で購読を開く", () => {
+    const { rerender } = render(<Probe enabled={false} />);
+
+    rerender(<Probe enabled />);
+
+    expect(openStream).toHaveBeenCalledOnce();
+  });
+
   it("描画し直しても購読を張り直さない", () => {
     const { rerender } = render(<Probe onEvents={ignoreEvents} />);
 
@@ -117,7 +125,6 @@ describe("useStream", () => {
     expect(close).toHaveBeenCalledOnce();
   });
 
-  // ----- 受け渡し -----
   it("最新の受け取り手へ流す", () => {
     const first = vi.fn();
     const second = vi.fn();
@@ -156,11 +163,23 @@ describe("useStream", () => {
     expect(screen.getByRole("button")).toHaveTextContent("connecting");
   });
 
-  it("取り直した位置を購読へ渡す", () => {
-    render(<Probe />);
+  it("取り直した位置を購読へ渡す", async () => {
+    const user = userEvent.setup();
 
-    act(() => screen.getByRole("button").click());
+    render(<Probe />);
+    await user.click(screen.getByRole("button"));
 
     expect(resume).toHaveBeenCalledWith("9");
+  });
+
+  it("購読が開く前の取り直しでも、開くときはその位置から始める", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<Probe enabled={false} />);
+
+    await user.click(screen.getByRole("button"));
+    rerender(<Probe enabled />);
+
+    expect(resume).not.toHaveBeenCalled();
+    expect(opened?.cursor).toBe("9");
   });
 });

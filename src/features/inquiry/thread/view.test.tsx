@@ -2,6 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 
 vi.mock("./ui/conversation/conversation", () => ({
   InquiryConversation: () => <p>やり取り</p>,
@@ -17,6 +18,12 @@ describe("InquiryThreadView", () => {
     expect(screen.getByText("やり取り")).toBeVisible();
   });
 
+  it("画面の名前を、見えない見出しとして置く", () => {
+    render(<InquiryThreadView history={HISTORY} />);
+
+    expect(screen.getByRole("heading", { level: 1, name: "お問い合わせ" })).toHaveClass("sr-only");
+  });
+
   it("器の高さを確定させ、画面ごとは流れないようにする", () => {
     const { container } = render(<InquiryThreadView history={HISTORY} />);
 
@@ -26,5 +33,11 @@ describe("InquiryThreadView", () => {
     expect(height).toContain("100dvh");
     expect(height).toContain("57px");
     expect(height).toContain("2rem");
+  });
+
+  it("a11y 自動検査に違反しない", async () => {
+    const { container } = render(<InquiryThreadView history={HISTORY} />);
+
+    expect((await axe(container)).violations).toEqual([]);
   });
 });

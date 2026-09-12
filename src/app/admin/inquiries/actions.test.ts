@@ -63,7 +63,6 @@ describe("replyInquiryAction", () => {
     expect(revalidatePath).toHaveBeenCalledWith(`/admin/inquiries/${INQUIRY_ID}`);
   });
 
-  // ----- 認可 -----
   it("役割を持たない主体の要求を、口の内側で止める", async () => {
     verifySession.mockResolvedValue({ role: SESSION_ROLE.user });
 

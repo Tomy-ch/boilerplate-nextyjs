@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { axe } from "vitest-axe";
 
@@ -26,11 +26,29 @@ describe("AdminInquiryMessageList", () => {
     expect(messages[1]).toHaveAttribute("data-align", "end");
   });
 
-  it("送り手を、向きに頼らず文字で示す", () => {
-    render(<AdminInquiryMessageList days={DAYS} pending={[]} />);
+  it("送り手の文字と寄せる向きを、同じ 1 通の中で対応させる", () => {
+    const { container } = render(<AdminInquiryMessageList days={DAYS} pending={[]} />);
+    const messages = [...container.querySelectorAll<HTMLElement>('[data-slot="message"]')];
 
-    expect(screen.getAllByText(/利用者/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/運営/).length).toBeGreaterThan(0);
+    for (const message of messages) {
+      const mine = message.getAttribute("data-align") === "end";
+
+      // 別々に数えると、送り手と向きの対応が入れ替わっても両方の検査が通る。
+      expect(within(message).getByText(mine ? /運営/ : /利用者/)).toBeVisible();
+      expect(within(message).queryByText(mine ? /利用者/ : /運営/)).not.toBeInTheDocument();
+    }
+  });
+
+  it("送り手ごとに吹き出しの見え方を変える", () => {
+    const { container } = render(<AdminInquiryMessageList days={DAYS} pending={[]} />);
+    const messages = [...container.querySelectorAll<HTMLElement>('[data-slot="message"]')];
+
+    for (const message of messages) {
+      const mine = message.getAttribute("data-align") === "end";
+      const bubble = message.querySelector('[data-slot="bubble"]');
+
+      expect(bubble).toHaveAttribute("data-variant", mine ? "default" : "muted");
+    }
   });
 
   it("送信中の回答を末尾に置く", () => {

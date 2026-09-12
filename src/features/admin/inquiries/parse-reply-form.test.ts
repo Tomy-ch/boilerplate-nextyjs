@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { INQUIRY_BODY_MAX_LENGTH } from "@/adapters/client/api/inquiry-limits";
+
 import { IDEMPOTENCY_KEY_FIELD } from "@/model/idempotency-key";
 
 import { REPLY_BODY_FIELD, REPLY_INQUIRY_ID_FIELD } from "./form-names";
@@ -46,7 +48,22 @@ describe("parseAdminInquiryReplyForm", () => {
   });
 
   it("上限を超えた本文を項目の文言として返す", () => {
-    expect(parseAdminInquiryReplyForm(formOf("あ".repeat(4_001)))).toMatchObject({ ok: false });
+    expect(parseAdminInquiryReplyForm(formOf("あ".repeat(4_001)))).toMatchObject({
+      ok: false,
+      bodyError: `本文は ${INQUIRY_BODY_MAX_LENGTH} 文字以内で入力してください。`,
+    });
+  });
+
+  it("本文の項目そのものを持たない送信も、空と同じ文言で返す", () => {
+    const formData = new FormData();
+
+    formData.set("inquiryId", INQUIRY_ID);
+    formData.set("idempotencyKey", KEY);
+
+    expect(parseAdminInquiryReplyForm(formData)).toMatchObject({
+      ok: false,
+      bodyError: "本文を入力してください。",
+    });
   });
 
   it("回答先が読めない送信を、項目に紐づかない失敗として返す", () => {

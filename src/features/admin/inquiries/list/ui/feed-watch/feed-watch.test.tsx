@@ -2,6 +2,7 @@
 
 import { act, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { axe } from "vitest-axe";
 
 import type { InquiryFeedEvent } from "@/adapters/client/api/inquiries";
 import type { UseStreamOptions } from "@/adapters/client/stream/use-stream";
@@ -88,5 +89,11 @@ describe("AdminInquiryFeedWatch", () => {
     render(<AdminInquiryFeedWatch />);
 
     expect(screen.getByRole("status")).toHaveAttribute("data-status", "offline");
+  });
+
+  it("a11y 自動検査に違反しない", async () => {
+    const { container } = render(<AdminInquiryFeedWatch />);
+
+    expect((await axe(container)).violations).toEqual([]);
   });
 });

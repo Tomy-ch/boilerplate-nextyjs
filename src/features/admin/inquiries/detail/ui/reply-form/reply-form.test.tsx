@@ -47,6 +47,14 @@ describe("AdminInquiryReplyForm", () => {
     expect(screen.getByRole("button", { name: "回答する" })).toBeDisabled();
   });
 
+  it("書きかけがあれば送信できる", async () => {
+    renderForm();
+
+    await userEvent.type(screen.getByLabelText("回答"), "承知しました。");
+
+    expect(screen.getByRole("button", { name: "回答する" })).toBeEnabled();
+  });
+
   it("送信中は二重に送れない", () => {
     renderForm({ pending: true });
 
@@ -84,6 +92,24 @@ describe("AdminInquiryReplyForm", () => {
     expect(textarea).toHaveValue("");
   });
 
+  it("通らなかった送信では書きかけを残す", async () => {
+    const { rerender } = renderForm();
+    const textarea = screen.getByLabelText("回答");
+
+    await userEvent.type(textarea, "打ち直したくない回答");
+    rerender(
+      <AdminInquiryReplyForm
+        action={vi.fn()}
+        idempotencyKey={KEY}
+        inquiryId={INQUIRY_ID}
+        pending={false}
+        state={failedActionState<void, typeof REPLY_BODY_FIELD>({ formError: "失敗" })}
+      />,
+    );
+
+    expect(textarea).toHaveValue("打ち直したくない回答");
+  });
+
   it("本文の項目エラーを入力欄へ紐づける", () => {
     renderForm({
       state: failedActionState<void, typeof REPLY_BODY_FIELD>({
@@ -92,6 +118,16 @@ describe("AdminInquiryReplyForm", () => {
     });
 
     expect(screen.getByLabelText("回答")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("本文を入力してください。")).toBeVisible();
+  });
+
+  it("項目に紐づかない失敗では、入力欄に不正の印を付けない", () => {
+    renderForm({ state: failedActionState<void, typeof REPLY_BODY_FIELD>({ formError: "失敗" }) });
+
+    const textarea = screen.getByLabelText("回答");
+
+    expect(textarea).not.toHaveAttribute("aria-invalid");
+    expect(textarea).toBeEnabled();
   });
 
   it("a11y 自動検査に違反しない", async () => {

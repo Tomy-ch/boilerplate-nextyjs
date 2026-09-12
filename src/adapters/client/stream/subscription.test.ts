@@ -184,7 +184,7 @@ afterEach(() => {
 });
 
 describe("openStream", () => {
-  // ----- 接続 -----
+  // ----- 繋ぎにいくとき -----
   it("開始位置を載せて繋ぐ", async () => {
     const stream = harness({ cursor: 4 });
 
@@ -210,7 +210,27 @@ describe("openStream", () => {
     expect(stream.states.at(-1)).toEqual({ kind: "open" });
   });
 
-  // ----- 受信 -----
+  it("発券を待つあいだに位置が変わっても、接続を 2 本にしない", async () => {
+    const pending: { release: ((connection: StreamConnection) => void) | null } = { release: null };
+    const stream = harness({
+      connection: () =>
+        new Promise<StreamConnection>((resolve) => {
+          pending.release = resolve;
+        }),
+    });
+
+    await settle();
+    stream.subscription.resume(toStreamCursor(9));
+    pending.release?.({ url: STREAM_URL, expiresAt: 10_000 });
+    await settle();
+
+    expect(stream.requestConnection).toHaveBeenCalledTimes(1);
+    expect(stream.sources).toHaveLength(1);
+
+    stream.subscription.close();
+  });
+
+  // ----- 繋がっているとき -----
   it("窓を閉じてから、整列した event を流す", async () => {
     const stream = harness();
 
@@ -220,24 +240,12 @@ describe("openStream", () => {
     stream.latest()?.handlers.onEvent(envelope(1));
 
     expect(stream.received).toEqual([]);
+    // 2 通届いても窓は 1 つ。重ねて仕掛けると、同じ窓を二度流すことになる。
+    expect(stream.delays()).toHaveLength(1);
 
     stream.runTimers();
 
     expect(stream.received.at(0)?.map((event) => event.payload.id)).toEqual(["m1", "m2"]);
-  });
-
-  it("取り直しで窓を捨てた後に窓が閉じても、上へは何も流れない", async () => {
-    const stream = harness({ cursor: 5 });
-
-    await settle();
-    stream.latest()?.handlers.onOpen();
-    // 窓へ 1 件入れて閉じる時刻を仕掛けたあと、遅れて届いた event で取り直しへ入る。
-    stream.latest()?.handlers.onEvent(envelope(6));
-    stream.latest()?.handlers.onEvent(envelope(3));
-    stream.subscription.resume(toStreamCursor(9));
-    stream.runTimers();
-
-    expect(stream.received).toEqual([]);
   });
 
   it("契約に無い種別の event を上へ流さない", async () => {
@@ -263,7 +271,17 @@ describe("openStream", () => {
     expect(stream.received.at(0)?.map((event) => event.payload.id)).toEqual(["m1"]);
   });
 
-  // ----- 取り直し -----
+  it("読めない制御指示を無視する", async () => {
+    const stream = harness();
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onControl("{");
+
+    expect(stream.latest()?.closed).toBe(false);
+  });
+
+  // ----- 正本を取り直すとき -----
   it("窓を越えて遅れた event を見つけたら、正本の取り直しを求める", async () => {
     const stream = harness({ cursor: 5 });
 
@@ -273,6 +291,20 @@ describe("openStream", () => {
 
     expect(stream.resyncs()).toBe(1);
     expect(stream.latest()?.closed).toBe(true);
+  });
+
+  it("取り直しで窓を捨てた後に窓が閉じても、上へは何も流れない", async () => {
+    const stream = harness({ cursor: 5 });
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    // 窓へ 1 件入れて閉じる時刻を仕掛けたあと、遅れて届いた event で取り直しへ入る。
+    stream.latest()?.handlers.onEvent(envelope(6));
+    stream.latest()?.handlers.onEvent(envelope(3));
+    stream.subscription.resume(toStreamCursor(9));
+    stream.runTimers();
+
+    expect(stream.received).toEqual([]);
   });
 
   it("取り直しを待つあいだは張り直さない", async () => {
@@ -300,7 +332,31 @@ describe("openStream", () => {
     expect(stream.latest()?.url).toContain("after=9");
   });
 
-  // ----- 張り直し -----
+  it("再同期の指示で、正本の取り直しを求める", async () => {
+    const stream = harness();
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onControl(control("RESYNC"));
+
+    expect(stream.resyncs()).toBe(1);
+    expect(stream.latest()?.closed).toBe(true);
+  });
+
+  it("取り直しを待つあいだに重ねて遅れが届いても、求めるのは 1 度だけ", async () => {
+    const stream = harness({ cursor: 5 });
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onEvent(envelope(3));
+    stream.latest()?.handlers.onEvent(envelope(2));
+
+    expect(stream.resyncs()).toBe(1);
+
+    stream.subscription.close();
+  });
+
+  // ----- 張り直すとき -----
   it("繋がる前に落ちたら、発券からやり直す", async () => {
     const stream = harness();
 
@@ -351,7 +407,74 @@ describe("openStream", () => {
     expect(stream.latest()?.url).toContain("after=7");
   });
 
-  // ----- 打ち切り -----
+  it("発券が落ちただけなら、間を置いて張り直す", async () => {
+    const stream = harness({
+      connection: () => Promise.reject(createAppError(ErrorKind.UNAVAILABLE)),
+    });
+
+    await settle();
+
+    expect(stream.states.at(-1)).toEqual({ kind: "reconnecting" });
+    expect(stream.delays()).toHaveLength(1);
+  });
+
+  it("再認証の指示で、発券からやり直す", async () => {
+    const stream = harness();
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onControl(control("REAUTHENTICATE"));
+    stream.runTimers();
+    await settle();
+
+    expect(stream.requestConnection).toHaveBeenCalledTimes(2);
+  });
+
+  it("再接続の指示で、同じ発券のまま張り直す", async () => {
+    const stream = harness();
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onControl(control("RECONNECT"));
+    stream.runTimers();
+    await settle();
+
+    expect(stream.requestConnection).toHaveBeenCalledTimes(1);
+    expect(stream.sources).toHaveLength(2);
+  });
+
+  it("待ってからの再接続の指示で、示された目安を散らして待つ", async () => {
+    const stream = harness();
+
+    await settle();
+    stream.latest()?.handlers.onOpen();
+    stream.latest()?.handlers.onControl(control("RETRY_LATER", 4_000));
+
+    // 目安にも散らしを掛ける。同じ値が全 client へ配られるため、そのまま待つと山が崩れない。
+    expect(stream.delays()).toEqual([3_000]);
+  });
+
+  it("世代の変わった接続から届いた制御指示は効かせない", async () => {
+    const stream = harness();
+
+    await settle();
+
+    const stale = stream.latest();
+
+    stream.subscription.resume(toStreamCursor(9));
+    await settle();
+
+    const fresh = stream.latest();
+
+    stale?.handlers.onControl(control("STOP"));
+
+    expect(stream.states.at(-1)?.kind).not.toBe("stopped");
+    expect(fresh?.closed).toBe(false);
+
+    stream.subscription.close();
+  });
+
+  // ----- 止まったとき -----
   it("発券が unauthenticated なら打ち切る", async () => {
     const stream = harness({
       connection: () => Promise.reject(createAppError(ErrorKind.UNAUTHENTICATED)),
@@ -391,30 +514,6 @@ describe("openStream", () => {
     });
   });
 
-  it("打ち切った後は張り直さない", async () => {
-    const stream = harness({
-      connection: () => Promise.reject(createAppError(ErrorKind.UNAUTHENTICATED)),
-    });
-
-    await settle();
-    stream.runTimers();
-    await settle();
-
-    expect(stream.requestConnection).toHaveBeenCalledTimes(1);
-  });
-
-  it("発券が落ちただけなら、間を置いて張り直す", async () => {
-    const stream = harness({
-      connection: () => Promise.reject(createAppError(ErrorKind.UNAVAILABLE)),
-    });
-
-    await settle();
-
-    expect(stream.states.at(-1)).toEqual({ kind: "reconnecting" });
-    expect(stream.delays()).toHaveLength(1);
-  });
-
-  // ----- 制御指示 -----
   it("打ち切りの指示で、自分から閉じて止まる", async () => {
     const stream = harness();
 
@@ -429,64 +528,71 @@ describe("openStream", () => {
     });
   });
 
-  it("再同期の指示で、正本の取り直しを求める", async () => {
-    const stream = harness();
+  it("打ち切った後は張り直さない", async () => {
+    const stream = harness({
+      connection: () => Promise.reject(createAppError(ErrorKind.UNAUTHENTICATED)),
+    });
 
     await settle();
-    stream.latest()?.handlers.onOpen();
-    stream.latest()?.handlers.onControl(control("RESYNC"));
-
-    expect(stream.resyncs()).toBe(1);
-    expect(stream.latest()?.closed).toBe(true);
-  });
-
-  it("再認証の指示で、発券からやり直す", async () => {
-    const stream = harness();
-
-    await settle();
-    stream.latest()?.handlers.onOpen();
-    stream.latest()?.handlers.onControl(control("REAUTHENTICATE"));
-    stream.runTimers();
-    await settle();
-
-    expect(stream.requestConnection).toHaveBeenCalledTimes(2);
-  });
-
-  it("再接続の指示で、同じ発券のまま張り直す", async () => {
-    const stream = harness();
-
-    await settle();
-    stream.latest()?.handlers.onOpen();
-    stream.latest()?.handlers.onControl(control("RECONNECT"));
     stream.runTimers();
     await settle();
 
     expect(stream.requestConnection).toHaveBeenCalledTimes(1);
-    expect(stream.sources).toHaveLength(2);
   });
 
-  it("待ってからの再接続の指示で、示された目安を散らして待つ", async () => {
+  it("打ち切った後は、待機が明けても繋ぎにいかない", async () => {
+    const stream = harness({
+      connection: () => Promise.reject(createAppError(ErrorKind.PERMISSION_DENIED)),
+    });
+
+    await settle();
+    stream.runTimers();
+    await settle();
+
+    expect(stream.sources).toHaveLength(0);
+  });
+
+  it("打ち切りの後に同じ接続から落下が届いても、張り直さない", async () => {
     const stream = harness();
 
     await settle();
-    stream.latest()?.handlers.onOpen();
-    stream.latest()?.handlers.onControl(control("RETRY_LATER", 4_000));
 
-    // 目安にも散らしを掛ける。同じ値が全 client へ配られるため、そのまま待つと山が崩れない。
-    expect(stream.delays()).toEqual([3_000]);
+    const source = stream.latest();
+
+    source?.handlers.onOpen();
+    source?.handlers.onControl(control("STOP"));
+    source?.handlers.onError();
+
+    expect(stream.states.at(-1)).toEqual({
+      kind: "stopped",
+      reason: STREAM_STOP_REASON.server,
+    });
+    expect(stream.delays()).toHaveLength(0);
+
+    stream.subscription.close();
   });
 
-  it("読めない制御指示を無視する", async () => {
-    const stream = harness();
+  it("閉じた後に発券の失敗が返っても、状態を流さない", async () => {
+    const pending: { reject: ((reason: unknown) => void) | null } = { reject: null };
+    const stream = harness({
+      connection: () =>
+        new Promise<StreamConnection>((_resolve, reject) => {
+          pending.reject = reject;
+        }),
+    });
 
     await settle();
-    stream.latest()?.handlers.onOpen();
-    stream.latest()?.handlers.onControl("{");
 
-    expect(stream.latest()?.closed).toBe(false);
+    const before = stream.states.length;
+
+    stream.subscription.close();
+    pending.reject?.(createAppError(ErrorKind.UNAUTHENTICATED));
+    await settle();
+
+    expect(stream.states).toHaveLength(before);
   });
 
-  // ----- 画面の可視性 -----
+  // ----- 画面が見えていないとき -----
   it("画面が見えていないあいだは繋がない", async () => {
     const stream = harness({ hidden: true });
 
@@ -505,7 +611,7 @@ describe("openStream", () => {
     expect(stream.requestConnection).toHaveBeenCalledTimes(1);
   });
 
-  // ----- 後片付け -----
+  // ----- 閉じた後 -----
   it("閉じたら接続も閉じる", async () => {
     const stream = harness();
 
@@ -562,18 +668,6 @@ describe("openStream", () => {
     expect(stream.delays()).toEqual([]);
   });
 
-  it("打ち切った後は、待機が明けても繋ぎにいかない", async () => {
-    const stream = harness({
-      connection: () => Promise.reject(createAppError(ErrorKind.PERMISSION_DENIED)),
-    });
-
-    await settle();
-    stream.runTimers();
-    await settle();
-
-    expect(stream.sources).toHaveLength(0);
-  });
-
   it("閉じた後の再開を受け付けない", async () => {
     const stream = harness();
 
@@ -585,168 +679,169 @@ describe("openStream", () => {
     expect(stream.sources).toHaveLength(1);
   });
 
-  // ----- 既定の道具（差し替えずに動かす経路） -----
-  /** 道具を差し替えずに購読を開く。ブラウザ側の既定がそのまま動く。 */
-  function openWithBrowserDefaults(
-    onEvents: (events: readonly ParsedEvent[]) => void = () => undefined,
-  ) {
-    return openStream<ParsedEvent>({
-      ticketPath: TICKET_PATH,
-      cursor: toStreamCursor(4),
-      schema,
-      onEvents,
-      onState: () => undefined,
-      onResync: () => undefined,
+  describe("道具を差し替えないとき", () => {
+    /** 道具を差し替えずに購読を開く。ブラウザ側の既定がそのまま動く。 */
+    function openWithBrowserDefaults(
+      onEvents: (events: readonly ParsedEvent[]) => void = () => undefined,
+    ) {
+      return openStream<ParsedEvent>({
+        ticketPath: TICKET_PATH,
+        cursor: toStreamCursor(4),
+        schema,
+        onEvents,
+        onState: () => undefined,
+        onResync: () => undefined,
+      });
+    }
+
+    it("発券の中継を POST で叩き、返った URL へ開始位置を載せて繋ぐ", async () => {
+      const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+
+      vi.stubGlobal("fetch", fetchImpl);
+      vi.stubGlobal("EventSource", FakeEventSource);
+
+      const subscription = openWithBrowserDefaults();
+
+      await settle();
+
+      expect(fetchImpl.mock.calls[0]?.[0]).toBe(TICKET_PATH);
+      expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
+      expect(FakeEventSource.instances[0]?.url).toContain("after=4");
+
+      subscription.close();
     });
-  }
 
-  it("発券の中継を POST で叩き、返った URL へ開始位置を載せて繋ぐ", async () => {
-    const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+    it("届いた本文を整列して上へ流す", async () => {
+      vi.stubGlobal("fetch", async () => ticketResponse());
+      vi.stubGlobal("EventSource", FakeEventSource);
 
-    vi.stubGlobal("fetch", fetchImpl);
-    vi.stubGlobal("EventSource", FakeEventSource);
+      const received: ParsedEvent[][] = [];
+      const subscription = openWithBrowserDefaults((events) => received.push([...events]));
 
-    const subscription = openWithBrowserDefaults();
+      await settle();
 
-    await settle();
+      const source = FakeEventSource.instances[0];
 
-    expect(fetchImpl.mock.calls[0]?.[0]).toBe(TICKET_PATH);
-    expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
-    expect(FakeEventSource.instances[0]?.url).toContain("after=4");
+      source?.emit("open", new Event("open"));
+      source?.emit("message", new MessageEvent("message", { data: envelope(5) }));
 
-    subscription.close();
-  });
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-  it("届いた本文を整列して上へ流す", async () => {
-    vi.stubGlobal("fetch", async () => ticketResponse());
-    vi.stubGlobal("EventSource", FakeEventSource);
+      expect(received.at(0)).toHaveLength(1);
 
-    const received: ParsedEvent[][] = [];
-    const subscription = openWithBrowserDefaults((events) => received.push([...events]));
+      subscription.close();
+    });
 
-    await settle();
+    it("本文を持たない event を上へ流さない", async () => {
+      vi.stubGlobal("fetch", async () => ticketResponse());
+      vi.stubGlobal("EventSource", FakeEventSource);
 
-    const source = FakeEventSource.instances[0];
+      const received: ParsedEvent[][] = [];
+      const subscription = openWithBrowserDefaults((events) => received.push([...events]));
 
-    source?.emit("open", new Event("open"));
-    source?.emit("message", new MessageEvent("message", { data: envelope(5) }));
+      await settle();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+      const source = FakeEventSource.instances[0];
 
-    expect(received.at(0)).toHaveLength(1);
+      source?.emit("open", new Event("open"));
+      source?.emit("message", new Event("message"));
 
-    subscription.close();
-  });
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-  it("本文を持たない event を上へ流さない", async () => {
-    vi.stubGlobal("fetch", async () => ticketResponse());
-    vi.stubGlobal("EventSource", FakeEventSource);
+      expect(received).toEqual([]);
 
-    const received: ParsedEvent[][] = [];
-    const subscription = openWithBrowserDefaults((events) => received.push([...events]));
+      subscription.close();
+    });
 
-    await settle();
+    it("制御指示を読み、打ち切りの指示で自分から閉じる", async () => {
+      vi.stubGlobal("fetch", async () => ticketResponse());
+      vi.stubGlobal("EventSource", FakeEventSource);
 
-    const source = FakeEventSource.instances[0];
+      const subscription = openWithBrowserDefaults();
 
-    source?.emit("open", new Event("open"));
-    source?.emit("message", new Event("message"));
+      await settle();
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+      const source = FakeEventSource.instances[0];
 
-    expect(received).toEqual([]);
+      source?.emit("open", new Event("open"));
+      source?.emit("control", new MessageEvent("control", { data: control("STOP") }));
 
-    subscription.close();
-  });
+      expect(source?.closed).toBe(true);
 
-  it("制御指示を読み、打ち切りの指示で自分から閉じる", async () => {
-    vi.stubGlobal("fetch", async () => ticketResponse());
-    vi.stubGlobal("EventSource", FakeEventSource);
+      subscription.close();
+    });
 
-    const subscription = openWithBrowserDefaults();
+    it("接続が落ちたら、その接続を閉じる", async () => {
+      vi.stubGlobal("fetch", async () => ticketResponse());
+      vi.stubGlobal("EventSource", FakeEventSource);
 
-    await settle();
+      const subscription = openWithBrowserDefaults();
 
-    const source = FakeEventSource.instances[0];
+      await settle();
 
-    source?.emit("open", new Event("open"));
-    source?.emit("control", new MessageEvent("control", { data: control("STOP") }));
+      const source = FakeEventSource.instances[0];
 
-    expect(source?.closed).toBe(true);
+      source?.emit("error", new Event("error"));
 
-    subscription.close();
-  });
+      expect(source?.closed).toBe(true);
 
-  it("接続が落ちたら、その接続を閉じて張り直しへ移る", async () => {
-    vi.stubGlobal("fetch", async () => ticketResponse());
-    vi.stubGlobal("EventSource", FakeEventSource);
+      subscription.close();
+    });
 
-    const subscription = openWithBrowserDefaults();
+    it("画面が見えていないあいだは繋がず、見えたら繋ぐ", async () => {
+      const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
 
-    await settle();
+      vi.stubGlobal("fetch", fetchImpl);
+      vi.stubGlobal("EventSource", FakeEventSource);
 
-    const source = FakeEventSource.instances[0];
+      const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+      const subscription = openWithBrowserDefaults();
 
-    source?.emit("error", new Event("error"));
+      await settle();
 
-    expect(source?.closed).toBe(true);
+      expect(fetchImpl).not.toHaveBeenCalled();
 
-    subscription.close();
-  });
+      hidden.mockReturnValue(false);
+      document.dispatchEvent(new Event("visibilitychange"));
+      await settle();
 
-  it("画面が見えていないあいだは繋がず、見えたら繋ぐ", async () => {
-    const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+      expect(fetchImpl).toHaveBeenCalledOnce();
 
-    vi.stubGlobal("fetch", fetchImpl);
-    vi.stubGlobal("EventSource", FakeEventSource);
+      subscription.close();
+    });
 
-    const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
-    const subscription = openWithBrowserDefaults();
+    it("見えないまま通知が来ても繋ぎにいかない", async () => {
+      const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
 
-    await settle();
+      vi.stubGlobal("fetch", fetchImpl);
+      vi.stubGlobal("EventSource", FakeEventSource);
+      vi.spyOn(document, "hidden", "get").mockReturnValue(true);
 
-    expect(fetchImpl).not.toHaveBeenCalled();
+      const subscription = openWithBrowserDefaults();
 
-    hidden.mockReturnValue(false);
-    document.dispatchEvent(new Event("visibilitychange"));
-    await settle();
+      await settle();
+      document.dispatchEvent(new Event("visibilitychange"));
+      await settle();
 
-    expect(fetchImpl).toHaveBeenCalledOnce();
+      expect(fetchImpl).not.toHaveBeenCalled();
 
-    subscription.close();
-  });
+      subscription.close();
+    });
 
-  it("見えないまま通知が来ても繋ぎにいかない", async () => {
-    const fetchImpl = vi.fn<typeof fetch>(async () => ticketResponse());
+    it("閉じた後は、待機も可視性の登録も残さない", async () => {
+      vi.stubGlobal("fetch", async () => ticketResponse());
+      vi.stubGlobal("EventSource", FakeEventSource);
 
-    vi.stubGlobal("fetch", fetchImpl);
-    vi.stubGlobal("EventSource", FakeEventSource);
-    vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+      const removeEventListener = vi.spyOn(document, "removeEventListener");
+      const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+      const subscription = openWithBrowserDefaults();
 
-    const subscription = openWithBrowserDefaults();
+      await settle();
+      subscription.close();
+      hidden.mockReturnValue(false);
+      document.dispatchEvent(new Event("visibilitychange"));
 
-    await settle();
-    document.dispatchEvent(new Event("visibilitychange"));
-    await settle();
-
-    expect(fetchImpl).not.toHaveBeenCalled();
-
-    subscription.close();
-  });
-
-  it("閉じた後は、待機も可視性の登録も残さない", async () => {
-    vi.stubGlobal("fetch", async () => ticketResponse());
-    vi.stubGlobal("EventSource", FakeEventSource);
-
-    const removeEventListener = vi.spyOn(document, "removeEventListener");
-    const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
-    const subscription = openWithBrowserDefaults();
-
-    await settle();
-    subscription.close();
-    hidden.mockReturnValue(false);
-    document.dispatchEvent(new Event("visibilitychange"));
-
-    expect(removeEventListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+      expect(removeEventListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+    });
   });
 });

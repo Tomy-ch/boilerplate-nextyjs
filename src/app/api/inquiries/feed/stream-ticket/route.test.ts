@@ -28,7 +28,10 @@ describe("POST", () => {
     const response = await POST();
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({ url: CONNECTION.url });
+    await expect(response.json()).resolves.toEqual({
+      url: CONNECTION.url,
+      expiresAt: CONNECTION.expiresAt.toISOString(),
+    });
   });
 
   // ----- 異常系 -----
@@ -36,6 +39,12 @@ describe("POST", () => {
     issueInquiryFeedStreamConnection.mockRejectedValue(createAppError(ErrorKind.PERMISSION_DENIED));
 
     expect((await POST()).status).toBe(403);
+  });
+
+  it("session が切れた発券を 401 で返す", async () => {
+    issueInquiryFeedStreamConnection.mockRejectedValue(createAppError(ErrorKind.UNAUTHENTICATED));
+
+    expect((await POST()).status).toBe(401);
   });
 
   it("分類の付いていない失敗を 500 へ矯正する", async () => {

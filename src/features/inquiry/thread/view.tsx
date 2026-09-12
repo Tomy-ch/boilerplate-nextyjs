@@ -29,6 +29,8 @@ export const InquiryThreadView = withScreenSpan(
         className="flex min-h-0 flex-col gap-4"
         style={{ height: `calc(100dvh - ${APP_SHELL_HEADER_HEIGHT}px - ${VERTICAL_PADDING})` }}
       >
+        {/* 画面には出さない見出し（画面要件「見出し」）。 */}
+        <h1 className="sr-only">お問い合わせ</h1>
         <InquiryConversation history={history} />
       </div>
     );

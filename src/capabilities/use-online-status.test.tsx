@@ -64,16 +64,18 @@ describe("useOnlineStatus", () => {
     expect(screen.getByText("繋がっている")).toBeInTheDocument();
   });
 
-  it("外したら通知を受け取らない", () => {
-    const network = stubOnLine(true);
+  it("外したら通知の口を残さない", () => {
+    stubOnLine(true);
+
+    const removeEventListener = vi.spyOn(globalThis, "removeEventListener");
     const { unmount } = render(<Probe />);
 
     unmount();
 
-    expect(() => act(() => network.change(false))).not.toThrow();
+    expect(removeEventListener).toHaveBeenCalledWith("online", expect.any(Function));
+    expect(removeEventListener).toHaveBeenCalledWith("offline", expect.any(Function));
   });
 
-  // ----- 描画の場所 -----
   it("サーバでは繋がっている側を返す", () => {
     expect(renderToStaticMarkup(<Probe />)).toContain("繋がっている");
   });

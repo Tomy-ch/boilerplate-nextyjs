@@ -9,8 +9,8 @@ describe("toInquiryId", () => {
     );
   });
 
-  it("実在するかは検査しない", () => {
-    expect(() => toInquiryId("not-a-real-inquiry")).not.toThrow();
+  it("実在するかは検査せず、受け取った綴りをそのまま返す", () => {
+    expect(toInquiryId("not-a-real-inquiry")).toBe("not-a-real-inquiry");
   });
 });
 

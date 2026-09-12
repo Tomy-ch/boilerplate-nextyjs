@@ -39,6 +39,8 @@ export const AdminInquiryDetailView = withScreenSpan(
 
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-4">
+        {/* 画面には出さない見出し（画面要件「見出し」）。 */}
+        <h1 className="sr-only">問い合わせの対応</h1>
         <KeyValueList>
           <KeyValueItem>
             <KeyValueLabel>問い合わせ</KeyValueLabel>

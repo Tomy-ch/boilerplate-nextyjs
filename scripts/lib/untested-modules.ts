@@ -26,12 +26,10 @@
 export const ENTRYPOINT_PATTERNS = [
   "scripts/*/index.ts",
   "scripts/setup/*/index.ts",
-  // boilerplate-only:begin
   // closed-loop は読む入口・送る入口・週次の入口を分けてある。畳むと、読むだけの経路が
   // 投稿の権限を持つ。
   "scripts/closed-loop/send/index.ts",
   "scripts/closed-loop/weekly/index.ts",
-  // boilerplate-only:end
   // portal と openapi は 1 ディレクトリに入口が複数あるツール群で、`index.ts` へ畳めない。
   "scripts/portal/gen-*.ts",
   "scripts/portal/build-site.ts",

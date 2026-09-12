@@ -2,10 +2,8 @@
 test-requirement: unit
 coverage-exclusions:
   - "scripts/*/index.ts"
-  # boilerplate-only:begin
   - "scripts/closed-loop/send/index.ts"
   - "scripts/closed-loop/weekly/index.ts"
-  # boilerplate-only:end
   - "scripts/lighthouse/diagnose.ts"
   - "scripts/openapi/check-generated.ts"
   - "scripts/openapi/extract-limits.ts"
@@ -124,5 +122,5 @@ GitHub 上の公開の面か」であって、モジュールの置き場では�
 - [0153](../docs/adr/0153-ci-configuration.md) — job の分割 / SHA ピン / 公開の面へ出す文字集合
 - [0157](../docs/adr/0157-inspection-declaration-discipline.md) — 成立しない検査を「違反なし」へ倒さない
 - [0159](../docs/adr/0159-script-structure.md) — 1 道具 1 ディレクトリ / 入口と判定を分ける / export と test の 1:1
-- [0160](../docs/adr/0160-agent-environment-loop.md) — 打刻と記録から稼ぎを測る機構 <!-- boilerplate-only:line -->
-- [0161](../docs/adr/0161-development-window-as-feedback-unit.md) — 窓を単位に測るという取り方 <!-- boilerplate-only:line -->
+- [0160](../docs/adr/0160-agent-environment-loop.md) — 打刻と記録から稼ぎを測る機構
+- [0161](../docs/adr/0161-development-window-as-feedback-unit.md) — 窓を単位に測るという取り方

@@ -437,7 +437,7 @@ README moves with the workflows, so the movement never reaches the definitions
 - [0153](../../docs/adr/0153-ci-configuration.md) — job partitioning, SHA pinning, secrets, the character set the public surface may carry
 - [0155](../../docs/adr/0155-claude-skills-development.md) — shell as the exception to TypeScript
 - [0157](../../docs/adr/0157-inspection-declaration-discipline.md) — report a gate as it reported itself; never through a filter that classifies by vocabulary
-- [0160](../../docs/adr/0160-agent-environment-loop.md) — the re-measurement step and what the loop may read <!-- boilerplate-only:line -->
+- [0160](../../docs/adr/0160-agent-environment-loop.md) — the re-measurement step and what the loop may read
 
 ## 通知
 

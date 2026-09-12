@@ -113,7 +113,7 @@ copy of it.
 
 ## Step 0. Resolve the scope and the apply mode
 
-Stamp the boundary this run crosses before anything else: `.agents/closed-loop/marks.sh reviewStartedAt`. <!-- boilerplate-only:line -->
+Stamp the boundary this run crosses before anything else: `.agents/closed-loop/marks.sh reviewStartedAt`.
 
 One `AskUserQuestion` call carrying **two** questions. Skip whichever one the argument or a flag
 already answers; skip the call entirely when both are fixed.

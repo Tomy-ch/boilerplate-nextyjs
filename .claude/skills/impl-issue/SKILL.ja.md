@@ -378,7 +378,6 @@ ADR [0155](../../../docs/adr/0155-claude-skills-development.md) を見よ。
 
 ## Step 4 —— 5 つの trip-wire を見ながら実装する
 
-<!-- boilerplate-only:begin -->
 計画が承認され実装が始まる —— 決めることと作ることの境界であり、これを知っているのは本スキルだけ
 である。打刻して、このリポジトリ自身のフィードバックループが各段の実時間を後から言えるようにする
 （ADR [0161](../../../docs/adr/0161-development-window-as-feedback-unit.md)）。
@@ -387,7 +386,6 @@ ADR [0155](../../../docs/adr/0155-claude-skills-development.md) を見よ。
 .agents/closed-loop/marks.sh planApprovedAt 2>/dev/null || true
 .agents/closed-loop/marks.sh implStartedAt 2>/dev/null || true
 ```
-<!-- boilerplate-only:end -->
 
 承認された計画に従う。引き金は意図して機械的である —— 判断が重大だったと**気づく**ことをあなたに
 頼るのが、まさに逸脱が報告されない仕組みだからである。
@@ -526,13 +524,11 @@ gh pr checks <n>
 gh pr merge <n> --merge
 ```
 
-<!-- boilerplate-only:begin -->
 打刻する —— ここで行う merge は、ループが `gh` を見に戻るまで他の誰にも観測されない。
 
 ```sh
 .agents/closed-loop/marks.sh mergedAt 2>/dev/null || true
 ```
-<!-- boilerplate-only:end -->
 
 ## Step 9 —— 締める
 

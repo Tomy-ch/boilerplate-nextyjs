@@ -32,14 +32,14 @@ CSP 適合の検査は **CI 時点で払える**ため [0110](0110-security-oper
 
 | ヘッダ | 値 | 備考 |
 | --- | --- | --- |
-| `X-Frame-Options` | `DENY` | CSP `frame-ancestors 'none'` と二重掛け。テンプレートから作った側で埋め込みが要るなら緩める |
+| `X-Frame-Options` | `DENY` | CSP `frame-ancestors 'none'` と二重掛け。埋め込みが要るなら緩める |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | 認証の往復がクエリに `code` / `id_token_hint` を載せる([0079](0079-auth-frontend-seam.md))。別 origin へは origin だけを送る |
 | `X-Content-Type-Options` | `nosniff` | |
-| `Permissions-Policy` | `accelerometer` / `camera` / `geolocation` / `gyroscope` / `magnetometer` / `microphone` / `payment` / `usb` を `()` | deny-by-default 寄りの最小許可。使う作った側が開ける。`payment` を閉じるのは決済 UI をフロントに置かない前提([0076](0076-payment-ui-seam.md)) |
+| `Permissions-Policy` | `accelerometer` / `camera` / `geolocation` / `gyroscope` / `magnetometer` / `microphone` / `payment` / `usb` を `()` | deny-by-default 寄りの最小許可。使うなら開ける。`payment` を閉じるのは決済 UI をフロントに置かない前提([0076](0076-payment-ui-seam.md)) |
 | `Cross-Origin-Opener-Policy` | `same-origin` | 別 origin の window から `opener` 経由で触れなくする。認証はリダイレクトで往復するため popup を要しない |
-| `Cross-Origin-Embedder-Policy` | `require-corp` | 別 origin の副資源を `Cross-Origin-Resource-Policy` の無いまま読み込めなくする。**画像は `next/image` の最適化経路(同一 origin)を通るため影響を受けない。** 別 origin の iframe / script を差す作った側は、この値から降りる判断を伴う |
+| `Cross-Origin-Embedder-Policy` | `require-corp` | 別 origin の副資源を `Cross-Origin-Resource-Policy` の無いまま読み込めなくする。**画像は `next/image` の最適化経路(同一 origin)を通るため影響を受けない。** 別 origin の iframe / script を差すなら、この値から降りる判断を伴う |
 | `Cross-Origin-Resource-Policy` | `same-origin` | 自分の応答を別 origin の文書へ埋め込ませない。効くのは `no-cors` の読み込み（`<img>` / `<script>` / nested navigation）だけで、§5 の CORS で開いた `fetch` には掛からない |
-| `Strict-Transport-Security` | `max-age=31536000` | **https で配信しているときだけ出す**(下記)。1 年は preload list の下限と同じ値。`includeSubDomains` / `preload` の付与と PaaS/CDN 側での終端は **作った側の判断**(§5) |
+| `Strict-Transport-Security` | `max-age=31536000` | **https で配信しているときだけ出す**(下記)。1 年は preload list の下限と同じ値。`includeSubDomains` / `preload` の付与と PaaS/CDN 側での終端は **ここでは定めない**(§5) |
 
 **https で配信しているかの判定は `isServedOverTls()`(`src/config/auth/auth.schema.ts`)が持つ。** callback URL(`AUTH_REDIRECT_URI`)の scheme を読む —— あれは IdP がブラウザを戻す先、すなわち自分の origin であり、環境の種類を別の変数で持たずに scheme を知れる唯一の既存の値である。cookie の `secure`(`docs/rules.md`「データ分類と機微情報」の「アプリ cookie は用途を接頭辞に含め、属性を用途ごとに明示する」)と同じ述語を使い、綴りを 2 つにしない。
 
@@ -61,22 +61,22 @@ frame-ancestors 'none';
 upgrade-insecure-requests                      ← https で配信しているときだけ
 ```
 
-- **`img-src` の配信元は検証済み ENV(`MEDIA_ORIGIN`)から組み立てる。** ここへ直接書くと、環境変数と設定の 2 か所が別々に動き、片方だけ直した状態を作れる。`blob:` はアップロード前の preview(`URL.createObjectURL`)が使う。`data:` は使う箇所が無いので載せない —— `placeholder="blur"` を採る作った側が足す
+- **`img-src` の配信元は検証済み ENV(`MEDIA_ORIGIN`)から組み立てる。** ここへ直接書くと、環境変数と設定の 2 か所が別々に動き、片方だけ直した状態を作れる。`blob:` はアップロード前の preview(`URL.createObjectURL`)が使う。`data:` は使う箇所が無いので載せない —— `placeholder="blur"` を採るなら足す
 - **`form-action` に IdP の origin を含める。** ログインは form の送信で始まり、その応答が IdP へリダイレクトする。Chromium は form の送信先だけでなく、その先のリダイレクト先にも `form-action` を適用するため、`'self'` だけだと認可要求が止まる
 - **`'unsafe-eval'` は開発サーバーだけ。** React が server 側のエラースタックをブラウザで組み直すのに eval を使う。本番の React も Next.js も eval を使わない
 - **`upgrade-insecure-requests` は https で配信しているときだけ。** http の開発環境で出すと `http://localhost` の副資源まで https へ書き換えられる
 - **`connect-src 'self'`**: ブラウザからの送信先は BFF(`/api/*`)に限る。観測性のシグナルも中継 seam を通る([0081](0081-observability-logging.md))。OTLP を直接叩かせない
-- **外部オリジン**(タグマネージャ・分析 SDK 等)は、[0131](0131-cookie-consent.md) §2 の同意ゲートと連動して `script-src` / `connect-src` / `img-src` に載る。**同梱するタグマネージャのぶんは本体が宣言し、それ以外を足すのは作った側の拡張点**とする。サードパーティスクリプト規約は `docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの裏に置く」
-- **`Cross-Origin-Embedder-Policy` は降ろす。** `require-corp` は副資源に `Cross-Origin-Resource-Policy` か CORS を要求するが、タグマネージャが注入するタグの配信元はそれを返さない。**cross-origin isolation を失うことを受け入れた結果**であり、`SharedArrayBuffer` 等の isolation を前提とする機能はこの構成では使えない。isolation が要る作った側は容器 ID を空にして本ヘッダを戻す
-- **`Content-Security-Policy-Report-Only` は経由しない。** 違反は CI が実ブラウザで検知する(§6)ので、可視化のためだけの段階導入は要らない。外部オリジンを足す作った側が衝突を見たいときの手段として残す
+- **外部オリジン**(タグマネージャ・分析 SDK 等)は、[0131](0131-cookie-consent.md) §2 の同意ゲートと連動して `script-src` / `connect-src` / `img-src` に載る。**同梱するタグマネージャのぶんは本体が宣言し、それ以外を足すのは拡張点**とする。サードパーティスクリプト規約は `docs/rules.md`「セキュリティ」の「第三者 script は同意ゲートの裏に置く」
+- **`Cross-Origin-Embedder-Policy` は降ろす。** `require-corp` は副資源に `Cross-Origin-Resource-Policy` か CORS を要求するが、タグマネージャが注入するタグの配信元はそれを返さない。**cross-origin isolation を失うことを受け入れた結果**であり、`SharedArrayBuffer` 等の isolation を前提とする機能はこの構成では使えない。isolation が要るなら容器 ID を空にして本ヘッダを戻す
+- **`Content-Security-Policy-Report-Only` は経由しない。** 違反は CI が実ブラウザで検知する(§6)ので、可視化のためだけの段階導入は要らない。外部オリジンを足して衝突を見たいときの手段として残す
 
 ### 4. enforce seam = seam A(静的・`next.config.ts`)
 
 CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層が吐く実行時防御** なので、**名前付きの拡張点を 2 系統敷き、seam A を既定にする**。
 
 - **seam A(既定・静的)= `next.config.ts` `headers()` に非 nonce CSP。** inline は `'unsafe-inline'` で許す。**レンダリングモードを固定しない**([0040](0040-routing-rendering-strategy.md))。
-- **seam B(opt-in・strict)= `src/proxy.ts` で per-request nonce。** `strict-dynamic` + nonce の strict CSP を敷けるが、**全ページを dynamic rendering に固定**し、静的最適化・ISR・CDN キャッシュ・Cache Components を犠牲にする。厳格な脅威モデル(`'unsafe-inline'` 禁止のコンプライアンス要件)を持つ作った側が **明示的に opt-in** する拡張点として名前を与える。
-- **seam A を確定した理由**: [0041](0041-cache-components-decision.md) が Cache Components を v1 で採用しており、nonce はこれと両立しない。nonce を既定にすると [0040](0040-routing-rendering-strategy.md)「モードを強制しない」・[0043](0043-middleware-policy.md)「Proxy は薄い last resort」の双方に反する。boilerplate は**開いておく**側に倒し、strict 化は作った側の選択に委ねる。
+- **seam B(opt-in・strict)= `src/proxy.ts` で per-request nonce。** `strict-dynamic` + nonce の strict CSP を敷けるが、**全ページを dynamic rendering に固定**し、静的最適化・ISR・CDN キャッシュ・Cache Components を犠牲にする。厳格な脅威モデル(`'unsafe-inline'` 禁止のコンプライアンス要件)を持つ場合に **明示的に opt-in** する拡張点として名前を与える。
+- **seam A を確定した理由**: [0041](0041-cache-components-decision.md) が Cache Components を v1 で採用しており、nonce はこれと両立しない。nonce を既定にすると [0040](0040-routing-rendering-strategy.md)「モードを強制しない」・[0043](0043-middleware-policy.md)「Proxy は薄い last resort」の双方に反する。既定は**開いておく**側に倒し、strict 化は選択に委ねる。
 - **`script-src` の `'unsafe-inline'` は弱い許可であり、strict CSP ではない。** 静的を保ったまま厳格化する道は nonce ではなく hash ベース(Next.js の実験的 SRI)である。実験的機能は採らない([0004](0004-library-management.md))。**撤回条件**: SRI が stable になり、Next.js 自身の inline script(RSC payload)を hash で許せるようになった時点で、seam A のまま `'unsafe-inline'` を外す。
 - **`style-src` は `style-src-elem` / `style-src-attr` に割らない。** 属性側は Radix の popper(`position` / `transform` / `--radix-popper-*`)と `next/image`(`color: transparent`)が要素の `style` 属性へ書くため、`'unsafe-inline'` から降りられない。要素側だけ厳格にする案は、動的な内容の `<style>` 要素(`components` の chart が系列色を CSS 変数として配る)と TipTap の runtime 注入(`injectCSS`)が hash で許せず、Safari が割った指定を持たず `style-src` へフォールバックするため、費用に対して得るものが薄い。リッチテキストの sanitizer は `style` 属性を通さない(`src/model/rich-text`)ので、**「リッチテキストのために `'unsafe-inline'`」は成立しない**。**撤回条件**: chart が変数を要素の `style` 属性へ移し、TipTap を `injectCSS: false` にし、[0102](0102-browser-support.md) の支持ブラウザが割った指定を揃えて持った時点で、要素側を `'self'` へ絞る。
 - seam B を採る場合も [0043](0043-middleware-policy.md) の制約を守る: `proxy.ts` は薄く保ち、nonce 生成とヘッダ設定に限る。`matcher` で prefetch・静的アセット(`_next/static` 等)を除外する。
@@ -91,13 +91,13 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 | **資格情報を載せた要求への `Cache-Control`** | **`src/proxy.ts`** | **要求に依る**(下記) |
 | **許可した別 origin への `Access-Control-*`** | **`src/proxy.ts`** | 要求の `Origin` に依る。宣言は `HTTP_ALLOWED_ORIGINS`(下記) |
 | **origin 検証(許可外 origin からの書き込みを 403)** | **`src/proxy.ts`** | 同じ宣言を読む。`docs/rules.md`「認可と入口」の「状態を変える要求の送信元を検証する」 |
-| HSTS の終端強制 | **PaaS/CDN も可(境界 seam)** | edge で一括付与する構成もある。二重掛けの整合は作った側が確認 |
+| HSTS の終端強制 | **PaaS/CDN も可(境界 seam)** | edge で一括付与する構成もある。二重掛けの整合は配送時に確認 |
 
 - **要求に依らないヘッダを `proxy.ts` で足さない。** 前捌きを通る経路にしか載らず、静的に配れる応答が漏れる。
-- **資格情報を載せた要求への応答は `Cache-Control: private, no-store`。** [0112](0112-data-classification-cache-boundary.md) 段 5(配信)の実体で、主体に紐づく応答が CDN / プロキシの共有キャッシュへ載り別の主体へ配られる事故を、応答ヘッダで止める。**判定は要求の側で行う** —— session cookie を載せた要求は、その応答が何であれ主体に紐づく。画面や Route Handler ごとに書かせず、宣言を持たない handler にも届く。代償はログイン済み利用者への静的画面が CDN で共有されないことで、これは 0112 の優先順位(機密性 > キャッシュ効率)どおりである。framework が動的な応答に付ける `no-store` はアプリ内側の判断で、静的に固まった応答には付かない —— 主体に紐づく画面が誤って固まった回に効くのは、この段だけである。**届く範囲は `proxy.ts` の `matcher` が選ぶ経路に限る** —— 除外している `_next/static` / `_next/image` / `favicon.ico` は cookie を載せた要求でも framework 自身の `Cache-Control`（画像最適化は `public, max-age=...`）のまま配られる。同梱の画像最適化経路には公開画像しか載せていないため成立している前提であり、主体固有の画像を `next/image` に載せる作った側は、この除外を見直すか配信元で `private` を返す。
-- **別 origin へ開く口は 1 つの宣言で持つ。** `HTTP_ALLOWED_ORIGINS`(`config/http`)に挙げた origin だけに、`src/proxy.ts` が BFF(`/api/*`)の応答へ `Access-Control-Allow-Origin` / `Access-Control-Allow-Credentials` / `Vary: Origin` を返し、preflight に 204 で答える。credentials を許すのは BFF の口が session cookie で主体を判定するためで、`*` は使えない。**既定は空 = 同一 origin だけ**であり、ブラウザから叩く先は BFF に限る(§3 `connect-src 'self'`)ので、この構成では宣言する相手が居ない。別 origin の SPA / 管理画面が BFF を叩く作った側が、その origin を宣言する。
+- **資格情報を載せた要求への応答は `Cache-Control: private, no-store`。** [0112](0112-data-classification-cache-boundary.md) 段 5(配信)の実体で、主体に紐づく応答が CDN / プロキシの共有キャッシュへ載り別の主体へ配られる事故を、応答ヘッダで止める。**判定は要求の側で行う** —— session cookie を載せた要求は、その応答が何であれ主体に紐づく。画面や Route Handler ごとに書かせず、宣言を持たない handler にも届く。代償はログイン済み利用者への静的画面が CDN で共有されないことで、これは 0112 の優先順位(機密性 > キャッシュ効率)どおりである。framework が動的な応答に付ける `no-store` はアプリ内側の判断で、静的に固まった応答には付かない —— 主体に紐づく画面が誤って固まった回に効くのは、この段だけである。**届く範囲は `proxy.ts` の `matcher` が選ぶ経路に限る** —— 除外している `_next/static` / `_next/image` / `favicon.ico` は cookie を載せた要求でも framework 自身の `Cache-Control`（画像最適化は `public, max-age=...`）のまま配られる。同梱の画像最適化経路には公開画像しか載せていないため成立している前提であり、主体固有の画像を `next/image` に載せるなら、この除外を見直すか配信元で `private` を返す。
+- **別 origin へ開く口は 1 つの宣言で持つ。** `HTTP_ALLOWED_ORIGINS`(`config/http`)に挙げた origin だけに、`src/proxy.ts` が BFF(`/api/*`)の応答へ `Access-Control-Allow-Origin` / `Access-Control-Allow-Credentials` / `Vary: Origin` を返し、preflight に 204 で答える。credentials を許すのは BFF の口が session cookie で主体を判定するためで、`*` は使えない。**既定は空 = 同一 origin だけ**であり、ブラウザから叩く先は BFF に限る(§3 `connect-src 'self'`)ので、この構成では宣言する相手が居ない。別 origin の SPA / 管理画面が BFF を叩くときに、その origin を宣言する。
 - **同じ宣言が書き込みの送信元を決める。** `Origin` を持つ要求のうち、自分自身(host が `X-Forwarded-Host` / `Host` と一致)でも宣言した origin でもないものからの状態を変えるメソッド(`GET` / `HEAD` / `OPTIONS` 以外)は、handler へ届く前に 403 で止める。**自分自身の判定は host だけで行い、scheme を比べない** —— TLS を終端するリバースプロキシの後ろでは、自分が見る要求は http でも `Origin` は https で届く。host は `X-Forwarded-Host` を先に読み、無ければ `Host` を使う(Next.js が Server Action の送信元を確かめるのと同じ順)。一方、宣言した別 origin は **origin の完全一致**で、scheme・host・port のどれか 1 つでも違えば別物として扱う。読むだけの要求は止めない —— CORS ヘッダを付けないので、ブラウザ側で応答を読めない。「読ませる相手」と「書かせる相手」を別々の宣言にすると、片方だけ開けた状態を作れる。Server Action は Next.js 自身が `Origin` と `Host` を突合しており、リバースプロキシで Host が書き換わる配備だけが `serverActions.allowedOrigins` を要する。判定は `src/model/cross-origin.ts` が持つ。
-- **PaaS/CDN での付与は「境界 seam」**として認める(HSTS・一部の静的ヘッダは配送層で終端する構成が現実的)。boilerplate 本体は `next.config.ts` を SSOT とするが、**PaaS 側と重複・矛盾しない**ことを作った側がデプロイ時に確認する(同一ヘッダの二重付与を避ける)。
+- **PaaS/CDN での付与は「境界 seam」**として認める(HSTS・一部の静的ヘッダは配送層で終端する構成が現実的)。`next.config.ts` を SSOT とするが、**PaaS 側と重複・矛盾しない**ことをデプロイ時に確認する(同一ヘッダの二重付与を避ける)。
 
 ### 6. CI 適合スライスは 0110 が持つ(本 ADR は実行時本体)
 
@@ -107,7 +107,7 @@ CSP は「別ドメイン(infra / backend)の責務」ではなく **表示層�
 
 ## 禁止事項
 
-- ❌ nonce ベース CSP(`proxy.ts`)を boilerplate の **既定**にすること(全経路を dynamic に固定し [0040](0040-routing-rendering-strategy.md)「モード非強制」と [0041](0041-cache-components-decision.md) に反する。strict 化は作った側の opt-in = seam B)
+- ❌ nonce ベース CSP(`proxy.ts`)を **既定**にすること(全経路を dynamic に固定し [0040](0040-routing-rendering-strategy.md)「モード非強制」と [0041](0041-cache-components-decision.md) に反する。strict 化は opt-in = seam B)
 - ❌ CSP・セキュリティヘッダを「Next.js が推奨するから」だけで正当化すること([0010](0010-standards-and-non-lockin.md) §2)
 - ❌ seam の形(nonce の載せ方・ヘッダ配置)を独自発明・中立化すること([0010](0010-standards-and-non-lockin.md) §1。Next.js デファクト = `headers()` / `proxy.ts` に乗る)
 - ❌ `proxy.ts` に nonce 生成・ヘッダ設定以外の業務ロジックを書くこと([0043](0043-middleware-policy.md) 薄い境界)

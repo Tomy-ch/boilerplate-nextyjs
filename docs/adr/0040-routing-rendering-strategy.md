@@ -38,8 +38,8 @@ Accepted
 
 ### レンダリングモードは特定モードを強制しない
 
-- 本 boilerplate は **CSR / SSR / SSG / ISR のいずれのモードも閉ざさない**。特定モードを一律強制せず、静的シェルのプリレンダーと request-time のストリーミングの**両対応を保つ**
-- 導出根拠: [0011](0011-no-docker.md) の想定デプロイは静的 CDN と SSR PaaS の**両方が主想定**であり、boilerplate 本体はどのモードも前提にしない
+- 本リポジトリは **CSR / SSR / SSG / ISR のいずれのモードも閉ざさない**。特定モードを一律強制せず、静的シェルのプリレンダーと request-time のストリーミングの**両対応を保つ**
+- 導出根拠: [0011](0011-no-docker.md) の想定デプロイは静的 CDN と SSR PaaS の**両方が主想定**であり、本リポジトリはどのモードも前提にしない
 - **モードの選択は機密性に従属する。** Server Components 既定は**性能と UX 上の既定値**であって、PII / user-scoped データの機密性を上回る制約ではない。PII を含む範囲のモード選択は [0112](0112-data-classification-cache-boundary.md)(不変条件 1 / 決定 8・10)が正であり、**PII のために SSR / PPR を諦めることは許可される**(ただし CSR にする範囲は最小の Client Island に限る)
 - **ただし、どちらで描くかを画面が宣言することはない。** Cache Components が有効なので([0041](0041-cache-components-decision.md))、殻と穴の分かれ目は器の形そのもの —— 何を `<Suspense>` の外に置き、何を内に置くか —— で決まり、segment config(`export const dynamic`)は併存しない。取得・`params` / `searchParams`・cookie・認可の判定・実時計は、すべて穴の内側で解く。**殻を配れない画面だけが `export const instant = false` を理由つきで名乗る。** 宣言と実態の突合は `scripts/render-mode` が `prerender-manifest.json` の `compute` に照らし、宣言なしにブロックしている route と、宣言が余っている route の双方を見る。**機械で確かめられるのは殻を配れたかどうかまで**で、「殻へ入れてよい内容か」は成果物から読めない
 - **描画モードは page 単体ではなく、layout の連なりを含めた route 全体で決まる。** 祖先の器が request 時の API(`cookies()` / `headers()` 等)を穴の外で読めば、その配下の画面は**自分が取得を持たなくても**殻を配れなくなる。画面側から逃げる手立ては無い。したがって**固めたい画面を含む route group の器は、request 時の読みを穴の内側に閉じるか、持たない**。器がその読みを殻の側で必要とするなら、固めたい画面をその器の外へ出す(器を分ける判断は [0026](0026-layout-shell-mount.md))
@@ -86,7 +86,7 @@ Accepted
 - ❌ `page.tsx` / `layout.tsx` / route / Server Action に業務ロジックを書くこと(薄い driving adapter。[0011](0011-no-docker.md) thin proxy)
 - ❌ `"use client"` を `layout.tsx` / `page.tsx` や上位に不要に置くこと(境界は葉へ押し下げる)
 - ❌ コード分割の第一軸を route にすること(第一軸は feature。[0020](0020-adopted-architecture.md))
-- ❌ 特定レンダリングモード(全面 SSG / 全面 dynamic 等)を boilerplate 本体で一律強制すること
+- ❌ 特定レンダリングモード(全面 SSG / 全面 dynamic 等)を 本リポジトリで一律強制すること
 - ❌ route-as-modal を全モーダルの既定として強制すること(あくまで**選択肢**。既定手段の判断は [0053](0053-ui-component-interaction-seam.md) 管轄)
 - ❌ intercepting / parallel routes の代替に独自ルーティング機構を発明・中立化すること(Next.js file convention にそのまま乗る。[0010](0010-standards-and-non-lockin.md) §1)
 

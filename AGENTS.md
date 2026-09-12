@@ -22,7 +22,7 @@ Three constraints apply to every task:
 
 > **TEMPORARY SECTION — delete it when v1.0.0 ships.**
 >
-> Process source of truth: [docs/plan/v1-implementation-plan.md](docs/plan/v1-implementation-plan.md).
+> Process source of truth: [docs/plan/v1-implementation-plan.md](docs/plan/v1-implementation-plan.md). <!-- boilerplate-only:line -->
 
 Below v1.0.0 the following are **temporarily lifted**:
 
@@ -46,31 +46,7 @@ Follow instructions in this order. If conflicts occur, the higher-priority docum
 3. **`.github/copilot-instructions.md`** and other agent-specific configs
 4. User instructions
 
-<!-- boilerplate-only:begin -->
-## What to Recommend
-
-Governs what you **recommend**, never what you may change — `Instruction Priority` above and
-`AI Modification Scope` below still decide that.
-
-- **Weigh options for the snapshot a new repository receives**, not for the history that produced it:
-  what reads as coherent to someone who never saw this repository and will never read its git log.
-- **Quality and consistency outrank the cost of reaching them.** A numbering that contradicts the
-  order it teaches, a convention followed everywhere but here, a name that survives only because
-  renaming is work — recommend fixing them. "It already shipped" carries little weight.
-- **Give the cost with the recommendation** — files touched, what breaks for whom, what must be
-  rebuilt — so a human can decline the scope while keeping the direction.
-- **Only two things carry authority**: a de-facto standard (an RFC, a specification, a platform's own
-  definition), and the shape this repository's architecture derives. A recommendation that cannot be
-  stated as one of those is a preference wearing a recommendation's clothes.
-- **Do not bake a particular deployment's situation into what survives**, but this is subordinate to
-  the rule above: a knob is justified only where the variation is genuinely situational **and**
-  neither the standard nor the architecture settled it. A knob where a standard already decided is a
-  departure from the standard, and needs the declaration
-  [0010](docs/adr/0010-standards-and-non-lockin.md) requires, or needs to go.
-- **The test is never "more abstraction" or "less"** — move toward the shape the standard or the
-  architecture derives, and drop the situational label.
-
-<!-- boilerplate-only:end -->
+See [boilerplate-only conventions](docs/get-started/boilerplate-only-conventions.md) for the statements that hold only while this repository is the upstream template. <!-- boilerplate-only:line -->
 
 ## Canonical Documentation
 
@@ -319,23 +295,7 @@ always; reach for `--log` only when the failure is genuinely not in a failed ste
 narrowed it with. **Never report a gate's verdict through a lossy filter**
 ([0157](docs/adr/0157-inspection-declaration-discipline.md)).
 
-<!-- boilerplate-only:begin -->
-### Do not pre-run the gates
-
-**This section is removed from a repository created from this template**, where one working tree makes
-pre-running cheap. Here, several worktrees run against one host and the gates multiply rather than
-queue.
-
-**The hooks and CI run them for you, and CI is the authority** ([0151](docs/adr/0151-git-hooks.md)):
-`pre-commit` runs the full lint chain and the cached tests, `pre-push` adds the type check, the full
-test run and the secret scan.
-
-- **Commit, push, and read the verdict from the hook or CI.**
-- Re-running a single file you just edited is fine; sweeping the whole suite or the whole lint is not.
-- `make load-status` prints which gates run locally right now; when the host is loaded the heavy ones
-  are delegated to CI automatically. **Do not pre-empt that with `--no-verify`** — bypassing is
-  governed by 0151's policy, not by how slow a gate feels.
-<!-- boilerplate-only:end -->
+The gates belong to the hooks and CI, and **CI is the authority** — [`docs/playbook.md`](docs/playbook.md), *ゲートを先回りして回さない*. What deviates upstream is in [boilerplate-only conventions](docs/get-started/boilerplate-only-conventions.md). <!-- boilerplate-only:line -->
 
 ### Two tools that only change what reaches your context
 
@@ -436,31 +396,6 @@ reason to skip a confirmation this file requires.
   counts, or coverage ([0157](docs/adr/0157-inspection-declaration-discipline.md)).
 - **Generated artifacts carry no decorative Unicode.** Code, config and commit messages use plain
   hyphens and straight quotes; prose written for humans keeps ordinary typography.
-
-<!-- boilerplate-only:begin -->
-## Purity Sweep
-
-Every file in this repository is walked once. A `PreToolUse` hook looks the path up before you edit it
-and, when the file is not yet recorded, tells you where the procedure is; **it never blocks**.
-[`.agents/README.md`](.agents/README.md) owns the mechanism, the ledger and the query entry points.
-
-The pass asks three questions of the **whole file**, not of your diff:
-
-1. **Purity** — can a repository created from this template resolve every reference here, and is every
-   statement still true once this repository is a template?
-2. **Distillation** — what design judgment does this file embody?
-3. **Routing** — which document owns that judgment: an ADR, a layer `README.md`, a feature
-   `README.md`, `docs/rules.md`, or the code itself?
-
-- The criteria are in `.agents/purity-sweep/purity-sweep.prompt`. Read it when the hook says so.
-- **Record a file only once you have seen all of it** — an entry claiming a sweep that did not happen
-  is worse than no entry, because nothing will look at that file again.
-- Edits made through `Bash` rather than the file-editing tools do not trigger the hook; the rule
-  applies to them anyway.
-
-This is not a review lane. `Review Phase Protocol` judges **a change**; this judges the **accumulated
-state of a file**, as a side effect of touching one.
-<!-- boilerplate-only:end -->
 
 ## Protected Documentation
 

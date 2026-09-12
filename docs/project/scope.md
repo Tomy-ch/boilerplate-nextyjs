@@ -21,7 +21,7 @@
   （[0111](../adr/0111-csp-security-headers.md) / [0030](../adr/0030-environment-variable-management.md)）
 
 ADR を読んで自分のプロジェクトの判断として書き換えられるメンバーがいることを前提にする。同梱する
-判断はどれも作った側で覆せる形で記録してあり、覆すときは ADR を上書きするか supersede する
+判断はどれも覆せる形で記録してあり、覆すときは ADR を上書きするか supersede する
 （例: [0011](../adr/0011-no-docker.md) の自己ホスト化）。
 
 ## 想定する開発方式
@@ -73,4 +73,4 @@ AI 無しで成立する。
   設計目標に入れない。ただしセキュリティ上の懸念はこの原則の外にある
   （[0020](../adr/0020-adopted-architecture.md) 設計原則 6）
 - **環境は stand-alone と cloud の 2 群。** `local` / `ci` は何も契約せずに全画面が動き、`dev` /
-  `stg` / `prd` は作った側の IdP / API へ向く（[0011](../adr/0011-no-docker.md) 環境の定義）
+  `stg` / `prd` は自分の IdP / API へ向く（[0011](../adr/0011-no-docker.md) 環境の定義）

@@ -14,7 +14,7 @@
 | IdP から受け取ったトークンを **httpOnly cookie に封緘して持つ**こと | トークンの発行・署名鍵・利用者の記録 |
 | session を読んで**入口を捌く**こと（前捌きと確定認可） | 役割の正本（バックエンドが持つ。session に載るのは確立時の写し） |
 
-この非対称が可能にするのは、**IdP を替えても画面が変わらない**ことである。この層が IdP について知っているのは `AUTH_ISSUER` 1 つと、そこから引く Discovery 文書だけで、IdP 固有の SDK も資格情報も依存に入っていない。バックエンドの役割体系も知らない —— 知っているのは「特権を持つ側 / 持たない側」の 2 値だけで（`src/model/session.ts` の `SESSION_ROLE`）、テンプレートから作った側はこの集合を自分の体系へ置き換える。
+この非対称が可能にするのは、**IdP を替えても画面が変わらない**ことである。この層が IdP について知っているのは `AUTH_ISSUER` 1 つと、そこから引く Discovery 文書だけで、IdP 固有の SDK も資格情報も依存に入っていない。バックエンドの役割体系も知らない —— 知っているのは「特権を持つ側 / 持たない側」の 2 値だけで（`src/model/session.ts` の `SESSION_ROLE`）、この集合は自分の体系へ置き換える。
 
 同じ非対称が不可能にするのは、**session の中身を自分で検証すること**である。cookie を復元できたなら、その中身は正しいと信じる —— 役割が確立時のまま古くなっていても、この層には照らし合わせる先が無い。確定認可（`verifySession()`）が確かめているのは「この cookie は自分が封緘したもので、まだ失効していない」ことまでであり、「この主体はいまもこの役割を持つ」ことではない。それを答えられるのは、Bearer を検証するバックエンドだけである。
 
@@ -53,9 +53,9 @@
 
 属性はどちらも `httpOnly` / `sameSite: "lax"` / `path: "/"` で、`secure` は `AUTH_REDIRECT_URI` の scheme が `https:` かで決まる。`strict` にしないのは、IdP からのリダイレクトで cookie が届かず callback が成立しなくなるためである。鍵は `AUTH_SESSION_SECRET` を SHA-256 に通した 32 バイトで、設定側に長さの制約を課さない。
 
-**session の寿命は Access Token の寿命と同じである。** Resolver の面に `refresh` は無い —— それを使う既定実装が無いためで、作った側の IdP が refresh を持つなら `restore` の内側で完結させる。失効した session は `restore` が `null` を返し、未認証と区別されない（壊れた cookie も同じ）。失効・改竄・鍵の入れ替えを呼び出し側が区別できると、その区別が攻撃者への手掛かりになる。
+**session の寿命は Access Token の寿命と同じである。** Resolver の面に `refresh` は無い —— それを使う既定実装が無いためで、IdP が refresh を持つなら `restore` の内側で完結させる。失効した session は `restore` が `null` を返し、未認証と区別されない（壊れた cookie も同じ）。失効・改竄・鍵の入れ替えを呼び出し側が区別できると、その区別が攻撃者への手掛かりになる。
 
-**役割は確立時に 1 度だけ引く。** 既定 Resolver は `resolveRole` を依存として受け取り、`completeAuthorization` の途中で Access Token を渡して呼ぶ。ここは cookie がまだ無い唯一の往復なので、取得口は `getBearerToken` ではなく `bearerToken` の綴りで解決済みの値を渡す（[ADR 0112](../adr/0112-data-classification-cache-boundary.md) 決定 5 の例外）。**`resolveRole` を渡さなければ、権限を持たない側へ倒す。** 同梱サンプルはバックエンドの役割の口を繋いでいるが、その adapter はサンプルと一緒に消えるので、残る側では役割の出所を作った側が繋ぎ直す。
+**役割は確立時に 1 度だけ引く。** 既定 Resolver は `resolveRole` を依存として受け取り、`completeAuthorization` の途中で Access Token を渡して呼ぶ。ここは cookie がまだ無い唯一の往復なので、取得口は `getBearerToken` ではなく `bearerToken` の綴りで解決済みの値を渡す（[ADR 0112](../adr/0112-data-classification-cache-boundary.md) 決定 5 の例外）。**`resolveRole` を渡さなければ、権限を持たない側へ倒す。** 同梱サンプルはバックエンドの役割の口を繋いでいるが、その adapter はサンプルと一緒に消えるので、残る側では役割の出所を繋ぎ直す。
 
 ## 認証の往復
 
@@ -119,7 +119,7 @@ matcher は `_next/static` / `_next/image` / metadata ファイルを外して�
 | --- | --- | --- | --- |
 | `local` | `live` | `idp`（既定） | 開発用 IdP へ通常のログインを通す。`/dev/session` も開く |
 | `ci` | `mock` | `dev` | `/login` が `/dev/session` へ送り出す。E2E は `/api/auth/test-session` で直接発行する |
-| `dev` / `stg` / `prd` | `live` | `idp` | 実 IdP。**`AUTH_*` は空欄で、作った側が埋める** |
+| `dev` / `stg` / `prd` | `live` | `idp` | 実 IdP。**`AUTH_*` は空欄で、利用側が埋める** |
 
 **`AUTH_MODE=dev` だけでは何も起きない。** `resolver.ts` の `usesDevelopmentAuthorization()` は `isDevelopmentOnlyEndpointOpen()`（`APP_ENV` が明示され、かつ `local` / `ci`）と併せて見る。`AUTH_MODE` だけを条件にすると、設定を誤って実環境へ `dev` を与えた瞬間に、IdP を通らずに任意の役割で入れる経路が公開ドメインで開く。
 
@@ -188,7 +188,7 @@ matcher は `_next/static` / `_next/image` / metadata ファイルを外して�
 - **前捌きは宣言した接頭辞しか見ない。** `/api/auth/*` と `/api/health` は誰でも叩ける。認証の要る Route Handler を足すときは、`authz.ts` へ接頭辞を足すか、`adapters` の 401 を写すかのどちらかであり、Route Handler 自身に判定を書かない。
 - **`Cache-Control: private, no-store` は matcher が外した経路には届かない。** 主体ごとに違う画像を `next/image` に載せるなら、除外を見直す。
 - **Bearer は `baseUrl` と同じ origin にしか付かない。** Discovery が返した絶対 URL や、別 origin の API を同じクライアントで叩くと、認証なしで出ていって 401 になる。接続先ごとにクライアントを作る。
-- **`resolveRole` を渡さなければ全員が権限を持たない側になる。** サンプルを破棄した直後はこの状態で、`/admin` には誰も入れない。役割の出所を繋ぐのは作った側の最初の仕事である。
+- **`resolveRole` を渡さなければ全員が権限を持たない側になる。** サンプルを破棄した直後はこの状態で、`/admin` には誰も入れない。役割の出所を繋ぐのが最初の仕事である。
 - **`/account` は宣言だけで画面が無い。** 前捌きは効く（未認証で踏むとログインへ送られる）が、認証後に戻ると 404 になる。宣言を消さずに画面を足すか、宣言ごと自分の接頭辞へ書き換える。
 - **Server Action から Route Handler へ `redirect()` しても要求は出ない。** `/dev/session` の認可の往復が素の form 送信になっているのはこのためで、同じ形を他所で組むときも Server Action を経由させない。
 - **`use cache` の下で `verifySession()` は呼べない。** `cookies()` を読むため framework が落とす。認可の判定は穴の内側で解く。

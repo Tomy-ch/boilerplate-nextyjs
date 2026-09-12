@@ -142,7 +142,7 @@ subagent はどれも「この変更は正しいか」を問うのに対し、�
 「最小変更 / 綺麗な構造 / 折衷」の 3 案を並べて選ばせるが、層と依存の向きは
 [0020](0020-adopted-architecture.md) / [0021](0021-frontend-responsibility.md) が既に決めており、
 0020 は粒度で切る分類（Atomic Design / FSD）を名指しで棄却している。**既に決まっている所へ案を
-並べることは、選択肢の提示ではなく決定の再開である**（`AGENTS.md` の *What to Recommend*）。
+並べることは、選択肢の提示ではなく決定の再開である**（[0010](0010-standards-and-non-lockin.md)）。
 
 **`code-reviewer` を採らないのは、レビューの主題の分け方が違うからである。**このリポジトリは
 `AGENTS.md` の Review Phase Protocol で主題を 3 つ（変更 / テスト / コメント在庫）に割り、それぞれを

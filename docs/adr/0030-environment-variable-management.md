@@ -110,7 +110,6 @@ taint は [0112](0112-data-classification-cache-boundary.md) の**段 4(client �
 - **テストの React 解決** —— 全体の alias は動かさない(client 側のテストが stable を要る)。taint の口のテストだけが、Next.js 同梱の experimental build を CJS の名前解決ごと差し替えて読む。位置は `next` の package から辿る(`experimental-react.fixture.ts`)
 - **文字列の秘密の登録場所** —— 読む側に置く。`config` は `imports-allowed: []` を宣言しており react を持ち込めない。署名鍵は `adapters/server/auth/resolver.ts` が登録し、登録の寿命は値を持つ singleton(`AuthConfig`)が握る
 - **汚す対象と粒度** —— **値が生まれる場所で、その object 1 つを汚す**。session の記録は復元した直後に汚す。入れ子は追わない —— 参照でしか追えない以上、粒度を細かくしても抜ける経路(コピー・派生値)は塞がらず、主防御は取得範囲と Client DTO の最小化が持つ
-- **爆破対象外**([0112](0112-data-classification-cache-boundary.md) 決定 7)。サンプル API 固有ではなく Server / Client 境界そのものを守る
 
 #### 例外の解消条件
 

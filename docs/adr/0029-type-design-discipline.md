@@ -32,7 +32,7 @@ Accepted
 
 **client へ届くスキーマは `zod/mini` で書き、server に閉じるスキーマと生成物は `zod` で書く。**
 
-同梱サンプルの実測で、使っている API 面(`z.object` / `z.string` / `z.array` / `z.int` / `z.boolean` / `z.uuid` / `z.email` / `z.coerce` / 長さ・書式の検査 / `safeParse` / `flattenError`)を両者で書き比べると **63.5 KB → 5.4 KB(gzip)** の差になる。`zod` の既定の入口は、この repository が呼ばない JSON Schema 変換とエラー文言の locale を抱えており、それが**画面を開いた人に配られる**。
+実測で、使っている API 面(`z.object` / `z.string` / `z.array` / `z.int` / `z.boolean` / `z.uuid` / `z.email` / `z.coerce` / 長さ・書式の検査 / `safeParse` / `flattenError`)を両者で書き比べると **63.5 KB → 5.4 KB(gzip)** の差になる。`zod` の既定の入口は、この repository が呼ばない JSON Schema 変換とエラー文言の locale を抱えており、それが**画面を開いた人に配られる**。
 
 - **境界で parse する規律は変わらない。** 変わるのは書き方だけで、`.min(n, msg)` が `.check(z.minLength(n, msg))` になる類の差である。検証の内容も文言もそのまま移せる
 - **server 側を揃えない。** bundle に載らないため利益が無く、生成物(`0072`)は生成器が `zod` で出すので選べない。**片方に寄せる価値より、載る側だけを選ぶ価値のほうが大きい**

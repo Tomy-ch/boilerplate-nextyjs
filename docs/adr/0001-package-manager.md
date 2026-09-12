@@ -88,7 +88,7 @@ pnpm fetch
 pnpm install --offline --frozen-lockfile
 ```
 
-> 配送層に Docker は用いない（[0011-no-docker.md](0011-no-docker.md)）。本リポジトリは表示層 boilerplate として PaaS / 静的 CDN 配送を主想定とし、アプリ本体配送用の `Dockerfile` は同梱しない。
+> 配送層に Docker は用いない（[0011-no-docker.md](0011-no-docker.md)）。本リポジトリは表示層 アプリケーション基盤として PaaS / 静的 CDN 配送を主想定とし、アプリ本体配送用の `Dockerfile` は同梱しない。
 
 ## 禁止事項
 

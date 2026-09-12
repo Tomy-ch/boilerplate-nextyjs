@@ -12,7 +12,7 @@
 | [out-of-scope.md](out-of-scope.md) | 何を意図して含めていないか。項ごとの理由 |
 | [policy.md](policy.md) | 何を足し、何を足さないか。受け入れの判定軸と保守の姿勢 |
 | [roadmap.md](roadmap.md) | どの方向へ維持されているか。スケジュールではない |
-| [versioning.md](versioning.md) | 版をどう付け、テンプレートから作った側とどう関係するか |
+| [versioning.md](versioning.md) | 版をどう付けるか |
 
 ## ここに置かないもの
 
@@ -29,10 +29,7 @@
   食い違えば ADR が正である（[0140](../adr/0140-documentation-operations.md)）
 - **out-of-scope はバックログではない。** 項目がそこを出るのは、書かれた理由が成り立たなくなった
   ときだけで、それは ADR の判断である
-- **テンプレートから作った側にとって、ここは自分の文書になる場所である。** scope / out-of-scope は
+- **ここは自分の文書になる場所である。** scope / out-of-scope は
   自分のプロジェクトの線に書き換える。roadmap は方向を書き換え、ページの形だけを引き継ぐ
 
-<!-- boilerplate-only:begin -->
-policy / roadmap のうちこのリポジトリにしか成り立たない節は撤去マーカーで囲ってあり、セットアップの
-剥がし（[setup-repository.md](../get-started/setup-repository.md)）で作った側向けの文面に置き換わる。
-<!-- boilerplate-only:end -->
+policy / roadmap のうち上流にしか成り立たない節は、セットアップの剥がしで置き換わる（[boilerplate 限定の規約](../get-started/boilerplate-only-conventions.md)）。 <!-- boilerplate-only:line -->

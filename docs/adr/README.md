@@ -19,7 +19,7 @@
 - [0003-version-manager.md](0003-version-manager.md) - Node.js / pnpm のバージョンマネージャ選定（mise 採用）
 - [0004-library-management.md](0004-library-management.md) - ライブラリ選定・運用方針（npm 依存のメタ方針 / exact pin / 監査）
 - [0010-standards-and-non-lockin.md](0010-standards-and-non-lockin.md) - 標準準拠と非ロックイン（設計判断の恒久メタ軸 = デファクト seam に乗る / 非ロックイン判定）
-- [0011-no-docker.md](0011-no-docker.md) - Docker を boilerplate に含めない方針（表示層 → アプリ基盤ロール定義）
+- [0011-no-docker.md](0011-no-docker.md) - Docker を採用しない方針（表示層 → アプリ基盤ロール定義）
 - [0020-adopted-architecture.md](0020-adopted-architecture.md) - 採用アーキテクチャ（機能スライス × 表示層カーネル / 設計原則 / 不採用パターン）
 - [0021-frontend-responsibility.md](0021-frontend-responsibility.md) - フロント内責務分離方針（カーネル責務 / 依存マトリクス / 命名規律 / Enforcement）
 - [0022-capabilities-kernel.md](0022-capabilities-kernel.md) - `capabilities` カーネル（横断 client hook の家 / runtime 能力供給 / use client 固定）
@@ -35,7 +35,7 @@
 - [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) - ルーティング・レンダリング戦略（App Router / Server Components 既定 / Server Actions / route-as-modal）
 - [0041-cache-components-decision.md](0041-cache-components-decision.md) - Cache Components（PPR）有効化判断
 - [0042-react19-rendering-api.md](0042-react19-rendering-api.md) - React 19 レンダリング API 規約（`use()` 等の書き方）
-- [0043-middleware-policy.md](0043-middleware-policy.md) - Middleware（Proxy）方針（Next.js 16 proxy.ts / thin・last resort / 認証はテンプレートから作った側）
+- [0043-middleware-policy.md](0043-middleware-policy.md) - Middleware（Proxy）方針（Next.js 16 proxy.ts / thin・last resort / 認証は対象外）
 - [0044-seo-metadata-strategy.md](0044-seo-metadata-strategy.md) - SEO / メタデータ戦略（Metadata API / sitemap・robots / canonical / JSON-LD / アイコン体系）
 - [0045-fonts-and-images.md](0045-fonts-and-images.md) - フォント・画像（next/font / next/image / public/ / 動的 OG）
 - [0050-styling-strategy.md](0050-styling-strategy.md) - スタイリング戦略（Tailwind 主軸 + CSS Modules 限定許可 / `cn()` / design token = CSS 変数）
@@ -60,15 +60,15 @@
 - [0078-dynamic-feature-flag-seam.md](0078-dynamic-feature-flag-seam.md) - 動的 feature flag・段階的配信 seam（A-B / 段階的公開）
 - [0079-auth-frontend-seam.md](0079-auth-frontend-seam.md) - 認証のフロント側 seam
 - [0080-error-handling.md](0080-error-handling.md) - エラーハンドリング（errors カーネル / sentinel 分類 / 境界正規化 / error.tsx 階層 / loading・Suspense）
-- [0081-observability-logging.md](0081-observability-logging.md) - 観測性・ロギング（logging/observability カーネル / OTLP-only / signal gating / RUM は作った側）
+- [0081-observability-logging.md](0081-observability-logging.md) - 観測性・ロギング（logging/observability カーネル / OTLP-only / signal gating / RUM は非同梱）
 - [0082-client-observability.md](0082-client-observability.md) - クライアント観測性（Web Vitals RUM / client エラー収集 / プロダクト分析 seam）
 - [0090-testing-strategy.md](0090-testing-strategy.md) - テスト戦略（Vitest + RTL + MSW + Playwright / go 準拠戦略 / 90% ゲート）
 - [0091-test-verification-methods.md](0091-test-verification-methods.md) - テスト検証手段方針（async RSC テストの寄せ先 / a11y 自動テスト = axe 組込）
 - [0100-accessibility-target.md](0100-accessibility-target.md) - アクセシビリティ目標（WCAG AA / biome a11y / 手動チェック）
-- [0101-performance-budget.md](0101-performance-budget.md) - パフォーマンス予算（Core Web Vitals / 仕組みは定義・閾値は作った側）
-- [0102-browser-support.md](0102-browser-support.md) - ブラウザサポート行列（Next.js 既定 browserslist 追認 / 切り捨ては作った側）
+- [0101-performance-budget.md](0101-performance-budget.md) - パフォーマンス予算（Core Web Vitals / 仕組みは定義・閾値は用途依存）
+- [0102-browser-support.md](0102-browser-support.md) - ブラウザサポート行列（Next.js 既定 browserslist 追認 / 切り捨ては用途依存）
 <!-- boilerplate-only:replace-begin -->
-- [0110-security-operations.md](0110-security-operations.md) - セキュリティ運用（Dependabot cooldown / gitleaks / Trivy 二段 / CodeQL / image-scan は exclusion）
+- [0110-security-operations.md](0110-security-operations.md) - セキュリティ運用（Dependabot cooldown / gitleaks / Trivy 二段 / Opengrep / image-scan は exclusion）
 <!-- boilerplate-only:replace-with -->
 <!-- = - [0110-security-operations.md](0110-security-operations.md) - セキュリティ運用（Dependabot cooldown / gitleaks / Trivy 二段 / Opengrep / image-scan は exclusion） -->
 <!-- boilerplate-only:replace-end -->
@@ -78,7 +78,7 @@
 - [0120-locale-aware-formatting.md](0120-locale-aware-formatting.md) - ロケール対応フォーマット（日付・数値 + Intl / date-fns 日付演算）
 - [0121-i18n-strategy.md](0121-i18n-strategy.md) - i18n 戦略（本体非同梱 = exclusion / 採用時の seam）
 - [0130-pwa-strategy.md](0130-pwa-strategy.md) - PWA 戦略（Manifest / SW / オフライン本体非同梱 = exclusion）
-- [0131-cookie-consent.md](0131-cookie-consent.md) - Cookie 同意（軽量 consent 機構 + スクリプトゲート + ゲートの裏のタグマネージャは同梱 / CMP・IAB TCF は非同梱。計測製品そのものは容器の中身として作った側が選ぶ）
+- [0131-cookie-consent.md](0131-cookie-consent.md) - Cookie 同意（軽量 consent 機構 + スクリプトゲート + ゲートの裏のタグマネージャは同梱 / CMP・IAB TCF は非同梱。計測製品そのものは容器の中身として選ぶ）
 - [0140-documentation-operations.md](0140-documentation-operations.md) - ドキュメント運用ポリシー（EN canonical 方向・移行 v1 / タクソノミー / rules.md 新設 / ADR 不可変性）
 - [0141-portal-operations.md](0141-portal-operations.md) - ポータル運用（manifest = 構造制御 / 登録基準 / GitHub Pages / 実装は Phase 3）
 - [0142-license.md](0142-license.md) - ライセンス選定（MIT 採用根拠 / OSS 寄与 = inbound=outbound / 同梱ライブラリ整合 / private:true との関係）
@@ -96,6 +96,4 @@
 - [0158-code-search-tooling.md](0158-code-search-tooling.md) - コード検索・影響解析ツール（採用範囲 / 導入経路 / allow・deny 境界）
 - [0159-script-structure.md](0159-script-structure.md) - 補助スクリプトの言語と構造（TypeScript / 1 ツール 1 ディレクトリ / 入口と判定の分離）
 - [0159-1-cross-repository-references.md](0159-1-cross-repository-references.md) - 他リポジトリへの参照（既定は `redirect.github.com` / 素のリンクは留保 / 使う判断は人のもの）
-- [0160-agent-environment-loop.md](0160-agent-environment-loop.md) - エージェント環境の改善をループにする（観測 → 改善 → 再計測 / 利用の型で判定する / 状態の 3 つの置き場）
-- [0161-development-window-as-feedback-unit.md](0161-development-window-as-feedback-unit.md) - 開発の窓をフィードバックの単位とする（セッション・コミット・PR を母数にしない理由 / 打刻が第一で記録は補完）
 - [0162-application-independence-from-ai.md](0162-application-independence-from-ai.md) - アプリケーションは AI に依存しない（成立の条件にエージェントを置かない / 依存は開発の流れに閉じる / 経路に自分を置く道具を採らない）

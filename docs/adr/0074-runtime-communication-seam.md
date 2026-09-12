@@ -22,7 +22,7 @@ seam の実体は `src/` に無い(§補足)。本 ADR が持つのは**選択�
 
 **境界判定(別ドメインか?の一問)で 2 分する**:
 
-- **長寿命接続の hosting(ソケットを開いたまま保持するサーバ)= 別ドメイン(infra/backend)責務 → 境界 seam で切る(非同梱)**。[0011](0011-no-docker.md) の PaaS / サーバレス前提では長寿命接続を本体で保持できない。realtime の供給元は **バックエンド直結 or 外部 managed サービス**(例: Pusher / Ably / Supabase Realtime / managed WebSocket / SSE ゲートウェイ)であり、本 boilerplate は realtime transport サーバを**同梱しない**。これは [0070](0070-backend-role-separation.md)(業務・接続ホスティングは backend)/ [0011](0011-no-docker.md) の帰結であって、新たな制約ではない。
+- **長寿命接続の hosting(ソケットを開いたまま保持するサーバ)= 別ドメイン(infra/backend)責務 → 境界 seam で切る(非同梱)**。[0011](0011-no-docker.md) の PaaS / サーバレス前提では長寿命接続を本体で保持できない。realtime の供給元は **バックエンド直結 or 外部 managed サービス**(例: Pusher / Ably / Supabase Realtime / managed WebSocket / SSE ゲートウェイ)であり、本リポジトリは realtime transport サーバを**同梱しない**。これは [0070](0070-backend-role-separation.md)(業務・接続ホスティングは backend)/ [0011](0011-no-docker.md) の帰結であって、新たな制約ではない。
 - **client 側の購読/消費 = フロント領域 → 名前付き拡張点(seam)**。家は既に [0024](0024-adapters-server-client-split.md) の **`adapters/client`**。
 
 強制: 散文 —— **寄せられない**。同梱しているかどうかは依存とディレクトリの有無で決まり、規則にする対象が無い。

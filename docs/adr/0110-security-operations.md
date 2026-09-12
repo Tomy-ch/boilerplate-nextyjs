@@ -1,10 +1,6 @@
 # セキュリティ運用
 
-<!-- boilerplate-only:replace-begin -->
-**依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・CodeQL・Opengrep)/ 依存監査ゲート / 依存差分ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。コンテナ配送を前提とする機構は no-Docker([0011](0011-no-docker.md))のため対象外とし、exclusion として記録する。Actions の SHA ピンは CI ハードニング側の主題であり [0153](0153-ci-configuration.md) が持つ。
-<!-- boilerplate-only:replace-with -->
-<!-- = **依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・Opengrep)/ 依存監査ゲート / 依存差分ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。コンテナ配送を前提とする機構は no-Docker([0011](0011-no-docker.md))のため対象外とし、exclusion として記録する。Actions の SHA ピンは CI ハードニング側の主題であり [0153](0153-ci-configuration.md) が持つ。 -->
-<!-- boilerplate-only:replace-end -->
+**依存更新(Dependabot + cooldown)/ 秘密スキャン(gitleaks)/ 脆弱性スキャン(Trivy fs 二段・OSV 二段・Opengrep)/ 依存監査ゲート / データフロー検査 / サプライチェーン姿勢の計測 / SECURITY.md / 多層防御** を定める。コンテナ配送を前提とする機構は no-Docker([0011](0011-no-docker.md))のため対象外とし、exclusion として記録する。Actions の SHA ピンは CI ハードニング側の主題であり [0153](0153-ci-configuration.md) が持つ。
 
 ## Status
 
@@ -79,23 +75,12 @@ Accepted (一部 exclusion)
 
 ### 3. 脆弱性スキャン(多層防御)
 
-- **CodeQL SAST**: `languages: javascript-typescript`。trigger = PR + 保護ブランチ push + 週次 cron。`security-events: write` で SARIF アップロード。high-severity はマージブロック(ブロックの実体は branch protection / code scanning の required 設定側。workflow 内の hard-fail には依存しない) <!-- boilerplate-only:line -->
-- **portable SAST(Opengrep)**: SAST の既定は**リポジトリと一緒に持ち出せる実体**で持つ。GitHub の code scanning が供給する解析は **GitHub の外へ持ち出せず**、テンプレートから作った側が private かつ GHAS 無しならその層がまるごと消えるため、**同じ問いに答える持ち出せる実体**を持つ。実体は `mise.toml` にピンした 1 バイナリで、ローカルでも CI でも同じ `make sast` が回す。**Semgrep 本体ではなく OSS fork の Opengrep を採る** —— ルール記法は互換で `// nosemgrep:` の抑止もそのまま効くうえ、boilerplate が作った側へライセンス判断を渡さずに済む。**0 件の baseline を保つことがこのゲートの前提**であり、0 件だからこそ新しい所見が読み飛ばす対象ではなく信号になる。許容する所見はソースへ `// nosemgrep: <rule-id>` を理由付きで置き、判断をコードの側に残す。**検査条件(対象・ルール・除外)は 1 箇所に持つ** —— ゲートと code scanning への取り込みが違う走査を指すと、落ちた内容と Security タブの一覧が食い違う。**ルールはレジストリ(semgrep.dev)から引かない** —— レジストリの集合は Semgrep Rules License v1.0 で内部利用に限られ、**エンジンだけ OSS へ替えても、ルールをそこから引いている限りライセンスの判断は作った側へ渡る**。代わりに `opengrep/opengrep-rules` を **commit で固定**して読む。取り出す分類・digest の照合・検体を置かない取り出し方の本体は `.github/workflows/README.md` の「SAST のルールをレジストリから引かない」が持つ
-<!-- boilerplate-only:replace-begin -->
-- **編集時 SAST(eslint-plugin-security)**: 上の 2 つと同じ問いに、**型を解決したうえで編集中に**答える層。走査が CI にしか無いと、指摘が届くのは push の後になる。ただし **[0002](0002-formatter-linter.md) の能力ベース分担に従い、推奨プリセットは当てない** —— 束を当てれば biome と重なる規則も、この層に対象の無い規則も同時に入る。**有効化するのは 0 件の baseline を保てる規則だけ**とし、落とした規則とその理由は `eslint.config.ts` に書く(ReDoS と path traversal は Opengrep / CodeQL が引き続き担うので、落としても検査面は消えない)。落とした規則を戻すのは、その規則が形ではなく実体を見るようになったときに限る —— 例えば `detect-unsafe-regex` が量指定子の入れ子の形ではなく実際の後戻り計算量で判定するようになれば、`/^\d+(\.\d+)?$/` は鳴らなくなり 0 件を保てる。「SAST の層が薄い」は理由にならない
-<!-- boilerplate-only:replace-with -->
-<!-- = - **編集時 SAST(eslint-plugin-security)**: 上と同じ問いに、**型を解決したうえで編集中に**答える層。走査が CI にしか無いと、指摘が届くのは push の後になる。ただし **[0002](0002-formatter-linter.md) の能力ベース分担に従い、推奨プリセットは当てない** —— 束を当てれば biome と重なる規則も、この層に対象の無い規則も同時に入る。**有効化するのは 0 件の baseline を保てる規則だけ**とし、落とした規則とその理由は `eslint.config.ts` に書く(ReDoS と path traversal は Opengrep が引き続き担うので、落としても検査面は消えない)。落とした規則を戻すのは、その規則が形ではなく実体を見るようになったときに限る —— 例えば `detect-unsafe-regex` が量指定子の入れ子の形ではなく実際の後戻り計算量で判定するようになれば、`/^\d+(\.\d+)?$/` は鳴らなくなり 0 件を保てる。「SAST の層が薄い」は理由にならない -->
-<!-- boilerplate-only:replace-end -->
-- **外部解析サービス(SonarQube Cloud)**: 上のどれとも違い、**外部アカウントに依存する**唯一の層。public リポジトリでは無料、private では有料であるため、作った側が契約していないことを既定として設計する —— `SONAR_TOKEN` が未設定なら解析ジョブごと降り、**緑のまま「未設定」を PR へ述べる**(コメントの不在は「検査が緑だった」と見分けが付かない)。**required check には登録しない**。第三者のアカウントの有無がマージの条件になってはならない。さらに boilerplate の剥がし対象とする —— projectKey も organization もこのリポジトリの名前で、そのまま渡ると作った側では死んだ設定になる <!-- boilerplate-only:line -->
+- **portable SAST(Opengrep)**: SAST の既定は**リポジトリと一緒に持ち出せる実体**で持つ。GitHub の code scanning が供給する解析は **GitHub の外へ持ち出せず**、private かつ GHAS 無しの構成ではその層がまるごと消えるため、**同じ問いに答える持ち出せる実体**を持つ。実体は `mise.toml` にピンした 1 バイナリで、ローカルでも CI でも同じ `make sast` が回す。**Semgrep 本体ではなく OSS fork の Opengrep を採る** —— ルール記法は互換で `// nosemgrep:` の抑止もそのまま効くうえ、ライセンス判断を利用側へ渡さずに済む。**0 件の baseline を保つことがこのゲートの前提**であり、0 件だからこそ新しい所見が読み飛ばす対象ではなく信号になる。許容する所見はソースへ `// nosemgrep: <rule-id>` を理由付きで置き、判断をコードの側に残す。**検査条件(対象・ルール・除外)は 1 箇所に持つ** —— ゲートと code scanning への取り込みが違う走査を指すと、落ちた内容と Security タブの一覧が食い違う。**ルールはレジストリ(semgrep.dev)から引かない** —— レジストリの集合は Semgrep Rules License v1.0 で内部利用に限られ、**エンジンだけ OSS へ替えても、ルールをそこから引いている限りライセンスの判断は利用側へ渡る**。代わりに `opengrep/opengrep-rules` を **commit で固定**して読む。取り出す分類・digest の照合・検体を置かない取り出し方の本体は `.github/workflows/README.md` の「SAST のルールをレジストリから引かない」が持つ
+- **編集時 SAST(eslint-plugin-security)**: 上と同じ問いに、**型を解決したうえで編集中に**答える層。走査が CI にしか無いと、指摘が届くのは push の後になる。ただし **[0002](0002-formatter-linter.md) の能力ベース分担に従い、推奨プリセットは当てない** —— 束を当てれば biome と重なる規則も、この層に対象の無い規則も同時に入る。**有効化するのは 0 件の baseline を保てる規則だけ**とし、落とした規則とその理由は `eslint.config.ts` に書く(ReDoS と path traversal は Opengrep が引き続き担うので、落としても検査面は消えない)。落とした規則を戻すのは、その規則が形ではなく実体を見るようになったときに限る —— 例えば `detect-unsafe-regex` が量指定子の入れ子の形ではなく実際の後戻り計算量で判定するようになれば、`/^\d+(\.\d+)?$/` は鳴らなくなり 0 件を保てる。「SAST の層が薄い」は理由にならない
 - **OSV 二段**: Trivy / `pnpm audit` と**参照するデータベースが違う**。件数は一致せず、下記「和集合を正とする」の実例そのものになる。二段の形は Trivy と同じで、**報告(全 PR・落とさない)と昇格ゲート(保護ブランチ宛 PR・検出で落ちる)**に割る
-- **依存差分ゲート(Dependency Review)**: 上の 3 者はいずれも**木の現状**を読むため、以前から抱えている脆弱性とこの変更が持ち込んだものを区別できない。前者は報告専用のゲートが構造的に許容せざるを得ないものであり、**「この PR が増やしたか」だけを問う層**を別に置く。増やした当人は取り消せるので、ここは落として良い。閾値は依存監査ゲートと揃えて `high`。**この層はこのリポジトリの運用にだけ置く** —— 呼ぶ API が無料なのは public のときだけで、private では Code Security のライセンスを要求する。既定として配ると、テンプレートから作ったリポジトリは「金が掛かる」か「コードでは直せない赤」かのどちらかを受け取る <!-- boilerplate-only:line -->
 - **データフロー検査(Bearer)**: 値が**プロセスの外(log 行 / 外向き要求 / 第三者クライアント)へ出る地点**を、その値が何かの分類と併せて見る。パターンと taint 経路はこの問いに答えない —— logger へ届いた文字列がメールアドレスであることを、どちらも知らない。**落とさない**(下記 3.2)
-<!-- boilerplate-only:replace-begin -->
-- **言語非依存の regex 検査(DevSkim)**: 言語フロントエンドを持たないため**全ファイルを 1 つのルールセットで読む**。Opengrep も CodeQL も自分が構文解析できる言語しか開かないので、**どちらも開かないファイル**(workflow でない YAML / JSON / 平文 / `docs/` の Markdown)にある弱い暗号名やハードコード資格情報は、他のどの層にも掛からない。**落とさない**(下記 3.2)
-<!-- boilerplate-only:replace-with -->
-<!-- = - **言語非依存の regex 検査(DevSkim)**: 言語フロントエンドを持たないため**全ファイルを 1 つのルールセットで読む**。Opengrep は自分が構文解析できる言語しか開かないので、**それが開かないファイル**(workflow でない YAML / JSON / 平文 / `docs/` の Markdown)にある弱い暗号名やハードコード資格情報は、他のどの層にも掛からない。**落とさない**(下記 3.2) -->
-<!-- boilerplate-only:replace-end -->
-- **サプライチェーン姿勢の計測(OpenSSF Scorecard)**: コードでも依存でもなく、**リポジトリ自身の設定**(ブランチ保護 / 依存のピン / token の権限 / セキュリティポリシーの有無)を測る。boilerplate は**姿勢そのものが商品**であり、作った側は宣言ファイルとセットアップ手順（`make setup-repo`）としてこれを受け取る —— **テンプレートからの生成はツリーしか写さず、ブランチ保護も token の権限も複製されない**ので、設定そのものではなく設定を適用する手順が渡る。変更ではなくリポジトリの性質なので PR では走らせず、required check にも登録しない。**公開データセットへの送信(`publish_results`)は行わない** —— リポジトリの名前に関する判断であり、技術的な判断ではないため作った側へ残す
+- **言語非依存の regex 検査(DevSkim)**: 言語フロントエンドを持たないため**全ファイルを 1 つのルールセットで読む**。Opengrep は自分が構文解析できる言語しか開かないので、**それが開かないファイル**(workflow でない YAML / JSON / 平文 / `docs/` の Markdown)にある弱い暗号名やハードコード資格情報は、他のどの層にも掛からない。**落とさない**(下記 3.2)
+- **サプライチェーン姿勢の計測(OpenSSF Scorecard)**: コードでも依存でもなく、**リポジトリ自身の設定**(ブランチ保護 / 依存のピン / token の権限 / セキュリティポリシーの有無)を測る。**姿勢そのものが成果物**であり、宣言ファイルとセットアップ手順（`make setup-repo`）としてこれを持つ —— **テンプレートからの生成はツリーしか写さず、ブランチ保護も token の権限も複製されない**ので、設定そのものではなく設定を適用する手順が渡る。変更ではなくリポジトリの性質なので PR では走らせず、required check にも登録しない。**公開データセットへの送信(`publish_results`)は行わない** —— リポジトリの名前に関する判断であり、技術的な判断ではないためここでは決めない
 - **Actions 定義の静的解析(zizmor)**: CI の実行内容そのものを対象にする層。アプリのコードと依存を見る上の 3 者は、`.github/**` に書かれた `run:` や権限の与え方を見ない。**hook と CI の双方**で`--offline` で走らせ、**high の所見で fail-closed**。`--min-severity` は表示も絞るので、全所見を出す実行とゲートの実行を分け、引き下げた所見が出力から消えないようにする。抑止は`.github/zizmor.yml` に理由付きで宣言し、下記 4 の抑止ポリシーに従う(検査の責務と落とし方は [0153](0153-ci-configuration.md) §1 が正)
 - **Trivy fs 二段運用**:
   - **dev ゲート**(全 PR・advisory): `scan-type: fs` / `severity: CRITICAL,HIGH,MEDIUM` / **`ignore-unfixed: true`**(修正不能は無視)/ hard-fail しない + PR コメント
@@ -124,10 +109,8 @@ Accepted (一部 exclusion)
 | 配線 | 該当 | 何が赤にするか |
 | --- | --- | --- |
 | **ゲート** | gitleaks / Opengrep / eslint-plugin-security / 依存監査 / Trivy・OSV の昇格側 | job 自身の exit code |
-| **ゲート** | Dependency Review | job 自身の exit code <!-- boilerplate-only:line --> |
 | **報告専用** | Trivy・OSV の報告側 | 何も赤にしない(スキャナが走らなかったときだけ落ちる) |
 | **code scanning へ送る** | Bearer / DevSkim | **その変更が新しく持ち込んだ所見**に対する GitHub 側の差分チェック |
-| **code scanning へ送る** | CodeQL / SonarQube Cloud | 同上 <!-- boilerplate-only:line --> |
 
 3 つ目は「落とさない」と「見せない」を分けるための配線である。job は緑を返すが、**差分が持ち込んだ alert は PR を赤にする**。baseline を 0 件にできない層 —— 誤検知の傾向が強く、0 へ寄せるには規則単位の無効化が要る層 —— はここに置く。規則単位の無効化は下記 3.4 が禁じている。
 
@@ -145,7 +128,6 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 | 依存監査ゲート(`pnpm audit`) | 降りる | base から引き継いだ判定は変更の作者がその場で解消できない(上記 3.1) |
 | 昇格ゲート(Trivy / OSV の release 側) | **降りない** | 昇格はツリーの現状を誰かが引き受ける場面であり、その PR の差分が lockfile に触れていないことは、ツリーが持つ脆弱性を引き受けない理由にならない |
 | code scanning へ送る層(3.2 の 3 つ目の配線) | **層ごとに別に決める** | alert を閉じるのは GitHub 側で、「後の解析がもう報告しない」ことでしか閉じない。降りた PR では閉じる契機が週次まで遅れる —— 判定を GitHub 側へ預けている層は、他の層と同じ差分判定で降ろす前に、その遅れを引き受けてよいかをその層について問う |
-| CodeQL | **降りない** | code scanning の alert は「後の解析がもう報告しない」ことでしか閉じない。走行回数を減らすと閉じる契機を落としうる <!-- boilerplate-only:line --> |
 
 ### 3.4 抑止(ignore)ポリシー
 
@@ -157,7 +139,6 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 | `.gitleaksignore` | 検出 1 件(フィンガープリント `<path>:<rule-id>:<line>`) |
 | `.trivyignore.yaml` | 脆弱性 ID 1 件(`paths` でパスを限定) |
 | `osv-scanner.toml` | 脆弱性 ID 1 件(`reason` が必須)。**フィルタした所見をツールが理由付きで出力へ残す**ため、抑止と黙殺が見分けられる |
-| `sonar-project.properties` | ルール 1 件 × パスの組(`sonar.issue.ignore.multicriteria`)。**SonarCloud は hotspot を UI で review する仕組みを持つが、それはリポジトリの外に決定を置く** —— 作った側が同じ判断を引き継げないので、リポジトリが持つ抑止はこのファイルに限る <!-- boilerplate-only:line --> |
 | `bearer.ignore` | 検出 1 件(フィンガープリント)。`comment` に理由を書く。**JSON なので冒頭のポリシー明記が置けない** —— 様式は `bearer ignore add` が決め、理由は各エントリが持つ |
 | `.github/zizmor.yml` | ファイル 1 件(`ignore`)。**ファイルで絞れない audit は severity の remap(監査 ID 単位)** —— composite action は全て `action.yaml` で、`ignore` はベース名一致のため 1 つ挙げると全ての composite action が黙る(zizmor 1.29.0 の制約。ファイル単位の remap が入ったら remap は撤回する) |
 | `mise.toml` | pin 1 件(直上のコメント `tools-cooldown-ignore:`)。**窓が明ける日を必ず添える** —— 検疫の免除は日付でしか撤去条件を書けない |
@@ -172,11 +153,6 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 - 抑止の妥当性そのものはレビュー時の人間判断に残る。機械が強制できるのは「抑止が上記の様式に載っていること」までである
 - **本ポリシーが及ぶのは自リポジトリが書いた抑止だけ**である。gitleaks の `useDefault` が同伴する global allowlist(上記 2 参照)や Trivy 本体の既定除外はツール側に埋め込まれており、ここには現れない。**「抑止ファイルが空 = 何も除外されていない」ではない**
 
-<!-- boilerplate-only:begin -->
-**SonarQube Cloud はこの様式の例外で、抑止の理由をリポジトリの他の場所へ書かない。** 上記 3 のとおりこの層は剥がしの対象であり、`sonar-project.properties` と `.github/workflows/sonarcloud.yaml` は作った側の初期化で消える。理由をそれ以外——ソースのコメントや、剥がしを生き延びる文書——へ置くと、**指摘した規則ごと消えたあとに理由だけが残り、何の話をしているのか誰にも辿れなくなる**。
-
-この検査の所見に応じてコードの形を変えるときも同じで、**規則名も「Sonar がこう言った」もコメントに書かない**。残す価値のある制約なら、規則を名指しせずにその場の性質として書けるはずで、書けないならそれは抑止ファイルだけが持つべき理由である。
-<!-- boilerplate-only:end -->
 
 ### 3.5 CSP 適合ゲート
 
@@ -192,16 +168,12 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 
 ### 4. SECURITY.md
 
-- **`SECURITY.md` を置く**。脆弱性報告フロー(Private Vulnerability Reporting 誘導 / 連絡先 / Supported Versions)を定める(連絡先は作った側で差し替える placeholder)
+- **`SECURITY.md` を置く**。脆弱性報告フロー(Private Vulnerability Reporting 誘導 / 連絡先 / Supported Versions)を定める(連絡先は差し替える placeholder)
 - release artifact の検証(cosign / provenance / SBOM)は、配送成果物がコンテナイメージでないため**含めない**(下記 exclusion)
 
 ### 5. release ゲート vs dev PR ゲート
 
-<!-- boilerplate-only:replace-begin -->
-- **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / CodeQL・gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy / CodeQL のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く
-<!-- boilerplate-only:replace-with -->
-<!-- = - **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く -->
-<!-- boilerplate-only:replace-end -->
+- **dev PR = advisory 寄り**(Trivy `ignore-unfixed:true` / audit は actionable のみ / gitleaks は fail-closed)、**release(保護ブランチへの PR)= 厳格化**(Trivy `ignore-unfixed:false`。severity リストは dev と同一で、未修正の可視化が差分)。この二段は言語非依存で載る([0153](0153-ci-configuration.md) の Security グループ)。Trivy のマージブロックの実体は required check / branch protection([0150](0150-git-workflow.md))側に置く
 
 ### 6. エージェントの文脈へ入るリポジトリ由来の文字列
 
@@ -218,22 +190,17 @@ Security グループは**週次スケジュール + 差分が届く PR** で走
 - ❌ **コンテナ image スキャン**(Trivy image / SBOM 生成)— アプリ本体の Docker イメージがない
 - ❌ **cosign によるイメージ署名 / SLSA provenance / SBOM attestation** — 配送成果物がコンテナイメージでない
 - ❌ **Dependabot の `docker` エコシステム** — 監査対象の Dockerfile がない(上記 1 のとおり `npm` + `github-actions` のみ)
-- これらは「意図的にやらない」判断として記録する([0140](0140-documentation-operations.md) タクソノミー: exclusion = ADR)。作った側が独自にコンテナ配送する場合は作った側の判断で追加する
+- これらは「意図的にやらない」判断として記録する([0140](0140-documentation-operations.md) タクソノミー: exclusion = ADR)。独自にコンテナ配送する場合は用途依存で追加する
 
 ## 禁止事項
 
 - ❌ Renovate を併用すること(Dependabot に一本化)
 - ❌ セキュリティアップデートに cooldown を効かせること(即時 PR)
 - ❌ リポジトリ由来の文字列を、囲いもラベルも無くエージェントの文脈へ連結すること
-<!-- boilerplate-only:replace-begin -->
-- ❌ gitleaks / CodeQL の検出を fail-closed にしないこと(秘密・SAST high は必ずブロック)
-<!-- boilerplate-only:replace-with -->
-<!-- = - ❌ gitleaks の検出を fail-closed にしないこと(秘密は必ずブロック) -->
-<!-- boilerplate-only:replace-end -->
+- ❌ gitleaks の検出を fail-closed にしないこと(秘密は必ずブロック)
 - ❌ 依存監査を「全 severity 一律 hard-fail」にすること(修正可能な `high` / `critical` のみ blocking = ノイズ抑制。到達可能性フィルタは JS/TS では実装不能)
 - ❌ image-scan / cosign / SBOM / provenance を no-Docker の本リポに持ち込むこと([0011](0011-no-docker.md))
-- ❌ SAST を CodeQL だけに寄せること(持ち出せない層を唯一の SAST にしない) <!-- boilerplate-only:line -->
-- ❌ Semgrep 本体を採ること(ライセンス判断を作った側へ渡さない。Opengrep へ一本化)
+- ❌ Semgrep 本体を採ること(ライセンス判断を利用側へ渡さない。Opengrep へ一本化)
 - ❌ baseline が 0 件でない層をゲートにすること(3.2 の配線から選ぶ)
 - ❌ スキャナのルールやチェックを一括で無効化すること(抑止は 3.4 の様式に限る)
 - ❌ 理由の書かれていない抑止エントリを置くこと

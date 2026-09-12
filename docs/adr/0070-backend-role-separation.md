@@ -10,7 +10,7 @@ Accepted
 
 Next.js が抱える責務(UI / 認証トークン交換 / BFF / 集約 — どこまでか)・バックエンドとの契約(REST / GraphQL / RPC と SSOT の所在)・ドメインロジックの所在を、本 ADR が確定する。
 
-BFF 境界は、[0011](0011-no-docker.md) の thin proxy 決定と「認証・DB はテンプレートから作った側の判断(out of scope)」原則から導出する。**契約 SSOT と境界値所有**は、バックエンドが契約成果物を所有しフロントがその消費者になる、という関係から導出する。
+BFF 境界は、[0011](0011-no-docker.md) の thin proxy 決定と「認証・DB は用途依存(out of scope)」原則から導出する。**契約 SSOT と境界値所有**は、バックエンドが契約成果物を所有しフロントがその消費者になる、という関係から導出する。
 
 ## 決定
 
@@ -23,7 +23,7 @@ BFF 境界は、[0011](0011-no-docker.md) の thin proxy 決定と「認証・DB
 
 - `/api/*`(Route Handler)は **thin proxy** に限る。許可される責務は、バックエンドへのプロキシ / 認証トークンの中継・交換の seam / 最小限のヘッダ付与に留める([0011](0011-no-docker.md) thin proxy)
 - **業務ロジック・複数 API の重い集約を `/api/*` に書かない**。集約が必要な場合も feature の server 関数 / `adapters`([0021](0021-frontend-responsibility.md))で最小限に行い、BFF が業務層化することを避ける
-- **認証・セッションの具体モデルは作った側の判断**(out of scope。Auth.js / Clerk / 自前 BFF / SaaS IdP 等)。本 boilerplate は token 交換の seam を許すが、特定 IdP・特定セッション方式を前提にしない
+- **認証・セッションの具体モデルは用途依存**(out of scope。Auth.js / Clerk / 自前 BFF / SaaS IdP 等)。本リポジトリは token 交換の seam を許すが、特定 IdP・特定セッション方式を前提にしない
 
 ### バックエンドとの契約 SSOT
 
@@ -45,7 +45,7 @@ BFF 境界は、[0011](0011-no-docker.md) の thin proxy 決定と「認証・DB
 - ❌ `/api/*` に業務ロジック・ドメインモデル・重い集約を書くこと(thin proxy に限る)
 - ❌ `src/` に DB 接続・ORM を足すこと([0011](0011-no-docker.md))
 - ❌ バックエンド API spec を手書き型で複製すること(SSOT = `openapi.gen.yaml`。生成は [0072](0072-api-type-generation.md))
-- ❌ 特定の認証・セッションモデルを boilerplate 本体に前提として組み込むこと(作った側の判断)
+- ❌ 特定の認証・セッションモデルを 本リポジトリに前提として組み込むこと(用途依存)
 - ❌ 生成型・外部型を `model` 等の内層へ漏らすこと(変換は `adapters` 境界)
 - ❌ 契約が返さない値(集計値等)を表示層で計算して出すこと(規則の写しになる)
 - ❌ 上流由来の値の網羅的な無害化を、この層の責務として引き受けること(始末するのは自分が作った値。脅威を特定できるものは名指しで置く)

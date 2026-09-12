@@ -18,8 +18,10 @@ import {
   EGRESS_DECLARATION_FILE,
   EXCLUDED_DIRECTORIES,
   EXCLUDED_PATH_PREFIXES,
+  PACKAGE_JSON_FILE,
   SELF_DESTRUCT_PATHS,
 } from "./manifest.js";
+import { dropOrphanedScriptSteps, ORPHANED_SCRIPT_STEPS } from "./package-scripts.js";
 import { ORPHANED_ACTIONS } from "./pins.js";
 import { isStripTarget } from "./strip-target.js";
 
@@ -79,6 +81,14 @@ function run(dryRun: boolean): void {
     dryRun,
   );
 
+  // 同じ形が npm script にもある。呼び先の区画が消えたあとも段が残ると、`pnpm lint:md` が
+  // 「そんなファイルは無い」で落ちる。`package.json` は JSON なのでマーカーを持てない。
+  const prunedScriptSteps = updateFile(
+    PACKAGE_JSON_FILE,
+    (content) => dropOrphanedScriptSteps(content, ORPHANED_SCRIPT_STEPS),
+    dryRun,
+  );
+
   const deleted: string[] = [];
 
   // 自消滅は最後に行う。先に消すと、剥がしの途中で落ちたときに道具だけが失われる。
@@ -100,6 +110,12 @@ function run(dryRun: boolean): void {
 
   if (prunedEndpoints !== null) {
     console.log(`- 宛先の宣言を除去 ${EGRESS_DECLARATION_FILE}`);
+  }
+
+  if (prunedScriptSteps !== null) {
+    for (const { script, step } of ORPHANED_SCRIPT_STEPS) {
+      console.log(`- script の段を除去 ${script}: ${step}`);
+    }
   }
 
   for (const entry of stripped) {

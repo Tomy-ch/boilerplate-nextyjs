@@ -34,6 +34,10 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   // サンプル破棄（`scripts/setup/remove-sample`）は、これが先に走った場合に備えて、引き直しを
   // 存在の確認で囲んである。
   "scripts/marker-baseline",
+  // 前提の綴りを入力として持つ検査。守っている相手は**前提を書きうる側**で、書ける場面は上流に
+  // しかない。複製した時点で前提は失効し終えており、剥がしが済んだ木に見張る対象は残らない。
+  // `package.json` はマーカーを持てないので、呼び出しの段は `package-scripts.ts` が落とす。
+  "scripts/premise-lint",
   // 純化パスの台帳と照会フック。答えている問い（どのファイルが純化を通ったか）は、配る側にしか
   // 開いていない —— テンプレートから作った側が受け取るのは通り終えたツリーである。
   // `.claude/settings.json` のフック定義は JSON なので同じ手が使えないが、スクリプトの不在を
@@ -68,12 +72,16 @@ export const EXCLUDED_DIRECTORIES: Set<string> = new Set([
  * 走査から外す相対パス接頭辞。マーカーの形をデータとして持つ区画。
  *
  * @remarks
- * マーカー行のベースライン（`scripts/marker-baseline/`）は、判定とテストがマーカーの形を**入力**
- * として持ちます。剥がしの対象にすると、そこに書かれた例示が消えます。区画自体はこの直後に
- * `SELF_DESTRUCT_PATHS` が消すので跡は残りませんが、**対応の取れない例示がひとつでも増えれば、
- * その時点で剥がしそのものが止まります。**読まないと決めておけば、どちらも起きません。
+ * マーカー行のベースライン（`scripts/marker-baseline/`）と前提の検査（`scripts/premise-lint/`）は、
+ * 判定とテストがマーカーの形を**入力**として持ちます。剥がしの対象にすると、そこに書かれた例示が
+ * 消えます。どちらの区画もこの直後に `SELF_DESTRUCT_PATHS` が消すので跡は残りませんが、**対応の
+ * 取れない例示がひとつでも増えれば、その時点で剥がしそのものが止まります。**読まないと決めて
+ * おけば、どちらも起きません。
  */
-export const EXCLUDED_PATH_PREFIXES: readonly string[] = ["scripts/marker-baseline/"];
+export const EXCLUDED_PATH_PREFIXES: readonly string[] = [
+  "scripts/marker-baseline/",
+  "scripts/premise-lint/",
+];
 
 /** マーカーを持てないファイルの拡張子。 */
 export const BINARY_EXTENSIONS: readonly string[] = [
@@ -94,6 +102,9 @@ export const BINARY_EXTENSIONS: readonly string[] = [
 
 /** action pin のロックファイル（リポジトリルート相対）。 */
 export const ACTIONS_PIN_LOCK_FILE = ".github/actions-pin.toml";
+
+/** npm script の宣言。剥がしで呼び先が消える段をここから落とす。 */
+export const PACKAGE_JSON_FILE = "package.json";
 
 /** 許可する外向きの宛先の宣言。剥がしで参照が消える塊をここから落とす。 */
 export const EGRESS_DECLARATION_FILE = ".github/egress.yaml";

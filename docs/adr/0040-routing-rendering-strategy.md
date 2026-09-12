@@ -86,7 +86,7 @@ Accepted
 - ❌ `page.tsx` / `layout.tsx` / route / Server Action に業務ロジックを書くこと(薄い driving adapter。[0011](0011-no-docker.md) thin proxy)
 - ❌ `"use client"` を `layout.tsx` / `page.tsx` や上位に不要に置くこと(境界は葉へ押し下げる)
 - ❌ コード分割の第一軸を route にすること(第一軸は feature。[0020](0020-adopted-architecture.md))
-- ❌ 特定レンダリングモード(全面 SSG / 全面 dynamic 等)を 本リポジトリで一律強制すること
+- ❌ 特定レンダリングモード(全面 SSG / 全面 dynamic 等)を本リポジトリで一律強制すること
 - ❌ route-as-modal を全モーダルの既定として強制すること(あくまで**選択肢**。既定手段の判断は [0053](0053-ui-component-interaction-seam.md) 管轄)
 - ❌ intercepting / parallel routes の代替に独自ルーティング機構を発明・中立化すること(Next.js file convention にそのまま乗る。[0010](0010-standards-and-non-lockin.md) §1)
 

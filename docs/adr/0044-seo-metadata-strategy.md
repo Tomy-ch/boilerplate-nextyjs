@@ -41,7 +41,7 @@ Accepted
 
 ### 4. 構造化データ(JSON-LD)
 
-- 構造化データ(schema.org / JSON-LD)は**採用可**とし、必要な feature の実装で埋め込む(Next.js 推奨どおり、コンポーネント内で JSON-LD の `<script type="application/ld+json">` を描画)。**採否・schema.org type は用途依存**のため 本リポジトリでは型を固定せず、枠のみ示す
+- 構造化データ(schema.org / JSON-LD)は**採用可**とし、必要な feature の実装で埋め込む(Next.js 推奨どおり、コンポーネント内で JSON-LD の `<script type="application/ld+json">` を描画)。**採否・schema.org type は用途依存**のため本リポジトリでは型を固定せず、枠のみ示す
 
 ### 5. アイコン体系(`icon.*` / `apple-icon.*` と `public/` favicon の役割分担)
 

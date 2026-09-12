@@ -22,7 +22,7 @@ Accepted
 
 ### flag / A-B / 段階的公開サービス本体は非同梱(exclusion)
 
-SaaS(LaunchDarkly / Statsig / Unleash / GrowthBook 等)を 本リポジトリに埋め込まない([0031](0031-policy-state-supply.md) と同じ立場)。供給方針(生値読み + no-op 既定 + stateless props 供給)は [0031](0031-policy-state-supply.md) が確定済みであり、本 ADR は**再決定しない**。以下の 2 点のみ確定する。
+SaaS(LaunchDarkly / Statsig / Unleash / GrowthBook 等)を本リポジトリに埋め込まない([0031](0031-policy-state-supply.md) と同じ立場)。供給方針(生値読み + no-op 既定 + stateless props 供給)は [0031](0031-policy-state-supply.md) が確定済みであり、本 ADR は**再決定しない**。以下の 2 点のみ確定する。
 
 ### 1. 評価場所の既定 = server(vendor-independent 根拠付き)
 

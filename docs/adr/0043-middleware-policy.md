@@ -53,7 +53,7 @@ Accepted
 - ❌ deprecated な `middleware.ts` を新規に作ること(Next.js 16 は `proxy.ts`)
 - ❌ Proxy で共有モジュール・グローバル状態・Node API に依存すること(CDN 配置され得る。Edge 互換を保つ)
 - ❌ `proxy.ts` に `runtime` セグメント設定を書くこと(Next.js 16 の Proxy では使用不可・エラーになる)
-- ❌ 特定の認証実装・デプロイ先 runtime 前提を 本リポジトリで強制すること(認証は用途依存。runtime はデプロイ先依存)
+- ❌ 特定の認証実装・デプロイ先 runtime 前提を本リポジトリで強制すること(認証は用途依存。runtime はデプロイ先依存)
 - ❌ 停止画面のために proxy が本体の HTML を組み立てること、および根拠の無い `Retry-After` を付けること(§5)
 
 ## 関連 ADR

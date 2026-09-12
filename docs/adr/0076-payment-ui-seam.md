@@ -34,7 +34,7 @@ Accepted
 
 ## 禁止事項
 
-- ❌ 決済 SDK を 本リポジトリに同梱すること / 特定 PSP を本体前提に組み込むこと(mount seam のみ・SDK と PSP は用途依存)
+- ❌ 決済 SDK を本リポジトリに同梱すること / 特定 PSP を本体前提に組み込むこと(mount seam のみ・SDK と PSP は用途依存)
 - ❌ フロント JS で生カード情報(カード番号 / CVC)を保持・送信する構成にすること(SDK の iframe / redirect 隔離 = PCI SAQ-A 相当を破る)
 - ❌ 決済 SDK の外部スクリプトを同意 / CSP ゲートの外でロードすること([0131](0131-cookie-consent.md) / [0111](0111-csp-security-headers.md))
 

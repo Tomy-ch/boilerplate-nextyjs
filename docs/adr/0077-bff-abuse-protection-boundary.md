@@ -41,7 +41,7 @@ Accepted
 
 ## 禁止事項
 
-- ❌ レート制限 / DDoS 緩和 / WAF を 本リポジトリのアプリコードに実装すること(infra 境界 seam = PaaS / edge へ委譲)
+- ❌ レート制限 / DDoS 緩和 / WAF を本リポジトリのアプリコードに実装すること(infra 境界 seam = PaaS / edge へ委譲)
 - ❌ 公開 `/api/*`(テレメトリ中継含む)にボディサイズ上限・content-type / 入力検証を一切設けず forwarding すること(本体が持つ最小防御)
 
 ## 補足

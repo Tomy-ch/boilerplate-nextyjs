@@ -6,8 +6,7 @@
 # 「自分が書いたコードが脆弱なパターンを含むか」を問う。
 #
 # Semgrep 本体ではなく OSS fork の opengrep を使う。ルール記法は互換で、抑止も
-# `// nosemgrep: <rule-id>` がそのまま効く。CodeQL は GitHub の外へ持ち出せないため、
-# private + GHAS 無しのテンプレートから作った側では層ごと消える。持ち出せる SAST を別に持つのはそのため。
+# `// nosemgrep: <rule-id>` がそのまま効く。SAST はリポジトリと一緒に持ち出せる実体で持つ。
 #
 # **検査条件は 1 箇所に持つ。** ゲート（text）と code scanning への取り込み（SARIF）は
 # 同じ対象・同じルール・同じ除外でなければ、落ちた内容と Security タブの一覧が食い違う。

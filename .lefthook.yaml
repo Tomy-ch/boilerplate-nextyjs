@@ -107,16 +107,6 @@ pre-commit:
         - ".github/**"
       run: make images-pin-check
 
-post-commit:
-  commands:
-    closed-loop-mark:
-      # コミットの瞬間を窓へ打刻する。段の境界はそれを越えた側にしか存在せず、
-      # ここが「実装が形になった」を知る唯一の場所である。
-      #
-      # 打刻は追跡外の tmp/ に書くだけで、失敗しても作業を止めない。スクリプトが無い checkout
-      # (剥がした後) でも成立するよう、存在確認を挟んで常に成功で抜ける。
-      run: test -x .agents/closed-loop/marks.sh && .agents/closed-loop/marks.sh commitAt || true
-
 post-checkout:
   commands:
     baseline-sync:

@@ -51,7 +51,6 @@ const COMMENT_BORNE_PATHS = [
   ".gitleaksignore",
   ".github/zizmor.yml",
   PNPM_PATH,
-  "sonar-project.properties",
 ] as const;
 
 /** 宣言単位では読めない面。報告がこれを名指しする。 */

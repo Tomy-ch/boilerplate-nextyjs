@@ -1,18 +1,6 @@
-// boilerplate-only:begin
-import { readFileSync } from "node:fs";
-
-// boilerplate-only:end
 import { describe, expect, it } from "vitest";
 
-// boilerplate-only:begin
-import { FINDING_KINDS, KIND_LABEL_PREFIX } from "../closed-loop/summarize";
-// boilerplate-only:end
-// boilerplate-only:replace-begin
-import { diffLabels, LABELS_PATH, type LabelSpec, parseLabelSpecs } from "./labels";
-
-// boilerplate-only:replace-with
-// = import { diffLabels, type LabelSpec, parseLabelSpecs } from "./labels";
-// boilerplate-only:replace-end
+import { diffLabels, type LabelSpec, parseLabelSpecs } from "./labels";
 
 const spec = (name: string): LabelSpec => ({ name, description: name, color: "d73a4a" });
 
@@ -105,33 +93,3 @@ describe("diffLabels", () => {
     expect(diff.alreadyPresent).toEqual(["bug", "release"]);
   });
 });
-
-// boilerplate-only:begin
-describe("LABELS_PATH", () => {
-  // ----- 正常系 -----
-  it("所見の分類をすべてラベルとして宣言している", () => {
-    const declared = new Set(
-      parseLabelSpecs(readFileSync(LABELS_PATH, "utf8")).map((label) => label.name),
-    );
-
-    // 分類を足してラベルを足し忘れると、`gh issue create` がその窓だけ拒否し、送出が静かに
-    // 溜まり続ける。宣言と綴りを機械で結んでおく。
-    for (const kind of FINDING_KINDS) {
-      expect(declared).toContain(`${KIND_LABEL_PREFIX}${kind}`);
-    }
-
-    expect(declared).toContain("feedback");
-  });
-
-  // ----- 異常系 -----
-  it("分類でないものが、分類の接頭辞で名乗っていない", () => {
-    const kinds = new Set<string>(FINDING_KINDS);
-
-    for (const label of parseLabelSpecs(readFileSync(LABELS_PATH, "utf8"))) {
-      if (label.name.startsWith(KIND_LABEL_PREFIX)) {
-        expect(kinds).toContain(label.name.slice(KIND_LABEL_PREFIX.length));
-      }
-    }
-  });
-});
-// boilerplate-only:end

@@ -24,44 +24,18 @@ export const BOILERPLATE_ONLY_MARKER = "boilerplate-only";
  */
 export const SELF_DESTRUCT_PATHS: readonly string[] = [
   "scripts/setup/remove-boilerplate-only",
-  // エージェント環境の稼ぎを測る機構。
-  // 問いの主語がこのリポジトリの保守者で、テンプレートから作った側のスキル群は作った側が判断する。
-  // 打刻そのものは追跡外の tmp/ に落ちるので、消すのは機構の側だけでよい。
-  ".agents/closed-loop",
-  "scripts/closed-loop",
-  // ディレクトリごとではなくファイル 1 枚。隣の `quiet.mk`（`make ai-<target>`）は配る側に固有の
-  // 機構ではないので残り、`Makefile` の include も印を持たない。ディレクトリごと消すと、その
-  // include が解決できなくなってすべての target が落ちる。
-  ".makefiles/agents/closed-loop.mk",
-  ".github/workflows/closed-loop-weekly.yaml",
   // 剥がしそのものを検証する CI。理由は冒頭の @remarks が持つ。
   ".github/workflows/strip-verify.yaml",
-  // このリポジトリの運用にだけ置く検査。呼ぶ API が無料なのは public のときだけで、private では
-  // Code Security のライセンスを要求する。既定として配ると、テンプレートから作ったリポジトリは
-  // 「金が掛かる」か「コードでは直せない赤」かのどちらかを受け取る。
-  ".github/workflows/dependency-review.yaml",
-  // 上と同じ理由。設定は読む相手が消えるので一緒に落とす。**`github/codeql-action` の pin は
-  // 残す** —— `upload-sarif` を他の 4 つが使い続ける。
-  ".github/workflows/codeql.yaml",
-  ".github/codeql",
-  // 解析先がこのリポジトリの SonarCloud organization に紐づく検査。projectKey も
-  // organization もここの名前なので、そのまま渡るとテンプレートから作った側では死んだ設定になる。SONAR_TOKEN が
-  // 無い間は赤くならない作りだが、赤くならないことと持っている意味があることは別である。
-  ".github/workflows/sonarcloud.yaml",
-  "sonar-project.properties",
-  // 上の検査だけが呼ぶ判定。検査が消えたあとも残すと、誰も呼ばないモジュールがカバレッジの
-  // 母数にだけ居座る。
-  "scripts/sonarcloud",
   // マーカー行数のベースライン。守っているのはマーカーを**書く側**で、書く場面は上流にしかない。
   // 剥がしが済んだツリーにはもう見張る対象が居らず、残せば永久に緑のままの検査が増えるだけになる。
   // サンプル破棄（`scripts/setup/remove-sample`）は、これが先に走った場合に備えて、引き直しを
   // 存在の確認で囲んである。
   "scripts/marker-baseline",
-  // 純化パスの台帳と照会フック。答えている問い（どのファイルが純化を通ったか）は、配る側にしか
-  // 開いていない —— テンプレートから作った側が受け取るのは通り終えたツリーである。
-  // `.claude/settings.json` のフック定義は JSON なので同じ手が使えないが、スクリプトの不在を
-  // 確かめてから呼ぶ形にしてあり、残っても何もしない。
-  ".agents/purity-sweep",
+  // この状態を生んだ計画であって、状態そのものではない。[0140](docs/adr/0140-documentation-operations.md)
+  // は v1.0.0 で削除すると決めており、それより前に複製された木へ渡す理由も無い。
+  "docs/plan",
+  // 上の計画の PR 1 行を issue 1 件へ写すための雛形。計画が消えれば指す先が無い。
+  ".github/ISSUE_TEMPLATE/implementation_task.yaml",
 ];
 
 /**

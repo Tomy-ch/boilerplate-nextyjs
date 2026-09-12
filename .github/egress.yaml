@@ -113,30 +113,11 @@ workflows:
   devskim:
     - api.nuget.org:443
     - crl3.digicert.com:443
-  dependency-review:
-    - api.deps.dev:443
-    - api.securityscorecards.dev:443
   scorecard:
     - api.deps.dev:443
     - api.osv.dev:443
     - oss-fuzz-build-logs.storage.googleapis.com:443
     - www.bestpractices.dev:443
-
-  # 解析の本体は scanner が SonarCloud へ送る。scanner の取得（`binaries.sonarsource.com`）と
-  # 送信先が別ホストで、送信は API・scanner 用の入口・可視化用の置き場の 3 つに割れている。
-  # `keyserver.ubuntu.com` は scanner の署名の検証で引く。
-  sonarcloud:
-    - sonarcloud.io:443
-    - api.sonarcloud.io:443
-    - scanner.sonarcloud.io:443
-    - binaries.sonarsource.com:443
-    # 可視化用の置き場。名前に region と環境が入っており、上流が移せば綴りごと変わる。
-    - dna-visualization-scannerdata-eu-central-1-prod.s3.eu-central-1.amazonaws.com:443
-    - keyserver.ubuntu.com:443
-
-  # SARIF の送信先。
-  codeql:
-    - uploads.github.com:443
   # shadcn の目録の取得元。
   shadcn-drift:
     - cafe.github.com:443

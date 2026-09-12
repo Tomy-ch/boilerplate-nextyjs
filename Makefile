@@ -53,7 +53,6 @@ include .makefiles/github/operation/setup-repository.mk
 
 # エージェント関連
 include .makefiles/agents/quiet.mk
-include .makefiles/agents/closed-loop.mk # boilerplate-only:line
 
 .PHONY: help
 help:

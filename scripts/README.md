@@ -2,10 +2,6 @@
 test-requirement: unit
 coverage-exclusions:
   - "scripts/*/index.ts"
-  # boilerplate-only:begin
-  - "scripts/closed-loop/send/index.ts"
-  - "scripts/closed-loop/weekly/index.ts"
-  # boilerplate-only:end
   - "scripts/lighthouse/diagnose.ts"
   - "scripts/openapi/check-generated.ts"
   - "scripts/openapi/extract-limits.ts"
@@ -56,34 +52,7 @@ GitHub 上の公開の面か」であって、モジュールの置き場では�
 撤去条件を添えてある。**外すのは検査が意味を持たないものだけ**で、「いまは書けていない」は理由に
 ならない。
 
-<!-- boilerplate-only:begin -->
-## 撤去マーカーを足したら数え直す
-
-`sample` / `boilerplate-only` の撤去マーカーは、**発火してほしい本物**と、**規約を説明するための
-例示**とが同じ形をしている。位置でも構文でも区別は付かないので、除去側は「例示だ」という宣言
-（`setup/remove-sample/sample-manifest.ts` の `MARKER_LITERAL_FILES` と、走査から外す接頭辞）を持つ。
-宣言を忘れたときに起きることは 2 通りで、対応の取れないマーカーなら除去が中断して声が出るが、
-**閉じたペアを散文が持っていると、その区間は例外を出さずに消える**。空になったコードフェンスは
-有効な Markdown のままなので、撤去後のツリーを lint しても鳴らない。
-
-そこで [`marker-baseline/`](marker-baseline/) がファイルごとのマーカー行数を
-[`baseline.json`](marker-baseline/baseline.json) に固定し、[`marker-baseline/scan.test.ts`](marker-baseline/scan.test.ts)
-が実ツリーと突き合わせる。マーカーを足した / 消した瞬間にしかこの数は動かないので、区間の中の散文を
-直しても差分は出ない。数が動いたら、そこが判断の場になる。
-
-同じ入口が**表として成立していない行**も見る。Markdown の表は表の行でない行に出会った時点で終わる
-ので、コメント**行**を表の途中へ置くと、それ以降の行が表から落ちて生のパイプを含む段落になる。
-行内で完結する `:line` はセルに納まるので安全だが、`begin` / `end` / `replace-*` は行を占めるため
-表を割る。**表は 1 行 1 実体にし、消える実体は自分の行を持って `:line` で落とす。**
-
-部分置換のために `replace` で 1 行を囲むと、変えたいのが数文字でも行が丸ごと退避側へ複製される。
-退避側は誰も読まないコメントなので、先に腐るのは必ずそちらである。こちらは行数と違って基準値を
-持たない —— 0 件が唯一の合格で、数えて固定する対象ではない。
-
-- 本物のマーカーを足した / 消した → `pnpm exec tsx scripts/marker-baseline --write` で引き直す
-- マーカーの形を**指示ではなくデータ**として書いた → 引き直す前に除去側へリテラルとして宣言する
-
-<!-- boilerplate-only:end -->
+撤去マーカーを足したときの数え直しは [boilerplate 限定の規約](../docs/get-started/boilerplate-only-conventions.md)「撤去マーカーを足したら数え直す」が持つ。 <!-- boilerplate-only:line -->
 
 ## 実行
 
@@ -124,5 +93,3 @@ GitHub 上の公開の面か」であって、モジュールの置き場では�
 - [0153](../docs/adr/0153-ci-configuration.md) — job の分割 / SHA ピン / 公開の面へ出す文字集合
 - [0157](../docs/adr/0157-inspection-declaration-discipline.md) — 成立しない検査を「違反なし」へ倒さない
 - [0159](../docs/adr/0159-script-structure.md) — 1 道具 1 ディレクトリ / 入口と判定を分ける / export と test の 1:1
-- [0160](../docs/adr/0160-agent-environment-loop.md) — 打刻と記録から稼ぎを測る機構 <!-- boilerplate-only:line -->
-- [0161](../docs/adr/0161-development-window-as-feedback-unit.md) — 窓を単位に測るという取り方 <!-- boilerplate-only:line -->

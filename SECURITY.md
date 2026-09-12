@@ -9,9 +9,9 @@
 **Security** タブ → **Report a vulnerability** から、メンテナだけが読める形で送れます。
 
 <!-- boilerplate-only:replace-begin -->
-この機能が無効な場合は、リポジトリのオーナーへ直接連絡してください。
+テンプレートから作ったリポジトリでこの機能が無効な場合は、リポジトリのオーナーへ直接連絡してください。
 <!-- boilerplate-only:replace-with -->
-<!-- = 連絡先: <security@example.com>（差し替えてください） -->
+<!-- = 連絡先: <security@example.com>（作った側で差し替えてください） -->
 <!-- boilerplate-only:replace-end -->
 
 報告に含めてほしいもの:
@@ -37,7 +37,7 @@
 | 最新のリリース | ✅ |
 | それ以前 | ❌ |
 
-これは**テンプレートリポジトリ**であり、配信される成果物を持ちません。自分の運用に
+これは**テンプレートリポジトリ**であり、配信される成果物を持ちません。作った側が自分の運用に
 合わせて上の表を書き替えてください。
 
 ## このリポジトリが自分に掛けている検査
@@ -50,6 +50,7 @@
 | 依存の脆弱性 | Trivy fs / `pnpm audit` / OSV | CI。PR は報告、保護ブランチ宛 PR で止める |
 | **この PR が増やした依存** | Dependency Review | CI（PR の差分だけを見る） <!-- boilerplate-only:line --> |
 | 自分が書いたコード | Opengrep | CI。GitHub の外へ持ち出せる実体なので、どの環境でも層が残る |
+| 自分が書いたコード | CodeQL | CI。GitHub の中でだけ走る層 <!-- boilerplate-only:line --> |
 | 値が外へ出る地点 | Bearer | CI（所見は code scanning へ） |
 | 言語を問わない文字列の検査 | DevSkim | CI（所見は code scanning へ） |
 | ワークフロー定義 | zizmor / actionlint | pre-commit hook と CI |

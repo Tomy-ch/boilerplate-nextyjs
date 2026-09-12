@@ -8,7 +8,7 @@ name: Suppression Expiry
 # Only dates are decided: "once upstream requires N or later" and "after the sample purge
 # runs" cannot be evaluated, so every declaration is listed, not only the judged ones.
 # And the surfaces that keep their reason in a comment (gitleaks, zizmor, the pnpm
-# overrides) cannot be read per declaration at all — a parser drops comments —
+# overrides, sonar) cannot be read per declaration at all — a parser drops comments —
 # so only their date-bearing lines appear.
 #
 # Cooldown exemptions (`minimumReleaseAgeExclude` in pnpm-workspace.yaml, the

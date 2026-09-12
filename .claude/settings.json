@@ -170,10 +170,17 @@
       "Bash(make -s base-branch)",
       "Bash(make base-merge)",
       "Bash(make base-merge *)",
+      "Bash(make closed-loop-report)",
+      "Bash(make closed-loop-send)",
+      "Bash(make closed-loop-send-dry)",
+      "Bash(make closed-loop-weekly)",
+      "Bash(make closed-loop-weekly *)",
       "Bash(make clean-ai-logs)",
       "Bash(make ai-install-tools)",
       "Bash(make ai-base-merge)",
       "Bash(make ai-base-merge *)",
+      "Bash(make ai-closed-loop-weekly)",
+      "Bash(make ai-closed-loop-weekly *)",
       "Bash(make install-tools *)",
       "Bash(make setup-replace-license-copyright *)",
       "Bash(make gh-login *)",
@@ -257,10 +264,48 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook session-start || true"
+          },
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/send.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/send.sh\" --hook || true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook pre-compact || true"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/closed-loop/marks.sh\" --hook session-end || true"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|MultiEdit|Write|NotebookEdit",
         "hooks": [
+          {
+            "type": "command",
+            "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/purity-sweep/purity-swept.sh\" --hook || true"
+          },
           {
             "type": "command",
             "command": "test -x \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" && \"$CLAUDE_PROJECT_DIR/.agents/doc-router/route.sh\" --hook || true"

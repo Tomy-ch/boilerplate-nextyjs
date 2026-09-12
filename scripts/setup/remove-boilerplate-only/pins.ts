@@ -18,7 +18,10 @@
  * 版ではなく action の名前で宣言します。pin を上げるたびに書き換える宣言は、上げた人が
  * 気づかない場所で腐ります。
  */
-export const ORPHANED_ACTIONS: readonly string[] = [];
+export const ORPHANED_ACTIONS: readonly string[] = [
+  "actions/dependency-review-action",
+  "SonarSource/sonarqube-scan-action",
+];
 
 /**
  * 孤児になる pin の行を落とす。

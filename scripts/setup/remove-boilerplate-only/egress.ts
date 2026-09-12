@@ -16,7 +16,12 @@
  * `.github/workflows/<名前>.yaml` の `<名前>` です。ここが増えるのは、剥がしが workflow を
  * 1 本消すときだけなので、[manifest](manifest.ts) の削除対象と対で動きます。
  */
-export const ORPHANED_WORKFLOWS: readonly string[] = ["strip-verify"];
+export const ORPHANED_WORKFLOWS: readonly string[] = [
+  "codeql",
+  "dependency-review",
+  "sonarcloud",
+  "strip-verify",
+];
 
 /**
  * 孤児になる宣言の塊を落とす。

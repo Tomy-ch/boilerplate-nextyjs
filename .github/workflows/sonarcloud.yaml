@@ -1,0 +1,404 @@
+name: SonarQube Cloud Scan
+
+# The one scanner here that needs an account somewhere else, and the whole file is shaped by
+# that. SonarCloud is free for a public repository and licensed for a private one, so a
+# repository created from this template must be able to receive this and have it cost nothing
+# and break nothing.
+#
+# TWO PROTECTIONS, FOR TWO DIFFERENT KINDS OF GENERATED REPOSITORY.
+#
+#   1. NO TOKEN, NO RED. `preflight` reads `SONAR_TOKEN` and, when it is unset, every job
+#      below is skipped and the run stays green. A missing account is a setup gap, not a
+#      scan result. `unconfigured-notice` then says so on the pull request, for the reason
+#      that job gives. This also covers a pull request from a fork, which never receives
+#      repository secrets.
+#   2. REMOVABLE. This file and `sonar-project.properties` are listed in
+#      `scripts/setup/remove-boilerplate-only/manifest.ts` (`SELF_DESTRUCT_PATHS`), so the
+#      strip takes them both. The project key here names THIS repository's SonarCloud
+#      organization; carried into a generated repository unchanged it is dead configuration.
+#
+# It is NOT a required status check, and must not become one: a check whose verdict depends
+# on a third-party account cannot be a condition for merging in a repository that ships to
+# people who do not have that account.
+#
+# PULL REQUESTS EVERYWHERE, PUSH ON THE TRUNK ALONE. On the free plan SonarCloud analyses
+# one branch per organization and refuses the rest, while pull-request analysis is exempt.
+# The push half exists because code scanning only closes an alert when a later analysis for
+# the same ref stops reporting it — without an analysis on the trunk, an exclusion added
+# here would silence the gate while the alert it was written for stayed open forever.
+#
+# That rationale reaches `production` and stops there. A push analysis for any second branch
+# is refused server-side on the free plan, and a refused branch analysis running beside the
+# pull-request one for the same commit takes it down with it. A protected branch other than
+# the trunk is always on its way into one through a pull request, and that pull request is
+# analysed, so nothing here goes unscanned.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - production
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      configured: ${{ steps.token.outputs.configured }}
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            *.githubapp.com:443
+            prod.app-api.stepsecurity.io:443
+            mise-versions.jdx.dev:443
+            nodejs.org:443
+            registry.npmjs.org:443
+            sonarcloud.io:443
+            api.sonarcloud.io:443
+            scanner.sonarcloud.io:443
+            binaries.sonarsource.com:443
+            dna-visualization-scannerdata-eu-central-1-prod.s3.eu-central-1.amazonaws.com:443
+            keyserver.ubuntu.com:443
+
+      # The secret is read here and nowhere that could print it. What leaves this job is a
+      # boolean, so no `if:` expression downstream ever touches the value.
+      - name: Resolve the SonarCloud credentials
+        id: token
+        shell: bash
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${SONAR_TOKEN:-}" ]; then
+            echo "configured=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "configured=false" >> "${GITHUB_OUTPUT}"
+            echo "::notice::SONAR_TOKEN is not configured, so the SonarCloud scan is skipped. Register the secret to enable it."
+          fi
+
+  sonarcloud:
+    needs: preflight
+    if: ${{ needs.preflight.outputs.configured == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      gate: ${{ steps.gate.outputs.status }}
+      count: ${{ steps.summarize.outputs.count }}
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            *.githubapp.com:443
+            prod.app-api.stepsecurity.io:443
+            mise-versions.jdx.dev:443
+            nodejs.org:443
+            registry.npmjs.org:443
+            sonarcloud.io:443
+            api.sonarcloud.io:443
+            scanner.sonarcloud.io:443
+            binaries.sonarsource.com:443
+            dna-visualization-scannerdata-eu-central-1-prod.s3.eu-central-1.amazonaws.com:443
+            keyserver.ubuntu.com:443
+
+      # Sonar attributes an issue to the commit that introduced it, which it can only do
+      # with the history present. `fetch-depth: 0` is the vendor's documented requirement
+      # for that, not a convenience.
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Run the SonarCloud scan
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # The toolchain is installed AFTER the scan on purpose. `sonar.sources` is the whole
+      # tree, so an already-populated node_modules is a directory walk the scanner pays for
+      # before its own exclusion discards it.
+      - name: Setup mise and the pinned tools
+        uses: ./.github/actions/setup-mise
+        with:
+          tools: core:node aqua:pnpm/pnpm
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        uses: ./.github/actions/setup-deps
+      - name: Read the analysis task
+        id: task
+        run: pnpm exec tsx scripts/sonarcloud task
+
+      # The analysis is queued rather than run inline, so the issues cannot be read until
+      # the entry reports SUCCESS. The ceiling exists because a queue that never drains
+      # would otherwise be indistinguishable from a clean scan.
+      - name: Wait for the analysis to complete
+        id: analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          CE_TASK_ID: ${{ steps.task.outputs.ceTaskId }}
+          SERVER_URL: ${{ steps.task.outputs.serverUrl }}
+        run: pnpm exec tsx scripts/sonarcloud wait
+
+      # Sonar's own pass / fail verdict, which is a different question from whether the
+      # analysis ran: a gate can fail on duplication with no issue raised at all. Read here
+      # and enforced at the end, so the findings are reported before the job goes red.
+      - name: Read the quality gate
+        id: gate
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SERVER_URL: ${{ steps.task.outputs.serverUrl }}
+          ANALYSIS_ID: ${{ steps.analysis.outputs.analysisId }}
+        run: pnpm exec tsx scripts/sonarcloud gate
+
+      # A pull-request analysis is stored against the PR rather than the branch, so the
+      # issues have to be requested the same way the scanner filed them.
+      - name: Fetch the issues
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SERVER_URL: ${{ steps.task.outputs.serverUrl }}
+          PROJECT_KEY: ${{ steps.task.outputs.projectKey }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: pnpm exec tsx scripts/sonarcloud issues
+
+      # The issue list becomes SARIF here. Sonar reports the component as
+      # "<projectKey>:<path>", so the key is stripped to leave the repository-relative path
+      # that code scanning needs to anchor an alert to a file.
+      - name: Convert the issues to SARIF
+        env:
+          SERVER_URL: ${{ steps.task.outputs.serverUrl }}
+        run: pnpm exec tsx scripts/sonarcloud sarif
+
+      - name: Create the SonarCloud summary
+        id: summarize
+        env:
+          GATE_STATUS: ${{ steps.gate.outputs.status }}
+        run: pnpm exec tsx scripts/sonarcloud summary
+
+      # The report job below has no token and runs on its own runner, so it reads the result
+      # from here rather than from this runner's filesystem.
+      - name: Upload the SonarCloud report
+        if: always() && hashFiles('sonarcloud.sarif') != ''
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sonarcloud
+          path: |
+            sonarcloud.sarif
+            sonarcloud-summary.md
+            sonar-issues.json
+            sonar-quality-gate.json
+
+      # Last, so everything above has already reported. NONE fails alongside ERROR: it means
+      # the project carries no gate, and a verdict nobody defined is not a pass.
+      - name: Enforce the quality gate
+        shell: bash
+        env:
+          GATE_STATUS: ${{ steps.gate.outputs.status }}
+          DASHBOARD_URL: ${{ steps.task.outputs.dashboardUrl }}
+        run: |
+          set -euo pipefail
+
+          case "${GATE_STATUS}" in
+            OK)
+              echo "quality gate: OK"
+              ;;
+            NONE)
+              echo "::error::no quality gate is assigned to this project, so the analysis proves nothing. Assign one in SonarCloud: ${DASHBOARD_URL}"
+              exit 1
+              ;;
+            *)
+              echo "::error::the SonarCloud quality gate reported ${GATE_STATUS}. Failing conditions are in the pull-request comment and at ${DASHBOARD_URL}"
+              exit 1
+              ;;
+          esac
+
+  # The only job that writes outside this run, and the only one with no SonarCloud token —
+  # the scan log must never share a runner with the thing that posts it. It
+  # runs even when the scan failed: a scan that was cut off still has to say so, for the
+  # reason `unconfigured-notice` gives.
+  #
+  # The SARIF upload is not restricted to pull requests, and that is what keeps code scanning
+  # honest — see the note at the top of this file.
+  sonarcloud-report:
+    needs: [preflight, sonarcloud]
+    if: ${{ always() && needs.preflight.outputs.configured == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      pull-requests: write
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            *.githubapp.com:443
+            prod.app-api.stepsecurity.io:443
+            mise-versions.jdx.dev:443
+            nodejs.org:443
+            registry.npmjs.org:443
+            sonarcloud.io:443
+            api.sonarcloud.io:443
+            scanner.sonarcloud.io:443
+            binaries.sonarsource.com:443
+            dna-visualization-scannerdata-eu-central-1-prod.s3.eu-central-1.amazonaws.com:443
+            keyserver.ubuntu.com:443
+
+      # The composite action below is read from the workspace, so the repository has to be
+      # present even though nothing here scans it.
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download the SonarCloud report
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: sonarcloud
+          path: reports
+
+      # A missing summary file is a cut-off scan, and the action reports it as one.
+      #
+      # **`body-sanitized` stays unset.** The body carries SonarCloud's own text — rule
+      # messages and file paths this repository did not author — so it must be fenced rather
+      # than rendered. Setting it to make the list read as Markdown would let that text
+      # become markup in a comment posted under `GITHUB_TOKEN`.
+      - name: Comment the SonarCloud result on PR
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: ./.github/actions/upsert-pr-comment
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          marker: '<!-- sonarcloud-result -->'
+          status: ${{ needs.sonarcloud.outputs.gate == 'OK' && 'success' || 'findings' }}
+          title: >-
+            ${{ needs.sonarcloud.outputs.gate == 'OK'
+            && '## ✅ SonarQube Cloud: PASS (quality gate OK)'
+            || '## ❌ SonarQube Cloud: FAIL (quality gate)' }}
+          body-file: reports/sonarcloud-summary.md
+          details-summary: 'SonarQube Cloud summary'
+
+      - name: Upload the SonarCloud SARIF to code scanning
+        if: always() && hashFiles('reports/sonarcloud.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        with:
+          sarif_file: reports/sonarcloud.sarif
+          category: sonarcloud
+
+  # A missing token leaves the scan skipped and the run green, and green is the right answer.
+  # Silence is not — a pull request with no comment is indistinguishable from one that was
+  # scanned and came back clean. This posts under the same marker the verdict would use, so
+  # the notice and a verdict can never both stand.
+  unconfigured-notice:
+    needs: preflight
+    if: ${{ needs.preflight.outputs.configured == 'false' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            release-assets.githubusercontent.com:443
+            *.actions.githubusercontent.com:443
+            *.blob.core.windows.net:443
+            *.githubapp.com:443
+            prod.app-api.stepsecurity.io:443
+            mise-versions.jdx.dev:443
+            nodejs.org:443
+            registry.npmjs.org:443
+            sonarcloud.io:443
+            api.sonarcloud.io:443
+            scanner.sonarcloud.io:443
+            binaries.sonarsource.com:443
+            dna-visualization-scannerdata-eu-central-1-prod.s3.eu-central-1.amazonaws.com:443
+            keyserver.ubuntu.com:443
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Describe the gap
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Backticks are spelled 「」 here rather than as Markdown code spans: a single-quoted
+          # shell string containing one is a shellcheck finding (SC2016), and the alternative
+          # forms — a double-quoted string, or an unindented heredoc inside a YAML block
+          # scalar — trade a lint warning for a real command substitution or a broken block.
+          {
+            echo 'SonarQube Cloud の解析は走っていません。secret 「SONAR_TOKEN」 が未設定です。'
+            echo
+            echo 'これは検査の結果ではなく設定の欠落です。この検査を有効にするなら、SonarCloud の'
+            echo 'organization を用意して 「SONAR_TOKEN」 を登録し、sonar-project.properties の'
+            echo 'sonar.projectKey / sonar.organization を自分のものへ書き換えてください。'
+            echo '使わないなら、このワークフローと sonar-project.properties を削除してください'
+            echo '（boilerplate の剥がしは両方を消します）。'
+          } > /tmp/sonarcloud-notice.md
+
+      - name: Comment the gap on PR
+        continue-on-error: true
+        uses: ./.github/actions/upsert-pr-comment
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          marker: '<!-- sonarcloud-result -->'
+          # Not `success`: the point of this comment is that no verdict exists, and a
+          # verdict-suppressing status would leave the pull request silent about it.
+          status: unconfigured
+          title: '## ⏭️ SonarQube Cloud: SKIP (SONAR_TOKEN 未設定)'
+          body-file: /tmp/sonarcloud-notice.md
+          # Workflow-authored prose; nothing here comes from the pull request.
+          body-sanitized: 'true'

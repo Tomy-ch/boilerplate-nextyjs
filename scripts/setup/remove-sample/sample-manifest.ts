@@ -144,8 +144,12 @@ export const SAMPLE_RESTORATIONS: readonly SampleRestoration[] = [
  *
  * 英語の語には語境界を付けます。付けないと別語の一部に当たります（`CartesianGrid` が `cart` に
  * 一致し、題材と無関係な部品が消し残しとして報告されます）。
+ *
+ * **「問い合わせ」はここに置けません。** 支援を求める先を指す語としてサイトが持っており、題材の
+ * 機能を消しても残ります。残る語を残留の印にすると、印は必ず当たります。題材側は識別子の
+ * `inquir` で見ます。
  */
-export const DANGLING_PATTERN = String.raw`商品|カート|在庫|購入|注文|問い合わせ|\bproducts\b|\bcart\b|\binquir`;
+export const DANGLING_PATTERN = String.raw`商品|カート|在庫|購入|注文|\bproducts\b|\bcart\b|\binquir`;
 
 /** マーカーの名前。`sample:begin` / `sample:end` / `sample:line` / `sample:replace-*` を作る。 */
 export const SAMPLE_MARKER = "sample";

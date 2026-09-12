@@ -36,7 +36,7 @@ function escapeForRegExp(literal: string): string {
  * 経路ではありません。
  *
  * @param source - spec 1 本のソース
- * @returns `/` で始まるリテラルの中身。問い合わせと素片は付いたまま
+ * @returns `/` で始まるリテラルの中身。クエリとフラグメントは付いたまま
  */
 export function listRouteLiterals(source: string): string[] {
   return listStringLiterals(source).filter((value) => value.startsWith("/"));
@@ -104,7 +104,7 @@ export function toRoutePattern(route: string): RegExp {
  * リテラルを、route と突き合わせられる経路へ整える。
  *
  * @remarks
- * 問い合わせと素片は route を決めないので落とします。末尾の区切りも同じで、`/reports/` と
+ * クエリとフラグメントは route を決めないので落とします。末尾の区切りも同じで、`/reports/` と
  * `/reports` は同じ画面です。
  */
 export function toRoutePath(literal: string): string {

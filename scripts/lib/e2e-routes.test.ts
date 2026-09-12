@@ -118,11 +118,11 @@ describe("toRoutePath", () => {
     expect(toRoutePath("/reports")).toBe("/reports");
   });
 
-  it("問い合わせを落とす", () => {
+  it("クエリを落とす", () => {
     expect(toRoutePath("/login?returnUrl=%2Fmypage")).toBe("/login");
   });
 
-  it("素片を落とす", () => {
+  it("フラグメントを落とす", () => {
     expect(toRoutePath("/about#history")).toBe("/about");
   });
 

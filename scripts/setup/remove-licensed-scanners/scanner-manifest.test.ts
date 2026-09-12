@@ -8,13 +8,16 @@ import { SCANNER_DOMAINS } from "./scanner-manifest";
 
 const exists = (relativePath: string): boolean => fs.existsSync(path.join(ROOT_DIR, relativePath));
 
+const read = (relativePath: string): string =>
+  fs.readFileSync(path.join(ROOT_DIR, relativePath), "utf8");
+
 describe("SCANNER_DOMAINS", () => {
   // ----- 正常系 -----
   it("資格情報を要する 3 つの製品を並べる", () => {
     expect(SCANNER_DOMAINS.map((domain) => domain.key)).toEqual([
       "sonarcloud",
-      "codeql",
       "dependency-review",
+      "codeql",
     ]);
   });
 
@@ -33,7 +36,10 @@ describe("SCANNER_DOMAINS", () => {
   });
 
   it("コミット件名の prefix が、commitlint の enum に在る", () => {
-    const [, , allowed] = commitlint.rules?.["type-enum"] as [unknown, unknown, string[]];
+    const rule = commitlint.rules?.["type-enum"] as [unknown, unknown, string[]] | undefined;
+    const allowed = rule?.[2] ?? [];
+
+    expect(allowed.length).toBeGreaterThan(0);
 
     for (const domain of SCANNER_DOMAINS) {
       expect(allowed).toContain(domain.commitSubject.split(":")[0]);
@@ -54,6 +60,34 @@ describe("SCANNER_DOMAINS", () => {
         expect(declaration).toContain(`  ${job}:`);
       }
     }
+  });
+
+  it("宣言した塊が、現物に完全一致で在る", () => {
+    for (const domain of SCANNER_DOMAINS) {
+      for (const { file, block } of domain.docBlocks) {
+        expect(read(file), `${file}: ${block.trim().slice(0, 50)}`).toContain(block);
+      }
+    }
+  });
+
+  it("宣言した語句が、現物に完全一致で在る", () => {
+    for (const domain of SCANNER_DOMAINS) {
+      for (const { file, fragment } of domain.docFragments) {
+        expect(read(file), `${file}: ${fragment.slice(0, 50)}`).toContain(fragment);
+      }
+    }
+  });
+
+  it("宣言した見出しが、現物に在る", () => {
+    for (const domain of SCANNER_DOMAINS) {
+      for (const { file, heading } of domain.docSections) {
+        expect(read(file).split("\n"), `${file}: ${heading}`).toContain(heading);
+      }
+    }
+  });
+
+  it("共有の散文を畳む CodeQL を最後に置く", () => {
+    expect(SCANNER_DOMAINS.at(-1)?.key).toBe("codeql");
   });
 
   // ----- 異常系 -----

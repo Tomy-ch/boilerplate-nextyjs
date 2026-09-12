@@ -140,7 +140,7 @@ setup-replace-repository-reference:
 # スクリプトは製品ごとに別のコミットへ分ける。後からライセンスを得たら git revert 1 回で戻せる
 # ので、作業ツリーはクリーンである必要がある。
 setup-remove-licensed-scanners:
-	@pnpm exec tsx scripts/setup/remove-licensed-scanners $(SETUP_DRY_RUN_FLAG) $(if $(SCANNER),--only $(SCANNER),)
+	@pnpm exec tsx scripts/setup/remove-licensed-scanners $(SETUP_DRY_RUN_FLAG)
 
 # boilerplate-only:begin
 # boilerplate 限定の記述（この template を配る側にしか意味を持たない規則・注記）を剥がす。

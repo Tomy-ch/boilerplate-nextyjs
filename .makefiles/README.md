@@ -82,7 +82,7 @@ make help
 | --- | --- | --- |
 | `make setup-replace-license-copyright COPYRIGHT_HOLDER=<name> [COPYRIGHT_YEAR=<year>]` | LICENSE の著作権表記を更新します。 | 年は省略可能です。 |
 | `make setup-replace-repository-reference REPOSITORY=<owner>/<repo> [PORTAL_URL=<url>]` | GitHub リポジトリ参照とプロジェクト名（`package.json` の `name`）、およびドキュメントポータルへのリンクを、新しいリポジトリのものへ置換します。 | `PORTAL_URL` を省くと GitHub Pages の配信先（`https://<owner>.github.io/<repo>/`）を組み立てます。custom domain のときだけ渡します。`docs/` / `.claude/` / `scripts/setup/` / ビルド成果物（`.next` / `dist` / `build` / `tmp`）/ ロックファイルは対象外です。 |
-| `make setup-remove-licensed-scanners [SCANNER=<key>]` | 資格情報を要するスキャナ（CodeQL / SonarQube Cloud / Dependency Review）を撤去します。 | **製品ごとに別のコミットへ分けます。**後からライセンスを得たら `git revert` 1 回で戻せます。作業ツリーはクリーンである必要があります。workflow・pin・宛先の宣言だけを始末し、**文書は書き換えず、製品名が残っている行を一覧で出します**。撤去は選択なので、決めるまでの間に壊れるものはありません（どれも未設定なら自分を飛ばして緑を返します）。 |
+| `make setup-remove-licensed-scanners` | 資格情報を要するスキャナ（CodeQL / SonarQube Cloud / Dependency Review）を 3 つまとめて撤去します。 | **製品ごとに別のコミットへ分けます。**1 つだけ残したくなったらそのコミットを `git revert` します。作業ツリーはクリーンである必要があります。workflow・pin・宛先の宣言に加えて、**宣言した文書の行も落とします** —— 宣言が現物と一致することはテストが見るので、行が動いていれば撤去は投げて止まります。撤去は選択なので、決めるまでの間に壊れるものはありません（どれも未設定なら自分を飛ばして緑を返します）。 |
 | `make setup-remove-boilerplate-only` | boilerplate 限定の記述（配る側にしか意味を持たない規則・注記）を剥がします。 | 剥がし終えると道具自身も消えます。飛ばす選択肢はありません（[0152](../docs/adr/0152-agents-md-policy.md)）。 <!-- boilerplate-only:line --> |
 | `make setup-remove-sample` | 題材を持つ画面一式を破棄し、検証まで実行します。 | **破壊的です。** 残す側にサンプル固有の語彙を持ち込まないための出口で、削除後にゲートが通ることまで確かめます。 |
 

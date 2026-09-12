@@ -17,7 +17,13 @@ import { dropOrphanedEndpoints } from "../lib/egress-declaration.js";
 import { listFilesRecursive, removeTarget, toRelativePath, updateFile } from "../lib/file-utils.js";
 import { exitWithUsage, parseCommonFlags, ROOT_DIR } from "../lib/runtime.js";
 import { SCANNER_DOMAINS, type ScannerDomain } from "./scanner-manifest.js";
-import { findMentions, isPinReferenced, type Mention } from "./scanner-removal.js";
+import {
+  findMentions,
+  isPinReferenced,
+  type Mention,
+  removeSection,
+  replaceExact,
+} from "./scanner-removal.js";
 
 const ACTIONS_PIN_LOCK_FILE = ".github/actions-pin.toml";
 const EGRESS_DECLARATION_FILE = ".github/egress.yaml";
@@ -26,15 +32,14 @@ const WORKFLOWS_DIR = ".github/workflows";
 function printUsage(): void {
   console.log(
     [
-      "使い方: pnpm exec tsx scripts/setup/remove-licensed-scanners [--dry-run] [--only <key>]",
+      "使い方: pnpm exec tsx scripts/setup/remove-licensed-scanners [--dry-run]",
       "",
-      "  資格情報を要するスキャナを撤去する。既に撤去済みの製品には手を付けない。",
+      "  資格情報を要するスキャナを 3 つまとめて撤去する。撤去済みの製品には手を付けない。",
       `  対象: ${SCANNER_DOMAINS.map((domain) => domain.key).join(" / ")}`,
       "",
       "  --dry-run  実際には書き換えず、対象だけを表示する",
-      "  --only     1 製品だけを撤去する",
       "",
-      "  製品ごとに別のコミットへ分ける。後からライセンスを得たら git revert 1 回で戻せる。",
+      "  製品ごとに別のコミットへ分ける。1 つだけ残したくなったらそのコミットを git revert する。",
     ].join("\n"),
   );
 }
@@ -47,7 +52,7 @@ function survivingWorkflowContents(removedPaths: ReadonlySet<string>): string[] 
     .map((relativePath) => fs.readFileSync(path.join(ROOT_DIR, relativePath), "utf8"));
 }
 
-function removeDomain(domain: ScannerDomain, dryRun: boolean): readonly Mention[] {
+function removeDomain(domain: ScannerDomain, dryRun: boolean): void {
   const removed: string[] = [];
 
   for (const target of domain.paths) {
@@ -77,53 +82,92 @@ function removeDomain(domain: ScannerDomain, dryRun: boolean): readonly Mention[
     console.log(`- pin は残す（他の workflow が参照している）: ${kept.join(" / ")}`);
   }
 
-  return domain.docMentions.flatMap((file) => {
+  for (const { file, block } of domain.docBlocks) {
+    updateFile(file, (content) => replaceExact(content, block, "", file, "塊"), dryRun);
+  }
+
+  for (const { file, fragment, replacement } of domain.docFragments) {
+    updateFile(
+      file,
+      (content) => replaceExact(content, fragment, replacement, file, "語句"),
+      dryRun,
+    );
+  }
+
+  for (const { file, heading } of domain.docSections) {
+    updateFile(file, (content) => removeSection(content, heading, file), dryRun);
+  }
+
+  const edited = domain.docBlocks.length + domain.docFragments.length + domain.docSections.length;
+
+  if (edited > 0) console.log(`- 文書を書き換え ${edited} 箇所`);
+}
+
+/**
+ * 撤去した製品の名前が残っている行を拾う。
+ *
+ * @remarks
+ * **全製品を終えてから 1 度だけ走らせます。**製品ごとに拾うと、後続の製品が文書を書き換えた時点で
+ * 行番号がずれ、報告が指す先に何も無くなります。
+ */
+function residualMentions(domains: readonly ScannerDomain[]): readonly Mention[] {
+  const files = new Set(domains.flatMap((domain) => domain.docMentions));
+
+  return [...files].flatMap((file) => {
     const absolute = path.join(ROOT_DIR, file);
+
     if (!fs.existsSync(absolute)) return [];
 
-    return findMentions(file, fs.readFileSync(absolute, "utf8"), domain.mentionPatterns);
+    const content = fs.readFileSync(absolute, "utf8");
+
+    return domains.flatMap((domain) => findMentions(file, content, domain.mentionPatterns));
   });
 }
 
 function commit(domain: ScannerDomain): void {
   execFileSync(
     "git",
-    ["add", "--", ...domain.paths, ACTIONS_PIN_LOCK_FILE, EGRESS_DECLARATION_FILE],
+    [
+      "add",
+      "--",
+      ...domain.paths,
+      ACTIONS_PIN_LOCK_FILE,
+      EGRESS_DECLARATION_FILE,
+      ...new Set([
+        ...domain.docBlocks.map((entry) => entry.file),
+        ...domain.docFragments.map((entry) => entry.file),
+        ...domain.docSections.map((entry) => entry.file),
+      ]),
+    ],
     { cwd: ROOT_DIR },
   );
   execFileSync("git", ["commit", "--no-verify", "-m", domain.commitSubject], { cwd: ROOT_DIR });
 }
 
-function run(dryRun: boolean, requested: string | undefined): void {
-  const selected =
-    only === undefined
-      ? SCANNER_DOMAINS
-      : SCANNER_DOMAINS.filter((candidate) => candidate.key === only);
+function run(dryRun: boolean): void {
+  const removed: ScannerDomain[] = [];
 
-  if (selected.length === 0) throw new Error(`知らない製品です: ${requested}`);
-
-  const mentions: Mention[] = [];
-  let touched = 0;
-
-  for (const domain of selected) {
+  for (const domain of SCANNER_DOMAINS) {
     if (!fs.existsSync(path.join(ROOT_DIR, domain.presenceMarker))) {
       console.log(`[${domain.label}] 撤去済みのため何もしない`);
       continue;
     }
 
-    mentions.push(...removeDomain(domain, dryRun));
-    touched += 1;
+    removeDomain(domain, dryRun);
+    removed.push(domain);
     if (!dryRun) commit(domain);
   }
 
-  if (touched === 0) {
+  if (removed.length === 0) {
     console.log("撤去する製品がありません。");
     return;
   }
 
+  const mentions = dryRun ? [] : residualMentions(removed);
+
   if (mentions.length > 0) {
     console.log("");
-    console.log("撤去した製品の名前が、次の行に残っています。文書は書き換えていません:");
+    console.log("宣言で拾い切れていない言及が、次の行に残っています:");
     const seen = new Set<string>();
     for (const mention of mentions) {
       const at = `${mention.file}:${mention.line}`;
@@ -143,11 +187,8 @@ if (options.help) {
   process.exit(0);
 }
 
-const onlyIndex = options.rest.indexOf("--only");
-const only = onlyIndex === -1 ? undefined : options.rest[onlyIndex + 1];
-
 try {
-  run(options.dryRun, only);
+  run(options.dryRun);
 } catch (error) {
   exitWithUsage(error instanceof Error ? error : new Error(String(error)), printUsage);
 }

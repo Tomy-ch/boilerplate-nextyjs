@@ -212,7 +212,6 @@ Display the unpushed commit list and diff summary. Then ask with the wording req
 
 ## Step 7. Push
 
-
 ```sh
 # First push (no upstream)
 git push -u origin <branch>

@@ -86,7 +86,6 @@ should see.
 
 ## Step 0 — Confirm Scope
 
-
 Call `AskUserQuestion` immediately. Default-detect scope by checking branch vs base. Resolve the base the way `commit` and `submit-pr` already do — `gh pr view --json baseRefName -q .baseRefName`, and `make -s base-branch` when no PR exists. Never `gh repo view --json defaultBranchRef`: `.makefiles/README.md` owns why, and a base resolved that way silently widens the diff by a release generation. If there are unmerged commits, default to "changed files", otherwise "whole working tree / specific paths".
 
 ```text

@@ -122,7 +122,6 @@ passes rather than until it is right.
 
 ## Step 5. Split (order step 4)
 
-
 Move what the review settled into its layers. Decide placement from `docs/playbook.md`'s reverse
 index and the kernel READMEs; carry the criteria as a reference path to the ADR that owns it rather
 than restating it in code or in the README. **The reference paths themselves are a table in

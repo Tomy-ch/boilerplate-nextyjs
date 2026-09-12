@@ -208,7 +208,6 @@ HTML コメントのプレースホルダは除去する。テンプレートが
 
 ## Step 7. push
 
-
 ```sh
 # 初回 push（upstream 無し）
 git push -u origin <branch>

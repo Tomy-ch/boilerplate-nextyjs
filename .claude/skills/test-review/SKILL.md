@@ -67,7 +67,6 @@ semantic findings point at. The reviewer subagents stay read-only; the orchestra
 
 ## Step 0. Resolve Scope
 
-
 `AskUserQuestion`:
 
 - Question: 「test-review の対象スコープを指定してください」

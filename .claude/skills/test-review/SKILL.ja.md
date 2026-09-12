@@ -43,7 +43,6 @@
 
 ## Step 0. スコープの解決
 
-
 `AskUserQuestion`:
 
 - 質問: 「test-review の対象スコープを指定してください」

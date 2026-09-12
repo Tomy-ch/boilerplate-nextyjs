@@ -64,7 +64,6 @@
 
 ## Step 0 — スコープ確認
 
-
 即座に `AskUserQuestion`。ベースは `commit` / `submit-pr` と同じ解き方で —— `gh pr view --json baseRefName -q .baseRefName`、PR が無ければ `make -s base-branch`。`gh repo view --json defaultBranchRef` は使わない（理由は `.makefiles/README.md` が持つ。この綴りで解くと diff がリリース 1 世代ぶん黙って広がる）。未マージのコミットがあれば「変更ファイルのみ」を既定、なければ作業ツリー / 指定パスを既定。
 
 ```text

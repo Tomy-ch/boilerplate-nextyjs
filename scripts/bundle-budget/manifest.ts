@@ -194,7 +194,7 @@ export function unionByRoute(entries: readonly RouteChunks[]): RouteChunks[] {
  * 共有が 8 KB 増えれば route ごとの行はすべて +8 KB として並びますが、原因は 1 つです。報告の側で
  * 1 度だけ出すために、どれが共有かをここで決めます。
  *
- * テンプレートから作った側に route が 1 つしかなければ全てが固有になりますが、そのとき共有の内訳は情報を持たないので
+ * route が 1 つしかなければ全てが固有になりますが、そのとき共有の内訳は情報を持たないので
  * それで正しい判定です。
  *
  * @param byRoute - 公開 route ごとの資材。

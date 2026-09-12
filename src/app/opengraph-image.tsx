@@ -24,7 +24,7 @@ export const contentType = "image/png";
  * segment に `opengraph-image.tsx` を置いて上書きします。
  *
  * **描くのはサイトの名だけです。** 説明文は和文で、既定の書体では描けません（`SITE_NAME` が
- * ラテン限定である理由と同じ。`site.ts`）。書体を持ち込む判断はテンプレートから作った側が絵を
+ * ラテン限定である理由と同じ。`site.ts`）。書体を持ち込む判断は、絵を
  * 決めるときに一緒に下します。
  */
 export default function OpenGraphImage() {

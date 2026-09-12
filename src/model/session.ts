@@ -22,7 +22,7 @@ export type Session = {
  *
  * @remarks
  * boilerplate は「特権を持つ側」と「持たない側」の 2 つだけを敷きます。実際の役割体系は
- * バックエンドと IdP が所有するため、テンプレートから作った側はこの集合を自分の体系へ置き換えます。
+ * バックエンドと IdP が所有するため、この集合は自分の体系へ置き換えます。
  */
 export const SESSION_ROLE: Readonly<{ admin: "admin"; user: "user" }> = {
   admin: "admin",

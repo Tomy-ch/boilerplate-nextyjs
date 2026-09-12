@@ -10,7 +10,7 @@ import { decideConsent, useConsentState } from "@/stores/consent-store";
  * 判断の材料として示す文書の行き先。
  *
  * @remarks
- * 器が持ちます。部品へ焼くと、テンプレートから作った側が文書を別の場所へ置いたときに部品側を
+ * 器が持ちます。部品へ焼くと、文書を別の場所へ置いたときに部品側を
  * 書き換えることになります。
  */
 const POLICY_HREF = "/privacy";

@@ -56,7 +56,7 @@ export type SessionRecord = {
  *
  * @remarks
  * boilerplate が持つのは既定実装 1 つであり、唯一の実装ではありません。OIDC クライアントの実装、
- * session の暗号化方式、トークンの保管形式はこの面の内側にあり、テンプレートから作った側は
+ * session の暗号化方式、トークンの保管形式はこの面の内側にあり、差し替える側は
  * 自社方式へ移るときにこの面だけを差し替えます。
  *
  * 逆に、保護ルートの判定・`returnUrl` の検証・ログアウト時の状態破棄・役割による認可は
@@ -64,7 +64,7 @@ export type SessionRecord = {
  * 差し替えのたびに書き直す羽目になります。
  *
  * `refresh` を置いていないのは、それを使う既定実装が無いためです。設置面のない面を先に敷くと、
- * 実装時に必ず形が変わります。作った側の IdP が refresh を持つ場合、その更新は
+ * 実装時に必ず形が変わります。IdP が refresh を持つ場合、その更新は
  * {@link SessionResolver.restore} の内側で完結させられます。
  */
 export type SessionResolver = {

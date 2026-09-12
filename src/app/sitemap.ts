@@ -11,7 +11,7 @@ import { toProductDetailHref } from "@/features/products/facade/detail-url/detai
  *
  * @remarks
  * Sitemaps protocol の値です。超える規模は `generateSitemaps` で分割するのが規約であり、
- * 分け方は経路の構成で決まるためテンプレートから作った側の判断です。ここでは上限で打ち切り、
+ * 分け方は経路の構成で決まるため用途依存です。ここでは上限で打ち切り、
  * 載せ切れないものを黙って落とすのではなく、分割が要ることが挙げた件数から読めるようにします。
  */
 const SITEMAP_URL_LIMIT = 50_000;

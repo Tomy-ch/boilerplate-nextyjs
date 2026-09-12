@@ -36,7 +36,7 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   "scripts/marker-baseline",
   // 前提の綴りを入力として持つ検査。守っている相手は**前提を書きうる側**で、書ける場面は上流に
   // しかない。複製した時点で前提は失効し終えており、剥がしが済んだ木に見張る対象は残らない。
-  // `package.json` はマーカーを持てないので、呼び出しの段は `package-scripts.ts` が落とす。
+  // `pnpm lint:md` からの呼び出しは `scripts/lint-md/steps.ts` がマーカーで囲っている。
   "scripts/premise-lint",
   // 純化パスの台帳と照会フック。答えている問い（どのファイルが純化を通ったか）は、配る側にしか
   // 開いていない —— テンプレートから作った側が受け取るのは通り終えたツリーである。
@@ -102,9 +102,6 @@ export const BINARY_EXTENSIONS: readonly string[] = [
 
 /** action pin のロックファイル（リポジトリルート相対）。 */
 export const ACTIONS_PIN_LOCK_FILE = ".github/actions-pin.toml";
-
-/** npm script の宣言。剥がしで呼び先が消える段をここから落とす。 */
-export const PACKAGE_JSON_FILE = "package.json";
 
 /** 許可する外向きの宛先の宣言。剥がしで参照が消える塊をここから落とす。 */
 export const EGRESS_DECLARATION_FILE = ".github/egress.yaml";

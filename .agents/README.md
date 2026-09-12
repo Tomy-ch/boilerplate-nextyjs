@@ -13,7 +13,7 @@
 | `skills/` | `AGENTS.md` が OpenAI Codex CLI 用に予約しているパス（実体は未作成） |
 | `purity-sweep/` | 純化パスの台帳と照会フック。下記 <!-- boilerplate-only:line --> |
 | `closed-loop/` | 開発の窓の打刻。下記 |
-| `private/` | 機械ローカルの索引（追跡外）。再生成できる cache で、失っても費用がゼロ | |
+| `private/` | 機械ローカルの索引（追跡外）。再生成できる cache で、失っても費用がゼロ |
 
 <!-- boilerplate-only:begin -->
 ## `purity-sweep/`

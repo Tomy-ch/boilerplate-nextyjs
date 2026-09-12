@@ -1,7 +1,6 @@
 // `.github/egress.yaml` から、参照が消えた workflow の宛先宣言を落とす判定。
 //
-// 剥がし（`remove-boilerplate-only`）と、資格情報を要するスキャナの撤去
-// （`remove-licensed-scanners`）の双方が使う。どちらも「workflow を 1 本消すと、その workflow
+// セットアップが workflow を消す 2 つの道具が使う。どちらも「workflow を 1 本消すと、その workflow
 // のためだけに置いた宛先が孤児になる」という同じ形を持ち、`make egress-check` は
 // 「どの workflow も対応しないキー」で落ちる。
 

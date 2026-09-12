@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
+import commitlint from "../../../commitlint.config";
 import { ROOT_DIR } from "../lib/runtime";
 import { SCANNER_DOMAINS } from "./scanner-manifest";
 
@@ -31,9 +32,17 @@ describe("SCANNER_DOMAINS", () => {
     }
   });
 
-  it("コミット件名が prefix を持つ", () => {
+  it("コミット件名の prefix が、commitlint の enum に在る", () => {
+    const [, , allowed] = commitlint.rules?.["type-enum"] as [unknown, unknown, string[]];
+
     for (const domain of SCANNER_DOMAINS) {
-      expect(domain.commitSubject).toMatch(/^[A-Z][a-z]+: /);
+      expect(allowed).toContain(domain.commitSubject.split(":")[0]);
+    }
+  });
+
+  it("コミット件名が句点で終わらない", () => {
+    for (const domain of SCANNER_DOMAINS) {
+      expect(domain.commitSubject.endsWith("。")).toBe(false);
     }
   });
 

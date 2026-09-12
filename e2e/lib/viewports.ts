@@ -90,8 +90,7 @@ const BAND_EDGES = ["md", "lg"] as const;
  * その帯の指定が初めて効く幅であり、崩れるならまずそこで崩れます。PC で常設する脇の領域が
  * 最も本文を圧迫するのも `lg` ちょうどです。
  *
- * モバイルだけは下端を token が持ちません（対応する下限は用途依存として委ねて
- * います）。代わりに上端（`md - 1`）を撮ります。この帯は幅が広いほど余白が伸びるため、崩れると
+ * モバイルだけは下端を token が持ちません（対応する下限が用途依存だからです）。代わりに上端（`md - 1`）を撮ります。この帯は幅が広いほど余白が伸びるため、崩れると
  * すれば上端です。
  */
 export function responsiveBands(breakpoints: ReadonlyMap<string, number>): readonly Band[] {

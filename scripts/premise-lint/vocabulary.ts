@@ -61,6 +61,8 @@ export const PREMISE_SHAPES: readonly PremiseShape[] = [
       "本 boilerplate",
       "この boilerplate",
       "boilerplate 本体",
+      " boilerplate が",
+      " boilerplate は",
       "boilerplate 限定",
     ],
   },

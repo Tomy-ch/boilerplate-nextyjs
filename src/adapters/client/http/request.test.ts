@@ -37,11 +37,27 @@ describe("request", () => {
     await expect(request("/api/ping", schema)).resolves.toEqual({ ok: true });
   });
 
+  it("既定では GET で送る", async () => {
+    const fetchImpl = stubFetch(200, { ok: true });
+
+    await request("/api/ping", schema);
+
+    expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ method: "GET" });
+  });
+
+  it("指定された method で送る", async () => {
+    const fetchImpl = stubFetch(200, { ok: true });
+
+    await request("/api/ping", schema, { method: "POST" });
+
+    expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
+  });
+
   it("打ち切りの signal をそのまま渡す", async () => {
     const fetchImpl = stubFetch(200, { ok: true });
     const signal = new AbortController().signal;
 
-    await request("/api/ping", schema, signal);
+    await request("/api/ping", schema, { signal });
 
     expect(fetchImpl.mock.calls[0]?.[1]).toMatchObject({ signal });
   });
@@ -72,6 +88,18 @@ describe("request", () => {
     stubFetch(401, {});
 
     expect(await kindOf(() => request("/api/ping", schema))).toBe(ErrorKind.UNAUTHENTICATED);
+  });
+
+  it("403 を permission-denied へ写す", async () => {
+    stubFetch(403, {});
+
+    expect(await kindOf(() => request("/api/ping", schema))).toBe(ErrorKind.PERMISSION_DENIED);
+  });
+
+  it("404 を not-found へ写す", async () => {
+    stubFetch(404, {});
+
+    expect(await kindOf(() => request("/api/ping", schema))).toBe(ErrorKind.NOT_FOUND);
   });
 
   it("分類の定まらない status を internal へ畳む", async () => {

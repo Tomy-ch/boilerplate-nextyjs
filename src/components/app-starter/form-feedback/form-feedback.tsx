@@ -8,7 +8,7 @@ export type FormFeedbackProps = {
   title: string;
   /** 影響や次の行動を示す説明。 */
   description?: ReactNode;
-  /** 問い合わせ時に伝える request ID。 */
+  /** 連絡のときに伝える request ID。 */
   requestId?: string;
   /** 通常・warning・destructive の見た目。 */
   variant?: "default" | "warning" | "destructive";
@@ -33,7 +33,7 @@ export function FormFeedback({
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>
         {description}
-        {requestId === undefined ? null : <p>問い合わせ ID: {requestId}</p>}
+        {requestId === undefined ? null : <p>リクエスト ID: {requestId}</p>}
         {children}
       </AlertDescription>
     </Alert>

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildSecurityHeaders, type SecurityHeaderInputs } from "./security-headers";
 
 const production: SecurityHeaderInputs = {
+  apiOrigin: "https://api.example.com",
   mediaOrigin: "https://media.example.com",
   authIssuer: "https://idp.example.com/realms/shop",
   servesOverTls: true,
@@ -11,6 +12,7 @@ const production: SecurityHeaderInputs = {
 };
 
 const local: SecurityHeaderInputs = {
+  apiOrigin: "http://localhost:8081",
   mediaOrigin: "http://media.example.test:9000",
   authIssuer: "http://localhost:2010/default",
   servesOverTls: false,
@@ -90,12 +92,19 @@ describe("buildSecurityHeaders", () => {
     expect(directives(local).has("upgrade-insecure-requests")).toBe(false);
   });
 
-  it("style と font と connect は同一 origin に閉じ、style だけ inline を許す", () => {
+  it("style と font は同一 origin に閉じ、style だけ inline を許す", () => {
     const csp = directives(production);
 
     expect(csp.get("style-src")).toStrictEqual(["'self'", "'unsafe-inline'"]);
     expect(csp.get("font-src")).toStrictEqual(["'self'"]);
-    expect(csp.get("connect-src")).toStrictEqual(["'self'"]);
+  });
+
+  it("購読の宛先だけを connect-src へ開ける", () => {
+    // 取得は同一オリジンの中継が担うので `'self'` で足りる。ブラウザが直接開くのは購読だけ。
+    expect(directives(production).get("connect-src")).toStrictEqual([
+      "'self'",
+      "https://api.example.com",
+    ]);
   });
 
   it("clickjacking と MIME sniffing を閉じる", () => {
@@ -153,7 +162,7 @@ describe("buildSecurityHeaders", () => {
     const declared = directives(production);
 
     expect(declared.get("script-src")).not.toContain("https://www.googletagmanager.com");
-    expect(declared.get("connect-src")).toEqual(["'self'"]);
+    expect(declared.get("connect-src")).not.toContain("https://*.google-analytics.com");
     expect(header(production, "Cross-Origin-Embedder-Policy")).toBe("require-corp");
   });
 });

@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { axe } from "vitest-axe";
 
 import { MEDIA_IMAGE_PRIORITY } from "@/components/design-system/display/media-image/media-image.definition";
+import { INQUIRY_PATH } from "@/features/inquiry/facade/paths/paths";
 import type { ActionState } from "@/model/action-state";
 import type { ProductListItem } from "@/model/product/product";
 import { toProductId } from "@/model/product/product";
@@ -17,8 +18,6 @@ const { addToCartAction } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/features/cart/facade/add-to-cart/add-to-cart", () => ({ addToCartAction }));
-
-import { ToastProvider } from "@/components/shell/toaster/toaster";
 
 import { ProductCard } from "./card";
 
@@ -32,13 +31,8 @@ const ITEM: ProductListItem = {
   imageUrl: null,
 };
 
-/** 問い合わせの入口が通知を出すため、通知の器ごと描く。 */
 function renderCard(item: ProductListItem) {
-  return render(
-    <ToastProvider>
-      <ProductCard item={item} />
-    </ToastProvider>,
-  );
+  return render(<ProductCard item={item} />);
 }
 
 describe("ProductCard", () => {
@@ -134,13 +128,16 @@ describe("ProductCard", () => {
   it("在庫が無ければ問い合わせの入口を並べる", () => {
     renderCard({ ...ITEM, quantity: 0 });
 
-    expect(screen.getByRole("button", { name: "お問い合わせ" })).toBeEnabled();
+    expect(screen.getByRole("link", { name: "お問い合わせ" })).toHaveAttribute(
+      "href",
+      INQUIRY_PATH,
+    );
   });
 
   it("在庫があれば問い合わせの入口を出さない", () => {
     renderCard(ITEM);
 
-    expect(screen.queryByRole("button", { name: "お問い合わせ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "お問い合わせ" })).not.toBeInTheDocument();
   });
 
   it("a11y 自動検査に違反しない", async () => {

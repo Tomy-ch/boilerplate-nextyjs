@@ -138,6 +138,7 @@ export const SCREENS: readonly ScreenDeclaration[] = [
   },
   { route: "/mypage", name: "mypage", path: "/mypage", signedIn: "user" },
   { route: "/mypage/edit", name: "profile-edit", path: "/mypage/edit", signedIn: "user" },
+  { route: "/mypage/inquiry", name: "inquiry", path: "/mypage/inquiry", signedIn: "user" },
   {
     route: "/onboarding",
     skip:
@@ -184,6 +185,18 @@ export const SCREENS: readonly ScreenDeclaration[] = [
     signedIn: "admin",
   },
   { route: "/admin/users", name: "admin-users", path: "/admin/users", signedIn: "admin" },
+  {
+    route: "/admin/inquiries",
+    name: "admin-inquiries",
+    path: "/admin/inquiries",
+    signedIn: "admin",
+  },
+  {
+    route: "/admin/inquiries/[inquiryId]",
+    name: "admin-inquiry-detail",
+    path: "/admin/inquiries/0195f0c2-0000-7000-9000-000000000001",
+    signedIn: "admin",
+  },
   // sample:end
   { route: "/login", name: "login", path: "/login" },
   // `APP_MAINTENANCE_MODE` を立てずに撮れる（判定は入口が持つ。理由は

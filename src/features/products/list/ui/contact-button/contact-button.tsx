@@ -1,35 +1,26 @@
-"use client";
-
-import { useCallback } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/design-system/action/button/button";
 import { MessageCircleIcon } from "@/components/icon";
-import { useToast } from "@/components/shell/toaster/toaster";
 
-/** 問い合わせの受け口がまだ無いことを伝える文言。 */
-const NOTICE = "チャット欄の作成までお待ちください";
+import { INQUIRY_PATH } from "../../../../inquiry/facade/paths/paths";
 
 /**
  * 在庫の無い商品について問い合わせる入口。
  *
  * @remarks
- * **押しても問い合わせは送られません。** 受け口はまだ無く、この操作が持っているのは入口の位置
- * だけです。それでも置くのは、在庫が無いと分かった時点で利用者が次にしたいことがここに現れる
- * ためで、入口が後から生えると、その場所を探す動線を作り直すことになります。
+ * **どの商品かは引き継ぎません。** 問い合わせは利用者ごとに 1 件で、商品ごとの筋を持たない
+ * ためです。何について尋ねているかは本文が示します。
  *
- * 通知で返します。押した場所から視線を動かさずに読め、読み終わったら自分で消えます。画面を
- * 遷移させると、一覧の読み進めた位置ごと失われます。
+ * 遷移させるのは、送り先が画面だからです。一覧の読み進めた位置は戻る操作で戻ります。
  */
 export function ProductContactButton() {
-  const { toast } = useToast();
-  const notify = useCallback(() => {
-    toast({ title: NOTICE, duration: 5000 });
-  }, [toast]);
-
   return (
-    <Button onClick={notify} type="button" variant="outline">
-      <MessageCircleIcon aria-hidden="true" className="size-4" />
-      お問い合わせ
+    <Button asChild variant="outline">
+      <Link href={INQUIRY_PATH}>
+        <MessageCircleIcon aria-hidden="true" className="size-4" />
+        お問い合わせ
+      </Link>
     </Button>
   );
 }

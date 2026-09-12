@@ -14,7 +14,7 @@ Accepted
 
 したがって本 ADR は**新カーネルも新しい家も立てない**。既存の家を結線したうえで、なお未確定だった点 —— **長寿命接続の hosting をどこが持つか([0011](0011-no-docker.md) PaaS 制約下の境界判定)** と、**実体化するときに毎回選び直すことになる契約** —— を、設計思想([0010](0010-standards-and-non-lockin.md) 標準準拠・非ロックイン)から確定する。同じ「往復モデルの外側」に見える動的 feature flag / 段階的配信は subject が異なり、[0078](0078-dynamic-feature-flag-seam.md) が持つ。
 
-seam の実体は `src/` に無い(§補足)。本 ADR が持つのは**選択と却下**であり、実体化するときに満たすべき形の通し説明 —— 一連の流れ・順序の扱い・再接続の組み立て・どの層が何を持つか・踏みやすい点 —— は [docs/design/realtime-delivery.md](../design/realtime-delivery.md) が持つ。
+seam は実体を持つ(§補足)。本 ADR が持つのは**選択と却下**であり、満たすべき形の通し説明 —— 一連の流れ・順序の扱い・再接続の組み立て・どの層が何を持つか・踏みやすい点 —— は [docs/design/realtime-delivery.md](../design/realtime-delivery.md) が持つ。
 
 ## 決定
 
@@ -33,7 +33,7 @@ seam の実体は `src/` に無い(§補足)。本 ADR が持つのは**選択�
 
 **責務分界**: 順序・重複・再接続・cursor・接続状態は transport 都合であり `adapters/client` が持つ。ドメインイベント(どの通知で何の表示をどう変えるか)の畳み込みは feature が持つ。`adapters` は境界であって業務状態の所有者ではない([0021](0021-frontend-responsibility.md) / [0024](0024-adapters-server-client-split.md))。
 
-強制: ESLint boundaries(`architecture.ts` の依存表)が、`features` / `components` から購読の**実装**(vendor client を含む)を import する経路を落とす。**ブラウザ組み込みの `EventSource` / `WebSocket` は import を持たない global なので boundaries には掛からない** —— これは `process` と同じ形で `no-restricted-syntax` に**寄せられる**(`adapters/client` の外での構築を落とす)。規則は seam を実体化する PR が置く —— 落とす対象が無いうちは、規則の正例が書けない。
+強制: ESLint boundaries(`architecture.ts` の依存表)が、`features` / `components` から購読の**実装**(vendor client を含む)を import する経路を落とす。**ブラウザ組み込みの `EventSource` / `WebSocket` は import を持たない global なので boundaries には掛からない** —— こちらは `process` と同じ形で `no-restricted-syntax` が落とす(`eslint.config.ts` の `SUBSCRIPTION_CONSTRUCTION_SELECTOR`。`src/adapters/client/stream/` の外での構築を禁じる)。見るのは**組み立てだけ**で、型としての参照は落とさない —— 型は接続を開かない。
 
 ### 3. transport は SSE を既定とし、WebSocket は真に双方向のときだけ
 
@@ -81,7 +81,10 @@ seam の実体は `src/` に無い(§補足)。本 ADR が持つのは**選択�
 - **`Last-Event-ID` は使わず、cursor を毎回明示する。** `Last-Event-ID` を送るのは組み込み再接続だけで、自前で張り直した接続には載らない。再開位置の経路が 2 つあると、どちらが正か決める規則が要る
 - **backoff の対象は 5xx と網の断だけ。** 発券の 401(`unauthenticated`)は session 切れとして打ち切り再ログインへ、stream 側の 403(`permission-denied`)は権限喪失として打ち切る。再試行が 401 / 403 で誤りであることは [0080](0080-error-handling.md) と同じ
 
-強制: 打ち切りの分類は `adapters/client` の購読 adapter の単体テスト。組み込み再接続を使わないことは散文 —— **寄せられる**(`onerror` で `close()` を呼ばない実装を検出する形は書けるが、規則は無い)。
+- **レスポンスが確定した後の指示は in-band の制御 event で届く。** 確定後は status を変えられないため、送り手が「どうしてほしいか」を伝える経路はこれしかない。**client が分岐に使うのは指示された動作だけ**で、理由は記録のための安定値として扱う —— 理由で分岐すると、増えた理由を知らない client が既定の枝へ落ち、どちらへ倒れるかが宣言から読めない。打ち切り・再認証・再同期の指示は**サーバの切断を待たず client 側から閉じてから**遷移する。閉じずに待つと、組み込み再接続が同じ URL へ走る
+- **制御の指示が来ないまま切れることを前提にする。** 指示の配送は保証されず、裸の切断からも回復できなければならない。指示は速く正しく動くための手がかりであって、回復の前提ではない
+
+強制: 打ち切りの分類と制御指示ごとの遷移は `adapters/client/stream` の購読 adapter の単体テスト。組み込み再接続を使わないことは散文 —— **寄せられる**(`onerror` で `close()` を呼ばない実装を検出する形は書けるが、規則は無い)。
 
 ### 9. mock で差し替えない
 
@@ -104,7 +107,8 @@ seam の実体は `src/` に無い(§補足)。本 ADR が持つのは**選択�
 
 ## 補足
 
-- **購読 seam はコードとして置かない。** 設置面(実使用箇所)が存在せず、使われない IF は腐るためである。本 ADR が記すのは**採用時の拡張点の座標**(`adapters/client` の subscription adapter 契約)と契約であり、実体化は最初の該当 feature 実装時に行う(既定 = native `EventSource` / `WebSocket` + 薄い client。§手段の優先順位=標準準拠は不変)。native で足りず外部クライアントを採る場合も本体は seam を保持し、[0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + adapters/カーネル境界の裏で差替可能・vendor 直参照を feature/component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。
+- **購読 seam は実体を持つ。** 設置面(問い合わせのやり取り)が生まれた時点で実体化した。置き場は `src/adapters/client/stream/` で、中身は native `EventSource` + 薄い client である(§手段の優先順位=標準準拠は不変)。**設置面が無いうちは置かない**という 3.4 の原則は変わっておらず、適用結果が変わっただけである。native で足りず外部クライアントを採る場合も本体は seam を保持し、[0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + adapters/カーネル境界の裏で差替可能・vendor 直参照を feature/component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。
+- **発券の中継と購読の家は別である。** 発券は同一オリジンの Route Handler(`src/app/api/<資源>/…/stream-ticket/`)が中継し、購読そのものはブラウザが backend へ直接開く。中継が返すのは ticket の生値ではなく**繋ぎ先の URL** で、ブラウザ側で組み立てと取り回しを増やさないためである(URL を文言・ログ・span へ載せない制約は 決定 4 のまま)。
 - **契約側に属するものは決めない。** 再開 cursor の query パラメータ名 / heartbeat の形式と間隔 / 開発時にイベントを起こす手段 / ticket の TTL は backend の契約が持つ。それらが client 側の設計に何を要求するかは [docs/design/realtime-delivery.md](../design/realtime-delivery.md) が列挙する。
 - 本 ADR は exclusion(非同梱宣言 + named seam を併記する)である。polling / 相対時刻更新等の周期 client 取得の rule は本 ADR の対象外([docs/rules.md](../rules.md))。本 ADR は**双方向/ストリーム**の seam のみを扱う(動的配信フラグは [0078](0078-dynamic-feature-flag-seam.md))。
 

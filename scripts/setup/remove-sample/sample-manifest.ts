@@ -40,14 +40,19 @@ export const SAMPLE_PATHS: readonly string[] = [
   "src/features/account",
   "src/features/site-info",
   "src/features/admin",
+  "src/features/inquiry",
   // 題材の取得を中継する BFF。`src/app/api` ごとではなく題材の口だけを挙げる。
   // 認証の口（`src/app/api/auth`）は同じ場所にあるコア残留である。
   "src/app/api/products",
   "src/app/api/addresses",
   "src/app/api/purchases",
+  // 購読の発券を中継する口。購読の機構（`src/adapters/client/stream`）はコア残留だが、
+  // 何を購読するかは題材が決めるので、この中継は題材側である。
+  "src/app/api/inquiries",
   // 題材に固有のカーネルモジュール
   "src/model/cart",
   "src/model/dashboard",
+  "src/model/inquiry",
   "src/model/product",
   "src/model/purchase",
   "src/model/user",
@@ -140,7 +145,7 @@ export const SAMPLE_RESTORATIONS: readonly SampleRestoration[] = [
  * 英語の語には語境界を付けます。付けないと別語の一部に当たります（`CartesianGrid` が `cart` に
  * 一致し、題材と無関係な部品が消し残しとして報告されます）。
  */
-export const DANGLING_PATTERN = String.raw`商品|カート|在庫|購入|注文|\bproducts\b|\bcart\b`;
+export const DANGLING_PATTERN = String.raw`商品|カート|在庫|購入|注文|問い合わせ|\bproducts\b|\bcart\b|\binquir`;
 
 /** マーカーの名前。`sample:begin` / `sample:end` / `sample:line` / `sample:replace-*` を作る。 */
 export const SAMPLE_MARKER = "sample";

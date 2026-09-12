@@ -173,6 +173,33 @@ span にするのは `fetch` を包む計装のほうで、要求境界のコー
 対象です。自分で呼んでいる場所だけを包むと、client 遷移が trace から抜けて別の trace の根になります。
 そのぶん 1 つの trace に載る span は増えます —— 先読みは見えている画面ぶんだけ出るためです。
 
+## 購読は開いて読む側だけを持つ
+
+長寿命接続を**保持する側**はバックエンドで、この層は**開いて読む側**です
+（[0074](../../docs/adr/0074-runtime-communication-seam.md)）。持つのは次の 3 つだけで、接続の保持も
+event の採番も、誰に何を配るかも持ちません。
+
+| 置き場 | 持つもの |
+| --- | --- |
+| `client/stream/subscription.ts` | 購読 1 本の状態機械。発券・接続・張り直し・打ち切りの分岐 |
+| `client/stream/ordering.ts` | 到達順の乱れを直す窓と、流した位置の記憶 |
+| `client/stream/backoff.ts` | 張り直しまでの待ち時間 |
+| `client/stream/envelope.ts` | 封筒と制御指示の読み取り。**本文の形は持たない** |
+| `client/stream/cursor.ts` | 位置の表し方と比較 |
+| `client/stream/use-stream.ts` | 購読を component の寿命へ束ねる |
+
+**本文の形は資源ごとの module が宣言します**（`client/api/<資源>.ts`）。封筒は feature に依らず
+同じで、中身は event の種別ごとに違うためです。契約に無い種別はその検証で落ち、上へ流れません。
+
+**ブラウザは backend の stream へ直接繋ぎます。** `EventSource` は任意のヘッダを載せられないため、
+資格情報は同一オリジンの中継（`app/api/**/stream-ticket`）が発券した短命の ticket を query に載せた
+**繋ぎ先の URL** として届きます。ticket を値として渡さないのは、ブラウザ側で組み立てと取り回しが
+増えるほど、文言やログへ写す経路が増えるためです。
+
+**`integration` の宣言は掛かりません。** 購読が持つ外部との往復は、時計・乱数・待機・接続として
+引数で受け取る形にしてあり、確かめるのは状態機械の分岐です。HTTP 境界を模す相手がいないので、
+`unit` の形——入力（逆順・重複・窓を越えた遅延・制御指示）を与えて遷移を直接照合する——で検証します。
+
 ## client へ渡してはいけないものを登録する
 
 `server/taint/taint.ts` が [0030](../../docs/adr/0030-environment-variable-management.md) §8 の口です。

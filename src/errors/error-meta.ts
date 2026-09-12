@@ -4,7 +4,7 @@ export type ErrorMetaOptions = Readonly<{
   code?: string;
   /** 利用者へ表示する文言です。空文字の場合はカタログの既定値を使います。 */
   message?: string;
-  /** 問い合わせやログ相関に使う、バックエンドが発行したリクエスト識別子です。 */
+  /** ログ相関と、利用者からの連絡の突き合わせに使う、バックエンドが発行した識別子です。 */
   requestId?: string;
   /** 公開して安全な詳細識別子です。入力値や理由文は渡してはいけません。 */
   details?: readonly string[];
@@ -43,7 +43,7 @@ export class ErrorMeta {
     return this.#message;
   }
 
-  /** 問い合わせやログ相関に使うリクエスト識別子を返します。 */
+  /** ログ相関と、利用者からの連絡の突き合わせに使う識別子を返します。 */
   get requestId(): string {
     return this.#requestId;
   }

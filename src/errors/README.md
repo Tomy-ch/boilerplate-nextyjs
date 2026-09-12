@@ -47,13 +47,13 @@ const error = withErrorDetails(classified, ["accessToken"]);
 const meta = resolveErrorMeta(error);
 ```
 
-`requestId` は問い合わせ番号・ログ相関に使うため、共通エラー画面で表示できます。`details` は wire に出して安全な識別子だけを指定します。画面の表示名は、業務フィールドを知る feature / form 側で変換します。入力値・token・password・理由文は渡しません。
+`requestId` はログ相関と、利用者からの連絡の突き合わせに使うため、共通エラー画面で表示できます。`details` は wire に出して安全な識別子だけを指定します。画面の表示名は、業務フィールドを知る feature / form 側で変換します。入力値・token・password・理由文は渡しません。
 
 ## boilerplate 導入時の変更点
 
 本 boilerplate はバックエンドエラーの追加情報として `requestId` と `details` を採用します。
 
-- `requestId` — 問い合わせ・ログ相関用の識別子。画面には問い合わせ番号として表示可能
+- `requestId` — ログ相関と連絡の突き合わせに使う識別子。画面にはリクエスト ID として表示可能
 - `details` — 不正フィールドなど、公開して安全な識別子の配列。feature / form が表示名へ変換
 
 これは本 boilerplate の既定であり、すべてのバックエンド契約に共通するものではありません。導入先が `traceId` / `correlationId`、`fieldErrors` のオブジェクト配列、または別のエラー形式を採用する場合は、adapter の応答変換と `ErrorMeta` を契約に合わせて変更してください。`errors` カーネルへ transport 固有の処理は追加しません。

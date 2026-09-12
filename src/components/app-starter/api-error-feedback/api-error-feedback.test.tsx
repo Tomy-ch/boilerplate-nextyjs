@@ -61,10 +61,10 @@ describe("ApiErrorAlert", () => {
     expect(screen.getByRole("link", { name: "ログイン" })).toBeVisible();
   });
 
-  it("requestId を問い合わせ用に表示する", () => {
+  it("requestId をリクエスト ID として表示する", () => {
     render(<ApiErrorAlert error={{ kind: "server", message: "失敗", requestId: "req_01HZY" }} />);
 
-    expect(screen.getByText("問い合わせ ID: req_01HZY")).toBeVisible();
+    expect(screen.getByText("リクエスト ID: req_01HZY")).toBeVisible();
   });
 });
 
@@ -101,7 +101,7 @@ describe("ApiErrorDialog", () => {
       </ApiErrorDialog>,
     );
 
-    expect(screen.getByText("問い合わせ ID: req_01J0A")).toBeVisible();
+    expect(screen.getByText("リクエスト ID: req_01J0A")).toBeVisible();
     expect(screen.getByText("再試行可能まで約 30 秒")).toBeVisible();
     expect(screen.getByRole("button", { name: "再試行中…" })).toBeDisabled();
     expect(screen.getByRole("link", { name: "ログイン" })).toBeVisible();

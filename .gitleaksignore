@@ -17,3 +17,17 @@ c21c383992553921e71b26e5ff31829a8359ea38:src/adapters/server/api/cart.test.ts:ge
 # 秘密鍵を検出する関数（looksLikePrivateKey）へ与える入力。本体は 4 文字で鍵ではない。
 # 走査対象は履歴の blob であり、当該パスは baseline-store へ改名済みで tip には無い。
 819590bfe6d1319b4305ffb540eef1eaa92d9816:scripts/setup/vrt-images/plan.test.ts:private-key:229
+
+# 問い合わせの画面を足したときに、テストと story が組み立てに使った固定値。冪等キー・アクセス
+# トークン・購読の ticket のいずれも、バックエンドへ送らず、どの環境の資格情報でもない。
+# **tip には残っていない** —— 値は秘密に見えない綴りへ置き換え済みで、走査対象が履歴の blob で
+# あるためここへ残る。エントリを消す条件は、これらのコミットが履歴から無くなったとき。
+0acdf23238b38b3453040c5191d9af25712ea3c4:src/features/inquiry/thread/ui/composer/composer.stories.tsx:generic-api-key:8
+1d388e5ba680557d6fd126807dd450ebdcce3e1f:src/features/inquiry/thread/ui/composer/composer.test.tsx:generic-api-key:13
+937f1ced462826434f28b188015f00ec81e13268:src/features/admin/inquiries/detail/ui/reply-form/reply-form.test.tsx:generic-api-key:14
+d4a49aca7440cf07404459335916d97a71651eb8:src/adapters/server/api/inquiries-stream.test.ts:generic-api-key:19
+d4a49aca7440cf07404459335916d97a71651eb8:src/adapters/server/api/inquiries.test.ts:generic-api-key:27
+d4a49aca7440cf07404459335916d97a71651eb8:src/features/admin/inquiries/actions.test.ts:generic-api-key:22
+d4a49aca7440cf07404459335916d97a71651eb8:src/features/admin/inquiries/parse-reply-form.test.ts:generic-api-key:11
+d4a49aca7440cf07404459335916d97a71651eb8:src/features/inquiry/actions.test.ts:generic-api-key:22
+d4a49aca7440cf07404459335916d97a71651eb8:src/features/inquiry/parse-message-form.test.ts:generic-api-key:7

@@ -72,7 +72,7 @@ export function ApiErrorAlert({
       <AlertTitle>{getTitle(error.kind)}</AlertTitle>
       <AlertDescription>
         {error.message}
-        {error.requestId === undefined ? null : <p>問い合わせ ID: {error.requestId}</p>}
+        {error.requestId === undefined ? null : <p>リクエスト ID: {error.requestId}</p>}
         {error.retryAfter === undefined ? null : (
           <span>再試行可能まで約 {error.retryAfter} 秒</span>
         )}
@@ -117,7 +117,7 @@ export function ApiErrorDialog({
           <AlertDialogTitle>{getTitle(error.kind)}</AlertDialogTitle>
           <AlertDialogDescription>
             {error.message}
-            {error.requestId === undefined ? null : <span>問い合わせ ID: {error.requestId}</span>}
+            {error.requestId === undefined ? null : <span>リクエスト ID: {error.requestId}</span>}
             {error.retryAfter === undefined ? null : (
               <span>再試行可能まで約 {error.retryAfter} 秒</span>
             )}

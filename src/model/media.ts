@@ -34,7 +34,7 @@ export function mediaUrl(origin: string, imagePath: string | null): string | nul
   // 配信元も URL として持つ。文字列のまま前方一致を見ると、host の大小や既定ポートの有無で
   // 正規化が片側にだけ効き、実在するキーまで外と判定される。
   //
-  // 問い合わせと素片は落とす。キーが解決されるのは経路に対してであり、残したまま前方一致を
+  // クエリとフラグメントは落とす。キーが解決されるのは経路に対してであり、残したまま前方一致を
   // 見ると、設定にそれが混ざっているだけで全部のキーが外と判定される。
   const configured = new URL(`${origin.replace(/\/+$/, "")}/`);
   const base = new URL(`${configured.origin}${configured.pathname}`);

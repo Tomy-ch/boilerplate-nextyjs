@@ -64,6 +64,7 @@ route group は URL に現れないため、括弧を外した名前で置きま
 | `/purchases/[code]` | [`screen`](<route/shop/purchases/[code]/page.screen.md>) / [`function`](<route/shop/purchases/[code]/page.function.md>) <!-- sample:line --> |
 | `/mypage` | [`screen`](route/shop/mypage/page.screen.md) / [`function`](route/shop/mypage/page.function.md) <!-- sample:line --> |
 | `/mypage/edit` | [`screen`](route/shop/mypage/edit/page.screen.md) / [`function`](route/shop/mypage/edit/page.function.md) <!-- sample:line --> |
+| `/mypage/inquiry` | [`screen`](route/shop/mypage/inquiry/page.screen.md) / [`function`](route/shop/mypage/inquiry/page.function.md) <!-- sample:line --> |
 | `(site-info)` 外枠 | [`layout.screen.md`](route/site-info/layout.screen.md) / [`layout.function.md`](route/site-info/layout.function.md) <!-- sample:line --> |
 | `/about` | [`screen`](route/site-info/about/page.screen.md) / [`function`](route/site-info/about/page.function.md) <!-- sample:line --> |
 | `/privacy` | [`screen`](route/site-info/privacy/page.screen.md) / [`function`](route/site-info/privacy/page.function.md) <!-- sample:line --> |
@@ -75,6 +76,8 @@ route group は URL に現れないため、括弧を外した名前で置きま
 | `/admin/products/new` | [`screen`](route/admin/products/new/page.screen.md) / [`function`](route/admin/products/new/page.function.md) <!-- sample:line --> |
 | `/admin/products/[id]/edit` | [`screen`](<route/admin/products/[id]/edit/page.screen.md>) / [`function`](<route/admin/products/[id]/edit/page.function.md>) <!-- sample:line --> |
 | `/admin/products/[id]/stock` | [`screen`](<route/admin/products/[id]/stock/page.screen.md>) / [`function`](<route/admin/products/[id]/stock/page.function.md>) <!-- sample:line --> |
+| `/admin/inquiries` | [`screen`](route/admin/inquiries/page.screen.md) / [`function`](route/admin/inquiries/page.function.md) <!-- sample:line --> |
+| `/admin/inquiries/[inquiryId]` | [`screen`](<route/admin/inquiries/[inquiryId]/page.screen.md>) / [`function`](<route/admin/inquiries/[inquiryId]/page.function.md>) <!-- sample:line --> |
 | `/admin/shipments` | [`screen`](route/admin/shipments/page.screen.md) / [`function`](route/admin/shipments/page.function.md) <!-- sample:line --> |
 | `/admin/users` | [`screen`](route/admin/users/page.screen.md) / [`function`](route/admin/users/page.function.md) <!-- sample:line --> |
 | `auth` 外枠 | [`screen`](route/auth/layout.screen.md) |

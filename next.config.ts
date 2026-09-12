@@ -77,6 +77,7 @@ const nextConfig = async (phase: string): Promise<NextConfig> => {
         {
           source: "/:path*",
           headers: buildSecurityHeaders({
+            apiOrigin: environment.APP_API_BASE_URL,
             mediaOrigin: environment.MEDIA_ORIGIN,
             authIssuer: environment.AUTH_ISSUER,
             servesOverTls: isServedOverTls(environment.AUTH_REDIRECT_URI),

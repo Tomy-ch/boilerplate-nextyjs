@@ -49,7 +49,7 @@ export const Destructive: Story = {
 };
 
 /**
- * 問い合わせ用の識別子を添える場合。利用者が対処できない失敗で、支援を求める先へ渡す値になる。
+ * リクエスト ID を添える場合。利用者が対処できない失敗で、支援を求める先へ渡す値になる。
  */
 export const WithRequestId: Story = {
   args: {

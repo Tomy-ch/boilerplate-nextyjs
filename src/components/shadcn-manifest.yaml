@@ -1456,3 +1456,9 @@ components:
       form 送信を経由しない非同期操作が複数画面に現れ、pending 表示と二重操作抑止の形が feature
       ごとに割れ始めたとき。その場合も置き場は `components` ではなく `capabilities` の hook になる。
     decidedAt: 2026-08-05T00:00:00.000Z
+  connection-status:
+    kind: original
+    layer: app-starter
+    as: status
+    directory: src/components/app-starter/connection-status
+    addedAt: 2026-09-11T18:42:03.548Z

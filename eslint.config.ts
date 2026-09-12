@@ -50,6 +50,37 @@ const iconVendorImports = {
  * 適用範囲の広いブロックの側だけへ足すと、それを外している例外ファイルには黙って効かない。
  * 例外ファイルを持つ締め出しは、この基底へではなく、例外を外した側のブロックで足す。
  */
+/**
+ * `process` の直読を落とす選択子。
+ *
+ * @remarks
+ * `.property` を外すのは `foo.process` のような無関係な名前を拾わないため。ただし
+ * `globalThis.process` はその除外にそのまま当たってしまう同じ global の別の綴りなので、名指しで
+ * 塞ぐ。塞がないと規則が 1 語で迂回できる。
+ */
+const PROCESS_ACCESS_SELECTOR = {
+  selector:
+    'Identifier[name="process"]:not(MemberExpression > .property):not(Property > .key), MemberExpression[object.name="globalThis"][property.name="process"]',
+  message:
+    "`process` を読んでよいのは config カーネルと起動境界だけです（ADR 0030）。値は config を通して受け取ってください。",
+};
+
+/**
+ * 購読の口を落とす選択子。
+ *
+ * @remarks
+ * `EventSource` / `WebSocket` は import を持たない global なので、層の依存表（boundaries）には
+ * 掛からない。整列・重複排除・張り直しを持たない購読が画面ごとに生まれるのを止めるのは、この
+ * 選択子だけである。
+ *
+ * 見るのは組み立てだけで、型としての参照は落とさない —— 型は接続を開かない。
+ */
+const SUBSCRIPTION_CONSTRUCTION_SELECTOR = {
+  selector: "NewExpression[callee.name=/^(EventSource|WebSocket)$/]",
+  message:
+    "購読を開けるのは `adapters/client/stream` だけです（ADR 0074）。画面は購読 adapter を通してください。",
+};
+
 const commonImportRestrictions = [nodeBuiltinImports];
 
 const elements = [
@@ -228,20 +259,22 @@ export default [
     rules: {
       "no-restricted-syntax": [
         "error",
-        {
-          selector:
-            // `.property` を外すのは `foo.process` のような無関係な名前を拾わないため。ただし
-            // `globalThis.process` はその除外にそのまま当たってしまう同じ global の別の綴りなので、
-            // 名指しで塞ぐ。塞がないと規則が 1 語で迂回できる。
-            'Identifier[name="process"]:not(MemberExpression > .property):not(Property > .key), MemberExpression[object.name="globalThis"][property.name="process"]',
-          message:
-            "`process` を読んでよいのは config カーネルと起動境界だけです（ADR 0030）。値は config を通して受け取ってください。",
-        },
+        PROCESS_ACCESS_SELECTOR,
+        SUBSCRIPTION_CONSTRUCTION_SELECTOR,
       ],
       "no-restricted-imports": [
         "error",
         { patterns: [...commonImportRestrictions, iconVendorImports] },
       ],
+    },
+  },
+  {
+    // 購読 adapter だけが接続を組み立てる。**規則ごと外さない** —— 同じ束の `process` の禁止は
+    // ここでも効いたままにする（flat config は規則の値を後勝ちで置き換えるので、並べ直すのではなく
+    // 残す側を書き下す）。
+    files: ["src/adapters/client/stream/**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": ["error", PROCESS_ACCESS_SELECTOR],
     },
   },
   {

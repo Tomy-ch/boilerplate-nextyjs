@@ -405,6 +405,17 @@ Present the plan and **wait for approval. Do not implement before it.** That app
 
 ## Step 4 — Implement, watching five trip-wires
 
+<!-- boilerplate-only:begin -->
+The plan is approved and implementation begins — the boundary between deciding and building, which
+only this skill knows. Stamp it, so this repository's own feedback loop can later say how long each
+phase actually took (ADR [0161](../../../docs/adr/0161-development-window-as-feedback-unit.md)):
+
+```sh
+.agents/closed-loop/marks.sh planApprovedAt 2>/dev/null || true
+.agents/closed-loop/marks.sh implStartedAt 2>/dev/null || true
+```
+<!-- boilerplate-only:end -->
+
 Follow the approved plan. These triggers are deliberately mechanical — relying on you to *notice* that
 a decision was significant is exactly how drift goes unreported.
 
@@ -546,6 +557,14 @@ Then merge:
 ```sh
 gh pr merge <n> --merge
 ```
+
+<!-- boilerplate-only:begin -->
+Stamp it — a merge performed here is observed by nobody else until the loop goes back to `gh` for it:
+
+```sh
+.agents/closed-loop/marks.sh mergedAt 2>/dev/null || true
+```
+<!-- boilerplate-only:end -->
 
 ## Step 9 — Close out
 

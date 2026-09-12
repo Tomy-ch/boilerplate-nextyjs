@@ -398,6 +398,31 @@ reason to skip a confirmation this file requires.
 - **Generated artifacts carry no decorative Unicode.** Code, config and commit messages use plain
   hyphens and straight quotes; prose written for humans keeps ordinary typography.
 
+<!-- boilerplate-only:begin -->
+## Purity Sweep
+
+Every file in this repository is walked once. A `PreToolUse` hook looks the path up before you edit it
+and, when the file is not yet recorded, tells you where the procedure is; **it never blocks**.
+[`.agents/README.md`](.agents/README.md) owns the mechanism, the ledger and the query entry points.
+
+The pass asks three questions of the **whole file**, not of your diff:
+
+1. **Purity** — can a repository created from this template resolve every reference here, and is every
+   statement still true once this repository is a template?
+2. **Distillation** — what design judgment does this file embody?
+3. **Routing** — which document owns that judgment: an ADR, a layer `README.md`, a feature
+   `README.md`, `docs/rules.md`, or the code itself?
+
+- The criteria are in `.agents/purity-sweep/purity-sweep.prompt`. Read it when the hook says so.
+- **Record a file only once you have seen all of it** — an entry claiming a sweep that did not happen
+  is worse than no entry, because nothing will look at that file again.
+- Edits made through `Bash` rather than the file-editing tools do not trigger the hook; the rule
+  applies to them anyway.
+
+This is not a review lane. `Review Phase Protocol` judges **a change**; this judges the **accumulated
+state of a file**, as a side effect of touching one.
+<!-- boilerplate-only:end -->
+
 ## Protected Documentation
 
 These require deliberate human review before modification:

@@ -101,7 +101,7 @@ Accepted
 - [0002-formatter-linter.md](0002-formatter-linter.md) — `lint:ci`(biome full + ESLint boundaries 直列)
 - [0072-api-type-generation.md](0072-api-type-generation.md) — 生成物 drift ゲート(CI 組込み先)
 <!-- boilerplate-only:replace-begin -->
-- [0110-security-operations.md](0110-security-operations.md) — Security グループ(Opengrep / Trivy / gitleaks / Dependabot)
+- [0110-security-operations.md](0110-security-operations.md) — Security グループ(CodeQL / Trivy / gitleaks / Dependabot)
 <!-- boilerplate-only:replace-with -->
 <!-- = - [0110-security-operations.md](0110-security-operations.md) — Security グループ(Opengrep / Trivy / gitleaks / Dependabot) -->
 <!-- boilerplate-only:replace-end -->

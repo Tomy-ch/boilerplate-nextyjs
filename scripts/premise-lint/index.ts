@@ -2,7 +2,8 @@
 
 // 残る文書に、その文書より先に失効する前提が書かれていないかを検査する入口。
 //
-// 規約は [`docs/rules.md`](../../docs/rules.md)「コメントと文書」が持つ。
+// 規約は [`docs/rules.md`](../../docs/rules.md)「コメントと文書」が持ち、そこに**この検査へ移す**
+// と書いてある —— それまでは純化パスの通過が肩代わりしており、あの機構は台帳が埋まると消える。
 import fs from "node:fs";
 import path from "node:path";
 

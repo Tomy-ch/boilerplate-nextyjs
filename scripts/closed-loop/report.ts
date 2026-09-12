@@ -22,11 +22,10 @@ export const NO_TRANSCRIPT_MESSAGE =
   "セッションの記録を 1 行も読めませんでした。置き場が無いか、この機械の記録ではありません";
 
 /**
- * 1 つの窓の報告。
+ * 1 つの窓の報告。所見が無い窓も「所見なし」と書く。
  *
  * @remarks
- * **所見が無い窓も「所見なし」と書きます。**黙って落とすと、見て何も無かった窓と、そもそも
- * 見ていない窓が区別できなくなります。
+ * 黙って落とすと、見て何も無かった窓と、そもそも見ていない窓が区別できなくなります。
  */
 export function reportWindow(window: WindowMarks): readonly string[] {
   const phases = toPhases(window);
@@ -54,10 +53,7 @@ export function reportWindow(window: WindowMarks): readonly string[] {
 }
 
 /**
- * 全窓の報告。
- *
- * @remarks
- * 窓が 0 件のときは「異常なし」ではなく、**0 件であること自体**を出します。
+ * 全窓の報告。0 件のときは「異常なし」ではなく、0 件であること自体を出す。
  */
 export function reportAll(windows: readonly WindowMarks[]): readonly string[] {
   if (windows.length === 0) {

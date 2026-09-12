@@ -13,7 +13,7 @@ CI / CD のワークフロー定義。設計判断の出所は [ADR 0153](../../
 | Deployment | 保護ブランチへの push | ビルド成果物の配信 |
 | Documentation | portal 配信 | 生成ドキュメントの再生成と配信 |
 
-実体があるのは **CI Checks** / **Security** / **Documentation**。Deployment はアプリ本体の配信先がテンプレートから作った側の決定であるため（[0011](../../docs/adr/0011-no-docker.md)）本リポには置かない。
+実体があるのは **CI Checks** / **Security** / **Documentation**。Deployment はアプリ本体の配信先が用途依存であるため（[0011](../../docs/adr/0011-no-docker.md)）本リポには置かない。
 
 ## ワークフロー一覧（CI Checks）
 
@@ -83,7 +83,7 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 | Scripts Check | `scripts-check.yaml` | `scripts-check` | 補助スクリプト（`scripts/**`）の Vitest をカバレッジ 100% で実行し、export と describe の 1:1 対応ゲートをリポジトリ全体へ掛ける |
 | Build | `build.yaml` | `build` | `next build` が通ることを検査する |
 | Bundle Budget | `bundle-budget.yaml` | `bundle-budget` | route ごとに browser が最初に読む client JS を測り、`performance-budget.yaml` の上限と base からの増分に照らす |
-| Dead Code | `dead-code.yaml` | `dead-code` | どの入口からも到達しない file / export / dependency を検出する。`src/components/**` は作った側が使う口として入口に宣言し、未使用を問わない |
+| Dead Code | `dead-code.yaml` | `dead-code` | どの入口からも到達しない file / export / dependency を検出する。`src/components/**` は利用者が使う口として入口に宣言し、未使用を問わない |
 | Smoke | `smoke.yaml` | `smoke` | `next start` を起動し `/` が応答することを検査する |
 | Storybook Build | `storybook-build.yaml` | `storybook-build` | `build-storybook` が通ることを検査する。Vitest は story を直接 import するので addon やビルダーの解決までは見ず、`vrt` の build は「比較の前段」なので失敗が別の意味に読める。配信（`deploy-docs`）とは分けている |
 | Purge Verify | `purge-verify.yaml` | `purge-verify` | 使い捨てチェックアウトで同梱サンプルを破棄し、破棄後のツリーで整形・検査・build・test が通ることと、過不足・残留参照が無いことを検査する |
@@ -104,9 +104,9 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 
 `a11y` だけが `--workers=100%` を渡し、`vrt` は Playwright の既定（論理コア数の半分）に任せる。`a11y` は違反の有無を見るだけだが、VRT は画素を比較するので、並列度が撮影のタイミングに影響しうる。
 
-どちらも**台数は書かない**。standard runner のコア数は public リポジトリで 4、private で 2 であり、作った側が受け取るのは後者。台数を書けばこのリポジトリの事情がそのまま作った側の既定になる。割合指定なら、その意思だけが渡ってコア数は実行環境が決める。
+どちらも**台数は書かない**。standard runner のコア数は public リポジトリで 4、private で 2 であり、受け取るのは後者。台数を書けばこのリポジトリの事情がそのまま既定になる。割合指定なら、その意思だけが渡ってコア数は実行環境が決める。
 
-大きいランナーを使う作った側で調整したい場合の口は `VRT_ARGS` で、`make vrt` / `make a11y` の双方が受け取る（[`.makefiles/testing/vrt.mk`](../../.makefiles/testing/vrt.mk)）。
+大きいランナーで調整したい場合の口は `VRT_ARGS` で、`make vrt` / `make a11y` の双方が受け取る（[`.makefiles/testing/vrt.mk`](../../.makefiles/testing/vrt.mk)）。
 
 ## ワークフロー一覧（Security）
 
@@ -363,7 +363,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 - コメントは HTML マーカー（`<!-- lint-result -->` 等）で同定し、**同一 PR では増やさず更新する**。マーカーは job ごとに一意
 - **緑のときはコメントを作らない。** 呼び出し側が `status:` に判定を渡し、`success` のときだけ新規作成を抑止する。すべての job が毎回コメントを残すと、PR の会話は 20 件を超える「PASS」で埋まり、その中に混ざった 1 件の FAIL が読み手に届かない。**通知の価値は件数ではなく信号対雑音比**で決まる
 - **ただし抑止するのは「作ること」だけで、「更新すること」は抑止しない。** 既にコメントがあれば `success` でも上書きする。FAIL → PASS で直したときに古い FAIL が残るのを避けるためで、これは「緑のときは何もしない」では達成できない
-- **REST を叩くジョブは App の installation token を使う。** `GITHUB_TOKEN` の上限は **1,000 req/h・リポジトリ単位**で、全ワークフローと開いている全 PR で共有する。installation token は 5,000 req/h。`baseline-retake` は VRT / E2E の完了ごとに発火して 1 回あたり約 10 回叩くため最初に枯れる側で、実際に `API rate limit exceeded for installation` で撮り直しが止まった。鋳造時の権限は**そのジョブの呼び出しが要るものだけ**を名指しする（push 用の鋳造は `setup-baselines` の側にあり、別の権限で別に取る）。**鋳造は落ちてよい**（`continue-on-error`）—— installation が許可していない権限を求めると 422 になり、そのままではジョブごと落ちる。避けようとした枠切れより悪い。落ちれば出力が空になり、呼び出しは `GITHUB_TOKEN` へ落ちて撮り直しは進む。App を登録していない作った側も同じ経路で動き続ける —— 枠が小さいだけである。**コメントを投稿するジョブはこの対象外**：長命の秘密鍵が本文を作るジョブへ入ることになり、下の「`secrets.*` を `env:` で渡さない」に反する。`a11y` / `e2e` が既にコメントを別ジョブへ割ってあるのはこの形で、issue を開く側だけがトークンを持つ。`lighthouse` は同じジョブで両方をやるため寄せられていない —— 寄せるならジョブを割る
+- **REST を叩くジョブは App の installation token を使う。** `GITHUB_TOKEN` の上限は **1,000 req/h・リポジトリ単位**で、全ワークフローと開いている全 PR で共有する。installation token は 5,000 req/h。`baseline-retake` は VRT / E2E の完了ごとに発火して 1 回あたり約 10 回叩くため最初に枯れる側で、実際に `API rate limit exceeded for installation` で撮り直しが止まった。鋳造時の権限は**そのジョブの呼び出しが要るものだけ**を名指しする（push 用の鋳造は `setup-baselines` の側にあり、別の権限で別に取る）。**鋳造は落ちてよい**（`continue-on-error`）—— installation が許可していない権限を求めると 422 になり、そのままではジョブごと落ちる。避けようとした枠切れより悪い。落ちれば出力が空になり、呼び出しは `GITHUB_TOKEN` へ落ちて撮り直しは進む。App を登録していなくても同じ経路で動き続ける —— 枠が小さいだけである。**コメントを投稿するジョブはこの対象外**：長命の秘密鍵が本文を作るジョブへ入ることになり、下の「`secrets.*` を `env:` で渡さない」に反する。`a11y` / `e2e` が既にコメントを別ジョブへ割ってあるのはこの形で、issue を開く側だけがトークンを持つ。`lighthouse` は同じジョブで両方をやるため寄せられていない —— 寄せるならジョブを割る
 - **本文ファイルが無いことは、投稿ステップの失敗ではなく job の打ち切りとして扱う。** 打ち切られた job は本文を書くステップまで到達しない。ここで失敗させると、結果が出ていないだけの実行で投稿ステップだけが赤くなる。**何も投稿せずに戻る** —— 打ち切られたことはチェック一覧が示しており、コメントはそれを言い換えるだけである。加えて費用の形が悪い：打ち切りは判定を持たないため `success` の抑止を通り抜けて必ず書き込みを起こし、それが出る状況（job の中断）は push が連続している状況と重なるので、**API の枠が一番苦しいときに消費が跳ねる**
 - **`diff-scope` で降りたときは `status: success` を渡して更新する。**降りた job は緑を報告するので、投稿ごと落とすと前の push が出した FAIL コメントが緑チェックの隣に残り続ける。赤くした変更を base と同一内容へ戻す直し方（履歴を書き換えないこのリポジトリでは、これが正）で必ず踏む経路である。降りたことを述べる本文を書いて upsert すれば、コメントが無い PR には何も付かず、赤が残っている PR ではそれが置き換わる
 - **報告専用のスキャナは、判定を「走ったか」ではなく「見つかったか」で渡す。** `dependency-scan` / `osv-scan` の job は検出で落ちない設計なので、`status` に job の成否をそのまま渡すと、脆弱性を見つけた実行が `success` としてコメントを抑止する。3 値（`success` / `findings` / `failure`）に割り、スキャナの exit code で区別する（`TRIVY_FS_DETECT_EXIT` / `OSV_DETECT_EXIT`）
@@ -384,7 +384,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 > You may use the rules only for your own internal business purposes.
 > This license does not allow you to distribute the rules, or to make them available to others as a service.
 
-エンジンに OSS fork の opengrep を採った判断は「作った側へライセンスの判断を渡さない」ことだった（[0110](../../docs/adr/0110-security-operations.md) 3）。**ルールをレジストリから引いている限り、その判断は成立しない** —— エンジンが LGPL でも、走らせているルールが内部利用限定なら、判断は層をずれて渡されているだけである。
+エンジンに OSS fork の opengrep を採った判断は「利用側へライセンスの判断を渡さない」ことだった（[0110](../../docs/adr/0110-security-operations.md) 3）。**ルールをレジストリから引いている限り、その判断は成立しない** —— エンジンが LGPL でも、走らせているルールが内部利用限定なら、判断は層をずれて渡されているだけである。
 
 | | 取得元 | ライセンス |
 | --- | --- | --- |

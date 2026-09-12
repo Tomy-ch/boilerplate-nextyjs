@@ -212,6 +212,8 @@ Display the unpushed commit list and diff summary. Then ask with the wording req
 
 ## Step 7. Push
 
+After the pull request exists, stamp the boundary this step crossed: `.agents/closed-loop/marks.sh prOpenedAt`. <!-- boilerplate-only:line -->
+
 ```sh
 # First push (no upstream)
 git push -u origin <branch>

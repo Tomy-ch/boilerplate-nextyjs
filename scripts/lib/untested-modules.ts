@@ -51,7 +51,7 @@ export const ENTRYPOINT_PATTERNS = [
  * `mocks/contract-conformance.test.ts` の全ハンドラ検査が担保します。
  *
  * 並ぶのは題材の契約から生成したものだけなので、サンプルを破棄すると空になります。テンプレートから
- * 作った側は自分の契約を生成した先をここへ並べます。
+ * 自分の契約を生成した先をここへ並べます。
  */
 // sample:replace-begin
 export const GENERATED_MODULES = ["src/adapters/gen/**", "mocks/api/**"] as const;

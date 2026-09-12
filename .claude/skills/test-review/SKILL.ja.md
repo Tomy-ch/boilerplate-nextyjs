@@ -43,6 +43,8 @@
 
 ## Step 0. スコープの解決
 
+何より先に、この実行が越える境界を打刻する: `.agents/closed-loop/marks.sh reviewStartedAt`。 <!-- boilerplate-only:line -->
+
 `AskUserQuestion`:
 
 - 質問: 「test-review の対象スコープを指定してください」

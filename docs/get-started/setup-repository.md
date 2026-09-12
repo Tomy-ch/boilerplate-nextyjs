@@ -56,7 +56,7 @@ make setup-repo
 1. **Actions を有効にする** — 作成直後は無効になっていることがある
 2. **Dependency graph を有効にする** — Settings → Security → Dependency graph。Dependabot が依存の木を
    読むのに要る（[0110](../adr/0110-security-operations.md)）。有効化そのものに課金は無い
-   （**このリポジトリでは `dependency-review` job もこれを読む**ため、無効のままだと「このリポジトリでは使えない」で落ちる。設定を入れるまでコード側では直せない） <!-- boilerplate-only:line -->
+   （**このリポジトリでは `dependency-review` job もこれを読む**ため、無効のままだと「このリポジトリでは使えない」で落ちる。設定を入れるまでコード側では直せない）
 3. **必須チェックを確認する** — `make setup-repo` が適用したルールセットの `required_status_checks` が、
    1 度 CI を回した後に実際の context 名と一致しているか見る（[`.github/workflows/README.md`](../../.github/workflows/README.md)）
 

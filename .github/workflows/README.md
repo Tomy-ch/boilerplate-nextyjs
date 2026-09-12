@@ -121,15 +121,15 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 | --- | --- | --- | --- |
 | Secret Scan | `gitleaks.yaml` | `secret-scan` | PR が足したコミットを gitleaks で走査する。週次は履歴全体。検出は fail-closed |
 | SAST | `sast.yaml` | `sast` | 自分が書いたコードを opengrep で見る。**0 件の baseline を保つ**ので検出で落ちる。許容する所見はソースの `// nosemgrep:` に理由付きで置く。**ルールはレジストリから引かず**、`opengrep/opengrep-rules` の commit を固定して読む（下記「SAST のルールをレジストリから引かない」） |
-| CodeQL Scan | `codeql.yaml` | `codeql` | 同じ問いに GitHub 側の解析で答える。high の検出でマージを止めるのは code scanning 側の設定で、この job が落ちるのは解析そのものが走らなかったときだけ <!-- boilerplate-only:line --> |
+| CodeQL Scan | `codeql.yaml` | `codeql` | 同じ問いに GitHub 側の解析で答える。high の検出でマージを止めるのは code scanning 側の設定で、この job が落ちるのは解析そのものが走らなかったときだけ |
 | Dependency Scan | `dependency-scan.yaml` | `dependency-scan` / `dependency-audit` / `dependency-gate` | 依存の脆弱性を Trivy と `pnpm audit` で。同じ対象に 3 つの異なる判定を掛ける（下記） |
 | OSV Scan | `osv-scan.yaml` | `osv-scan` / `osv-gate` | 同じ依存を OSV データベースで読む。報告と昇格ゲートの二段は Trivy と同じ形 |
-| Dependency Review | `dependency-review.yaml` | `dependency-review` | **この PR が増やした依存**だけを見る。他の依存スキャナが見るのは木の現状で、持ち越しと増分を区別できない。**このリポジトリの運用にだけ置く**（呼ぶ API が無料なのは public のときだけで、private では Code Security のライセンスを要求するため） <!-- boilerplate-only:line --> |
+| Dependency Review | `dependency-review.yaml` | `dependency-review` | **この PR が増やした依存**だけを見る。他の依存スキャナが見るのは木の現状で、持ち越しと増分を区別できない。呼ぶ API が無料なのは public のときだけで、private では Code Security のライセンスを要求する。外すかはセットアップの 1 段で選ぶ |
 | Bearer Scan | `bearer.yaml` | `bearer` | 値がプロセスの外へ出る地点を、その値の分類と併せて見る。**落とさない**（下記） |
 | DevSkim Scan | `devskim.yaml` | `devskim` | 言語フロントエンドを持たない regex 検査。**構文木を組む検査が開かないファイル**を読む。**落とさない**（下記） |
 | Tools Cooldown | `tools-cooldown.yaml` | `tools-cooldown` | `mise.toml` の pin が配布経路ごとの冷却期間を満たすかを、版の公開日時を上流から引いて見る。PR では**差分で動いた pin だけ**、週次は全 pin。公開日時を引けない backend は「違反なし」ではなく検査不成立として落ちる。免除は pin の直上のコメント（[`scripts/tools-cooldown/README.md`](../../scripts/tools-cooldown/README.md)） |
 | OpenSSF Scorecard | `scorecard.yaml` | `scorecard` | リポジトリ自身の設定を測る。PR では走らない |
-| SonarQube Cloud Scan | `sonarcloud.yaml` | `preflight` / `sonarcloud` / `report` / `unconfigured-notice` | **外部アカウントを要する唯一の検査。** `SONAR_TOKEN` が無ければ走らず、緑のまま「未設定」を PR へ述べる。剥がしの対象 <!-- boilerplate-only:line --> |
+| SonarQube Cloud Scan | `sonarcloud.yaml` | `preflight` / `sonarcloud` / `report` / `unconfigured-notice` | **外部アカウントを要する唯一の検査。** `SONAR_TOKEN` が無ければ走らず、緑のまま「未設定」を PR へ述べる。外すかはセットアップの 1 段で選ぶ |
 | DAST | `dast.yaml` | `dast` | **ここだけが応答を読む。** アプリを立てて OWASP ZAP で HTTP を撃ち、配信面を見る。既知の欠落は `.github/zap/rules.tsv` の一覧が持ち、**一覧に無い所見は赤にする** |
 
 ### 配信面の既知の欠落は「一覧」として持つ
@@ -149,10 +149,10 @@ merge を待てば答えが出るが、後者はいくら待っても何も出�
 | 配線 | 該当 job | 何が赤にするか |
 | --- | --- | --- |
 | ゲート | `secret-scan` / `sast` / `dependency-audit` / `dependency-gate` / `osv-gate` / `dast` | job の exit code |
-| ゲート | `dependency-review` | job の exit code <!-- boilerplate-only:line --> |
+| ゲート | `dependency-review` | job の exit code |
 | 報告専用 | `dependency-scan` / `osv-scan` | 何も赤にしない（スキャナが走らなかったときだけ落ちる） |
 | code scanning へ送る | `bearer` / `devskim` | **差分が新しく持ち込んだ alert** に対する GitHub 側のチェック |
-| code scanning へ送る | `codeql` / `sonarcloud` | 同上 <!-- boilerplate-only:line --> |
+| code scanning へ送る | `codeql` / `sonarcloud` | 同上 |
 
 **「落とさない」のは所見に対してだけで、機構が壊れたら落ちる。** `bearer` / `devskim` / `scorecard` は報告が出力のすべてなので、走らなかった走査・書かれなかった SARIF・届かなかったアップロードは、いずれも綺麗な結果と同じ緑になってしまう。**検査しない gate は「違反なし」と見分けが付かない**（下記「`paths:` フィルタを使わない」）。
 
@@ -294,7 +294,7 @@ Node / pnpm などの供給は composite action [`../actions/setup-mise`](../act
 | secret-scan | hook + CI | 同じ `make secret-scan` を呼ぶが、**走査範囲の決まり方が違う**。hook の既定は「どのリモートにも無いコミット」で、PR のブランチは既に push 済みなので CI では 0 件になる。CI は `SECRET_SCAN_LOG_OPTS` で base からの範囲を渡す。履歴全体は週次だけ（`make secret-scan-history`） |
 | 依存の脆弱性 | CI のみ | 上記「依存の脆弱性は、3 つの判定が同じ対象を見る」と同じ理由で、hook に載せると `--no-verify` の常用を教える |
 | `sast` | CI のみ | 走査に 1 分前後かかり hook の速度目標に収まらない。手元で確かめるなら `make sast` がそのまま同じ検査を回す |
-| `sonarcloud` | CI のみ | 解析を実行するのは SonarCloud 側で、手元には結果を読む口しか無い。そもそも `SONAR_TOKEN` を開発者の環境へ配らない <!-- boilerplate-only:line --> |
+| `sonarcloud` | CI のみ | 解析を実行するのは SonarCloud 側で、手元には結果を読む口しか無い。そもそも `SONAR_TOKEN` を開発者の環境へ配らない |
 | `dast` | CI のみ | build と起動を伴うので hook には収まらない。手元で確かめるなら `pnpm start` したものへ `DAST_TARGET=http://host.docker.internal:3000 make dast` を当てる |
 
 ## 共通の骨格
@@ -346,7 +346,7 @@ CI Checks のワークフローには `paths:` / `paths-ignore:` を付けない
 
 `dependency-gate` / `osv-gate`（昇格ゲート）は**降りない**。昇格は誰かがツリーの現状を引き受けて判断する場面であり、その PR の差分が lockfile に触れていないことは、ツリーが持っている脆弱性を引き受けない理由にならない。一方 `dependency-audit` は降りる —— base から引き継いだ判定は変更の作者がその場で解消できず、それを赤にするのは [0110](../../docs/adr/0110-security-operations.md) 3.1 が禁じている形そのものである。
 
-`codeql` には掛けていない。code scanning の alert は「後の解析がもう報告しない」ことでしか閉じず、PR ごとに解析を省くと閉じる契機を落としうる。**GitHub 側の仕組みに judgement を預けている検査なので、こちらの都合で走行回数を減らさない。** <!-- boilerplate-only:line -->
+`codeql` には掛けていない。code scanning の alert は「後の解析がもう報告しない」ことでしか閉じず、PR ごとに解析を省くと閉じる契機を落としうる。**GitHub 側の仕組みに judgement を預けている検査なので、こちらの都合で走行回数を減らさない。**
 
 **一覧の実体は各 workflow の `ignore:` ブロックが正**（[`bundle-budget.yaml`](bundle-budget.yaml) / [`vrt.yaml`](vrt.yaml) / [`a11y.yaml`](a11y.yaml)）。この表はどの範囲を外しているかを示すだけで、パスを書き写さない — 書き写せば実体と黙ってずれる側が 1 つ増える。
 
@@ -406,11 +406,7 @@ coverage 以外の各 job は検査結果を即 fail させず、いったん ca
 
 **ルール数が減る。** 固定した commit から取り出す集合は、レジストリの 3 パックより小さい。`p/owasp-top-ten` は複数言語を跨ぐパックで、その大半はこのリポジトリに対象が無いが、**それを差し引いても減っている**。
 
-<!-- boilerplate-only:replace-begin -->
 **ルールが更新されない。** `opengrep/opengrep-rules` はライセンス変更直前（2024-12-13）の fork で、上流の動きは鈍い。新しい規則は入ってこない。**この層の鮮度は CodeQL が補っている**（GitHub 側が更新し続ける）ため、SAST 全体が固まるわけではない。
-<!-- boilerplate-only:replace-with -->
-<!-- = **ルールが更新されない。** `opengrep/opengrep-rules` はライセンス変更直前（2024-12-13）の fork で、上流の動きは鈍い。新しい規則は入ってこない。**固定した commit を上げるまで、この層の鮮度は動かない。** -->
-<!-- boilerplate-only:replace-end -->
 
 この判断を見直すのは、レジストリのルールが OSI 承認ライセンスへ戻ったときか、固定先が更新を止めて**他の層でも補えない面**が実測で見つかったときである。**ルールが少ないこと・上流の更新が鈍いことだけでは条件にならない** —— 減ること自体は承知のうえで選んでおり、条件は「減った分がどこにも無い」と実測で言えることである。
 

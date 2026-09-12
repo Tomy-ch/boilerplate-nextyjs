@@ -26,22 +26,6 @@ export const SELF_DESTRUCT_PATHS: readonly string[] = [
   "scripts/setup/remove-boilerplate-only",
   // 剥がしそのものを検証する CI。理由は冒頭の @remarks が持つ。
   ".github/workflows/strip-verify.yaml",
-  // このリポジトリの運用にだけ置く検査。呼ぶ API が無料なのは public のときだけで、private では
-  // Code Security のライセンスを要求する。既定として配ると、テンプレートから作ったリポジトリは
-  // 「金が掛かる」か「コードでは直せない赤」かのどちらかを受け取る。
-  ".github/workflows/dependency-review.yaml",
-  // 上と同じ理由。設定は読む相手が消えるので一緒に落とす。**`github/codeql-action` の pin は
-  // 残す** —— `upload-sarif` を他の 4 つが使い続ける。
-  ".github/workflows/codeql.yaml",
-  ".github/codeql",
-  // 解析先がこのリポジトリの SonarCloud organization に紐づく検査。projectKey も
-  // organization もここの名前なので、そのまま渡るとテンプレートから作った側では死んだ設定になる。SONAR_TOKEN が
-  // 無い間は赤くならない作りだが、赤くならないことと持っている意味があることは別である。
-  ".github/workflows/sonarcloud.yaml",
-  "sonar-project.properties",
-  // 上の検査だけが呼ぶ判定。検査が消えたあとも残すと、誰も呼ばないモジュールがカバレッジの
-  // 母数にだけ居座る。
-  "scripts/sonarcloud",
   // 上流でしか成り立たない記述を 1 本に集めた文書。残る側にはその指し先しか置かず、指し先は
   // 行ごと消えるので、本体はここで消す以外に消える道が無い。
   "docs/get-started/boilerplate-only-conventions.md",

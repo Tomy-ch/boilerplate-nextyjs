@@ -14,7 +14,8 @@ const DECLARATION = [
   "  strip-verify:",
   "    - fonts.googleapis.com:443",
   "audit:",
-  "  sonarcloud: 宛先を実測できていない",
+  "  strip-verify: 宛先を実測できていない",
+  "  notify: 宛先を実測できていない",
   "",
 ].join("\n");
 
@@ -22,8 +23,6 @@ describe("ORPHANED_WORKFLOWS", () => {
   // ----- 正常系 -----
   it("剥がしが消す workflow の名前を並べる", () => {
     expect(ORPHANED_WORKFLOWS).toContain("strip-verify");
-    expect(ORPHANED_WORKFLOWS).toContain("sonarcloud");
-    expect(ORPHANED_WORKFLOWS).toContain("dependency-review");
   });
 
   it("実際の宣言を剥がすと、孤児が 1 つも残らない", () => {
@@ -48,7 +47,10 @@ describe("dropOrphanedEndpoints", () => {
   });
 
   it("監査のままの宣言も落とす", () => {
-    expect(dropOrphanedEndpoints(DECLARATION, ["sonarcloud"])).not.toContain("sonarcloud");
+    const out = dropOrphanedEndpoints(DECLARATION, ["strip-verify"]);
+
+    expect(out).toContain("audit:\n  notify: 宛先を実測できていない");
+    expect(out).not.toContain("  strip-verify: 宛先を実測できていない");
   });
 
   it("残す塊には手を付けない", () => {
@@ -62,7 +64,7 @@ describe("dropOrphanedEndpoints", () => {
     const declaration = parseDeclaration(dropOrphanedEndpoints(DECLARATION, ORPHANED_WORKFLOWS));
 
     expect(Object.keys(declaration.workflows)).toEqual(["vrt"]);
-    expect(declaration.audit).toEqual({});
+    expect(declaration.audit).toEqual({ notify: "宛先を実測できていない" });
   });
 
   it("塊の途中に空行があっても最後まで落とす", () => {

@@ -17,11 +17,12 @@
  * @remarks
  * 版ではなく action の名前で宣言します。pin を上げるたびに書き換える宣言は、上げた人が
  * 気づかない場所で腐ります。
+ *
+ * **現在は空です。**剥がしが消す workflow は `strip-verify` だけで、それが専有する action が
+ * ありません。空でも宣言を残すのは、workflow を 1 本足して剥がしの対象にした人が、pin の孤児を
+ * ここへ書く場所を探さずに済むためです。
  */
-export const ORPHANED_ACTIONS: readonly string[] = [
-  "actions/dependency-review-action",
-  "SonarSource/sonarqube-scan-action",
-];
+export const ORPHANED_ACTIONS: readonly string[] = [];
 
 /**
  * 孤児になる pin の行を落とす。

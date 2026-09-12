@@ -48,9 +48,9 @@
 | --- | --- | --- |
 | 秘密の混入 | gitleaks | pre-push hook と CI（PR は差分、週次で履歴全体） |
 | 依存の脆弱性 | Trivy fs / `pnpm audit` / OSV | CI。PR は報告、保護ブランチ宛 PR で止める |
-| **この PR が増やした依存** | Dependency Review | CI（PR の差分だけを見る） <!-- boilerplate-only:line --> |
+| **この PR が増やした依存** | Dependency Review | CI（PR の差分だけを見る） |
 | 自分が書いたコード | Opengrep | CI。GitHub の外へ持ち出せる実体なので、どの環境でも層が残る |
-| 自分が書いたコード | CodeQL | CI。GitHub の中でだけ走る層 <!-- boilerplate-only:line --> |
+| 自分が書いたコード | CodeQL | CI。GitHub の中でだけ走る層 |
 | 値が外へ出る地点 | Bearer | CI（所見は code scanning へ） |
 | 言語を問わない文字列の検査 | DevSkim | CI（所見は code scanning へ） |
 | ワークフロー定義 | zizmor / actionlint | pre-commit hook と CI |

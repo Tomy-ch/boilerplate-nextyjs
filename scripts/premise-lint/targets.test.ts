@@ -8,12 +8,13 @@ describe("SCANNED_PATHS", () => {
     expect(SCANNED_PATHS).toContain("docs/adr");
     expect(SCANNED_PATHS).toContain("docs/rules.md");
     expect(SCANNED_PATHS).toContain("src");
+    expect(SCANNED_PATHS).toContain("README.md");
   });
 
   // ----- 異常系 -----
   it("捨てられる側を走査の対象にしない", () => {
     expect(SCANNED_PATHS).not.toContain("docs/get-started");
-    expect(SCANNED_PATHS).not.toContain("README.md");
+    expect(SCANNED_PATHS).not.toContain("docs/plan");
   });
 });
 
@@ -34,9 +35,16 @@ describe("isScanned", () => {
     expect(isScanned("src/features/README.md")).toBe(true);
   });
 
+  it("残る側のソースも対象にする", () => {
+    expect(isScanned("src/model/session.ts")).toBe(true);
+    expect(isScanned(".makefiles/testing/scripts.mk")).toBe(true);
+    expect(isScanned(".github/workflows/test.yaml")).toBe(true);
+  });
+
   // ----- 異常系 -----
-  it("Markdown でないものを対象にしない", () => {
-    expect(isScanned("docs/adr/0011-no-docker.ts")).toBe(false);
+  it("コメントを持てない形式を対象にしない", () => {
+    expect(isScanned("package.json")).toBe(false);
+    expect(isScanned(".github/settings/labels.json")).toBe(false);
   });
 
   it("除外したパスを対象にしない", () => {
@@ -46,7 +54,7 @@ describe("isScanned", () => {
   });
 
   it("走査対象に入っていないパスを対象にしない", () => {
-    expect(isScanned("README.md")).toBe(false);
-    expect(isScanned(".github/README.md")).toBe(false);
+    expect(isScanned("tokens/theme.ts")).toBe(false);
+    expect(isScanned("eslint-rules/no-foo.ts")).toBe(false);
   });
 });

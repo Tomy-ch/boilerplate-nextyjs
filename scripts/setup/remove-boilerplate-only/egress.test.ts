@@ -14,6 +14,7 @@ const DECLARATION = [
   "  strip-verify:",
   "    - fonts.googleapis.com:443",
   "audit:",
+  "  strip-verify: 宛先を実測できていない",
   "  notify: 宛先を実測できていない",
   "",
 ].join("\n");
@@ -46,7 +47,10 @@ describe("dropOrphanedEndpoints", () => {
   });
 
   it("監査のままの宣言も落とす", () => {
-    expect(dropOrphanedEndpoints(DECLARATION, ["strip-verify"])).not.toContain("strip-verify");
+    const out = dropOrphanedEndpoints(DECLARATION, ["strip-verify"]);
+
+    expect(out).toContain("audit:\n  notify: 宛先を実測できていない");
+    expect(out).not.toContain("  strip-verify: 宛先を実測できていない");
   });
 
   it("残す塊には手を付けない", () => {
@@ -60,7 +64,7 @@ describe("dropOrphanedEndpoints", () => {
     const declaration = parseDeclaration(dropOrphanedEndpoints(DECLARATION, ORPHANED_WORKFLOWS));
 
     expect(Object.keys(declaration.workflows)).toEqual(["vrt"]);
-    expect(declaration.audit).toEqual({});
+    expect(declaration.audit).toEqual({ notify: "宛先を実測できていない" });
   });
 
   it("塊の途中に空行があっても最後まで落とす", () => {

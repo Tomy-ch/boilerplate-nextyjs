@@ -23,7 +23,7 @@ DDD への整合を謳わない（[`docs/project/out-of-scope.md`](../project/ou
 
 | 相手 | 境界の所有 | 翻案 | 契約の出所 | 機構を持つ文書 |
 | --- | --- | --- | --- | --- |
-| **バックエンド** | 相手（作った側が定義する） | **あり** —— wire 型は `adapters` を出る前に表示用の型へ写す | 作った側の契約（OpenAPI / GraphQL） | [`data-fetching.md`](data-fetching.md) |
+| **バックエンド** | 相手（自分で定義する） | **あり** —— wire 型は `adapters` を出る前に表示用の型へ写す | 自分の契約（OpenAPI / GraphQL） | [`data-fetching.md`](data-fetching.md) |
 | **IdP** | 相手（OIDC の標準に従う） | **あり** —— 受け取った表明を、こちらの session へ封緘し直す | OpenID Connect | [`auth.md`](auth.md) |
 | **観測基盤** | 標準（OTel） | **なし** —— OTLP のまま送る | OpenTelemetry | [`observability.md`](observability.md) |
 | **メディア配信元** | 相手 | **なし** —— URL を組むだけ | 配信元の URL 規約 | [`security.md`](security.md) / [0045](../adr/0045-fonts-and-images.md) |
@@ -46,8 +46,8 @@ DDD への整合を謳わない（[`docs/project/out-of-scope.md`](../project/ou
   ここが持つと、辺が増えたときに 2 か所が同時に古くなる
 - **設定値。**口の在り処は `src/config/` の目的別モジュールが持ち、正はそこである
   （[0030](../adr/0030-environment-variable-management.md)）
-- **相手が実在するかどうか。**この表は**接触の形**を並べる。テンプレートから作った側で、
-  どの相手を実際に繋ぐかは作った側が決める
+- **相手が実在するかどうか。**この表は**接触の形**を並べる。
+  どの相手を実際に繋ぐかは用途で決まる
 
 ## 辺が増えたとき
 

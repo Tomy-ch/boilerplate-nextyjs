@@ -86,7 +86,7 @@ should see.
 
 ## Step 0 — Confirm Scope
 
-Stamp the boundary this run crosses before anything else: `.agents/closed-loop/marks.sh reviewStartedAt`. <!-- boilerplate-only:line -->
+Stamp the boundary this run crosses before anything else: `.agents/closed-loop/marks.sh reviewStartedAt`.
 
 Call `AskUserQuestion` immediately. Default-detect scope by checking branch vs base. Resolve the base the way `commit` and `submit-pr` already do — `gh pr view --json baseRefName -q .baseRefName`, and `make -s base-branch` when no PR exists. Never `gh repo view --json defaultBranchRef`: `.makefiles/README.md` owns why, and a base resolved that way silently widens the diff by a release generation. If there are unmerged commits, default to "changed files", otherwise "whole working tree / specific paths".
 
@@ -139,8 +139,8 @@ audits the change and nothing else").
 ### Resolve the static verdict once, here
 
 The lenses must not run the gates — each one that did would recompute the same verdict, once per
-lens, and this repository's authority for a gate verdict is CI anyway (`AGENTS.md`, *Do not pre-run
-the gates*). So **the orchestrator resolves it a single time and hands the result to every finder**:
+lens, and this repository's authority for a gate verdict is CI anyway (`docs/playbook.md`,
+*ゲートを先回りして回さない*). So **the orchestrator resolves it a single time and hands the result to every finder**:
 
 ```bash
 gh pr checks --json name,state,link 2>/dev/null   # the branch's PR, if one is open

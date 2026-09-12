@@ -73,7 +73,7 @@
 
 ## 手順 0. 範囲と適用モードを決める
 
-何より先に、この実行が越える境界を打刻する: `.agents/closed-loop/marks.sh reviewStartedAt`。 <!-- boilerplate-only:line -->
+何より先に、この実行が越える境界を打刻する: `.agents/closed-loop/marks.sh reviewStartedAt`。
 
 `AskUserQuestion` 1 回に **2 問**を載せる。引数やフラグで既に確定している問いは出さない。両方が確定しているなら呼び出し自体を行わない。
 
@@ -241,7 +241,7 @@ pipeline そのものより、**決定的で安価である**という性質が�
 
 書き込みが発生したときだけ実行する。報告のみには検証する対象が無い。自動適用こそ最も必要である —— 1 件ずつ人間が編集を読んでいないからである。
 
-**この実行が書いたものだけを整形し、ゲートは hook と CI へ任せる**（`AGENTS.md` の *Do not pre-run the gates* —— 判定は CI が正）:
+**この実行が書いたものだけを整形し、ゲートは hook と CI へ任せる**（`docs/playbook.md`「ゲートを先回りして回さない」 —— 判定は CI が正）:
 
 ```sh
 pnpm exec biome check --fix <触れたソース>

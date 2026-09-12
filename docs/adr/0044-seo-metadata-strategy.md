@@ -1,6 +1,6 @@
 # SEO / メタデータ戦略
 
-表示層 boilerplate における **メタデータの体系(App Router Metadata API)/ クローラ制御(`sitemap.ts` / `robots.ts`)/ canonical・alternates / 構造化データ(JSON-LD)/ アイコン体系 / 公開面の検査** の規約を定める。Next.js 16 組込みの Metadata 機構を追認し、最小の運用ルールを敷く。具体値(タイトル文言・URL 一覧・schema.org type)は用途依存としてテンプレートから作った側に委ねる。
+本リポジトリにおける **メタデータの体系(App Router Metadata API)/ クローラ制御(`sitemap.ts` / `robots.ts`)/ canonical・alternates / 構造化データ(JSON-LD)/ アイコン体系 / 公開面の検査** の規約を定める。Next.js 16 組込みの Metadata 機構を追認し、最小の運用ルールを敷く。具体値(タイトル文言・URL 一覧・schema.org type)は用途依存とし、ここでは定めない。
 
 ## Status
 
@@ -25,12 +25,12 @@ Accepted
   - 静的に決まるものは **静的 `metadata` export**、リクエスト / パラメータ依存のものは **`generateMetadata`** を使い分ける
 - ルート(`src/app/layout.tsx`。配置は [0027](0027-directory-structure.md))に **`metadataBase` と `title.template`(サイト共通のタイトル雛形)の既定土台**を置く。各セグメントはそこからの差分だけを宣言する(重複定義を避ける)
 - **絶対 URL の出所は config(`SITE_PUBLIC_ORIGIN`)の 1 つに限り、要求の `Host` から採らない。** canonical / sitemap / OG 画像の絶対 URL はすべてこの origin に経路を足して組み立てる。配信面(CDN / ロードバランサ)を挟むと要求が名乗る host は公開名と一致しなくなり、`Host` から採ると他人を指す canonical を配ることになる
-- 具体的なタイトル文言・description・OG 画像割当は**用途依存**のため、雛形の枠のみ boilerplate 本体で持ち、値は作った側 / feature 実装で確定する
+- 具体的なタイトル文言・description・OG 画像割当は**用途依存**のため、雛形の枠のみをここで持ち、値は feature 実装で確定する
 
 ### 2. クローラ制御 = `sitemap.ts` / `robots.ts`(Next.js 規約)
 
 - サイトマップは **`app/sitemap.(xml|ts)`**、クローラ制御は **`app/robots.(txt|ts)`** で Next.js 規約に従い生成する(独自の静的ファイル配置・手書き XML 生成を作らない)。URL 数が多い場合は **`generateSitemaps`** で分割する
-- 収録 URL・`Disallow` パス・`changefreq` 等の**具体内容は用途依存**(ルート構成に従属)のため作った側で確定。boilerplate 本体は仕組み(このファイル規約を使う方針)を定める
+- 収録 URL・`Disallow` パス・`changefreq` 等の**具体内容は用途依存**(ルート構成に従属)のため、ここでは確定しない。本リポジトリは仕組み(このファイル規約を使う方針)を定める
 - **索引させてよいかは環境が宣言する**(`SITE_INDEXABLE`。[0030](0030-environment-variable-management.md))。宣言の無い環境は `robots.txt` が巡回を拒み、画面が `noindex` を出す。索引を許す側だけが明示する
 - **サイトマップが一覧を末尾まで辿るなら、辿った結果は要求をまたいで持つ**(`use cache`。所有と寿命の規約は [0071](0071-bff-api-integration.md))。クローラは同じ URL を繰り返し開くため、開くたびに辿ると 1 要求が一覧の件数ぶんのバックエンド呼び出しへ膨らむ
 - **メタデータの route は部分的に劣化させる。** 動的な一覧の取得が失敗しても、取得できた分と、バックエンドに依らない静的な経路は返す。1 系統の失敗で全体を 500 にすると、クローラは静的な画面の存在まで知れなくなる
@@ -41,7 +41,7 @@ Accepted
 
 ### 4. 構造化データ(JSON-LD)
 
-- 構造化データ(schema.org / JSON-LD)は**採用可**とし、必要な feature の実装で埋め込む(Next.js 推奨どおり、コンポーネント内で JSON-LD の `<script type="application/ld+json">` を描画)。**採否・schema.org type は用途依存**のため boilerplate 本体では型を固定せず、枠のみ示す
+- 構造化データ(schema.org / JSON-LD)は**採用可**とし、必要な feature の実装で埋め込む(Next.js 推奨どおり、コンポーネント内で JSON-LD の `<script type="application/ld+json">` を描画)。**採否・schema.org type は用途依存**のため本リポジトリでは型を固定せず、枠のみ示す
 
 ### 5. アイコン体系(`icon.*` / `apple-icon.*` と `public/` favicon の役割分担)
 
@@ -79,7 +79,7 @@ Accepted
 - ❌ `proxy.ts` でメタデータファイルを巻き込むこと(Proxy の対象外とする)
 - ❌ 公開面の検査を存在確認だけで済ませること(§7)
 - ❌ 動的な一覧の取得が失敗したとき、`sitemap` 全体を 500 で返すこと(§2。静的な経路まで一緒に落とさない)
-- ❌ 用途依存の具体値(タイトル文言・収録 URL・JSON-LD type)を boilerplate 本体で固定すること(枠のみ・値は作った側)
+- ❌ 用途依存の具体値(タイトル文言・収録 URL・JSON-LD type)をここで固定すること(枠のみ・値は置かない)
 
 ## 関連 ADR
 

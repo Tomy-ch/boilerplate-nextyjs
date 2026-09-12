@@ -78,9 +78,7 @@ function main(): void {
 
   console.error(`✘ premise-lint: ${premises.length} 件の前提`);
   report(premises);
-  console.error(
-    "\n  前提を書いてよいのは、前提と一緒に捨てられる文書（README.md / docs/get-started/）だけ。",
-  );
+  console.error("\n  前提を書いてよいのは、前提と一緒に捨てられる文書（docs/get-started/）だけ。");
   console.error("  残る文書では、決定として書き直すか、剥がしのマーカーで囲う。");
   console.error(`\n  ${note}`);
   process.exit(1);

@@ -147,7 +147,7 @@ done
 
 ## Step 5. 検証
 
-**ゲートを先回りして回さない**(`AGENTS.md`「Do not pre-run the gates」)。lint の full profile・カバレッジゲート付きの
+**ゲートを先回りして回さない**(`docs/playbook.md`「ゲートを先回りして回さない」)。lint の full profile・カバレッジゲート付きの
 テスト・型検査は pre-commit / pre-push の hook と CI が回し、判定は CI が正。コミット前に `pnpm lint` / `pnpm build` /
 `make test-full` を手で回すのは同じ時間を二度使うことであり、負荷の高いホストでは修正と無関係な失敗を生む。
 

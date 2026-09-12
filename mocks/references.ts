@@ -16,7 +16,7 @@ import type { DrawFromEndpoint, ReferencePatches } from "./stable-responses";
  * 表せません。
  *
  * **契約ごとの知識なので、機構（`stable-responses.ts`）ではなくこちらが持ちます。** テンプレートから
- * 作った側は自分の契約の参照をこの表に書き、この題材ごと破棄します。
+ * 自分の契約の参照をこの表に書き、この題材ごと破棄します。
  */
 
 /** 分類マスタの口。seed は要求の URL から決まるので、画面が叩くのと同じ綴りを使う。 */

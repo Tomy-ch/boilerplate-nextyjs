@@ -60,7 +60,7 @@ function featureInput(featureName: string, placementOptions: readonly string[]):
   const contract = readLayerContract(
     readRepositoryFile(
       FEATURES_README,
-      `層 README ${FEATURES_README} が見つかりません。生成先の層が未整備です。`,
+      `層 README ${FEATURES_README} が見つかりません。生成先の層がまだありません。`,
     ),
   );
 

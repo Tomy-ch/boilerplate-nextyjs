@@ -11,7 +11,7 @@
 | --- | --- |
 | [mise](https://mise.jdx.dev) | ツール / ランタイムの版管理。**シェルで activate しておくこと**（[0003](../adr/0003-version-manager.md)） |
 | GitHub CLI (`gh`) | リポジトリ運用の make ターゲットが使う。`gh auth login` 済みであること |
-| Docker | 手順 6 でのみ使う。基準画像は digest 固定したコンテナの中でしか撮らない（[`vrt/README.md`](../../vrt/README.md)） |
+| Docker | 手順 7 でのみ使う。基準画像は digest 固定したコンテナの中でしか撮らない（[`vrt/README.md`](../../vrt/README.md)） |
 
 ## 1. 手元を用意する
 
@@ -56,7 +56,7 @@ make setup-repo
 1. **Actions を有効にする** — 作成直後は無効になっていることがある
 2. **Dependency graph を有効にする** — Settings → Security → Dependency graph。Dependabot が依存の木を
    読むのに要る（[0110](../adr/0110-security-operations.md)）。有効化そのものに課金は無い
-   （**このリポジトリでは `dependency-review` job もこれを読む**ため、無効のままだと「このリポジトリでは使えない」で落ちる。設定を入れるまでコード側では直せない） <!-- boilerplate-only:line -->
+   （**このリポジトリでは `dependency-review` job もこれを読む**ため、無効のままだと「このリポジトリでは使えない」で落ちる。設定を入れるまでコード側では直せない）
 3. **必須チェックを確認する** — `make setup-repo` が適用したルールセットの `required_status_checks` が、
    1 度 CI を回した後に実際の context 名と一致しているか見る（[`.github/workflows/README.md`](../../.github/workflows/README.md)）
 
@@ -81,7 +81,47 @@ URL の形は Pages の有効化ではなく `<owner>/<repo>` が決めるため
 失効しているので、残すと自分に効かない規則に従うことになる。剥がし終えると道具自身も消える。
 <!-- boilerplate-only:end -->
 
-## 5. 同梱サンプルを破棄する
+## 5. 資格情報を要するスキャナを残すかを決める
+
+3 つのスキャナが、このリポジトリだけでは供給できないものを要求する。
+
+| 検査 | 要るもの |
+| --- | --- |
+| [`codeql.yaml`](../../.github/workflows/codeql.yaml) | GitHub Advanced Security。public は無料、private は課金 |
+| [`sonarcloud.yaml`](../../.github/workflows/sonarcloud.yaml) | SonarQube Cloud のアカウントと `SONAR_TOKEN` |
+| [`dependency-review.yaml`](../../.github/workflows/dependency-review.yaml) | Dependency graph の有効化（手順 3）。呼ぶ API が無料なのは public のときだけ |
+
+**決めるまでの間、壊れるものは無い。** どれもスキャン前に必要なものが揃っているかを確かめ、無ければ
+自分を飛ばして実行を緑のまま残す —— 資格情報の欠如はスキャン結果ではなくセットアップの未了だからで
+ある。fork からの pull request も同じ経路が覆う（fork にはリポジトリの secret が渡らない）。
+
+### 残す場合
+
+リポジトリへ secret を登録し、ベンダー側に対応するプロジェクトを作る。`sonar-project.properties` の
+`sonar.projectKey` / `sonar.organization` は手順 4 の `make setup-replace-repository-reference` が
+書き換えるので、その手順を飛ばしたときだけ最初のスキャンの前に手で直す（さもないと解析結果が
+テンプレート側のプロジェクトへ送られる）。
+
+### 撤去する場合
+
+```bash
+DRY_RUN=1 make setup-remove-licensed-scanners          # 何も書かず、何もコミットしない
+make setup-remove-licensed-scanners                    # 撤去
+```
+
+**製品ごとに別のコミットへ分ける。** 後からライセンスを得たら `git revert` 1 回で戻せる。作業ツリーは
+クリーンである必要がある。
+
+workflow・`.github/actions-pin.toml` の pin・`.github/egress.yaml` の宛先を始末する。`make
+actions-pin-check` と `make egress-check` はどちらも「どの workflow からも参照されないエントリ」で
+落ちるので、片方だけ残って黙って通ることはない。**`github/codeql-action` の pin は残る** —— 他の 4 つ
+の workflow が `upload-sarif` で使い続けており、参照は宣言ではなく実際の数で判定している。
+
+**宣言した文書の行も落とす。** 一致しなければ撤去は投げて止まるので、消したつもりで消えていない状態は
+残らない。拾い切れていない言及は最後に一覧で出すので、そこは自分で掃く。有効/無効を切り替えるスイッチ
+は無い —— 残すとは残すことであり、設定されたまま無効なスキャナは、誰も読まず誰も保守しないものになる。
+
+## 6. 同梱サンプルを破棄する
 
 ```bash
 make setup-remove-sample   # DRY_RUN=1 でプレビュー
@@ -111,9 +151,9 @@ make setup-remove-sample   # DRY_RUN=1 でプレビュー
 必須かは [`env/README.md`](../../env/README.md)。`MEDIA_ORIGIN` は画像を 1 枚も置かない間も必須で、
 `next/image` の許可 host と CSP の `img-src` をこの値だけが決める。
 
-## 6. VRT の基準画像の置き場を用意する
+## 7. VRT の基準画像の置き場を用意する
 
-### 6-1. 置き場を作る
+### 7-1. 置き場を作る
 
 ```bash
 make setup-baseline-store
@@ -143,7 +183,7 @@ git commit -m "Build: 基準画像の置き場を配線する"
 > **置き場にルールセットを掛けないこと。** 撮り直しは GitHub App の push で行うため、
 > 保護を掛けると更新経路そのものを塞ぐ。
 
-### 6-2. GitHub App を作る（人手）
+### 7-2. GitHub App を作る（人手）
 
 自動化できない。REST に作成の口が無く、秘密鍵は生成時に一度しか表示されない。
 
@@ -178,7 +218,7 @@ owner 名などを足す。名前は後から変えられる（slug も追随す
 > いないと、撮り直しはトークンの発行そのものが
 > `422 The permissions requested are not granted to this installation.` で落ちる。
 
-### 6-3. App を登録する
+### 7-3. App を登録する
 
 ```bash
 make setup-baseline-app
@@ -203,7 +243,7 @@ App ID（General ページの App ID）:           ← 6-2 で控えた数字
 gh secret list   # BASELINE_APP_ID / BASELINE_APP_PRIVATE_KEY が並ぶ
 ```
 
-### 6-4. 最初の基準画像を撮る
+### 7-4. 最初の基準画像を撮る
 
 Docker が要る。**2 つある。**置き場は story 単位と画面単位で共有し、区画だけが分かれる
 （[`baseline/README.md`](../../baseline/README.md)）。片方だけ撮ると、もう片方は「基準画像が無い」で
@@ -226,7 +266,7 @@ count=<動いた枚数>
 以降の運用（撮り直し・承認・掃除）は [`vrt/README.md`](../../vrt/README.md) が正。画面単位の側は
 [`e2e/README.md`](../../e2e/README.md) を見る。
 
-## 7. 自分の契約を入れる
+## 8. 自分の契約を入れる
 
 `openapi/sources.yaml` に自分のバックエンドの契約の座標を書き、生成し直す。
 
@@ -235,7 +275,7 @@ make api-fetch
 make api-gen
 ```
 
-## 8. 認証済みの画面を手元で見る
+## 9. 認証済みの画面を手元で見る
 
 手元では `/dev/session` が開いており、**IdP のリダイレクトを通さずに session を発行できる**。
 主体と役割を決めて「この内容で入る」を押すと、指定した画面へ着地する。この口は開発と CI の手元の

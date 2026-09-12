@@ -144,7 +144,7 @@ function report(
   findings: Finding[],
 ): void {
   if (findings.length === 0) {
-    // 投稿 action が無いリポジトリ（テンプレートから作った側が削除した場合など）で「N ジョブ検査した」と出すと、
+    // 投稿 action が無いリポジトリ（削除した場合など）で「N ジョブ検査した」と出すと、
     // 検査が働いた結果に見える。実際は対象が無いだけなので、そう書く。
     console.log(
       defined

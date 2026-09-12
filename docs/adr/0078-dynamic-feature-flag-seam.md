@@ -22,7 +22,7 @@ Accepted
 
 ### flag / A-B / 段階的公開サービス本体は非同梱(exclusion)
 
-SaaS(LaunchDarkly / Statsig / Unleash / GrowthBook 等)を boilerplate に埋め込まない([0031](0031-policy-state-supply.md) と同じ立場)。供給方針(生値読み + no-op 既定 + stateless props 供給)は [0031](0031-policy-state-supply.md) が確定済みであり、本 ADR は**再決定しない**。以下の 2 点のみ確定する。
+SaaS(LaunchDarkly / Statsig / Unleash / GrowthBook 等)を本リポジトリに埋め込まない([0031](0031-policy-state-supply.md) と同じ立場)。供給方針(生値読み + no-op 既定 + stateless props 供給)は [0031](0031-policy-state-supply.md) が確定済みであり、本 ADR は**再決定しない**。以下の 2 点のみ確定する。
 
 ### 1. 評価場所の既定 = server(vendor-independent 根拠付き)
 
@@ -40,7 +40,7 @@ SaaS(LaunchDarkly / Statsig / Unleash / GrowthBook 等)を boilerplate に埋め
 - **再デプロイ単位で固定するフラグ**(deploy 単位の kill switch 等)= **[0030](0030-environment-variable-management.md) の env / 目的別 config で持ってよい**(凍結が正しい振る舞い)。
 - **再デプロイなしで変えたい動的フラグ** = env に載せない。[0030](0030-environment-variable-management.md) の周辺ルール「再デプロイなしで変えたい値は **BFF runtime config へ逃がす**」([0071](0071-bff-api-integration.md) 補足)に従い、**リクエスト時に source adapter(cookie / BFF runtime config / 外部サービス)から読む**([0031](0031-policy-state-supply.md) の source adapter)。
 
-これにより [0030](0030-environment-variable-management.md) と本 ADR は**補完関係**になり矛盾しない(env は静的フラグ、runtime config / source adapter は動的フラグ)。具体ソース(cookie か BFF runtime config か外部か)は用途依存で [0031](0031-policy-state-supply.md) / 実装 / テンプレートから作った側が持つ。
+これにより [0030](0030-environment-variable-management.md) と本 ADR は**補完関係**になり矛盾しない(env は静的フラグ、runtime config / source adapter は動的フラグ)。具体ソース(cookie か BFF runtime config か外部か)は用途依存で [0031](0031-policy-state-supply.md) / 実装側が持つ。
 
 ### 3. RSC キャッシュとの相互作用(保守的立場)
 
@@ -55,9 +55,9 @@ SaaS(LaunchDarkly / Statsig / Unleash / GrowthBook 等)を boilerplate に埋め
 
 ## 補足
 
-- 本 ADR は保守的に **評価場所 = server 既定 + 動的値 = runtime config / source adapter 逃し + cache 焼き込み回避**の指針までを定め、具体機構(source の選択・cache key 設計)は実装 / 作った側へ委ねる。
+- 本 ADR は保守的に **評価場所 = server 既定 + 動的値 = runtime config / source adapter 逃し + cache 焼き込み回避**の指針までを定め、具体機構(source の選択・cache key 設計)は実装側へ委ねる。
 - 本 ADR は [0140](0140-documentation-operations.md) のタクソノミーで **exclusion(+ 拡張点)** 分類に属する。exclusion 本体(非同梱宣言)と named seam(拡張点)を併記する型に従う。
-- **本体は flag 供給 seam をコードとして置かない。** 動的 flag を消費する設置面が本体に存在せず、使われない seam は腐るためである。本 ADR が記すのは採用時の拡張点の座標(source adapter + no-op 既定 + stateless props〈[0031](0031-policy-state-supply.md)〉/ 評価既定 = server / 動的値 = runtime config 逃し)であり、SaaS 採用と seam の実体化は作った側が行う(既定の形は env + adapter で、GrowthBook 等の SaaS は adapter の裏で差し替える)。採用時も本体は source adapter / no-op 既定 / server 評価既定を保持し、flag SaaS を [0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + adapters / カーネル境界の裏で差替可能・vendor 直参照を feature / component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。
+- **本体は flag 供給 seam をコードとして置かない。** 動的 flag を消費する設置面が本体に存在せず、使われない seam は腐るためである。本 ADR が記すのは採用時の拡張点の座標(source adapter + no-op 既定 + stateless props〈[0031](0031-policy-state-supply.md)〉/ 評価既定 = server / 動的値 = runtime config 逃し)であり、SaaS 採用と seam の実体化は採用時に行う(既定の形は env + adapter で、GrowthBook 等の SaaS は adapter の裏で差し替える)。採用時も本体は source adapter / no-op 既定 / server 評価既定を保持し、flag SaaS を [0010](0010-standards-and-non-lockin.md)(vendor-independent 正当化 + adapters / カーネル境界の裏で差替可能・vendor 直参照を feature / component に散らさない)/ [0004](0004-library-management.md)(exact-pin / `pnpm audit`)の枠内で置く。
 
 ## 関連 ADR
 

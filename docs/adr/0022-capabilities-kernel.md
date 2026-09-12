@@ -30,7 +30,7 @@ Accepted
 - scroll 制御
 - Web Worker へのオフロード(seam)
 
-キーボードショートカットは据え置き除外のため hook 例から外す([0053](0053-ui-component-interaction-seam.md) §5)。テンプレートから作った側がグローバルショートカットを採用する場合の置き場が `capabilities` であることだけは変わらない。
+キーボードショートカットは据え置き除外のため hook 例から外す([0053](0053-ui-component-interaction-seam.md) §5)。グローバルショートカットを採用する場合の置き場が `capabilities` であることだけは変わらない。
 
 ### `"use client"` 不変条件(client-only)
 

@@ -1,5 +1,5 @@
 /**
- * 剥がしで参照が消える action pin の除去。
+ * 剥がしで参照が消える action pin。判定は [lib](../lib/actions-pin.ts) が持つ。
  *
  * @remarks
  * `.github/actions-pin.toml` は「どの workflow も参照しないエントリ」で
@@ -17,22 +17,9 @@
  * @remarks
  * 版ではなく action の名前で宣言します。pin を上げるたびに書き換える宣言は、上げた人が
  * 気づかない場所で腐ります。
- */
-export const ORPHANED_ACTIONS: readonly string[] = [
-  "actions/dependency-review-action",
-  "SonarSource/sonarqube-scan-action",
-];
-
-/**
- * 孤児になる pin の行を落とす。
  *
- * @param text - `.github/actions-pin.toml` の中身。
- * @param actions - 落とす action の名前。
- * @returns 書き戻す中身。落とす行が無ければ元のまま。
+ * **現在は空です。**剥がしが消す workflow は `strip-verify` だけで、それが専有する action が
+ * ありません。空でも宣言を残すのは、workflow を 1 本足して剥がしの対象にした人が、pin の孤児を
+ * ここへ書く場所を探さずに済むためです。
  */
-export function dropOrphanedPins(text: string, actions: readonly string[]): string {
-  const lines = text.split("\n");
-  const kept = lines.filter((line) => !actions.some((action) => line.startsWith(`"${action}@`)));
-
-  return kept.length === lines.length ? text : kept.join("\n");
-}
+export const ORPHANED_ACTIONS: readonly string[] = [];

@@ -94,8 +94,8 @@ export type DefaultSessionResolverDeps = {
  * Authorization Code + PKCE と JWE 封緘による既定の Resolver を作る。
  *
  * @remarks
- * boilerplate が同梱する 1 つの実装です。差し替えの単位は `SessionResolver` の面であって、
- * この関数の中身ではありません。
+ * 同梱している 1 つの実装です。差し替えの単位は `SessionResolver` の面であって、この関数の
+ * 中身ではありません。
  *
  * Discovery の結果は生成した Resolver が抱えます。**取得に失敗したときは抱え込みません**
  * （`resolveEndpoints` の `??=` を参照）。

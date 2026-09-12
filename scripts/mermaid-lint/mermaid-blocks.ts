@@ -54,7 +54,7 @@ export function extractMermaidBlocks(content: string): MermaidBlock[] {
  * 依存を解決できなかったことによる失敗か。
  *
  * @remarks
- * mermaid 図の文法問題と環境未整備は、利用者が取る対処が違います。区別できないと
+ * mermaid 図の文法問題と依存の欠落は、利用者が取る対処が違います。区別できないと
  * 「図を直す」方向で時間を使わせます。
  */
 export function isDependencyMissing(error: unknown): boolean {

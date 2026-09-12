@@ -21,7 +21,6 @@ Accepted
 - **置き場は `docs/spec/route/**`** で、`src/app` の階層をそのまま写す。route group は括弧を外し、動的セグメントは角括弧のまま置く。layout の仕様はその配下すべてに効き、画面をまたぐ約束は上位の `layout.*.md` に 1 回だけ書く
 - **画面ごとに機能要件（`*.function.md`）と画面要件（`*.screen.md`）の 2 層へ分ける。** 振り分けの問いは 1 つ —— バックエンドの契約と利用者の目的が同じまま、その記述だけが違う画面があり得るか。あり得るなら画面要件、あり得ないなら機能要件
 - **機能要件を持たない画面には `page.function.md` を置かない。** 空のファイルは「まだ書いていない」と「無い」の区別を消す
-- サンプル画面の仕様書はサンプルの一部であり、サンプルの破棄と一緒に消える。残るのは `docs/spec/README.md` と、コアとして残る画面の分だけである
 
 ## 指すだけで写さない
 
@@ -65,7 +64,7 @@ Accepted
 
 - **母数**: `src/app/**` の `page.tsx` / `page.dev.tsx` / `layout.tsx` の全件。**開発専用の route も約束を持つ** —— build から外れること（[0113](0113-development-access-surface.md)）と、約束を持たないことは別である。[`docs/spec/README.md`](../spec/README.md) の写像（route group の括弧を外す・動的セグメントは角括弧のまま）で仕様書のパスへ変換する
 - **判定**: 各 route に `*.screen.md` が在ること。`*.function.md` は無くてよい（機能要件を持たない画面には置かない）。逆向きに、route を持たない仕様書は失敗として挙げる —— 画面を消して約束だけが残った状態である
-- **倒し方**: route が 0 件に列挙されたら「違反なし」ではなく失敗にする（[0157](0157-inspection-declaration-discipline.md)）。サンプル画面の仕様書はサンプルと一緒に消えるので、剥がした後の木でも成立することを剥がしの検査（`.github/workflows/strip-verify.yaml`）の下で確かめる
+- **倒し方**: route が 0 件に列挙されたら「違反なし」ではなく失敗にする（[0157](0157-inspection-declaration-discipline.md)）
 
 実体は [`scripts/spec-routes.gate.test.ts`](../../scripts/spec-routes.gate.test.ts) で、写像と判定は [`scripts/lib/spec-routes.ts`](../../scripts/lib/spec-routes.ts) が持つ。**写像の実装はここ 1 つだけ**にする —— 2 つあると、片方だけが規約に追随する。
 

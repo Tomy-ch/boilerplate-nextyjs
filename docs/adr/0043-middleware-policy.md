@@ -26,13 +26,13 @@ Accepted
 
 ### 2. Runtime 方針(Node.js 既定・Edge 互換維持)
 
-- **Next.js 16 の Proxy は既定で Node.js runtime** であり、`runtime` セグメント設定は Proxy ファイルでは使用できない(設定するとエラー)。runtime はコードで選択する対象ではなく、実際の実行環境はデプロイ先(adapter)に依存する。boilerplate 本体は特定のデプロイ先・runtime 前提を強制しない([0011](0011-no-docker.md))
+- **Next.js 16 の Proxy は既定で Node.js runtime** であり、`runtime` セグメント設定は Proxy ファイルでは使用できない(設定するとエラー)。runtime はコードで選択する対象ではなく、実際の実行環境はデプロイ先(adapter)に依存する。本リポジトリは特定のデプロイ先・runtime 前提を強制しない([0011](0011-no-docker.md))
 - ただし Proxy は最適化されたデプロイでは **CDN(Edge 相当)に配置され得る**ため、`proxy.ts` のコードは **Edge Runtime 互換(Node API・共有グローバル非依存)を保つ**ことを既定とする。config を参照する場合は **Node API 非依存の config スライス**を使う([0030](0030-environment-variable-management.md))。config は import 境界に従い、Proxy でも [0030](0030-environment-variable-management.md) の client/server 分割・不変 Config を守る
 
-### 3. 認証 hook の置き場 = テンプレートから作った側の判断
+### 3. 認証 hook の置き場 = 用途依存
 
-- **認証・セッションの具体モデルは作った側の判断**([0070](0070-backend-role-separation.md)。Next.js 公式も「Proxy をセッション管理・認可に使うな」と明示)。boilerplate 本体は `proxy.ts` に特定の認証実装を組み込まない
-- 作った側が認証を導入する場合、`proxy.ts` で行ってよいのは **optimistic なリダイレクト**(未ログインらしきリクエストのリダイレクト等)までとし、**確定的な認可はデータ境界(`adapters` / Route Handler / Server Action)** で行う([0070](0070-backend-role-separation.md) / [0071](0071-bff-api-integration.md))
+- **認証・セッションの具体モデルは用途依存**([0070](0070-backend-role-separation.md)。Next.js 公式も「Proxy をセッション管理・認可に使うな」と明示)。本リポジトリは `proxy.ts` に特定の認証実装を組み込まない
+- 認証を導入する場合、`proxy.ts` で行ってよいのは **optimistic なリダイレクト**(未ログインらしきリクエストのリダイレクト等)までとし、**確定的な認可はデータ境界(`adapters` / Route Handler / Server Action)** で行う([0070](0070-backend-role-separation.md) / [0071](0071-bff-api-integration.md))
 
 ### 4. 検証の割り(関数本体 = unit / matcher の選別 = e2e)
 
@@ -53,12 +53,12 @@ Accepted
 - ❌ deprecated な `middleware.ts` を新規に作ること(Next.js 16 は `proxy.ts`)
 - ❌ Proxy で共有モジュール・グローバル状態・Node API に依存すること(CDN 配置され得る。Edge 互換を保つ)
 - ❌ `proxy.ts` に `runtime` セグメント設定を書くこと(Next.js 16 の Proxy では使用不可・エラーになる)
-- ❌ 特定の認証実装・デプロイ先 runtime 前提を boilerplate 本体で強制すること(認証は作った側の判断。runtime はデプロイ先依存)
+- ❌ 特定の認証実装・デプロイ先 runtime 前提を本リポジトリで強制すること(認証は用途依存。runtime はデプロイ先依存)
 - ❌ 停止画面のために proxy が本体の HTML を組み立てること、および根拠の無い `Retry-After` を付けること(§5)
 
 ## 関連 ADR
 
-- [0070-backend-role-separation.md](0070-backend-role-separation.md) — thin proxy / 認証は作った側 / 確定的認可はデータ境界
+- [0070-backend-role-separation.md](0070-backend-role-separation.md) — thin proxy / 認証は用途依存 / 確定的認可はデータ境界
 - [0079-auth-frontend-seam.md](0079-auth-frontend-seam.md) — 前捌きは防御線ではない(確定認可の側が持つ)
 - [0040-routing-rendering-strategy.md](0040-routing-rendering-strategy.md) — App Router / driving adapter 原則
 - [0030-environment-variable-management.md](0030-environment-variable-management.md) — Edge 用 Node API 非依存 config スライス(本 ADR との交点)

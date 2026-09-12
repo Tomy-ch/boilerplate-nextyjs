@@ -1,6 +1,6 @@
 # nextjs-boilerplate
 
-**Next.js / React の表示層ボイラープレート**。バックエンド（DB / 認証 / ビジネスロジック）は別リポジトリ
+**Next.js / React の表示層アプリケーション基盤**。バックエンド（DB / 認証 / ビジネスロジック）は別リポジトリ
 またはサービスが持ち、本リポジトリは表示層だけを受け持って PaaS または静的 CDN へデプロイします
 （Docker は採らない — [ADR 0011](docs/adr/0011-no-docker.md)）。
 
@@ -74,10 +74,7 @@ pnpm dev
 
 <http://localhost:3000> を開くと表示されます。`src/app/page.tsx` を編集すると自動で反映されます。
 
-<!-- boilerplate-only:begin -->
-このボイラープレートから新規プロジェクトを作る場合（**Use this template**）は追加の手順が必要です。**順序に依存する箇所が
-あるので** [`docs/get-started/setup-repository.md`](docs/get-started/setup-repository.md) を上から辿ってください。
-<!-- boilerplate-only:end -->
+**Use this template** で新規プロジェクトを作る場合は [`docs/get-started/setup-repository.md`](docs/get-started/setup-repository.md) を上から辿ってください。 <!-- boilerplate-only:line -->
 
 ## コマンド
 

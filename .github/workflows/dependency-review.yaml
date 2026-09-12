@@ -1,14 +1,15 @@
 name: Dependency Review
 
-# BOILERPLATE-ONLY. This workflow is removed by `make setup-remove-boilerplate-only`,
-# and it is declared in that script's manifest rather than marked in place, because a
-# whole file cannot carry a marker that survives its own deletion.
+# Blocks a pull request before merge when it introduces a dependency with a known
+# vulnerability. The other dependency scanners read the tree as it stands and cannot separate
+# a finding carried over from the base from one this change added; this job answers only
+# "did this pull request add it", which its author can undo.
 #
-# It is kept to this repository's own operation because the API it calls is free only
-# on a public repository; on a private one it needs a GitHub Advanced Security (Code
-# Security) licence. Shipping it as a default would hand every repository made from
-# this template a check that either costs money or stays red for a reason no code
-# change can fix.
+# Two things it needs are settings rather than code: the repository's Dependency graph must be
+# enabled, and the API behind it is free on a public repository while a private one needs a
+# GitHub Advanced Security (Code Security) licence. Both are decisions for whoever owns the
+# repository, so this file ships and `docs/get-started/setup-repository.md` says where to turn
+# the graph on and how to remove the workflow when the licence is not wanted.
 
 # The one question the other dependency scanners do not ask: what did THIS pull
 # request add. Trivy, `pnpm audit` and OSV all read the tree as it stands, so a

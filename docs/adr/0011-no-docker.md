@@ -1,6 +1,6 @@
-# Docker を boilerplate に含めない方針
+# Docker を採用しない方針
 
-本プロジェクトでは **アプリケーション配送としての Docker を採用しない** 方針とする。具体的には、Next.js アプリ本体を動かすための `Dockerfile` および本体配送用 `docker-compose.yml` / `.dockerignore` を同梱しない。あわせて本リポジトリの想定ロールを **「Next.js を表示層 (presentation layer) として用いる boilerplate」** と定義し、デプロイ先は PaaS / 静的 CDN を主想定とする。
+本プロジェクトでは **アプリケーション配送としての Docker を採用しない** 方針とする。具体的には、Next.js アプリ本体を動かすための `Dockerfile` および本体配送用 `docker-compose.yml` / `.dockerignore` を同梱しない。あわせて本リポジトリの想定ロールを **「Next.js を表示層 (presentation layer) として用いるアプリケーション基盤」** と定義し、デプロイ先は PaaS / 静的 CDN を主想定とする。
 
 一方、**dev インフラとしての docker-compose**（モック backend API・OpenAPI viewer・docs viewer・Lighthouse runner など、アプリ起動とは独立した補助ツール群）の利用は本 ADR の禁止対象外とする（後述「Dev インフラとしての docker-compose（例外）」節を参照）。
 
@@ -8,9 +8,9 @@
 
 Accepted
 
-## boilerplate の性格
+## リポジトリの性格
 
-本 boilerplate は **一般的な Next.js アプリケーション基盤** である。これは「Next.js を表示層として用いる」というロール定義の **具体化** であって、ロールの拡張・変更ではない。表示層に必要な汎用ライブラリを boilerplate 側で決めておく、という粒度である（バックエンド業務ロジック / DB・ORM / アプリ本体の self-host Docker はロール外）。
+本リポジトリは **一般的な Next.js アプリケーション基盤** である。これは「Next.js を表示層として用いる」というロール定義の **具体化** であって、ロールの拡張・変更ではない。表示層に必要な汎用ライブラリをここで決めておく、という粒度である（バックエンド業務ロジック / DB・ORM / アプリ本体の self-host Docker はロール外）。
 
 目指すものは 3 つ（哲学 3 本柱）。
 
@@ -34,23 +34,11 @@ out-of-scope は「**ロール境界の外**」（バックエンド業務ロジ
 - [0010](0010-standards-and-non-lockin.md): デファクトに乗りつつ **vendor-independent な正当性材料を本体に明記**、かつ **adapters / カーネル境界の裏に置いて差し替え可能** に保つ（vendor 直参照を feature / component に散らさない）。
 - [0004](0004-library-management.md): コア依存は **exact-pin**、追加時に **`pnpm audit`**。
 
-## 同梱サンプルと破棄境界
-
-本 boilerplate は題材を持つサンプル（画面・feature・ルート・E2E・モック・生成物からなるジャーニー）を同梱し、テンプレートから作った側はセットアップ時にそれを破棄してコアだけを受け取る（`make setup-remove-sample`）。
-
-- **サンプルは、component を実データ・実操作へ配線した実装例として作る。** `components` に持っている部品を、画面要件に直接現れないことだけを理由に使わずに終えない。API から取得した実データ・form の実入力・Server Action の実送信へ繋ぐ
-- **残す / 破棄するの判定基準は「用途特化か汎用か」。** 破棄するのはジャーニーと、題材でしか使わない部品・装飾目的の部品。残すのはドメインを持たないもの — どのプロジェクトでも使う汎用 UI 部品・機構（`cn()` / `ActionState<T>` / 画像ローディングの仕組み等）・デザイントークン・認証・認可の機構
-- **破棄対象をディレクトリ名で隔離しない。** ファイルは自然な場所・自然な名前に置き、破棄対象は manifest の明示パス宣言と、共有ファイル内のマーカーで表現する
-- 破棄機構の設計は 3 点で成り立つ
-  1. **マーカー 3 種** — `sample:begin` / `sample:end`（ブロック・ネスト可）、`sample:line`（行末）、`sample:replace-begin` / `sample:replace-with` / `sample:replace-end`（サンプル在時のコードを除去し、退避してあった代替コードを有効化する）。3 つめは、既定値の切替のように「削除後にだけ有効化したい代替コード」のためにある
-  2. **マーカー除去を削除より先に実行する** — 不整合があれば中断し、「消したがマーカーが残った」半端な状態を作らない
-  3. **`verify` が過不足を両方見て、最後に自身を消す** — 不足（登録パスの残留）と過剰（登録外の削除）・make ターゲットの消失・残留参照を検証し、検証後に自身とスナップショットを削除してコアのみを残す
-
 ## 採用理由
 
 ### 1. 想定ロールが「表示層」に限定される
 
-本リポジトリは Next.js を「フロントエンド表示層」として用いる boilerplate と定義する。
+本リポジトリは Next.js を「フロントエンド表示層」として用いるアプリケーション基盤と定義する。
 
 - UI レンダリング（CSR / SSR / ISR / 静的書き出し）が主責務
 - バックエンド API（DB / 認証 / ビジネスロジック）は **別リポジトリ・別サービス**（例: Go / Rails / NestJS / Supabase 等）
@@ -69,7 +57,7 @@ out-of-scope は「**ロール境界の外**」（バックエンド業務ロジ
 - **Cloudflare は別枠**: Cloudflare 上の Next.js は Workers / OpenNext 方式が前提で、edge runtime 制約が大きく ISR も限定的（一般 PaaS と同列に「ISR も不要」とは扱えない）。静的書き出し + Cloudflare Pages 配信は上表の CDN 行に含まれるが、SSR / ISR は制約ありの別枠として扱う。
 - **Fly.io は対象外**: Fly.io は OCI コンテナ実行基盤であり、`fly launch` は Dockerfile 生成を標準とする。Dockerfile を要するため本方針（アプリ本体の no-Docker）の対象外。
 
-Next.js を self-host する選択肢（ECS / Kubernetes / オンプレ / Fly.io 等のコンテナ実行基盤）でのみ Docker が現実的に必要となるが、これは本 boilerplate の想定外。
+Next.js を self-host する選択肢（ECS / Kubernetes / オンプレ / Fly.io 等のコンテナ実行基盤）でのみ Docker が現実的に必要となるが、これは本リポジトリの想定外。
 
 ### 3. `next/image` の sharp は外部 system 依存を持たない
 
@@ -89,7 +77,7 @@ Docker を維持する場合、以下を毎リリースで同期する必要が�
 
 ## 想定デプロイ先
 
-本 boilerplate を採用したプロジェクトは、原則として以下のいずれかにデプロイする想定。
+本リポジトリは、原則として以下のいずれかにデプロイする想定。
 
 - **Vercel**（Next.js 公式運営、新機能追従が最速）
 - **AWS Amplify Hosting**（AWS エコシステム統合）
@@ -114,27 +102,17 @@ Docker を維持する場合、以下を毎リリースで同期する必要が�
 | 呼び名 | `APP_ENV` | 何をする場所か |
 | --- | --- | --- |
 | **stand-alone** | `local` / `ci` | 何も契約せずに全画面が動く。compose を上げれば IdP も画像配信も API も揃い、外部サービスの account を持たない人がその日のうちに触れる |
-| **cloud** | `dev` / `stg` / `prd` | `env/.env.<環境>` の接続先を、作った側自身の IdP / CDN / API へ向ける。作った側が本番でやることと同じ経路を通す |
+| **cloud** | `dev` / `stg` / `prd` | `env/.env.<環境>` の接続先を、自分の IdP / CDN / API へ向ける。本番でやることと同じ経路を通す |
 
 各環境の位置づけ:
 
 - **`local`** — 手元の開発。開発専用の口が開く
 - **`ci`** — 自動検査。手元と同じ相手(mock)へ向き、人手を介さず全画面が動く必要がある。開発専用の
   口が開く
-- **`dev`** — 作った側が最初に外部サービスへ繋ぐ場所。実 IdP・実 API を相手にし、**開発専用の口は
+- **`dev`** — 最初に外部サービスへ繋ぐ場所。実 IdP・実 API を相手にし、**開発専用の口は
   閉じる**
 - **`stg`** — 本番と同じ構成での確認
 - **`prd`** — 本番
-
-### 同梱サンプルはどちらでも動く
-
-**サンプルは cloud でもフル構成で動かす。** backend と実 IdP を立て、作った側が本番でやることと同じ
-経路を通す。**frontend だけを mock のまま cloud に置く形は採らない** —— それは IdP 無しで session を
-出す口を cloud で開くことであり、`load-environment.ts` が名指しで閉じているものになる。
-
-cloud 側の IdP の具体は**実装の一例であって推奨ではない**。逸脱の吸収は Resolver
-([0079](0079-auth-frontend-seam.md) §6)の内側に閉じ、同梱するのは標準準拠の既定 Resolver のままと
-する([0010](0010-standards-and-non-lockin.md) 非ロックイン)。
 
 ### 開発専用の口の判定
 
@@ -151,7 +129,7 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 
 `APP_MODE` のような「stand-alone / cloud」を値に持つ軸は**置かない**。束ねると
 **IdP は Cognito・ストレージは自前**や **IdP は Keycloak・配信は CloudFront** のような組み合わせが
-表現できなくなる。作った側の現実はその組み合わせであり、束ねることは
+表現できなくなる。現実はその組み合わせであり、束ねることは
 [0010](0010-standards-and-non-lockin.md) の非ロックインを config の形で否定することになる。
 **実装が本当に割れる点だけ、割れた分だけ独立した指定を置く。**
 
@@ -172,7 +150,7 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 
 ### backend / IdP / ストレージの compose は持たず、backend 側のスタックへ接続する
 
-本リポジトリは backend / 観測性 / ストレージ / IdP を立てる compose を **持たない**。開発時に必要なそれらは、backend 側リポジトリの compose スタックへ接続して賄う（同梱サンプルの backend は go-boilerplate で、スタックの起動はそちらで行う）。表示層のリポジトリが backend の起動手順を抱えると、backend 側の変更に追随する二重管理が生じるためである。
+本リポジトリは backend / 観測性 / ストレージ / IdP を立てる compose を **持たない**。開発時に必要なそれらは、backend 側リポジトリの compose スタックへ接続して賄う。表示層のリポジトリが backend の起動手順を抱えると、backend 側の変更に追随する二重管理が生じるためである。
 
 | 接続先 | 既定 | 用途 |
 | --- | --- | --- |
@@ -181,7 +159,7 @@ cloud 側の IdP の具体は**実装の一例であって推奨ではない**�
 | Object Storage | `http://gobp-local.web.garage.localhost:3902` | 画像配信（virtual-host 形式のみ。[0045](0045-fonts-and-images.md)） |
 | 認証 | `http://localhost:4000` | 疑似 OIDC（[0079](0079-auth-frontend-seam.md)） |
 
-フロント単独で作業する場合は **MSW モック**へ切り替える（`APP_API_MODE=mock`）。接続先はすべて env 経由で差し替え可能とし、コードに焼き込まない（[0030](0030-environment-variable-management.md)）。上記は開発時の既定値であり、作った側が別 backend を持つ場合は env の差し替えだけで足りる。
+フロント単独で作業する場合は **MSW モック**へ切り替える（`APP_API_MODE=mock`）。接続先はすべて env 経由で差し替え可能とし、コードに焼き込まない（[0030](0030-environment-variable-management.md)）。上記は開発時の既定値であり、別 backend を持つ場合は env の差し替えだけで足りる。
 
 ### 対象になりうる用途
 
@@ -217,11 +195,11 @@ registry の tag は同じ名前のまま別の中身を指せるため、tag �
 
 ここで挙げた用途も、PaaS / SaaS で代替可能なものが多い（モック API は MSW のような Node 内モック、OpenAPI viewer は Stoplight Studio / Postman、docs viewer は GitHub Pages 等）。**Docker でないと解決できないか** を一度問うこと。
 
-## 自己ホスト・コンテナ化したい場合（作った側向け）
+## 自己ホスト・コンテナ化したい場合
 
-本 boilerplate から作ったプロジェクトが、Docker / self-host が必要なロールに拡張する場合の指針:
+Docker / self-host が必要なロールに拡張する場合の指針:
 
-1. 本 ADR を、作った側のプロジェクトで superseded（廃止）扱いとし、別 ADR で「本プロジェクトでは Docker を採用する」と上書き宣言する
+1. 本 ADR を superseded（廃止）扱いとし、別 ADR で「本プロジェクトでは Docker を採用する」と上書き宣言する
 2. `Dockerfile` を新規作成する
 3. 以下を SSOT と整合させる:
    - `FROM node:<X.Y.Z>-alpine` を `mise.toml` の `node` と一致
@@ -239,7 +217,7 @@ registry の tag は同じ名前のまま別の中身を指せるため、tag �
 
 ## 禁止事項
 
-- ❌ **アプリケーション本体の `Dockerfile`** や **本体配送目的の `docker-compose.yml`**（無印）を主要構成として復活させること（作った側での個別判断は対象外）
+- ❌ **アプリケーション本体の `Dockerfile`** や **本体配送目的の `docker-compose.yml`**（無印）を主要構成として復活させること
 - ❌ README / ドキュメントで「Docker での起動」を **アプリ本体の推奨デプロイ手段** として記載すること
 - ❌ CI / scripts に **アプリ本体の** Docker build を組み込むこと
 - ❌ `stand-alone` / `cloud` を値に持つ config の軸を置くこと(呼び名は 2 群の別名であって独立した軸ではない。組み合わせが表現できなくなる。§環境の定義)
@@ -252,8 +230,8 @@ registry の tag は同じ名前のまま別の中身を指せるため、tag �
 ## 補足
 
 - 本 ADR が否定するのは **「アプリ本体の配送手段としての Docker」**（Type A）。**「補助ツール群を docker-compose で立ち上げる」**（Type B、例: モック API / OpenAPI viewer / docs viewer）は対象外であり、専用ファイル名で導入してよい
-- 「Docker を全否定する」のではなく、「本 boilerplate のロール定義（表示層）には Type A が不要」という整理。作った側で必要になったら導入すればよい
-- 本 ADR は **ロール定義の文書化** でもある。boilerplate を採用する開発者は、本 ADR を読むことで「このリポジトリで何を作る前提か」を理解できる
+- 「Docker を全否定する」のではなく、「本リポジトリのロール定義（表示層）には Type A が不要」という整理。必要になったら導入すればよい
+- 本 ADR は **ロール定義の文書化** でもある。本 ADR を読むことで「このリポジトリで何を作る前提か」を理解できる
 
 ## 関連 ADR
 

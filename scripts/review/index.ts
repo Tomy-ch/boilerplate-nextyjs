@@ -232,7 +232,7 @@ function download(tree: string, kind: Kind, run: string): string | null {
 }
 
 /**
- * 落とした一式を配る。HTML レポートは `file://` では開けないため、配る側が要る。
+ * 落とした一式を配る。HTML レポートは `file://` では開けないため、配信する側が要る。
  *
  * @remarks
  * 待ち受けを {@link LOOPBACK_HOST} へ絞ります。宛先を省くと全インターフェースで待ち受けるためです。

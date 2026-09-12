@@ -60,7 +60,7 @@ const TAG_MANAGER_COLLECT_ORIGINS = [
  */
 const REFERRER_POLICY = "strict-origin-when-cross-origin";
 
-/** 使わない強力な機能を明示して閉じる。使うならテンプレートから作った側が開ける。 */
+/** 使わない強力な機能を明示して閉じる。使うなら開ける。 */
 const PERMISSIONS_POLICY = [
   "accelerometer=()",
   "camera=()",

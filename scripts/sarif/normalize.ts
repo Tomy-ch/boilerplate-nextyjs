@@ -29,7 +29,7 @@ function isSuppressed(result: unknown): boolean {
  * @remarks
  * 抑止済みの所見を落とし、`results` を必ず配列にします（`null` は SARIF 2.1.0 に無い値で、
  * 取り込みがそこで弾かれます）。**読めない形はそのまま返します** —— ここが落とすと、SARIF を
- * 作った側の問題がこの工程の失敗として現れ、原因の在り処がずれます。
+ * 書き出した側の問題がこの工程の失敗として現れ、原因の在り処がずれます。
  *
  * @param sarif - スキャナが書き出した SARIF
  * @returns 抑止済みの所見を除き、`results` を配列に揃えた SARIF

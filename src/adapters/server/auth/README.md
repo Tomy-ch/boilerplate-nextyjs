@@ -52,7 +52,7 @@ test-requirement: unit
 
 ## 差し替え点
 
-`session-resolver.ts` の `SessionResolver` が唯一の差し替え単位です。テンプレートから作った側が自社方式へ移るときは
+`session-resolver.ts` の `SessionResolver` が唯一の差し替え単位です。自社方式へ移るときは
 `resolver.ts` が返す実装を替えます。cookie を扱う側は封緘された文字列しか触らないため、方式が
 変わっても書き直しになりません。
 

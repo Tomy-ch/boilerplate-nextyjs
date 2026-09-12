@@ -19,7 +19,7 @@ You have been invoked via `/commit`. Argument string: `$ARGUMENTS`
 
 This command analyzes uncommitted changes in the working tree and produces one or more git commits with appropriate granularity and the project's prefix convention. All commit messages are in Japanese, per `AGENTS.md`.
 
-This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` do not fire once per commit during multi-commit splits. They are not run afterwards either: `AGENTS.md`'s *Do not pre-run the gates* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
+This command intentionally bypasses lefthook on every commit (`git commit --no-verify`) so that the pre-commit checks defined in `.lefthook.yaml` do not fire once per commit during multi-commit splits. They are not run afterwards either: `docs/playbook.md`'s *ゲートを先回りして回さない* puts the gates on the hooks and CI, and makes **CI the authority**. Step 6 formats only what this run wrote and reports which gates were deferred.
 
 ## Step 0. Auto-format
 
@@ -215,7 +215,7 @@ EOF
 ### Commit message rules
 
 - **Title**: `<Prefix>: <Japanese title>`, aim for 50 characters or fewer.
-- **Body**: Optional. If present, leave one blank line after the title and wrap around 72 characters. Prefer "why" over "what".
+- **Body**: Optional. If present, leave one blank line after the title and wrap around 72 characters. Prefer "why" over "what". **What the body carries is the change's background, never the run's footsteps** — 「前は壊れていた」/「〜を直した」 is already in the diff, and when it points at a state this same pull request produced, that fact never happened as far as the base is concerned. Write the post-change present tense: what stands now, and why it takes that shape (`docs/rules.md`, *作業とエージェント* / [0150](../../../docs/adr/0150-git-workflow.md)).
 - **Language**: Japanese (per the output rule in `AGENTS.md`).
 - **`Co-Authored-By` footer**: Required, in the form `Co-Authored-By: <running model name> <noreply@anthropic.com>` — e.g. `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`. Use the identifier of the model actually producing the commit, as given by the environment. Do not copy a model name hardcoded in this document: it goes stale at every model release, and a wrong name misattributes the commit.
 - **`Refs:` footer (review-applied commits only)**: when a commit applies a finding from `full-apply` / `impl-review` / `code-review`, add a `Refs: tmp/reviews/mod_*.md (<severity>)` line in the footer so the commit links to the finding. Omit it for ordinary commits.
@@ -243,7 +243,7 @@ If `git add` or `git commit` fails for any group (file-path typo, mid-operation 
 ## Step 6. Verification
 
 <!-- boilerplate-only:replace-begin -->
-**Do not run the gates here.** `AGENTS.md`'s *Do not pre-run the gates* is explicit that the hooks and
+**Do not run the gates here.** `docs/playbook.md`'s *ゲートを先回りして回さない* is explicit that the hooks and
 CI run them and that **CI is the authority**; running `pnpm lint:ci` / `pnpm lint:md` over the whole
 repository after committing does not make the verdict more true, and on a loaded host the duplicate
 run is itself a source of failures that have nothing to do with the change. `make load-status` prints

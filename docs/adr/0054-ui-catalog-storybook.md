@@ -12,14 +12,14 @@ Accepted
 
 ## 決定
 
-- **UI カタログとして Storybook を boilerplate 本体に採用する**。コンポーネントの視覚的仕様・使い方・状態バリエーションのカタログ置き場を Storybook が担う
+- **UI カタログとして Storybook を本リポジトリに採用する**。コンポーネントの視覚的仕様・使い方・状態バリエーションのカタログ置き場を Storybook が担う
 - **カタログ性は Storybook を第一の担保とし、`components` カーネルの層別 README([0021](0021-frontend-responsibility.md) per-package README / [0141](0141-portal-operations.md) portal)の叙述と併走**させる。README は責務・設計意図の叙述、Storybook は視覚的仕様・インタラクションのカタログという役割分担で、ドキュメント portal(0141)と UI カタログを混同しない
 - **Storybook を部品の唯一の在庫リストとする。** 全画面を並べて見る場が他に無いため、一貫性は「story を持たない部品が存在しない」ことで担保する。story を持たない component を新規に作らない(feature 配下も同じ)
 - **`.stories.*` ファイルは対象コンポーネントに co-locate する**([0027](0027-directory-structure.md) の co-location に story ファイルを乗せる)
 - Storybook 本体および addon の依存追加は **exact pin + `pnpm audit`**([0004](0004-library-management.md))。CI 上のビルド組込は [0153](0153-ci-configuration.md) が持つ(本 ADR では二重に決めない)
 - **story は「そのコンポーネントが何のためにあるか」を、開いた canvas から読める形で示す。** default 1 本で終えず、その部品自身が表現する状態(variant / disabled / invalid / 開いた状態など)へ canvas 上で到達できるようにする。**story 名が約束した状態に canvas が届いていないものはカタログとして成立していない**
   - **hover でだけ現れる面は、play で focus まで進めて開く。** 撮影は pointer を持たないため、hover に任せた面は開いた姿が基準画像に一度も写らない。focus で同じ面が開くことは a11y 契約([0053](0053-ui-component-interaction-seam.md))が要求しており、play はその経路を使う
-- **画面固有の業務語彙・API・route を story に埋め込まない。** カタログは boilerplate を利用する人が参照する中立な面であり、業務文脈を伴う実例は feature 側の story か画面実装に置く
+- **画面固有の業務語彙・API・route を story に埋め込まない。** カタログは本リポジトリを利用する人が参照する中立な面であり、業務文脈を伴う実例は feature 側の story か画面実装に置く
 - **story の表示分類は実装の配置や依存方向を決めない。** 分類は閲覧のためのものであり、`title` の具体的な体系は `components/README.md` が所有する(本 ADR では固定しない)。ただし**画面まるごとの story は feature を跨いで合成してよい**([0021](0021-frontend-responsibility.md) の昇格ルールの例外)。これは分類が依存を決めるのではなく、確認専用の面に限って製品コードと別の権限を与える判断である
 - **画面まるごとの story は route と同じ器で包む。** その route の layout が置く shell と、page が置く見出し・階層・読み幅を story 側で再現する。再現しないと余白と重心が実物とずれ、画面がどう収まるかを取得なしで確かめるというこの story の目的を果たせない
   - **再現に含めるのは layout / page が置くものだけではない。** 本文の取り分を変える常設領域(脇に開く panel など)の開閉と、`Suspense` の殻の側に居て view の外にある節も含める。前者は開閉で本文の幅が変わり、後者は枠に置かないと段の見え方が実物とずれる

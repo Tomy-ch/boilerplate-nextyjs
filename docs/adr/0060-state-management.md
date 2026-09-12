@@ -8,14 +8,14 @@ Accepted
 
 ## 背景
 
-本 boilerplate は「一般的な Next.js アプリケーション基盤」であり、フォーム入力と横断する client 状態はどちらもその常用要件である。したがって form state = **react-hook-form + zod**(`@hookform/resolvers`)/ 横断 client 状態 = **Zustand**(家は [0023](0023-stores-kernel.md) `stores` カーネル)を本体に採用する。既定は local-first(単一 feature は local / server state は RSC fetch)であり、ライブラリはその既定の外側で要るものにだけ使う。Server state(TanStack Query 等)/ Client state(Zustand / Jotai / Context)/ Form state / URL state の使い分けを本 ADR が確定する。
+本リポジトリは「一般的な Next.js アプリケーション基盤」であり、フォーム入力と横断する client 状態はどちらもその常用要件である。したがって form state = **react-hook-form + zod**(`@hookform/resolvers`)/ 横断 client 状態 = **Zustand**(家は [0023](0023-stores-kernel.md) `stores` カーネル)を本体に採用する。既定は local-first(単一 feature は local / server state は RSC fetch)であり、ライブラリはその既定の外側で要るものにだけ使う。Server state(TanStack Query 等)/ Client state(Zustand / Jotai / Context)/ Form state / URL state の使い分けを本 ADR が確定する。
 
 ## 決定
 
 ### Server state = Server Component fetch 既定
 
 - サーバ由来のデータは **Server Component 内の `fetch` を既定**とする([0040](0040-routing-rendering-strategy.md))
-- クライアントでのデータ取得・キャッシュ(TanStack Query 等)は boilerplate 本体で前提にしない。必要な取得の編成は feature の server 関数 / `adapters` 経由([0021](0021-frontend-responsibility.md) / [0071](0071-bff-api-integration.md))で行う。キャッシュ設計は **[0071](0071-bff-api-integration.md)(BFF / API 統合)** の責務。無限スクロールの増分取得だけは、この既定に対する限定例外として [0073](0073-pagination-fetch-boundary.md) が所有する
+- クライアントでのデータ取得・キャッシュ(TanStack Query 等)は本リポジトリで前提にしない。必要な取得の編成は feature の server 関数 / `adapters` 経由([0021](0021-frontend-responsibility.md) / [0071](0071-bff-api-integration.md))で行う。キャッシュ設計は **[0071](0071-bff-api-integration.md)(BFF / API 統合)** の責務。無限スクロールの増分取得だけは、この既定に対する限定例外として [0073](0073-pagination-fetch-boundary.md) が所有する
 
 ### Client state = local-first
 

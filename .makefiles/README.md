@@ -63,7 +63,7 @@ make help
 
 #### `make setup-repo`
 
-テンプレートから作った直後のリポジトリ初期化処理をまとめて実行します。以下を順に行います。破壊的な手順を含むため、
+複製直後のリポジトリ初期化処理をまとめて実行します。以下を順に行います。破壊的な手順を含むため、
 作った直後以外で実行する前に必ず内容を確認してください。
 
 - `gh` ログイン
@@ -81,9 +81,10 @@ make help
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
 | `make setup-replace-license-copyright COPYRIGHT_HOLDER=<name> [COPYRIGHT_YEAR=<year>]` | LICENSE の著作権表記を更新します。 | 年は省略可能です。 |
-| `make setup-replace-repository-reference REPOSITORY=<owner>/<repo> [PORTAL_URL=<url>]` | GitHub リポジトリ参照とプロジェクト名（`package.json` の `name`）、およびドキュメントポータルへのリンクを、テンプレートから作った側へ置換します。 | `PORTAL_URL` を省くと GitHub Pages の配信先（`https://<owner>.github.io/<repo>/`）を組み立てます。custom domain のときだけ渡します。`docs/` / `.claude/` / `scripts/setup/` / ビルド成果物（`.next` / `dist` / `build` / `tmp`）/ ロックファイルは対象外です。 |
+| `make setup-replace-repository-reference REPOSITORY=<owner>/<repo> [PORTAL_URL=<url>]` | GitHub リポジトリ参照とプロジェクト名（`package.json` の `name`）、およびドキュメントポータルへのリンクを、新しいリポジトリのものへ置換します。 | `PORTAL_URL` を省くと GitHub Pages の配信先（`https://<owner>.github.io/<repo>/`）を組み立てます。custom domain のときだけ渡します。`docs/` / `.claude/` / `scripts/setup/` / ビルド成果物（`.next` / `dist` / `build` / `tmp`）/ ロックファイルは対象外です。 |
+| `make setup-remove-licensed-scanners` | 資格情報を要するスキャナ（CodeQL / SonarQube Cloud / Dependency Review）を 3 つまとめて撤去します。 | **製品ごとに別のコミットへ分けます。**1 つだけ残したくなったらそのコミットを `git revert` します。作業ツリーはクリーンである必要があります。workflow・pin・宛先の宣言に加えて、**宣言した文書の行も落とします** —— 宣言が現物と一致することはテストが見るので、行が動いていれば撤去は投げて止まります。撤去は選択なので、決めるまでの間に壊れるものはありません（どれも未設定なら自分を飛ばして緑を返します）。 |
 | `make setup-remove-boilerplate-only` | boilerplate 限定の記述（配る側にしか意味を持たない規則・注記）を剥がします。 | 剥がし終えると道具自身も消えます。飛ばす選択肢はありません（[0152](../docs/adr/0152-agents-md-policy.md)）。 <!-- boilerplate-only:line --> |
-| `make setup-remove-sample` | 同梱のサンプル画面一式を破棄し、検証まで実行します。 | **破壊的です。** 残す側にサンプル固有の語彙を持ち込まないための出口で、削除後にゲートが通ることまで確かめます。 |
+| `make setup-remove-sample` | 題材を持つ画面一式を破棄し、検証まで実行します。 | **破壊的です。** 残す側にサンプル固有の語彙を持ち込まないための出口で、削除後にゲートが通ることまで確かめます。 |
 
 いずれの補助コマンドも `DRY_RUN=1` を付けると、書き換えずに変更予定だけを出力します。有効値は `1` のみで、
 それ以外（`DRY_RUN=0` や変数の省略）はすべて実際に書き換えます。
@@ -411,18 +412,15 @@ tag を省いた `uses: docker://alpine`（＝`:latest`）は検査の網に入�
 | `make ai-<target>` | 任意のターゲットを静かに実行し、出力を `tmp/ai-logs/<target>.txt` へ退避します。 | エージェントが呼ぶときの既定の形です。成功時の出力は 0 バイト、終了コードは素通し、失敗時だけ読むべきログを 1 行で指します。**ハーネスは失敗時に抜粋しか渡さずファイルのパスを渡さない**ため、最も読みたい失敗のときに限って切り落とされた行が取り戻せないという穴を、出力元で塞ぎます。**出力そのものが答えのターゲット**（`help` / `load-status` / `lighthouse-report`）と**常駐するターゲット**（`e2e-report` / `vrt-report`）には使いません —— 前者は読めなくなるだけ、後者は完了しないので呼び出し側が待ち続けます。 |
 | `make clean-ai-logs` | 退避したログ（`tmp/ai-logs`）を削除します。 | ログは成功時も残します。生成系のように「落ちてはいないが何が起きたか確かめたい」ときに実行し直さず読めるほうが安いためです。 |
 
-<!-- boilerplate-only:begin -->
 ### 開発の窓の観測関連
 
 | コマンド | 説明 | 補足 |
 | --- | --- | --- |
-| `make closed-loop-report` | 打刻された開発の窓の、段の区間と所見を報告します。 | 読むだけで何も刻みません。打刻は `.agents/closed-loop/marks.sh` が hook とスキルから行い、置き場は追跡外の `tmp/closed-loop/` です。**決定的な集計だけでモデルを使いません**（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 2）。窓が 0 件のときは「所見なし」ではなく 0 件であること自体を出します（[ADR 0157](../docs/adr/0157-inspection-declaration-discipline.md)）。**この機構はテンプレートから作った側へは配りません。** |
+| `make closed-loop-report` | 打刻された開発の窓の、段の区間と所見を報告します。 | 読むだけで何も刻みません。打刻は `.agents/closed-loop/marks.sh` が hook とスキルから行い、置き場は追跡外の `tmp/closed-loop/` です。**決定的な集計だけでモデルを使いません**（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 2）。窓が 0 件のときは「所見なし」ではなく 0 件であること自体を出します（[ADR 0157](../docs/adr/0157-inspection-declaration-discipline.md)）。 |
 | `make closed-loop-send` | 閉じたまま届いていない窓の所見を issue へ送出します。 | **先に `make labels-create-default` を 1 回通しておくこと。**`feedback` 系のラベルが実在しないと `gh issue create` が拒否し、窓は未送出のまま溜まり続けます。送出先は `.git` の remote から導き、設定項目で宛先を持ちません（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 4）。送るのは**閉じていて、段の境界を 1 つ以上越えた窓**だけです。通常はセッション開始時に `.agents/closed-loop/send.sh` が自動で回すので、これを叩くのは取りこぼしを手で流すときです。 |
 | `make closed-loop-send-dry` | 送出する内容だけを出します。 | 何も送らず、送出済みの索引にも触れません。送出が走っている最中でも見られます。 |
 | `make closed-loop-weekly` | 期間ぶんの所見を束ね、点の高い順に並べ、着地した改善を測り直します。 | **週次で `.github/workflows/closed-loop-weekly.yaml` が同じものを回す**ので、手で叩くのは期間を指定して見直すときです。既定は直近 7 日。`ARGS="--from 2026-09-01 --to 2026-09-07"` で期間を指定します。**読むだけで、issue を作りも閉じもしません。**再計測は省略できない段です（[ADR 0160](../docs/adr/0160-agent-environment-loop.md) 決定 1）—— 省略した時点でループは蓄積器へ退化します。 |
 | `make closed-loop-weekly-consolidate` | 同じことをした上で、未クローズの所見を関心へ畳みます。 | **issue を作り、畳んだ大元を閉じます。**畳み込みだけを明示指定にしてあるのは、副作用が既定に入ると意図しない畳み込みに誰も気づかないためです。 |
-
-<!-- boilerplate-only:end -->
 
 ## 関連する ADR
 
@@ -436,7 +434,7 @@ ADR は番号も節も決定の所在も動くが、README は区画と一緒に
 - [0151](../docs/adr/0151-git-hooks.md) — ローカルゲートの帯と、hook から呼ぶ側の責務
 - [0153](../docs/adr/0153-ci-configuration.md) — workflow 定義の検査 / secret の渡し方 / 公開の面へ出す文字集合
 - [0155](../docs/adr/0155-claude-skills-development.md) — TypeScript で書けない例外としてのシェル
-- [0160](../docs/adr/0160-agent-environment-loop.md) — 決定的な集計だけを持ち、モデルを使わない <!-- boilerplate-only:line -->
+- [0160](../docs/adr/0160-agent-environment-loop.md) — 決定的な集計だけを持ち、モデルを使わない
 
 ## 補足
 

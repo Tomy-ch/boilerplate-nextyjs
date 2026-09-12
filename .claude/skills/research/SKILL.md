@@ -52,7 +52,7 @@ that favour it are the ones that get written down. Fixing the axes first is the 
 has to happen before any option is named.
 
 **Cost picks the answer.** 「30 ファイル触ることになる」 quietly becomes the deciding argument.
-`AGENTS.md`'s *What to Recommend* is explicit that here quality and consistency outrank the cost of
+[0010](../../../docs/adr/0010-standards-and-non-lockin.md) is explicit that quality and consistency outrank the cost of
 reaching them, and that the cost is stated so a human can decline the scope while keeping the
 direction. Stating the cost is required; letting it choose is not.
 
@@ -164,7 +164,7 @@ this repository's judgments actually live, and each one is owned by a document t
 | --- | --- |
 | デファクトへの適合 / 非ロックイン | [0010](../../../docs/adr/0010-standards-and-non-lockin.md) |
 | 採用アーキテクチャからの導出 | [0020](../../../docs/adr/0020-adopted-architecture.md) / [0021](../../../docs/adr/0021-frontend-responsibility.md) / `architecture.ts` |
-| テンプレート適用時の状態としての純粋さ | `AGENTS.md` § What to Recommend |
+| いまの状態としての純粋さ | [0010](../../../docs/adr/0010-standards-and-non-lockin.md) §3 |
 | 依存を足す問いなら、選定基準 | [0004](../../../docs/adr/0004-library-management.md) と [`.github/pull_request_template.md`](../../../.github/pull_request_template.md) の依存欄 |
 
 A question about a CI gate does not turn on the architecture axis; a question about adding a library

@@ -64,7 +64,7 @@
 
 ## Step 0 — スコープ確認
 
-何より先に、この実行が越える境界を打刻する: `.agents/closed-loop/marks.sh reviewStartedAt`。 <!-- boilerplate-only:line -->
+何より先に、この実行が越える境界を打刻する: `.agents/closed-loop/marks.sh reviewStartedAt`。
 
 即座に `AskUserQuestion`。ベースは `commit` / `submit-pr` と同じ解き方で —— `gh pr view --json baseRefName -q .baseRefName`、PR が無ければ `make -s base-branch`。`gh repo view --json defaultBranchRef` は使わない（理由は `.makefiles/README.md` が持つ。この綴りで解くと diff がリリース 1 世代ぶん黙って広がる）。未マージのコミットがあれば「変更ファイルのみ」を既定、なければ作業ツリー / 指定パスを既定。
 
@@ -110,7 +110,7 @@
 ### 静的な判定は、ここで 1 回だけ解く
 
 lens にゲートを回させない。**回せば同じ判定が lens の数だけ再計算され**、そもそもこのリポジトリで
-ゲートの判定を持つのは CI である（`AGENTS.md` の *Do not pre-run the gates*）。だから
+ゲートの判定を持つのは CI である（`docs/playbook.md`「ゲートを先回りして回さない」）。だから
 **統合側が 1 回だけ解いて、全 finder へ渡す**。
 
 ```bash

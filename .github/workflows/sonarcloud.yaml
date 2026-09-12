@@ -12,10 +12,11 @@ name: SonarQube Cloud Scan
 #      scan result. `unconfigured-notice` then says so on the pull request, for the reason
 #      that job gives. This also covers a pull request from a fork, which never receives
 #      repository secrets.
-#   2. REMOVABLE. This file and `sonar-project.properties` are listed in
-#      `scripts/setup/remove-boilerplate-only/manifest.ts` (`SELF_DESTRUCT_PATHS`), so the
-#      strip takes them both. The project key here names THIS repository's SonarCloud
-#      organization; carried into a generated repository unchanged it is dead configuration.
+#   2. REMOVABLE, AS A CHOICE. Whether to keep this layer belongs to whoever owns the
+#      repository, so `make setup-remove-licensed-scanners` takes this file and
+#      `sonar-project.properties` together, in a commit of their own. The project key names a
+#      SonarCloud organization, so it is rewritten by `make setup-replace-repository-reference`
+#      rather than deleted.
 #
 # It is NOT a required status check, and must not become one: a check whose verdict depends
 # on a third-party account cannot be a condition for merging in a repository that ships to

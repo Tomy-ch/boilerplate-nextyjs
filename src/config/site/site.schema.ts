@@ -21,7 +21,7 @@ const publicOrigin = z.string().refine(isOrigin, {
  * @remarks
  * **パスを持たせません。** canonical / sitemap / OG 画像の絶対 URL はこの値へ経路を足して組み立てる
  * ため、パス付きの base を許すと `new URL("/about", base)` がそのパスを捨て、書いた人の意図と
- * 組み立ての結果が食い違います。サブパス配備が要るなら、テンプレートから作った側で組み立ての側ごと
+ * 組み立ての結果が食い違います。サブパス配備が要るなら、組み立ての側ごと
  * 見直します。
  */
 export function publicOriginValidator() {

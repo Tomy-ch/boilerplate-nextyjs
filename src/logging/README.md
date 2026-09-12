@@ -33,7 +33,7 @@ test-requirement: unit
 
 - 出力先や有効化の設定は注入で受け取る
 - ログに secret や個人情報を残さない
-- テンプレートから作った側でフィールド名や redaction 対象を増やす場合は、Pino の `redact` と sink へ渡す前の正規化を同時に更新する
+- フィールド名や redaction 対象を増やす場合は、Pino の `redact` と sink へ渡す前の正規化を同時に更新する
 
 ## 関連する ADR
 

@@ -14,7 +14,7 @@ export type CommentActions = {
   // upsert-pr-comment へ（他のローカル action を経由してでも）到達するローカル action の
   // ディレクトリ。リポジトリルートからの相対パス。
   dirs: Set<string>;
-  // upsert-pr-comment の定義ファイルが実在するか。テンプレートから作った側が action ごと削除した場合と、
+  // upsert-pr-comment の定義ファイルが実在するか。action ごと削除した場合と、
   // 参照の同定が壊れて 0 件になった場合を区別するために要る。
   defined: boolean;
 };

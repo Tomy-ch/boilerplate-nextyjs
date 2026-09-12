@@ -6,7 +6,6 @@ import { RULES_REPO } from "./manifest.js";
 
 /** ロックファイルが持つ固定 1 件。 */
 export type RulesPin = {
-  /** 固定した commit。 */
   commit: string;
   /** 取り出したルール集合の digest。 */
   digest: string;

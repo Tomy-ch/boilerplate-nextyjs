@@ -5,11 +5,9 @@
 // 同じでも落ちる日が来る。中身そのものから取れば、包み方が変わっても答えは変わらない。
 import { createHash } from "node:crypto";
 
-/** digest の入力 1 件。 */
 export type RuleFile = {
   /** {@link RULES_DIR} からの相対パス。 */
   path: string;
-  /** ファイルの中身。 */
   content: string;
 };
 

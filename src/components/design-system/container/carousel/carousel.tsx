@@ -44,7 +44,6 @@ import { cn } from "@/components/cn";
  * </Carousel>
  * ```
  *
- * @param props - native `section` 属性。
  * @see Storybook `Container/Carousel`
  */
 export function Carousel({ className, ...props }: ComponentProps<"section">) {
@@ -77,7 +76,6 @@ export function Carousel({ className, ...props }: ComponentProps<"section">) {
  * 遷移でのスクロールを行わない。`CarouselPrevious` / `CarouselNext` / `CarouselLink` は hydration
  * 前を fragment 遷移で凌ぐため、指定すると hydration が済むまで何も動かなくなる。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Container/Carousel`
  */
 export function CarouselContent({ className, ...props }: ComponentProps<"div">) {
@@ -116,7 +114,6 @@ export function CarouselContent({ className, ...props }: ComponentProps<"div">) 
  * （`MediaImage` など）より前に置くと、その中身に覆われて押せない。段階値を持ち出さずに済むよう、
  * 重なりは順序で決める。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Container/Carousel`
  */
 export function CarouselItem({ className, ...props }: ComponentProps<"div">) {
@@ -142,7 +139,6 @@ export function CarouselItem({ className, ...props }: ComponentProps<"div">) {
  * 何の送りかを示す `aria-label` を必ず与える。同じ画面に carousel が複数あるとき、link の集合が
  * どちらのものか名前でしか区別できない。
  *
- * @param props - native `ul` 属性。
  * @see Storybook `Container/Carousel`
  */
 export function CarouselNav({ className, ...props }: ComponentProps<"ul">) {

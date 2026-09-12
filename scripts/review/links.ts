@@ -5,7 +5,6 @@
 // 探し当てる作業を残さないため。
 import type { ScreenDeclaration } from "../../e2e/lib/screens.js";
 
-/** 開ける先 1 件。 */
 export type ReviewLink = {
   /** CI の報告に出ていた名前。 */
   readonly name: string;

@@ -8,7 +8,6 @@ export type ClaudeEnv = Readonly<Record<string, string | undefined>>;
 export type ExternalSkill = {
   /** PATH から起動するコマンド名。 */
   command: string;
-  /** 導入に渡す引数。 */
   args: readonly string[];
   /** 導入後に実体が居るべき場所。ここを見て着地を検証する。 */
   landing: string;

@@ -34,7 +34,6 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
  * 通常は `CardTitle` と `CardDescription` を子に置く。`CardAction` があるときは、見出し群と
  * 操作を二列に配置する。下端に区切りを付ける場合は `className="border-b border-border"` を渡す。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Display/Card`
  */
 export function CardHeader({ className, ...props }: ComponentProps<"div">) {
@@ -57,7 +56,6 @@ export function CardHeader({ className, ...props }: ComponentProps<"div">) {
  * この部品は見た目のみを持つ `div` である。文書構造上の見出しが必要な場合は、呼び出し元で
  * heading 要素を子として渡すか、feature 側で適切な heading を配置する。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Display/Card`
  */
 export function CardTitle({ className, ...props }: ComponentProps<"div">) {
@@ -73,7 +71,6 @@ export function CardTitle({ className, ...props }: ComponentProps<"div">) {
 /**
  * 見出しを補足する短い説明文の領域。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Display/Card`
  */
 export function CardDescription({ className, ...props }: ComponentProps<"div">) {
@@ -93,7 +90,6 @@ export function CardDescription({ className, ...props }: ComponentProps<"div">) 
  * `Button` や補助 link など、カード全体ではなく明確に独立した操作だけを置く。主操作を
  * カード全体への click に暗黙化しない。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Display/Card`
  */
 export function CardAction({ className, ...props }: ComponentProps<"div">) {
@@ -109,7 +105,6 @@ export function CardAction({ className, ...props }: ComponentProps<"div">) {
 /**
  * カードの主内容を配置する領域。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Display/Card`
  */
 export function CardContent({ className, ...props }: ComponentProps<"div">) {
@@ -123,7 +118,6 @@ export function CardContent({ className, ...props }: ComponentProps<"div">) {
  * 上端に区切りを付ける場合は `className="border-t border-border"` を渡す。操作が複数あるときの
  * 並びや間隔は feature 側で指定し、ここへ業務固有の variant を増やさない。
  *
- * @param props - native `div` 属性。
  * @see Storybook `Display/Card`
  */
 export function CardFooter({ className, ...props }: ComponentProps<"div">) {

@@ -180,7 +180,6 @@ function lacksAnchor(target: string, fragment: string | undefined): boolean {
   return markdown !== null && !hasAnchor(markdown, fragment);
 }
 
-/** 指し先が在るか。 */
 function exists(target: string): boolean {
   try {
     statSync(target);

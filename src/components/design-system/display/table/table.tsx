@@ -90,7 +90,6 @@ function Table({ className, containerClassName, label, ...props }: TableProps) {
  * 子の `TableRow` には `TableCell` ではなく `TableHead` を並べる。列見出しであることは
  * `scope="col"` が伝えるため、呼び出し元が指定する。
  *
- * @param props - native `thead` 属性。
  * @see Storybook `Display/Table`
  */
 function TableHeader({ className, ...props }: ComponentProps<"thead">) {
@@ -100,7 +99,6 @@ function TableHeader({ className, ...props }: ComponentProps<"thead">) {
 /**
  * 表の主なデータ行を置く領域。
  *
- * @param props - native `tbody` 属性。
  * @see Storybook `Display/Table`
  */
 function TableBody({ className, ...props }: ComponentProps<"tbody">) {
@@ -120,7 +118,6 @@ function TableBody({ className, ...props }: ComponentProps<"tbody">) {
  * データ行とは別の面として表示される。行の意味を示す見出し cell には `TableHead` を
  * `scope="row"` 付きで置く。
  *
- * @param props - native `tfoot` 属性。
  * @see Storybook `Display/Table`
  */
 function TableFooter({ className, ...props }: ComponentProps<"tfoot">) {
@@ -140,7 +137,6 @@ function TableFooter({ className, ...props }: ComponentProps<"tfoot">) {
  * 選択状態を面で示す場合は `data-state="selected"` を渡す。選択そのものの管理は持たないため、
  * どの行が選択中かは呼び出し元が決める。
  *
- * @param props - native `tr` 属性。
  * @see Storybook `Display/Table`
  */
 function TableRow({ className, ...props }: ComponentProps<"tr">) {
@@ -165,7 +161,6 @@ function TableRow({ className, ...props }: ComponentProps<"tr">) {
  *
  * 内容は既定で折り返さない。長い見出しを折り返す場合は `className="whitespace-normal"` を渡す。
  *
- * @param props - native `th` 属性。
  * @see Storybook `Display/Table`
  */
 function TableHead({ className, ...props }: ComponentProps<"th">) {
@@ -187,7 +182,6 @@ function TableHead({ className, ...props }: ComponentProps<"th">) {
  * @remarks
  * 折り返しは {@link TableHead} と同じで、既定では折り返さない。複数の列や行にまたがる場合は native の `colSpan` / `rowSpan` を渡す。
  *
- * @param props - native `td` 属性。
  * @see Storybook `Display/Table`
  */
 function TableCell({ className, ...props }: ComponentProps<"td">) {
@@ -210,7 +204,6 @@ function TableCell({ className, ...props }: ComponentProps<"td">) {
  * 表のアクセシブルな名前になる。視覚的には表の下に表示されるが、支援技術では表の先頭として
  * 読まれるため、`Table` の最初の子として置く。
  *
- * @param props - native `caption` 属性。
  * @see Storybook `Display/Table`
  */
 function TableCaption({ className, ...props }: ComponentProps<"caption">) {

@@ -12,7 +12,6 @@
 
 import { toPathPattern } from "./path-pattern";
 
-/** 規則 1 件。 */
 export type PathRule = {
   /** `**` と `*` だけの glob。 */
   readonly globs: readonly string[];

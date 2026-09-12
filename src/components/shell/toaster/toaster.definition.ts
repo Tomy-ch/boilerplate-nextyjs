@@ -112,10 +112,10 @@ export type ToastAction = {
 };
 
 /**
- * 通知一件。
+ * 表示に必要な値だけを運ぶ通知 1 件。
  *
  * @remarks
- * queue の生成・並び替え・削除は Provider か feature が所有する。この型は表示に必要な値だけを運ぶ。
+ * queue の生成・並び替え・削除は Provider か feature が所有する。
  */
 export type Toast = {
   /** 通知を識別する値。React の key にも使われるため queue 内で一意にする。 */

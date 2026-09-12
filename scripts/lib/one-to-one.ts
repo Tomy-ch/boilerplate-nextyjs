@@ -16,7 +16,6 @@ import ts from "typescript";
  * 「読み取り済みの構文木と、呼べるかどうかの判定」から違反を導くところだけを持つ。
  */
 
-/** export 1 件。 */
 export type ExportedSymbol = {
   readonly name: string;
   readonly line: number;

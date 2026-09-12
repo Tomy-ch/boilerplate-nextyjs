@@ -6,15 +6,12 @@ export type ShiftedElement = {
   readonly score: number;
   /** 掴むための selector。 */
   readonly selector: string;
-  /** 確定後の上端。 */
   readonly finalTop: number;
-  /** 要素の高さ。 */
   readonly height: number;
 };
 
 /** 起動時に実行した script 1 つ。 */
 type BootupScript = {
-  /** 取得元。 */
   readonly url: string;
   /** 解析・実行の合計 (ms)。 */
   readonly total: number;

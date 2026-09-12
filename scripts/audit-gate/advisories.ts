@@ -44,15 +44,12 @@ const NO_PATCH = "<0.0.0";
 /** blocking へ上げる severity。 */
 const BLOCKING_SEVERITIES: ReadonlySet<string> = new Set(["high", "critical"]);
 
-/** 検出 1 件。 */
 export type Advisory = {
   /** 脆弱性を持つパッケージ名。 */
   readonly module: string;
   /** advisory DB の severity。 */
   readonly severity: string;
-  /** 見出し。 */
   readonly title: string;
-  /** advisory のページ。 */
   readonly url: string;
   /** 修正版の範囲。修正版が無ければ `undefined`。 */
   readonly patched: string | undefined;

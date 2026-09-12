@@ -372,8 +372,9 @@ worktree は `make review-clean` が片付ける —— Ctrl-C では消えず�
 
 技術用語（HTTP ステータスコード名 / API 名 / コマンド名等）は英語のままでよい。
 
-**例外 —— `.github/workflows/**` のコメントは英語で書く**
-（[0140](docs/adr/0140-documentation-operations.md)）。`.github/` のそれ以外は日本語ルールに従う。
+**例外 —— ワークフロー定義（`.github/workflows/**` と `.github/actions/**`）のコメントは
+英語で書く**（[0140](docs/adr/0140-documentation-operations.md)）。`.github/` のそれ以外 ——
+issue / PR テンプレート、`settings/`、道具自身の設定 —— は日本語ルールに従う。
 
 ### 応答の規律
 

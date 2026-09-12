@@ -24,14 +24,12 @@ function pathCell(paths: readonly string[]): string {
   return rest > 0 ? `${shown.join(", ")} ほか ${rest} 件` : shown.join(", ");
 }
 
-/** 1 件を行にする。 */
 function row(advisory: Advisory): string {
   const fix = advisory.patched === undefined ? "**修正版なし**" : `\`${advisory.patched}\``;
 
   return `| ${advisory.severity} | \`${advisory.module}\` | ${fix} | [${advisory.title}](${advisory.url}) | ${pathCell(advisory.paths)} |`;
 }
 
-/** 表の骨。 */
 function table(advisories: readonly Advisory[]): string[] {
   return [
     "| severity | パッケージ | 修正版 | 内容 | 経路 |",

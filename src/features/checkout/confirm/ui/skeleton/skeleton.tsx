@@ -24,10 +24,10 @@ const FIELDS = Array.from({ length: PLACEHOLDER_FIELDS }, (_, index) => index);
 const ROWS = Array.from({ length: PLACEHOLDER_ROWS }, (_, index) => index);
 
 /**
- * 購入確認の待機表示。
+ * 出来上がりと同じ器（`Card` / `KeyValueList`）で組む、購入確認の待機表示。
  *
  * @remarks
- * 出来上がりと同じ器（`Card` / `KeyValueList`）で組みます。高さを数値で予約しません
+ * 高さを数値で予約しません
  * （`docs/rules.md`「UI 部品と操作」の「高さを数値で予約して揃えない」）。
  *
  * 集計は広い画面にしか出しません。狭い画面では固定の操作帯が持つため、器の側と同じく

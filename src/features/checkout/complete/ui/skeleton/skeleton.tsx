@@ -7,12 +7,11 @@ const PLACEHOLDER_LINES = 3;
 const LINES = Array.from({ length: PLACEHOLDER_LINES }, (_, index) => index);
 
 /**
- * 購入完了の待機表示。
+ * 実物と同じ段組み・同じ高さで枠を出す、購入完了の待機表示。
  *
  * @remarks
- * **実物と同じ段組み・同じ高さで枠を出します。** 礼の一文、控えと集計の 2 枚、購入した商品の
- * 一覧、次の導線まで場所取りします。枠が実物より短いと、穴が埋まった瞬間に下の要素が押し
- * 下げられます（`docs/rules.md`「状態表示と待機」の「loading は形状が近い skeleton を優先する」と
+ * 礼の一文、控えと集計の 2 枚、購入した商品の一覧、次の導線まで場所取りします。枠が実物より
+ * 短いと、穴が埋まった瞬間に下の要素が押し下げられます（`docs/rules.md`「状態表示と待機」の「loading は形状が近い skeleton を優先する」と
  * 「UI 部品と操作」の「状態で出入りする表示で操作の位置を動かさない」）。
  */
 export const CheckoutCompleteSkeleton = withPartSpan(

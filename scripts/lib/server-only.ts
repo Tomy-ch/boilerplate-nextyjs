@@ -20,7 +20,6 @@ export type UnguardedModule = {
 /** server 専用と名乗る綴り。 */
 const SERVER_MODULE = /\.server\.tsx?$/;
 
-/** 番人が引く先。 */
 const GUARD_SPECIFIER = "server-only";
 
 /**

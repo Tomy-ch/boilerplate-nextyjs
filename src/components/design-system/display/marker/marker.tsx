@@ -92,7 +92,6 @@ export function Marker({
  * `aria-hidden` を持つため支援技術へは読み上げられない。アイコンだけで意味を伝えず、意味は必ず
  * `MarkerContent` のテキストに書く。
  *
- * @param props - native `span` 属性。
  * @see Storybook `Display/Marker`
  */
 export function MarkerIcon({ className, ...props }: ComponentProps<"span">) {
@@ -112,7 +111,6 @@ export function MarkerIcon({ className, ...props }: ComponentProps<"span">) {
  * @remarks
  * `separator` の Marker では、左右へ伸びる水平線に挟まれて中央に置かれる。長い文は折り返す。
  *
- * @param props - native `span` 属性。
  * @see Storybook `Display/Marker`
  */
 export function MarkerContent({ className, ...props }: ComponentProps<"span">) {

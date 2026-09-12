@@ -62,15 +62,15 @@ export function renderFloor(measurements: readonly Measurement[], screen: string
 }
 
 /**
- * 表を組み立てる。
+ * 超過した画面を先に並べた、全画面の表を組み立てる。
  *
  * @param verdicts - 判定。
  * @param runs - 1 画面あたりの試行回数。中央値であることが読み取れるように添える。
  * @param floor - {@link renderFloor} が組んだ 1 行。空なら添えない。
  *
  * @remarks
- * 超過した画面を先に並べます。全画面を出すのは、超過していない画面の余裕がどれだけ残って
- * いるかが、次に重くする判断の材料になるためです。
+ * 全画面を出すのは、超過していない画面の余裕がどれだけ残っているかが、次に重くする判断の
+ * 材料になるためです。
  */
 export function renderReport(verdicts: readonly Verdict[], runs: number, floor = ""): string {
   const failed = verdicts.filter((verdict) => Object.keys(verdict.over).length > 0);

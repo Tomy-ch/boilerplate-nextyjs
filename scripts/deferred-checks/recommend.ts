@@ -21,9 +21,7 @@ import { movesResult } from "./subject";
 export type CheckSummary = {
   /** 付けると回るラベル。 */
   readonly label: string;
-  /** 回るもの。 */
   readonly runs: string;
-  /** 目安の時間。 */
   readonly duration: string;
 };
 

@@ -25,11 +25,11 @@ export function logStep(message: string): ReleaseStep {
 }
 
 /**
- * 走らせる 1 コマンド。
+ * 走らせる 1 コマンド。引数は配列のまま持つ。
  *
  * @remarks
- * 引数は配列のまま持ちます。1 本の文字列へ畳むと走らせる側がシェルを一段挟むことになり、
- * 版番号やブランチ名が展開の対象になります。
+ * 1 本の文字列へ畳むと走らせる側がシェルを一段挟むことになり、版番号やブランチ名が展開の
+ * 対象になります。
  */
 export function runStep(command: string, args: readonly string[]): ReleaseStep {
   return { kind: "run", command, args };

@@ -15,7 +15,6 @@ import { expectedShardTotal } from "../lib/shard-completeness";
  * 答えるためです。
  */
 
-/** 分割の 1 台ぶん。 */
 export type Shard = {
   /** 何台目か。1 始まり。 */
   readonly index: number;

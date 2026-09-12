@@ -133,7 +133,6 @@ export function artifactDirOf(pagePath: string): string {
 
 /** 公開 route 1 つぶんの、成果物から引いた資材。 */
 export type RouteChunks = {
-  /** 公開 route。 */
   readonly route: string;
   /** 初期に読む JS。 */
   readonly initial: readonly string[];

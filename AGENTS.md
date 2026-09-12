@@ -376,9 +376,10 @@ Targets:
 
 Technical terms (HTTP status code names / API names / command names, etc.) may stay in English.
 
-**Exception — comments in `.github/workflows/**` are written in English**
-([0140](docs/adr/0140-documentation-operations.md)). Everything else under `.github/` follows the
-Japanese rule.
+**Exception — comments in a workflow definition (`.github/workflows/**` and
+`.github/actions/**`) are written in English**
+([0140](docs/adr/0140-documentation-operations.md)). Everything else under `.github/` — the issue
+and PR templates, `settings/`, a tool's own config — follows the Japanese rule.
 
 ### Response Discipline
 

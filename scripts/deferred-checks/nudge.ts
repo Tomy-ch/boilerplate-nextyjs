@@ -9,7 +9,6 @@ import type { Change } from "../lib/numstat";
 import { type CheckSummary, pending, type Recommendation, recommend } from "./recommend";
 import { countChangedLines } from "./volume";
 
-/** コメントの中身。 */
 export type Nudge =
   | {
       /** 構造で名指しできた。 */
@@ -23,7 +22,6 @@ export type Nudge =
       readonly checks: readonly CheckSummary[];
     }
   | {
-      /** 言うことがない。 */
       readonly kind: "quiet";
     };
 

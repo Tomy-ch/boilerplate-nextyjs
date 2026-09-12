@@ -5,11 +5,11 @@ import { withPartSpan } from "@/observability/render-span";
 const PLACEHOLDER_ROWS = 6;
 
 /**
- * 利用者一覧の待機表示。
+ * 実際に並ぶものと同じ行の高さで枠だけを出す、利用者一覧の待機表示。
  *
  * @remarks
- * 実際に並ぶものと同じ行の高さで枠だけを出します。スピナー 1 つで代用すると、描画された瞬間に
- * 表の高さが変わり、下に置いたページ送りの位置が動きます。
+ * スピナー 1 つで代用すると、描画された瞬間に表の高さが変わり、下に置いたページ送りの位置が
+ * 動きます。
  */
 export const AdminUserListSkeleton = withPartSpan(
   "features/admin/users/ui/skeleton/skeleton",

@@ -11,7 +11,6 @@ export const WORKFLOW_DIR = ".github/workflows";
 
 const HARDEN = /^(\s*)uses: step-security\/harden-runner@/;
 
-/** 書き換えの結果。 */
 export type RewriteResult = {
   readonly out: string;
   /** 想定した形をしていなかった行番号（1 始まり）。 */
@@ -63,7 +62,6 @@ export function rewriteHarden(data: string, endpoints: readonly string[] | null)
   return { out: out.join("\n"), malformed };
 }
 
-/** その行の字下げ。 */
 function indentOf(line: string): string {
   return line.slice(0, line.length - line.trimStart().length);
 }
@@ -100,7 +98,6 @@ function endOfStep(lines: readonly string[], at: number, indent: string): number
   return last;
 }
 
-/** 走査した結果。 */
 export type EgressReport = {
   /** 宣言どおりに固定されていないファイル（リポジトリ相対）。dryRun のときだけ埋まる。 */
   readonly drifted: string[];

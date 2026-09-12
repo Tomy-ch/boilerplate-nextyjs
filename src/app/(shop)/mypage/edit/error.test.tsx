@@ -35,10 +35,10 @@ describe("ProfileEditError", () => {
     expect(screen.getByText(new RegExp(DIGEST))).toBeVisible();
   });
 
-  it("識別子が無いときは問い合わせ ID を出さない", () => {
+  it("識別子が無いときはリクエスト ID を出さない", () => {
     renderError(null);
 
-    expect(screen.queryByText(/問い合わせ ID/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/リクエスト ID/)).not.toBeInTheDocument();
   });
 
   it("再試行が境界の reset を呼ぶ", async () => {

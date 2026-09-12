@@ -35,7 +35,7 @@ describe("mediaUrl", () => {
     );
   });
 
-  it("配信元に問い合わせが付いていても経路を保つ", () => {
+  it("配信元にクエリが付いていても経路を保つ", () => {
     expect(mediaUrl("https://cdn.example.test?token=x", "items/abc.png")).toBe(
       "https://cdn.example.test/items/abc.png",
     );

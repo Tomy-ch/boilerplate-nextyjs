@@ -7,7 +7,7 @@ import { axe } from "vitest-axe";
 import GlobalError from "./global-error";
 
 describe("GlobalError", () => {
-  it("正規化済みの文言と問い合わせ番号を出す", () => {
+  it("正規化済みの文言と識別子を出す", () => {
     render(
       <GlobalError
         error={Object.assign(new Error("layout が壊れた"), { digest: "9f2c" })}
@@ -30,7 +30,7 @@ describe("GlobalError", () => {
     expect(reset).toHaveBeenCalledOnce();
   });
 
-  it("digest が無いときは問い合わせ番号の行を出さない", () => {
+  it("digest が無いときは識別子の行を出さない", () => {
     render(<GlobalError error={new Error("失敗")} reset={vi.fn()} />);
 
     expect(screen.queryByText(/識別子/)).not.toBeInTheDocument();

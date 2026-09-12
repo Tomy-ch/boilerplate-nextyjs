@@ -1071,7 +1071,7 @@ export default function NoteDetailError({
     <ContentContainer className="flex flex-col items-start gap-4 py-8">
       <h1 className="text-xl font-emphasis">{getDefaultErrorMeta(ErrorKind.INTERNAL).message}</h1>
       {error.digest === undefined ? null : (
-        <p className="text-sm text-muted-foreground">問い合わせ ID: {error.digest}</p>
+        <p className="text-sm text-muted-foreground">リクエスト ID: {error.digest}</p>
       )}
       <Button onClick={reset} type="button">
         もう一度読み込む

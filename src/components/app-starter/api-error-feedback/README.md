@@ -10,7 +10,7 @@ client-side の API 失敗を、画面の責務に応じて Alert または Dial
 | --- | --- |
 | `ApiErrorAlert` | フォームや一覧など、文脈を保ったまま失敗を表示します。 |
 | `ApiErrorDialog` | 操作の継続を止め、確認・再試行を促します。`open` は呼び出し側で管理します。 |
-| `ApiError` | `client` / `server` / `network` の分類、表示メッセージ、問い合わせ ID、再試行可否を表します。 |
+| `ApiError` | `client` / `server` / `network` の分類、表示メッセージ、リクエスト ID、再試行可否を表します。 |
 
 ## 利用ケース
 
@@ -28,7 +28,7 @@ raw response の status 判定、業務固有の文言、再試行処理、reque
 
 ## request ID の扱い
 
-`requestId` はサーバーログと利用者の問い合わせを結び付けるための、サーバー生成の不透明な識別子です。5xx など調査が必要な失敗でだけ渡し、画面には問い合わせ ID として表示します。token、個人情報、内部 URL などを request ID に含めてはいけません。4xx の入力エラーでは通常省略し、network error のようにサーバーへ到達していない場合は値が存在しないこともあります。
+`requestId` はサーバーログと利用者からの連絡を結び付けるための、サーバー生成の不透明な識別子です。5xx など調査が必要な失敗でだけ渡し、画面にはリクエスト ID として表示します。token、個人情報、内部 URL などを request ID に含めてはいけません。4xx の入力エラーでは通常省略し、network error のようにサーバーへ到達していない場合は値が存在しないこともあります。
 
 ## Storybook とテスト
 
